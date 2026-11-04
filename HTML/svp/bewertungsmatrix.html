@@ -195,6 +195,49 @@
 
         .bm-titlerow .bm-verdict { flex: 1 1 14rem; }
 
+        /* Notes for the whole talk: a speech-bubble button beside the title,
+           a quiet text field above the table. Filled = the button in the accent. */
+        .bm-notebtn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            color: var(--text);
+            background: transparent;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            cursor: pointer;
+        }
+        .bm-notebtn[hidden] { display: none; }
+        .bm-notebtn svg { width: 16px; height: 16px; }
+        .bm-notebtn:hover,
+        .bm-notebtn[aria-expanded="true"] { border-color: var(--bm-accent); }
+        .bm-notebtn.filled { color: var(--bm-ink); background: var(--bm-accent); border-color: var(--bm-accent); }
+
+        .bm-notes { margin: 0 0 10px; }
+        .bm-notes[hidden] { display: none; }
+        .bm-notes textarea {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 5.5em;
+            resize: vertical;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            padding: 8px 10px;
+            color: var(--text);
+            background: var(--input-bg, transparent);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            outline: none;
+        }
+        .bm-notes textarea:focus { border-color: var(--bm-accent); }
+
         .bm-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 0.95rem;
@@ -517,11 +560,23 @@
         <section class="bm-card bare">
             <div class="bm-titlerow">
                 <div class="bm-title" id="bmTitle">Bewertungskriterien</div>
+                <!-- one note for the whole talk, Coach sheet only (Doc, 04.11.2026) - Lucide "message-square-text" (ISC) -->
+                <button class="bm-notebtn bm-noprint" type="button" id="bmNoteBtn" hidden aria-expanded="false"
+                    title="Notizen zum ganzen Vortrag">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z
+                        M7 8h10M7 12h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span>Notizen</span>
+                </button>
                 <div class="bm-verdict">
                     <span class="bm-big" id="bmBig">&ndash;</span>
                     <span class="bm-note" id="bmNote"></span>
                     <span class="bm-sum" id="bmSummary" hidden></span>
                 </div>
+            </div>
+            <div class="bm-notes" id="bmNotes" hidden>
+                <textarea id="bmNotesText" rows="4" spellcheck="true"
+                    placeholder="Notizen zum ganzen Vortrag &ndash; z. B. Sprachstil, Auftreten, Wirkung &hellip;"
+                    aria-label="Notizen zum ganzen Vortrag"></textarea>
             </div>
             <div class="bm-frame">
                 <table class="bm" id="bmTable"></table>
@@ -662,6 +717,9 @@
             const elCancel = document.getElementById('bmCancel');
             const elOrig = document.getElementById('bmOrig');
             const elAdd = document.getElementById('bmAdd');
+            const elNoteBtn = document.getElementById('bmNoteBtn');
+            const elNotes = document.getElementById('bmNotes');
+            const elNotesText = document.getElementById('bmNotesText');
 
             /* One state for both languages: lang, the four head fields, the
                SoS name, and per criterion the points and the comment. */
@@ -934,6 +992,34 @@
                 drawTable();
                 drawVerdict();
                 drawClear();
+                drawNotes();
+            }
+
+            /* One note for the whole talk (Doc, 04.11.2026: "ein generelles Kommentarfeld ... Sprachstil
+               und so weiter") - the Coach sheet only, the Team sheet has no such field. It travels
+               encrypted with the sheet (payload.notiz). Open by default once something is written. */
+            function drawNotes() {
+                if (!elNoteBtn) return;
+                const show = role !== 'publikum';
+                const text = state.notiz || '';
+                elNoteBtn.hidden = !show;
+                elNoteBtn.classList.toggle('filled', !!text.trim());
+                if (elNotesText.value !== text) elNotesText.value = text;
+                if (!show) elNotes.hidden = true;
+                else if (text.trim()) elNotes.hidden = false;
+                elNoteBtn.setAttribute('aria-expanded', String(!elNotes.hidden));
+            }
+            if (elNoteBtn) {
+                elNoteBtn.addEventListener('click', function () {
+                    elNotes.hidden = !elNotes.hidden;
+                    elNoteBtn.setAttribute('aria-expanded', String(!elNotes.hidden));
+                    if (!elNotes.hidden) elNotesText.focus();
+                });
+                elNotesText.addEventListener('input', function () {
+                    state.notiz = elNotesText.value;
+                    save();
+                    elNoteBtn.classList.toggle('filled', !!state.notiz.trim());
+                });
             }
 
             /* ---------- edit mode: the sheet itself ---------- */
@@ -1025,7 +1111,7 @@
                collect first, change, redraw - still unsaved until Speichern. */
             elAdd.addEventListener('click', function () {
                 const work = collectSheet();
-                work.rows.push({ text: '', max: 1 });
+                work.rows.push({ text: '', max: 3 });   /* never a 0-or-1 criterion (Doc, 04.11.2026: "wo es maximal einen Punkt gibt ... drei Punkte") */
                 overrides[state.lang] = work;
                 drawTable();
                 const last = elTable.querySelector('tbody tr:last-child .bm-text');
@@ -1190,7 +1276,8 @@
                     const payload = JSON.stringify({
                         lang: state.lang, rows: state.rows, sos: state.sos,
                         got: t.got, max: t.max, bonus: t.bonus,
-                        topic: state.fields.topic || '', presenter: state.fields.presenter || ''
+                        topic: state.fields.topic || '', presenter: state.fields.presenter || '',
+                        notiz: role === 'publikum' ? '' : (state.notiz || '')
                     });
                     const body = {
                         plan: meta.plan, klasse: meta.klasse, idx: meta.idx, rolle: role,
@@ -1279,6 +1366,7 @@
                     const d = JSON.parse(await svpCrypto.open(rows[0].data_enc));
                     state.rows = d.rows || {};
                     state.sos = d.sos || state.sos;
+                    if (d.notiz && !state.notiz) state.notiz = d.notiz;
                     if (d.presenter && !state.fields.presenter) state.fields.presenter = d.presenter;
                     if (d.topic && !state.fields.topic) state.fields.topic = d.topic;
                     try { state.fields.reviewer = state.fields.reviewer || await svpCrypto.open(rows[0].name_enc); } catch (e) { }
