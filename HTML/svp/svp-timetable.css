@@ -194,31 +194,39 @@
     .tt-jg { display: none; }
 }
 
-/* A test in this lesson, read from the Stoffverteilungsplan (svp-pruefungen.js), in the colours of
-   the plan's buttons: Klassenarbeit and Klausur red, Leistungstest orange with navy. It rides behind
-   the subject - in the corner it ran into the Jahrgang on a 45-min tile - and is as tall as the
-   letters beside it (Doc, 01.11.2026). All in em of the subject: Orbitron's capitals are 0.72 em,
-   so 0.72 / 0.56 = 1.286 em of the pill's own type. overflow makes the lower edge the pill's
-   baseline, so it stands on the line of the letters. */
+/* A test in this lesson, read from the Stoffverteilungsplan (svp-pruefungen.js), cut like the plan's
+   button (.red-btn, svp-aufgaben.css) and written out like it: Klassenarbeit and Klausur red,
+   Leistungstest orange with navy and a pale navy rim. It stands between the text and the Jahrgang,
+   level with the Jahrgang (Doc, 04.11.2026: "dahin, wo ich es markiert habe ... voll ausgeschrieben");
+   the text column gives way, the pill does not. */
 .tt-pruef {
-    display: inline-block;
-    overflow: hidden;
-    margin-left: 6px;
-    padding: 0 6px;
-    border-radius: 999px;
-    font-family: Orbitron, sans-serif;
-    font-weight: 700;
-    font-size: 0.56em;
-    height: 1.286em;
-    line-height: 1.286em;
-    letter-spacing: 0.06em;
+    flex: 0 0 auto;
+    margin-right: 6px;
+    padding: 2px 11px;
+    border: 1px solid var(--ypsilon);
+    border-radius: 6px;
+    font-family: Outfit, sans-serif;
+    font-weight: 300;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: nowrap;
     color: #fff;
     background: var(--ypsilon);
 }
 
 .tt-pruef.lt {
+    border-color: rgba(var(--g-wichtig-ink), 0.3);
     color: rgb(var(--g-wichtig-ink));
     background: rgb(var(--g-wichtig));
+}
+
+.tt-pruef-short { display: none; }
+
+/* a narrow tile keeps its class, room and time readable: KA / LT instead of the word */
+@container (max-width: 230px) {
+    .tt-pruef { margin-right: 0; padding: 1px 5px; }
+    .tt-pruef-long { display: none; }
+    .tt-pruef-short { display: inline; }
 }
 
 .tt-lesson:hover {

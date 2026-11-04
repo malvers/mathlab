@@ -577,7 +577,7 @@
                        for bigger type on a 45-min tile; the Jahrgang rides in a third. */
                     const parts = ['<div class="tt-cols">'
                         + '<div class="tt-col">'
-                        + '<div class="tt-subject">' + (l.subject || '—') + (l.ghost ? '' : svpPruefungen.pill(l)) + '</div>'
+                        + '<div class="tt-subject">' + (l.subject || '—') + '</div>'
                         + (who ? '<div class="tt-who">' + who + '</div>' : '')
                         + '</div>'
                         + '<div class="tt-col">'
@@ -586,6 +586,7 @@
                         + '<div class="tt-time">' + hhmm(l.startTime) + '–' + hhmm(l.endTime) + '</div>'
                         + '</div>'
                         + '</div>'];
+                    if (!l.ghost) parts.push(svpPruefungen.pill(l));
                     const jg = jahrgangOf(l);
                     if (jg) parts.push('<div class="tt-jg">' + jg + '</div>');
                     if (l.ghost) parts.push('<div class="tt-tag">alt</div>');

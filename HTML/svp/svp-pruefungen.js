@@ -155,14 +155,19 @@
         return pills.size > 0;
     }
 
-    /* The pill of a tile. A double period is one tile, a test on either of its periods marks it. */
+    /* The pill of a tile, written out like the plan's button, the short KA/LT only for a narrow tile
+       (Doc, 04.11.2026: "voll ausgeschrieben, nicht nur so kleine Icons"). It names the kind, not the
+       button's label: a Mini-Test reads "Leistungstest" too (Doc, 04.11.2026). The page puts it between
+       the text and the Jahrgang. A double period is one tile, a test on either of its periods marks it. */
+    const WORD = { KA: 'Klassenarbeit', KL: 'Klausur', LT: 'Leistungstest' };
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     function pill(l) {
         for (const p of l.parts || [l]) {
             const test = pills.get(keyOf(p.date, SvpTimetable.hhmm(p.startTime), p.subject, p.classes));
             if (test) {
-                return '<span class="tt-pruef ' + test.short.toLowerCase() + '" title="'
-                    + String(test.title).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
-                    + '">' + test.short + '</span>';
+                return '<span class="tt-pruef ' + test.short.toLowerCase() + '" title="' + esc(test.title) + '">'
+                    + '<span class="tt-pruef-long">' + WORD[test.short] + '</span>'
+                    + '<span class="tt-pruef-short">' + test.short + '</span></span>';
             }
         }
         return '';
