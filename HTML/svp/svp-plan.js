@@ -35,6 +35,7 @@
         'search',           // search in the plan
         'listen',           // "Zusatzmaterial" and "Videos" in the toolbar: the decks, labs and films of every week
         'keys',             // all weeks open/closed, ?kw= jump, current week, keyboard
+        'notenstopp',       // the Notenstopp of the school form: red pill in the head and in its week
         'edit',             // edit mode: gate, save, cancel, reset
         'shift',            // moving the content by a week ("Verschieben")
         'sync',             // cloud sync of edits and notes
