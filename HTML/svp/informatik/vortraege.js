@@ -805,7 +805,7 @@
                                 '" id="grade-' + r[0] + '-' + i + '" title="' +
                                 (sent ? 'Bewertung ' + r[1] + ' ist abgegeben'
                                       : 'Bewertungsbogen ' + r[1] + ' für diesen Vortrag') +
-                                '">' + r[1] + (sent ? ' ✓' : '') + '</button>' + ptsHtml(i, r);
+                                '">' + r[1] + '</button>' + ptsHtml(i, r);
                         }).join('') + noteHtml(i, pos) + uploadHtml() + meldHtml(i) + '</div>' +
                 /* Die Namensfelder stehen in EINEM Block, nicht als eigene
                    Grid-Zeilen: sonst dehnen sie sich mit dem Themenblock mit
@@ -1697,7 +1697,7 @@
     /* Two sheets per talk: Doc's Coach sheet, and ONE Publikum sheet that
        three pupils fill in together (Doc, 04.09.2026). Both live in
        svp_vortrag_bewertung, one row per talk and role. */
-    const ROLES = [['coach', 'Coach'], ['publikum', 'Publikum']];
+    const ROLES = [['coach', 'Coach'], ['publikum', 'Team']];
     const TABLE_BEW = 'svp_vortrag_bewertung';
     /* which sheets are in, per talk: { 3: { coach: true, publikum: false } }.
        Read anonymously (the rows carry only ciphertext), so everybody sees at a
@@ -1729,7 +1729,7 @@
                     : 'Bewertungsbogen ' + r[1] + ' für diesen Vortrag';
                 const sent = !!(bewIn[i] && bewIn[i][r[0]]);
                 gb.classList.toggle('full', sent);
-                gb.textContent = r[1] + (sent ? ' ✓' : '');
+                gb.textContent = r[1];   /* handed in = filled green (svp-talks.css .vt-grade.full), no check mark */
                 if (sent) gb.title = 'Bewertung ' + r[1] + ' ist abgegeben';
             });
             /* the second sheet coming in turns the locked mark into *** */
@@ -2145,7 +2145,10 @@
             '</span>';
     }
 
-    /* Grey placeholder = computed, typed value = Doc's override. */
+    /* The computed mark stands in its own box, the field beside it takes Doc's
+       hand-set mark (Doc, 04.11.2026: "neben der automatisch ausgerechneten Note
+       noch ein Feld, wo ich per Hand korrigieren kann"); left empty, the
+       computed mark counts - the field shows it as a grey placeholder. */
     function noteHtml(i, pos) {
         if (!gradesVisible()) return noteLockHtml(i);
         const c = noteCalc(i);
@@ -2154,17 +2157,21 @@
         const W = window.svpNoten ? svpNoten.WEIGHT : null;
         const why = c
             ? 'Errechnet: Note ' + c.note + ' aus ' + pctTxt(c.pct) +
-                (W ? ' (Coach ×' + W.coach + ', Publikum ×' + W.publikum + ')' : '')
-            : s.coach ? 'Der Publikumsbogen fehlt noch'
+                (W ? ' (Coach ×' + W.coach + ', Team ×' + W.publikum + ')' : '')
+            : s.coach ? 'Der Team-Bogen fehlt noch'
             : s.publikum ? 'Der Coach-Bogen fehlt noch' : 'Noch kein Bogen abgegeben';
         return '<span class="vt-note-box">' +
             '<span class="vt-grade-lbl">Note</span>' +
+            '<span class="vt-note calc' + (c ? '' : ' none') + '" title="' + esc(why) + '"' +
+            ' aria-label="Errechnete Note für Thema ' + (pos + 1) + '">' + (c ? c.note : '–') + '</span>' +
+            (c ? '<span class="vt-note-pct">' + pctTxt(c.pct) + '</span>' : '') +
+            /* an arrow, not a word: the row has to keep Abgabe and Meldung on one line */
+            '<span class="vt-grade-lbl" title="Endnote">→</span>' +
             '<input type="text" class="vt-note' + (over ? ' over' : '') + '" id="note-' + i + '"' +
             ' value="' + esc(over) + '" placeholder="' + (c ? c.note : '–') + '"' +
             ' maxlength="4" autocomplete="off" spellcheck="false"' +
-            ' title="' + esc(why + (over ? ' · von Hand überschrieben' : '') + ' — Feld leeren = errechnete Note') + '"' +
-            ' aria-label="Note für Thema ' + (pos + 1) + '">' +
-            (c ? '<span class="vt-note-pct">' + pctTxt(c.pct) + '</span>' : '') +
+            ' title="' + esc((over ? 'Von Hand gesetzt' : 'Leer = errechnete Note') + ' — hier per Hand korrigieren, Feld leeren = errechnete Note') + '"' +
+            ' aria-label="Endnote für Thema ' + (pos + 1) + '">' +
             '</span>';
     }
 
@@ -2680,8 +2687,8 @@
         'Beim Drucken erscheinen die Namen nur im entsperrten Zustand. ' +
         'Das <b>Datum</b> neben dem Titel setzt Doc Alvers angemeldet per Klick. Das Feld <b>Note</b> steht bei jedem ' +
         'Vortrag: <b>&ndash;</b> hei&szlig;t noch keine Note, <b>***</b> hei&szlig;t vergeben. Die Note selbst sieht nur er, ' +
-        'angemeldet und entsperrt: errechnet aus Coach- und Publikumsbogen, von Hand &uuml;berschreibbar &mdash; ' +
-        'Feld leeren stellt die errechnete wieder her. ' +
+        'angemeldet und entsperrt: links die aus Coach- und Team-Bogen errechnete, hinter dem Pfeil das Feld ' +
+        'f&uuml;r die <b>Endnote</b> von Hand &mdash; Feld leeren stellt die errechnete wieder her. ' +
         'Den eigenen Eintrag &auml;ndern kann man nur in den ersten zehn Minuten. Danach &mdash; austragen, Thema ' +
         'wechseln, Wunschthema, Name falsch &mdash; an der Karte auf <b>Stimmt was nicht?</b> klicken: die Meldung ' +
         'geht verschl&uuml;sselt an Doc Alvers, die Karte zeigt dann &bdquo;Gemeldet&ldquo;.';

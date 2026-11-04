@@ -247,8 +247,9 @@
 /* a sheet already exists for this talk */
 .vt-grade.done { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
 
-/* all three grading places for this talk are taken */
-.vt-grade.full { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
+/* sheet handed in: filled green with white letters instead of a check mark, so
+   the button keeps its width (Doc, 04.11.2026: "kein Checkmark ... grün, grüner als jetzt") */
+.vt-grade.full { color: #fff; background: var(--phi); border-color: var(--phi); }
 
 /* Punkte des Bogens, direkt hinter seinem Knopf (Doc, 21.09.2026). Ruhig wie
    die Prozentzahl neben der Note - der Knopf bleibt das Auffaellige, die Zahl
@@ -484,9 +485,10 @@
 
 html.svp-light .vt-date input { color-scheme: light; }
 
-/* Doc's mark for the talk. Logged in and unlocked: grey placeholder =
-   computed from the sheets, typed value = his override. Everybody else
-   gets the locked field: –, or *** once a mark is given. */
+/* Doc's mark for the talk. Logged in and unlocked: the computed mark in its
+   own box (.calc), beside it the field "Endnote" for his hand-set mark (grey
+   placeholder = computed). Everybody else gets the locked field: –, or ***
+   once a mark is given. */
 .vt-note-box {
     display: inline-flex;
     align-items: center;
@@ -514,7 +516,8 @@ html.svp-light .vt-date input { color-scheme: light; }
     outline: none;
 }
 
-.vt-pts { width: 4.2em; }
+/* "26/36" in Orbitron needs room (Doc, 04.11.2026: "ein bisschen zu schmal ... nach rechts noch Platz") */
+.vt-pts { width: 4.9em; }
 
 .vt-note::placeholder { color: var(--muted); opacity: 1; }
 .vt-note:focus { border-color: var(--lambda); }
@@ -523,6 +526,7 @@ html.svp-light .vt-date input { color-scheme: light; }
 /* locked: a plain box of the input's size, nothing to click or type.
    Die Punkte sind immer so ein Kaestchen - getippt wird darin nie. */
 .vt-note.locked,
+.vt-note.calc,
 .vt-pts {
     display: inline-block;
     height: 22px;            /* = the input: 14px line + 2 x 3px padding + 2 x 1px border */
@@ -531,6 +535,7 @@ html.svp-light .vt-date input { color-scheme: light; }
 }
 /* no mark yet: the dash in grey, like the placeholder in Doc's field */
 .vt-note.locked.none,
+.vt-note.calc.none,
 .vt-pts.none { color: var(--muted); }
 
 .vt-note-pct {

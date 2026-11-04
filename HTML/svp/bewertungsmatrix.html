@@ -634,7 +634,7 @@
                12.09.2026: 3 : 3, it was 3 : 1). The talk id ends in the role,
                so the sibling sheet is one string replacement away. */
             const WEIGHT = svpNoten.WEIGHT;
-            const ROLE_LABEL = { coach: 'Coach', publikum: 'Publikum' };
+            const ROLE_LABEL = { coach: 'Coach', publikum: 'Team' };
             const role = (talk.match(/-(coach|publikum)$/) || [])[1] || '';
             const otherRole = role === 'coach' ? 'publikum' : (role === 'publikum' ? 'coach' : '');
 
@@ -1221,7 +1221,7 @@
                     }
                     try { localStorage.setItem(sentKey, new Date().toISOString()); } catch (e) { }
                     status(role === 'publikum'
-                        ? 'Bewertung des Publikums gesendet. Danke!'
+                        ? 'Bewertung des Teams gesendet. Danke!'
                         : 'Coach-Bogen gespeichert.', 'ok');
                 } catch (e) {
                     status('Senden fehlgeschlagen: ' + e.message, 'err');
@@ -1242,11 +1242,11 @@
                         '&select=taken,name_enc,data_enc');
                     if (!res.ok) throw new Error('HTTP ' + res.status);
                     rows = (await res.json()).filter(function (r) { return r.taken && r.data_enc; });
-                } catch (e) { status('Publikum nicht ladbar: ' + e.message, 'err'); return; }
+                } catch (e) { status('Team-Bogen nicht ladbar: ' + e.message, 'err'); return; }
 
-                if (!rows.length) { publikum = null; status('Noch keine Bewertung aus dem Publikum.'); drawVerdict(); return; }
+                if (!rows.length) { publikum = null; status('Noch keine Bewertung vom Team.'); drawVerdict(); return; }
                 if (!(window.svpCrypto && svpCrypto.hasPrivate())) {
-                    status('Die Bewertung des Publikums liegt vor - zum Anzeigen entschlüsseln.');
+                    status('Die Bewertung des Teams liegt vor - zum Anzeigen entschlüsseln.');
                     drawVerdict();
                     return;
                 }
@@ -1255,10 +1255,10 @@
                     const d = JSON.parse(await svpCrypto.open(rows[0].data_enc));
                     if (typeof d.got === 'number') publikum.got = d.got;
                     if (typeof d.max === 'number') publikum.max = d.max;
-                } catch (e) { status('Bewertung des Publikums nicht lesbar.', 'err'); }
+                } catch (e) { status('Bewertung des Teams nicht lesbar.', 'err'); }
                 try { publikum.names = await svpCrypto.open(rows[0].name_enc); } catch (e) { }
                 if (publikum.got !== null) {
-                    status('Publikum: ' + fmt(publikum.got) + ' Punkte' +
+                    status('Team: ' + fmt(publikum.got) + ' Punkte' +
                         (publikum.names ? ' (' + publikum.names + ')' : ''), 'ok');
                 }
                 drawVerdict();
