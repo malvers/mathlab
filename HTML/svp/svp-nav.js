@@ -817,7 +817,7 @@
         try { localStorage.removeItem('svp-session'); } catch (e2) { }
         /* the unlocked names key stays on the device until logout (svp-crypto.js) -
            so Logout takes it along, also on pages that do not load svp-crypto.js */
-        try { localStorage.removeItem('svp-vortrag-priv'); sessionStorage.removeItem('svp-vortrag-priv'); } catch (e2) { }
+        try { localStorage.removeItem('svp-vortrag-priv'); localStorage.removeItem('svp-vortrag-priv-sub'); sessionStorage.removeItem('svp-vortrag-priv'); } catch (e2) { }
         location.reload();
     });
     renderAuthPill();

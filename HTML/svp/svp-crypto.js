@@ -23,8 +23,9 @@
 // on that device: unlocked once, the names are always visible there (Doc,
 // 06.10.2026: "mach die Namen bitte immer sichtbar", and on the trade-off
 // below: "mir egal, Hauptsache Namen sichtbar"). Logging out (svp-nav's
-// Logout pill, or a session that is gone) drops it again - so on a classroom
-// machine, Logout is what leaves nothing behind. Until then it was
+// Logout pill) drops it again - so on a classroom machine, Logout is what
+// leaves nothing behind. A session that merely lapsed keeps it, unused, for
+// the next login of the same account. Until 06.10.2026 it was
 // sessionStorage, and every new tab asked for the passphrase again.
 //
 // Needs svp-auth.js (DB_URL/DB_KEY, session for reading the wrapped key).
@@ -32,6 +33,7 @@
 (function () {
     const KEY_ID = 'doc';                       /* one key pair for all pages */
     const PRIV_KEY = 'svp-vortrag-priv';        /* localStorage: unwrapped private JWK, until logout */
+    const OWNER_KEY = 'svp-vortrag-priv-sub';   /* localStorage: the account that unlocked it */
     const ROUNDS = 250000;
     const TABLE = 'svp_vortrag_key';
 
@@ -202,26 +204,45 @@
         return true;
     }
 
+    /* The user id of the stored session (the "sub" of its access token), or null. */
+    function sessionSub() {
+        try {
+            const s = JSON.parse(localStorage.getItem('svp-session'));
+            const part = s.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(atob(part)).sub || null;
+        } catch (e) { return null; }
+    }
+
     function keep(jwk) {
         try { localStorage.setItem(PRIV_KEY, JSON.stringify(jwk)); } catch (e) { }
+        const sub = sessionSub();
+        try { if (sub) localStorage.setItem(OWNER_KEY, sub); } catch (e) { }
     }
 
     function lock() {
         privKey = null;
-        try { localStorage.removeItem(PRIV_KEY); } catch (e) { }
+        try { localStorage.removeItem(PRIV_KEY); localStorage.removeItem(OWNER_KEY); } catch (e) { }
         try { sessionStorage.removeItem(PRIV_KEY); } catch (e) { }   /* where it lived until 06.10.2026 */
     }
 
     /* Re-arm after a reload, before anything renders - but only while this
-       browser is still logged in: the key belongs to the session. A tab that
-       was unlocked under the old code hands its key over to localStorage. */
+       browser is logged in to the account that unlocked it. Without a session
+       the key stays where it is: a session also ends on its own - at 07:05 on
+       04.11.2026 seven tabs refreshed at once after the Mac woke, two got a
+       500, svp-auth dropped the session, another tab stored a fresh one a few
+       seconds later, but the page loaded in between had already thrown the key
+       away and every name read "vergeben" again (Doc: "dass man die Namen
+       immer sehen kann? Bitte so machen"). Only Logout removes it now. A tab
+       that was unlocked under the old code hands its key over to localStorage. */
     const ready = (async function () {
         if (!subtle) return false;
-        let raw = null, session = null;
-        try { session = localStorage.getItem('svp-session'); } catch (e) { }
-        if (!session) { lock(); return false; }
+        let raw = null, owner = null;
+        const sub = sessionSub();
+        if (!sub) return false;
         try { raw = localStorage.getItem(PRIV_KEY) || sessionStorage.getItem(PRIV_KEY); } catch (e) { }
         if (!raw) return false;
+        try { owner = localStorage.getItem(OWNER_KEY); } catch (e) { }
+        if (owner && owner !== sub) { lock(); return false; }   /* another account logged in here */
         try {
             await useJwk(JSON.parse(raw));
             keep(JSON.parse(raw));
