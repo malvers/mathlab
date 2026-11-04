@@ -11,7 +11,7 @@ window.BUCH = {
     short: 'Hisabati 13 LK',
     lang: 'sw',
     druck: false,
-    description: 'Kitabu shirikishi cha kiada cha hisabati kwa Berufliches Gymnasium (shule ya sekondari ya juu nchini Ujerumani yenye mwelekeo wa kitaaluma), darasa la 13, Leistungskurs (kozi ya kiwango cha juu), Saksonia: kalkulasi ya kiunganishi pamoja na nadharia kuu na magimba ya mzunguko, vigeu vya nasibu vyenye mgawanyo wa kawaida, takwimu za kukisia, maeneo yote mawili ya hiari – mistari na mabapa katika nafasi au matriki pamoja na modeli ya Leontief na modeli za idadi ya viumbe –, matumizi zaidi na sura ya kujiandaa kwa Abitur, pamoja na maabara, uigaji, michoro ya 3D na majaribio ya kujipima yanayotoa jibu papo hapo.',
+    description: 'Kitabu shirikishi cha kiada cha hisabati kwa Berufliches Gymnasium (shule ya sekondari ya juu nchini Ujerumani yenye mwelekeo wa kitaaluma), darasa la 13, Leistungskurs (kozi ya kina), Saksonia: kalkulasi ya kiunganishi pamoja na nadharia kuu na magimba ya mzunguko, vigeu vya nasibu vyenye mgawanyo wa kawaida, takwimu za kukisia, maeneo yote mawili ya hiari – mistari na mabapa katika nafasi au matriki pamoja na modeli ya Leontief na modeli za idadi ya viumbe –, matumizi zaidi na sura ya kujiandaa kwa Abitur, pamoja na maabara, uigaji, michoro ya 3D na majaribio ya kujipima yanayotoa jibu papo hapo.',
     chapters: [
         { file: 'lb3-1.html', lb: 'Eneo la kujifunza 3', k: '3.1', title: 'Fanksheni asili',
           sub: 'Kunyambua kinyume, uthibitisho, kanuni za uunganishaji, 1/x na ln|x|, CAS', when: 'Agosti · Septemba', ustd: 10 },

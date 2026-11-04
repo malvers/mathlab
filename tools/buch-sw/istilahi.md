@@ -283,7 +283,7 @@ Suaheli ist, steht er in der Spalte „Hinweis“ – genau dort sind Rückmeldu
 
 | Deutsch | Kiswahili | English (Kenya) | Hinweis |
 |---|---|---|---|
-| Leistungskurs · Wahlpflicht 1 / 2 | Leistungskurs (kozi ya kiwango cha juu) · eneo la hiari 1 / 2 | advanced course · elective 1 / 2 | „Leistungskurs“ bleibt deutsch, auf der Startseite erklärt; Kapitel W1.1 … W2.3 heißen H1.1 … H2.3 (H = hiari), wie H.1 in mathe13-sw |
+| Leistungskurs · Wahlpflicht 1 / 2 | Leistungskurs (kozi ya kina) · eneo la hiari 1 / 2 | advanced course · elective 1 / 2 | wie LK 12; „Leistungskurs“ bleibt deutsch, auf der Startseite erklärt; Kapitel W1.1 … W2.3 heißen H1.1 … H2.3 (H = hiari), wie H.1 in mathe13-sw |
 | Exponent | kipeo | exponent, index | wie die Widgets seit BGY 11 („ongeza kipeo kwa 1“), nicht „kielelezo“ |
 | Grundintegrale · Integrand | viunganishi vya msingi · kinachounganishwa | standard integrals · integrand | beschreibend |
 | Untersumme · Obersumme | jumla ya chini $U_n$ · jumla ya juu $O_n$ | lower · upper sum | Buchstaben bleiben wie im Widget |
