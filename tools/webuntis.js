@@ -1370,11 +1370,18 @@ async function main() {
       // not a gap - it has content, usually because the plan was edited afterwards - and would
       // otherwise nag every single day for the rest of the school year.
       if (dry || (!open.length && !tickable.length)) {
-        // The app ("WebUntis holen", deliberately not rebuilt - a rebuild resets its macOS
-        // permissions) shows the Eintragen button only for a line containing "ohne Lernstoff" or
+        // The app ("WebUntis holen") shows the Eintragen button only for a line containing "ohne Lernstoff" or
         // "FEHLGESCHLAGEN". So an open tick is reported together with the (true) "0 Stunden ohne
         // Lernstoff", otherwise there would be no button to set it. The gaps without plan text
         // count as "ohne Lernstoff" too, so the line turns red, and are named at the end.
+        // One "OFFEN:" line per lesson the button WOULD fill, with the very text it would write.
+        // The app collects them for its reminder when OK is pressed instead of Eintragen - so Doc
+        // sees the planned topic and can spot a day that went differently (a test instead of the
+        // plan's topic, BGY24/BGY25 on 05.11.2026).
+        for (const p of open) {
+          console.log(`OFFEN: ${p.l.date.slice(6)}.${p.l.date.slice(4, 6)}. ${p.l.start} `
+            + `${p.l.klassen.join(',')} – ${p.text}`);
+        }
         const parts = [];
         const empty = open.length + gaps.length;
         if (empty || tickable.length) parts.push(`${empty} Stunde${empty === 1 ? '' : 'n'} ohne Lernstoff`);

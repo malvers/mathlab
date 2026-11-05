@@ -20,6 +20,11 @@
 // and which tests the next school day has (Doc, 04.11.2026, after BGY 13 read an old Mini-Test
 // date in WebUntis). Read-only, nothing to press.
 //
+// Since 05.11.2026 OK no longer closes quietly while the classbook line is red: a warning names
+// the open lessons with the text the button would write ("OFFEN:" lines of the same check) and
+// offers Eintragen once more. Doc had pressed OK at 18:00 and BGY24/BGY25 stayed empty ("Da muss
+// also dringend eine Warnung kommen"). The window's close button goes the same way.
+//
 // Since 22.09.2026 nothing is cut off any more: every line wraps, each fact separated by " · "
 // gets its own line, and the window grows to whatever it needs. Green rgb(121,158,49) means
 // fine, red rgb(176,36,24) means something wants doing - the palette values as they are, on
@@ -48,7 +53,7 @@ func broken(_ line: String) -> String {
     line.components(separatedBy: " \u{00b7} ").joined(separator: "\n")
 }
 
-final class App: NSObject, NSApplicationDelegate {
+final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: NSWindow!
     let title = NSTextField(labelWithString: "WebUntis: Stundenplan holen")
     let status = NSTextField(labelWithString: "Anmelden …")
@@ -61,10 +66,12 @@ final class App: NSObject, NSApplicationDelegate {
     var summary: [String] = []
     var buffer = ""
     var writing = false          // second phase: the classbook is being filled
+    var pending: [String] = []   // "OFFEN:" lines - what Eintragen would write, for the warning
     func applicationDidFinishLaunching(_ n: Notification) {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: WIN, height: 212),
                           styleMask: [.titled, .closable], backing: .buffered, defer: false)
         window.title = "WebUntis holen"
+        window.delegate = self
         // Always dark, whatever the system does - the palette is made for a dark ground.
         window.appearance = NSAppearance(named: .darkAqua)
         window.backgroundColor = docNavy
@@ -197,6 +204,10 @@ final class App: NSObject, NSApplicationDelegate {
                 showVerdict(line)
                 continue
             }
+            if line.hasPrefix("OFFEN:") {
+                pending.append(String(line.dropFirst(6)).trimmingCharacters(in: .whitespaces))
+                continue
+            }
             if line.hasPrefix("KLASSENBUCH:") {
                 showBook(line)
                 continue
@@ -316,7 +327,37 @@ final class App: NSObject, NSApplicationDelegate {
         }
     }
 
-    @objc func quit() { NSApp.terminate(nil) }
+    // OK and the close button both ask here first. While lessons are still empty and nothing was
+    // written in this run, leaving takes a second word: the warning lists what is open and offers
+    // Eintragen again. After an Eintragen run (writing) it never asks - a failure is red already.
+    func mayLeave() -> Bool {
+        guard !writing, !fill.isHidden else { return true }
+        let a = NSAlert()
+        a.alertStyle = .critical
+        // no OFFEN line = only the attendance tick or plan gaps are left, not a topic
+        a.messageText = pending.isEmpty ? "Klassenbuch ist noch nicht fertig!"
+            : "Klassenbuch ist noch NICHT eingetragen!"
+        let shown = pending.prefix(8).map { $0.count > 110 ? String($0.prefix(110)) + " …" : $0 }
+        let more = pending.count > shown.count ? ["… und \(pending.count - shown.count) weitere"] : []
+        var text = book.stringValue.replacingOccurrences(of: "KLASSENBUCH: ", with: "")
+        if !shown.isEmpty {
+            text += "\n\nDas würde eingetragen:\n" + (shown + more).joined(separator: "\n")
+                + "\n\nStimmt das für jede Stunde? (Test geschrieben, Stunde anders gelaufen?)"
+        }
+        a.informativeText = text
+        a.addButton(withTitle: "Eintragen")
+        a.addButton(withTitle: "Nicht eintragen")
+        a.buttons[1].keyEquivalent = "\u{1b}"   // Esc = leave without writing
+        NSApp.activate(ignoringOtherApps: true)
+        if a.runModal() == .alertFirstButtonReturn {
+            fillBook()
+            return false
+        }
+        return true
+    }
+
+    @objc func quit() { if mayLeave() { NSApp.terminate(nil) } }
+    func windowShouldClose(_ sender: NSWindow) -> Bool { mayLeave() }
     func applicationShouldTerminateAfterLastWindowClosed(_ s: NSApplication) -> Bool { true }
 }
 
