@@ -67,4 +67,26 @@ final class Rufe {
         }
         prefs(c).edit().putString("rufe", a.toString()).apply();
     }
+
+    /** Doc's answer to a call, shown under it in the list ("→ …", with ✓ once ntfy.sh took it). */
+    static synchronized void answered(Context c, String id, String text, boolean ok) {
+        if (id == null || id.isEmpty()) return;
+        JSONArray a = all(c);
+        for (int i = 0; i < a.length(); i++) {
+            JSONObject o = a.optJSONObject(i);
+            if (id.equals(o.optString("id"))) {
+                try {
+                    o.put("antwort", text).put("antwortOk", ok);
+                } catch (JSONException ignored) {
+                }
+            }
+        }
+        prefs(c).edit().putString("rufe", a.toString()).apply();
+    }
+
+    /** The newest call, which the app's answer field answers. */
+    static synchronized String newestId(Context c) {
+        JSONArray a = all(c);
+        return a.length() > 0 ? a.optJSONObject(0).optString("id") : "";
+    }
 }

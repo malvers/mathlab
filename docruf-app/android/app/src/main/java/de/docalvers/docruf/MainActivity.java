@@ -88,6 +88,12 @@ public class MainActivity extends Activity {
                 Uri.parse("package:" + getPackageName()))));
         col.addView(akku, gap(12));
 
+        // a spoken answer to the newest call (Doc, 05.11.2026); typing stays in the notification ("Antworten")
+        col.addView(text("Antworten", 18, LAMBDA), gap(32));
+        Button speakAnswer = button("Antwort sprechen", LAMBDA, BG);
+        speakAnswer.setOnClickListener(v -> startActivity(Sprechen.intent(this, Rufe.newestId(this), 0)));
+        col.addView(speakAnswer, gap(8));
+
         col.addView(text("Letzte Rufe", 18, LAMBDA), gap(32));
         list = new LinearLayout(this);
         list.setOrientation(LinearLayout.VERTICAL);
@@ -139,7 +145,9 @@ public class MainActivity extends Activity {
         for (int i = 0; i < a.length(); i++) {
             JSONObject r = a.optJSONObject(i);
             TextView row = text(f.format(new Date(r.optLong("time") * 1000)) + "  " + r.optString("title")
-                    + (r.optBoolean("ok") ? "  ✓" : "") + "\n" + r.optString("text"), 14, TEXT);
+                    + (r.optBoolean("ok") ? "  ✓" : "") + "\n" + r.optString("text")
+                    + (r.has("antwort") ? "\n→ " + r.optString("antwort") + (r.optBoolean("antwortOk") ? "  ✓" : "  (nicht raus)") : ""),
+                    14, TEXT);
             row.setPadding(dp(12), dp(10), dp(12), dp(10));
             row.setBackground(round(CARD));
             // a tap plays the call again; Solita's MP3 only lives 3 h on ntfy.sh, after that the phone reads it

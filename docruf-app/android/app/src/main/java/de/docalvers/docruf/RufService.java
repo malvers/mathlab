@@ -176,6 +176,8 @@ public class RufService extends Service {
                 .setShowWhen(true)
                 .setAutoCancel(true)
                 .setContentIntent(openApp(this))
+                .addAction(Sprechen.action(this, id, id.hashCode()))
+                .addAction(Antwort.action(this, id, id.hashCode()))
                 .build();
         NotificationManager nm = getSystemService(NotificationManager.class);
         nm.notify(id.hashCode(), n);

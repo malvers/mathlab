@@ -18,6 +18,21 @@ vibration, and when "Ansagen" is on the phone also speaks it, in Solita's own vo
 Media volume goes up to at least 70 % for a call and back afterwards. Calls older than
 10 min, found after the line was down, are only listed.
 
+## How Doc answers (since 1.2, 05.11.2026)
+
+Every call carries two buttons. "Sprechen" opens Google's speech input (de-DE) and sends what
+Doc said right away; the notification then shows what the phone understood. "Antworten" types
+the answer in the notification. The app's "Antwort sprechen" answers the newest call. The
+answer goes to `<topic>-antwort`, with the id of the call as its title, and shows under its
+call in the app's list.
+
+On the Mac an agent follows that topic:
+
+    node docruf-app/docruf-antwort.mjs [--since 30m] [--once]
+
+One line per answer (`ANTWORT 20:06: …`), kept in `~/Library/Logs/docruf-antwort.log`. Run as
+a Claude Code Monitor, every answer arrives in the agent's chat.
+
 ## The secret
 
 The topic name is the channel's only key: whoever knows it can read and send calls. It
