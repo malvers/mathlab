@@ -1156,8 +1156,8 @@
             /* the BGY tables (Notenpunkte 12/13, Note 11): the rule of
                punktetabelle.html and the test page - needed units = threshold x
                total, rounded up only on a genuine remainder; never a rounded
-               percent. Half points of Teil B count as they are: 28,5 of 30 is
-               below the 29 the table asks for a 1. */
+               percent. Teil B takes whole points only (parseB), as its
+               Erwartungshorizont gives them. */
             function byUnits(meta) { return meta.gradeRule === 'units' || meta.gradeUnit === 'NP'; }
             function unitsGrade(meta, pts, max) {
                 const row = (meta.gradeScale || []).find(function (st) {
@@ -1246,19 +1246,22 @@
                 return { a: res.score, b: b, pts: res.score + b, max: res.total + meta.partB };
             }
             function fmtB(v) { return String(v).replace('.', ','); }
-            /* whole or half points, 0 to max; '' = not entered; NaN = not valid */
+            /* whole points only, 0 to max; '' = not entered; NaN = not valid.
+               The Erwartungshorizont of Teil B gives whole BE, and a half point
+               right on a threshold read differently by percent and by the table
+               (Doc, 05.11.2026: no half points). */
             function parseB(s, max) {
-                s = String(s).trim().replace(',', '.');
+                s = String(s).trim();
                 if (s === '') return null;
-                if (!/^\d{1,2}(\.[05])?$/.test(s)) return NaN;
+                if (!/^\d{1,2}$/.test(s)) return NaN;
                 const v = Number(s);
                 return v <= max ? v : NaN;
             }
             function partBInput(code, meta) {
                 const inp = document.createElement('input');
                 inp.type = 'text';
-                inp.inputMode = 'decimal';
-                inp.maxLength = 4;
+                inp.inputMode = 'numeric';
+                inp.maxLength = 2;
                 inp.autocomplete = 'off';
                 inp.className = 'lt-b';
                 inp.dataset.code = code;
@@ -1270,7 +1273,7 @@
                 inp.addEventListener('input', function () {
                     const nv = parseB(inp.value, meta.partB);
                     inp.classList.toggle('bad', Number.isNaN(nv));
-                    inp.title = Number.isNaN(nv) ? '0 bis ' + meta.partB + ', auch halbe Punkte (7,5)' : '';
+                    inp.title = Number.isNaN(nv) ? '0 bis ' + meta.partB + ', nur ganze Punkte' : '';
                     if (!Number.isNaN(nv)) partBChanged(code, meta, nv, inp);
                 });
                 /* Enter goes on to the next pupil, as Tab does */
