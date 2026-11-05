@@ -421,7 +421,26 @@ window.svpPlanParts.push(function (P) {
     /* red or orange: the rule lives in svp-pruefungen.js, the timetable pills follow it too */
     function pruefArt(cfg) { return svpPruefungen.pruefArt(cfg); }
 
-    function buildRedList(title, items, art) {
+    /* Doc, 05.11.2026: from the test's list straight into Mission Control - only for Doc,
+       logged in. row.redBtn.mc = { group: 'test page?klasse=...' }, one button per group.
+       Mission Control lives on his Mac (codes and names are in that browser), so the link
+       always goes to localhost:8765, also from docalvers.de. */
+    const MC_URL = 'http://localhost:8765/svp/leistungstest.html?ziel=';
+    function isDoc() {
+        return !!(window.svpAuth && svpAuth.hasSession() &&
+                  (typeof svpAuth.whoami !== 'function' || svpAuth.whoami() === 'info@docalvers.de'));
+    }
+    function mcLink(label, ziel) {
+        const a = document.createElement('a');
+        a.className = 'red-list-pdf red-list-mc';
+        a.href = MC_URL + encodeURIComponent(ziel);
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = label;
+        a.title = 'Mission Control für ' + ziel.replace(/^.*klasse=/, '') + ' öffnen (auf deinem Mac)';
+        return a;
+    }
+    function buildRedList(title, items, art, cfg) {
         if (!redListWired) {
             redListWired = true;
             document.addEventListener('click', closeRedList);
@@ -457,6 +476,16 @@ window.svpPlanParts.push(function (P) {
             pdf.title = 'Aufgaben und Lösungen als PDF herunterladen';
             head.appendChild(pdf);
         }
+        /* in one group's view (?g=) only that group's button */
+        let mc = cfg && cfg.mc && isDoc() ? Object.keys(cfg.mc) : [];
+        if (mc.length > 1 && P.GROUP) {
+            const own = mc.filter(function (g) { return svpTermine.groupKey(g) === svpTermine.groupKey(P.GROUP); });
+            if (own.length) mc = own;
+        }
+        if (mc.length === 1) {
+            head.appendChild(mcLink('Mission Control', cfg.mc[mc[0]]));
+            panel.classList.add('has-mc');   /* a little wider, so the title keeps its line */
+        }
         head.appendChild(x);
         /* an item is a string or { q, a }: the answer folds out under the
            question (Doc, 18.09.2026: "aufklappbar drunter die Loesungen") */
@@ -479,6 +508,16 @@ window.svpPlanParts.push(function (P) {
             ol.appendChild(li);
         });
         panel.appendChild(head);
+        if (mc.length > 1) {
+            /* several groups write this test: one button each, under the head */
+            const row = document.createElement('div');
+            row.className = 'red-list-mcrow';
+            const lab = document.createElement('span');
+            lab.textContent = 'Mission Control';
+            row.appendChild(lab);
+            mc.forEach(function (g) { row.appendChild(mcLink(g.replace(/_/g, ' + '), cfg.mc[g])); });
+            panel.appendChild(row);
+        }
         if (items.info) {
             const info = document.createElement('div');
             info.className = 'red-list-info';

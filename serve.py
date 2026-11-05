@@ -214,6 +214,48 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         origin_host = origin.split('//', 1)[-1].rsplit(':', 1)[0] if origin else host
         return host in ok and origin_host in ok
 
+    UNTIS_CACHE = {}
+
+    def untis_api(self):
+        """Who is absent in Doc's current lesson of a group, read from WebUntis (Mission Control, 05.11.2026:
+        a circle with a check for present, with an X for absent, as in WebUntis' class register).
+
+        The names go WebUntis -> node (tools/webuntis.local.js `abwesend`) -> this server -> the browser on this
+        Mac, nowhere else, and are kept only in memory for a minute so the school server is asked at most once a
+        minute per group. Only our own pages, and only with the custom header (a foreign site cannot send it
+        without a preflight this server never answers).
+        """
+        if not self.local_caller() or self.headers.get('X-Mission-Control') != '1':
+            return self.send_error(403, 'local pages only')
+        from urllib.parse import urlsplit, parse_qs
+        q = parse_qs(urlsplit(self.path).query)
+        gruppe = (q.get('gruppe') or [''])[0]
+        tag = (q.get('tag') or [''])[0]
+        if not re.fullmatch(r'[A-Za-z0-9_-]{1,20}', gruppe) or (tag and not re.fullmatch(r'\d{8}', tag)):
+            return self.send_error(400, 'bad request')
+        key = gruppe + '|' + tag
+        hit = self.UNTIS_CACHE.get(key)
+        if hit and time.time() - hit[0] < 60 and (q.get('frisch') or [''])[0] != '1':
+            body = hit[1]
+        else:
+            node = next((n for n in ('/opt/homebrew/bin/node', '/usr/local/bin/node') if os.path.exists(n)), 'node')
+            root = os.path.dirname(os.path.abspath(__file__))
+            try:
+                r = subprocess.run([node, os.path.join(root, 'tools', 'webuntis.js'), 'abwesend', gruppe] + ([tag] if tag else []),
+                                   capture_output=True, timeout=45, cwd=root)
+                line = next((l for l in reversed(r.stdout.decode('utf-8', 'replace').splitlines()) if l.startswith('{')), '')
+                body = line.encode('utf-8') if line else json.dumps({'ok': False, 'error': 'WebUntis antwortet nicht'}).encode()
+            except subprocess.TimeoutExpired:
+                body = json.dumps({'ok': False, 'error': 'WebUntis zu langsam'}).encode()
+            if b'"ok":true' in body:
+                self.UNTIS_CACHE[key] = (time.time(), body)
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_POST(self):
         if not self.local_caller():
             return self.send_error(403, 'local pages only')
@@ -254,6 +296,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.proben_api()
         if self.path.startswith('/__live/'):
             return self.live_api()
+        if self.path.startswith('/__untis/abwesend'):
+            return self.untis_api()
         self.path = local_icon(self.path) or self.path   # served as usual, just the red file
         path = self.translate_path(self.path)
         if os.path.isdir(path):

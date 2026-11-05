@@ -62,7 +62,7 @@ window.svpPlanParts.push(function (P) {
                     P.redListItems(cfg).then(function (items) {
                         if (!items.length || !rb.isConnected) return;
                         /* built once per week, reused across re-renders of the row */
-                        if (!ref.redList) ref.redList = P.buildRedList(cfg.title || cfg.label, items, art);
+                        if (!ref.redList) ref.redList = P.buildRedList(cfg.title || cfg.label, items, art, cfg);
                         P.closeRedList();
                         ref.redList.hidden = false;
                         P.redListOpen = { panel: ref.redList, btn: rb };
