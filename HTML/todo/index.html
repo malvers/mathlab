@@ -35,16 +35,18 @@
             --lambda: rgb(245, 194, 66);
             --upsilon: rgb(176, 36, 24);
             --phi: rgb(121, 158, 49);
-            /* the priorities keep the exact palette in every scheme, with their own ink on top */
-            --prio1: rgb(176, 36, 24);
-            --prio2: rgb(245, 194, 66);
-            --prio3: rgb(121, 158, 49);
+            /* the priorities keep the exact palette in every scheme (as r, g, b to carry an alpha), with their own ink on top */
+            --prio1: 176, 36, 24;
+            --prio2: 245, 194, 66;
+            --prio3: 121, 158, 49;
             --ink-light: rgb(248, 251, 255);
             --ink-navy: rgb(14, 36, 78);
         }
 
         * { box-sizing: border-box; }
         html, body { margin: 0; background: var(--bg); color: var(--text); }
+        /* keep the scrollbar's place even when the list is short (filtered): otherwise the page shifts sideways */
+        html { scrollbar-gutter: stable; }
         body {
             font-family: Orbitron, sans-serif;
             padding: 0 16px max(40px, env(safe-area-inset-bottom));
@@ -72,12 +74,10 @@
             border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font: 20px Raleway, sans-serif;
         }
         input.new:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
-        button.add, button.mic {
+        button.mic {
             flex: 0 0 58px; height: 58px; border-radius: 12px; cursor: pointer; display: grid; place-items: center; padding: 0;
+            background: transparent; color: var(--text); border: 1px solid var(--line);
         }
-        button.add { background: var(--lambda); color: var(--bg); border: 0; }
-        button.add svg { width: 32px; height: 32px; fill: currentColor; }
-        button.mic { background: transparent; color: var(--text); border: 1px solid var(--line); }
         button.mic svg { width: 26px; height: 26px; fill: currentColor; }
         button.mic.on { background: var(--upsilon); border-color: var(--upsilon); animation: pulse 1.2s ease-in-out infinite; }
         @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(176, 36, 24, .35); } }
@@ -86,32 +86,45 @@
         .status:empty { min-height: 0; margin-top: 0; }
         .status.err { color: var(--lambda); }
 
-        /* the three priorities: one colour each from the palette, the text on it readable */
-        .p1 { --c: var(--prio1); --on: var(--ink-light); }
-        .p2 { --c: var(--prio2); --on: var(--ink-navy); }
-        .p3 { --c: var(--prio3); --on: var(--ink-navy); }
+        /* the three priorities: one colour each from the palette, plus a quiet one for the checked items (the
+           scheme's own tint); --on = the text on the full colour */
+        .p1 { --c-rgb: var(--prio1); --on: var(--ink-light); }
+        .p2 { --c-rgb: var(--prio2); --on: var(--ink-navy); }
+        .p3 { --c-rgb: var(--prio3); --on: var(--ink-navy); }
+        .pd { --c-rgb: var(--tint); --on: var(--bg); }
 
-        /* add the typed item straight into a priority (+ and Enter put it into Prio 2) */
-        .prio { display: flex; gap: 10px; margin-top: 10px; }
+        /* with text in the field a Prio button adds it there (Enter: Prio 2); with an empty field it filters the
+           list to that priority, "Erledigt" to the checked items; the same button again shows everything.
+           Calmer than full colour at rest (Doc 05.11.: "ein Stück zurücknehmen", then "ein bisschen satter"); the
+           filtering one shows its full colour and a frame; "Erledigt" keeps its quiet ground then, only the frame */
+        .prio { display: flex; gap: 8px; margin-top: 10px; }
         .prio button {
-            flex: 1 1 0; height: 44px; border-radius: 10px; cursor: pointer; padding: 0; border: 0;
-            background: var(--c); color: var(--on); font: 700 13px Orbitron, sans-serif; letter-spacing: .06em;
-            transition: transform .08s ease;
+            flex: 1 1 0; min-width: 0; height: 44px; border-radius: 10px; cursor: pointer; padding: 0;
+            background: rgba(var(--c-rgb), .3); border: 1px solid rgba(var(--c-rgb), .85); color: var(--text);
+            font: 700 clamp(11px, 3.1vw, 13px) Orbitron, sans-serif; letter-spacing: .04em; white-space: nowrap;
+            transition: transform .08s ease, background-color .2s ease, color .2s ease;
         }
         .prio button:active { transform: scale(.96); }
+        .prio button[aria-pressed="true"] {
+            background: rgb(var(--c-rgb)); border-color: transparent; color: var(--on);
+            box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--text);   /* a ring: no layout shift */
+        }
+        .prio button.pd[aria-pressed="true"] { background: rgba(var(--c-rgb), .3); color: var(--text); }
+        .grp-note { margin-left: 10px; font: 14px Raleway, sans-serif; color: var(--muted); }
 
         /* open items in three groups, priority 1 on top, each group in Doc's own order;
            checked ones below them (last checked first) */
-        .grp { margin-top: 16px; }
-        .grp:first-child { margin-top: 4px; }
+        #lists { padding-top: 4px; }
+        .grp { margin: 0 0 16px; }   /* below, not above: a hidden group above leaves no gap */
+        .grp-done { margin-top: 22px; }   /* a little air between open and checked */
         .pill {
             display: inline-block; margin: 0 0 4px; padding: 0 12px; height: 26px; border-radius: 13px;
-            background: var(--c); color: var(--on); font: 700 12px/26px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase;
+            background: rgba(var(--c-rgb), .38); color: var(--text); font: 700 12px/26px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase;
         }
         ul.list { list-style: none; margin: 0; padding: 0; }
         ul.list.open { min-height: 44px; }   /* an empty group stays a place to drop an item */
         ul.list.open:empty::before { content: 'leer'; display: block; padding: 11px 4px; font: 15px Raleway, sans-serif; color: var(--muted); }
-        ul.list.done:not(:empty) { margin-top: 22px; }   /* a little air between open and checked */
+        ul.list.done:empty::before { content: 'leer'; display: block; padding: 11px 4px; font: 15px Raleway, sans-serif; color: var(--muted); }
         ul.list li {
             display: grid; grid-template-columns: 44px 1fr 44px; align-items: start; gap: 6px;
             padding: 4px 0; border-top: 1px solid var(--line); background: var(--bg);
@@ -136,7 +149,9 @@
         button.chk:hover { color: var(--lambda); }
         li.done button.chk { color: var(--phi); }
         .txt { padding: 9px 2px; min-height: 44px; cursor: text; white-space: pre-wrap; overflow-wrap: anywhere; }
-        li.done .txt { color: var(--muted); text-decoration: line-through; }
+        li.done .txt {   /* a thin, faint strike-through, so the text under it stays readable (Doc 05.11.) */
+            color: var(--muted); text-decoration: line-through 1px rgba(var(--tint), .4);
+        }
         .txt.editing { outline: 2px solid var(--lambda); border-radius: 8px; padding: 9px 8px; color: var(--text); text-decoration: none; }
 
         .gate { text-align: center; padding: 30px 16px; }
@@ -145,6 +160,29 @@
             width: 100%; max-width: 260px; height: 58px; border: 0; border-radius: 12px; cursor: pointer;
             background: var(--lambda); color: var(--bg); font: 700 15px Orbitron, sans-serif; letter-spacing: .04em;
         }
+        /* head of the checked items: pill, note, and on the right the bin for all of them (over the rows' bins) */
+        .grp-head { display: flex; align-items: center; margin: 0 0 4px; }
+        .grp-head .pill { margin: 0; }
+        button.del-all { margin-left: auto; width: 44px; height: 30px; }
+
+        /* own confirm dialog in the page's look - never the browser's confirm() */
+        .dlg-back {
+            position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px;
+            background: var(--scrim);
+        }
+        .dlg {
+            width: 100%; max-width: 380px; padding: 20px; border-radius: 14px;
+            background: var(--card); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
+        }
+        .dlg p { margin: 0 0 18px; font: 17px/1.45 Raleway, sans-serif; color: var(--text); }
+        .dlg-btns { display: flex; gap: 10px; }
+        .dlg-btns button {
+            flex: 1 1 0; height: 50px; border-radius: 10px; cursor: pointer; padding: 0;
+            font: 700 13px Orbitron, sans-serif; letter-spacing: .04em;
+        }
+        .dlg-no { background: transparent; color: var(--text); border: 1px solid var(--line); }
+        .dlg-yes { background: rgb(var(--prio1)); color: var(--ink-light); border: 0; }
+
         [hidden] { display: none !important; }
     </style>
 </head>
@@ -165,28 +203,36 @@
             <div class="card" id="entry" hidden>
                 <div class="row">
                     <input class="new" id="text" type="text" enterkeyhint="done" autocomplete="off" placeholder="Was ist zu tun?" aria-label="Neue Aufgabe">
-                    <!-- add: Material Icons "add", mic: Material Icons "mic" (Apache 2.0) -->
-                    <button class="add" id="addBtn" type="button" aria-label="Hinzufügen">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                    </button>
+                    <!-- mic: Material Icons "mic" (Apache 2.0) -->
                     <button class="mic" id="micBtn" type="button" aria-label="Diktieren">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
                     </button>
                 </div>
-                <div class="prio" id="prio" role="group" aria-label="Hinzufügen in eine Priorität">
-                    <button class="p1" type="button" data-prio="1" aria-label="In Prio 1 hinzufügen">Prio 1</button>
-                    <button class="p2" type="button" data-prio="2" aria-label="In Prio 2 hinzufügen">Prio 2</button>
-                    <button class="p3" type="button" data-prio="3" aria-label="In Prio 3 hinzufügen">Prio 3</button>
+                <div class="prio" id="prio" role="group" aria-label="Hinzufügen in eine Priorität, mit leerem Feld filtern">
+                    <button class="p1" type="button" data-prio="1" aria-pressed="false">Prio 1</button>
+                    <button class="p2" type="button" data-prio="2" aria-pressed="false">Prio 2</button>
+                    <button class="p3" type="button" data-prio="3" aria-pressed="false">Prio 3</button>
+                    <button class="pd" type="button" data-filter="done" aria-pressed="false">Erledigt</button>
                 </div>
                 <div class="status" id="status" role="status"></div>
             </div>
         </div>
 
         <div id="lists" hidden>
-            <section class="grp p1"><h2 class="pill">Prio 1</h2><ul class="list open" id="p1" data-prio="1" aria-label="Prio 1"></ul></section>
-            <section class="grp p2"><h2 class="pill">Prio 2</h2><ul class="list open" id="p2" data-prio="2" aria-label="Prio 2"></ul></section>
-            <section class="grp p3"><h2 class="pill">Prio 3</h2><ul class="list open" id="p3" data-prio="3" aria-label="Prio 3"></ul></section>
-            <ul class="list done" id="done" aria-label="Erledigt"></ul>
+            <section class="grp p1"><h2 class="pill">Prio 1</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p1" data-prio="1" aria-label="Prio 1"></ul></section>
+            <section class="grp p2"><h2 class="pill">Prio 2</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p2" data-prio="2" aria-label="Prio 2"></ul></section>
+            <section class="grp p3"><h2 class="pill">Prio 3</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p3" data-prio="3" aria-label="Prio 3"></ul></section>
+            <section class="grp-done pd" id="doneSec"><div class="grp-head"><h2 class="pill">Erledigt</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><button class="del del-all" id="delAll" type="button" aria-label="Alle erledigten löschen"></button></div><ul class="list done" id="done" aria-label="Erledigt"></ul></section>
+        </div>
+    </div>
+
+    <div class="dlg-back" id="dlg" hidden>
+        <div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgText">
+            <p id="dlgText"></p>
+            <div class="dlg-btns">
+                <button class="dlg-no" id="dlgNo" type="button">Abbrechen</button>
+                <button class="dlg-yes" id="dlgYes" type="button">Löschen</button>
+            </div>
         </div>
     </div>
 
@@ -210,6 +256,7 @@
             let editingId = null;    // item whose text is being edited in place - no re-render meanwhile
             let dragging = false;    // an item is being dragged - no re-render meanwhile
             let busy = 0;            // writes in flight - a reload now could bring back the old state
+            let filter = 0;          // the one priority shown, 'done' = only the checked items, 0 = all
 
             const byId = id => items.find(x => x.id === id);
             const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -259,18 +306,33 @@
                 '</li>';
 
             /* Rows that change place slide there (FLIP): measure before, render, push back, let go */
-            function render() {
+            function render(flip = true) {
                 if (editingId || dragging) return;
                 const box = $('lists');
                 const before = new Map();
-                for (const li of box.querySelectorAll('li[data-id]')) before.set(li.dataset.id, li.getBoundingClientRect().top);
+                for (const li of box.querySelectorAll('li[data-id]')) {
+                    const r = li.getBoundingClientRect();
+                    if (r.height) before.set(li.dataset.id, r.top);   // rows of a hidden group have no place to slide from
+                }
 
+                // a filter shows one priority only, its checked items included - or only the checked items
+                const shown = x => !filter || filter === 'done' || x.prio === filter;
                 const open = items.filter(x => !x.done);
-                for (const p of PRIOS) $('p' + p).innerHTML = open.filter(x => x.prio === p).sort(byPos).map(row).join('');
-                $('done').innerHTML = items.filter(x => x.done).sort((a, b) => ms(b.done_at) - ms(a.done_at) || b.id - a.id).map(row).join('');
+                for (const p of PRIOS) {
+                    const grp = $('p' + p).closest('.grp');
+                    grp.hidden = !!filter && p !== filter;
+                    grp.querySelector('.grp-note').hidden = filter !== p;
+                    $('p' + p).innerHTML = open.filter(x => x.prio === p).sort(byPos).map(row).join('');
+                }
+                const done = items.filter(x => x.done && shown(x)).sort((a, b) => ms(b.done_at) - ms(a.done_at) || b.id - a.id);
+                $('done').innerHTML = done.map(row).join('');
+                $('doneSec').hidden = !done.length && filter !== 'done';
+                $('doneSec').querySelector('.grp-note').hidden = filter !== 'done';
 
+                if (!flip) return;
                 const moved = [];
                 for (const li of box.querySelectorAll('li[data-id]')) {
+                    if (!li.offsetParent) continue;   // in a hidden group
                     const old = before.get(li.dataset.id);
                     const dy = old === undefined ? 0 : old - li.getBoundingClientRect().top;
                     if (!dy) continue;
@@ -322,6 +384,41 @@
                     () => send(`todo?id=eq.${id}`, 'DELETE'));
             }
 
+            /* Ask in the page's own dialog; Enter = yes, Escape or a tap beside it = no */
+            function confirmBox(text, yes) {
+                return new Promise(done => {
+                    $('dlgText').textContent = text;
+                    $('dlgYes').textContent = yes;
+                    $('dlg').hidden = false;
+                    $('dlgNo').focus();
+                    const close = ok => {
+                        $('dlg').hidden = true;
+                        document.removeEventListener('keydown', key, true);
+                        $('dlgYes').onclick = $('dlgNo').onclick = $('dlg').onclick = null;
+                        done(ok);
+                    };
+                    const key = e => {
+                        if (e.key === 'Escape') { e.preventDefault(); close(false); }
+                        if (e.key === 'Enter') { e.preventDefault(); close(true); }
+                    };
+                    document.addEventListener('keydown', key, true);
+                    $('dlgYes').onclick = () => close(true);
+                    $('dlgNo').onclick = () => close(false);
+                    $('dlg').onclick = e => { if (e.target === $('dlg')) close(false); };
+                });
+            }
+
+            /* the bin in the "Erledigt" head: all checked items that are shown now (a Prio filter: only its own) */
+            async function removeDone() {
+                const gone = items.filter(x => x.done && (!filter || filter === 'done' || x.prio === filter));
+                if (!gone.length) return;
+                const n = gone.length;
+                if (!(await confirmBox(n === 1 ? 'Die erledigte Aufgabe löschen?' : `Alle ${n} erledigten Aufgaben löschen?`, 'Löschen'))) return;
+                const ids = gone.map(x => x.id).join(',');
+                write(() => { items = items.filter(x => !gone.includes(x)); }, () => { items.push(...gone); },
+                    () => send(`todo?id=in.(${ids})&done=is.true`, 'DELETE'));
+            }
+
             /* An item was dropped: it takes the priority of the group it landed in and a pos between its
                new neighbours. If two neighbours have no room left between them, the group is numbered anew. */
             function dropped(evt) {
@@ -347,14 +444,24 @@
                 ), 0);
             }
 
-            // the + and the three Prio buttons are all ways to add: none of them twice at once
+            // the three Prio buttons and Enter add: never twice at once
+            let adding_ = false;
             function adding(on) {
-                $('addBtn').disabled = on;
+                adding_ = on;
                 for (const b of $('prio').children) b.disabled = on;
             }
 
-            /* add the typed item on top of priority `prio` - the Prio buttons pass theirs, + and Enter mean 2 */
+            /* filter to one priority or to the checked items ('done'); 0 = all. The active button shows its full colour */
+            const btnFilter = b => (b.dataset.prio ? Number(b.dataset.prio) : b.dataset.filter);
+            function setFilter(f) {
+                filter = PRIOS.includes(f) || f === 'done' ? f : 0;
+                for (const b of $('prio').children) b.setAttribute('aria-pressed', String(btnFilter(b) === filter));
+                render(false);
+            }
+
+            /* add the typed item on top of priority `prio` - the Prio buttons pass theirs, Enter means 2 */
             async function add(prio) {
+                if (adding_) return;
                 prio = PRIOS.includes(prio) ? prio : 2;
                 // still dictating: end it first, the final text is added right after (onFinal)
                 if (ear && ear.active) { addAfterDictation = prio; ear.stop(); return; }
@@ -368,6 +475,8 @@
                     const rows = await send('todo', 'POST', [{ text, prio, pos }]);
                     if (!rows.length) throw new Error('nichts gespeichert');
                     items.push(norm(rows[0]));
+                    // a filter on another priority would hide the new item at once: show everything again
+                    if (filter && filter !== prio) setFilter(0);
                     $('text').value = '';
                     saveDraft();
                     status('');
@@ -489,13 +598,18 @@
                 $('text').addEventListener('input', saveDraft);
                 $('text').addEventListener('input', () => { if ($('status').textContent === 'Erst die Aufgabe eintippen.') status(''); });
                 $('text').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(2); } });
-                $('addBtn').addEventListener('pointerdown', e => e.preventDefault());   // keep the keyboard open on the phone
-                $('addBtn').onclick = () => add(2);
                 $('micBtn').onclick = dictate;
+                $('delAll').innerHTML = ICON_DEL;
+                $('delAll').onclick = removeDone;
                 $('prio').addEventListener('pointerdown', e => e.preventDefault());   // keep the keyboard open on the phone
                 $('prio').addEventListener('click', e => {
-                    const b = e.target.closest('button[data-prio]');
-                    if (b) add(Number(b.dataset.prio));
+                    const b = e.target.closest('button');
+                    if (!b) return;
+                    if (b.dataset.filter === 'done') { setFilter(filter === 'done' ? 0 : 'done'); return; }   // never adds
+                    const p = Number(b.dataset.prio);
+                    // text typed or still being dictated: add it there; empty field: filter (again: all)
+                    if ($('text').value.trim() || (ear && ear.active)) add(p);
+                    else setFilter(filter === p ? 0 : p);
                 });
                 $('lists').addEventListener('click', e => {
                     const li = e.target.closest('li[data-id]');
