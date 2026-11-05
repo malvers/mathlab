@@ -27,6 +27,7 @@ FILES = {
     'todo/manifest.webmanifest': 'manifest.webmanifest',
     'svp/svp-auth.js': 'svp/svp-auth.js',
     'svp/svp-gate.js': 'svp/svp-gate.js',
+    'svp/svp-tokens.css': 'svp/svp-tokens.css',      # the colours of Hell and Grau
     'js/natur-bild.js': 'js/natur-bild.js',          # svp-gate.js loads it from ../js/
     'js/solita-listen.js': 'js/solita-listen.js',    # dictation
     # the app's own icon (checklist), see todo/icons/icon.svg
