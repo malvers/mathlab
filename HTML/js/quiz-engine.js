@@ -857,6 +857,7 @@
      false switches it off for a single test. */
   const GUARD_ON = CFG.guard !== false && CFG.submit !== false;
   let guardEl = null;
+  let guardMode = '';         /* the face showing: 'start' | 'code' | 'lock' | 'abort' */
   let guardArmed = false;     /* from "Test starten" until the submission */
   let guardAway = false;      /* lock screen showing, waiting for the teacher */
   let guardAwaySeen = false;  /* the server has this leave - only then is 'running' a release */
@@ -992,11 +993,12 @@
       guardEl.querySelector('.guard-btn').addEventListener('click', guardGo);
       guardEl.querySelector('.guard-code').addEventListener('input', gateInput);
       guardEl.querySelector('.guard-code').addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && CODE_RE.test(code)) guardGo();
+        if (e.key === 'Enter' && CODE_RE.test(code) && codeCleared()) guardGo();
       });
       document.body.appendChild(guardEl);
     }
     /* 'code' is the start screen with the code field (codeGate) */
+    guardMode = mode;
     guardEl.className = 'guard guard-' + (mode === 'code' ? 'start' : mode);
     const gateIn = guardEl.querySelector('.guard-code');
     gateIn.hidden = mode !== 'code';
@@ -1007,6 +1009,7 @@
     btn.textContent = label;
     btn.hidden = !label;
     btn.disabled = mode === 'code' && !CODE_RE.test(code);
+    guardEl.querySelector('.guard-note').classList.remove('guard-warn');
     guardEl.hidden = false;
     document.documentElement.classList.add('guard-open');
     if (mode === 'code') gateIn.focus();
@@ -1032,6 +1035,70 @@
       'wird er unterbrochen, und nur deine Lehrkraft kann dich wieder freigeben.',
       slipLabel(),
       'Test starten');
+    if (REQUIRE_CODE) { paintVerdict(); askCode(); }
+  }
+
+  /* Only codes of the teacher's list start (Doc, 05.11.2026: "die Codes nehmen wir
+     gar nicht an"). Mission Control puts the list's codes - never names - on the
+     server (rpc quiz_codes_set); before "Test starten" turns green the page asks
+     rpc quiz_code_ok: 'ok' starts, 'unknown' is a typo (compare with the slip),
+     'nolist' means Mission Control has not been opened for this test yet - asked
+     again every 5 s, so the pupil gets in as soon as the teacher opens it. A
+     network error lets the pupil start as before: a flaky check must not lock a
+     whole class out (and the old server without the rpc answers 404 = start). */
+  let verdict = '';         /* '' | 'checking' | 'ok' | 'unknown' | 'nolist' | 'error' */
+  let verdictCode = '';
+  let verdictTimer = null;
+  function codeCleared() { return verdictCode === code && (verdict === 'ok' || verdict === 'error'); }
+  function askCode() {
+    clearTimeout(verdictTimer);
+    if (!REQUIRE_CODE || !CODE_RE.test(code)) return;
+    const asked = code;
+    if (verdictCode !== asked || (verdict !== 'nolist' && verdict !== 'checking')) verdict = 'checking';
+    verdictCode = asked;
+    fetch(DB_URL + '/rest/v1/rpc/quiz_code_ok', {
+      method: 'POST',
+      headers: {
+        apikey: DB_KEY,
+        Authorization: 'Bearer ' + DB_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ p_quiz: QUIZ_ID, p_code: asked })
+    }).then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }).then(function (v) {
+      if (code !== asked) return;
+      verdict = v === 'ok' || v === 'unknown' || v === 'nolist' ? v : 'error';
+      afterVerdict();
+    }).catch(function () {
+      if (code !== asked) return;
+      verdict = 'error';
+      afterVerdict();
+    });
+  }
+  function afterVerdict() {
+    if (verdict === 'unknown' && guardMode === 'start') { codeGate(); return; }
+    paintVerdict();
+    if (verdict === 'nolist' && guardEl && !guardEl.hidden) verdictTimer = setTimeout(askCode, 5000);
+  }
+  /* the start screen (QR) or the code screen, as far as the server's answer goes */
+  function paintVerdict() {
+    if (!guardEl || guardEl.hidden || (guardMode !== 'start' && guardMode !== 'code') || guardArmed) return;
+    const btn = guardEl.querySelector('.guard-btn');
+    const note = guardEl.querySelector('.guard-note');
+    const inp = guardEl.querySelector('.guard-code');
+    const valid = CODE_RE.test(code);
+    const known = valid && verdictCode === code;
+    btn.disabled = !(valid && codeCleared());
+    inp.classList.toggle('ok', valid && codeCleared());
+    inp.classList.toggle('bad', (code.length === 4 && !valid) || (known && verdict === 'unknown'));
+    note.classList.toggle('guard-warn', known && (verdict === 'unknown' || verdict === 'nolist'));
+    if (!valid) note.textContent = guardMode === 'code' ? '4 Zeichen, sie stehen auf deinem Zettel' : slipLabel();
+    else if (!known || verdict === 'checking') note.textContent = 'Code wird geprüft …';
+    else if (verdict === 'unknown') note.textContent = 'Diesen Code gibt es für diesen Test nicht – bitte genau mit deinem Zettel vergleichen.';
+    else if (verdict === 'nolist') note.textContent = 'Deine Lehrkraft hat die Codes für diesen Test noch nicht freigegeben – bitte kurz warten oder melden.';
+    else note.textContent = guardMode === 'code' ? 'Zettel-Code ' + code : slipLabel();
   }
 
   /* "Test starten", and "Weiter mit dem Test" once the teacher has released
@@ -1044,15 +1111,17 @@
       '4 Zeichen, sie stehen auf deinem Zettel', 'Test starten');
     const inp = guardEl.querySelector('.guard-code');
     inp.value = code;
+    paintVerdict();
+    if (CODE_RE.test(code) && !(verdictCode === code && verdict === 'unknown')) askCode();
   }
   function gateInput() {
     const inp = guardEl.querySelector('.guard-code');
     const v = normCode(inp.value);
     if (inp.value !== v) inp.value = v;
     code = v;
-    inp.classList.toggle('ok', CODE_RE.test(code));
-    inp.classList.toggle('bad', code.length === 4 && !CODE_RE.test(code));
-    guardEl.querySelector('.guard-btn').disabled = !CODE_RE.test(code);
+    clearTimeout(verdictTimer);
+    if (CODE_RE.test(code)) askCode();
+    paintVerdict();
     /* the field on the page shows the same code */
     const codeInput = document.getElementById('codeInput');
     if (codeInput) { codeInput.value = code; paintCode(codeInput); }
@@ -1063,7 +1132,8 @@
 
   function guardGo() {
     if (guardAborted || guardAway) return;
-    if (REQUIRE_CODE && !CODE_RE.test(code)) return;
+    if (REQUIRE_CODE && !(CODE_RE.test(code) && codeCleared()) && !guardArmed) return;
+    clearTimeout(verdictTimer);
     guardQuietUntil = Date.now() + 1500;
     enterFullscreen();
     if (!guardArmed) {
