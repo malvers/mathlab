@@ -153,20 +153,45 @@
   const NP_SCALE = [[95, '15'], [90, '14'], [85, '13'], [80, '12'], [75, '11'], [70, '10'],
                     [65, '09'], [60, '08'], [55, '07'], [50, '06'], [45, '05'], [40, '04'],
                     [33.3, '03'], [28.3, '02'], [20, '01']];
-  const NP = CFG.gradeScale === 'np';
-  function npFor(score, total) {
-    for (let i = 0; i < NP_SCALE.length; i++) {
-      if (score >= Math.ceil(Number((NP_SCALE[i][0] / 100 * total).toFixed(9)))) return NP_SCALE[i][1];
+  /* BGY Klasse 11, Note 1-6 (punktetabelle.html SCALES[11]): same rule as the
+     Notenpunkte, below 25 % = 6. */
+  const BGY11_SCALE = [[95, 1], [80, 2], [65, 3], [45, 4], [25, 5]];
+  /* A page without QUIZ.gradeScale gets the table of its Klassenstufe from its
+     file name (Doc, 05.11.2026: "nach der jeweiligen Bewertungstabelle" - the
+     weekly quizzes of BGY 11-13 showed the online scale 95/80/60/40/20, which
+     is no grade key: 9 of 10 read "Note 2", it is 14 NP = 1). Only the BGY
+     pages: the weekly quizzes inf11test-/inf12test-/inf13test-, Mathe 11 and the
+     entry tests infotest11/12/13 and mathetest12/13 ("Berufliches Gymnasium" in
+     their subtitle). infotest11-* and infotest12-* are FOS weekly quizzes and,
+     like OS and GY, keep the old scale. */
+  const PAGE_FILE = (location.pathname.split('/').pop() || '').toLowerCase();
+  const PAGE_SCALE = /^(inf12test-|inf13test-|(infotest|mathetest)1[23](\.html)?$)/.test(PAGE_FILE) ? 'np'
+                   : /^(inf11test-|infotest11(\.html)?$|mathetest11(-|\.html|$))/.test(PAGE_FILE) ? 'bgy11'
+                   : '';
+  const SCALE_NAME = typeof CFG.gradeScale === 'string' ? CFG.gradeScale
+                   : CFG.gradeScale ? '' : PAGE_SCALE;
+  const NP = SCALE_NAME === 'np';
+  /* the two BGY tables count units, never a rounded percent: needed units =
+     threshold x total, rounded up only on a genuine remainder */
+  const BY_UNITS = NP || SCALE_NAME === 'bgy11';
+  function unitsMark(score, total) {
+    const rows = NP ? NP_SCALE : BGY11_SCALE;
+    for (let i = 0; i < rows.length; i++) {
+      if (score >= Math.ceil(Number((rows[i][0] / 100 * total).toFixed(9)))) return rows[i][1];
     }
-    return '00';
+    return NP ? '00' : 6;
   }
+  function npFor(score, total) { return unitsMark(score, total); }
   /* Grading scale: [min percentage, grade]. A page may override it via QUIZ.gradeScale. */
   const GRADE_SCALE = NP ? NP_SCALE
+                         : SCALE_NAME === 'bgy11' ? BGY11_SCALE.concat([[0, 6]])
                          : CFG.gradeScale || [[95, 1], [80, 2], [60, 3], [40, 4], [20, 5], [0, 6]];
   /* the scale actually in force, for the Note column of svp/leistungstest.html
-     (it loads this page in a hidden frame) - one scale, not a copy there */
+     (it loads this page in a hidden frame) - one scale, not a copy there;
+     quizGradeRule 'units' tells it to count units like unitsMark() */
   window.quizGradeScale = GRADE_SCALE;
   window.quizGradeUnit = NP ? 'NP' : '';
+  window.quizGradeRule = BY_UNITS ? 'units' : 'percent';
   /* A Klassenarbeit with a paper part (Doc, 04.11.2026): QUIZ.partB = the points
      of Teil B, written on paper. The page then shows only the points of Teil A -
      the grade of A + B comes from svp/leistungstest.html once Teil B is entered
@@ -420,7 +445,8 @@
       document.getElementById('score').innerHTML =
         score + ' / ' + QUESTIONS.length +
         ' <span style="font-size:0.6em">· ' + pctOwn + ' % · ' + (NP ? '' : 'Note ') + '<span style="color:' +
-        barColor(pctOwn) + '">' + (NP ? npFor(score, QUESTIONS.length) + ' NP' : gradeFor(pctOwn)) +
+        barColor(pctOwn) + '">' + (NP ? npFor(score, QUESTIONS.length) + ' NP'
+                                   : BY_UNITS ? unitsMark(score, QUESTIONS.length) : gradeFor(pctOwn)) +
         '</span></span>';
     }
 

@@ -1107,7 +1107,8 @@
                                 ok(JSON.parse(JSON.stringify({ id: q.id, version: q.version || 'v1',
                                     questions: q.questions || [], partB: Number(q.partB) || 0,
                                     gradeScale: f.contentWindow.quizGradeScale || q.gradeScale || [],
-                                    gradeUnit: f.contentWindow.quizGradeUnit || '' })));
+                                    gradeUnit: f.contentWindow.quizGradeUnit || '',
+                                    gradeRule: f.contentWindow.quizGradeRule || '' })));
                             } catch (e) { no(e); }
                             f.remove();
                         };
@@ -1152,24 +1153,29 @@
             }
             /* the grade exactly as the test page gives it: rounded percent, first
                step of the scale it reaches */
+            /* the BGY tables (Notenpunkte 12/13, Note 11): the rule of
+               punktetabelle.html and the test page - needed units = threshold x
+               total, rounded up only on a genuine remainder; never a rounded
+               percent. Half points of Teil B count as they are: 28,5 of 30 is
+               below the 29 the table asks for a 1. */
+            function byUnits(meta) { return meta.gradeRule === 'units' || meta.gradeUnit === 'NP'; }
+            function unitsGrade(meta, pts, max) {
+                const row = (meta.gradeScale || []).find(function (st) {
+                    return st[0] > 0 && pts >= Math.ceil(Number((st[0] / 100 * max).toFixed(9)));
+                });
+                return row ? row[1] : meta.gradeUnit === 'NP' ? '00' : '6';
+            }
             function gradeOf(meta, res, code) {
                 if (meta.partB) {
                     /* a Klassenarbeit with Teil B: graded only once B is in */
                     const s = sumAB(meta, res, code);
                     if (!s) return '';
+                    if (byUnits(meta)) return unitsGrade(meta, s.pts, s.max);
                     const p = pctHalfUp(s.pts, s.max);
                     const st = (meta.gradeScale || []).find(function (x) { return p >= x[0]; });
                     return st ? st[1] : '';
                 }
-                /* Notenpunkte (BGY 12/13): the rule of punktetabelle.html and the test
-                   page - needed points = threshold x total, rounded up only on a
-                   genuine remainder; never the rounded percent */
-                if (meta.gradeUnit === 'NP') {
-                    const row = (meta.gradeScale || []).find(function (st) {
-                        return res.score >= Math.ceil(Number((st[0] / 100 * res.total).toFixed(9)));
-                    });
-                    return row ? row[1] : '00';
-                }
+                if (byUnits(meta)) return unitsGrade(meta, res.score, res.total);
                 const pct = Math.round(res.score / res.total * 100);
                 const step = (meta.gradeScale || []).find(function (st) { return pct >= st[0]; });
                 return step ? step[1] : '';
@@ -1318,12 +1324,12 @@
                 if (!res) return who + ' — noch keine Abgabe';
                 if (!meta.partB) {
                     return who + ' — ' + res.score + '/' + res.total +
-                        ' (' + Math.round(res.score / res.total * 100) + ' %) · Note ' + gradeOf(meta, res);
+                        ' (' + Math.round(res.score / res.total * 100) + ' %) · ' + gradeText(meta, gradeOf(meta, res));
                 }
                 const s = sumAB(meta, res, code);
                 return who + ' — A ' + res.score + '/' + res.total + (s
                     ? ' · B ' + fmtB(s.b) + '/' + meta.partB + ' = ' + fmtB(s.pts) + '/' + s.max +
-                      ' (' + pctHalfUp(s.pts, s.max) + ' %) · Note ' + gradeOf(meta, res, code)
+                      ' (' + pctHalfUp(s.pts, s.max) + ' %) · ' + gradeText(meta, gradeOf(meta, res, code))
                     : ' · B fehlt');
             }
             function partBChanged(code, meta, v, src) {
