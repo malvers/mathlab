@@ -300,6 +300,10 @@
    Specific enough to beat the light scheme's tint below. */
 .tt-lesson.tt-termin:not(.tt-block) {
     background: color-mix(in srgb, rgb(var(--g-wichtig)) 22%, var(--card));
+    /* the pill sits as far from the right edge as from top and bottom: a 15-min slot is 21px,
+       the pill 15.3px, so 2.85px above and below - 3px here, 2px in the light scheme with its
+       1px frame (Doc, 05.11.2026: "Spalt zu rechts genauso wie zu oben unten") */
+    padding-right: 3px;
 }
 
 .tt-termin .tt-termin-who {
@@ -498,6 +502,11 @@ html.svp-light .tt-lesson {
     border: 1px solid color-mix(in srgb, var(--hue, var(--cyan)) 35%, var(--card));
     border-left-width: 3px;
     border-left-color: var(--hue, var(--cyan));
+}
+
+/* the 1px frame takes 1px off the gap above and below the Coaching pill, so off the right too */
+html.svp-light .tt-lesson.tt-termin:not(.tt-block) {
+    padding-right: 2px;
 }
 
 html.svp-light .tt-lesson:hover {
