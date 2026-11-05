@@ -220,7 +220,7 @@
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
                     </button>
                 </div>
-                <div class="prio" id="prio" role="group" aria-label="Hinzufügen in eine Priorität, mit leerem Feld filtern">
+                <div class="prio" id="prio" role="group" aria-label="Hinzufügen in eine Priorität, ausgewählte Aufgabe umstufen, mit leerem Feld filtern">
                     <button class="p1" type="button" data-prio="1" aria-pressed="false">Prio 1</button>
                     <button class="p2" type="button" data-prio="2" aria-pressed="false">Prio 2</button>
                     <button class="p3" type="button" data-prio="3" aria-pressed="false">Prio 3</button>
@@ -509,6 +509,22 @@
                 }
             }
 
+            /* The selected item (its text tapped: gold frame) gets priority `prio`, on top of that group; a changed
+               text is saved first. A checked item keeps its tick, it just belongs to that priority then. */
+            function reprio(id, prio) {
+                const span = $('lists').querySelector(`li[data-id="${id}"] .txt`);
+                if (span) span.blur();   // ends the edit (saves the text), editingId = null
+                const x = byId(id);
+                if (!x || x.prio === prio) return;
+                const group = items.filter(y => !y.done && y.prio === prio && y !== x);
+                const next = { prio, pos: group.length ? Math.min(...group.map(y => y.pos)) - 1 : 0 };
+                const prev = { prio: x.prio, pos: x.pos };
+                // a filter on another priority would hide the item at once: show everything again
+                if (PRIOS.includes(filter) && filter !== prio) setFilter(0);
+                write(() => Object.assign(x, next), () => Object.assign(x, prev),
+                    () => send(`todo?id=eq.${id}`, 'PATCH', next));
+            }
+
             /* tap on a text: edit it in place; Enter or tapping elsewhere saves, Escape reverts */
             function edit(li) {
                 const x = byId(Number(li.dataset.id));
@@ -630,6 +646,8 @@
                     if (!b) return;
                     if (b.dataset.filter === 'done') { setFilter(filter === 'done' ? 0 : 'done'); return; }   // never adds
                     const p = Number(b.dataset.prio);
+                    // an item selected (its text tapped): it moves into that priority (Doc 05.11.)
+                    if (editingId) { reprio(editingId, p); return; }
                     // text typed or still being dictated: add it there; empty field: filter (again: all)
                     if ($('text').value.trim() || (ear && ear.active)) add(p);
                     else setFilter(filter === p ? 0 : p);
