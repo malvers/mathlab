@@ -772,6 +772,22 @@ def handle(method, path, headers, body):
         return 403, {"error": "origin"}
     url = urlsplit(path)
     try:
+        if url.path == "/__deck/kritik":               # a spoken remark while the deck runs (deck-kritik.js): one JSON line, outside the public repo
+            k = json.loads(body or b"{}") if method == "POST" else {"deck": parse_qs(url.query).get("deck", [""])[0]}
+            name = str(k.get("deck", ""))
+            if not re.fullmatch(r"[a-z0-9_-]+", name):
+                return 400, {"error": "deck"}
+            folder = os.path.expanduser("~/Documents/deck-kritik")
+            os.makedirs(folder, exist_ok=True)
+            if method == "GET":                        # the marks on the bar
+                path = os.path.join(folder, name + ".jsonl")
+                if not os.path.exists(path):
+                    return 200, {"items": []}
+                with open(path, encoding="utf-8") as f:
+                    return 200, {"items": [json.loads(x) for x in f if x.strip()]}
+            with open(os.path.join(folder, name + ".jsonl"), "a", encoding="utf-8") as f:
+                f.write(json.dumps(k, ensure_ascii=False) + "\n")
+            return 200, {"ok": True}
         if url.path in ("/__deck/label", "/__deck/box"):
             # a figure's words moved or sized, a text box moved or removed (deck_label.py) - reloaded per call like deck_image
             if HERE not in sys.path:

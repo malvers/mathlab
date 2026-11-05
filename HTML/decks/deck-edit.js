@@ -1195,3 +1195,5 @@
   } catch (e) { }
 
 })();
+// the spoken remarks on a running deck live next to the editor, on this machine only
+(function () { const s = document.createElement('script'); s.src = '/decks/deck-kritik.js'; document.head.appendChild(s); })();

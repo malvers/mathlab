@@ -48,7 +48,7 @@ def files_for(page):
         if p and p.endswith(WATCHED):
             out.append(p)
     if base == DECKS:                                 # serve.py injects the editor into decks - not in the file
-        out += [os.path.join(DECKS, f) for f in ("deck-edit.js", "deck-image.js", "deck-label.js")]
+        out += [os.path.join(DECKS, f) for f in ("deck-edit.js", "deck-image.js", "deck-label.js", "deck-kritik.js")]
         # slides a deck fills from a file of their own (deck.js data-aus, tafel.html VORSPANN): that file changed is the deck changed
         out += [p for p in (os.path.join(DECKS, f) for f in sorted(set(VORSPANN.findall(text)))) if os.path.isfile(p)]
     return out
