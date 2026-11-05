@@ -145,11 +145,28 @@
      quiz version automatically resets the lock */
   const DONE_KEY = 'done-' + QUIZ_ID;
 
+  /* Notenpunkte for BGY 12 and 13 (Doc, 05.11.2026: "Wir müssen unbedingt die
+     Notenpunkte der 12 und 13 nehmen" - 17 of 20 had shown "Note 2", it is
+     13 NP = 1-). QUIZ.gradeScale = 'np' takes the table of svp/punktetabelle.html
+     (SCALES[12]) with its rule: needed points = threshold x total, rounded up
+     only on a genuine remainder. */
+  const NP_SCALE = [[95, '15'], [90, '14'], [85, '13'], [80, '12'], [75, '11'], [70, '10'],
+                    [65, '09'], [60, '08'], [55, '07'], [50, '06'], [45, '05'], [40, '04'],
+                    [33.3, '03'], [28.3, '02'], [20, '01']];
+  const NP = CFG.gradeScale === 'np';
+  function npFor(score, total) {
+    for (let i = 0; i < NP_SCALE.length; i++) {
+      if (score >= Math.ceil(Number((NP_SCALE[i][0] / 100 * total).toFixed(9)))) return NP_SCALE[i][1];
+    }
+    return '00';
+  }
   /* Grading scale: [min percentage, grade]. A page may override it via QUIZ.gradeScale. */
-  const GRADE_SCALE = CFG.gradeScale || [[95, 1], [80, 2], [60, 3], [40, 4], [20, 5], [0, 6]];
+  const GRADE_SCALE = NP ? NP_SCALE
+                         : CFG.gradeScale || [[95, 1], [80, 2], [60, 3], [40, 4], [20, 5], [0, 6]];
   /* the scale actually in force, for the Note column of svp/leistungstest.html
      (it loads this page in a hidden frame) - one scale, not a copy there */
   window.quizGradeScale = GRADE_SCALE;
+  window.quizGradeUnit = NP ? 'NP' : '';
   /* A Klassenarbeit with a paper part (Doc, 04.11.2026): QUIZ.partB = the points
      of Teil B, written on paper. The page then shows only the points of Teil A -
      the grade of A + B comes from svp/leistungstest.html once Teil B is entered
@@ -402,8 +419,9 @@
     } else {
       document.getElementById('score').innerHTML =
         score + ' / ' + QUESTIONS.length +
-        ' <span style="font-size:0.6em">· ' + pctOwn + ' % · Note <span style="color:' +
-        barColor(pctOwn) + '">' + gradeFor(pctOwn) + '</span></span>';
+        ' <span style="font-size:0.6em">· ' + pctOwn + ' % · ' + (NP ? '' : 'Note ') + '<span style="color:' +
+        barColor(pctOwn) + '">' + (NP ? npFor(score, QUESTIONS.length) + ' NP' : gradeFor(pctOwn)) +
+        '</span></span>';
     }
 
     resEl.scrollIntoView({ behavior: 'smooth' });
