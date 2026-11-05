@@ -34,10 +34,19 @@ def block_label(x, top, w, lines, size, color=S.BODY, extra=""):
     return (x, top + size * 1.28 / 2, w, "<nl>".join(lines), css(size, color, extra))
 
 
+def framed(c, x, y, w, h, color, rx=9, spine=10, width=2.2):
+    """A white box with a coloured spine that stays INSIDE the frame (Doc, 05.11.2026: "die dürfen da nicht drüber
+    rausmalen"): white ground, then the spine as the left edge of the same rounded shape, then the frame on top."""
+    c.rect(x, y, w, h, fill=S.PAPER, rx=rx)
+    c.path("M %g %g H %g V %g H %g A %g %g 0 0 1 %g %g V %g A %g %g 0 0 1 %g %g Z"
+           % (x + rx, y, x + spine, y + h, x + rx, rx, rx, x, y + h - rx, y + rx, rx, rx, x + rx, y),
+           stroke="none", width=0, fill=color)
+    c.rect(x, y, w, h, fill="none", stroke=S.INK, width=width, rx=rx)
+
+
 def card(c, labels, x, y, w, h, head, lines, color, size=12):
     """A white card with a coloured spine: the heading in Orbitron, the lines right under it."""
-    c.rect(x, y, w, h, fill=S.PAPER, stroke=S.INK, width=2.2, rx=9)
-    c.rect(x, y, 8, h, fill=color, rx=4)
+    framed(c, x, y, w, h, color, rx=9, spine=10, width=2.2)
     labels.append((x + w / 2 + 4, y + 22, w - 20, "<f2>%s</f2>" % head, HEAD))
     if lines:
         labels.append(block_label(x + w / 2 + 4, y + 42, w - 20, lines, size))
@@ -187,8 +196,7 @@ def ki():
     chain = [("LOKAL · MAC", S.GREEN), ("GIT", S.ORANGE), ("GITHUB", S.INK), ("GITHUB PAGES", BLUE), ("BESUCHER", S.GREEN)]
     cxs = [4 + i * (cw + cg) for i in range(5)]
     for x, (head, color) in zip(cxs, chain):
-        c.rect(x, cy, cw, ch, fill=S.PAPER, stroke=S.INK, width=1.8, rx=7)
-        c.rect(x, cy, 6, ch, fill=color, rx=3)
+        framed(c, x, cy, cw, ch, color, rx=7, spine=8, width=1.8)
         labels.append((x + cw / 2 + 3, cy + ch / 2, cw - 12, "<f2>%s</f2>" % head,
                        "font-size:11px;font-weight:600;color:%s" % S.INK))
     for i in range(4):
