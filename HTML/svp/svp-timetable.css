@@ -222,9 +222,25 @@
 
 .tt-pruef-short { display: none; }
 
-/* a narrow tile keeps its class, room and time readable: KA / LT instead of the word */
+/* A narrow tile still writes the word out, in the small cut of the Coaching pill (.tt-termin-what),
+   and its Jahrgang steps down early, so the time keeps one line (Doc, 05.11.2026: "die bitte auch
+   ausschreiben ... die Pillen kleiner machen, so wie die Coaching-Pillen"). */
 @container (max-width: 230px) {
-    .tt-pruef { margin-right: 0; padding: 1px 5px; }
+    .tt-pruef {
+        margin-right: 0;
+        padding: 0 5px;
+        border-radius: 4px;
+        font-family: Orbitron, sans-serif;
+        font-weight: 700;
+        font-size: 0.52rem;
+        line-height: 1.6;
+        letter-spacing: 0.03em;
+    }
+    .tt-pruef ~ .tt-jg { font-size: 1.1rem; }
+}
+
+/* two lessons side by side in one day: the word would squeeze class, room and time - KA / LT */
+@container (max-width: 190px) {
     .tt-pruef-long { display: none; }
     .tt-pruef-short { display: inline; }
 }
