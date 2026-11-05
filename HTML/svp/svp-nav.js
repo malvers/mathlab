@@ -978,7 +978,11 @@
             const qr = qrcode(0, 'M');
             qr.addData(url);
             qr.make();
-            box.innerHTML = qr.createSvgTag({ scalable: true });
+            /* Doc, 05.11.2026: "den QR-Code innerhalb der weißen Box größer
+               machen, kann fast bis zum Rand reichen" - no quiet zone of its
+               own (the library's default is 4 modules); the white card's
+               22 px padding is the quiet zone, still over 2 modules wide. */
+            box.innerHTML = qr.createSvgTag({ scalable: true, margin: 0 });
         }
         qrOverlay.querySelector('.qr-label').textContent = document.title;
         qrOverlay.classList.add('open');
