@@ -117,8 +117,14 @@
     } catch (e) { return false; }
   }
   const SLIPS = slipsHere();
-  /* empty is fine: without slips the test simply stays anonymous */
-  function codeOk() { return !code || CODE_RE.test(code); }
+  /* QUIZ.requireCode (Doc, 05.11.2026: "ohne Code gar nicht anfangen"): in BGY24
+     two pupils left the field empty, their submissions came in without a code and
+     never reached Mission Control. With the flag the test does not start without
+     a valid code (codeGate) and nothing is submitted without one. The demo pool
+     (?test) stays open. */
+  const REQUIRE_CODE = CFG.requireCode === true && !TEST_MODE && CFG.submit !== false;
+  /* empty is fine otherwise: without slips the test simply stays anonymous */
+  function codeOk() { return CODE_RE.test(code) || (!code && !REQUIRE_CODE); }
   /* With a code the footer claim "anonymous" would be wrong: the submission is
      pseudonymous (Art. 4 Nr. 5 DSGVO) - say so. */
   function tagFooter() {
@@ -360,8 +366,10 @@
     guardProgress();
   }
 
-  function submit() {
-    if (locked || guardAborted || !codeOk()) return;
+  /* replay === true: the result shown again after a reload - nothing is sent then,
+     so a code typed by hand and lost with the reload must not block it */
+  function submit(replay) {
+    if (locked || guardAborted || (replay !== true && !codeOk())) return;
     locked = true;
     guardStop();
     if (submitBtn) submitBtn.disabled = true;
@@ -620,7 +628,8 @@
     row.htmlFor = 'codeInput';
     row.innerHTML = '<span>Zettel-Code</span>' +
       '<input id="codeInput" type="text" maxlength="8" autocomplete="off" ' +
-      'autocapitalize="characters" spellcheck="false" placeholder="falls vorhanden">';
+      'autocapitalize="characters" spellcheck="false" placeholder="' +
+      (REQUIRE_CODE ? 'vom Zettel' : 'falls vorhanden') + '">';
     const input = row.querySelector('input');
     input.value = code;
     input.addEventListener('input', function () {
@@ -958,21 +967,32 @@
           '<div class="guard-title"></div>' +
           '<p class="guard-text"></p>' +
           '<p class="guard-note"></p>' +
+          '<input type="text" class="guard-code" maxlength="8" autocomplete="off" ' +
+            'autocapitalize="characters" spellcheck="false" aria-label="Zettel-Code" hidden>' +
           '<button type="button" class="guard-btn"></button>' +
         '</div>';
       guardEl.querySelector('.guard-btn').addEventListener('click', guardGo);
+      guardEl.querySelector('.guard-code').addEventListener('input', gateInput);
+      guardEl.querySelector('.guard-code').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && CODE_RE.test(code)) guardGo();
+      });
       document.body.appendChild(guardEl);
     }
-    guardEl.className = 'guard guard-' + mode;
+    /* 'code' is the start screen with the code field (codeGate) */
+    guardEl.className = 'guard guard-' + (mode === 'code' ? 'start' : mode);
+    const gateIn = guardEl.querySelector('.guard-code');
+    gateIn.hidden = mode !== 'code';
     guardEl.querySelector('.guard-title').textContent = title;
     guardEl.querySelector('.guard-text').textContent = text;
     guardEl.querySelector('.guard-note').textContent = note;
     const btn = guardEl.querySelector('.guard-btn');
     btn.textContent = label;
     btn.hidden = !label;
+    btn.disabled = mode === 'code' && !CODE_RE.test(code);
     guardEl.hidden = false;
     document.documentElement.classList.add('guard-open');
-    if (label) btn.focus();
+    if (mode === 'code') gateIn.focus();
+    else if (label) btn.focus();
   }
   function hideGuard() {
     if (guardEl) guardEl.hidden = true;
@@ -983,8 +1003,12 @@
      also the user gesture full screen needs. Offered as soon as a valid code
      is there (QR at load, or typed by hand). */
   function guardOffer() {
-    if (!GUARD_ON || guardArmed || locked || !CODE_RE.test(code)) return;
+    if (!GUARD_ON || guardArmed || locked) return;
     try { if (!TEST_MODE && localStorage.getItem(DONE_KEY) === '1') return; } catch (e) { /* no storage */ }
+    if (!CODE_RE.test(code)) {
+      if (REQUIRE_CODE) codeGate();
+      return;
+    }
     showGuard('start', 'Leistungstest',
       'Der Test läuft im Vollbild. Verlässt du ihn (anderer Tab, andere App, Esc), ' +
       'wird er unterbrochen, und nur deine Lehrkraft kann dich wieder freigeben.',
@@ -994,8 +1018,34 @@
 
   /* "Test starten", and "Weiter mit dem Test" once the teacher has released
      the pupil or taken an abort back. */
+  /* No code, no test (QUIZ.requireCode): the start screen asks for the code
+     first; "Test starten" stays grey until it is a valid slip code. */
+  function codeGate() {
+    showGuard('code', 'Leistungstest',
+      'Gib zuerst den Code von deinem Zettel ein. Ohne Code kannst du den Test nicht starten.',
+      '4 Zeichen, sie stehen auf deinem Zettel', 'Test starten');
+    const inp = guardEl.querySelector('.guard-code');
+    inp.value = code;
+  }
+  function gateInput() {
+    const inp = guardEl.querySelector('.guard-code');
+    const v = normCode(inp.value);
+    if (inp.value !== v) inp.value = v;
+    code = v;
+    inp.classList.toggle('ok', CODE_RE.test(code));
+    inp.classList.toggle('bad', code.length === 4 && !CODE_RE.test(code));
+    guardEl.querySelector('.guard-btn').disabled = !CODE_RE.test(code);
+    /* the field on the page shows the same code */
+    const codeInput = document.getElementById('codeInput');
+    if (codeInput) { codeInput.value = code; paintCode(codeInput); }
+    tagFooter();
+    tagContext();
+    updateSubmitState();
+  }
+
   function guardGo() {
     if (guardAborted || guardAway) return;
+    if (REQUIRE_CODE && !CODE_RE.test(code)) return;
     guardQuietUntil = Date.now() + 1500;
     enterFullscreen();
     if (!guardArmed) {
@@ -1102,7 +1152,7 @@
        (sendStats only reads the class average once DONE_KEY is set) */
     let doneHere = false;
     try { doneHere = localStorage.getItem(DONE_KEY) === '1'; } catch (e) { /* no storage */ }
-    if (restored && doneHere) submit();
+    if (restored && doneHere) submit(true);
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */
     if (TEST_MODE) {
       document.addEventListener('keydown', function (e) {

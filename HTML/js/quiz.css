@@ -360,6 +360,30 @@ html.guard-open, html.guard-open body { overflow: hidden; }
     color: #fff;
 }
 .guard-btn:hover { background: var(--green-dark); }
+/* no code, no start (QUIZ.requireCode): grey until the code is valid */
+.guard-btn:disabled, .guard-btn:disabled:hover { background: rgba(14, 36, 78, 0.25); cursor: default; }
+/* the code field of the start screen - Arial like the slip codes (8/B, 5/S, 2/Z);
+   16px or more so phones do not zoom in on focus */
+.guard-code {
+    display: block;
+    margin: 0 auto 24px;
+    width: 7.5em;
+    max-width: 100%;
+    padding: 10px 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.3em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--blue);
+    background: var(--card);
+    border: 2px solid rgba(40, 70, 120, 0.35);
+    border-radius: 12px;
+}
+.guard-code[hidden] { display: none; }
+.guard-code:focus { outline: none; border-color: var(--blue); }
+.guard-code.ok { border-color: var(--green); background: rgba(121, 158, 49, 0.08); }
+.guard-code.bad { border-color: var(--red); background: rgba(176, 36, 24, 0.06); }
 .guard-lock .guard-btn { background: #fff; color: var(--red); }
 .guard-lock .guard-btn:hover { background: rgba(255, 255, 255, 0.85); }
 .guard-btn:focus { outline: none; }
