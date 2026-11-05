@@ -41,7 +41,16 @@
             --prio3: 121, 158, 49;
             --ink-light: rgb(248, 251, 255);
             --ink-navy: rgb(14, 36, 78);
+            /* how strongly the buttons and pills are tinted: Blau and Grau need nearly the full colour on the phone
+               (Doc 05.11.: "noch ein bisschen mehr"), so their text takes the ink of the full colour */
+            --btn-a: .75;
+            --btn-rim-a: 1;
+            --pill-a: .75;
         }
+        html.svp-light { --btn-a: .3; --btn-rim-a: .85; --pill-a: .38; }   /* Hell stays as Doc approved it */
+        html.svp-light .prio button:not([aria-pressed="true"]),
+        html.svp-light .prio button.pd,
+        html.svp-light .pill { color: var(--text); }
 
         * { box-sizing: border-box; }
         html, body { margin: 0; background: var(--bg); color: var(--text); }
@@ -55,23 +64,17 @@
         /* heading and entry field stay at the top while the list scrolls under them */
         .top {
             position: sticky; top: 0; z-index: 2; background: var(--bg);
-            padding: max(20px, env(safe-area-inset-top)) 0 12px;
+            padding: max(12px, env(safe-area-inset-top)) 0 12px;
         }
-        .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
-        h1 { font-size: clamp(21px, 6vw, 30px); font-weight: 700; margin: 0; letter-spacing: .04em; }
-        /* colour scheme switch like the Stoffverteilungsplan: it names the scheme a click turns on */
-        button.theme {
-            height: 32px; padding: 0 14px; border-radius: 16px; cursor: pointer; background: transparent;
-            color: var(--muted); border: 1px solid var(--line); font: 700 12px Orbitron, sans-serif; letter-spacing: .06em;
-        }
-        button.theme:hover { color: var(--text); }
+        /* no visible heading (Doc 05.11.: "braucht man eigentlich nicht") - the name stays for screen readers */
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
         .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
 
         .row { display: flex; gap: 10px; }
         input.new {
             flex: 1 1 auto; min-width: 0; height: 58px; background: var(--bg); color: var(--text);
-            border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font: 20px Raleway, sans-serif;
+            border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font: clamp(17px, 5vw, 20px) Raleway, sans-serif;
         }
         input.new:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
         button.mic {
@@ -79,6 +82,17 @@
             background: transparent; color: var(--text); border: 1px solid var(--line);
         }
         button.mic svg { width: 26px; height: 26px; fill: currentColor; }
+        /* colour scheme switch (Blau / Grau / Hell like the Stoffverteilungsplan) at the end of the list - rarely
+           needed, beside the mic it was too present (Doc 05.11.); a line above it, a bit bigger than a plain pill.
+           Its label names the scheme a tap turns on */
+        .foot { margin: 28px 0 8px; padding-top: 20px; border-top: 1px solid var(--line); text-align: center; }
+        button.theme {
+            display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 22px;
+            cursor: pointer; background: transparent; color: var(--text); border: 1px solid rgba(var(--tint), .5);
+            font: 700 13px Orbitron, sans-serif; letter-spacing: .06em;
+        }
+        button.theme:hover { background: rgba(var(--tint), .12); }
+        button.theme svg { width: 22px; height: 22px; fill: currentColor; }
         button.mic.on { background: var(--upsilon); border-color: var(--upsilon); animation: pulse 1.2s ease-in-out infinite; }
         @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(176, 36, 24, .35); } }
         button:disabled { opacity: .5; cursor: default; }
@@ -95,12 +109,13 @@
 
         /* with text in the field a Prio button adds it there (Enter: Prio 2); with an empty field it filters the
            list to that priority, "Erledigt" to the checked items; the same button again shows everything.
-           Calmer than full colour at rest (Doc 05.11.: "ein Stück zurücknehmen", then "ein bisschen satter"); the
+           Calmer than full colour at rest (Doc 05.11.: "ein Stück zurücknehmen", "ein bisschen satter", then on the
+           phone "zu faint ... mehr Power"); the
            filtering one shows its full colour and a frame; "Erledigt" keeps its quiet ground then, only the frame */
         .prio { display: flex; gap: 8px; margin-top: 10px; }
         .prio button {
             flex: 1 1 0; min-width: 0; height: 44px; border-radius: 10px; cursor: pointer; padding: 0;
-            background: rgba(var(--c-rgb), .3); border: 1px solid rgba(var(--c-rgb), .85); color: var(--text);
+            background: rgba(var(--c-rgb), var(--btn-a)); border: 1px solid rgba(var(--c-rgb), var(--btn-rim-a)); color: var(--on);
             font: 700 clamp(11px, 3.1vw, 13px) Orbitron, sans-serif; letter-spacing: .04em; white-space: nowrap;
             transition: transform .08s ease, background-color .2s ease, color .2s ease;
         }
@@ -109,7 +124,7 @@
             background: rgb(var(--c-rgb)); border-color: transparent; color: var(--on);
             box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--text);   /* a ring: no layout shift */
         }
-        .prio button.pd[aria-pressed="true"] { background: rgba(var(--c-rgb), .3); color: var(--text); }
+        .prio button.pd[aria-pressed="true"] { background: rgba(var(--c-rgb), var(--btn-a)); }
         .grp-note { margin-left: 10px; font: 14px Raleway, sans-serif; color: var(--muted); }
 
         /* open items in three groups, priority 1 on top, each group in Doc's own order;
@@ -119,7 +134,7 @@
         .grp-done { margin-top: 22px; }   /* a little air between open and checked */
         .pill {
             display: inline-block; margin: 0 0 4px; padding: 0 12px; height: 26px; border-radius: 13px;
-            background: rgba(var(--c-rgb), .38); color: var(--text); font: 700 12px/26px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase;
+            background: rgba(var(--c-rgb), var(--pill-a)); color: var(--on); font: 700 12px/26px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase;
         }
         ul.list { list-style: none; margin: 0; padding: 0; }
         ul.list.open { min-height: 44px; }   /* an empty group stays a place to drop an item */
@@ -190,10 +205,7 @@
 <body>
     <div class="wrap">
         <div class="top">
-            <div class="head">
-                <h1>To-do</h1>
-                <button class="theme" id="themeBtn" type="button" role="switch">Grau</button>
-            </div>
+            <h1 class="sr-only">To-do</h1>
 
             <div class="card gate" id="gate" hidden>
                 <p>Bitte einmal anmelden, danach merkt sich das Gerät die Anmeldung.</p>
@@ -223,6 +235,13 @@
             <section class="grp p2"><h2 class="pill">Prio 2</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p2" data-prio="2" aria-label="Prio 2"></ul></section>
             <section class="grp p3"><h2 class="pill">Prio 3</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p3" data-prio="3" aria-label="Prio 3"></ul></section>
             <section class="grp-done pd" id="doneSec"><div class="grp-head"><h2 class="pill">Erledigt</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><button class="del del-all" id="delAll" type="button" aria-label="Alle erledigten löschen"></button></div><ul class="list done" id="done" aria-label="Erledigt"></ul></section>
+            <div class="foot">
+                <!-- colour scheme: Material Symbols "contrast" (Apache 2.0) -->
+                <button class="theme" id="themeBtn" type="button" role="switch">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm1-17.93c3.94.49 7 3.86 7 7.93s-3.06 7.44-7 7.93V4.07z"/></svg>
+                    <span id="themeNext">Grau</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -531,7 +550,11 @@
                 $('micBtn').setAttribute('aria-label', on ? 'Diktat beenden' : 'Diktieren');
             }
             function dictated(t) {
-                $('text').value = join(dictBase, dictBase ? t : capital(t));
+                const el = $('text');
+                el.value = join(dictBase, dictBase ? t : capital(t));
+                // the end of what is being said stays in view (Doc 05.11.: it vanished behind the right edge)
+                if (document.activeElement === el) el.setSelectionRange(el.value.length, el.value.length);
+                el.scrollLeft = el.scrollWidth;
                 saveDraft();
             }
             function dictate() {
@@ -567,7 +590,7 @@
                 root.classList.toggle('svp-light', theme === 'light');
                 root.classList.toggle('svp-grey', theme === 'grey');
                 const next = THEME_LABEL[THEME_NEXT[theme]];
-                $('themeBtn').textContent = next;
+                $('themeNext').textContent = next;
                 $('themeBtn').title = 'Farbschema ' + next + ' einschalten';
                 $('themeBtn').setAttribute('aria-label', $('themeBtn').title);
                 $('themeBtn').setAttribute('aria-checked', String(theme === 'light'));
