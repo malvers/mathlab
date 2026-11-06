@@ -275,6 +275,43 @@
     font-variant-numeric: tabular-nums;
   }
   .chip.low { background: rgba(176, 36, 24, 0.08); border-color: rgba(176, 36, 24, 0.4); }
+  /* Notenspiegel: one column per mark, best first - count, bar, mark, points */
+  .gm {
+    display: grid;
+    grid-template-columns: repeat(var(--gm-n, 6), minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0 4px;
+  }
+  .gm-col { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+  .gm-n { font-family: 'Orbitron', sans-serif; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+  .gm-n.zero { color: rgba(14, 36, 78, 0.3); }
+  .gm-bar {
+    width: 100%;
+    height: 72px;
+    display: flex;
+    align-items: flex-end;
+    background: var(--blue-soft);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .gm-bar i { display: block; width: 100%; border-radius: 6px 6px 0 0; }
+  .gm-g {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    width: 100%;
+    text-align: center;
+    padding-top: 4px;
+    border-top: 1px solid rgba(14, 36, 78, 0.2);
+  }
+  .gm-r { font-size: 0.72rem; color: rgba(14, 36, 78, 0.55); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  #dashgrades .gm-avg { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; text-align: center; margin-top: 12px; }
+  /* Notenpunkte have 16 marks: two rows on a phone */
+  @media (max-width: 620px) {
+    .gm.many { grid-template-columns: repeat(8, minmax(0, 1fr)); row-gap: 14px; }
+    .gm { gap: 5px; }
+    .gm-bar { height: 56px; }
+  }
   .live { color: rgba(14, 36, 78, 0.55); font-size: 0.8rem; }
   /* result table */
   .revtable { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin-bottom: 12px; }

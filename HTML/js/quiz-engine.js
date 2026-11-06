@@ -51,6 +51,10 @@
           '<div id="dashscores">Noch keine Abgaben.</div>' +
         '</div>' +
         '<div class="card">' +
+          '<div class="dashhead">Notenspiegel <span class="live">Anzahl je Note, darunter die Punkte dafür</span></div>' +
+          '<div id="dashgrades">Noch keine Abgaben.</div>' +
+        '</div>' +
+        '<div class="card">' +
           '<div class="dashhead">Gruppenleistung pro Frage</div>' +
           '<div id="dashquestions"></div>' +
         '</div>' +
@@ -203,6 +207,12 @@
       if (pct >= GRADE_SCALE[i][0]) return GRADE_SCALE[i][1];
     }
     return 6;
+  }
+  /* The mark of score/total - one rule for the pupil's result screen and the
+     Notenspiegel of the dashboard: the BGY tables count units, every other
+     scale takes the rounded percent. */
+  function markOf(score, total) {
+    return BY_UNITS ? unitsMark(score, total) : gradeFor(Math.round(score / total * 100));
   }
 
   const QUESTIONS = CFG.questions || [];
@@ -445,8 +455,7 @@
       document.getElementById('score').innerHTML =
         score + ' / ' + QUESTIONS.length +
         ' <span style="font-size:0.6em">· ' + pctOwn + ' % · ' + (NP ? '' : 'Note ') + '<span style="color:' +
-        barColor(pctOwn) + '">' + (NP ? npFor(score, QUESTIONS.length) + ' NP'
-                                   : BY_UNITS ? unitsMark(score, QUESTIONS.length) : gradeFor(pctOwn)) +
+        barColor(pctOwn) + '">' + markOf(score, QUESTIONS.length) + (NP ? ' NP' : '') +
         '</span></span>';
     }
 
@@ -767,6 +776,7 @@
       return res.json();
     }).then(function (subs) {
       renderScores(subs);
+      renderGradeMirror(subs);
       return fetch(DB_URL + '/rest/v1/quiz_stats?quiz=eq.' + QUIZ_ID + '&order=q', {
         headers: { apikey: DB_KEY, Authorization: 'Bearer ' + DB_KEY }
       });
@@ -800,6 +810,59 @@
       '</b> (' + Math.round(avg / QUESTIONS.length * 100) + ' %)</div>' +
       '<div class="avgsub">' + subs.length + (subs.length === 1 ? ' Abgabe' : ' Abgaben') + '</div>';
     info.textContent = '(' + subs.length + ' Abgaben · live, aktualisiert alle 5 s)';
+  }
+
+  /* Notenspiegel (Doc, 06.11.2026: "dass man bei der Auswertung auch den
+     Notenspiegel sieht"): how many got which mark, best mark first, every mark
+     from markOf() - the very rule of the result screen, never a second scale.
+     Under each mark the points it takes, worked out with the same rule. With
+     Teil B on paper there is no mark here yet. */
+  function renderGradeMirror(subs) {
+    const el = document.getElementById('dashgrades');
+    if (!el) return;
+    if (PART_B) {
+      el.textContent = 'Die Noten gibt es erst zusammen mit Teil B (Papier) – deshalb hier kein Notenspiegel.';
+      return;
+    }
+    if (!subs.length) { el.textContent = 'Noch keine Abgaben.'; return; }
+    const steps = [];
+    GRADE_SCALE.forEach(function (st) { if (steps.indexOf(String(st[1])) < 0) steps.push(String(st[1])); });
+    const floor = NP ? '00' : '6';
+    if (steps.indexOf(floor) < 0) steps.push(floor);
+    /* points per mark for this test's length */
+    const T = QUESTIONS.length;
+    const range = {};
+    for (let p = 0; p <= T; p++) {
+      const m = String(markOf(p, T));
+      if (!range[m]) range[m] = [p, p];
+      range[m][1] = p;
+    }
+    const count = {};
+    steps.forEach(function (m) { count[m] = 0; });
+    let sum = 0;
+    subs.forEach(function (s) {
+      const m = String(markOf(s.score, s.total));
+      if (!(m in count)) { count[m] = 0; steps.push(m); }
+      count[m]++;
+      sum += Number(m);
+    });
+    const max = Math.max.apply(null, steps.map(function (m) { return count[m]; }));
+    let html = '<div class="gm' + (steps.length > 8 ? ' many' : '') + '" style="--gm-n:' + steps.length + '">';
+    steps.forEach(function (m) {
+      const r = range[m];
+      const n = count[m];
+      const h = n ? Math.max(6, Math.round(n / max * 100)) : 0;
+      const col = barColor(r ? r[0] / T * 100 : 0);
+      html += '<div class="gm-col">' +
+        '<div class="gm-n' + (n ? '' : ' zero') + '">' + n + '</div>' +
+        '<div class="gm-bar"><i style="height:' + h + '%;background:' + col + '"></i></div>' +
+        '<div class="gm-g">' + m + '</div>' +
+        '<div class="gm-r">' + (!r ? '–' : r[0] === r[1] ? r[0] : r[0] + '–' + r[1]) + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    const avg = (Math.round(sum / subs.length * 10) / 10).toFixed(1).replace('.', ',');
+    el.innerHTML = html + '<div class="avg gm-avg">Ø ' + (NP ? '<b>' + avg + ' NP</b>' : 'Note <b>' + avg + '</b>') + '</div>';
   }
 
   function renderQuestionStats(rows) {
