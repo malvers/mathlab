@@ -21,6 +21,7 @@
         'gdw',              // "Gedanke der Woche": preview in the week row, full page on click
         'fahrplan',         // the run of a lesson, in a frameless sheet behind the stack
         'talks',            // the "Vortrag: Nr · Titel" line of a week
+        'mitschrift',       // the "Notizen" button: what Doc said in the week's lessons (local server only)
         'material-edit',    // editing material: dialog, clipboard, pill menu, drag and drop
         'state',            // stored edits and notes (localStorage), the merged plan rows
         'text',             // formulas (KaTeX), inline marks, dates, the bullet list of a week

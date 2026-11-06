@@ -10,6 +10,8 @@ Decks (HTML/decks/*.html) also get the text editor (decks/deck-edit.js) and its 
 /__deck/source and /__deck/save (tools/pptx/deck_edit.py) - editing exists only on this machine.
 Every page also gets live reload (/__live/reload.js, tools/live_reload.py): it reloads itself when its file or
 the scripts and styles it loads change (Doc, 17.09.2026).
+The plans' "Notizen" button opens Doc's DocMitschrift of a week from /__mitschrift/ (docmitschrift-app/mitschrift_seite.py,
+school data from ~/Documents/mitschrift, so it exists only here, never on docalvers.de).
 
     python3 serve.py            # http://localhost:8765, serves the HTML/ folder
     python3 serve.py 8080       # other port
@@ -223,6 +225,29 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def mitschrift_api(self):
+        """DocMitschrift for the plans' "Notizen" button (docmitschrift-app/mitschrift_seite.py, reloaded per call,
+        Doc 06.11.2026). The text is school data from ~/Documents/mitschrift: only for pages of this server."""
+        if not self.local_caller():
+            return self.send_error(403, 'local pages only')
+        here = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'docmitschrift-app')
+        try:
+            if here not in sys.path:
+                sys.path.insert(0, here)
+            import mitschrift_seite
+            status, ctype, body = importlib.reload(mitschrift_seite).handle(self.path)
+        except Exception as err:
+            status, ctype = 500, 'text/plain; charset=utf-8'
+            body = ('serve.py: %s: %s' % (type(err).__name__, err)).encode('utf-8')
+        if ctype.startswith('text/html'):
+            body = inject(body)                  # the LOCAL badge, like every page served here
+        self.send_response(status)
+        self.send_header('Content-Type', ctype)
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def local_caller(self):
         """Only our own pages may write here (audit 27.09.2026).
 
@@ -325,6 +350,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.live_api()
         if self.path.startswith('/__untis/abwesend'):
             return self.untis_api()
+        if self.path.startswith('/__mitschrift/'):
+            return self.mitschrift_api()
         self.path = local_icon(self.path) or self.path   # served as usual, just the red file
         path = self.translate_path(self.path)
         if os.path.isdir(path):

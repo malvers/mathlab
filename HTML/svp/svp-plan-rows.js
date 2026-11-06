@@ -383,12 +383,14 @@ window.svpPlanParts.push(function (P) {
             subLeft.className = 'sub-left';
             subBody.appendChild(subLeft);
             ref.ul = document.createElement('ul');
-            /* Two tabs in the sub-row (Doc, 03.09.2026): "Inhalt" holds the
-               bullet list as before, "Notizen" a free text field that Doc
-               fills in edit mode. Notes stay out of both exports and out of
-               the Untis text - they belong to the lesson, not to the plan.
-               Logged out there is no tab strip and no Notizen element at all,
-               so a visitor's DOM looks exactly as it did before. */
+            /* The tab strip of the sub-row: "Inhalt" holds the bullet list. Until
+               06.11.2026 a second tab "Notizen" held a free text field; since then
+               "Notizen" is a button that opens what Doc said in the week's lessons
+               (DocMitschrift) in a new tab - part "mitschrift", only on the local
+               server (Doc: "Wir machen das Notizen als Button ... die Notizen
+               koennen weg"). The old notes stay stored (svp_plan_notes), they are
+               just no longer shown. Logged out there is no tab strip at all, so a
+               visitor's DOM looks exactly as it did before. */
             if (!P.notesAllowed()) {
                 /* Ohne Anmeldung gibt es keine Reiter. Dann steht links dieselbe
                    gemalte Beschriftung wie rechts, sonst haengt da eine nackte
@@ -411,7 +413,7 @@ window.svpPlanParts.push(function (P) {
                     /* the mark strip belongs to the bullets, not to the notes */
                     tabs.classList.toggle('on-notizen', name === 'notizen');
                 };
-                [['inhalt', 'Inhalt'], ['notizen', 'Notizen']].forEach(function (t, k) {
+                [['inhalt', 'Inhalt']].forEach(function (t, k) {
                     const b = document.createElement('button');
                     b.type = 'button';
                     b.className = 'sub-tab' + (k ? '' : ' on');
@@ -427,45 +429,12 @@ window.svpPlanParts.push(function (P) {
                     panes[t[0]] = { btn: b, pane: pane };
                 });
                 panes.inhalt.pane.appendChild(ref.ul);
+                /* "Notizen" right after "Inhalt": opens the week's Mitschrift in a new tab
+                   (part "mitschrift", local server only - elsewhere nothing is added) */
+                P.mitschriftBtn(ref, tabs);
                 /* Styles right of the tabs, visible only while editing
                    (Doc, 06.09.2026: "damit ich Sachen hervorheben kann"). */
                 tabs.appendChild(P.buildMarkTools(ref));
-                const notesEl = document.createElement('div');
-                notesEl.className = 'notes-body';
-                notesEl.dataset.ph = 'Notizen …';
-                P.setNotesText(notesEl, P.noteOf(i));
-                /* Doc, 07.09.2026: "wenn es Notizen gibt, schreib Notizen in Gruen" -
-                   so sieht man einer zugeklappten Woche an, dass dort etwas steht. */
-                ref.markNotes = function () {
-                    panes.notizen.btn.classList.toggle('has-notes',
-                        P.notesTextOf(notesEl).length > 0);
-                };
-                ref.markNotes();
-                /* Doc, 03.09.2026: "die Anforderung nur in Bearbeiten ist
-                   hinfaellig" - the field is live as soon as he is logged in,
-                   saving itself like the notes page does. The Bearbeiten mode
-                   stays what it always was: for the plan itself. */
-                notesEl.setAttribute('contenteditable', 'true');
-                let noteTimer = null;
-                const stashNote = function () {
-                    const t = P.notesTextOf(notesEl);
-                    if (t) P.planNotes[i] = t; else delete P.planNotes[i];
-                    P.persistNotes();
-                    P.pushNotes();
-                };
-                notesEl.addEventListener('input', function () {
-                    ref.markNotes();
-                    clearTimeout(noteTimer);
-                    noteTimer = setTimeout(stashNote, 700);
-                });
-                notesEl.addEventListener('blur', function () {
-                    clearTimeout(noteTimer);
-                    stashNote();
-                });
-                /* typing must not fold the week away under the cursor */
-                notesEl.addEventListener('keydown', function (ev) { ev.stopPropagation(); });
-                panes.notizen.pane.appendChild(notesEl);
-                ref.notesEl = notesEl;
                 ref.showPane = showPane;
             }
             /* Rechte Haelfte der Kopfzeile: zwei echte Reiter wie links (Doc,

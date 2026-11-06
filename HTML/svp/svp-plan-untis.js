@@ -808,6 +808,9 @@ window.svpPlanParts.push(function (P) {
         for (const r of P.rendered) {
             if (!r.lbTd) continue;
             const entries = termine ? untisEntriesFor(termine, r.i) : weeks[String(r.kw)];
+            /* the "Notizen" button finds the week's Mitschrift by these lessons (part "mitschrift") */
+            r.untisEntries = entries || null;
+            if (P.mitschriftRefresh) P.mitschriftRefresh(r);
             if (!entries || !entries.length) continue;
             const chip = document.createElement('span');
             chip.className = 'untis-chip ' + untisChipClass(entries);
