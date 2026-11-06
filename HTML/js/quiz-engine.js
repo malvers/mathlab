@@ -51,7 +51,7 @@
           '<div id="dashscores">Noch keine Abgaben.</div>' +
         '</div>' +
         '<div class="card">' +
-          '<div class="dashhead">Notenspiegel <span class="live">Anzahl je Note, darunter die Punkte dafür</span></div>' +
+          '<div class="dashhead">Notenspiegel <span class="live" id="gmhint">Anzahl je Note, darunter die Punkte dafür</span></div>' +
           '<div id="dashgrades">Noch keine Abgaben.</div>' +
         '</div>' +
         '<div class="card">' +
@@ -186,6 +186,13 @@
     return NP ? '00' : 6;
   }
   function npFor(score, total) { return unitsMark(score, total); }
+  /* The Zensur of each Notenpunkte value, from the same table (punktetabelle.html
+     SCALES[12]: 15-13 = 1, 12-10 = 2, 09-07 = 3, 06-04 = 4, 03-01 = 5, 00 = 6);
+     within a Note the three values read +, plain, - (Doc, 06.11.2026: "welche
+     Zensuren das sind"). The whole Note is its first digit. */
+  const NP_ZENSUR = { '15': '1+', '14': '1', '13': '1\u2212', '12': '2+', '11': '2', '10': '2\u2212',
+                      '09': '3+', '08': '3', '07': '3\u2212', '06': '4+', '05': '4', '04': '4\u2212',
+                      '03': '5+', '02': '5', '01': '5\u2212', '00': '6' };
   /* Grading scale: [min percentage, grade]. A page may override it via QUIZ.gradeScale. */
   const GRADE_SCALE = NP ? NP_SCALE
                          : SCALE_NAME === 'bgy11' ? BGY11_SCALE.concat([[0, 6]])
@@ -787,12 +794,31 @@
       });
   }
 
+  /* How many pupils the group has (Doc, 06.11.2026: "19 Abgaben ... von so und
+     so viel Gesamtschülern, dass man sofort sieht, wie viele haben nicht
+     abgegeben"): the slips of this test and group that leistungstest.html keeps
+     in this browser, one per pupil - codes only, no names. Read on every
+     refresh, so a changed list counts at once. Without slips here (another
+     browser, an anonymous test) there is no total and the count stands alone. */
+  function classSize() {
+    if (!SLIPS) return 0;
+    try {
+      const rec = JSON.parse(localStorage.getItem('svp-leistungstest-v1') || '{}')[KLASSE];
+      return rec && Array.isArray(rec.ids) ? rec.ids.length : 0;
+    } catch (e) { return 0; }
+  }
+  function countText(n) {
+    const of = classSize();
+    if (!of) return n + (n === 1 ? ' Abgabe' : ' Abgaben');
+    return n + ' von ' + of + ' Abgaben' + (of > n ? ' · ' + (of - n) + ' ohne Abgabe' : '');
+  }
+
   function renderScores(subs) {
     const el = document.getElementById('dashscores');
     const info = document.getElementById('liveinfo');
     if (!subs.length) {
       el.textContent = 'Noch keine Abgaben.';
-      info.textContent = '(live, aktualisiert alle 5 s)';
+      info.textContent = '(' + (classSize() ? countText(0) + ' · ' : '') + 'live, aktualisiert alle 5 s)';
       return;
     }
     let sum = 0;
@@ -800,7 +826,9 @@
     subs.forEach(function (s, i) {
       sum += s.score;
       const low = s.score < s.total / 2 ? ' low' : '';
-      html += '<span class="chip' + low + '" title="Abgabe ' + (i + 1) + '">' +
+      const col = chipColor(s.score, s.total);
+      html += '<span class="chip' + low + '" title="Abgabe ' + (i + 1) + '" style="background:' +
+              col + ';border-color:' + col + ';color:' + textOn(col) + '">' +
               s.score + '/' + s.total + '</span>';
     });
     html += '</div>';
@@ -808,15 +836,45 @@
     el.innerHTML = html +
       '<div class="avg">Ø <b>' + (Math.round(avg * 10) / 10) + ' / ' + QUESTIONS.length +
       '</b> (' + Math.round(avg / QUESTIONS.length * 100) + ' %)</div>' +
-      '<div class="avgsub">' + subs.length + (subs.length === 1 ? ' Abgabe' : ' Abgaben') + '</div>';
-    info.textContent = '(' + subs.length + ' Abgaben · live, aktualisiert alle 5 s)';
+      '<div class="avgsub">' + countText(subs.length) + '</div>';
+    info.textContent = '(' + countText(subs.length) + ' · live, aktualisiert alle 5 s)';
+  }
+
+  /* The colour of a score (Doc, 06.11.2026: "bei den Einzelleistungen das
+     Farbschema ... hinterlegen" - "tatsächlich gefüllt ... wie im Histogramm"):
+     the colour of its mark's bar in the Notenspiegel - the lowest score that
+     still earns the mark - so a chip and its column match. With Teil B on paper
+     there is no mark yet: plain percent. */
+  function chipColor(score, total) {
+    if (PART_B || !total) return barColor(total ? score / total * 100 : 0);
+    const m = String(markOf(score, total));
+    let p = score;
+    while (p > 0 && String(markOf(p - 1, total)) === m) p--;
+    return barColor(p / total * 100);
+  }
+  /* Text on a filled chip: navy or white, whichever stands out more against
+     the fill (WCAG contrast) - navy on green and orange, white on red. */
+  function textOn(rgb) {
+    const lum = function (c) {
+      const l = c.map(function (v) {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
+    };
+    const L = lum(rgb.match(/\d+/g).map(Number));
+    const navy = lum([14, 36, 78]);
+    return 1.05 / (L + 0.05) > (L + 0.05) / (navy + 0.05) ? '#fff' : 'rgb(14, 36, 78)';
   }
 
   /* Notenspiegel (Doc, 06.11.2026: "dass man bei der Auswertung auch den
      Notenspiegel sieht"): how many got which mark, best mark first, every mark
      from markOf() - the very rule of the result screen, never a second scale.
      Under each mark the points it takes, worked out with the same rule. With
-     Teil B on paper there is no mark here yet. */
+     Teil B on paper there is no mark here yet. Notenpunkte pages also show the
+     Zensur under each value and the average Note next to the average NP - the
+     mean of the pupils' whole Noten from NP_ZENSUR (Doc, 06.11.2026: "hinter
+     den Notenpunkten noch Gedankenstrich, Note ... die Durchschnittsnote"). */
   function renderGradeMirror(subs) {
     const el = document.getElementById('dashgrades');
     if (!el) return;
@@ -825,6 +883,8 @@
       return;
     }
     if (!subs.length) { el.textContent = 'Noch keine Abgaben.'; return; }
+    const hint = document.getElementById('gmhint');
+    if (hint && NP) hint.textContent = 'Anzahl je Notenpunkte, darunter Zensur und Punkte dafür';
     const steps = [];
     GRADE_SCALE.forEach(function (st) { if (steps.indexOf(String(st[1])) < 0) steps.push(String(st[1])); });
     const floor = NP ? '00' : '6';
@@ -840,11 +900,13 @@
     const count = {};
     steps.forEach(function (m) { count[m] = 0; });
     let sum = 0;
+    let noteSum = 0;
     subs.forEach(function (s) {
       const m = String(markOf(s.score, s.total));
       if (!(m in count)) { count[m] = 0; steps.push(m); }
       count[m]++;
       sum += Number(m);
+      if (NP) noteSum += parseInt(NP_ZENSUR[m], 10);
     });
     const max = Math.max.apply(null, steps.map(function (m) { return count[m]; }));
     let html = '<div class="gm' + (steps.length > 8 ? ' many' : '') + '" style="--gm-n:' + steps.length + '">';
@@ -857,12 +919,16 @@
         '<div class="gm-n' + (n ? '' : ' zero') + '">' + n + '</div>' +
         '<div class="gm-bar"><i style="height:' + h + '%;background:' + col + '"></i></div>' +
         '<div class="gm-g">' + m + '</div>' +
+        (NP ? '<div class="gm-z">' + (NP_ZENSUR[m] || '') + '</div>' : '') +
         '<div class="gm-r">' + (!r ? '–' : r[0] === r[1] ? r[0] : r[0] + '–' + r[1]) + '</div>' +
       '</div>';
     });
     html += '</div>';
-    const avg = (Math.round(sum / subs.length * 10) / 10).toFixed(1).replace('.', ',');
-    el.innerHTML = html + '<div class="avg gm-avg">Ø ' + (NP ? '<b>' + avg + ' NP</b>' : 'Note <b>' + avg + '</b>') + '</div>';
+    const oneDec = function (x) { return (Math.round(x * 10) / 10).toFixed(1).replace('.', ','); };
+    const avg = oneDec(sum / subs.length);
+    el.innerHTML = html + '<div class="avg gm-avg">Ø ' +
+      (NP ? '<b>' + avg + ' NP</b> – Note <b>' + oneDec(noteSum / subs.length) + '</b>'
+          : 'Note <b>' + avg + '</b>') + '</div>';
   }
 
   function renderQuestionStats(rows) {
