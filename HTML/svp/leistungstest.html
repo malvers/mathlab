@@ -1675,7 +1675,10 @@
                     const st = statusOf(control[e.code] || null).key;
                     if (st === 'done') return;
                     if (hit.absent) must.push({ e: e, ex: hit.excused });
-                    else if (st === 'none' || !untis.lesson.running) clear.push({ e: e });
+                    /* "present but no submission" only means something after the bell - mid-lesson it
+                       listed every pupil still on paper or not yet started (same trap as the triangle,
+                       Doc, 06.11.2026: "Bitte erst am Ende") */
+                    else if (lessonOver()) clear.push({ e: e });
                 });
                 return { must: must, clear: clear };
             }
