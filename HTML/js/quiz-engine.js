@@ -907,10 +907,41 @@
     const el = document.documentElement;
     const req = el.requestFullscreen || el.webkitRequestFullscreen;
     if (!req || fsElement()) return;
+    keepScrollThroughFullscreen();
     try {
       const p = req.call(el);
       if (p && p.catch) p.catch(function () {});
     } catch (e) { /* iPhone: no full screen for pages - the other triggers still work */ }
+  }
+  /* Going full screen throws tablets back to the top of the page. On touch the
+     tap on an answer brings a lost full screen back (GUARD_TOUCH), so a pupil far
+     down picked an answer and had to scroll all the way down again after every
+     tap (Info 9b, 06.11.2026). Remember the place and put it back while the
+     switch settles; a new touch by the pupil ends the restoring at once. */
+  function keepScrollThroughFullscreen() {
+    const y = window.scrollY || window.pageYOffset || 0;
+    if (y < 1) return;
+    let done = false;
+    const back = function () {
+      if (done) return;
+      const now = window.scrollY || window.pageYOffset || 0;
+      if (Math.abs(now - y) > 2) window.scrollTo(0, y);
+    };
+    const stop = function () {
+      done = true;
+      window.removeEventListener('touchstart', stop, true);
+      window.removeEventListener('wheel', stop, true);
+      ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+        document.removeEventListener(ev, back);
+      });
+    };
+    window.addEventListener('touchstart', stop, { capture: true, passive: true });
+    window.addEventListener('wheel', stop, { capture: true, passive: true });
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+      document.addEventListener(ev, back);
+    });
+    [0, 60, 150, 300, 500, 800].forEach(function (ms) { setTimeout(back, ms); });
+    setTimeout(stop, 1000);
   }
   function exitFullscreen() {
     const ex = document.exitFullscreen || document.webkitExitFullscreen;
