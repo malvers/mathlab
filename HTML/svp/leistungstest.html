@@ -1557,9 +1557,22 @@
             }
             const UNTIS_SVG_ALARM = '<svg viewBox="0 0 48 42" aria-hidden="true"><path d="M24 3 L45 39 H3 Z" fill="rgb(245,194,66)" stroke="rgb(245,194,66)" stroke-width="4" stroke-linejoin="round"/>' +
                 '<path d="M24 15 V27" stroke="rgb(14,36,78)" stroke-width="4.5" stroke-linecap="round"/><circle cx="24" cy="33.5" r="2.6" fill="rgb(14,36,78)"/></svg>';
-            /* present in WebUntis but never started: the 6 candidate */
+            /* present in WebUntis but never started: the 6 candidate - only once the
+               lesson is over. At the start every tile showed it ("überall das
+               Ausrufezeichen ... aber die sind alle da"), and mid-test the pupils still on
+               paper did ("absolut verwirrend. Bitte erst am Ende" - Doc, 9a, 06.11.2026).
+               The end is the WebUntis lesson's own (date + end), checked against the clock
+               here, so the warning comes with the bell, not with the next Untis question. */
+            function lessonOver() {
+                const L = untis && untis.lesson;
+                if (!L || !L.date || !L.end) return false;
+                const two = function (n) { return String(n).padStart(2, '0'); };
+                const d = new Date();
+                const now = '' + d.getFullYear() + two(d.getMonth() + 1) + two(d.getDate()) + two(d.getHours()) + two(d.getMinutes());
+                return now >= String(L.date) + String(L.end).padStart(4, '0');
+            }
             function untisAlarm(code, state) {
-                return state === 'in' && statusOf(control[code] || null).key === 'none';
+                return state === 'in' && statusOf(control[code] || null).key === 'none' && lessonOver();
             }
             function paintAttendance(t, code) {
                 let badge = t.querySelector('.tl-att');
@@ -2603,6 +2616,9 @@
                     abortShown = '';
                     paintAbort(code);
                     elDetail.hidden = false;
+                    /* the panel sits below all tiles and the Nachschreiben box - out of sight, so
+                       "Freigeben" could not be found mid-test (Doc, 06.11.2026, 9a) */
+                    elDetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 });
             }
 
