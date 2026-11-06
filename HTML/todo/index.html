@@ -71,28 +71,42 @@
 
         .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
 
-        .row { display: flex; gap: 10px; }
+        /* mic on the left, field, gear on the right - all as high as the Prio buttons below (Doc 06.11.) */
+        .row { display: flex; gap: 8px; }
         input.new {
-            flex: 1 1 auto; min-width: 0; height: 58px; background: var(--bg); color: var(--text);
-            border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font: clamp(17px, 5vw, 20px) Raleway, sans-serif;
+            flex: 1 1 auto; min-width: 0; height: 44px; background: var(--bg); color: var(--text);
+            border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font: clamp(17px, 5vw, 19px) Raleway, sans-serif;
         }
         input.new:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
-        button.mic {
-            flex: 0 0 58px; height: 58px; border-radius: 12px; cursor: pointer; display: grid; place-items: center; padding: 0;
+        button.mic, button.gear {
+            flex: 0 0 44px; height: 44px; border-radius: 10px; cursor: pointer; display: grid; place-items: center; padding: 0;
             background: transparent; color: var(--text); border: 1px solid var(--line);
         }
-        button.mic svg { width: 26px; height: 26px; fill: currentColor; }
-        /* colour scheme switch (Blau / Grau / Hell like the Stoffverteilungsplan) at the end of the list - rarely
-           needed, beside the mic it was too present (Doc 05.11.); a line above it, a bit bigger than a plain pill.
-           Its label names the scheme a tap turns on */
-        .foot { margin: 28px 0 8px; padding-top: 20px; border-top: 1px solid var(--line); text-align: center; }
-        button.theme {
-            display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 22px;
-            cursor: pointer; background: transparent; color: var(--text); border: 1px solid rgba(var(--tint), .5);
-            font: 700 13px Orbitron, sans-serif; letter-spacing: .06em;
+        button.mic svg, button.gear svg { width: 24px; height: 24px; fill: currentColor; }
+        button.gear[aria-expanded="true"] { background: rgba(var(--tint), .18); }
+
+        /* settings, opened by the gear: a small card under it, over the list (Doc 06.11.: the colour scheme first,
+           more later). It used to be a button at the end of the list (Doc 05.11.: beside the mic "zu präsent") */
+        #entry { position: relative; }
+        .settings {
+            position: absolute; top: calc(100% + 8px); right: 0; z-index: 3; width: min(340px, 100%);
+            padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line);
+            box-shadow: 0 12px 40px var(--shadow);
         }
-        button.theme:hover { background: rgba(var(--tint), .12); }
-        button.theme svg { width: 22px; height: 22px; fill: currentColor; }
+        .set-title { margin: 0 0 12px; font: 700 12px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+        .set-label { display: block; margin: 0 0 8px; font: 15px Raleway, sans-serif; color: var(--text); }
+        .seg { display: flex; gap: 8px; }
+        .seg button {
+            flex: 1 1 0; min-width: 0; height: 44px; border-radius: 10px; cursor: pointer; padding: 0;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: transparent; color: var(--text); border: 1px solid var(--line);
+            font: 700 13px Orbitron, sans-serif; letter-spacing: .04em;
+        }
+        /* the chosen one like the "Done" button: the scheme's tint, its ink on top (Hell: the plain text colour) */
+        .seg button[aria-checked="true"] { background: rgba(var(--tint), var(--btn-a)); border-color: rgba(var(--tint), var(--btn-rim-a)); color: var(--bg); }
+        html.svp-light .seg button[aria-checked="true"] { color: var(--text); }
+        /* a dot in the page colour of each scheme */
+        .seg i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(var(--tint), .6); flex: 0 0 auto; }
         button.mic.on { background: var(--upsilon); border-color: var(--upsilon); animation: pulse 1.2s ease-in-out infinite; }
         @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(176, 36, 24, .35); } }
         button:disabled { opacity: .5; cursor: default; }
@@ -106,6 +120,8 @@
         .p2 { --c-rgb: var(--prio2); --on: var(--ink-navy); }
         .p3 { --c-rgb: var(--prio3); --on: var(--ink-navy); }
         .pd { --c-rgb: var(--tint); --on: var(--bg); }
+        /* Grau's own tint is plain grey ("mausgrau", Doc 06.11.): "Done" takes a slightly bluish grey there */
+        html.svp-grey .pd { --c-rgb: 160, 178, 210; }
 
         /* with text in the field a Prio button adds it there (Enter: Prio 2); with an empty field it filters the
            list to that priority, "Done" to the checked items; the same button again shows everything.
@@ -172,7 +188,7 @@
             box-shadow: 0 8px 24px var(--shadow); cursor: grabbing;
         }
         button.chk:hover { color: var(--lambda); }
-        li.done button.chk { color: var(--phi); }
+        li.done button.chk { color: rgb(var(--tint)); }   /* light grey, not green: the green stood out too much (Doc 06.11.) */
         .txt { padding: 9px 2px; min-height: 44px; cursor: text; white-space: pre-wrap; overflow-wrap: anywhere; }
         li.done .txt {   /* a thin, faint strike-through, so the text under it stays readable (Doc 05.11.) */
             color: var(--muted); text-decoration: line-through 1px rgba(var(--tint), .4);
@@ -224,11 +240,24 @@
 
             <div class="card" id="entry" hidden>
                 <div class="row">
-                    <input class="new" id="text" type="text" enterkeyhint="done" autocomplete="off" placeholder="Was ist zu tun?" aria-label="Neue Aufgabe">
                     <!-- mic: Material Icons "mic" (Apache 2.0) -->
                     <button class="mic" id="micBtn" type="button" aria-label="Diktieren">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
                     </button>
+                    <input class="new" id="text" type="text" enterkeyhint="done" autocomplete="off" placeholder="Was ist zu tun?" aria-label="Neue Aufgabe">
+                    <!-- gear: Material Icons "settings" (Apache 2.0) -->
+                    <button class="gear" id="gearBtn" type="button" aria-label="Einstellungen" aria-expanded="false" aria-controls="settings">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                    </button>
+                </div>
+                <div class="settings" id="settings" role="dialog" aria-label="Einstellungen" hidden>
+                    <p class="set-title">Einstellungen</p>
+                    <span class="set-label" id="themeLabel">Farbschema</span>
+                    <div class="seg" id="themeSeg" role="radiogroup" aria-labelledby="themeLabel">
+                        <button type="button" role="radio" data-theme="dark" aria-checked="false"><i style="background: rgb(8, 20, 42)"></i>Blau</button>
+                        <button type="button" role="radio" data-theme="grey" aria-checked="false"><i style="background: rgb(26, 26, 28)"></i>Grau</button>
+                        <button type="button" role="radio" data-theme="light" aria-checked="false"><i style="background: rgb(246, 248, 252)"></i>Hell</button>
+                    </div>
                 </div>
                 <div class="prio" id="prio" role="group" aria-label="Hinzufügen in eine Priorität, ausgewählte Aufgabe umstufen, mit leerem Feld filtern">
                     <button class="p1" type="button" data-prio="1" aria-pressed="false">Prio 1</button>
@@ -245,13 +274,6 @@
             <section class="grp p2"><h2 class="pill">Prio 2</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p2" data-prio="2" aria-label="Prio 2"></ul></section>
             <section class="grp p3"><h2 class="pill">Prio 3</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p3" data-prio="3" aria-label="Prio 3"></ul></section>
             <section class="grp-done pd" id="doneSec"><div class="grp-head"><h2 class="pill">Done</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><button class="del del-all" id="delAll" type="button" aria-label="Alle erledigten löschen"></button></div><ul class="list done" id="done" aria-label="Done"></ul></section>
-            <div class="foot">
-                <!-- colour scheme: Material Symbols "contrast" (Apache 2.0) -->
-                <button class="theme" id="themeBtn" type="button" role="switch">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm1-17.93c3.94.49 7 3.86 7 7.93s-3.06 7.44-7 7.93V4.07z"/></svg>
-                    <span id="themeNext">Grau</span>
-                </button>
-            </div>
         </div>
     </div>
 
@@ -605,25 +627,27 @@
                 ear.start();
             }
 
-            /* Blau / Hell / Grau, cycling like the Stoffverteilungsplan (svp-nav.js) and stored under the same key:
-               on the Mac both follow one choice, the phone app (own address) keeps its own */
-            const THEME_LABEL = { dark: 'Blau', light: 'Hell', grey: 'Grau' };
-            const THEME_NEXT = { light: 'dark', dark: 'grey', grey: 'light' };
+            /* Blau / Hell / Grau like the Stoffverteilungsplan (svp-nav.js) and stored under the same key:
+               on the Mac both follow one choice, the phone app (own address) keeps its own.
+               Chosen in the settings under the gear (Doc 06.11.) */
+            const THEMES = ['dark', 'grey', 'light'];
             let theme = 'dark';
             function applyTheme(t) {
-                theme = THEME_NEXT[t] ? t : 'dark';
+                theme = THEMES.includes(t) ? t : 'dark';
                 const root = document.documentElement;
                 root.classList.toggle('svp-light', theme === 'light');
                 root.classList.toggle('svp-grey', theme === 'grey');
-                const next = THEME_LABEL[THEME_NEXT[theme]];
-                $('themeNext').textContent = next;
-                $('themeBtn').title = 'Farbschema ' + next + ' einschalten';
-                $('themeBtn').setAttribute('aria-label', $('themeBtn').title);
-                $('themeBtn').setAttribute('aria-checked', String(theme === 'light'));
+                for (const b of $('themeSeg').children) b.setAttribute('aria-checked', String(b.dataset.theme === theme));
                 // the phone's status bar takes the page colour
                 const m = document.querySelector('meta[name=theme-color]');
                 if (m) m.content = getComputedStyle(document.body).backgroundColor;
                 try { localStorage.setItem('svp-theme', theme); } catch (e) { }
+            }
+
+            /* the gear opens and closes the settings; a tap outside them or Escape closes them too */
+            function showSettings(on) {
+                $('settings').hidden = !on;
+                $('gearBtn').setAttribute('aria-expanded', String(on));
             }
 
             async function refresh() {
@@ -643,7 +667,12 @@
 
             function init() {
                 try { applyTheme(localStorage.getItem('svp-theme')); } catch (e) { applyTheme('dark'); }
-                $('themeBtn').onclick = () => applyTheme(THEME_NEXT[theme]);
+                $('themeSeg').onclick = e => { const b = e.target.closest('button'); if (b) applyTheme(b.dataset.theme); };
+                $('gearBtn').onclick = () => showSettings($('settings').hidden);
+                document.addEventListener('pointerdown', e => {
+                    if (!$('settings').hidden && !e.target.closest('#settings, #gearBtn')) showSettings(false);
+                });
+                document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('settings').hidden) showSettings(false); });
                 $('text').addEventListener('input', saveDraft);
                 $('text').addEventListener('input', () => { if ($('status').textContent === 'Erst die Aufgabe eintippen.') status(''); });
                 $('text').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(2); } });
