@@ -1278,6 +1278,14 @@ const narr = (function () {
   const label = document.createElement('div');
   label.className = 'play-big-label';
   label.textContent = 'Solita erklärt';
+  // how long she talks, under the label (Doc, 06.11.2026, the Making-of: "Solita soll am Anfang sagen wie lange sie spricht
+  // (auch per Zahl auf die Folie)") - narration "minutes", measured from a full play-through, only where a deck has it
+  if (data.minutes > 0) {
+    const min = document.createElement('span');
+    min.className = 'play-min';
+    min.textContent = data.minutes + (data.minutes === 1 ? ' Minute' : ' Minuten');
+    label.appendChild(min);
+  }
   const face = document.createElement('button');      // no <img>: the deck editor counts a slide's pictures against its file
   face.type = 'button';
   face.className = 'play-big play-face';
