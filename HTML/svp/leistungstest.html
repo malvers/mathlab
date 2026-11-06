@@ -1756,6 +1756,66 @@
                 if (!nachOfficial || !dayIso || !/^BGY/i.test(groupKey())) return '';
                 return nachOfficial.days.find(function (d) { return d > dayIso; }) || '';
             }
+            /* OS 9 writes again on a Friday at 14:15, on a Friday the class is in school (Doc,
+               06.11.2026: "Freitag 14:15 Uhr Nachschreiben OS 9 (immer, wenn sie da sind -> Untis)" -
+               "im Nov sind die irgendwann mal Freitags nicht da"). In school = Doc's own lesson with
+               the class that Friday stands in WebUntis and is not cancelled, read from plandaten/
+               w<Monday>.json (Doc's timetable out of WebUntis, the plans' local copy; on Fri
+               20.11.2026 it is cancelled for 9a and 9b). A Friday without that lesson or without a
+               week file (holidays) is passed over, eight Fridays at most. Only a suggestion, like
+               the BGY dates: a day typed in the field wins. */
+            const OS_NACH = { group: /^9[a-z]$/i, label: 'OS 9', zeit: '14:15', fridays: 8 };
+            const planWeeks = {};      /* 'YYYYMMDD' of a Monday -> Promise of its lessons, null without a file */
+            function planWeek(monday) {
+                if (!(monday in planWeeks)) {
+                    planWeeks[monday] = fetch('plandaten/w' + monday + '.json', { cache: 'no-store' })
+                        .then(function (r) { return r.ok ? r.json() : null; })
+                        .then(function (o) { return o && Array.isArray(o.lessons) ? o.lessons : null; })
+                        .catch(function () { return null; });
+                }
+                return planWeeks[monday];
+            }
+            function ymdOf(d) {
+                return '' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+            }
+            /* -> Promise of { day: 'YYYY-MM-DD', away: ['20.11.', ...] } or null: the first Friday
+               after dayIso with the group's lesson; away = the Fridays passed over for a cancelled one */
+            function osFridayAfter(dayIso, g) {
+                const p = dayIso.split('-');
+                const fri = new Date(+p[0], +p[1] - 1, +p[2]);
+                fri.setDate(fri.getDate() + ((5 - fri.getDay() + 7) % 7 || 7));
+                const away = [];
+                function look(n) {
+                    if (n >= OS_NACH.fridays) return Promise.resolve(null);
+                    const mon = new Date(fri);
+                    mon.setDate(fri.getDate() - 4);
+                    const ymd = Number(ymdOf(fri));
+                    return planWeek(ymdOf(mon)).then(function (lessons) {
+                        const mine = (lessons || []).filter(function (l) {
+                            return l.date === ymd && (l.classes || []).some(function (k) { return String(k).toLowerCase() === g.toLowerCase(); });
+                        });
+                        if (mine.some(function (l) { return l.code !== 'cancelled'; })) {
+                            return { day: ymdOf(fri).replace(/^(\d{4})(\d\d)(\d\d)$/, '$1-$2-$3'), away: away };
+                        }
+                        if (mine.length) away.push(fri.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }));
+                        fri.setDate(fri.getDate() + 7);
+                        return look(n + 1);
+                    });
+                }
+                return look(0);
+            }
+            function osSuggest() {
+                const g = groupKey(), day = testDayIso(), url = testUrl();
+                if (!OS_NACH.group.test(g) || !day) return;
+                osFridayAfter(day, g).then(function (s) {
+                    /* the page moved on to another test, or a day was typed meanwhile */
+                    if (!s || testUrl() !== url || nachTerminFor !== url || elNachTag.value) return;
+                    elNachTag.value = s.day;
+                    elNachZeit.value = OS_NACH.zeit;
+                    nachMsg('Vorschlag ' + OS_NACH.label + ': erster Freitag nach dem Test, an dem die ' + g + ' laut Untis da ist' +
+                        (s.away.length ? ' (am ' + s.away.join(', ') + ' nicht)' : '') + ', ' + OS_NACH.zeit + ' Uhr. Ändern geht oben im Feld.');
+                });
+            }
             function paintNachTermin() {
                 const t = nachTerminAll()[testUrl()] || {};
                 elNachTag.value = t.tag || '';
@@ -1769,7 +1829,7 @@
                         elNachZeit.value = nachOfficial.von;
                         nachMsg('Vorschlag aus „Nachschreibetermine BGY“: nächster Termin nach dem Test, ' +
                             nachOfficial.von + '–' + nachOfficial.bis + ' Uhr, ' + nachOfficial.raum + '. Ändern geht oben im Feld.');
-                    }
+                    } else osSuggest();
                 }
             }
             function saveNachTermin() {
