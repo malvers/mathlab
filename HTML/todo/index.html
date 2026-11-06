@@ -108,10 +108,10 @@
         .pd { --c-rgb: var(--tint); --on: var(--bg); }
 
         /* with text in the field a Prio button adds it there (Enter: Prio 2); with an empty field it filters the
-           list to that priority, "Erledigt" to the checked items; the same button again shows everything.
+           list to that priority, "Done" to the checked items; the same button again shows everything.
            Calmer than full colour at rest (Doc 05.11.: "ein Stück zurücknehmen", "ein bisschen satter", then on the
            phone "zu faint ... mehr Power"); the
-           filtering one shows its full colour and a frame; "Erledigt" keeps its quiet ground then, only the frame */
+           filtering one shows its full colour and a frame; "Done" keeps its quiet ground then, only the frame */
         .prio { display: flex; gap: 8px; margin-top: 10px; }
         .prio button {
             flex: 1 1 0; min-width: 0; height: 44px; border-radius: 10px; cursor: pointer; padding: 0;
@@ -122,7 +122,9 @@
         .prio button:active { transform: scale(.96); }
         .prio button[aria-pressed="true"] {
             background: rgb(var(--c-rgb)); border-color: transparent; color: var(--on);
-            box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--text);   /* a ring: no layout shift */
+            /* no ring in a foreign colour with a gap (Doc 06.11.: the navy frame "gefällt mir nie", the white line
+               between): a darker rim of the button's own colour inside, a soft glow of it outside - no layout shift */
+            box-shadow: inset 0 0 0 2px color-mix(in srgb, rgb(var(--c-rgb)) 70%, black), 0 2px 10px rgba(var(--c-rgb), .55);
         }
         .prio button.pd[aria-pressed="true"] { background: rgba(var(--c-rgb), var(--btn-a)); }
         .grp-note { margin-left: 10px; font: 14px Raleway, sans-serif; color: var(--muted); }
@@ -130,11 +132,19 @@
         /* open items in three groups, priority 1 on top, each group in Doc's own order;
            checked ones below them (last checked first) */
         #lists { padding-top: 4px; }
-        .grp { margin: 0 0 16px; }   /* below, not above: a hidden group above leaves no gap */
-        .grp-done { margin-top: 22px; }   /* a little air between open and checked */
+        /* each group in a box like the entry card above, same width (Doc 06.11.: "so eine Box ... wie oben");
+           6px side padding puts the pill, the check circles and the input above on one line, 14px in */
+        .grp, .grp-done {
+            margin: 0 0 12px; padding: 12px 6px 4px;   /* below, not above: a hidden group above leaves no gap */
+            background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+        }
+        /* less round, like the buttons above (radius 10 on 44px, here 6 on 26px); all four the same width, text in
+           the middle (Doc 06.11.: "sollen also gleich breit sein" - the widest, PRIO 2, is about 79px) */
         .pill {
-            display: inline-block; margin: 0 0 4px; padding: 0 12px; height: 26px; border-radius: 13px;
-            background: rgba(var(--c-rgb), var(--pill-a)); color: var(--on); font: 700 12px/26px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase;
+            display: inline-block; margin: 0 0 4px 8px; padding: 0 12px; height: 26px; border-radius: 6px;
+            min-width: 84px; text-align: center;
+            border: 1px solid rgba(var(--c-rgb), var(--btn-rim-a));   /* the rim of the buttons above (Doc 06.11.) */
+            background: rgba(var(--c-rgb), var(--pill-a)); color: var(--on); font: 700 12px/24px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase;
         }
         ul.list { list-style: none; margin: 0; padding: 0; }
         ul.list.open { min-height: 44px; }   /* an empty group stays a place to drop an item */
@@ -142,7 +152,7 @@
         ul.list.done:empty::before { content: 'leer'; display: block; padding: 11px 4px; font: 15px Raleway, sans-serif; color: var(--muted); }
         ul.list li {
             display: grid; grid-template-columns: 44px 1fr 44px; align-items: start; gap: 6px;
-            padding: 4px 0; border-top: 1px solid var(--line); background: var(--bg);
+            padding: 4px 0; border-top: 1px solid var(--line); background: var(--card);
             font: 18px/1.45 Raleway, sans-serif; font-variant-numeric: lining-nums;
         }
         ul.list li:first-child { border-top: 0; }
@@ -177,7 +187,7 @@
         }
         /* head of the checked items: pill, note, and on the right the bin for all of them (over the rows' bins) */
         .grp-head { display: flex; align-items: center; margin: 0 0 4px; }
-        .grp-head .pill { margin: 0; }
+        .grp-head .pill { margin: 0 0 0 8px; }
         button.del-all { margin-left: auto; width: 44px; height: 30px; }
 
         /* own confirm dialog in the page's look - never the browser's confirm() */
@@ -224,7 +234,7 @@
                     <button class="p1" type="button" data-prio="1" aria-pressed="false">Prio 1</button>
                     <button class="p2" type="button" data-prio="2" aria-pressed="false">Prio 2</button>
                     <button class="p3" type="button" data-prio="3" aria-pressed="false">Prio 3</button>
-                    <button class="pd" type="button" data-filter="done" aria-pressed="false">Erledigt</button>
+                    <button class="pd" type="button" data-filter="done" aria-pressed="false">Done</button>
                 </div>
                 <div class="status" id="status" role="status"></div>
             </div>
@@ -234,7 +244,7 @@
             <section class="grp p1"><h2 class="pill">Prio 1</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p1" data-prio="1" aria-label="Prio 1"></ul></section>
             <section class="grp p2"><h2 class="pill">Prio 2</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p2" data-prio="2" aria-label="Prio 2"></ul></section>
             <section class="grp p3"><h2 class="pill">Prio 3</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p3" data-prio="3" aria-label="Prio 3"></ul></section>
-            <section class="grp-done pd" id="doneSec"><div class="grp-head"><h2 class="pill">Erledigt</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><button class="del del-all" id="delAll" type="button" aria-label="Alle erledigten löschen"></button></div><ul class="list done" id="done" aria-label="Erledigt"></ul></section>
+            <section class="grp-done pd" id="doneSec"><div class="grp-head"><h2 class="pill">Done</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><button class="del del-all" id="delAll" type="button" aria-label="Alle erledigten löschen"></button></div><ul class="list done" id="done" aria-label="Done"></ul></section>
             <div class="foot">
                 <!-- colour scheme: Material Symbols "contrast" (Apache 2.0) -->
                 <button class="theme" id="themeBtn" type="button" role="switch">
@@ -427,7 +437,7 @@
                 });
             }
 
-            /* the bin in the "Erledigt" head: all checked items that are shown now (a Prio filter: only its own) */
+            /* the bin in the "Done" head: all checked items that are shown now (a Prio filter: only its own) */
             async function removeDone() {
                 const gone = items.filter(x => x.done && (!filter || filter === 'done' || x.prio === filter));
                 if (!gone.length) return;
