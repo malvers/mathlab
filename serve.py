@@ -201,6 +201,28 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def mail_api(self):
+        """Mail drafts to the pupils who missed a test (tools/nachschreiber_mail.py) - reloaded per call, no restart
+        after a change. It never sends; Doc presses Send in Outlook."""
+        n = int(self.headers.get('Content-Length') or 0)
+        if n > 256 * 1024:
+            return self.send_error(413, 'too large')
+        data = self.rfile.read(n) if n else b''
+        try:
+            if TOOLS not in sys.path:
+                sys.path.insert(0, TOOLS)
+            import nachschreiber_mail
+            status, reply = importlib.reload(nachschreiber_mail).handle(self.command, self.path, self.headers, data)
+        except Exception as err:
+            status, reply = 500, {'ok': False, 'error': 'serve.py: %s: %s' % (type(err).__name__, err)}
+        body = json.dumps(reply, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def local_caller(self):
         """Only our own pages may write here (audit 27.09.2026).
 
@@ -231,9 +253,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         q = parse_qs(urlsplit(self.path).query)
         gruppe = (q.get('gruppe') or [''])[0]
         tag = (q.get('tag') or [''])[0]
-        if not re.fullmatch(r'[A-Za-z0-9_-]{1,20}', gruppe) or (tag and not re.fullmatch(r'\d{8}', tag)):
+        zeit = (q.get('zeit') or [''])[0]          # HHMM: the lesson around that time (when the test ran)
+        if not re.fullmatch(r'[A-Za-z0-9_-]{1,20}', gruppe) or (tag and not re.fullmatch(r'\d{8}', tag)) \
+                or (zeit and not (tag and re.fullmatch(r'\d{4}', zeit))):
             return self.send_error(400, 'bad request')
-        key = gruppe + '|' + tag
+        key = gruppe + '|' + tag + '|' + zeit
         hit = self.UNTIS_CACHE.get(key)
         if hit and time.time() - hit[0] < 60 and (q.get('frisch') or [''])[0] != '1':
             body = hit[1]
@@ -241,7 +265,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             node = next((n for n in ('/opt/homebrew/bin/node', '/usr/local/bin/node') if os.path.exists(n)), 'node')
             root = os.path.dirname(os.path.abspath(__file__))
             try:
-                r = subprocess.run([node, os.path.join(root, 'tools', 'webuntis.js'), 'abwesend', gruppe] + ([tag] if tag else []),
+                r = subprocess.run([node, os.path.join(root, 'tools', 'webuntis.js'), 'abwesend', gruppe]
+                                   + ([tag] if tag else []) + (['--zeit=' + zeit] if zeit else []),
                                    capture_output=True, timeout=45, cwd=root)
                 line = next((l for l in reversed(r.stdout.decode('utf-8', 'replace').splitlines()) if l.startswith('{')), '')
                 body = line.encode('utf-8') if line else json.dumps({'ok': False, 'error': 'WebUntis antwortet nicht'}).encode()
@@ -265,6 +290,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.proben_api()
         if self.path.startswith('/__termine/'):
             return self.termine_api()
+        if self.path.startswith('/__mail/'):
+            return self.mail_api()
         self.send_error(405, 'read-only server')
 
     def one_address(self):

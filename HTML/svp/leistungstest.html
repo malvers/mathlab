@@ -279,7 +279,9 @@
         .lt-mc-codes[hidden] { display: none; }
         .lt-mc-codes.on { color: var(--phi); border-color: var(--phi); }
         .lt-mc-codes.err { color: var(--lt-red); border-color: var(--lt-red); cursor: pointer; }
-        #ltMcUntis { cursor: pointer; }
+        #ltMcUntis, #ltMcNach { cursor: pointer; }
+        #ltMcNach.alarm { color: rgb(245, 194, 66); border-color: rgb(245, 194, 66); }
+        html.svp-light #ltMcNach.alarm { color: rgb(140, 95, 0); border-color: rgb(140, 95, 0); }
         #ltMcUntis.alarm { color: rgb(245, 194, 66); border-color: rgb(245, 194, 66); }
         html.svp-light #ltMcUntis.alarm { color: rgb(140, 95, 0); border-color: rgb(140, 95, 0); }
         @keyframes lt-pulse { 50% { opacity: 0.25; } }
@@ -376,6 +378,70 @@
         html.svp-light .lt-tile .tl-alarm span { color: rgb(140, 95, 0); }
         @keyframes lt-alarm { 50% { transform: scale(1.08); } }
         .lt-tile .tl-alarm svg { animation: lt-alarm 2.4s ease-in-out infinite; }
+        /* Nachschreiben (Doc, 05.11.2026): who missed the test, from WebUntis on the day it ran */
+        .lt-nach { margin-top: 14px; padding: 12px 14px 14px; border: 1px solid var(--line); border-radius: 10px; }
+        .lt-nach[hidden] { display: none; }
+        .lt-nach-head { font-family: Orbitron, system-ui, sans-serif; font-size: 0.82rem; letter-spacing: 0.09em; text-transform: uppercase;
+            color: var(--lambda); margin-bottom: 10px; }
+        .lt-nach-when { margin-left: 10px; font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); text-transform: none; }
+        .lt-nach-grp + .lt-nach-grp { margin-top: 12px; }
+        .lt-nach-lab { font-family: Orbitron, system-ui, sans-serif; font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+        .lt-nach-lab.warn { color: rgb(245, 194, 66); }
+        html.svp-light .lt-nach-lab.warn { color: rgb(140, 95, 0); }
+        .lt-nach-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .lt-nach-chip { display: inline-flex; align-items: baseline; gap: 8px; padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px;
+            font-size: 0.92rem; }
+        .lt-nach-chip .nc-code { font-family: 'Arial Narrow', Arial, Helvetica, sans-serif; font-weight: 700; font-size: 1.05rem; letter-spacing: 0.03em; }
+        .lt-nach-chip .nc-ex { font-family: Orbitron, system-ui, sans-serif; font-size: 0.6rem; color: var(--muted); }
+        .lt-nach-none { color: var(--muted); font-size: 0.85rem; }
+        /* the list to print and the mail to the pupils, under the two groups (Doc, 05.11.2026) */
+        .lt-nach-act { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; padding-top: 12px;
+            border-top: 1px solid var(--line); }
+        .lt-nach-act .lt-btn { margin: 0; }
+        .lt-nach-term { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+        .lt-nach-tlab { font-family: Orbitron, system-ui, sans-serif; font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); }
+        .lt-nach-term input { font: inherit; font-size: 0.92rem; color: inherit; background: var(--card); border: 1px solid var(--line);
+            border-radius: 8px; padding: 6px 8px; color-scheme: dark; }
+        html.svp-light .lt-nach-term input { color-scheme: light; }
+        .lt-nach-term input.bad { border-color: var(--lt-red); }
+        .lt-nach-msg { flex-basis: 100%; font-size: 0.85rem; color: var(--muted); }
+        .lt-nach-msg.warn { color: rgb(245, 194, 66); }
+        html.svp-light .lt-nach-msg.warn { color: rgb(140, 95, 0); }
+        .lt-nach-mail { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; }
+        .lt-nach-mail[hidden] { display: none; }
+        .lt-nm-head { font-family: Orbitron, system-ui, sans-serif; font-size: 0.72rem; letter-spacing: 0.07em; color: var(--lambda);
+            text-transform: uppercase; margin-bottom: 4px; }
+        .lt-nm-src { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
+        .lt-nm-src code { font-family: Menlo, monospace; font-size: 0.78rem; }
+        .lt-nm-src.warn { color: rgb(245, 194, 66); }
+        html.svp-light .lt-nm-src.warn { color: rgb(140, 95, 0); }
+        .lt-nm-row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 10px;
+            padding: 6px 0; border-top: 1px solid var(--line); cursor: pointer; }
+        .lt-nm-row input { width: 18px; height: 18px; margin: 0; accent-color: rgb(121, 158, 49); }
+        .lt-nm-who { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; }
+        .lt-nm-who .nc-code { font-family: 'Arial Narrow', Arial, Helvetica, sans-serif; font-weight: 700; letter-spacing: 0.03em; }
+        .lt-nm-kind { font-family: Orbitron, system-ui, sans-serif; font-size: 0.6rem; letter-spacing: 0.06em; color: var(--muted);
+            border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+        .lt-nm-kind.must { color: var(--lt-red); border-color: var(--lt-red); }
+        .lt-nm-addr { grid-column: 2; font-size: 0.8rem; color: var(--muted); overflow-wrap: anywhere; }
+        .lt-nm-addr.miss { color: rgb(245, 194, 66); }
+        html.svp-light .lt-nm-addr.miss { color: rgb(140, 95, 0); }
+        .lt-nm-prev { margin-top: 10px; padding: 10px 12px; border-left: 3px solid var(--lambda); background: var(--card); border-radius: 0 8px 8px 0;
+            font-size: 0.88rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .lt-nm-prev b { font-family: Orbitron, system-ui, sans-serif; font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); font-weight: 400; }
+        .lt-nm-grp { font-family: Orbitron, system-ui, sans-serif; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--lt-red);
+            margin: 16px 0 6px; padding-top: 10px; border-top: 1px solid var(--line); }
+        .lt-nm-grp.clear { color: rgb(245, 194, 66); }
+        html.svp-light .lt-nm-grp.clear { color: rgb(140, 95, 0); }
+        .lt-nm-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+        .lt-nm-btns .lt-btn { margin: 0; }
+        .lt-nm-res { font-size: 0.85rem; color: var(--phi); }
+        .lt-nm-res.err { color: var(--lt-red); }
+        .lt-tab td.nach { font-family: Orbitron, system-ui, sans-serif; font-size: 0.76rem; letter-spacing: 0.05em; white-space: nowrap; }
+        .lt-tab td.nach.must { color: var(--lt-red); }
+        .lt-tab td.nach.clear { color: rgb(245, 194, 66); }
+        html.svp-light .lt-tab td.nach.clear { color: rgb(140, 95, 0); }
+        @media print { .lt-nach { display: none !important; } }
         .lt-tile:hover { border-color: var(--muted); }
         .lt-tile.sel { box-shadow: 0 0 0 2px rgba(120, 160, 220, 0.7); }
         .lt-tile .tl-name { grid-area: name; font-size: 1.3rem; font-weight: 600; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -729,6 +795,7 @@
                 <span class="lt-mc-live" id="ltMcLive">live</span>
                 <button type="button" class="lt-mc-codes" id="ltMcCodes" hidden></button>
                 <button type="button" class="lt-mc-codes" id="ltMcUntis" hidden title="Anwesenheit aus WebUntis neu holen"></button>
+                <button type="button" class="lt-mc-codes" id="ltMcNach" hidden title="Zur Liste der Nachschreiber unter den Kacheln"></button>
                 <span class="lt-mc-chips" id="ltMcChips"></span>
                 <span class="lt-mc-reset">
                     <span class="ab-msg" id="ltMcResetMsg"></span>
@@ -744,6 +811,22 @@
                 <table class="lt-tab" id="ltTable"></table>
             </div>
             <div class="lt-tiles" id="ltTiles" hidden></div>
+            <div class="lt-nach" id="ltNach" hidden>
+                <div class="lt-nach-head">Nachschreiben <span class="lt-nach-when" id="ltNachWhen"></span></div>
+                <div class="lt-nach-grp"><div class="lt-nach-lab">Fehlte laut WebUntis &middot; muss nachschreiben</div><div class="lt-nach-chips" id="ltNachOut"></div></div>
+                <div class="lt-nach-grp"><div class="lt-nach-lab warn">Laut WebUntis da, aber keine Abgabe &middot; kl&auml;ren</div><div class="lt-nach-chips" id="ltNachClear"></div></div>
+                <div class="lt-nach-act">
+                    <button type="button" class="lt-btn" id="ltNachList" title="Saubere Liste zum Ansehen und Drucken, im eigenen Tab">Nachschreiber-Liste</button>
+                    <span class="lt-nach-term">
+                        <span class="lt-nach-tlab">Nachschreiben am</span>
+                        <input type="date" id="ltNachTag" aria-label="Tag des Nachschreibens">
+                        <input type="time" id="ltNachZeit" step="300" aria-label="Uhrzeit des Nachschreibens">
+                    </span>
+                    <button type="button" class="lt-btn" id="ltNachMail" title="Je Kind ein Mail-Entwurf in Outlook - du liest und sendest selbst">Nachschreiber benachrichtigen</button>
+                    <div class="lt-nach-msg" id="ltNachMsg" hidden></div>
+                </div>
+                <div class="lt-nach-mail" id="ltNachMailBox" hidden></div>
+            </div>
             <div class="lt-detail" id="ltDetail" hidden></div>
             <div class="lt-btns">
                 <button type="button" class="lt-btn" id="ltResults">Ergebnisse abrufen</button>
@@ -1028,11 +1111,14 @@
                 document.getElementById('ltSlipTitle').textContent = groupKey();
                 elState.textContent = entries.length + ' SuS in ' + groupKey() + ' · gespeichert nur in diesem Browser.';
 
-                let html = '<tr><th>Klarname</th><th>Code</th><th>Status</th><th>Ergebnis</th><th>Note</th></tr>';
+                /* "Nachschreiben" right after Status, so Teil B (inserted before the last head cell) still
+                   lands in front of Note */
+                let html = '<tr><th>Klarname</th><th>Code</th><th>Status</th><th>Nachschreiben</th><th>Ergebnis</th><th>Note</th></tr>';
                 entries.forEach(function (e) {
                     html += '<tr data-code="' + esc(e.code) + '"><td>' + (e.name ? esc(shownName(e)) : LOCKED) +
                         '</td><td class="code">' + codeHtml(e.code) +
                         '</td><td class="status" data-code="' + esc(e.code) + '">\u2026</td>' +
+                        '<td class="nach" data-code="' + esc(e.code) + '"></td>' +
                         '<td class="result" data-code="' + esc(e.code) + '">\u2026</td>' +
                         '<td class="grade" data-code="' + esc(e.code) + '">\u2026</td></tr>';
                 });
@@ -1104,7 +1190,7 @@
                             try {
                                 const q = f.contentWindow.QUIZ || {};
                                 /* copied out before the frame goes */
-                                ok(JSON.parse(JSON.stringify({ id: q.id, version: q.version || 'v1',
+                                ok(JSON.parse(JSON.stringify({ id: q.id, version: q.version || 'v1', title: q.title || '',
                                     questions: q.questions || [], partB: Number(q.partB) || 0,
                                     gradeScale: f.contentWindow.quizGradeScale || q.gradeScale || [],
                                     gradeUnit: f.contentWindow.quizGradeUnit || '',
@@ -1444,6 +1530,24 @@
             let untis = null;          /* { map: key -> {absent, excused} | 'two', lesson, at } for untisGroup */
             let untisGroup = '';
             let untisTimer = null;
+            let untisWhenKey = '';     /* the test day and hour the last answer was asked for */
+            /* the group last asked for, answered or not: the day after a test the first question
+               goes out before the pupils' signs of life are in, asks for today and fails (no
+               lesson) - the retry with the test's day must still follow (06.11.2026) */
+            let untisAskedGroup = '';
+            /* when the test ran: the middle of the pupils' last signs of life (a submission ends the
+               beat) - so a test looked at the next day still gets the absences of its own lesson */
+            function testWhen() {
+                const t = Object.keys(control).map(function (c) { return control[c]; })
+                    .filter(function (r) { return r && r.started && typeof r.seen_secs === 'number'; })
+                    .map(function (r) { return Date.now() - r.seen_secs * 1000; })
+                    .sort(function (a, b) { return a - b; });
+                if (!t.length) return null;
+                const d = new Date(t[Math.floor(t.length / 2)]);
+                const two = function (n) { return String(n).padStart(2, '0'); };
+                return { tag: '' + d.getFullYear() + two(d.getMonth() + 1) + two(d.getDate()), zeit: two(d.getHours()) + two(d.getMinutes()) };
+            }
+            function whenKey(w) { return w ? w.tag + '|' + w.zeit.slice(0, 2) : ''; }
             function personKey(first, last) {
                 return ((first || '').trim().split(/\s+/)[0] + ' ' + (last || '').trim().charAt(0)).toLowerCase();
             }
@@ -1489,7 +1593,11 @@
                     chip.className = 'lt-mc-codes'; chip.textContent = 'Untis \u00b7 erst Namen anzeigen'; return;
                 }
                 chip.className = 'lt-mc-codes'; chip.textContent = 'Untis \u2026';
-                fetch('/__untis/abwesend?gruppe=' + encodeURIComponent(g) + (fresh ? '&frisch=1' : ''),
+                const w = testWhen();
+                untisWhenKey = whenKey(w);
+                untisAskedGroup = g;
+                fetch('/__untis/abwesend?gruppe=' + encodeURIComponent(g) + (w ? '&tag=' + w.tag + '&zeit=' + w.zeit : '') +
+                      (fresh ? '&frisch=1' : ''),
                       { headers: { 'X-Mission-Control': '1' }, cache: 'no-store' })
                     .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
                     .then(function (o) {
@@ -1511,15 +1619,463 @@
                             (o.lesson.running ? ' (l\u00e4uft)' : '') + ' \u00b7 neu holen per Klick';
                         entries.forEach(function (e) { paintTile(e.code); });
                         paintUntisCount();
+                        paintNach();
                     })
                     .catch(function (err) {
                         if (groupKey() !== g) return;
+                        /* a failed question keeps what an earlier answer for this group showed
+                           (06.11.2026: the names flashed up - the question for the test's day had
+                           answered, the one for today came back a moment later and wiped them) */
+                        if (untis && untisGroup === g) { chip.title = 'Untis: ' + err.message + ' · Stand ' + untis.at; return; }
                         untis = null;
+                        paintNach();
                         chip.className = 'lt-mc-codes err';
                         chip.textContent = 'Untis \u00b7 ' + err.message;
                         entries.forEach(function (e) { paintTile(e.code); });
                     });
             }
+            /* The list of who has to write later: absent in WebUntis and no submission; below, present
+               in WebUntis without a submission (the triangles; once the lesson is over also a test
+               begun and left unfinished). A later submission takes the pupil off by itself. */
+            /* who has to write later, the one source for the box, the list column, the printed list and
+               the mails: null while there is nothing to say (no WebUntis answer for this group, no
+               submission yet, names locked) */
+            function nachLists() {
+                const anyDone = Object.keys(control).some(function (c) { return control[c] && control[c].submitted; });
+                if (!untis || untisGroup !== groupKey() || !anyDone || !entries.some(function (e) { return e.name; })) return null;
+                const must = [], clear = [];
+                entries.forEach(function (e) {
+                    const hit = e.name ? untis.map[entryKey(e.name)] : null;
+                    if (!hit || hit === 'two') return;
+                    const st = statusOf(control[e.code] || null).key;
+                    if (st === 'done') return;
+                    if (hit.absent) must.push({ e: e, ex: hit.excused });
+                    else if (st === 'none' || !untis.lesson.running) clear.push({ e: e });
+                });
+                return { must: must, clear: clear };
+            }
+            function paintNach() {
+                const box = document.getElementById('ltNach');
+                const jump = document.getElementById('ltMcNach');
+                const lists = nachLists();
+                paintNachColumn(lists);
+                if (!lists) { box.hidden = jump.hidden = true; return; }
+                const must = lists.must, clear = lists.clear;
+                const chips = function (list, el) {
+                    el.textContent = '';
+                    if (!list.length) { const n = document.createElement('span'); n.className = 'lt-nach-none'; n.textContent = 'niemand'; el.appendChild(n); return; }
+                    list.forEach(function (x) {
+                        const c = document.createElement('span');
+                        c.className = 'lt-nach-chip';
+                        c.innerHTML = '<span>' + esc(shownName(x.e)) + '</span><span class="nc-code">' + codeHtml(x.e.code) + '</span>' +
+                            (x.ex ? '<span class="nc-ex">entschuldigt</span>' : '');
+                        el.appendChild(c);
+                    });
+                };
+                chips(must, document.getElementById('ltNachOut'));
+                chips(clear, document.getElementById('ltNachClear'));
+                const L = untis.lesson, hm = function (t) { t = String(t).padStart(4, '0'); return t.slice(0, 2) + ':' + t.slice(2); };
+                const d = String(L.date);
+                const day = new Date(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8));
+                document.getElementById('ltNachWhen').textContent = 'Test am ' +
+                    day.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }) +
+                    ', Stunde ' + hm(L.start) + '\u2013' + hm(L.end) + ' laut WebUntis \u00b7 ' + must.length + ' nachschreiben, ' + clear.length + ' kl\u00e4ren';
+                const first = box.hidden;
+                box.hidden = false;
+                /* the bar says it too, and a click jumps down to the list (Doc: "wo sehe ich die Liste?") */
+                jump.hidden = false;
+                jump.className = 'lt-mc-codes' + (must.length + clear.length ? ' alarm' : ' on');
+                jump.textContent = 'Nachschreiben ' + must.length + (clear.length ? ' \u00b7 kl\u00e4ren ' + clear.length : '') + ' \u2193';
+                if (first && location.hash === '#nachschreiben') box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (nachTerminFor !== testUrl()) { nachTerminFor = testUrl(); paintNachTermin(); closeNachMail(); }
+            }
+            document.getElementById('ltMcNach').addEventListener('click', function () {
+                document.getElementById('ltNach').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+
+            /* --- Nachschreiber-Liste and the mail to them (Doc, 05.11.2026) -----------------------
+               The list opens as a page of its own, to look at and to print: test, day and lesson,
+               group, name + code, "muss" or "klären". It is written into a blank tab from here, so
+               the names stay in this browser's memory - no file, no storage, no network.
+               The day of the re-sit is kept per test in this browser (no names). "Benachrichtigen"
+               asks serve.py which school mail belongs to whom (klassenlisten/mail-<GRUPPE>.csv, out
+               of Teams - the address never comes from this page), shows every mail before, and opens
+               one Outlook draft per pupil only after a second click. Nothing is ever sent from here:
+               Doc reads each draft and presses Send himself. */
+            const NACH_STORE = 'svp-leistungstest-nachtermin-v1';
+            const elNachTag = document.getElementById('ltNachTag');
+            const elNachZeit = document.getElementById('ltNachZeit');
+            const elNachMsg = document.getElementById('ltNachMsg');
+            const elNachMail = document.getElementById('ltNachMailBox');
+            const WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+            let nachTerminFor = null;  /* the test whose re-sit day stands in the fields */
+            let nachMail = null;       /* { meta, liste, rows: [{ x, kind, addr, why, on, sent }] } while the mail box is open */
+            let nachArmed = 0;
+            function nachTerminAll() {
+                try { return JSON.parse(localStorage.getItem(NACH_STORE)) || {}; } catch (e) { return {}; }
+            }
+            /* The school's own re-sit dates for the BGY (Mehr -> MRA -> Nachschreiben, plandaten/
+               nachschreiben.json: Mon/Wed 16:00-17:30, KES 210). A BGY test without a day of its own
+               gets the first of them after the test day as a suggestion (Doc, 06.11.2026: "Genauso
+               will ich das"); typing a day of one's own overrides it and is kept as before. */
+            let nachOfficial = null;   /* { raum, von, bis, days: ['2026-11-09', ...] } once loaded */
+            fetch('plandaten/nachschreiben.json', { cache: 'no-store' })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (o) {
+                    if (!o || !Array.isArray(o.zeilen)) return;
+                    const z = String(o.zeit || '').match(/(\d{1,2}:\d{2})\D+(\d{1,2}:\d{2})/);
+                    nachOfficial = {
+                        raum: o.raum || '', von: z ? z[1].padStart(5, '0') : '', bis: z ? z[2].padStart(5, '0') : '',
+                        days: o.zeilen.filter(function (x) { return x.art === 'termin' && x.d; })
+                            .map(function (x) { return x.d; }).sort()
+                    };
+                    if (nachTerminFor !== null) paintNachTermin();
+                })
+                .catch(function () { /* no list: the fields stay for typing */ });
+            /* 'YYYY-MM-DD' of the test: the lesson WebUntis gave, else the pupils' signs of life */
+            function testDayIso() {
+                const L = lessonOf();
+                if (L) return L.day.getFullYear() + '-' + String(L.day.getMonth() + 1).padStart(2, '0') + '-' + String(L.day.getDate()).padStart(2, '0');
+                const w = testWhen();
+                return w ? w.tag.slice(0, 4) + '-' + w.tag.slice(4, 6) + '-' + w.tag.slice(6, 8) : '';
+            }
+            function officialAfter(dayIso) {
+                if (!nachOfficial || !dayIso || !/^BGY/i.test(groupKey())) return '';
+                return nachOfficial.days.find(function (d) { return d > dayIso; }) || '';
+            }
+            function paintNachTermin() {
+                const t = nachTerminAll()[testUrl()] || {};
+                elNachTag.value = t.tag || '';
+                elNachZeit.value = t.zeit || '';
+                elNachTag.classList.remove('bad');
+                elNachZeit.classList.remove('bad');
+                if (!t.tag) {
+                    const d = officialAfter(testDayIso());
+                    if (d) {
+                        elNachTag.value = d;
+                        elNachZeit.value = nachOfficial.von;
+                        nachMsg('Vorschlag aus „Nachschreibetermine BGY“: nächster Termin nach dem Test, ' +
+                            nachOfficial.von + '–' + nachOfficial.bis + ' Uhr, ' + nachOfficial.raum + '. Ändern geht oben im Feld.');
+                    }
+                }
+            }
+            function saveNachTermin() {
+                const all = nachTerminAll();
+                if (elNachTag.value || elNachZeit.value) all[testUrl()] = { tag: elNachTag.value, zeit: elNachZeit.value };
+                else delete all[testUrl()];
+                try { localStorage.setItem(NACH_STORE, JSON.stringify(all)); } catch (e) { /* this visit only */ }
+            }
+            [elNachTag, elNachZeit].forEach(function (el) {
+                el.addEventListener('change', function () {
+                    el.classList.remove('bad');
+                    saveNachTermin();
+                    nachMsg('');
+                    if (nachMail) paintNachMail();   /* the preview follows the new day */
+                });
+            });
+            function nachMsg(text, warn) {
+                elNachMsg.textContent = text;
+                elNachMsg.hidden = !text;
+                elNachMsg.classList.toggle('warn', !!warn);
+            }
+            function hhmm(t) { t = String(t).padStart(4, '0'); return t.slice(0, 2) + ':' + t.slice(2); }
+            /* the lesson the test ran in, as WebUntis gave it */
+            function lessonOf() {
+                const L = untis && untis.lesson;
+                if (!L) return null;
+                const d = String(L.date);
+                return { day: new Date(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8)), start: hhmm(L.start), end: hhmm(L.end) };
+            }
+            function dayLong(d) {
+                return WEEKDAYS[d.getDay()] + ', ' + d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            }
+            /* "Donnerstag, 12.11.2026, 14:00 Uhr" - or '' while no day is set */
+            function terminText() {
+                if (!elNachTag.value) return '';
+                const p = elNachTag.value.split('-');
+                /* one of the school's re-sit dates at its own time: with the end and the room */
+                const official = nachOfficial && nachOfficial.days.indexOf(elNachTag.value) >= 0 && elNachZeit.value === nachOfficial.von;
+                return dayLong(new Date(+p[0], +p[1] - 1, +p[2])) +
+                    (official ? ', ' + nachOfficial.von + '–' + nachOfficial.bis + ' Uhr, Raum ' + nachOfficial.raum
+                              : elNachZeit.value ? ', ' + elNachZeit.value + ' Uhr' : '');
+            }
+            /* "Leistungstest KI" out of "Leistungstest KI · BGY25" (the test page's title) */
+            function testName(meta) {
+                const t = String(meta && meta.title || '').split(' · ')[0].trim();
+                if (t) return t;
+                const o = elTest.options[elTest.selectedIndex];
+                return o ? o.textContent.split(' · ').slice(-1)[0] : 'Test';
+            }
+            /* all given names: "Anna Lena" of "Anna Lena Muster", "Anna" of "Anna M." */
+            function givenName(e) {
+                const parts = String(e.name || '').trim().split(/\s+/);
+                return parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0];
+            }
+            function nachRows(lists) {
+                return lists.must.map(function (x) { return { x: x, kind: 'must' }; })
+                    .concat(lists.clear.map(function (x) { return { x: x, kind: 'clear' }; }));
+            }
+            /* the column "Nachschreiben" of the list view */
+            function paintNachColumn(lists) {
+                const kind = {};
+                if (lists) nachRows(lists).forEach(function (r) { kind[r.x.e.code] = r.kind; });
+                elTable.querySelectorAll('td.nach').forEach(function (td) {
+                    const k = kind[td.dataset.code] || '';
+                    td.textContent = k === 'must' ? 'muss' : k === 'clear' ? 'klären' : '';
+                    td.className = 'nach' + (k ? ' ' + k : '');
+                    td.title = k === 'must' ? 'fehlte laut WebUntis, keine Abgabe' : k === 'clear' ? 'laut WebUntis da, aber keine Abgabe' : '';
+                });
+            }
+
+            /* the printable page - its own small sheet: white, Orbitron headings, the codes coloured
+               as on the slips (letters blue, digits red) */
+            const NACH_PAGE_CSS =
+                ':root{--ink:rgb(14,36,78);--muted:rgb(96,108,128);--line:rgb(205,212,224);--ups:rgb(176,36,24);--amber:rgb(140,95,0);--blue:rgb(30,70,160)}' +
+                '*{box-sizing:border-box}html{background:#fff}body{margin:0;background:#fff;color:var(--ink);font:15px/1.45 Outfit,system-ui,sans-serif}' +
+                '.pg{max-width:880px;margin:0 auto;padding:24px 16px 32px}' +
+                'h1{font:700 1.5rem/1.2 Orbitron,system-ui,sans-serif;letter-spacing:.06em;margin:0 0 4px}' +
+                '.sub{font:400 .82rem/1.4 Orbitron,system-ui,sans-serif;letter-spacing:.05em;color:var(--muted);margin:0 0 18px}' +
+                '.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:10px 18px;margin:0 0 20px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}' +
+                '.facts div{min-width:0}.facts b{display:block;font:400 .62rem/1.3 Orbitron,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}' +
+                '.facts span{font-size:1rem;overflow-wrap:anywhere}.facts .open{color:var(--amber)}' +
+                '.scroll{overflow-x:auto}table{width:100%;border-collapse:separate;border-spacing:0;font-size:.98rem}' +
+                'th,td{border:0 solid var(--line);border-bottom-width:1px;padding:8px 10px;text-align:left;vertical-align:baseline}' +
+                'th{font:400 .64rem/1.3 Orbitron,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-top-width:1px}' +
+                'td.n{color:var(--muted);width:2.2em}td.code{font-family:"Arial Narrow",Arial,Helvetica,sans-serif;font-weight:700;font-size:1.08rem;letter-spacing:.04em;white-space:nowrap}' +
+                '.cd-l{color:var(--blue)}.cd-n{color:var(--ups)}' +
+                '.k{display:inline-block;font:400 .64rem/1.2 Orbitron,system-ui,sans-serif;letter-spacing:.06em;border:1px solid;border-radius:999px;padding:3px 9px;white-space:nowrap}' +
+                '.k.must{color:var(--ups)}.k.clear{color:var(--amber)}td.rem{color:var(--muted);font-size:.88rem}' +
+                '.none{padding:14px 0;color:var(--muted)}' +
+                '.foot{margin-top:18px;font-size:.8rem;color:var(--muted)}.foot b{color:var(--ink);font-weight:600}' +
+                '.bar{display:flex;justify-content:flex-end;margin:0 0 10px}' +
+                'button{font:400 .78rem/1 Orbitron,system-ui,sans-serif;letter-spacing:.06em;color:var(--ink);background:#fff;border:1px solid var(--ink);border-radius:8px;padding:9px 16px;cursor:pointer}' +
+                'button:hover{background:rgb(240,244,250)}' +
+                '@media (max-width:520px){td,th{padding:7px 6px}td.rem{display:none}th.rem{display:none}}' +
+                '@media print{@page{size:A4;margin:14mm}.bar{display:none}.pg{padding:0;max-width:none}body{font-size:11pt}' +
+                'td.rem,th.rem{display:table-cell!important}tr{break-inside:avoid}}';
+            function nachListPage(meta, lists) {
+                const L = lessonOf();
+                const g = groupKey();
+                const rows = nachRows(lists);
+                const termin = terminText();
+                const now = new Date();
+                let body = '<div class="pg"><div class="bar"><button type="button" onclick="window.print()">Drucken</button></div>' +
+                    '<h1>Nachschreiber</h1><div class="sub">' + esc(testName(meta)) + ' · ' + esc(g) + '</div>' +
+                    '<div class="facts">' +
+                    '<div><b>Test</b><span>' + esc(testName(meta)) + '</span></div>' +
+                    '<div><b>Klasse</b><span>' + esc(g) + '</span></div>' +
+                    '<div><b>Geschrieben am</b><span>' + (L ? esc(dayLong(L.day)) : '–') + '</span></div>' +
+                    '<div><b>Stunde</b><span>' + (L ? esc(L.start + '–' + L.end) + ' Uhr' : '–') + '</span></div>' +
+                    '<div><b>Nachschreiben</b><span' + (termin ? '>' + esc(termin) : ' class="open">noch offen') + '</span></div>' +
+                    '<div><b>Anzahl</b><span>' + lists.must.length + ' muss · ' + lists.clear.length + ' klären</span></div>' +
+                    '</div>';
+                if (!rows.length) {
+                    body += '<div class="none">Niemand muss nachschreiben.</div>';
+                } else {
+                    body += '<div class="scroll"><table><tr><th>#</th><th>Name</th><th>Code</th><th>Status</th><th class="rem">Bemerkung</th></tr>' +
+                        rows.map(function (r, i) {
+                            const must = r.kind === 'must';
+                            return '<tr><td class="n">' + (i + 1) + '</td><td>' + esc(r.x.e.name) + '</td><td class="code">' + codeHtml(r.x.e.code) + '</td>' +
+                                '<td><span class="k ' + r.kind + '">' + (must ? 'muss nachschreiben' : 'klären') + '</span></td>' +
+                                '<td class="rem">' + (must ? (r.x.ex ? 'fehlte entschuldigt' : 'fehlte laut WebUntis') : 'laut WebUntis da, keine Abgabe') + '</td></tr>';
+                        }).join('') + '</table></div>';
+                }
+                body += '<div class="foot"><b>Nur für dich</b> – Namen und Codes, nicht aushängen. Anwesenheit laut WebUntis, Abgaben laut Mission Control · Stand ' +
+                    esc(now.toLocaleDateString('de-DE') + ', ' + now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })) + ' Uhr</div></div>';
+                return '<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
+                    '<title>Nachschreiber ' + esc(g) + '</title>' +
+                    '<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">' +
+                    '<style>' + NACH_PAGE_CSS + '</style></head><body>' + body + '</body></html>';
+            }
+            document.getElementById('ltNachList').addEventListener('click', function () {
+                const lists = nachLists();
+                if (!lists) return;
+                /* opened right in the click, written once the test's title is there */
+                const w = window.open('', '_blank');
+                if (!w) { nachMsg('Der Browser hat den neuen Tab blockiert.', true); return; }
+                const write = function (meta) {
+                    w.document.open();
+                    w.document.write(nachListPage(meta, nachLists() || lists));
+                    w.document.close();
+                };
+                quizMeta(testUrl()).then(write, function () { write(null); });
+            });
+
+            /* the mail, built here so that the preview is exactly what lands in Outlook */
+            /* two texts (Doc, 06.11.2026: "für die zu klärenden und die muss zwei verschiedene
+               E-Mail-Texte"): absent in WebUntis = a plain re-sit date; present but no submission =
+               please get in touch, with the date in case it comes to a re-sit */
+            /* One mail per group with everyone in BCC (Doc, 06.11.2026: "zwei Knöpfe ... mit einer
+               E-Mail ... im BCC"), so the text greets no one by name. */
+            function nachMailOf(kind, meta) {
+                const L = lessonOf();
+                const name = testName(meta);
+                const day = L ? dayLong(L.day) : '';
+                if (kind === 'must') {
+                    return {
+                        subject: 'Nachschreiben: ' + name + ' am ' + terminText(),
+                        text: 'Hallo,\n\n' +
+                            'beim Test „' + name + '“ am ' + day + ' hast du gefehlt. Du schreibst ihn nach:\n\n' +
+                            terminText() + '\n\n' +
+                            'Kannst du zu diesem Termin nicht, sag mir bitte vorher Bescheid.\n\n' +
+                            'Viele Grüße\nDr. Alvers'
+                    };
+                }
+                return {
+                    subject: 'Test „' + name + '“: keine Abgabe von dir',
+                    text: 'Hallo,\n\n' +
+                        'beim Test „' + name + '“ am ' + day + ' warst du laut Klassenbuch da, ' +
+                        'aber von dir ist keine Abgabe angekommen. Bitte melde dich kurz bei mir, damit wir das klären.\n\n' +
+                        'Musst du nachschreiben, ist der Termin:\n\n' + terminText() + '\n\n' +
+                        'Viele Grüße\nDr. Alvers'
+                };
+            }
+            let nachArmedKind = '';    /* the group whose button waits for its second click */
+            function closeNachMail() {
+                nachMail = null;
+                elNachMail.hidden = true;
+                elNachMail.textContent = '';
+                window.clearTimeout(nachArmed);
+                nachArmed = 0;
+                nachArmedKind = '';
+            }
+            function nachChosen() {
+                return nachMail ? nachMail.rows.filter(function (r) { return r.on && r.addr && !r.sent; }) : [];
+            }
+            function paintNachMail() {
+                if (!nachMail) return;
+                const m = nachMail;
+                const found = m.rows.filter(function (r) { return r.addr; }).length;
+                let h = '<div class="lt-nm-head">Mail an die Nachschreiber</div>';
+                h += m.liste
+                    ? '<div class="lt-nm-src">Schulmails aus Teams, <code>klassenlisten/' + esc(m.liste) + '</code> · ' + found + ' von ' + m.rows.length + ' gefunden</div>'
+                    : '<div class="lt-nm-src warn">Für ' + esc(groupKey()) + ' liegt noch keine Adressliste vor. Einmal aus Teams holen: ' +
+                      '<code>pwsh -File tools/teams_mails_export.ps1 -Team "…" -Gruppe ' + esc(groupKey()) + '</code></div>';
+                const pick = nachChosen();
+                /* two groups, each with its own mail */
+                [['must', 'Muss nachschreiben · fehlte laut WebUntis', ''],
+                 ['clear', 'Klären · laut WebUntis da, aber keine Abgabe', ' clear']].forEach(function (g) {
+                    const n = m.rows.filter(function (r) { return r.kind === g[0]; }).length;
+                    if (!n) return;
+                    h += '<div class="lt-nm-grp' + g[2] + '">' + g[1] + ' (' + n + ')</div>';
+                    m.rows.forEach(function (r, i) {
+                        if (r.kind !== g[0]) return;
+                        const why = r.why === 'mehrdeutig' ? 'zwei passende Namen in der Liste' : r.why === 'keine Liste' ? 'keine Adressliste' : 'nicht in der Liste';
+                        /* the tick shows Doc's choice in full colour even while the address is missing
+                           (Doc, 06.11.2026: greyed it was "kaum sichtbar"); a draft opens only with one */
+                        h += '<label class="lt-nm-row"><input type="checkbox" data-i="' + i + '"' + (r.on && !r.sent ? ' checked' : '') +
+                            (r.sent ? ' disabled' : '') + '>' +
+                            '<span class="lt-nm-who"><span>' + esc(shownName(r.x.e)) + '</span><span class="nc-code">' + codeHtml(r.x.e.code) + '</span></span>' +
+                            '<span class="lt-nm-addr' + (r.addr ? '' : ' miss') + '">' +
+                            (r.sent ? '✓ im Entwurf (BCC) · ' : '') + (r.addr ? esc(r.addr) : 'keine Adresse · ' + why) + '</span></label>';
+                    });
+                    const mine = pick.filter(function (r) { return r.kind === g[0]; });
+                    if (elNachTag.value && elNachZeit.value) {
+                        const mail = nachMailOf(g[0], m.meta);
+                        h += '<div class="lt-nm-prev"><b>BETREFF</b>\n' + esc(mail.subject) + '\n\n<b>TEXT</b> (eine Mail, alle angehakten in BCC)\n' + esc(mail.text) + '</div>';
+                    }
+                    /* one button per group: its own text, one draft, everyone in BCC */
+                    const armed = nachArmed && nachArmedKind === g[0];
+                    h += '<div class="lt-nm-btns"><button type="button" class="lt-btn primary lt-nm-open" data-kind="' + g[0] + '"' +
+                        (mine.length ? '' : ' disabled') + '>' +
+                        (armed ? 'Wirklich? Mail mit ' + mine.length + ' in BCC öffnen'
+                               : 'In Outlook öffnen · ' + mine.length + ' in BCC') + '</button>' +
+                        '<span class="lt-nm-res" data-kind="' + g[0] + '"></span></div>';
+                });
+                h += '<div class="lt-nm-btns"><button type="button" class="lt-btn" id="ltNmClose">Schließen</button></div>';
+                elNachMail.innerHTML = h;
+                elNachMail.hidden = false;
+                elNachMail.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
+                    cb.addEventListener('change', function () { m.rows[+cb.dataset.i].on = cb.checked; disarm(); paintNachMail(); });
+                });
+                document.getElementById('ltNmClose').addEventListener('click', closeNachMail);
+                elNachMail.querySelectorAll('.lt-nm-open').forEach(function (b) {
+                    b.addEventListener('click', function () { openGroup(b.dataset.kind); });
+                });
+            }
+            function disarm() { window.clearTimeout(nachArmed); nachArmed = 0; nachArmedKind = ''; }
+            function nachPost(body) {
+                return fetch('/__mail/nachschreiber', {
+                    method: 'POST', cache: 'no-store',
+                    headers: { 'Content-Type': 'application/json', 'X-Mission-Control': '1' },
+                    body: JSON.stringify(body)
+                }).then(function (r) { return r.json(); }).then(function (o) {
+                    if (!o.ok) throw new Error(o.error || 'keine Antwort');
+                    return o;
+                });
+            }
+            /* Two clicks, like "Alles löschen": the first only says how many go into BCC; then ONE
+               Outlook draft for this group, everyone in BCC - Doc reads it and presses Send. */
+            function openGroup(kind) {
+                /* only who is still on the list - a submission meanwhile takes a pupil off */
+                const now = nachLists();
+                const still = {};
+                if (now) nachRows(now).forEach(function (r) { still[r.x.e.code] = true; });
+                const pick = nachChosen().filter(function (r) { return r.kind === kind && still[r.x.e.code]; });
+                if (!pick.length || !elNachTag.value || !elNachZeit.value) { paintNachMail(); return; }
+                if (!(nachArmed && nachArmedKind === kind)) {
+                    disarm();
+                    nachArmedKind = kind;
+                    nachArmed = window.setTimeout(function () { nachArmed = 0; nachArmedKind = ''; paintNachMail(); }, 4000);
+                    paintNachMail();
+                    return;
+                }
+                disarm();
+                const m = nachMail;
+                const btn = elNachMail.querySelector('.lt-nm-open[data-kind="' + kind + '"]');
+                if (btn) { btn.disabled = true; btn.textContent = 'Öffnet …'; }
+                const mail = nachMailOf(kind, m.meta);
+                const result = function (text, bad) {
+                    const res = elNachMail.querySelector('.lt-nm-res[data-kind="' + kind + '"]');
+                    if (!res) return;
+                    res.textContent = text;
+                    res.classList.toggle('err', !!bad);
+                };
+                nachPost({
+                    aktion: 'bcc', gruppe: groupKey(), betreff: mail.subject, text: mail.text,
+                    kinder: pick.map(function (r) { return { code: r.x.e.code, name: r.x.e.name }; })
+                }).then(function (o) {
+                    if (nachMail !== m) return;
+                    const ok = {};
+                    o.kinder.forEach(function (k) { if (k.ok) ok[k.code] = true; });
+                    m.rows.forEach(function (r) { if (ok[r.x.e.code]) { r.sent = true; r.on = false; } });
+                    paintNachMail();
+                    const bad = o.kinder.length - o.bcc;
+                    result('1 Entwurf offen in Outlook, ' + o.bcc + ' in BCC – lesen und selbst senden.' +
+                        (bad > 0 ? ' ' + bad + ' ohne Adresse.' : ''), bad > 0);
+                }).catch(function (err) {
+                    if (nachMail !== m) return;
+                    paintNachMail();
+                    result('Outlook: ' + err.message, true);
+                });
+            }
+            document.getElementById('ltNachMail').addEventListener('click', function () {
+                const lists = nachLists();
+                if (!lists) return;
+                if (!elNachTag.value) { elNachTag.classList.add('bad'); elNachTag.focus(); nachMsg('Erst den Tag des Nachschreibens eintragen.', true); return; }
+                if (!elNachZeit.value) { elNachZeit.classList.add('bad'); elNachZeit.focus(); nachMsg('Erst die Uhrzeit des Nachschreibens eintragen.', true); return; }
+                const rows = nachRows(lists);
+                if (!rows.length) { nachMsg('Niemand muss nachschreiben.'); return; }
+                if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) { nachMsg('Die Mails gehen nur auf deinem Mac (localhost).', true); return; }
+                nachMsg('Adressen werden gesucht …');
+                const g = groupKey(), url = testUrl();
+                quizMeta(url).then(function (meta) {
+                    return nachPost({ aktion: 'pruefen', gruppe: g,
+                        kinder: rows.map(function (r) { return { code: r.x.e.code, name: r.x.e.name }; }) })
+                        .then(function (o) {
+                            if (groupKey() !== g || testUrl() !== url) return;
+                            const by = {};
+                            o.kinder.forEach(function (k) { by[k.code] = k; });
+                            nachMail = { meta: meta, liste: o.liste, rows: rows.map(function (r) {
+                                const k = by[r.x.e.code] || {};
+                                /* all ticked (Doc, 06.11.2026: "hakt da mal bitte alle an") */
+                                return { x: r.x, kind: r.kind, addr: k.adresse || null, why: k.grund || '', on: true, sent: false };
+                            }) };
+                            nachMsg('');
+                            paintNachMail();
+                        });
+                }).catch(function (err) { nachMsg('Adressen: ' + err.message, true); });
+            });
             /* the chip also counts the triangles: "Untis 18:23 · 6 fehlen · 2 ohne Test" */
             let untisChip = null;
             function paintUntisCount() {
@@ -1617,6 +2173,8 @@
                         if (fresh) fillResults(false);
                         paintSummary(codes, true);
                         paintUntisCount();
+                        paintNach();
+                        if (untisAskedGroup === groupKey() && whenKey(testWhen()) !== untisWhenKey) fetchUntis(false);
                         const sel = elTable.querySelector('tr.sel') || elTiles.querySelector('.lt-tile.sel');
                         if (sel) paintAbort(sel.dataset.code);
                     });
