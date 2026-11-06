@@ -409,6 +409,16 @@
         html.svp-light .lt-nach-msg.warn { color: rgb(140, 95, 0); }
         .lt-nach-mail { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; }
         .lt-nach-mail[hidden] { display: none; }
+        /* "Noten -> FuxNoten": what is ready, and the bookmarklet to drag into the bookmarks bar */
+        .lt-fux { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 0.9rem; line-height: 1.5; }
+        .lt-fux[hidden] { display: none; }
+        .lt-fux p { margin: 0 0 8px; }
+        .lt-fux p:last-child { margin-bottom: 0; }
+        .lt-fux b { color: var(--lambda); }
+        .lt-fux .warn { color: rgb(245, 194, 66); }
+        html.svp-light .lt-fux .warn { color: rgb(140, 95, 0); }
+        .lt-fux a.lt-btn { display: inline-block; margin-left: 6px; text-decoration: none; color: var(--lambda); border-color: var(--lambda); cursor: grab; }
+        @media print { .lt-fux { display: none !important; } }
         .lt-nm-head { font-family: Orbitron, system-ui, sans-serif; font-size: 0.72rem; letter-spacing: 0.07em; color: var(--lambda);
             text-transform: uppercase; margin-bottom: 4px; }
         .lt-nm-src { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
@@ -832,7 +842,9 @@
                 <button type="button" class="lt-btn" id="ltResults">Ergebnisse abrufen</button>
                 <button type="button" class="lt-btn" id="ltPrintList">Liste drucken</button>
                 <button type="button" class="lt-btn" id="ltCsv">Liste als CSV sichern</button>
+                <button type="button" class="lt-btn" id="ltFux" title="Die Noten dieses Tests ins FuxNoten-Notenbuch – dort erst als Vorschau, speichern tust du selbst">Noten &rarr; FuxNoten</button>
             </div>
+            <div class="lt-fux" id="ltFuxBox" hidden></div>
             <div class="lt-bsaved" id="ltBSaved" role="status" hidden>
                 <span>Teil B gesichert im Browser</span>
                 <button type="button" class="lt-btn" id="ltBCsv">CSV exportieren</button>
@@ -3054,6 +3066,75 @@
             document.getElementById('ltPrintSlips').addEventListener('click', function () { printAs('print-slips'); });
             document.getElementById('ltCsv').addEventListener('click', csv);
             document.getElementById('ltBCsv').addEventListener('click', csv);
+            /* --- Noten -> FuxNoten (Doc, 06.11.2026) ---------------------------------------------
+               The Oberschule keeps its grades in FuxNoten, which has no interface for them. The button
+               leaves this test's grades (name, points, grade) in this browser's localStorage; in
+               FuxNoten the bookmarklet "Noten -> FuxNoten" (fuxBookmarklet below, dragged once into the
+               bookmarks bar) has fuxnoten-bruecke.html hand over the panel (fuxnoten.js) and the grades,
+               shows them in the grade book as a preview, saves only on Doc's click and reads every
+               cell back.
+               Names and grades never leave the browser. Only whole grades 1-6: FuxNoten's Sek I book
+               has no Notenpunkte. */
+            const FUX_KEY = 'svp-fuxnoten-v1';
+            const elFux = document.getElementById('ltFuxBox');
+            function fuxSay(html) { elFux.innerHTML = html; elFux.hidden = false; }
+            document.getElementById('ltFux').addEventListener('click', function () {
+                const url = testUrl();
+                if (!url || !entries.length) return;
+                if (!unlocked() || !entries.some(function (e) { return e.name; })) {
+                    fuxSay('<p class="warn">Erst „Namen anzeigen“ – FuxNoten ordnet die Noten nach Namen zu.</p>');
+                    return;
+                }
+                quizMeta(url).then(function (meta) {
+                    if (meta.gradeUnit === 'NP') {
+                        fuxSay('<p class="warn">Dieser Test gibt Notenpunkte, das FuxNoten-Notenbuch nimmt Noten 1–6. So nicht.</p>');
+                        return;
+                    }
+                    const rows = [];
+                    let open = 0;
+                    entries.forEach(function (e) {
+                        const r = tileRes[e.code];
+                        if (!e.name) return;
+                        if (!r || !r.grade) { open++; return; }
+                        rows.push({ name: e.name, note: String(r.grade), score: r.score, total: r.total,
+                            b: r.partB ? r.b : null, pct: Math.round(r.pct * 10) / 10 });
+                    });
+                    if (!rows.length) {
+                        fuxSay('<p class="warn">Noch keine Noten – erst „Ergebnisse abrufen“.</p>');
+                        return;
+                    }
+                    const p = { at: Date.now(), klasse: groupKey(), test: testName(meta), tag: testDayIso(),
+                        scale: (meta.gradeScale || []).map(function (s) { return s[0]; }).filter(function (x) { return x > 0; }),
+                        rows: rows };
+                    try { localStorage.setItem(FUX_KEY, JSON.stringify(p)); } catch (err) {
+                        fuxSay('<p class="warn">Dieser Browser lässt gerade nichts speichern – so geht es nicht.</p>');
+                        return;
+                    }
+                    fuxSay('<p><b>' + rows.length + ' Noten bereit</b> (' + esc(p.test) + ', ' + esc(p.klasse) + ')' +
+                        (open ? ', ' + open + ' ohne Note sind nicht dabei' : '') + ' – nur in diesem Browser, 12 Stunden lang.</p>' +
+                        '<p>In FuxNoten das Notenbuch der ' + esc(p.klasse) + ' öffnen und dort das Lesezeichen <b>Noten → FuxNoten</b> klicken. ' +
+                        'Du siehst die Noten erst als Vorschau, wählst die Spalte und speicherst selbst.</p>' +
+                        '<p>Noch nicht in der Lesezeichenleiste (die Leiste mit deinen Links unter der Adresszeile, ⌘⇧B)? ' +
+                        'Diesen Knopf einmal dort hineinziehen – nicht in die Adresszeile:' +
+                        '<a class="lt-btn" id="ltFuxBm" href="#" draggable="true">Noten → FuxNoten</a></p>');
+                    const a = document.getElementById('ltFuxBm');
+                    a.href = fuxBookmarklet();
+                    a.addEventListener('click', function (ev) {
+                        ev.preventDefault();
+                        a.textContent = 'Ziehen, nicht klicken';
+                        window.setTimeout(function () { a.textContent = 'Noten → FuxNoten'; }, 2000);
+                    });
+                });
+            });
+            /* The bookmarklet stays short (Doc, 06.11.2026: the whole panel in it, 35 KB, dropped on the
+               address bar, became a Google search - 413): it only opens this site's bridge, which hands
+               over fuxnoten.js and then the grades; the code it runs comes from this site alone. */
+            function fuxBookmarklet() {
+                return 'javascript:' + encodeURIComponent('(function(){var o=' + JSON.stringify(location.origin) + ';' +
+                    'addEventListener("message",function f(e){if(e.origin!==o||!e.data||e.data.kind!=="svp-fuxnoten-code")return;' +
+                    'removeEventListener("message",f);window.__svpFuxLoader=true;(0,eval)(e.data.code);});' +
+                    'open(o+"/svp/fuxnoten-bruecke.html?code=1&an="+encodeURIComponent(location.origin),"svpfuxbruecke","width=460,height=200");})()');
+            }
             /* "Statistik": the test's own Auswertung (?auswertung, behind the password),
                for the chosen test and group, in a tab of its own (Doc, 05.11.2026: "wo sehe
                ich die Statistik ... aus Mission Control") */
@@ -3088,6 +3169,7 @@
             elTest.addEventListener('change', function () {
                 demoMode = false;      /* the demo set never follows into a real group */
                 testPicked = true;     /* this choice wins over the test stored with the group */
+                elFux.hidden = true;   /* "Noten -> FuxNoten" spoke of the test before */
                 elNames.value = '';
                 restore();
                 prefillFromLocal();

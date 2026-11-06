@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>FuxNoten-Brücke</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html, body { margin: 0; height: 100%; }
+        body {
+            display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;
+            background: rgb(14, 36, 78); color: #fff; text-align: center;
+            font: 14px/1.5 Orbitron, system-ui, sans-serif; letter-spacing: 0.04em;
+        }
+        b { color: rgb(245, 194, 66); }
+    </style>
+</head>
+<body>
+    <p id="m">Übergabe an FuxNoten …</p>
+    <script>
+        /* The bridge of "Noten → FuxNoten" (Doc, 06.11.2026). The bookmarklet in FuxNoten opens this
+           page as a small popup; it reads what Mission Control left in this site's localStorage and
+           hands it to the FuxNoten window that opened it - only to a *.fuxnoten.online page, by
+           postMessage, nothing over the network. Grades older than 12 hours are dropped instead.
+           With ?code=1 (the short bookmarklet) it first hands over the panel itself, fuxnoten.js of
+           this site: a bookmarklet holding the whole panel (35 KB) ended up as a Google search when
+           it was dropped on the address bar (Doc, 06.11.2026: 413), and FuxNoten may not load a
+           script from localhost by itself. */
+        (function () {
+            var KEY = 'svp-fuxnoten-v1';
+            var MAX_AGE = 12 * 3600 * 1000;
+            var m = document.getElementById('m');
+            var q = new URLSearchParams(location.search);
+            var to = q.get('an') || '';
+            if (!/^https:\/\/[a-z0-9-]+\.fuxnoten\.online$/.test(to) || !window.opener) {
+                m.textContent = 'Diese Seite öffnet das Lesezeichen „Noten → FuxNoten“ in FuxNoten selbst.';
+                return;
+            }
+            var p = null;
+            try { p = JSON.parse(localStorage.getItem(KEY)); } catch (e) { p = null; }
+            if (p && !(Date.now() - p.at < MAX_AGE)) {
+                try { localStorage.removeItem(KEY); } catch (e) { /* nothing to drop */ }
+                p = null;
+            }
+            function handOver() {
+                window.opener.postMessage({ kind: 'svp-fuxnoten', payload: p }, to);
+                m.innerHTML = p ? '<b>' + p.rows.length + ' Noten</b> übergeben.'
+                    : 'Keine Noten bereit – erst in Mission Control „Noten → FuxNoten“ klicken.';
+                setTimeout(function () { window.close(); }, p ? 700 : 4000);
+            }
+            if (q.get('code') !== '1') { handOver(); return; }
+            fetch('fuxnoten.js', { cache: 'no-store' })
+                .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+                .then(function (code) {
+                    /* the panel answers only to this site - localhost or docalvers.de */
+                    code = code.replace("'http://localhost:8765'", JSON.stringify(location.origin));
+                    window.opener.postMessage({ kind: 'svp-fuxnoten-code', code: code }, to);
+                    handOver();
+                })
+                .catch(function (e) { m.textContent = 'Das Notenfenster ließ sich nicht laden (' + e.message + ').'; });
+        })();
+    </script>
+</body>
+</html>
