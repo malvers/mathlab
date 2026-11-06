@@ -55,6 +55,8 @@ const PHASES = [
 ];
 
 let phase = PHASES[0];
+const MAILED = {};          // "<pool>|<code>" -> { kind, at }, the server's stamps of the re-sit mail
+const mailCalls = [];       // what the page asked for: drafts, stamps, take-backs
 const hm = t => Number(t.replace(':', ''));
 const json = (route, body) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
 
@@ -90,7 +92,30 @@ await page.route(/supabase\.co\//, async r => {
     }
     if (u.includes('/rpc/quiz_codes_set')) return json(r, KIDS.length);
     if (u.includes('/rpc/quiz_code_ok')) return json(r, 'ok');
+    // "Abgeschickt": the stamps of the re-sit mail, kept here instead of the server
+    if (u.includes('/rpc/quiz_nach_mail_get')) {
+        return json(r, Object.entries(MAILED).filter(([k]) => k.startsWith(body.p_quiz + '|'))
+            .map(([k, v]) => ({ code: k.split('|')[1], kind: v.kind, first_at: v.at, last_at: v.at })));
+    }
+    if (u.includes('/rpc/quiz_nach_mail_set')) {
+        mailCalls.push({ fn: 'set', kind: body.p_kind, codes: body.p_codes });
+        body.p_codes.forEach(c => { MAILED[body.p_quiz + '|' + c] = { kind: body.p_kind, at: DAY + 'T10:50:00+01:00' }; });
+        return json(r, body.p_codes.length);
+    }
+    if (u.includes('/rpc/quiz_nach_mail_unset')) {
+        mailCalls.push({ fn: 'unset', codes: body.p_codes });
+        body.p_codes.forEach(c => { delete MAILED[body.p_quiz + '|' + c]; });
+        return json(r, body.p_codes.length);
+    }
     return json(r, []);
+});
+// Outlook: every invented pupil has an invented address; a draft "opens" without Outlook
+await page.route(/\/__mail\/nachschreiber/, r => {
+    const body = JSON.parse(r.request().postData() || '{}');
+    const kinder = (body.kinder || []).map(k => ({ code: k.code, adresse: k.code.toLowerCase() + '@example.invalid', grund: '', ok: true }));
+    if (body.aktion === 'pruefen') return json(r, { ok: true, liste: 'mail-9A.csv', kinder });
+    mailCalls.push({ fn: 'draft', codes: kinder.map(k => k.code) });
+    return json(r, { ok: true, geoeffnet: 1, bcc: kinder.length, kinder });
 });
 // WebUntis
 await page.route(/\/__untis\/abwesend/, r => {
@@ -161,6 +186,87 @@ for (const ph of PHASES) {
     }
     if (SHOTS) await page.screenshot({ path: join(SHOT_DIR, ph.time.replace(':', '') + '.png'), fullPage: true });
 }
+
+// after the bell: the re-sit mail (Doc, 06.11.2026: "wir müssen uns irgendwie merken, dass ich die E-Mail
+// für das Nachschreiben geschickt habe") - draft for "muss", "Abgeschickt", the stamp everywhere, take it back
+console.log('10:45  Mail an die Nachschreiber');
+await page.evaluate(() => {
+    const set = (id, v) => { const el = document.getElementById(id); if (!el.value) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); } };
+    set('ltNachTag', '2026-11-13'); set('ltNachZeit', '14:15');
+});
+const dlg = () => page.evaluate(() => {
+    const box = document.getElementById('ltNachMailBox');
+    const rows = [...box.querySelectorAll('.lt-nm-row')].map(l => ({ code: l.querySelector('.nc-code').textContent.trim(),
+        on: l.querySelector('input').checked, stamp: !!l.querySelector('.lt-nm-sent'), undo: !!l.querySelector('.lt-nm-undo') }));
+    const done = k => { const b = box.querySelector('.lt-nm-done[data-kind="' + k + '"]'); return b ? { off: b.disabled, text: b.textContent } : null; };
+    const chipMail = [...document.querySelectorAll('#ltNach .lt-nach-chip')].filter(c => c.querySelector('.nc-mail')).map(c => c.querySelector('.nc-code').textContent.trim());
+    return { open: !box.hidden, rows, must: done('must'), clear: done('clear'), chipMail,
+        res: [...box.querySelectorAll('.lt-nm-res')].map(x => x.textContent).join(' ') };
+});
+await page.click('#ltNachMail');
+await page.waitForTimeout(1500);
+let d = await dlg();
+check(d.open && d.rows.length === 2, 'Mail-Kasten offen mit Lise + Kurt (' + d.rows.map(r => firstOf(r.code)).join(', ') + ')');
+check(d.rows.every(r => r.on && !r.stamp), 'beide angehakt, noch ohne Vermerk');
+check(!d.must && !d.clear, 'kein „Abgeschickt“-Knopf, solange kein Entwurf offen ist (Doc: „Ich habe noch nichts geschickt. Oder?“)');
+await page.click('.lt-nm-open[data-kind="must"]');      // first click arms
+await page.click('.lt-nm-open[data-kind="must"]');      // second click opens the draft
+await page.waitForTimeout(1200);
+d = await dlg();
+check(mailCalls.some(c => c.fn === 'draft' && c.codes.join() === code('Lise')), 'Entwurf für Lise geöffnet');
+check(d.must && /^Abgeschickt/.test(d.must.text) && /· 1 /.test(d.must.text), '„Abgeschickt ✓ · 1 vermerken“ (ist: ' + (d.must && d.must.text) + ')');
+check(!mailCalls.some(c => c.fn === 'set'), 'noch nichts vermerkt, bevor Doc „Abgeschickt“ klickt');
+// Doc sends in Outlook, comes back to a reloaded page: the open draft and its button are still there
+await page.reload({ waitUntil: 'domcontentloaded' });
+await page.waitForSelector('.lt-tile', { state: 'attached', timeout: 30000 });
+await page.waitForTimeout(7000);
+await page.evaluate(() => {
+    const set = (id, v) => { const el = document.getElementById(id); if (!el.value) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); } };
+    set('ltNachTag', '2026-11-13'); set('ltNachZeit', '14:15');
+});
+await page.click('#ltNachMail');
+await page.waitForTimeout(1500);
+d = await dlg();
+check(d.must && /^Abgeschickt/.test(d.must.text) && /· 1 /.test(d.must.text) && !d.rows.find(r => r.code === code('Lise')).on,
+    'nach Neuladen: Entwurf für Lise noch offen, „Abgeschickt ✓ · 1“ da (ist: ' + (d.must && d.must.text) + ')');
+await page.click('.lt-nm-done[data-kind="must"]');
+await page.waitForTimeout(1500);
+d = await dlg();
+const set1 = mailCalls.find(c => c.fn === 'set');
+check(set1 && set1.kind === 'must' && set1.codes.join() === code('Lise'), 'vermerkt: nur Lise, als „muss“ (ist: ' + JSON.stringify(set1 || null) + ')');
+check(d.rows.find(r => r.code === code('Lise')).stamp, 'Lise im Kasten: „✉ abgeschickt …“');
+check(JSON.stringify(d.chipMail) === JSON.stringify([code('Lise')]), 'Box: ✉ nur bei Lise (ist: ' + (d.chipMail.map(firstOf).join(', ') || 'niemand') + ')');
+const td = await page.evaluate(c => { const x = document.querySelector('td.nach[data-code="' + c + '"]'); return x ? x.textContent : null; }, code('Lise'));
+check(td === null || /✉/.test(td), 'Listenspalte zeigt ✉ bei Lise (ist: ' + td + ')');
+// a fresh mail box: who already has it is not ticked again
+await page.click('#ltNmClose');
+await page.click('#ltNachMail');
+await page.waitForTimeout(1500);
+d = await dlg();
+check(!d.rows.find(r => r.code === code('Lise')).on && d.rows.find(r => r.code === code('Kurt')).on, 'neu geöffnet: Lise nicht mehr angehakt, Kurt schon');
+if (SHOTS) {
+    await page.locator('#ltNach').screenshot({ path: join(SHOT_DIR, '1045-vermerkt.png') });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.waitForTimeout(400);
+    const wide = await page.evaluate(() => document.documentElement.scrollWidth);
+    check(wide <= 390, 'Handy 390 px: nichts ragt seitlich heraus (Breite ' + wide + ')');
+    await page.locator('#ltNach').screenshot({ path: join(SHOT_DIR, '1045-vermerkt-390.png') });
+    await page.setViewportSize({ width: 1280, height: 900 });
+}
+// the printed list
+const [sheet] = await Promise.all([page.waitForEvent('popup'), page.click('#ltNachList')]);
+await sheet.waitForTimeout(800);
+const sheetText = await sheet.evaluate(() => document.body.innerText);
+if (process.env.MC_DEBUG) console.log('    [Druckliste] ' + sheetText.replace(/\s+/g, ' ').slice(0, 500));
+check(/\bmail\b/i.test(sheetText) &&/✉/.test(sheetText) && /noch nicht/.test(sheetText), 'Druckliste: Spalte „Mail“ mit ✉ bei Lise, „noch nicht“ bei Kurt');
+await sheet.close();
+// a click by mistake is taken back
+await page.click('.lt-nm-undo[data-code="' + code('Lise') + '"]');
+await page.waitForTimeout(1500);
+d = await dlg();
+check(mailCalls.some(c => c.fn === 'unset' && c.codes.join() === code('Lise')) && d.chipMail.length === 0, 'zurückgenommen: kein ✉ mehr');
+if (SHOTS) await page.screenshot({ path: join(SHOT_DIR, '1045-mail.png'), fullPage: true });
+
 check(errors.length === 0, 'keine Skriptfehler' + (errors.length ? ': ' + errors.join(' | ') : ''));
 await browser.close();
 console.log(failed ? failed + ' Prüfung(en) FEHLGESCHLAGEN' : 'Alles gut: die ganze Stunde zeigt, was sie soll.');

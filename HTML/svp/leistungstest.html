@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leistungstest | Stoffverteilungspl&auml;ne</title>
+    <title>Leistungstest &ndash; Mission Control | Stoffverteilungspl&auml;ne</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
@@ -59,6 +59,9 @@
             margin-bottom: 12px;
         }
         .lt-field .lt-title { margin-bottom: 3px; }
+        /* the gap under the red warning only while it shows - hidden, "Test und Lerngruppe" sits right at
+           the top of the card (Doc, 06.11.2026: "einen Tick höher, über Test ist viel Platz") */
+        .lt-warn:not([hidden]) + .lt-setup-form { margin-top: 14px; }
 
         /* The warning is the whole point of the tool, so it gets the red band. */
         .lt-warn {
@@ -206,14 +209,21 @@
         }
 
         .lt-btn:hover { border-color: var(--phi); color: var(--phi); }
+        /* light mode: every button white, so it stands out from the cloudy page (Doc, 06.11.2026: "etwas
+           sichtbarer"); :where() keeps it weaker than the coloured states (.on, .stop, .undo) */
+        html.svp-light :where(.lt-btn) { background: var(--card); }
         /* Klassenauswertung: top right of the Zuordnungsliste, beside its title and the
            Mission Control bar (Doc, 05.11.2026: "mach den Button dahin") */
         /* the header runs on the tiles' own columns: the button takes the last one - as wide as a
            tile - and stretches from the top of "Zuordnungsliste" to the bottom of the chips */
         .lt-mchead { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(215px, 100%), 1fr)); column-gap: 10px; margin: 0 0 12px; }
-        .lt-mchead-main { grid-column: 1 / -2; min-width: 0; }
+        /* the title takes the first row over all columns; the button sits in the second row beside the
+           chips, only as high as their lines (Doc, 06.11.2026: "nur so hoch wie die 2 Button-Lines") */
+        .lt-mchead-main { display: contents; }
+        .lt-mchead-main > .lt-title { grid-column: 1 / -1; grid-row: 1; }
+        .lt-mchead-bar { grid-column: 1 / -2; grid-row: 2; min-width: 0; }
         .lt-mchead-main .lt-mc { margin-bottom: 0; }
-        .lt-stats { grid-column: -2 / -1; align-self: stretch; min-width: 0; margin: 0; padding: 8px 10px;
+        .lt-stats { grid-column: -2 / -1; grid-row: 2; align-self: stretch; min-width: 0; margin: 0; padding: 8px 10px;
             display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; text-align: center;
             font-family: Orbitron, system-ui, sans-serif; color: var(--lambda); background: transparent;
             border: 2px solid var(--lambda); border-radius: 10px; cursor: pointer; }
@@ -386,6 +396,12 @@
         .lt-tile .tl-alarm svg { animation: lt-alarm 2.4s ease-in-out infinite; }
         /* Nachschreiben (Doc, 05.11.2026): who missed the test, from WebUntis on the day it ran */
         .lt-nach { margin-top: 14px; padding: 12px 14px 14px; border: 1px solid var(--line); border-radius: 10px; }
+        /* a light blue ground, so the box stands out from the page (Doc, 06.11.2026: "leicht bläulich") */
+        .lt-nach { background: rgba(70, 110, 190, 0.16); border-color: rgba(120, 160, 220, 0.45); }
+        html.svp-light .lt-nach { background: rgb(234, 241, 252); border-color: rgb(190, 208, 236); }
+        html.svp-light .lt-nach .lt-nach-chip { background: #fff; }
+        /* the buttons on the blue ground as white as the date fields (Doc, 06.11.2026) */
+        .lt-nach .lt-btn:not(.primary) { background: var(--card); }
         .lt-nach[hidden] { display: none; }
         .lt-nach-head { margin-bottom: 10px; }
         .lt-nach-when { margin-left: 10px; font-size: 0.66rem; font-weight: 400; letter-spacing: 0.06em; color: var(--muted); text-transform: none; }
@@ -398,6 +414,8 @@
             font-size: 0.92rem; }
         .lt-nach-chip .nc-code { font-family: 'Arial Narrow', Arial, Helvetica, sans-serif; font-weight: 700; font-size: 1.05rem; letter-spacing: 0.03em; }
         .lt-nach-chip .nc-ex { font-family: Orbitron, system-ui, sans-serif; font-size: 0.6rem; color: var(--muted); }
+        /* the re-sit mail went out (Doc's "Abgeschickt" click, kept on the server) */
+        .lt-nach-chip .nc-mail { font-family: Orbitron, system-ui, sans-serif; font-size: 0.7rem; letter-spacing: 0.04em; color: var(--phi); white-space: nowrap; }
         .lt-nach-none { color: var(--muted); font-size: 0.85rem; }
         /* the list to print and the mail to the pupils, under the two groups (Doc, 05.11.2026) */
         .lt-nach-act { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; padding-top: 12px;
@@ -444,6 +462,7 @@
         .lt-nm-prev { margin-top: 10px; padding: 10px 12px; border-left: 3px solid var(--lambda); background: var(--card); border-radius: 0 8px 8px 0;
             font-size: 0.88rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
         .lt-nm-prev b { font-family: Orbitron, system-ui, sans-serif; font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); font-weight: 400; }
+        .lt-nm-prev strong { font-weight: 700; }
         .lt-nm-grp { font-family: Orbitron, system-ui, sans-serif; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--lt-red);
             margin: 16px 0 6px; padding-top: 10px; border-top: 1px solid var(--line); }
         .lt-nm-grp.clear { color: rgb(245, 194, 66); }
@@ -452,6 +471,12 @@
         .lt-nm-btns .lt-btn { margin: 0; }
         .lt-nm-res { font-size: 0.85rem; color: var(--phi); }
         .lt-nm-res.err { color: var(--lt-red); }
+        .lt-nm-sent { color: var(--phi); }
+        .lt-nm-undo { font: inherit; font-size: 0.78rem; color: var(--muted); background: none; border: 0; border-bottom: 1px dotted currentColor;
+            padding: 0; margin-left: 6px; cursor: pointer; }
+        .lt-nm-undo:hover { color: var(--lt-red); }
+        .lt-nm-btns .lt-btn.lt-nm-done { color: var(--phi); border-color: var(--phi); }
+        .lt-nm-btns .lt-btn.lt-nm-done[disabled] { opacity: 0.45; }
         .lt-tab td.nach { font-family: Orbitron, system-ui, sans-serif; font-size: 0.76rem; letter-spacing: 0.05em; white-space: nowrap; }
         .lt-tab td.nach.must { color: var(--lt-red); }
         .lt-tab td.nach.clear { color: rgb(245, 194, 66); }
@@ -685,8 +710,8 @@
         <a class="back-link" href="./">&larr; &Uuml;bersicht</a>
         <div class="head-row">
             <div class="lt-headtitle">
-                <h1>Leistungstest</h1>
-                <button type="button" class="lt-help" id="ltHelp" title="Kurzanleitung" aria-label="Kurzanleitung"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="8.4" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M7.15 7.3a1.85 1.85 0 1 1 3.37 1.06c-.8.55-1.52.95-1.52 1.9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="9" cy="12.4" r=".85" fill="currentColor"/></svg></button>
+                <h1>Leistungstest &ndash; Mission Control</h1>
+                <button type="button" class="lt-help" id="ltHelp" title="Kurzanleitung" aria-label="Kurzanleitung"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="8.4" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M7.15 7.3a1.85 1.85 0 1 1 3.37 1.06c-.8.55-1.52.95-1.52 1.9" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/><circle cx="9" cy="12.4" r=".72" fill="currentColor"/></svg></button>
             </div>
             <!-- The data-protection note folds away behind this round paragraph
                  sign: present on demand, silent in daily use. -->
@@ -714,7 +739,7 @@
                 </div>
             </div>
 
-            <div class="lt-form" style="margin-top:14px">
+            <div class="lt-form lt-setup-form">
                 <label class="lt-field" for="ltTest"><span class="lt-title">Test und Lerngruppe</span>
                     <select id="ltTest">
                         <option value="../infotestfos12.html?klasse=FOG25-1">Informatik &middot; FOG25-1</option>
@@ -800,9 +825,9 @@
             <div class="lt-mchead">
             <div class="lt-mchead-main">
             <div class="lt-title">Zuordnungsliste &mdash; nur f&uuml;r dich</div>
+            <div class="lt-mchead-bar">
             <div class="lt-listqr" id="ltListQr" hidden></div>
             <div class="lt-mc" id="ltMc" hidden>
-                <span class="lt-mc-title">Mission Control</span>
                 <span class="lt-mc-view" role="group" aria-label="Ansicht">
                     <button type="button" id="ltViewTiles" data-view="tiles" aria-pressed="true">Kacheln</button>
                     <button type="button" id="ltViewList" data-view="list" aria-pressed="false">Liste</button>
@@ -816,6 +841,7 @@
                     <span class="ab-msg" id="ltMcResetMsg"></span>
                     <button type="button" class="lt-btn danger" id="ltMcReset" hidden>Neubeginn</button>
                 </span>
+            </div>
             </div>
             </div>
             <button type="button" class="lt-stats" id="ltStats" title="Auswertung des Tests im eigenen Tab (Passwort): Gruppenleistung pro Frage und Einzelleistungen">
@@ -1691,6 +1717,12 @@
                 const box = document.getElementById('ltNach');
                 const jump = document.getElementById('ltMcNach');
                 const lists = nachLists();
+                /* another test: the stamps of the old one never show on the new one (lists exist only
+                   once WebUntis and the control rows are in, long after the script ran) */
+                if (lists) {
+                    if (mailedUrl !== testUrl()) { mailed = {}; mailedPool = ''; mailedAsked = ''; mailedUrl = testUrl(); }
+                    loadMailed(false);
+                }
                 paintNachColumn(lists);
                 if (!lists) { box.hidden = jump.hidden = true; return; }
                 const must = lists.must, clear = lists.clear;
@@ -1700,8 +1732,10 @@
                     list.forEach(function (x) {
                         const c = document.createElement('span');
                         c.className = 'lt-nach-chip';
+                        const ml = mailed[x.e.code];
                         c.innerHTML = '<span>' + esc(shownName(x.e)) + '</span><span class="nc-code">' + codeHtml(x.e.code) + '</span>' +
-                            (x.ex ? '<span class="nc-ex">entschuldigt</span>' : '');
+                            (x.ex ? '<span class="nc-ex">entschuldigt</span>' : '') +
+                            (ml ? '<span class="nc-mail" title="Nachschreib-Mail abgeschickt">✉ ' + esc(mailStamp(ml.last)) + '</span>' : '');
                         el.appendChild(c);
                     });
                 };
@@ -1744,6 +1778,46 @@
             let nachTerminFor = null;  /* the test whose re-sit day stands in the fields */
             let nachMail = null;       /* { meta, liste, rows: [{ x, kind, addr, why, on, sent }] } while the mail box is open */
             let nachArmed = 0;
+            /* --- who has been sent the re-sit mail (Doc, 06.11.2026: "wir müssen uns irgendwie merken,
+               dass ich die E-Mail für das Nachschreiben geschickt habe") ------------------------------
+               The school Outlook takes drafts from this Mac but cannot be read back, so after Send Doc
+               clicks "Abgeschickt" and the server keeps when - per code, never a name, in the same pool
+               as the codes (supabase/migrations/20261106_quiz_nach_mail.sql). It outlives this browser;
+               the chips, the list column, the printed list and the mail box show it. */
+            let mailed = {};           /* code -> { kind, first, last } of the shown test */
+            let mailedUrl = '';        /* the test `mailed` belongs to */
+            let mailedPool = '';       /* its pool, once loaded */
+            let mailedAsked = '';      /* the pool asked for (also after a failure: no retry every beat) */
+            function mailStamp(iso) {
+                const d = new Date(iso);
+                if (isNaN(d)) return '';
+                return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) + ' ' +
+                    d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+            }
+            function mailedApi(fn, body) {
+                return svpAuth.api('rpc/' + fn, { method: 'POST', body: JSON.stringify(body) }).then(function (r) {
+                    if (!r.ok) throw new Error(r.status === 404 ? 'Server ohne Mail-Vermerk' : r.status === 400 || r.status === 403 ? 'nur mit Docs Konto' : 'HTTP ' + r.status);
+                    return r.json();
+                });
+            }
+            function loadMailed(force) {
+                const url = testUrl();
+                if (!url || !window.svpAuth || !svpAuth.hasSession()) return Promise.resolve();
+                return quizMeta(url).then(function (meta) {
+                    const pool = poolOf(meta, url);
+                    if (!force && mailedAsked === pool) return;
+                    mailedAsked = pool;
+                    return mailedApi('quiz_nach_mail_get', { p_quiz: pool }).then(function (rows) {
+                        if (testUrl() !== url) return;
+                        const map = {};
+                        (rows || []).forEach(function (r) { map[r.code] = { kind: r.kind, first: r.first_at, last: r.last_at }; });
+                        mailed = map;
+                        mailedPool = pool;
+                        paintNach();
+                        paintNachMail();
+                    });
+                }).catch(function (err) { if (window.console) console.warn('Mail-Vermerk: ' + err.message); });
+            }
             function nachTerminAll() {
                 try { return JSON.parse(localStorage.getItem(NACH_STORE)) || {}; } catch (e) { return {}; }
             }
@@ -1914,9 +1988,11 @@
                 if (lists) nachRows(lists).forEach(function (r) { kind[r.x.e.code] = r.kind; });
                 elTable.querySelectorAll('td.nach').forEach(function (td) {
                     const k = kind[td.dataset.code] || '';
-                    td.textContent = k === 'must' ? 'muss' : k === 'clear' ? 'klären' : '';
+                    const ml = k ? mailed[td.dataset.code] : null;
+                    td.textContent = (k === 'must' ? 'muss' : k === 'clear' ? 'klären' : '') + (ml ? ' ✉' : '');
                     td.className = 'nach' + (k ? ' ' + k : '');
-                    td.title = k === 'must' ? 'fehlte laut WebUntis, keine Abgabe' : k === 'clear' ? 'laut WebUntis da, aber keine Abgabe' : '';
+                    td.title = (k === 'must' ? 'fehlte laut WebUntis, keine Abgabe' : k === 'clear' ? 'laut WebUntis da, aber keine Abgabe' : '') +
+                        (ml ? ' · Mail abgeschickt ' + mailStamp(ml.last) : '');
                 });
             }
 
@@ -1938,6 +2014,7 @@
                 '.cd-l{color:var(--blue)}.cd-n{color:var(--ups)}' +
                 '.k{display:inline-block;font:400 .64rem/1.2 Orbitron,system-ui,sans-serif;letter-spacing:.06em;border:1px solid;border-radius:999px;padding:3px 9px;white-space:nowrap}' +
                 '.k.must{color:var(--ups)}.k.clear{color:var(--amber)}td.rem{color:var(--muted);font-size:.88rem}' +
+                'td.ml{white-space:nowrap;font-size:.88rem;color:rgb(80,110,30)}td.ml.open{color:var(--amber)}' +
                 '.none{padding:14px 0;color:var(--muted)}' +
                 '.foot{margin-top:18px;font-size:.8rem;color:var(--muted)}.foot b{color:var(--ink);font-weight:600}' +
                 '.bar{display:flex;justify-content:flex-end;margin:0 0 10px}' +
@@ -1965,11 +2042,13 @@
                 if (!rows.length) {
                     body += '<div class="none">Niemand muss nachschreiben.</div>';
                 } else {
-                    body += '<div class="scroll"><table><tr><th>#</th><th>Name</th><th>Code</th><th>Status</th><th class="rem">Bemerkung</th></tr>' +
+                    body += '<div class="scroll"><table><tr><th>#</th><th>Name</th><th>Code</th><th>Status</th><th>Mail</th><th class="rem">Bemerkung</th></tr>' +
                         rows.map(function (r, i) {
                             const must = r.kind === 'must';
+                            const ml = mailed[r.x.e.code];
                             return '<tr><td class="n">' + (i + 1) + '</td><td>' + esc(r.x.e.name) + '</td><td class="code">' + codeHtml(r.x.e.code) + '</td>' +
                                 '<td><span class="k ' + r.kind + '">' + (must ? 'muss nachschreiben' : 'klären') + '</span></td>' +
+                                '<td class="ml' + (ml ? '' : ' open') + '">' + (ml ? '✉ ' + esc(mailStamp(ml.last)) : 'noch nicht') + '</td>' +
                                 '<td class="rem">' + (must ? (r.x.ex ? 'fehlte entschuldigt' : 'fehlte laut WebUntis') : 'laut WebUntis da, keine Abgabe') + '</td></tr>';
                         }).join('') + '</table></div>';
                 }
@@ -2008,10 +2087,12 @@
                     return {
                         subject: 'Nachschreiben: ' + name + ' am ' + terminText(),
                         text: 'Hallo,\n\n' +
-                            'beim Test „' + name + '“ am ' + day + ' hast du gefehlt. Du schreibst ihn nach:\n\n' +
-                            terminText() + '\n\n' +
-                            'Kannst du zu diesem Termin nicht, sag mir bitte vorher Bescheid.\n\n' +
-                            'Viele Grüße\nDr. Alvers'
+                            'beim Test „' + name + '“ am ' + day + ' hast du gefehlt. Du schreibst ihn bitte nach:\n\n' +
+                            '**' + terminText() + '**\n\n' +
+                            /* Doc, 06.11.2026: no "can't make it" sentence - the date is binding */
+                            'Der Nachschreibetermin ist verpflichtend.\n\n' +
+                            'Du schaffst das!\n\n' +
+                            'Mit bestem Gruß'
                     };
                 }
                 return {
@@ -2019,8 +2100,8 @@
                     text: 'Hallo,\n\n' +
                         'beim Test „' + name + '“ am ' + day + ' warst du laut Klassenbuch da, ' +
                         'aber von dir ist keine Abgabe angekommen. Bitte melde dich kurz bei mir, damit wir das klären.\n\n' +
-                        'Musst du nachschreiben, ist der Termin:\n\n' + terminText() + '\n\n' +
-                        'Viele Grüße\nDr. Alvers'
+                        'Musst du nachschreiben, ist der Termin:\n\n**' + terminText() + '**\n\n' +
+                        'Mit bestem Gruß'
                 };
             }
             let nachArmedKind = '';    /* the group whose button waits for its second click */
@@ -2056,16 +2137,22 @@
                         const why = r.why === 'mehrdeutig' ? 'zwei passende Namen in der Liste' : r.why === 'keine Liste' ? 'keine Adressliste' : 'nicht in der Liste';
                         /* the tick shows Doc's choice in full colour even while the address is missing
                            (Doc, 06.11.2026: greyed it was "kaum sichtbar"); a draft opens only with one */
+                        const ml = mailed[r.x.e.code];
                         h += '<label class="lt-nm-row"><input type="checkbox" data-i="' + i + '"' + (r.on && !r.sent ? ' checked' : '') +
-                            (r.sent ? ' disabled' : '') + '>' +
+                            '>' +
                             '<span class="lt-nm-who"><span>' + esc(shownName(r.x.e)) + '</span><span class="nc-code">' + codeHtml(r.x.e.code) + '</span></span>' +
                             '<span class="lt-nm-addr' + (r.addr ? '' : ' miss') + '">' +
+                            (ml ? '<span class="lt-nm-sent">✉ abgeschickt ' + esc(mailStamp(ml.last)) + '</span>' +
+                                  '<button type="button" class="lt-nm-undo" data-code="' + esc(r.x.e.code) + '" title="Falls die Mail doch nicht rausging">zurücknehmen</button> · ' : '') +
                             (r.sent ? '✓ im Entwurf (BCC) · ' : '') + (r.addr ? esc(r.addr) : 'keine Adresse · ' + why) + '</span></label>';
                     });
                     const mine = pick.filter(function (r) { return r.kind === g[0]; });
+                    const done = nachDoneRows(g[0]);
                     if (elNachTag.value && elNachZeit.value) {
                         const mail = nachMailOf(g[0], m.meta);
-                        h += '<div class="lt-nm-prev"><b>BETREFF</b>\n' + esc(mail.subject) + '\n\n<b>TEXT</b> (eine Mail, alle angehakten in BCC)\n' + esc(mail.text) + '</div>';
+                        /* **…** is bold in the mail (the re-sit date, Doc 06.11.2026) - the preview shows it so */
+                        h += '<div class="lt-nm-prev"><b>BETREFF</b>\n' + esc(mail.subject) + '\n\n<b>TEXT</b> (eine Mail, alle angehakten in BCC)\n' +
+                            esc(mail.text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') + '</div>';
                     }
                     /* one button per group: its own text, one draft, everyone in BCC */
                     const armed = nachArmed && nachArmedKind === g[0];
@@ -2073,18 +2160,86 @@
                         (mine.length ? '' : ' disabled') + '>' +
                         (armed ? 'Wirklich? Mail mit ' + mine.length + ' in BCC öffnen'
                                : 'In Outlook öffnen · ' + mine.length + ' in BCC') + '</button>' +
+                        /* after Send in Outlook: one click keeps who got it (the Outlook can't be read back).
+                           Only once a draft is open - a button before that read as "already sent?" (Doc,
+                           06.11.2026: "Ich habe noch nichts geschickt. Oder?") */
+                        (done.length ? '<button type="button" class="lt-btn lt-nm-done" data-kind="' + g[0] + '"' +
+                            ' title="Erst klicken, wenn du die Mail in Outlook abgeschickt hast">Abgeschickt ✓ · ' + done.length + ' vermerken</button>' : '') +
                         '<span class="lt-nm-res" data-kind="' + g[0] + '"></span></div>';
                 });
                 h += '<div class="lt-nm-btns"><button type="button" class="lt-btn" id="ltNmClose">Schließen</button></div>';
                 elNachMail.innerHTML = h;
                 elNachMail.hidden = false;
                 elNachMail.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
-                    cb.addEventListener('change', function () { m.rows[+cb.dataset.i].on = cb.checked; disarm(); paintNachMail(); });
+                    cb.addEventListener('change', function () {
+                        const r = m.rows[+cb.dataset.i];
+                        /* ticking a pupil whose draft is open again = that draft was thrown away, a new one comes */
+                        if (r.sent && cb.checked) { r.sent = false; keepDrafts([r], false); }
+                        r.on = cb.checked; disarm(); paintNachMail();
+                    });
                 });
                 document.getElementById('ltNmClose').addEventListener('click', closeNachMail);
                 elNachMail.querySelectorAll('.lt-nm-open').forEach(function (b) {
                     b.addEventListener('click', function () { openGroup(b.dataset.kind); });
                 });
+                elNachMail.querySelectorAll('.lt-nm-done').forEach(function (b) {
+                    b.addEventListener('click', function () { markSent(b.dataset.kind); });
+                });
+                elNachMail.querySelectorAll('.lt-nm-undo').forEach(function (b) {
+                    b.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); unmarkSent(b.dataset.code); });
+                });
+            }
+            /* An open draft outlives closing the box and reloading the page: Doc sends in Outlook, comes
+               back, and "Abgeschickt" is still there (06.11.2026: the 9b mail went out, the box was gone).
+               Kept in this browser per pool, codes only - code -> 'must' | 'clear'; a stamp clears it. */
+            const DRAFT_STORE = 'svp-leistungstest-entwurf-v1';
+            function draftsAll() {
+                try { return JSON.parse(localStorage.getItem(DRAFT_STORE)) || {}; } catch (e) { return {}; }
+            }
+            function draftsOf() {
+                return (mailedPool && draftsAll()[mailedPool]) || {};
+            }
+            function keepDrafts(rows, on) {
+                if (!mailedPool) return;
+                const all = draftsAll();
+                const mine = all[mailedPool] || {};
+                rows.forEach(function (r) { if (on) mine[r.x.e.code] = r.kind; else delete mine[r.x.e.code]; });
+                if (Object.keys(mine).length) all[mailedPool] = mine; else delete all[mailedPool];
+                try { localStorage.setItem(DRAFT_STORE, JSON.stringify(all)); } catch (e) { /* private window: only this visit */ }
+            }
+            /* who "Abgeschickt" stamps: the pupils of the open draft */
+            function nachDoneRows(kind) {
+                if (!nachMail) return [];
+                return nachMail.rows.filter(function (r) { return r.kind === kind && r.sent; });
+            }
+            function nachResult(kind, text, bad) {
+                const res = elNachMail.querySelector('.lt-nm-res[data-kind="' + kind + '"]');
+                if (!res) return;
+                res.textContent = text;
+                res.classList.toggle('err', !!bad);
+            }
+            function markSent(kind) {
+                const m = nachMail;
+                const rows = nachDoneRows(kind);
+                if (!m || !rows.length || !mailedPool) { nachResult(kind, 'Vermerk geht gerade nicht – Server noch nicht gefragt.', true); return; }
+                const pool = mailedPool;
+                const btn = elNachMail.querySelector('.lt-nm-done[data-kind="' + kind + '"]');
+                if (btn) { btn.disabled = true; btn.textContent = 'Vermerkt …'; }
+                mailedApi('quiz_nach_mail_set', { p_quiz: pool, p_kind: kind, p_codes: rows.map(function (r) { return r.x.e.code; }) })
+                    .then(function (n) {
+                        keepDrafts(rows, false);
+                        rows.forEach(function (r) { r.sent = false; r.on = false; });
+                        return loadMailed(true).then(function () {
+                            if (nachMail === m) nachResult(kind, '✓ vermerkt: ' + n + (n === 1 ? ' Kind hat' : ' Kinder haben') + ' die Mail.');
+                        });
+                    })
+                    .catch(function (err) { if (nachMail === m) { paintNachMail(); nachResult(kind, 'Vermerk: ' + err.message, true); } });
+            }
+            function unmarkSent(code) {
+                if (!mailedPool) return;
+                mailedApi('quiz_nach_mail_unset', { p_quiz: mailedPool, p_codes: [code] })
+                    .then(function () { return loadMailed(true); })
+                    .catch(function (err) { nachMsg('Vermerk: ' + err.message, true); });
             }
             function disarm() { window.clearTimeout(nachArmed); nachArmed = 0; nachArmedKind = ''; }
             function nachPost(body) {
@@ -2132,6 +2287,7 @@
                     const ok = {};
                     o.kinder.forEach(function (k) { if (k.ok) ok[k.code] = true; });
                     m.rows.forEach(function (r) { if (ok[r.x.e.code]) { r.sent = true; r.on = false; } });
+                    keepDrafts(m.rows.filter(function (r) { return ok[r.x.e.code]; }), true);
                     paintNachMail();
                     const bad = o.kinder.length - o.bcc;
                     result('1 Entwurf offen in Outlook, ' + o.bcc + ' in BCC – lesen und selbst senden.' +
@@ -2161,8 +2317,10 @@
                             o.kinder.forEach(function (k) { by[k.code] = k; });
                             nachMail = { meta: meta, liste: o.liste, rows: rows.map(function (r) {
                                 const k = by[r.x.e.code] || {};
-                                /* all ticked (Doc, 06.11.2026: "hakt da mal bitte alle an") */
-                                return { x: r.x, kind: r.kind, addr: k.adresse || null, why: k.grund || '', on: true, sent: false };
+                                /* all ticked (Doc, 06.11.2026: "hakt da mal bitte alle an") - except who already
+                                   has the mail, so a second one goes only to the new ones */
+                                const drafted = !mailed[r.x.e.code] && draftsOf()[r.x.e.code] === r.kind;
+                                return { x: r.x, kind: r.kind, addr: k.adresse || null, why: k.grund || '', on: !mailed[r.x.e.code] && !drafted, sent: drafted };
                             }) };
                             nachMsg('');
                             paintNachMail();

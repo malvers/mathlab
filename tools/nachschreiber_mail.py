@@ -148,9 +148,15 @@ def _kids(req, need_text):
 
 
 def _html(text):
-    """plain text from the page -> the HTML Outlook wants, one <p> per paragraph"""
+    """plain text from the page -> the HTML Outlook wants; **...** is bold (the re-sit date, Doc
+    06.11.2026: "das Freitag, 13.11. fett"). Lines as Outlook writes them itself - one <div> each, an
+    empty <div><br></div> between paragraphs and none after the last: a <p> brings its own margin, which
+    put an extra empty line between "Viele Grüße" and the signature (Doc: "noch eine Zeile raus")."""
     paras = [p for p in re.split(r'\n\s*\n', text.strip()) if p.strip()]
-    return ''.join('<p>' + html.escape(p.strip()).replace('\n', '<br>') + '</p>' for p in paras)
+    def para(p):
+        s = html.escape(p.strip()).replace('\n', '<br>')
+        return '<div>' + re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', s) + '</div>'
+    return '<div><br></div>'.join(para(p) for p in paras)
 
 
 def _outlook(addr, subject, body):
