@@ -431,7 +431,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var startsAtLogin: Bool { SMAppService.mainApp.status == .enabled }
 
     func applicationDidFinishLaunching(_ note: Notification) {
-        bar = DocBarClient(id: "de.docalvers.deskphoto", name: "DeskPhoto",
+        bar = DocBarClient(id: "de.docalvers.deskphoto", name: "DocPhoto",
                            symbol: "photo.on.rectangle.angled") { [weak self] item in
             self?.handle(item)
         }
@@ -520,7 +520,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             else { try SMAppService.mainApp.register() }
         } catch {
             let a = NSAlert()
-            a.messageText = "DeskPhoto"
+            a.messageText = "DocPhoto"
             a.informativeText = "Der Anmeldeeintrag ließ sich nicht ändern: \(error.localizedDescription)"
             a.runModal()
         }

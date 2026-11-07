@@ -87,7 +87,7 @@ async function serve(req, url, nav) {
   const f = m && m.files.get(p), c = await caches.open(FILES);
   let hit = f ? await c.match(fileUrl(f.h)) : await caches.match(url.origin + path);   // not in the list: what the app keeps itself
   if (!hit && f) { await fetchIn(f).catch(() => {}); hit = await c.match(fileUrl(f.h)); }
-  if (!hit) return new Response('DOCPAD: ' + path + ' not found - please open the page again', { status: 404 });
+  if (!hit) return new Response('DocPad: ' + path + ' not found - please open the page again', { status: 404 });
   const range = req.headers.get('range');
   if (!range) return hit;
   const buf = await hit.arrayBuffer(), r = /bytes=(\d*)-(\d*)/.exec(range) || [];

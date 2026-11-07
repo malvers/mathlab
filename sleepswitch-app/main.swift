@@ -125,7 +125,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ note: Notification) {
-        bar = DocBarClient(id: "de.docalvers.sleepswitch", name: "SleepSwitch",
+        bar = DocBarClient(id: "de.docalvers.sleepswitch", name: "DocSleep",
                            symbol: "moon.zzz.fill", rank: 0) { [weak self] item in
             self?.handle(item)
         }
@@ -226,7 +226,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Sudo.recheck()
         refresh()
         if result.ok {
-            alert("Done — SleepSwitch now switches without a password, "
+            alert("Done — DocSleep now switches without a password, "
                   + "confirmed by Touch ID.\n\nRule in \(Sudo.rulePath):\n\(rule)")
         } else if !result.message.isEmpty {
             alert(result.message)
@@ -235,7 +235,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func alert(_ text: String) {
         let a = NSAlert()
-        a.messageText = "SleepSwitch"
+        a.messageText = "DocSleep"
         a.informativeText = text
         a.runModal()
     }
