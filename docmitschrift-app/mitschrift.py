@@ -17,6 +17,9 @@ Everything stays on this Mac, outside the repo (pupils' lessons are school data)
     ~/Documents/mitschrift/daten/<tag>.stunden.json   the lessons of the day with their summaries
     ~/Documents/mitschrift/tage/<tag>.md         the day: per lesson the summary and the full wording
     ~/Documents/mitschrift/klassen/<klasse>.md   per class: what was said there, newest first
+    ~/Documents/mitschrift/daten/<tag>.papierkorb.jsonl   sections Doc hid on the reading page (never deleted)
+
+The reading page is served by serve.py: http://localhost:8765/__mitschrift/tag?d=<tag> (mitschrift_seite.py).
 
 A written-down piece goes to the Trash on the Mac and is deleted on the phone; only the text stays.
 Speech recognition and summaries run on this Mac (Apple SpeechAnalyzer and Apple Intelligence).
@@ -34,6 +37,8 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+from mitschrift_seite import deleted as in_trash, lesson_id   # the reading page's trash (Doc, 07.11.2026)
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -143,6 +148,7 @@ def write_down(root, keep):
             })
         rows.sort(key=lambda r: r["t"])
         store.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+        remember_audio_size(root, day, audio)
         days.add(day)
         if not keep:
             to_trash(audio)
@@ -354,6 +360,48 @@ def spoken(rows):
     return f"{round(s / 60)} min" if s >= 60 else f"{round(s)} s"
 
 
+# Storage next to the word count (Doc, 07.11.2026: "schreib hinter die Wörter auch wie viel Speicher das ist ...
+# auch vom mp3"). The audio goes to the Trash after writing down, so its size is kept per day in
+# daten/<tag>.audio.json (piece name -> bytes); days written down before that show the text size only.
+
+def audio_sizes_file(root, day):
+    return root / "daten" / f"{day}.audio.json"
+
+
+def remember_audio_size(root, day, audio):
+    f = audio_sizes_file(root, day)
+    sizes = json.loads(f.read_text()) if f.exists() else {}
+    sizes[audio.name] = audio.stat().st_size
+    f.write_text(json.dumps(sizes, indent=1, sort_keys=True))
+
+
+def size_de(n):
+    """1234 -> '1 KB', 16100000 -> '16,1 MB' (decimal units, German comma)."""
+    if n < 1_000_000:
+        return f"{max(1, round(n / 1000))} KB"
+    return f"{n / 1_000_000:.1f} MB".replace(".", ",")
+
+
+def seconds(r):
+    return max(0.0, (dt.datetime.fromisoformat(r["bis"]) - dt.datetime.fromisoformat(r["t"])).total_seconds())
+
+
+def storage(rows, sizes, piece_seconds):
+    """' · Text 45 KB · Audio 16,1 MB' for a group of sentences; the audio part only when its pieces are known.
+    A five-minute piece can reach into the next lesson, so each piece's bytes are shared out by the spoken
+    seconds of its sentences in this group (piece_seconds: piece -> spoken seconds over the whole day)."""
+    text = " ".join(r["text"] for r in rows)
+    out = f" · Text {size_de(len(text.encode('utf-8')))}"
+    pieces = {r["quelle"] for r in rows}
+    if pieces and all(p in sizes for p in pieces):
+        audio = 0.0
+        for p in pieces:
+            mine = sum(seconds(r) for r in rows if r["quelle"] == p)
+            audio += sizes[p] * (mine / piece_seconds[p] if piece_seconds.get(p) else 1.0)
+        out += f" · Audio {size_de(audio)}"
+    return out
+
+
 def by_talk(rows):
     """Sentences recorded by hand, one talk per recording: its pieces follow each other every five minutes."""
     talks, last = [], None
@@ -371,6 +419,11 @@ def by_talk(rows):
 def build_day(root, day, cache, with_summary):
     store = root / "daten" / f"{day}.jsonl"
     rows = [json.loads(l) for l in store.read_text().splitlines()] if store.exists() else []
+    sizes_f = audio_sizes_file(root, day)
+    sizes = json.loads(sizes_f.read_text()) if sizes_f.exists() else {}
+    piece_seconds = {}
+    for r in rows:
+        piece_seconds[r["quelle"]] = piece_seconds.get(r["quelle"], 0.0) + seconds(r)
     calls = solita_calls(day)
     heard = len(rows)
     rows = [r for r in rows if not is_solita(r, calls)]
@@ -390,6 +443,8 @@ def build_day(root, day, cache, with_summary):
     if heard > kept:
         n = heard - kept
         md += [f"_Solitas Rufe ausgeblendet: {n} {'Satz' if n == 1 else 'Sätze'}._", ""]
+    if not blocks:      # a note on the whole day, under its title - not at the end of its last section
+        md += ["_Für diesen Tag steht nichts im Stundenplan (plandaten fehlt oder schulfrei)._", ""]
     done = []
     for b in blocks:
         g = groups[id(b)]
@@ -404,7 +459,8 @@ def build_day(root, day, cache, with_summary):
         if b["rooms"]:
             head += f" · {', '.join(b['rooms'])}"
         md += [f"## {head}", ""] + summary_md(summary) + [""]
-        md += [f"<details><summary>Wortlaut · {spoken(g)} gesprochen · {words:,} Wörter</summary>".replace(",", "."), ""]
+        md += [f"<details><summary>Wortlaut · {spoken(g)} gesprochen · {words:,} Wörter".replace(",", ".")
+               + f"{storage(g, sizes, piece_seconds)}</summary>", ""]
         md += [p + "\n" for p in wording(g)] + ["</details>", ""]
         done.append({"start": b["start"].isoformat(timespec="minutes"), "end": b["end"].isoformat(timespec="minutes"),
                      "subject": b["subject"], "classes": b["classes"], "summary": summary, "words": words})
@@ -413,14 +469,13 @@ def build_day(root, day, cache, with_summary):
         summary = summarize(text, cache) if with_summary else None
         start, end = dt.datetime.fromisoformat(g[0]["t"]), dt.datetime.fromisoformat(g[-1]["bis"])
         md += [f"## {start:%H:%M}–{end:%H:%M} · Gespräch", ""] + summary_md(summary) + [""]
-        md += [f"<details><summary>Wortlaut · {spoken(g)} gesprochen · {len(text.split()):,} Wörter</summary>".replace(",", "."), ""]
+        md += [f"<details><summary>Wortlaut · {spoken(g)} gesprochen · {len(text.split()):,} Wörter".replace(",", ".")
+               + f"{storage(g, sizes, piece_seconds)}</summary>", ""]
         md += [p + "\n" for p in wording(g)] + ["</details>", ""]
     if outside:
         md += ["## Außerhalb der Stunden", "",
-               f"<details><summary>Wortlaut · {spoken(outside)} gesprochen</summary>", ""]
+               f"<details><summary>Wortlaut · {spoken(outside)} gesprochen{storage(outside, sizes, piece_seconds)}</summary>", ""]
         md += [p + "\n" for p in wording(outside)] + ["</details>", ""]
-    if not blocks:
-        md += ["_Für diesen Tag steht nichts im Stundenplan (plandaten fehlt oder schulfrei)._", ""]
 
     (root / "tage" / f"{day}.md").write_text("\n".join(md))
     (root / "daten" / f"{day}.stunden.json").write_text(json.dumps(done, ensure_ascii=False, indent=1))
@@ -428,11 +483,15 @@ def build_day(root, day, cache, with_summary):
 
 
 def build_classes(root):
-    """One page per class from all days, newest first."""
+    """One page per class from all days, newest first - without the lessons Doc put into the trash on the
+    reading page (daten/<tag>.papierkorb.jsonl; the day page keeps them, the reading page hides them)."""
     per_class = {}
     for f in sorted((root / "daten").glob("*.stunden.json"), reverse=True):
         day = dt.date.fromisoformat(f.name.split(".")[0])
+        gone = in_trash(root, day)
         for l in json.loads(f.read_text()):
+            if lesson_id(l["start"]) in gone:
+                continue
             for c in l["classes"]:
                 per_class.setdefault(c, []).append((day, l))
     for c, items in per_class.items():
@@ -474,6 +533,7 @@ def main():
     for day in sorted(days):
         n = build_day(root, day, cache, not a.ohne_zusammenfassung)
         say(f"{german(day)}: {n} Stunde(n) → {root / 'tage' / f'{day}.md'}")
+        say(f"  lesen: http://localhost:8765/__mitschrift/tag?d={day}")
     cache_file.write_text(json.dumps(cache, ensure_ascii=False))
     if days:
         say(f"Klassenseiten: {build_classes(root)} → {root / 'klassen'}")

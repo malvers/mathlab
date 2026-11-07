@@ -1,15 +1,124 @@
-/* DocMitschrift reading page for the plans' "Notizen" button, built per call by mitschrift_seite.py and
-   served by serve.py under /__mitschrift/ (local only: the text is school data). Same look as the pages
-   in ~/Documents/mitschrift/lesen/. Orbitron comes from Google Fonts like on every page of the site. */
-:root { --bg: #f6f7fb; --ink: #0e244e; --muted: #5a6b8c; --line: #d6dcea; --accent: rgb(176,36,24); }
-@media (prefers-color-scheme: dark) { :root { --bg: #14171f; --ink: #e6e9f2; --muted: #9aa6bf; --line: #2c3342; --accent: rgb(245,194,66); } }
-body { background: var(--bg); color: var(--ink); font: 17px/1.6 -apple-system, "Helvetica Neue", Arial, sans-serif; max-width: 860px; margin: 0 auto; padding: 24px 16px 80px; }
-h1, h2, h3 { font-family: Orbitron, sans-serif; letter-spacing: .03em; line-height: 1.25; }
-h1 { font-size: 1.6rem; } h2 { font-size: 1.2rem; color: var(--accent); border-top: 1px solid var(--line); padding-top: 18px; margin-top: 32px; } h3 { font-size: 1rem; }
-strong { font-family: Orbitron, sans-serif; font-weight: 500; font-size: .85rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+/* DocMitschrift pages (a day, the lessons of a week), built per call by mitschrift_seite.py and served by
+   serve.py under /__mitschrift/ (local only: the text is school data). One title, then one block per
+   section that folds away and can go into the trash (Doc, 07.11.2026: "bissl strukturierter bitte,
+   Mitschrift nicht 2 mal" - "dass man die einzelnen löschen und einklappen kann").
+   Orbitron is the one installed on this Mac (/Library/Fonts, Medium + Bold), not the web font: a web font
+   comes in after the first paint, and stepping from day to day with the arrow keys made every heading and
+   pill jump (Doc, 07.11.2026: "dann springt der Text"). The pages exist only on this Mac anyway. */
+
+/* The middle dot is a round dot from the computer's own Times: Orbitron has none and other fonts draw a
+   small square (Doc, 04.11.2026: "Schöne Punkte"). Same technique as 'Deck Punkt' in decks/deck.css:
+   a font that takes nothing but the dots, first in every font list. */
+@font-face { font-family: 'Punkt'; src: local('Times New Roman'), local('TimesNewRomanPSMT'), local('Times');
+  font-weight: 100 500; unicode-range: U+00B7, U+22C5, U+2219; }
+@font-face { font-family: 'Punkt'; src: local('Times New Roman Bold'), local('TimesNewRomanPS-BoldMT'), local('Times Bold');
+  font-weight: 600 900; unicode-range: U+00B7, U+22C5, U+2219; }
+
+:root { --bg: #f6f7fb; --ink: #0e244e; --muted: #5a6b8c; --line: #d6dcea; --accent: rgb(176,36,24);
+  /* the heads of the parts: a slightly held-back cyan (Doc, 07.11.2026: "ein bisschen deutlicher ... leicht zurückgenommenes Cyan") */
+  --teil: rgb(30,128,146);
+  --text: 'Punkt', -apple-system, "Helvetica Neue", Arial, sans-serif; --head: 'Punkt', Orbitron, sans-serif; }
+@media (prefers-color-scheme: dark) { :root { --bg: #14171f; --ink: #e6e9f2; --muted: #9aa6bf; --line: #2c3342; --accent: rgb(245,194,66); --teil: rgb(104,190,205); } }
+
+/* the scrollbar's place is kept even on a short page (sections folded away), so the column never shifts */
+html { scrollbar-gutter: stable; }
+body { background: var(--bg); color: var(--ink); font: 17px/1.6 var(--text); max-width: 860px; margin: 0 auto; padding: 28px 16px 120px; }
+h1, h2, h3 { font-family: var(--head); letter-spacing: .03em; line-height: 1.25; }
+h3 { font-size: 1rem; }
+strong { font-family: var(--head); font-weight: 500; font-size: .85rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
 a { color: inherit; } li { margin: 2px 0; } p { margin: 6px 0; }
-summary { cursor: pointer; }
-.leer { color: var(--muted); font-style: italic; }
+.ico { width: 18px; height: 18px; flex: none; }
+
+/* ---- the one title: "Mitschrift" small above, the day (or the classes) big below */
+.seitenkopf { margin-bottom: 8px; }
+.ueber { font-family: var(--head); font-size: .74rem; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin: 0; }
+h1 { font-size: 1.75rem; margin: 2px 0 14px; }
+.leiste { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.blaettern, .werkzeug { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.werkzeug { margin-left: auto; }
+.woche { font-family: var(--head); font-size: .8rem; letter-spacing: .05em; padding: 0 4px; }
+.knopf { font: 500 .72rem/1 var(--head); letter-spacing: .06em; text-transform: uppercase; color: var(--ink);
+  background: transparent; border: 1px solid var(--line); border-radius: 999px; min-height: 38px; padding: 0 14px;
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer; text-decoration: none; }
+.knopf:hover { border-color: var(--accent); color: var(--accent); }
+.knopf:focus-visible, .klapp:focus-visible, .weg:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.knopf.tot { opacity: .35; cursor: default; pointer-events: none; }
+.knopf.rund { width: 38px; padding: 0; justify-content: center; }
+/* pills keep their width from day to day: the ‹ › ones fit the longest day ("Donnerstag, 30.12."), the two
+   tools both of their words (lesen.js) - so nothing in the row moves when the arrow keys step on */
+.blaettern .knopf:not(.rund) { box-sizing: border-box; min-width: 17.7em; justify-content: center; }
+.werkzeug .knopf { justify-content: center; }
+.knopf .ico { width: 16px; height: 16px; }
+.hinweis { color: var(--muted); font-style: italic; margin-top: 10px; }
+.leer { color: var(--muted); font-style: italic; margin-top: 28px; }
+
+/* ---- a section: the header folds it (arrow, time, kind), the bin on the right */
+.abschnitt { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 6px; }
+.abschnitt[hidden] { display: none; }
+.kopf { display: flex; align-items: center; gap: 4px; }
+.kopf h2 { flex: 1; min-width: 0; margin: 0; font-size: 1.15rem; }
+.klapp { all: unset; box-sizing: border-box; width: 100%; display: flex; flex-wrap: wrap; align-items: center;
+  gap: 2px 14px; padding: 10px 0; cursor: pointer; border-radius: 8px; font-family: var(--head); letter-spacing: .03em; }
+.pfeil { width: 20px; height: 20px; flex: none; color: var(--muted); transition: transform .2s ease; }
+.zu .pfeil { transform: rotate(-90deg); }
+.datum { flex-basis: 100%; order: -1; padding-left: 34px; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.zeit { color: var(--accent); font-variant-numeric: tabular-nums; }
+.art { color: var(--ink); }
+.weg { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 10px;
+  background: transparent; color: var(--muted); cursor: pointer; }
+.weg:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.weg .ico { width: 20px; height: 20px; }
+.inhalt { padding: 0 0 8px 34px; }
+.zu .inhalt { display: none; }
+
+/* ---- the parts of a section - Zusammenfassung, Im Gespräch, Hausaufgabe, Termine, Transcript - all of one rank,
+   each folds on its own (Doc, 07.11.2026: "macht die alle gleich groß und auch einklappbar"); the
+   wording starts closed, its numbers small behind its name */
+.teil { margin: 2px 0; }
+.teil > summary { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-height: 36px;
+  padding: 4px 0; cursor: pointer; border-radius: 6px; color: var(--teil); }
+.teil > summary::-webkit-details-marker { display: none; }
+.teil > summary::before { content: ""; width: 16px; height: 16px; flex: none; background: currentColor; transform: rotate(-90deg);
+  transition: transform .2s ease;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; }
+.teil[open] > summary::before { transform: none; }
+.teil > summary:hover { color: var(--accent); }
+.teil > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.teil-name { font-family: var(--head); font-weight: 500; font-size: .85rem; letter-spacing: .06em; text-transform: uppercase; }
+.mass { font-size: .78rem; color: var(--muted); opacity: .85; }
+.teil > :not(summary) { margin-left: 26px; }
+.teil > ul, .teil > ol { padding-left: 18px; margin-top: 2px; margin-bottom: 8px; }
 /* Wording: the clock time stands in its own column left of the text so it does not break the flow (Doc 06.11.2026) */
-details p { position: relative; padding-left: 4.6em; overflow-wrap: anywhere; }
-details p > strong:first-child { position: absolute; left: 0; top: 0; line-height: calc(17px * 1.6); }
+.teil[data-teil="wortlaut"] p { position: relative; padding-left: 4.6em; overflow-wrap: anywhere; }
+.teil[data-teil="wortlaut"] p > strong:first-child { position: absolute; left: 0; top: 0; line-height: calc(17px * 1.6); }
+
+/* ---- the trash under the page: what is hidden, and the way back */
+.korb { margin-top: 48px; border-top: 1px dashed var(--line); padding-top: 14px; }
+.korb h2 { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.erkl { color: var(--muted); font-size: .9rem; }
+.korb ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.korb li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.korb li span { font-family: var(--head); font-size: .82rem; letter-spacing: .03em; }
+
+/* ---- "… liegt im Papierkorb · Rückgängig" */
+.toast { position: fixed; left: 16px; right: 16px; bottom: 20px; z-index: 10; margin: 0 auto; width: fit-content; max-width: 600px; box-sizing: border-box;
+  display: flex; align-items: center; gap: 14px; padding: 8px 8px 8px 18px; border-radius: 14px;
+  background: var(--ink); color: var(--bg); box-shadow: 0 10px 30px rgba(14,36,78,.28);
+  transform: translateY(calc(100% + 40px)); visibility: hidden; transition: transform .25s ease, visibility 0s .25s; }
+.toast.da { transform: none; visibility: visible; transition: transform .25s ease; }
+.toast-text { font-size: .95rem; }
+.toast-zurueck { font: 500 .72rem/1 var(--head); letter-spacing: .06em; text-transform: uppercase; color: inherit;
+  background: transparent; border: 1px solid currentColor; border-radius: 999px; min-height: 38px; padding: 0 14px; cursor: pointer; flex: none; }
+
+@media (max-width: 560px) {
+  h1 { font-size: 1.4rem; }
+  .werkzeug { margin-left: 0; }
+  .inhalt { padding-left: 0; }
+  .datum { padding-left: 0; }
+  .kopf h2 { font-size: 1.02rem; }
+  .knopf { padding: 0 11px; letter-spacing: .04em; }
+  .teil > :not(summary) { margin-left: 0; }
+  /* no arrow keys on the phone: the pills take only their words, so the tools fit in one row */
+  .blaettern .knopf:not(.rund), .werkzeug .knopf { min-width: 0 !important; }
+}

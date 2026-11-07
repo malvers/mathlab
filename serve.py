@@ -11,7 +11,8 @@ Decks (HTML/decks/*.html) also get the text editor (decks/deck-edit.js) and its 
 Every page also gets live reload (/__live/reload.js, tools/live_reload.py): it reloads itself when its file or
 the scripts and styles it loads change (Doc, 17.09.2026).
 The plans' "Notizen" button opens Doc's DocMitschrift of a week from /__mitschrift/ (docmitschrift-app/mitschrift_seite.py,
-school data from ~/Documents/mitschrift, so it exists only here, never on docalvers.de).
+school data from ~/Documents/mitschrift, so it exists only here, never on docalvers.de); /__mitschrift/tag shows a day,
+and a POST to /__mitschrift/papierkorb hides one section of it, never deleting anything.
 
     python3 serve.py            # http://localhost:8765, serves the HTML/ folder
     python3 serve.py 8080       # other port
@@ -231,11 +232,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not self.local_caller():
             return self.send_error(403, 'local pages only')
         here = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'docmitschrift-app')
+        sent = b''
+        if self.command == 'POST':               # a section into the trash or back (Doc 07.11.2026), a few bytes
+            sent = self.rfile.read(min(int(self.headers.get('Content-Length') or 0), 65536))
         try:
             if here not in sys.path:
                 sys.path.insert(0, here)
             import mitschrift_seite
-            status, ctype, body = importlib.reload(mitschrift_seite).handle(self.path)
+            status, ctype, body = importlib.reload(mitschrift_seite).handle(self.path, self.command, sent)
         except Exception as err:
             status, ctype = 500, 'text/plain; charset=utf-8'
             body = ('serve.py: %s: %s' % (type(err).__name__, err)).encode('utf-8')
@@ -317,6 +321,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.termine_api()
         if self.path.startswith('/__mail/'):
             return self.mail_api()
+        if self.path.startswith('/__mitschrift/'):
+            return self.mitschrift_api()
         self.send_error(405, 'read-only server')
 
     def one_address(self):
