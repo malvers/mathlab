@@ -4,6 +4,11 @@ Doc's timetable and keep one page per day and one per class.
 
     python3 docmitschrift-app/mitschrift.py            fetch (if the Pixel hangs on USB), transcribe, sort
     python3 docmitschrift-app/mitschrift.py --behalten  same, but the audio stays in eingang/ (for tests)
+    python3 docmitschrift-app/mitschrift.py --nur-seiten --tag 2026-11-05   only rebuild that day's pages
+
+Solita's calls (her voice from the Mac or the Pixel, picked up in class) are left out of the pages and
+the summaries; the recognised sentences themselves stay in daten/. Homework and dates are only kept
+with the words they rest on, and only when those words really stand in the lesson (since 05.11.2026).
 
 Everything stays on this Mac, outside the repo (pupils' lessons are school data):
 
@@ -19,8 +24,10 @@ Speech recognition and summaries run on this Mac (Apple SpeechAnalyzer and Apple
 
 import argparse
 import datetime as dt
+import difflib
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -180,10 +187,130 @@ def lesson_of(t, blocks):
     return min(near, key=lambda b: min(abs((t - b["start"]).total_seconds()), abs((t - b["end"]).total_seconds()))) if near else None
 
 
+# ---------------------------------------------------------------- Solita's calls
+
+# Solita calls from the Mac's speakers or from the Pixel itself (DocRuf app) - in class the phone hears
+# her, and her words became part of the lesson and of its summary (05.11.2026). When and what she said is
+# known: solita-ruf.log has the time of every call, the watcher moves the call's text and MP3 into the
+# Trash after playing. Without those files a sentence still counts as hers when it names her with
+# "hier ist", the opening of every call.
+SOLITA_LOG = Path.home() / "Library" / "Logs" / "solita-ruf.log"
+SOLITA_TRASH = Path.home() / ".Trash" / "solita-rufe"
+LOUD_INTRO = "Du bist nicht hier, deshalb rufe ich Dich laut."   # solita-laut-ansage.mp3, before every call at 100
+SOLITA = re.compile(r"\bs[ao]l[iíy]e?t?a\b", re.I)
+MARGIN = dt.timedelta(seconds=3)
+
+
+def tokens(s):
+    return re.sub(r"[^a-zäöüß0-9 ]", " ", s.lower().replace("í", "i")).split()
+
+
+def seconds_of(mp3):
+    if not mp3.exists():
+        return None
+    r = subprocess.run(["afinfo", str(mp3)], capture_output=True, text=True)
+    m = re.search(r"estimated duration: ([\d.]+)", r.stdout)
+    return float(m.group(1)) if m else None
+
+
+def solita_calls(day):
+    """Solita's calls of that day as (start, end, her words)."""
+    calls = []
+    if not SOLITA_LOG.exists():
+        return calls
+    for line in SOLITA_LOG.read_text(errors="replace").splitlines():
+        parts = line.split()
+        if len(parts) < 4 or parts[0] != str(day):
+            continue
+        try:
+            start = dt.datetime.fromisoformat(f"{parts[0]}T{parts[1]}")
+        except ValueError:
+            continue
+        mode, name = parts[2], parts[3]
+        note = SOLITA_TRASH / re.sub(r"\.mp3$", ".txt", name)
+        text = note.read_text(errors="replace") if note.exists() else ""
+        length = seconds_of(SOLITA_TRASH / name) or 15.0
+        if mode == "vol=100":
+            text, length = LOUD_INTRO + " " + text, length + 3.5
+        calls.append((start, start + dt.timedelta(seconds=length), [w for w in tokens(text) if len(w) > 2]))
+    return calls
+
+
+def is_solita(row, calls):
+    """A sentence heard while she was speaking that is mostly her words (or names her) is hers. Doc's own
+    sentences around a call share hardly a word with it and stay (measured 05.11.: hers 55-92 %, his <= 25 %)."""
+    t, bis = dt.datetime.fromisoformat(row["t"]), dt.datetime.fromisoformat(row["bis"])
+    mine = [w for w in tokens(row["text"]) if len(w) > 2]
+    for start, end, hers in calls:
+        if bis < start - MARGIN or t > end + MARGIN:
+            continue
+        if SOLITA.search(row["text"]):
+            return True
+        if hers and mine:
+            hit = sum(b.size for b in difflib.SequenceMatcher(None, mine, hers, autojunk=False).get_matching_blocks())
+            if hit >= 2 and hit >= 0.4 * len(mine):
+                return True
+    return bool(SOLITA.search(row["text"]) and "hier ist" in row["text"].lower())
+
+
+# ---------------------------------------------------------------- homework and dates: only with their words
+
+HOMEWORK_CUE = re.compile(r"hausaufgabe|zu hause|nächste[nr]? (mal|stunde)|bis (morgen|montag|dienstag|mittwoch|donnerstag"
+                          r"|freitag|nächste)|erledig|abgeben|hochlad|vorbereite|durchles|anschau|bearbeite", re.I)
+DATE_CUE = re.compile(r"\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|morgen|übermorgen|heute|"
+                      r"nächste[nr]? woche|\d{1,2}\.\s?\d{1,2}\.?|\d{1,2}\.? (januar|februar|märz|april|mai|juni|juli|"
+                      r"august|september|oktober|november|dezember)|\d{1,2}(:\d\d)? ?uhr)\b", re.I)
+
+
+def quote_found(quote, text_words):
+    """True when about three quarters of the quote stand together, in order, in the lesson's words -
+    the recogniser and the model may each change a word, the model may not make up a sentence."""
+    q = tokens(quote)
+    if len(q) < 3:
+        return False
+    need, span, qs = math.ceil(0.75 * len(q)), len(q) + 6, set(q)
+    for i, w in enumerate(text_words):
+        if w in qs:
+            win = text_words[i:i + span]
+            if sum(b.size for b in difflib.SequenceMatcher(None, win, q, autojunk=False).get_matching_blocks()) >= need:
+                return True
+    return False
+
+
+def grounded(points, text_words, cue):
+    """The points that rest on real words: the quote is in the lesson, it sounds like homework (or names a
+    day or time), and every number of the point is in the quote. A point without a quote is dropped."""
+    keep = []
+    for p in points or []:
+        if not isinstance(p, dict):
+            continue
+        punkt, zitat = p.get("punkt", "").strip(), p.get("zitat", "").strip()
+        if not punkt or not cue.search(zitat) or not quote_found(zitat, text_words):
+            continue
+        if any(n not in re.findall(r"\d+", zitat) for n in re.findall(r"\d+", punkt)):
+            continue
+        keep.append({"punkt": punkt, "zitat": zitat})
+    return keep
+
+
+def homework_and_dates(summary, text_words):
+    """Both lists checked against the lesson, and each point filed by its own words: the model put a
+    Klassenarbeit with its date under homework in the test (05.11.2026) - homework is what sounds like
+    homework, a date is what names a day or a time."""
+    both = [p for p in (summary.get("hausaufgaben") or []) + (summary.get("termine") or []) if isinstance(p, dict)]
+    homework = grounded(both, text_words, HOMEWORK_CUE)
+    taken = {p["zitat"] for p in homework}
+    dates = [p for p in grounded(both, text_words, DATE_CUE) if p["zitat"] not in taken]
+    return dict(summary, hausaufgaben=homework, termine=dates)
+
+
 # ---------------------------------------------------------------- summaries
 
+SUMMARY_VERSION = "2"   # 2 = homework and dates with their quotes (05.11.2026); older cache entries are not reused
+
+
 def summarize(text, cache):
-    key = hashlib.sha1(text.encode()).hexdigest()
+    key = hashlib.sha1((SUMMARY_VERSION + "\n" + text).encode()).hexdigest()
     if key in cache:
         return cache[key]
     r = subprocess.run([str(SWIFT), "summarize"], input=text, capture_output=True, text=True)
@@ -205,7 +332,9 @@ def summary_md(s):
     out = []
     for key, title in SECTIONS:
         if s.get(key):
-            out += [f"**{title}**", ""] + [f"- {p}" for p in s[key]] + [""]
+            # homework and dates carry the words they rest on, so Doc can see they were really said
+            out += [f"**{title}**", ""] + [f"- {p['punkt']} _(„{p['zitat']}“)_" if isinstance(p, dict) else f"- {p}"
+                                           for p in s[key]] + [""]
     return out[:-1] if out else ["_Nichts Greifbares._"]
 
 
@@ -242,8 +371,12 @@ def by_talk(rows):
 def build_day(root, day, cache, with_summary):
     store = root / "daten" / f"{day}.jsonl"
     rows = [json.loads(l) for l in store.read_text().splitlines()] if store.exists() else []
+    calls = solita_calls(day)
+    heard = len(rows)
+    rows = [r for r in rows if not is_solita(r, calls)]
     # recorded by hand ("Gespräch", Doc 07.11.2026: a talk on Monday at ten, while the timetable says
     # Inf) - never part of a lesson, its summary or a class page, but a section of its own on the day
+    kept = len(rows)
     talks = [r for r in rows if NAME.match(r["quelle"]) and NAME.match(r["quelle"]).group(3)]
     rows = [r for r in rows if r not in talks]
     blocks = lessons(day)
@@ -254,6 +387,9 @@ def build_day(root, day, cache, with_summary):
         (groups[id(b)] if b else outside).append(r)
 
     md = [f"# Mitschrift · {german(day)}", ""]
+    if heard > kept:
+        n = heard - kept
+        md += [f"_Solitas Rufe ausgeblendet: {n} {'Satz' if n == 1 else 'Sätze'}._", ""]
     done = []
     for b in blocks:
         g = groups[id(b)]
@@ -261,6 +397,8 @@ def build_day(root, day, cache, with_summary):
             continue
         text = " ".join(r["text"] for r in g)
         summary = summarize(text, cache) if with_summary else None
+        if summary and "fehler" not in summary:
+            summary = homework_and_dates(summary, tokens(text))
         words = len(text.split())
         head = f"{b['start']:%H:%M}–{b['end']:%H:%M} · {b['subject']} · {', '.join(b['classes'])}"
         if b["rooms"]:
@@ -317,6 +455,7 @@ def main():
     ap.add_argument("--ohne-zusammenfassung", action="store_true", help="nur Wortlaut, keine Zusammenfassungen")
     ap.add_argument("--nicht-holen", action="store_true", help="nicht beim Pixel nachsehen")
     ap.add_argument("--tag", action="append", default=[], help="diesen Tag (JJJJ-MM-TT) neu aufbauen")
+    ap.add_argument("--nur-seiten", action="store_true", help="nichts holen, nichts mitschreiben, nur die Seiten der --tag-Tage neu bauen")
     a = ap.parse_args()
 
     if not SWIFT.exists():
@@ -325,9 +464,10 @@ def main():
     for sub in ("eingang", "daten", "tage", "klassen"):
         (root / sub).mkdir(parents=True, exist_ok=True)
 
-    if not a.nicht_holen:
+    if not a.nicht_holen and not a.nur_seiten:
         fetch(root / "eingang")
-    days = write_down(root, a.behalten) | {dt.date.fromisoformat(t) for t in a.tag}
+    days = set() if a.nur_seiten else write_down(root, a.behalten)
+    days |= {dt.date.fromisoformat(t) for t in a.tag}
 
     cache_file = root / "daten" / "zusammenfassungen.json"
     cache = json.loads(cache_file.read_text()) if cache_file.exists() else {}

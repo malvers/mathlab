@@ -4,7 +4,8 @@
 //                                       (seconds from the start of the file), via Apple's SpeechAnalyzer
 //   mitschrift-mac summarize            reads a lesson's words on stdin, prints one JSON object with four
 //                                       German lists (stoff, unterricht, hausaufgaben, termine), via
-//                                       Apple's on-device language model (Apple Intelligence)
+//                                       Apple's on-device language model (Apple Intelligence);
+//                                       hausaufgaben and termine as {"punkt", "zitat"}, checked in mitschrift.py
 //
 // mitschrift.py drives both; Doc never needs to call this by hand.
 
@@ -67,11 +68,19 @@ func transcribe(_ path: String) async throws {
 // in the first test a free summary of the same lesson dropped both.
 let partWords = 900
 
+// Homework and dates come with the exact words they rest on ("zitat"); mitschrift.py keeps a point only
+// when those words really stand in the lesson's text and every number of the point is in them. In the
+// first real lesson (05.11.2026, a test day) the model made up 4 + 3 homework and 11 + 8 dates.
 let instructions = """
     Du bekommst einen Ausschnitt aus der automatischen Mitschrift einer Unterrichtsstunde. \
     Es spricht fast nur die Lehrkraft, die Spracherkennung macht Fehler. Halte auf Deutsch nur fest, \
     was wirklich gesagt wurde, in kurzen Stichpunkten. Nenne keine Namen von Schülerinnen und Schülern. \
-    Nichts erfinden; eine Liste bleibt leer, wenn dazu nichts gesagt wurde.
+    Nichts erfinden; eine Liste bleibt leer, wenn dazu nichts gesagt wurde. \
+    Eine Hausaufgabe nur, wenn die Lehrkraft ausdrücklich etwas für zu Hause oder bis zur nächsten Stunde aufgibt. \
+    Ein Termin nur, wenn die Lehrkraft einen Tag, ein Datum oder eine Uhrzeit nennt. \
+    Zu jeder Hausaufgabe und jedem Termin gehört ein Zitat: die Wörter aus dem Ausschnitt, auf denen der Punkt beruht, \
+    genau so abgeschrieben, wie sie dastehen. Gibt es kein solches Zitat, gibt es auch keinen Punkt. \
+    Meist sind beide Listen leer.
     """
 
 // The four lists as a schema built at run time: the @Generable macro needs Xcode, this Mac only has
@@ -81,11 +90,22 @@ func list(_ name: String, _ description: String) -> DynamicGenerationSchema.Prop
                                      schema: DynamicGenerationSchema(arrayOf: DynamicGenerationSchema(type: String.self)))
 }
 
+// a point with the words it rests on
+func quoted(_ name: String, _ description: String) -> DynamicGenerationSchema.Property {
+    DynamicGenerationSchema.Property(name: name, description: description, schema: DynamicGenerationSchema(
+        arrayOf: DynamicGenerationSchema(name: "Beleg", properties: [
+            DynamicGenerationSchema.Property(name: "punkt", description: "Der Punkt, kurz",
+                                             schema: DynamicGenerationSchema(type: String.self)),
+            DynamicGenerationSchema.Property(name: "zitat", description: "Die Wörter aus dem Ausschnitt, auf denen der Punkt beruht, wörtlich abgeschrieben",
+                                             schema: DynamicGenerationSchema(type: String.self)),
+        ]), maximumElements: 3))
+}
+
 let notesSchema = try! GenerationSchema(root: DynamicGenerationSchema(name: "Notizen", properties: [
     list("stoff", "Welcher Stoff erklärt wurde, mit den Regeln und Begriffen, höchstens 4 kurze Punkte"),
     list("unterricht", "Beispiele und Aufgaben, die im Unterricht vorgerechnet oder bearbeitet wurden, mit Seite und Nummer, falls genannt"),
-    list("hausaufgaben", "Hausaufgaben genau so, wie die Lehrkraft sie aufgegeben hat, mit Seite und Nummer"),
-    list("termine", "Termine und Absprachen: Klausuren, Tests, Abgaben, nächste Stunde, mit Datum, falls genannt"),
+    quoted("hausaufgaben", "Nur ausdrücklich aufgegebene Hausaufgaben, mit Seite und Nummer; meist leer"),
+    quoted("termine", "Nur Termine mit genanntem Tag, Datum oder Uhrzeit: Klausuren, Tests, Abgaben; meist leer"),
 ]), dependencies: [])
 
 let shorterSchema = try! GenerationSchema(root: DynamicGenerationSchema(name: "Kurzfassung", properties: [
@@ -99,17 +119,38 @@ func strings(_ content: GeneratedContent, _ name: String) -> [String] {
         .filter { !$0.isEmpty }
 }
 
+struct Beleg: Codable {
+    let punkt: String
+    let zitat: String
+}
+
+/// The {punkt, zitat} objects of one list, read straight from the content's structure (no @Generable
+/// type without Xcode). A point without its quote is dropped here already.
+func belege(_ content: GeneratedContent, _ name: String) -> [Beleg] {
+    guard case .structure(let props, _) = content.kind, let list = props[name], case .array(let items) = list.kind
+    else { return [] }
+    func text(_ c: GeneratedContent?) -> String {
+        if let c, case .string(let s) = c.kind { return s.trimmingCharacters(in: .whitespacesAndNewlines) }
+        return ""
+    }
+    return items.compactMap { item in
+        guard case .structure(let p, _) = item.kind else { return nil }
+        let b = Beleg(punkt: text(p["punkt"]), zitat: text(p["zitat"]))
+        return b.punkt.isEmpty || b.zitat.isEmpty ? nil : b
+    }
+}
+
 struct Summary: Codable {
     var stoff: [String] = []
     var unterricht: [String] = []
-    var hausaufgaben: [String] = []
-    var termine: [String] = []
+    var hausaufgaben: [Beleg] = []
+    var termine: [Beleg] = []
 
     mutating func add(_ c: GeneratedContent) {
         stoff += strings(c, "stoff")
         unterricht += strings(c, "unterricht")
-        hausaufgaben += strings(c, "hausaufgaben")
-        termine += strings(c, "termine")
+        hausaufgaben += belege(c, "hausaufgaben")
+        termine += belege(c, "termine")
     }
 
     mutating func add(_ s: Summary) {
@@ -144,6 +185,11 @@ func notes(_ words: ArraySlice<Substring>) async -> Summary {
 func unique(_ points: [String]) -> [String] {
     var seen = Set<String>()
     return points.filter { seen.insert($0.lowercased().filter { !$0.isWhitespace }).inserted }
+}
+
+func unique(_ points: [Beleg]) -> [Beleg] {
+    var seen = Set<String>()
+    return points.filter { seen.insert($0.punkt.lowercased().filter { !$0.isWhitespace }).inserted }
 }
 
 /// The same points without repeats; only used when the parts together gave too many.
