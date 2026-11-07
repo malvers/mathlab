@@ -16,6 +16,7 @@ on every call.
     GET  /__mitschrift/woche?w=20261102&k=9a&f=Inf     the lessons of classes k (subjects f) in the week of w
     GET  /__mitschrift/stunden.json                    every written-down lesson: date, start, end, classes
     POST /__mitschrift/papierkorb  {tag, id, aktion}   a section into the trash ("weg") or back ("zurueck")
+    POST /__mitschrift/zusammenfassung {tag, id, gliederung}   Doc's own outline of a section (null: the page's)
 
 The button (HTML/svp/svp-plan-mitschrift.js) knows a week's lessons from WebUntis (date, start, class);
 a lesson belongs to a written-down block when the date and a class match and its start lies inside the
@@ -26,6 +27,7 @@ one button, "‹ Woche 45 · 02.–08.11. ›" on the page, never past the curre
 import datetime as dt
 import html
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -147,13 +149,204 @@ SHOWN = {"Stoff": "Zusammenfassung", "Im Unterricht": "Im Gespräch"}
 TRANSCRIPT = "Transcript"
 
 
-def parts_md(body, wording_open=False):
+# ---- Zusammenfassung and Im Gespräch as one outline (Doc, 07.11.2026: "fasst die beiden mal bitte zusammen ...
+# dass man die Überschrift hat, Sensoren in Handys, und dann so ein bisschen genauer noch drunter aus dem im
+# Gespräch"). The model gives two flat lists - topics (Stoff) and what was said, in spoken order (Im Unterricht).
+# Here, on the page only, each point said goes under the topic it shares the most words with; a point that
+# shares none but speaks of "sie", "es" ... continues the point before; any other stands on its own. Topics are
+# ordered as they came up; a topic that only repeats another one (or a point under it) is dropped.
+STOP = set("""aber alle allem allen aller alles also auch beim dabei damit dann darauf daran davon dazu dass deine
+deinem deinen deiner dem den denen der deren des dessen die dies diese diesem diesen dieser dieses durch eine einem
+einen einer eines euch euer eure eurem euren eurer für hier ihre ihrem ihren ihrer ihres immer ist jede jedem jeden
+jeder jedes kann keine mehr mit nach nicht noch oder sehr sich sind über unser unsere unserem unseren unter viel
+vom von vor war warum was weil welche welchem welchen welcher welches wenn werden wie wird wir zum zur zwei""".split())
+REFER = {"sie", "ihr", "ihre", "ihren", "ihrem", "ihn", "ihm", "es", "er", "dies", "diese", "dieser", "dieses",
+         "dabei", "dazu", "damit", "davon", "darauf", "daran", "dadurch", "deren", "dessen"}
+
+
+def words(text):
+    return [w for w in re.findall(r"[a-zäöüß]+", text.lower()) if len(w) >= 4 and w not in STOP]
+
+
+def same_word(a, b):
+    """Handy ~ Handys, neuronale ~ neuronalen, Netz ~ Netze: equal, or one begins the other (4+ letters)."""
+    return a == b or (min(len(a), len(b)) >= 4 and (a.startswith(b) or b.startswith(a))) or \
+        len(os.path.commonprefix([a, b])) >= 6
+
+
+def covered(ws, others):
+    return bool(ws) and all(any(same_word(w, o) for o in others) for w in ws)
+
+
+def outline(topics, said):
+    """[(title, [points said under it])] from the two flat lists."""
+    kept = []                                           # [title, words]
+    for t in topics:
+        ws = words(t)
+        hit = next((k for k in kept if covered(ws, k[1])), None)
+        if hit:
+            continue                                    # "Sensoren" after "Sensoren in Handys, ..."
+        wider = next((k for k in kept if covered(k[1], ws)), None)
+        if wider:                                       # "Neuronale Netze", then "Künstliches neuronales Netz"
+            wider[0], wider[1] = t, ws
+            continue
+        kept.append([t, ws])
+    groups, order, last = {}, [], None
+    for p in said:
+        ws = words(p)
+        score = [sum(any(same_word(w, o) for o in k[1]) for w in ws) for k in kept]
+        best = max(range(len(kept)), key=lambda i: (score[i], -i)) if kept else None
+        if best is not None and score[best] > 0:
+            key = ("t", best)
+        elif last is not None and REFER & set(re.findall(r"[a-zäöüß]+", p.lower())):
+            key = last                                   # "Wie sie funktionieren ..." goes on with the point before
+        else:
+            key = ("p", p)                               # a point of its own
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        if key[0] == "t" and covered(ws, kept[key[1]][1]):
+            pass                                         # "Wasserzeichen" under "Wasserzeichen" says nothing new
+        elif key[0] == "t" or (key == last and key[0] == "p" and p != key[1]):
+            groups[key].append(p)
+        last = key
+    out = [(kept[k[1]][0] if k[0] == "t" else k[1], groups[k]) for k in order]
+    said_words = [w for p in said for w in words(p)]
+    for i, (t, ws) in enumerate(kept):                  # topics nobody spoke to: kept unless they repeat a point
+        if ("t", i) not in groups and not covered(ws, said_words):
+            out.append((t, []))
+    return out
+
+
+def outline_html(items, by_hand=False):
+    """The outline as a list (lesen.js makes it editable in place); when Doc rewrote it, a quiet note and the
+    way back to the page's own outline under it."""
+    lis = []
+    for title, under in items:
+        sub = "".join(f"<li>{html.escape(u)}</li>" for u in under)
+        lis.append(f"<li>{html.escape(title)}" + (f"<ul>{sub}</ul>" if sub else "") + "</li>")
+    return (f'<ul class="themen"{" data-von-hand" if by_hand else ""}>{"".join(lis)}</ul>'
+            + ('<div class="bearbeiten"><span class="von-hand">von Hand</span><button type="button" '
+               'class="knopf klein" data-automatisch>Automatische Fassung</button></div>' if by_hand else ""))
+
+
+def summary_spans(body):
+    """lines, {part name: (first line, end)} of a section body; a part ends at the next one or the wording."""
+    lines = body.split("\n")
+    marks = [(i, m.group(1).strip()) for i, l in enumerate(lines) if (m := PART.match(l))]
+    span = {}
+    for n, (i, name) in enumerate(marks):
+        end = marks[n + 1][0] if n + 1 < len(marks) else len(lines)
+        end = next((j for j in range(i + 1, end) if lines[j].startswith("<details")), end)
+        span[name] = (i, end)
+    return lines, span
+
+
+def auto_outline(body):
+    """The outline the page builds by itself from the model's two lists, or None without a Stoff list."""
+    lines, span = summary_spans(body)
+    if "Stoff" not in span:
+        return None
+    items = lambda name: [l[2:].strip() for l in lines[span[name][0] + 1:span[name][1]] if l.startswith("- ")] \
+        if name in span else []
+    return outline(items("Stoff"), items("Im Unterricht"))
+
+
+def merge_parts(body, edited=None):
+    """The body with **Stoff** and **Im Unterricht** turned into one **Stoff** part holding the outline -
+    Doc's own version of it when he rewrote it."""
+    lines, span = summary_spans(body)
+    if "Stoff" not in span:
+        return body
+    tree = edited if edited is not None else auto_outline(body)
+    merged = ["**Stoff**", "", outline_html(tree, edited is not None), ""]
+    cut = sorted(v for k, v in span.items() if k in ("Stoff", "Im Unterricht"))
+    out, at = [], 0
+    for n, (a, b) in enumerate(cut):
+        out += lines[at:a] + (merged if n == 0 else [])
+        at = b
+    return "\n".join(out + lines[at:])
+
+
+# ---- Doc rewrites a Zusammenfassung (Doc, 07.11.2026: "lass mich die Zusammenfassung dann bitte editieren ...
+# Gravitationswellen, das war nur aus der Vorrede"). Kept like the trash, as a log next to the day's data -
+# daten/<tag>.bearbeitet.jsonl, the last line per section counts, null brings back the page's own outline -
+# so every earlier version stays.
+
+def edits_file(root, day):
+    return Path(root) / "daten" / f"{day}.bearbeitet.jsonl"
+
+
+def edits(root, day):
+    """section id -> Doc's outline [[topic, [points]], ...] for the sections he rewrote."""
+    out = {}
+    try:
+        lines = edits_file(root, day).read_text().splitlines()
+    except OSError:
+        return out
+    for line in lines:
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        if e.get("gliederung") is None:
+            out.pop(e.get("id"), None)
+        else:
+            out[e.get("id")] = e["gliederung"]
+    return out
+
+
+def clean_tree(tree):
+    """[[topic, [points]]] from what the browser sent, or None when it is something else."""
+    if not isinstance(tree, list) or len(tree) > 200:
+        return None
+    out = []
+    for item in tree:
+        if not (isinstance(item, list) and len(item) == 2 and isinstance(item[0], str) and isinstance(item[1], list)):
+            return None
+        title = item[0].strip()[:500]
+        under = [u.strip()[:500] for u in item[1][:200] if isinstance(u, str) and u.strip()]
+        if title:
+            out.append([title, under])
+        elif under:                                     # points without a topic: each one stands on its own
+            out += [[u, []] for u in under]
+    return out
+
+
+def summary_post(body):
+    """POST /__mitschrift/zusammenfassung {tag, id, gliederung}: Doc's outline (or null) as one line more."""
+    try:
+        req = json.loads(body or b"{}")
+    except ValueError:
+        return 400, {"ok": False, "fehler": "kein JSON"}
+    if not isinstance(req, dict):
+        return 400, {"ok": False, "fehler": "kein Objekt"}
+    day, sid = str(req.get("tag", "")), str(req.get("id", ""))
+    if not DAY.match(day) or not SID.match(sid):
+        return 400, {"ok": False, "fehler": "tag oder id fehlt"}
+    parts = day_parts(day)
+    hit = next((x for x in parts[1] if x["id"] == sid), None) if parts else None
+    if not hit or auto_outline(hit["body"]) is None:
+        return 404, {"ok": False, "fehler": "Zusammenfassung nicht gefunden"}
+    tree = None
+    if req.get("gliederung") is not None:
+        tree = clean_tree(req.get("gliederung"))
+        if tree is None:
+            return 400, {"ok": False, "fehler": "Gliederung unlesbar"}
+    entry = {"um": dt.datetime.now().isoformat(timespec="seconds"), "id": sid, "gliederung": tree}
+    with edits_file(ROOT, day).open("a") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    return 200, {"ok": True, "von_hand": tree is not None,
+                 "gliederung": tree if tree is not None else auto_outline(hit["body"])}
+
+
+def parts_md(body, wording_open=False, edited=None):
     """Stoff, Im Unterricht, Hausaufgabe, Termine and the wording as parts of equal rank, each folding on
     its own (Doc, 07.11.2026: "macht die alle gleich groß und auch einklappbar"): the lists open, the
     wording closed with its numbers small behind its name. The day pages themselves stay as they are."""
     out, part, in_wording = [], False, False
     close = ["", "</details>", ""]
-    for line in body.split("\n"):
+    for line in merge_parts(body, edited).split("\n"):
         if in_wording:
             out.append(line)
             in_wording = line.strip() != "</details>"
@@ -243,7 +436,7 @@ def wanted(query):
 # ---------------------------------------------------------------- building a page
 
 def pandoc(md):
-    r = subprocess.run([PANDOC, "-f", "markdown", "-t", "html"], input=md, text=True,
+    r = subprocess.run([PANDOC, "-f", "markdown", "-t", "html", "--wrap=none"], input=md, text=True,
                        capture_output=True, timeout=30)
     if r.returncode:
         raise RuntimeError(r.stderr.strip() or "pandoc failed")
@@ -298,6 +491,11 @@ def shell(title, over, h1, nav, notes, sections, empty):
             "Das Transcript bleibt erhalten, „Zurückholen“ stellt den Abschnitt wieder her.</p>\n<ul></ul></section>\n"
             "<div class=\"toast\" role=\"status\" aria-live=\"polite\"><span class=\"toast-text\"></span>"
             "<button type=\"button\" class=\"toast-zurueck\" hidden>Rückgängig</button></div>\n"
+            "<dialog class=\"frage\" aria-labelledby=\"frage-text\"><p id=\"frage-text\"></p>"
+            "<p class=\"frage-klein\">Du kannst es dort jederzeit zurückholen.</p><div class=\"frage-leiste\">"
+            "<button type=\"button\" class=\"knopf\" data-frage=\"nein\">Abbrechen</button>"
+            "<button type=\"button\" class=\"knopf stark\" data-frage=\"ja\">In den Papierkorb</button>"
+            "</div></dialog>\n"
             f"<script>\n{js}</script>\n</body>\n</html>\n").encode("utf-8")
 
 
@@ -337,7 +535,8 @@ def day_page(query):
         return shell(f"Mitschrift · {german(day)}", "Mitschrift", german(day), nav, "", "",
                      "Für diesen Tag gibt es keine Mitschrift.")
     notes, sections = parts
-    rendered = render([notes] + [parts_md(s["body"], wording_open) for s in sections])
+    mine = edits(ROOT, d)
+    rendered = render([notes] + [parts_md(s["body"], wording_open, mine.get(s["id"])) for s in sections])
     notes_html = f'<div class="hinweis">{rendered[0]}</div>\n' if notes else ""
     gone = deleted(ROOT, d)
     body = "\n".join(section_html(d, s, h, gone) for s, h in zip(sections, rendered[1:]))
@@ -401,7 +600,8 @@ def week_page(query):
         hit = next((s for s in parts[1] if s["id"] == lesson_id(b["start"])), None) if parts else None
         if hit:
             chosen.append((day, hit))
-    rendered = render([parts_md(s["body"]) for _, s in chosen])
+    mine = {day: edits(ROOT, day) for day, _ in chosen}
+    rendered = render([parts_md(s["body"], False, mine[day].get(s["id"])) for day, s in chosen])
     body = "\n".join(section_html(day, s, h, deleted(ROOT, day), german(dt.date.fromisoformat(day)))
                      for (day, s), h in zip(chosen, rendered))
     name = ", ".join(classes)
@@ -414,8 +614,8 @@ def handle(path, method="GET", body=b""):
     url = urlsplit(path)
     as_json = lambda obj: json.dumps(obj, ensure_ascii=False).encode("utf-8")
     if method == "POST":
-        if url.path == "/__mitschrift/papierkorb":
-            status, obj = trash_post(body)
+        if url.path in ("/__mitschrift/papierkorb", "/__mitschrift/zusammenfassung"):
+            status, obj = (trash_post if url.path.endswith("papierkorb") else summary_post)(body)
             return status, "application/json; charset=utf-8", as_json(obj)
         return 405, "text/plain; charset=utf-8", b"read-only"
     if url.path == "/__mitschrift/stunden.json":

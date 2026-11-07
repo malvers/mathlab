@@ -7,6 +7,7 @@ RELOAD_JS). Each frame watches only itself, so a lab inside a deck slide reloads
 
 serve.py reloads this module on every call - a change here needs no restart of the LaunchAgent.
 """
+import glob
 import json
 import os
 import re
@@ -19,6 +20,8 @@ DECKS = os.path.join(HTML_DIR, "decks")
 REFS = re.compile(r'<script\b[^>]*\bsrc="([^"#?]+)"|<link\b[^>]*\bhref="([^"#?]+)"|\bfrom\s+[\'"]([^\'"#?]+\.m?js)[\'"]', re.I)
 WATCHED = (".js", ".mjs", ".css")
 VORSPANN = re.compile(r"\bvorspann/[a-z0-9_-]+\.html")
+MITSCHRIFT_APP = os.path.join(os.path.dirname(HTML_DIR), "docmitschrift-app")
+MITSCHRIFT_DATA = os.path.join(os.path.expanduser("~"), "Documents", "mitschrift")
 
 
 def _local(ref, base):
@@ -28,9 +31,23 @@ def _local(ref, base):
     return p if p.startswith(HTML_DIR + os.sep) else None
 
 
+def mitschrift_files():
+    """DocMitschrift's pages (/__mitschrift/, serve.py) have no file under HTML/: they are built per call by
+    mitschrift_seite.py with lesen.css and lesen.js inlined, from the day texts, the trash and Doc's edits in
+    ~/Documents/mitschrift. All of that is what they hang on (Doc, 07.11.2026: "jedes Mal einen harten Reload").
+    The page's own writes do not count: lesen.js says busy while it writes and rebases afterwards."""
+    out = [os.path.join(MITSCHRIFT_APP, f) for f in ("mitschrift_seite.py", "lesen.css", "lesen.js")]
+    out += glob.glob(os.path.join(MITSCHRIFT_DATA, "tage", "*.md"))
+    for pattern in ("*.stunden.json", "*.papierkorb.jsonl", "*.bearbeitet.jsonl"):
+        out += glob.glob(os.path.join(MITSCHRIFT_DATA, "daten", pattern))
+    return out
+
+
 def files_for(page):
     """The page file and the local scripts and styles it loads, as paths on disk."""
     rel = urlsplit(page).path or "/"
+    if rel.startswith("/__mitschrift/"):
+        return mitschrift_files()
     if rel.endswith("/"):
         rel += "index.html"
     path = os.path.normpath(os.path.join(HTML_DIR, rel.lstrip("/")))
@@ -164,11 +181,12 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
       })
       .catch(function () { });                        // server restarting: next round
   }
-  // the page wrote a file itself (deck editor): what is on disk now is what it shows
+  // the page wrote a file itself (deck editor, DocMitschrift's trash and edits): what is on disk now is what it shows.
+  // Hands back a promise, so a page can stay busy until the new ground is taken.
   window.__liveReload = {
     rebase: function () {
       const now = refs();
-      fetch('/__live/stamp?page=' + encodeURIComponent(page) + '&refs=' + encodeURIComponent(now), { cache: 'no-store' })
+      return fetch('/__live/stamp?page=' + encodeURIComponent(page) + '&refs=' + encodeURIComponent(now), { cache: 'no-store' })
         .then(function (r) { return r.json(); })
         .then(function (j) { first = j.stamp; firstRefs = now; }).catch(function () { });
     }

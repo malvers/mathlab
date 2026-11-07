@@ -16,9 +16,9 @@
 
 :root { --bg: #f6f7fb; --ink: #0e244e; --muted: #5a6b8c; --line: #d6dcea; --accent: rgb(176,36,24);
   /* the heads of the parts: a slightly held-back cyan (Doc, 07.11.2026: "ein bisschen deutlicher ... leicht zurückgenommenes Cyan") */
-  --teil: rgb(30,128,146);
+  --teil: rgb(30,128,146); --andere: rgb(176,92,18);
   --text: 'Punkt', -apple-system, "Helvetica Neue", Arial, sans-serif; --head: 'Punkt', Orbitron, sans-serif; }
-@media (prefers-color-scheme: dark) { :root { --bg: #14171f; --ink: #e6e9f2; --muted: #9aa6bf; --line: #2c3342; --accent: rgb(245,194,66); --teil: rgb(104,190,205); } }
+@media (prefers-color-scheme: dark) { :root { --bg: #14171f; --ink: #e6e9f2; --muted: #9aa6bf; --line: #2c3342; --accent: rgb(245,194,66); --teil: rgb(104,190,205); --andere: rgb(240,160,92); } }
 
 /* the scrollbar's place is kept even on a short page (sections folded away), so the column never shifts */
 html { scrollbar-gutter: stable; }
@@ -28,6 +28,7 @@ h3 { font-size: 1rem; }
 strong { font-family: var(--head); font-weight: 500; font-size: .85rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
 a { color: inherit; } li { margin: 2px 0; } p { margin: 6px 0; }
 .ico { width: 18px; height: 18px; flex: none; }
+[hidden] { display: none !important; }        /* also where a rule sets display (.bearbeiten, .knopf ...) */
 
 /* ---- the one title: "Mitschrift" small above, the day (or the classes) big below */
 .seitenkopf { margin-bottom: 8px; }
@@ -89,9 +90,28 @@ h1 { font-size: 1.75rem; margin: 2px 0 14px; }
 .mass { font-size: .78rem; color: var(--muted); opacity: .85; }
 .teil > :not(summary) { margin-left: 26px; }
 .teil > ul, .teil > ol { padding-left: 18px; margin-top: 2px; margin-bottom: 8px; }
+/* Zusammenfassung as an outline: the topic, and under it what was said about it (Doc, 07.11.2026: "dass man die
+   Überschrift hat, Sensoren in Handys, und dann so ein bisschen genauer noch drunter"). The weight comes from
+   the place in the list, so a point moved with Tab takes its look along. */
+.themen > li { margin: 6px 0; font-weight: 600; }
+.themen ul { list-style: circle; padding-left: 22px; margin: 2px 0 6px; font-weight: 400; }
+.themen ul li { margin: 1px 0; }
+/* edited in place: it looks as it does when read - while typing only a thin line and a barely-there tint
+   (the shadow spreads the tint out to the line, which sits 6px off the text) */
+.themen[contenteditable] { cursor: text; border-radius: 6px; }
+.themen[contenteditable]:focus { --tint: color-mix(in srgb, var(--teil) 3%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--teil) 55%, transparent); outline-offset: 6px;
+  background: var(--tint); box-shadow: 0 0 0 6px var(--tint); }
+.knopf.klein { min-height: 30px; padding: 0 12px; font-size: .66rem; }
+.bearbeiten { display: flex; align-items: center; gap: 10px; margin: 2px 0 10px; }
+.bearbeiten .knopf { color: var(--muted); }
+.von-hand { font-family: var(--head); font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--teil); }
 /* Wording: the clock time stands in its own column left of the text so it does not break the flow (Doc 06.11.2026) */
 .teil[data-teil="wortlaut"] p { position: relative; padding-left: 4.6em; overflow-wrap: anywhere; }
 .teil[data-teil="wortlaut"] p > strong:first-child { position: absolute; left: 0; top: 0; line-height: calc(17px * 1.6); }
+/* what someone other than Doc said (sprecher.py) in a soft orange - grey was too faint (Doc 07.11.2026);
+   Doc's own words keep the full ink. A real orange, not the yellow of the clock times. */
+.andere { color: var(--andere); }
 
 /* ---- the trash under the page: what is hidden, and the way back */
 .korb { margin-top: 48px; border-top: 1px dashed var(--line); padding-top: 14px; }
@@ -110,6 +130,15 @@ h1 { font-size: 1.75rem; margin: 2px 0 14px; }
 .toast-text { font-size: .95rem; }
 .toast-zurueck { font: 500 .72rem/1 var(--head); letter-spacing: .06em; text-transform: uppercase; color: inherit;
   background: transparent; border: 1px solid currentColor; border-radius: 999px; min-height: 38px; padding: 0 14px; cursor: pointer; flex: none; }
+
+/* ---- the question before a whole section goes into the trash */
+.frage { box-sizing: border-box; width: min(440px, calc(100vw - 32px)); padding: 22px 22px 18px; border: 1px solid var(--line);
+  border-radius: 16px; background: var(--bg); color: var(--ink); box-shadow: 0 20px 60px rgba(14,36,78,.35); }
+.frage::backdrop { background: rgba(14,36,78,.45); backdrop-filter: blur(2px); }
+#frage-text { font-size: 1.05rem; margin: 0 0 6px; }
+.frage-klein { color: var(--muted); font-size: .9rem; margin: 0 0 18px; }
+.frage-leiste { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.frage .stark { border-color: var(--accent); color: var(--accent); }
 
 @media (max-width: 560px) {
   h1 { font-size: 1.4rem; }

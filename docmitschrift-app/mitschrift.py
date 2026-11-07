@@ -39,6 +39,10 @@ import sys
 from pathlib import Path
 
 from mitschrift_seite import deleted as in_trash, lesson_id   # the reading page's trash (Doc, 07.11.2026)
+try:                                    # who is speaking, Doc or someone else (Alan, 07.11.2026) - optional:
+    import sprecher                     # without it (or without its venv/profile) the transcript is written as before
+except Exception:                       # noqa: BLE001
+    sprecher = None
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -121,6 +125,63 @@ def to_trash(path):
     shutil.move(str(path), str(target))
 
 
+def voices(audio, sentences):
+    """Doc or someone else per sentence (sprecher.py), or None - the transcript never fails because of it."""
+    if not (sprecher and sentences):
+        return None
+    try:
+        return sprecher.erkenne(audio, sentences)
+    except Exception as e:                      # noqa: BLE001
+        say(f"    Sprecher: {e}")
+        return None
+
+
+def audio_for(root, name):
+    """A piece by its name: still in the inbox, or in the Trash (to_trash adds -HHMMSS when the name is taken)."""
+    trash = Path.home() / ".Trash"
+    stem, suffix = os.path.splitext(name)
+    for p in [root / "eingang" / name, trash / name, *sorted(trash.glob(f"{stem}-{'[0-9]' * 6}{suffix}"))]:
+        if p.exists():
+            return p
+    return None
+
+
+def relabel(root, day):
+    """Who spoke, afterwards, for a day already written down (Doc, 07.11.2026: "das heute mal anwenden auf den
+    Vortrag von heute"). The text stays exactly as it is; the audio is only read where it lies (inbox or Trash)
+    and stays there. Pieces without audio keep what they had."""
+    store = root / "daten" / f"{day}.jsonl"
+    if not store.exists():
+        say(f"  Sprecher {day}: nichts mitgeschrieben")
+        return
+    rows = [json.loads(l) for l in store.read_text().splitlines() if l.strip()]
+    pieces = {}
+    for r in rows:
+        pieces.setdefault(r["quelle"], []).append(r)
+    done, without = 0, []
+    for name, group in sorted(pieces.items()):
+        m, audio = NAME.match(name), audio_for(root, name)
+        labels = None
+        if m and audio:
+            begin = dt.datetime.strptime(m.group(1) + m.group(2), "%Y%m%d%H%M%S")
+            sentences = [{"start": (dt.datetime.fromisoformat(r["t"]) - begin).total_seconds(),
+                          "end": (dt.datetime.fromisoformat(r["bis"]) - begin).total_seconds()} for r in group]
+            labels = voices(audio, sentences)
+        if labels is None:
+            without.append(name)
+            continue
+        for r, label in zip(group, labels):
+            r.pop("sprecher", None)
+            r.pop("aehnlich", None)
+            for key in ("sprecher", "aehnlich"):            # only these two fields, nothing else from the module
+                if label and label.get(key) is not None:
+                    r[key] = label[key]
+        done += 1
+    store.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+    say(f"  Sprecher {day}: {done} von {len(pieces)} Stück(en) erkannt"
+        + (f", ohne Audio oder Erkennung: {', '.join(without)}" if without else ""))
+
+
 def write_down(root, keep):
     """Turns every piece in the inbox into sentences with clock times, filed by day."""
     inbox = root / "eingang"
@@ -135,17 +196,23 @@ def write_down(root, keep):
         except RuntimeError as e:
             say(f"    übersprungen: {e}")
             continue
+        labels = voices(audio, sentences)        # before the audio goes to the Trash - it is not kept for this
         day = begin.date()
         store = root / "daten" / f"{day}.jsonl"
         rows = [json.loads(l) for l in store.read_text().splitlines()] if store.exists() else []
         rows = [r for r in rows if r["quelle"] != audio.name]          # written down again: replace
-        for s in sentences:
-            rows.append({
+        for n, s in enumerate(sentences):
+            row = {
                 "t": (begin + dt.timedelta(seconds=s["start"])).isoformat(timespec="seconds"),
                 "bis": (begin + dt.timedelta(seconds=s["end"])).isoformat(timespec="seconds"),
                 "text": s["text"],
                 "quelle": audio.name,
-            })
+            }
+            if labels and labels[n]:             # only these two fields, nothing else from the module
+                for key in ("sprecher", "aehnlich"):
+                    if labels[n].get(key) is not None:
+                        row[key] = labels[n][key]
+            rows.append(row)
         rows.sort(key=lambda r: r["t"])
         store.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
         remember_audio_size(root, day, audio)
@@ -351,8 +418,15 @@ def german(day):
 
 
 def wording(rows):
-    """The full text, one paragraph per recognised stretch (about a minute each) with its clock time."""
-    return [f"**{dt.datetime.fromisoformat(r['t']):%H:%M}** {r['text']}" for r in rows]
+    """The full text, one paragraph per recognised stretch (about a minute each) with its clock time.
+    What someone other than Doc said is a span of class "andere", so the reading page can colour it."""
+    out = []
+    for r in rows:
+        text = r["text"]
+        if r.get("sprecher") == "andere":
+            text = "[" + text.replace("[", "\\[").replace("]", "\\]") + "]{.andere}"
+        out.append(f"**{dt.datetime.fromisoformat(r['t']):%H:%M}** {text}")
+    return out
 
 
 def spoken(rows):
@@ -515,7 +589,12 @@ def main():
     ap.add_argument("--nicht-holen", action="store_true", help="nicht beim Pixel nachsehen")
     ap.add_argument("--tag", action="append", default=[], help="diesen Tag (JJJJ-MM-TT) neu aufbauen")
     ap.add_argument("--nur-seiten", action="store_true", help="nichts holen, nichts mitschreiben, nur die Seiten der --tag-Tage neu bauen")
+    ap.add_argument("--sprecher", action="store_true",
+                    help="für die --tag-Tage nachträglich erkennen, wer spricht (Audio aus eingang/ oder dem Papierkorb), "
+                         "dann ihre Seiten neu bauen; holt nichts und schreibt nichts neu mit")
     a = ap.parse_args()
+    if a.sprecher and not a.tag:
+        sys.exit("--sprecher braucht --tag JJJJ-MM-TT")
 
     if not SWIFT.exists():
         sys.exit(f"{SWIFT} fehlt – erst docmitschrift-app/build.sh mac laufen lassen.")
@@ -523,10 +602,14 @@ def main():
     for sub in ("eingang", "daten", "tage", "klassen"):
         (root / sub).mkdir(parents=True, exist_ok=True)
 
-    if not a.nicht_holen and not a.nur_seiten:
+    only_pages = a.nur_seiten or a.sprecher
+    if not a.nicht_holen and not only_pages:
         fetch(root / "eingang")
-    days = set() if a.nur_seiten else write_down(root, a.behalten)
+    days = set() if only_pages else write_down(root, a.behalten)
     days |= {dt.date.fromisoformat(t) for t in a.tag}
+    if a.sprecher:
+        for day in sorted(days):
+            relabel(root, day)
 
     cache_file = root / "daten" / "zusammenfassungen.json"
     cache = json.loads(cache_file.read_text()) if cache_file.exists() else {}

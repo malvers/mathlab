@@ -233,6 +233,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.send_error(403, 'local pages only')
         here = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'docmitschrift-app')
         sent = b''
+        served = b'reload.js?served=%d' % time.time_ns()   # before the build: what changes after this is not in the page
         if self.command == 'POST':               # a section into the trash or back (Doc 07.11.2026), a few bytes
             sent = self.rfile.read(min(int(self.headers.get('Content-Length') or 0), 65536))
         try:
@@ -244,7 +245,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             status, ctype = 500, 'text/plain; charset=utf-8'
             body = ('serve.py: %s: %s' % (type(err).__name__, err)).encode('utf-8')
         if ctype.startswith('text/html'):
-            body = inject(body)                  # the LOCAL badge, like every page served here
+            # the LOCAL badge and live reload, like every page served here (live reload was missing until
+            # 07.11.2026 - Doc: "ich muss jedes Mal einen harten Reload machen"); what it watches: tools/live_reload.py
+            body = inject(body, LIVE_RELOAD.replace(b'reload.js', served))
         self.send_response(status)
         self.send_header('Content-Type', ctype)
         self.send_header('Cache-Control', 'no-store')
