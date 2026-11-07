@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#08142a">
+    <title>Kalender</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Doc's own Supabase account (shared SVP login): only that uid may read or write table calendar_event (RLS) -->
+    <script src="../svp/svp-gate.js"></script>
+    <script src="../svp/svp-auth.js"></script>
+    <!-- dictation: the shared tap-to-talk engine (listens through pauses, "bin fertig" ends) -->
+    <script src="../js/solita-listen.js"></script>
+    <!-- occurrences, reminders, .ics import, quick entry - shared with the reminder watcher on the Mac -->
+    <script src="kalender-core.js"></script>
+    <!-- the colour schemes Blau / Hell / Grau of the Stoffverteilungsplan (key svp-theme), like the To-do app -->
+    <link rel="stylesheet" href="../svp/svp-tokens.css">
+    <style>
+        /* --- plain standalone page, a sibling of the To-do app (HTML/todo/), deliberately no lab shell CSS --- */
+        /* Blau = these values; Hell and Grau override them from svp-tokens.css (html.svp-light / html.svp-grey) */
+        :root {
+            --bg: rgb(8, 20, 42);
+            --card: rgb(14, 36, 78);
+            --line: rgba(120, 160, 220, .22);
+            --text: rgb(214, 226, 245);
+            --muted: rgb(110, 128, 160);
+            --lambda: rgb(245, 194, 66);
+            --upsilon: rgb(176, 36, 24);
+            --phi: rgb(121, 158, 49);
+            /* the three appointment colours keep the exact palette in every scheme (r, g, b to carry an alpha) */
+            --c-red: 176, 36, 24;
+            --c-gold: 245, 194, 66;
+            --c-green: 121, 158, 49;
+            --ink-light: rgb(248, 251, 255);
+            --ink-navy: rgb(14, 36, 78);
+            --btn-a: .75;
+            --btn-rim-a: 1;
+            --pill-a: .75;
+            --hour: 44px;   /* one hour in the week view */
+        }
+        html.svp-light { --btn-a: .3; --btn-rim-a: .85; --pill-a: .38; }
+        @media (max-width: 480px) { :root { --hour: 40px; } }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; background: var(--bg); color: var(--text); }
+        html { scrollbar-gutter: stable; }
+        body {
+            font-family: Orbitron, sans-serif;
+            padding: 0 0 max(40px, env(safe-area-inset-bottom));
+        }
+        .wrap { max-width: 980px; margin: 0 auto; padding: 12px 16px 0; }
+        @media (max-width: 480px) { .wrap { padding-left: 8px; padding-right: 8px; } }
+        /* week and month use the whole width like the header (Doc, 07.11.2026: "den breit?"); the agenda stays a column */
+        body[data-view="week"] .wrap, body[data-view="month"] .wrap { max-width: none; }
+        /* the header: one slim bar over the whole width of the page (Doc, 07.11.2026: "Der Header ist viel zu groß ...
+           Mach den ruhig über die ganze Breite der Seite"); wide screens one row, the phone two (three in week/month) */
+        :root { --ctl: 38px; }
+        @media (min-width: 900px) { :root { --ctl: 36px; } }
+        .top {
+            position: sticky; top: 0; z-index: 4; background: var(--card); border-bottom: 1px solid var(--line);
+            padding: max(8px, env(safe-area-inset-top)) 16px 8px;
+        }
+        @media (max-width: 480px) { .top { padding-left: 8px; padding-right: 8px; } }
+        .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+        .bar #micBtn { order: 1; }
+        .bar #text { order: 2; flex: 1 1 0; }
+        .bar #gearBtn { order: 3; }
+        /* views and back/period/forward share one line: on the phone the second row, on wide screens inside the one row */
+        .bar .row2 { order: 4; flex: 1 1 100%; display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .row2 .views { flex: 1 1 0; min-width: 0; }
+        .row2 .nav { flex: 0 1 auto; min-width: 0; }
+        .row2 .nav .period { cursor: pointer; min-width: 84px; }
+        @media (max-width: 599px) {
+            .row2 .today-btn { display: none; }   /* on the phone a tap on the period goes back to today */
+            .row2 .views button { font-size: 11px; letter-spacing: .02em; gap: 0; }
+            .row2 .views { gap: 4px; }
+            .row2 .nav { gap: 4px; }
+            .row2 .nav button.icon { flex-basis: 32px; width: 32px; }
+            .row2 .nav .period { font-size: 12px; }
+            .row2 .nav .period small { font-size: 10px; }
+        }
+        @media (min-width: 900px) {
+            .bar { flex-wrap: nowrap; }
+            .bar #text { flex: 1 1 200px; }
+            .bar .row2 { order: 3; flex: 0 1 740px; }
+            .row2 .views { flex: 0 0 330px; }
+            .row2 .nav { flex: 1 1 auto; }
+            .bar #gearBtn { order: 4; }
+        }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+
+        /* the appointment colours: --c = r, g, b of the palette colour, --on = the text on the full colour */
+        .c1 { --c: var(--c-red); --on: var(--ink-light); }
+        .c2 { --c: var(--c-gold); --on: var(--ink-navy); }
+        .c3 { --c: var(--c-green); --on: var(--ink-navy); }
+
+        /* ---------- entry: mic, field, gear (like the To-do app) ---------- */
+        .row { display: flex; gap: 8px; }
+        input.new {
+            flex: 1 1 auto; min-width: 0; height: var(--ctl); background: var(--bg); color: var(--text);
+            border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font: clamp(16px, 4.6vw, 18px) Raleway, sans-serif;
+        }
+        input.new::placeholder { color: var(--muted); }
+        input.new:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
+        button.icon {
+            flex: 0 0 var(--ctl); height: var(--ctl); border-radius: 10px; cursor: pointer; display: grid; place-items: center; padding: 0;
+            background: transparent; color: var(--text); border: 1px solid var(--line);
+        }
+        button.icon svg { width: 24px; height: 24px; fill: currentColor; }
+        button.icon[aria-expanded="true"] { background: rgba(var(--tint), .18); }
+        button.mic.on { background: var(--upsilon); border-color: var(--upsilon); animation: pulse 1.2s ease-in-out infinite; }
+        @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(176, 36, 24, .35); } }
+        button:disabled { opacity: .5; cursor: default; }
+        .status { min-height: 1.4em; margin-top: 6px; font: 14px Raleway, sans-serif; color: var(--muted); }
+        .status:empty { min-height: 0; margin-top: 0; }
+        .status.err { color: var(--lambda); }
+
+        /* settings under the gear */
+        .settings {
+            position: absolute; top: calc(100% + 6px); right: 16px; z-index: 5; width: min(360px, calc(100% - 32px));
+            padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line);
+            box-shadow: 0 12px 40px var(--shadow);
+        }
+        .set-title { margin: 0 0 12px; font: 700 12px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+        .set-label { display: block; margin: 0 0 8px; font: 15px Raleway, sans-serif; color: var(--text); }
+        .set-text { margin: 0 0 10px; font: 14px/1.45 Raleway, sans-serif; color: var(--muted); }
+        .set-text a { color: var(--lambda); }
+        .set-sep { border: 0; border-top: 1px solid var(--line); margin: 16px 0 14px; }
+        .seg { display: flex; gap: 8px; }
+        .seg button {
+            flex: 1 1 0; min-width: 0; height: 44px; border-radius: 10px; cursor: pointer; padding: 0;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: transparent; color: var(--text); border: 1px solid var(--line);
+            font: 700 clamp(11px, 3.2vw, 13px) Orbitron, sans-serif; letter-spacing: .04em;
+        }
+        .seg button[aria-checked="true"], .seg button[aria-selected="true"] {
+            background: rgba(var(--tint), var(--btn-a)); border-color: rgba(var(--tint), var(--btn-rim-a)); color: var(--bg);
+        }
+        html.svp-light .seg button[aria-checked="true"], html.svp-light .seg button[aria-selected="true"] { color: var(--text); }
+        .seg i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(var(--tint), .6); flex: 0 0 auto; }
+        button.wide {
+            width: 100%; height: 44px; border-radius: 10px; cursor: pointer; padding: 0 12px;
+            background: transparent; color: var(--text); border: 1px solid var(--line);
+            font: 700 13px Orbitron, sans-serif; letter-spacing: .04em;
+        }
+
+        /* the views: Agenda / Woche / Monat, the chosen one in λ gold */
+        .views button { height: var(--ctl); }
+        .views button[aria-selected="true"] { background: rgba(var(--c-gold), var(--btn-a)); border-color: rgba(var(--c-gold), var(--btn-rim-a)); color: var(--ink-navy); }
+        html.svp-light .views button[aria-selected="true"] { color: var(--text); }
+        /* back, the period, forward, today */
+        .nav { display: flex; align-items: center; gap: 8px; }
+        .nav .period {
+            flex: 1 1 auto; min-width: 0; text-align: center; font: 700 clamp(13px, 3.8vw, 15px)/1.2 Orbitron, sans-serif;
+            letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .nav .period small { display: block; font: 500 11px/1.4 Orbitron, sans-serif; letter-spacing: .08em; color: var(--muted); }
+        .nav .today-btn {
+            flex: 0 0 auto; height: var(--ctl); padding: 0 14px; border-radius: 10px; cursor: pointer;
+            background: transparent; color: var(--text); border: 1px solid var(--line);
+            font: 700 12px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase;
+        }
+
+        /* ---------- Agenda ---------- */
+        .hero {
+            position: relative; margin: 0 0 12px; padding: 16px 16px 18px 22px; border-radius: 14px; overflow: hidden;
+            background: var(--card); border: 1px solid rgba(var(--c), .85);
+            box-shadow: 0 10px 40px rgba(var(--c), .16); cursor: pointer;
+        }
+        .hero::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: rgb(var(--c)); }
+        .hero.empty { border-color: var(--line); box-shadow: none; cursor: default; }
+        .hero.empty::before { display: none; }
+        .hero-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .pill {
+            display: inline-block; padding: 0 12px; height: 26px; border-radius: 6px; text-align: center;
+            border: 1px solid rgba(var(--c, var(--tint)), var(--btn-rim-a));
+            background: rgba(var(--c, var(--tint)), var(--pill-a)); color: var(--on, var(--bg));
+            font: 700 12px/24px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
+        }
+        html.svp-light .pill { color: var(--text); }
+        .hero-count { margin: 12px 0 4px; font: 700 clamp(28px, 8vw, 40px)/1.1 Orbitron, sans-serif; letter-spacing: .02em; }
+        .hero-title { margin: 6px 0 4px; font: 600 clamp(19px, 5.4vw, 24px)/1.3 Raleway, sans-serif; overflow-wrap: anywhere; }
+        .hero-meta { font: 16px/1.45 Raleway, sans-serif; color: var(--muted); font-variant-numeric: lining-nums; }
+        .hero-bar { margin-top: 14px; height: 4px; border-radius: 2px; background: rgba(var(--tint), .18); overflow: hidden; }
+        .hero-bar i { display: block; height: 100%; background: rgb(var(--c)); border-radius: 2px; transition: width .6s ease; }
+        .hero.empty .hero-count { font-size: clamp(18px, 5vw, 24px); color: var(--muted); }
+
+        .day {
+            margin: 0 0 12px; padding: 12px 6px 4px; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+        }
+        .day-head { display: flex; align-items: center; gap: 10px; margin: 0 0 4px 8px; }
+        .day-head .pill { --c: var(--tint); }
+        .day.today .day-head .pill { --c: var(--c-gold); --on: var(--ink-navy); }
+        .day-head .sub { font: 14px Raleway, sans-serif; color: var(--muted); }
+        .day-head .add { margin-left: auto; width: 44px; height: 30px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
+        .day-head .add svg { width: 22px; height: 22px; fill: currentColor; }
+        .day-head .add:hover { color: var(--lambda); }
+        ul.evs { list-style: none; margin: 0; padding: 0; }
+        ul.evs:empty::before { content: 'nichts'; display: block; padding: 11px 10px; font: 15px Raleway, sans-serif; color: var(--muted); }
+        ul.evs li {
+            display: grid; grid-template-columns: 62px 1fr; gap: 10px; align-items: start;
+            padding: 8px 8px 8px 4px; border-top: 1px solid var(--line); cursor: pointer; border-radius: 8px;
+        }
+        ul.evs li:first-child { border-top: 0; }
+        ul.evs li:hover { background: rgba(var(--tint), .07); }
+        ul.evs li.past { opacity: .5; }
+        ul.evs li.now .t b { color: var(--lambda); }
+        .t { text-align: right; padding-top: 2px; font: 700 14px/1.3 Orbitron, sans-serif; font-variant-numeric: tabular-nums; }
+        .t small { display: block; font: 500 12px/1.4 Orbitron, sans-serif; color: var(--muted); }
+        .t .allday { font: 700 10px/1.3 Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+        .ev-body { border-left: 4px solid rgb(var(--c)); padding: 0 0 0 10px; min-height: 36px; }
+        .ev-title { font: 600 18px/1.35 Raleway, sans-serif; overflow-wrap: anywhere; }
+        .ev-meta { font: 14px/1.4 Raleway, sans-serif; color: var(--muted); overflow-wrap: anywhere; }
+        .ev-meta svg { width: 14px; height: 14px; fill: currentColor; vertical-align: -2px; margin-right: 2px; }
+        .more { display: block; margin: 0 auto 12px; }
+
+        /* ---------- Woche ---------- */
+        .wk { padding: 8px 6px 10px; }
+        .wk-head, .wk-allday, .wk-grid { display: grid; grid-template-columns: 34px repeat(7, minmax(0, 1fr)); }
+        .wk-dayname {
+            padding: 4px 0 8px; text-align: center; cursor: pointer; border: 0; background: transparent; color: var(--text);
+            font: 700 11px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase;
+        }
+        .wk-dayname b {
+            display: block; margin: 4px auto 0; width: 32px; height: 32px; border-radius: 50%;
+            font: 700 15px/32px Orbitron, sans-serif; letter-spacing: 0;
+        }
+        .wk-dayname.today b { background: var(--lambda); color: var(--ink-navy); }
+        .wk-dayname.weekend { color: var(--muted); }
+        .wk-allday { border-top: 1px solid var(--line); min-height: 6px; }
+        .wk-allday > div { padding: 3px 2px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .chip {
+            display: block; padding: 2px 6px; border-radius: 5px; cursor: pointer; text-align: left; border: 0; width: 100%;
+            background: rgb(var(--c)); color: var(--on);
+            font: 600 12px/1.35 Raleway, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .wk-grid { position: relative; border-top: 1px solid var(--line); }
+        .wk-hours > div { height: var(--hour); position: relative; }
+        .wk-hours span {
+            position: absolute; top: -7px; right: 6px; font: 500 10px Orbitron, sans-serif; color: var(--muted); font-variant-numeric: tabular-nums;
+        }
+        .wk-col {
+            position: relative; border-left: 1px solid var(--line); cursor: pointer;
+            background-image: linear-gradient(var(--line) 1px, transparent 1px); background-size: 100% var(--hour);
+        }
+        .wk-col.today { background-color: rgba(var(--c-gold), .06); }
+        .wk-ev {
+            position: absolute; z-index: 1; overflow: hidden; border-radius: 6px; padding: 2px 4px; cursor: pointer;
+            background: rgb(var(--c)); color: var(--on); border: 1px solid var(--card);
+            font: 600 11px/1.25 Raleway, sans-serif;
+        }
+        .wk-ev small { display: block; font: 500 10px/1.3 Orbitron, sans-serif; opacity: .85; }
+        /* a short one (a 15-minute coaching) has room for one line only: time and title side by side */
+        .wk-ev.short { padding-top: 0; padding-bottom: 0; white-space: nowrap; text-overflow: ellipsis; font-size: 10px; line-height: 1.2; }
+        .wk-ev.short small { display: inline; margin-right: 4px; line-height: 1.2; }
+        /* the cards stay opaque, so no hour line shows through (Doc, 07.11.2026: "die Cards bitte alle über die Linien");
+           past and cancelled ones fade under a veil of the card colour instead of turning see-through */
+        .wk-ev.past::after, .wk-ev.off::after {
+            content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--card); opacity: .45; pointer-events: none;
+        }
+        .now-line { position: absolute; left: -1px; right: 0; height: 2px; background: var(--lambda); z-index: 2; pointer-events: none; }
+        .now-line::before { content: ''; position: absolute; left: -5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--lambda); }
+
+        /* ---------- Monat ---------- */
+        .mo { padding: 8px 6px 6px; }
+        .mo-head, .mo-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+        .mo-head span { padding: 4px 0 8px; text-align: center; font: 700 11px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+        .mo-cell {
+            display: flex; flex-direction: column; align-items: stretch; gap: 3px; min-width: 0; min-height: 92px; padding: 4px 3px;
+            border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--text); cursor: pointer; text-align: left; border-radius: 0;
+        }
+        .mo-cell .n {
+            align-self: flex-start; width: 28px; height: 28px; border-radius: 50%; text-align: center;
+            font: 700 13px/28px Orbitron, sans-serif; font-variant-numeric: tabular-nums;
+        }
+        .mo-cell.out { color: var(--muted); }
+        .mo-cell.out .chip { opacity: .55; }
+        .mo-cell.today .n { background: var(--lambda); color: var(--ink-navy); }
+        .mo-cell.sel { background: rgba(var(--tint), .14); border-radius: 8px; }
+        .mo-cell .evs { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .mo-cell .chip { font-size: 11px; padding: 1px 5px; pointer-events: none; }
+        .mo-cell .plus { font: 600 11px Raleway, sans-serif; color: var(--muted); padding-left: 4px; }
+        /* on the phone the days carry dots instead of titles */
+        @media (max-width: 640px) {
+            .mo-cell { min-height: 58px; align-items: center; }
+            .mo-cell .n { align-self: center; }
+            .mo-cell .evs { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 3px; }
+            .mo-cell .chip { width: 7px; height: 7px; padding: 0; border-radius: 50%; font-size: 0; }
+            .mo-cell .plus { display: none; }
+        }
+        #moDay { margin-top: 12px; }
+
+        /* ---------- dialogs ---------- */
+        .gate { text-align: center; padding: 30px 16px; }
+        .gate p { font: 15px/1.5 Raleway, sans-serif; color: var(--muted); margin: 0 0 18px; }
+        .gate button {
+            width: 100%; max-width: 260px; height: 58px; border: 0; border-radius: 12px; cursor: pointer;
+            background: var(--lambda); color: var(--bg); font: 700 15px Orbitron, sans-serif; letter-spacing: .04em;
+        }
+        .dlg-back {
+            position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px;
+            background: var(--scrim);
+        }
+        .dlg {
+            width: 100%; max-width: 420px; max-height: calc(100dvh - 32px); overflow: auto; padding: 20px; border-radius: 14px;
+            background: var(--card); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
+        }
+        .dlg p.msg { margin: 0 0 18px; font: 17px/1.45 Raleway, sans-serif; color: var(--text); white-space: pre-line; }
+        .dlg-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+        .dlg-btns button {
+            flex: 1 1 0; min-width: 96px; height: 50px; border-radius: 10px; cursor: pointer; padding: 0 10px;
+            font: 700 13px Orbitron, sans-serif; letter-spacing: .04em;
+            background: transparent; color: var(--text); border: 1px solid var(--line);
+        }
+        .dlg-btns button.yes { background: var(--lambda); color: var(--ink-navy); border: 0; }
+        .dlg-btns button.danger { background: rgb(var(--c-red)); color: var(--ink-light); border: 0; }
+        .dlg-btns button.left { flex: 0 0 auto; margin-right: auto; }
+
+        /* the editor: a card in the middle, on the phone a sheet from below */
+        .ed { max-width: 520px; }
+        @media (max-width: 560px) {
+            #ed { place-items: end stretch; padding: 0; }
+            #ed .ed { max-width: none; border-radius: 16px 16px 0 0; max-height: 92dvh; padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+        }
+        .fld { display: block; margin: 0 0 12px; min-width: 0; }
+        .fld > span, .fld-label { display: block; margin: 0 0 6px; font: 700 11px Orbitron, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+        .fld input, .fld select, .fld textarea {
+            width: 100%; height: 44px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
+            padding: 0 12px; font: 17px Raleway, sans-serif; font-variant-numeric: lining-nums;
+        }
+        .fld textarea { height: auto; min-height: 66px; padding: 10px 12px; resize: vertical; line-height: 1.4; }
+        .fld input:focus, .fld select:focus, .fld textarea:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
+        .fld input[type="date"], .fld input[type="time"] { color-scheme: dark; }
+        html.svp-light .fld input[type="date"], html.svp-light .fld input[type="time"] { color-scheme: light; }
+        .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .ed-title { margin: 0 0 14px; font: 700 14px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+        /* switch for "ganztägig" */
+        .switch { display: flex; align-items: center; gap: 10px; height: 44px; cursor: pointer; font: 16px Raleway, sans-serif; }
+        .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+        .switch i { position: relative; width: 46px; height: 26px; border-radius: 13px; background: rgba(var(--tint), .3); transition: background .2s; flex: 0 0 auto; }
+        .switch i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink-light); transition: transform .2s; }
+        .switch input:checked + i { background: var(--lambda); }
+        .switch input:checked + i::after { transform: translateX(20px); }
+        .switch input:focus-visible + i { outline: 2px solid var(--lambda); outline-offset: 2px; }
+        /* reminder chips: several may be on */
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chips button {
+            height: 40px; padding: 0 12px; border-radius: 10px; cursor: pointer; background: transparent; color: var(--text);
+            border: 1px solid var(--line); font: 700 12px Orbitron, sans-serif; letter-spacing: .04em;
+        }
+        .chips button[aria-pressed="true"] { background: rgba(var(--c-gold), var(--btn-a)); border-color: rgba(var(--c-gold), var(--btn-rim-a)); color: var(--ink-navy); }
+        html.svp-light .chips button[aria-pressed="true"] { color: var(--text); }
+        .colors { display: flex; gap: 12px; }
+        .colors button {
+            width: 44px; height: 44px; border-radius: 50%; cursor: pointer; padding: 0; border: 3px solid transparent;
+            background: rgb(var(--c)) content-box;
+        }
+        .colors button[aria-checked="true"] { border-color: rgb(var(--c)); padding: 3px; }
+        .ed-note { margin: -4px 0 12px; font: 14px/1.4 Raleway, sans-serif; color: var(--muted); }
+
+        /* lessons from Untis: in the scheme's tint, quieter than the appointments; cancelled ones struck through */
+        .cl { --c: var(--tint); --on: var(--text); }
+        .wk-ev.cl { background: linear-gradient(rgba(var(--tint), .2), rgba(var(--tint), .2)), var(--card); border: 1px solid rgba(var(--tint), .5); }
+        .chip.cl { background: rgba(var(--tint), .28); color: var(--text); }
+        .off .ev-title, .wk-ev.off, .chip.off { text-decoration: line-through; }
+        li.off { opacity: .5; }
+        .ev-meta .note { color: var(--lambda); }
+        @media (max-width: 640px) { .mo-cell .chip.cl { background: rgba(var(--tint), .7); } }
+        /* the call switches in the settings */
+        .settings .switch { height: 40px; }
+        .ed-note:empty { display: none; }
+
+        [hidden] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <header class="top" id="entry" hidden>
+        <h1 class="sr-only">Kalender</h1>
+        <div class="bar">
+            <!-- mic: Material Icons "mic" (Apache 2.0) -->
+            <button class="icon mic" id="micBtn" type="button" aria-label="Diktieren">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+            </button>
+            <input class="new" id="text" type="text" enterkeyhint="go" autocomplete="off" placeholder="Neuer Termin …" aria-label="Neuer Termin, zum Beispiel morgen 18 Uhr Essen">
+            <!-- gear: Material Icons "settings" (Apache 2.0) -->
+            <button class="icon gear" id="gearBtn" type="button" aria-label="Einstellungen" aria-expanded="false" aria-controls="settings">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            </button>
+            <div class="row2">
+                <div class="seg views" id="views" role="tablist" aria-label="Ansicht">
+                    <button type="button" role="tab" data-view="agenda" aria-selected="true">Agenda</button>
+                    <button type="button" role="tab" data-view="week" aria-selected="false">Woche</button>
+                    <button type="button" role="tab" data-view="month" aria-selected="false">Monat</button>
+                </div>
+                <div class="nav" id="nav" hidden>
+                    <!-- Material Icons "chevron_left" / "chevron_right" (Apache 2.0) -->
+                    <button class="icon" id="prevBtn" type="button" aria-label="Zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+                    <span class="period" id="period" aria-live="polite" title="Zurück zu heute"></span>
+                    <button class="icon" id="nextBtn" type="button" aria-label="Weiter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
+                    <button class="today-btn" id="todayBtn" type="button">Heute</button>
+                </div>
+            </div>
+        </div>
+        <div class="settings" id="settings" role="dialog" aria-label="Einstellungen" hidden>
+            <p class="set-title">Einstellungen</p>
+            <span class="set-label">Solita ruft an</span>
+            <label class="switch"><input id="callEvents" type="checkbox"><i></i>vor Terminen</label>
+            <label class="switch"><input id="callLessons" type="checkbox"><i></i><span id="callLessonsText">5 Min. vor jeder Stunde</span></label>
+            <p class="set-text" id="callNote">Ausgefallene Stunden ruft sie nicht. Gilt ab der nächsten Minute, auch am Phone.</p>
+            <hr class="set-sep">
+            <span class="set-label" id="themeLabel">Farbschema</span>
+            <div class="seg" id="themeSeg" role="radiogroup" aria-labelledby="themeLabel">
+                <button type="button" role="radio" data-theme="dark" aria-checked="false"><i style="background: rgb(8, 20, 42)"></i>Blau</button>
+                <button type="button" role="radio" data-theme="grey" aria-checked="false"><i style="background: rgb(26, 26, 28)"></i>Grau</button>
+                <button type="button" role="radio" data-theme="light" aria-checked="false"><i style="background: rgb(246, 248, 252)"></i>Hell</button>
+            </div>
+            <hr class="set-sep">
+            <span class="set-label">Termine aus Google übernehmen</span>
+            <p class="set-text">Bei Google <a href="https://calendar.google.com/calendar/u/0/r/settings/export" target="_blank" rel="noopener">„Exportieren“</a> drücken, dann die heruntergeladene Datei (.zip oder .ics) hier wählen. Doppelte kommen nicht zweimal rein.</p>
+            <button class="wide" id="importBtn" type="button">Datei wählen</button>
+            <input type="file" id="importFile" accept=".ics,.zip,text/calendar,application/zip" hidden>
+        </div>
+        <div class="status" id="status" role="status"></div>
+    </header>
+
+    <div class="wrap">
+        <div class="card gate" id="gate" hidden>
+            <p>Bitte einmal anmelden, danach merkt sich das Gerät die Anmeldung.</p>
+            <button id="loginBtn" type="button">Anmelden</button>
+        </div>
+
+        <main id="main" hidden>
+            <section id="vAgenda" aria-label="Agenda">
+                <div class="hero" id="hero"></div>
+                <div id="days"></div>
+                <button class="wide more" id="moreBtn" type="button" hidden>Weitere Termine</button>
+            </section>
+            <section id="vWeek" aria-label="Woche" hidden>
+                <div class="card wk" id="wk"></div>
+            </section>
+            <section id="vMonth" aria-label="Monat" hidden>
+                <div class="card mo" id="mo"></div>
+                <div id="moDay"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- the editor -->
+    <div class="dlg-back" id="ed" hidden>
+        <form class="dlg ed" id="edForm" role="dialog" aria-modal="true" aria-labelledby="edTitle" novalidate>
+            <p class="ed-title" id="edTitle">Neuer Termin</p>
+            <label class="fld"><span>Was</span><input id="fTitle" type="text" autocomplete="off" enterkeyhint="done"></label>
+            <div class="two">
+                <label class="fld"><span>Tag</span><input id="fDate" type="date"></label>
+                <div class="fld"><span class="fld-label">&nbsp;</span>
+                    <label class="switch"><input id="fAllDay" type="checkbox"><i></i>ganztägig</label>
+                </div>
+            </div>
+            <div class="two" id="timeRow">
+                <label class="fld"><span>Beginn</span><input id="fStart" type="time" step="300"></label>
+                <label class="fld"><span>Ende</span><input id="fEnd" type="time" step="300"></label>
+            </div>
+            <div class="two" id="endDateRow" hidden>
+                <label class="fld"><span>Bis einschließlich</span><input id="fEndDate" type="date"></label>
+            </div>
+            <label class="fld"><span>Wo</span><input id="fLoc" type="text" autocomplete="off"></label>
+            <label class="fld"><span>Notiz</span><textarea id="fNotes" rows="2"></textarea></label>
+            <label class="fld"><span>Wiederholen</span>
+                <select id="fRepeat">
+                    <option value="">nie</option>
+                    <option value="FREQ=DAILY">jeden Tag</option>
+                    <option value="FREQ=WEEKLY">jede Woche</option>
+                    <option value="FREQ=WEEKLY;INTERVAL=2">alle zwei Wochen</option>
+                    <option value="FREQ=MONTHLY">jeden Monat</option>
+                    <option value="FREQ=YEARLY">jedes Jahr</option>
+                </select>
+            </label>
+            <div class="fld"><span class="fld-label" id="remLabel">Solita erinnert</span><div class="chips" id="fRemind" role="group" aria-labelledby="remLabel"></div></div>
+            <div class="fld"><span class="fld-label" id="colLabel">Farbe</span>
+                <div class="colors" id="fColor" role="radiogroup" aria-labelledby="colLabel">
+                    <button type="button" class="c2" role="radio" data-color="2" aria-label="Gold"></button>
+                    <button type="button" class="c1" role="radio" data-color="1" aria-label="Rot"></button>
+                    <button type="button" class="c3" role="radio" data-color="3" aria-label="Grün"></button>
+                </div>
+            </div>
+            <p class="ed-note" id="edNote"></p>
+            <div class="dlg-btns">
+                <button type="button" class="danger left" id="edDel">Löschen</button>
+                <button type="button" id="edCancel">Abbrechen</button>
+                <button type="submit" class="yes" id="edSave">Speichern</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- own question dialog in the page's look - never the browser's confirm() -->
+    <div class="dlg-back" id="dlg" hidden>
+        <div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgText">
+            <p class="msg" id="dlgText"></p>
+            <div class="dlg-btns" id="dlgBtns"></div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const K = window.KalenderCore;
+            const auth = window.svpAuth;
+            const $ = id => document.getElementById(id);
+            const DRAFT_KEY = 'kalender-draft';
+            const CACHE_KEY = 'kalender-cache';
+            const LESSON_KEY = 'kalender-lessons';
+            const SETTING_KEY = 'kalender-setting';
+            const LESSON_COLS = 'id,day,starts_at,ends_at,subject,classes,rooms,code,note';
+            const VIEW_KEY = 'kalender-view';
+            const COLS = 'id,title,starts_at,ends_at,all_day,location,notes,rrule,exdates,remind,color,source_uid';
+            const AGENDA_DAYS = 60;   // the agenda shows this many days, "Weitere Termine" the next ones
+
+            // reminder choices: minutes before the start (all-day: before 00:00 of the day)
+            const REMIND_TIMED = [[1440, '1 Tag'], [120, '2 Std'], [60, '1 Std'], [30, '30 Min'], [15, '15 Min'], [5, '5 Min'], [0, 'Beginn']];
+            const REMIND_ALLDAY = [[360, 'Vortag 18 Uhr'], [-420, 'am Tag 7 Uhr']];
+
+            // Material Icons (Apache 2.0): "place", "repeat", "add"
+            const ICON_PLACE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
+            const ICON_REPEAT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>';
+            const ICON_ADD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+
+            let items = [];            // rows of calendar_event
+            let lessons = [];          // rows of calendar_lesson: the timetable, mirrored from Untis by the watcher on the Mac
+            let setting = null;        // Doc's row of calendar_setting: does Solita call before appointments / lessons
+            let busy = 0;              // writes in flight - a reload now could bring back the old state
+            let view = 'agenda';       // 'agenda' | 'week' | 'month'
+            let anchor = K.startOfDay(new Date());   // the day the week or month view shows
+            let selDay = K.startOfDay(new Date());   // the chosen day in the month view
+            let agendaDays = AGENDA_DAYS;
+
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const colorOf = ev => (ev.lesson ? 'l' : [1, 2, 3].includes(ev.color) ? ev.color : 2);   // 'l' -> class cl
+            const isOff = occ => !!(occ.ev.lesson && occ.ev.lesson.code === 'cancelled');
+            const byId = id => items.find(x => x.id === id);
+
+            function status(msg, cls) {
+                const el = $('status');
+                el.textContent = msg || '';
+                el.className = 'status' + (cls ? ' ' + cls : '');
+            }
+            function cache() {
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(items));
+                    localStorage.setItem(LESSON_KEY, JSON.stringify(lessons));
+                    localStorage.setItem(SETTING_KEY, JSON.stringify(setting));
+                } catch (e) { }
+            }
+            function saveDraft() { try { localStorage.setItem(DRAFT_KEY, $('text').value); } catch (e) { } }
+
+            /* PostgREST call that returns the touched rows, or throws */
+            async function send(path, method, body, prefer) {
+                const opts = { method: method || 'GET', headers: { Prefer: prefer || 'return=representation' } };
+                if (body !== undefined) opts.body = JSON.stringify(body);
+                const res = await auth.api(path, opts);
+                if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'Kein Zugriff mit diesem Konto'
+                    : res.status === 404 ? 'Der Kalender ist in der Datenbank noch nicht eingerichtet' : 'HTTP ' + res.status);
+                return res.json();
+            }
+
+            async function load() {
+                // the timetable and the switches are part 2 (20261107_calendar_lessons.sql): missing, they just stay away
+                const [ev, ls, se] = await Promise.all([
+                    send(`calendar_event?select=${COLS}&order=starts_at.asc&limit=5000`),
+                    send(`calendar_lesson?select=${LESSON_COLS}&order=starts_at.asc&limit=5000`).catch(() => null),
+                    send('calendar_setting?select=call_events,call_lessons,lesson_lead').catch(() => null)
+                ]);
+                items = ev;
+                if (ls) lessons = ls;
+                if (se) setting = se[0] || null;
+                cache();
+            }
+
+            /* the lessons in [from, to) as occurrences like the appointments' (key "L|id"; ev.lesson = the row) */
+            function lessonOccs(from, to) {
+                const out = [];
+                for (const l of lessons) {
+                    const s = new Date(l.starts_at), e = new Date(l.ends_at);
+                    if (s < to && e > from) out.push({
+                        ev: { id: 'L' + l.id, title: K.lessonTitle(l), location: (l.rooms || []).join(', '), all_day: false, lesson: l },
+                        start: s, end: e, key: 'L|' + l.id
+                    });
+                }
+                return out;
+            }
+            /* appointments and lessons together, sorted like K.expand */
+            function occsIn(from, to) {
+                return K.expand(items, from, to).concat(lessonOccs(from, to))
+                    .sort((a, b) => a.start - b.start || (b.ev.all_day ? 1 : 0) - (a.ev.all_day ? 1 : 0) || a.end - b.end);
+            }
+
+            /* a write: change locally at once, then tell the server; on failure undo and say so */
+            async function write(apply, undo, request) {
+                apply();
+                render();
+                cache();
+                busy++;
+                try {
+                    const rows = await request();
+                    if (Array.isArray(rows) && !rows.length) throw new Error('nichts gespeichert');
+                    status('');
+                    return rows;
+                } catch (e) {
+                    undo();
+                    render();
+                    cache();
+                    status('Nicht gespeichert (' + e.message + ') – bitte nochmal.', 'err');
+                    return null;
+                } finally {
+                    busy--;
+                }
+            }
+
+            /* ---------- words for times ---------- */
+            const dayLabel = d => K.WEEKDAY_SHORT[d.getDay()] + ' ' + d.getDate() + '. ' + K.MONTH_SHORT[d.getMonth()];
+            const longDay = d => K.WEEKDAY_LONG[d.getDay()] + ', ' + d.getDate() + '. ' + K.MONTH_LONG[d.getMonth()];
+            function relDay(d) {
+                const diff = Math.round((K.startOfDay(d) - K.startOfDay(new Date())) / K.DAY);
+                return diff === 0 ? 'Heute' : diff === 1 ? 'Morgen' : diff === 2 ? 'Übermorgen' : diff === -1 ? 'Gestern' : null;
+            }
+            /* "in 14 Min", "in 2 Std 10 Min", "morgen", "in 5 Tagen" */
+            function countdown(occ, now) {
+                if (occ.start <= now) {
+                    const left = Math.max(1, Math.round((occ.end - now) / 60000));
+                    return 'läuft · noch ' + (left < 60 ? left + ' Min' : Math.floor(left / 60) + ' Std' + (left % 60 ? ' ' + (left % 60) + ' Min' : ''));
+                }
+                const min = Math.round((occ.start - now) / 60000);
+                const days = Math.round((K.startOfDay(occ.start) - K.startOfDay(now)) / K.DAY);
+                if (min < 1) return 'jetzt';
+                if (min < 60) return 'in ' + min + ' Min';
+                if (min < 12 * 60) return 'in ' + Math.floor(min / 60) + ' Std' + (min % 60 ? ' ' + (min % 60) + ' Min' : '');
+                if (days === 1) return 'morgen';
+                if (days === 2) return 'übermorgen';
+                if (days < 1) return 'in ' + Math.round(min / 60) + ' Std';
+                return 'in ' + days + ' Tagen';
+            }
+            function timeText(occ) {
+                if (occ.ev.all_day) {
+                    const last = K.addDays(occ.end, -1);
+                    return K.sameDay(occ.start, last) ? 'ganztägig' : 'bis ' + dayLabel(last);
+                }
+                return K.hhmm(occ.start) + '–' + K.hhmm(occ.end);
+            }
+
+            /* ---------- Agenda ---------- */
+            function renderHero(now) {
+                const hero = $('hero');
+                // the next appointment with a time that has not ended yet (all-day ones stand in the day list)
+                const next = occsIn(new Date(+now - K.DAY), K.addDays(now, 366)).find(o => !o.ev.all_day && !isOff(o) && o.end > now);
+                hero.className = 'hero';
+                if (!next) {
+                    hero.classList.add('empty');
+                    hero.innerHTML = '<div class="hero-top"><span class="pill">Als Nächstes</span></div><p class="hero-count">Nichts geplant.</p>' +
+                        '<div class="hero-meta">Oben eintippen oder aufs Mikrofon tippen: „morgen 18 Uhr Essen“.</div>';
+                    hero.onclick = null;
+                    return;
+                }
+                hero.classList.add('c' + colorOf(next.ev));
+                const running = next.start <= now;
+                // the bar fills over the last 3 hours before the start, and while it runs over its length
+                const pct = running ? (now - next.start) / (next.end - next.start) : 1 - Math.min(1, (next.start - now) / (3 * 3600000));
+                const rel = relDay(next.start);
+                const meta = [rel || longDay(next.start), timeText(next)];
+                hero.innerHTML =
+                    `<div class="hero-top"><span class="pill">${running ? 'Läuft gerade' : 'Als Nächstes'}</span></div>` +
+                    `<p class="hero-count">${esc(countdown(next, now))}</p>` +
+                    `<div class="hero-title">${esc(next.ev.title)}</div>` +
+                    `<div class="hero-meta">${esc(meta.join(' · '))}</div>` +
+                    (next.ev.location ? `<div class="hero-meta">${ICON_PLACE.replace('<svg', '<svg style="width:14px;height:14px;fill:currentColor;vertical-align:-2px"')} ${esc(next.ev.location)}</div>` : '') +
+                    `<div class="hero-bar"><i style="width:${Math.round(Math.max(0, Math.min(1, pct)) * 100)}%"></i></div>`;
+                hero.onclick = () => openOcc(next);
+            }
+
+            const evRow = (occ, now) => {
+                const past = occ.end <= now, cur = occ.start <= now && occ.end > now;
+                const last = K.addDays(occ.end, -1);
+                const t = occ.ev.all_day
+                    ? `<div class="t"><span class="allday">${K.sameDay(occ.start, last) ? 'ganz-<br>tägig' : 'bis<br>' + last.getDate() + '.' + (last.getMonth() + 1) + '.'}</span></div>`
+                    : `<div class="t"><b>${K.hhmm(occ.start)}</b><small>${K.hhmm(occ.end)}</small></div>`;
+                const meta = [];
+                if (occ.ev.location) meta.push(ICON_PLACE + esc(occ.ev.location));
+                if (occ.ev.rrule) meta.push(ICON_REPEAT + 'wiederholt sich');
+                const l = occ.ev.lesson;
+                // Untis notes stand out (cancelled, substitution, "nicht im Haus"); a coaching block's note is just its slots
+                if (l && l.code === 'cancelled') meta.push(`<span class="note">${esc('fällt aus' + (l.note ? ' – ' + l.note : ''))}</span>`);
+                else if (l && l.note) meta.push(/^coaching/i.test(l.subject) ? esc(l.note) : `<span class="note">${esc(l.note)}</span>`);
+                return `<li class="c${colorOf(occ.ev)}${past ? ' past' : ''}${cur ? ' now' : ''}${isOff(occ) ? ' off' : ''}" data-key="${esc(occ.key)}">${t}` +
+                    `<div class="ev-body"><div class="ev-title">${esc(occ.ev.title)}</div>${meta.length ? `<div class="ev-meta">${meta.join(' · ')}</div>` : ''}</div></li>`;
+            };
+
+            let shownOcc = new Map();   // key -> occurrence, for taps on rows
+            function dayBox(day, occs, now, addBtn) {
+                const rel = relDay(day);
+                const isToday = K.sameDay(day, now);
+                for (const o of occs) shownOcc.set(o.key, o);
+                return `<section class="day${isToday ? ' today' : ''}" data-day="${K.ymd(day)}"><div class="day-head">` +
+                    `<h2 class="pill">${esc(rel || dayLabel(day))}</h2>${rel ? `<span class="sub">${esc(longDay(day))}</span>` : ''}` +
+                    (addBtn ? `<button class="add" type="button" data-add="${K.ymd(day)}" aria-label="Termin an diesem Tag">${ICON_ADD}</button>` : '') +
+                    `</div><ul class="evs">${occs.map(o => evRow(o, now)).join('')}</ul></section>`;
+            }
+
+            function renderAgenda(now) {
+                renderHero(now);
+                const today = K.startOfDay(now);
+                const to = K.addDays(today, agendaDays);
+                const occs = occsIn(today, to);
+                const groups = new Map([[K.ymd(today), []]]);   // today always shows, also when empty
+                for (const o of occs) {
+                    // an all-day span that began earlier counts from today on
+                    const d = o.start < today ? today : K.startOfDay(o.start);
+                    const k = K.ymd(d);
+                    if (!groups.has(k)) groups.set(k, []);
+                    groups.get(k).push(o);
+                }
+                const keys = [...groups.keys()].sort();
+                $('days').innerHTML = keys.map(k => {
+                    const [y, m, d] = k.split('-').map(Number);
+                    return dayBox(new Date(y, m - 1, d), groups.get(k), now, true);
+                }).join('');
+                const later = K.expand(items, to, K.addDays(to, 366)).length;
+                $('moreBtn').hidden = !later;
+                $('moreBtn').textContent = later ? `Weitere Termine (${later} im Jahr danach)` : '';
+            }
+
+            /* ---------- Woche ---------- */
+            const mondayOf = d => K.addDays(K.startOfDay(d), -((d.getDay() + 6) % 7));
+            function renderWeek(now) {
+                const mon = mondayOf(anchor);
+                const days = [...Array(7)].map((_, i) => K.addDays(mon, i));
+                const sun = days[6];
+                $('period').innerHTML = esc(mon.getDate() + '.' + (mon.getMonth() !== sun.getMonth() ? ' ' + K.MONTH_SHORT[mon.getMonth()] + ' ' : '') +
+                    '–' + sun.getDate() + '. ' + K.MONTH_SHORT[sun.getMonth()]) + `<small>KW ${K.isoWeek(mon)} · ${sun.getFullYear()}</small>`;
+                const occs = occsIn(mon, K.addDays(mon, 7));
+                const timed = occs.filter(o => !o.ev.all_day), allday = occs.filter(o => o.ev.all_day);
+                // hours shown: 7 to 22, wider when an appointment lies outside
+                let h0 = 7, h1 = 22;
+                for (const o of timed) {
+                    const s = K.sameDay(o.start, o.end) || o.start >= mon ? o.start.getHours() : 0;
+                    const e = K.sameDay(o.start, o.end) ? o.end.getHours() + (o.end.getMinutes() ? 1 : 0) : 24;
+                    h0 = Math.min(h0, s); h1 = Math.max(h1, e);
+                }
+                const H = h1 - h0;
+                shownOcc = new Map();
+                let html = '<div class="wk-head"><div></div>' + days.map(d =>
+                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${K.WEEKDAY_SHORT[d.getDay()]}<b>${d.getDate()}</b></button>`).join('') + '</div>';
+                if (allday.length) {
+                    html += '<div class="wk-allday"><div></div>' + days.map(d => {
+                        const here = allday.filter(o => o.start < K.addDays(d, 1) && o.end > d);
+                        here.forEach(o => shownOcc.set(o.key, o));
+                        return '<div>' + here.map(o => `<button type="button" class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}" title="${esc(o.ev.title)}">${esc(o.ev.title)}</button>`).join('') + '</div>';
+                    }).join('') + '</div>';
+                }
+                html += `<div class="wk-grid" data-h0="${h0}"><div class="wk-hours">` + [...Array(H)].map((_, i) => `<div>${i ? `<span>${String(h0 + i).padStart(2, '0')}</span>` : ''}</div>`).join('') + '</div>';
+                html += days.map(d => {
+                    const dEnd = K.addDays(d, 1);
+                    const here = timed.filter(o => o.start < dEnd && o.end > d).map(o => {
+                        const s = Math.max(+o.start, +d), e = Math.min(+o.end, +dEnd);
+                        const sm = (new Date(s).getHours() - h0) * 60 + new Date(s).getMinutes();
+                        const em = e === +dEnd ? (24 - h0) * 60 : (new Date(e).getHours() - h0) * 60 + new Date(e).getMinutes();
+                        return { o, sm, em: Math.max(em, sm + 20) };
+                    }).sort((a, b) => a.sm - b.sm || b.em - a.em);
+                    // side by side when they overlap: each one gets the first free lane of its cluster
+                    const lanesEnd = [];
+                    let cluster = [], clusterEnd = -1;
+                    const flush = () => { for (const x of cluster) x.lanes = lanesEnd.length; cluster = []; lanesEnd.length = 0; };
+                    for (const x of here) {
+                        if (x.sm >= clusterEnd) flush();
+                        let lane = lanesEnd.findIndex(end => end <= x.sm);
+                        if (lane < 0) { lane = lanesEnd.length; lanesEnd.push(0); }
+                        lanesEnd[lane] = x.em;
+                        x.lane = lane;
+                        cluster.push(x);
+                        clusterEnd = Math.max(clusterEnd, x.em);
+                    }
+                    flush();
+                    let col = `<div class="wk-col${K.sameDay(d, now) ? ' today' : ''}" data-day="${K.ymd(d)}" style="height:calc(var(--hour) * ${H})">`;
+                    for (const x of here) {
+                        shownOcc.set(x.o.key, x.o);
+                        const top = `calc(var(--hour) * ${x.sm / 60})`, height = `calc(var(--hour) * ${(x.em - x.sm) / 60} - 2px)`;
+                        const left = (x.lane / x.lanes * 100).toFixed(2), width = (100 / x.lanes).toFixed(2);
+                        col += `<div class="wk-ev c${colorOf(x.o.ev)}${x.o.end <= now ? ' past' : ''}${isOff(x.o) ? ' off' : ''}${x.em - x.sm <= 30 ? ' short' : ''}" data-key="${esc(x.o.key)}" style="top:${top};height:${height};left:calc(${left}% + 1px);width:calc(${width}% - 2px)" title="${esc(K.hhmm(x.o.start) + ' ' + x.o.ev.title)}">` +
+                            `<small>${K.hhmm(x.o.start)}</small>${esc(x.o.ev.title)}</div>`;
+                    }
+                    if (K.sameDay(d, now)) {
+                        const nm = (now.getHours() - h0) * 60 + now.getMinutes();
+                        if (nm >= 0 && nm <= H * 60) col += `<div class="now-line" style="top:calc(var(--hour) * ${nm / 60})"></div>`;
+                    }
+                    return col + '</div>';
+                }).join('') + '</div>';
+                $('wk').innerHTML = html;
+            }
+
+            /* ---------- Monat ---------- */
+            function renderMonth(now) {
+                const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+                const start = mondayOf(first);
+                const cells = [...Array(42)].map((_, i) => K.addDays(start, i));
+                $('period').innerHTML = esc(K.MONTH_LONG[first.getMonth()]) + `<small>${first.getFullYear()}</small>`;
+                const occs = K.expand(items, start, K.addDays(start, 42));
+                shownOcc = new Map();
+                let html = '<div class="mo-head">' + [1, 2, 3, 4, 5, 6, 0].map(i => `<span>${K.WEEKDAY_SHORT[i]}</span>`).join('') + '</div><div class="mo-grid">';
+                for (const d of cells) {
+                    const here = occs.filter(o => o.start < K.addDays(d, 1) && o.end > d);
+                    const school = lessonOccs(d, K.addDays(d, 1)).some(o => !isOff(o));   // one quiet mark for the lessons
+                    const cls = (d.getMonth() !== first.getMonth() ? ' out' : '') + (K.sameDay(d, now) ? ' today' : '') + (K.sameDay(d, selDay) ? ' sel' : '');
+                    html += `<button type="button" class="mo-cell${cls}" data-day="${K.ymd(d)}" aria-label="${esc(longDay(d))}${here.length ? ', ' + here.length + ' Termin' + (here.length > 1 ? 'e' : '') : ''}${school ? ', Unterricht' : ''}">` +
+                        `<span class="n">${d.getDate()}</span><span class="evs">` +
+                        here.slice(0, 3).map(o => `<span class="chip c${colorOf(o.ev)}">${esc((o.ev.all_day ? '' : K.hhmm(o.start) + ' ') + o.ev.title)}</span>`).join('') +
+                        (here.length > 3 ? `<span class="plus">+${here.length - 3}</span>` : '') +
+                        (school ? '<span class="chip cl">Unterricht</span>' : '') + '</span></button>';
+                }
+                $('mo').innerHTML = html + '</div>';
+                // the chosen day's appointments below the month
+                $('moDay').innerHTML = dayBox(selDay, occsIn(selDay, K.addDays(selDay, 1)), now, true);
+            }
+
+            function render() {
+                const now = new Date();
+                shownOcc = new Map();
+                $('nav').hidden = view === 'agenda';
+                document.body.dataset.view = view;
+                $('vAgenda').hidden = view !== 'agenda';
+                $('vWeek').hidden = view !== 'week';
+                $('vMonth').hidden = view !== 'month';
+                for (const b of $('views').children) b.setAttribute('aria-selected', String(b.dataset.view === view));
+                if (view === 'agenda') renderAgenda(now);
+                else if (view === 'week') renderWeek(now);
+                else renderMonth(now);
+                renderSetting();
+            }
+
+            /* ---------- the call switches (calendar_setting; the watcher on the Mac reads them every minute) ---------- */
+            function renderSetting() {
+                const s = setting || {};
+                $('callEvents').checked = s.call_events !== false;
+                $('callLessons').checked = s.call_lessons !== false;
+                $('callLessonsText').textContent = (Number.isFinite(s.lesson_lead) ? s.lesson_lead : 5) + ' Min. vor jeder Stunde';
+                $('callEvents').disabled = $('callLessons').disabled = !setting;
+                $('callNote').textContent = setting ? 'Ausgefallene Stunden ruft sie nicht. Gilt ab der nächsten Minute, auch am Phone.'
+                    : 'Die Schalter kommen, sobald die Datenbank dafür eingerichtet ist.';
+            }
+            async function toggleSetting(field, on) {
+                if (!setting) return;
+                const prev = setting[field];
+                setting[field] = on;
+                cache();
+                busy++;
+                try {
+                    const rows = await send('calendar_setting?user_id=not.is.null', 'PATCH', { [field]: on });
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    status(field === 'call_lessons' ? (on ? 'Solita ruft vor jeder Stunde an.' : 'Solita ruft vor den Stunden nicht mehr an.')
+                        : (on ? 'Solita ruft vor Terminen an.' : 'Solita ruft vor Terminen nicht mehr an.'));
+                } catch (e) {
+                    setting[field] = prev;
+                    cache();
+                    status('Nicht gespeichert (' + e.message + ') – bitte nochmal.', 'err');
+                } finally {
+                    busy--;
+                    renderSetting();
+                }
+            }
+
+            /* a tapped occurrence: an appointment opens the editor, a lesson only says what it is (Untis owns it) */
+            function openOcc(occ) {
+                if (!occ.ev.lesson) { openEditor({ occ }); return; }
+                const l = occ.ev.lesson;
+                const lines = [K.lessonTitle(l), longDay(occ.start) + ', ' + K.hhmm(occ.start) + '–' + K.hhmm(occ.end)];
+                if (l.rooms && l.rooms.length) lines.push('Raum ' + l.rooms.join(', '));
+                if (l.code === 'cancelled') lines.push('Fällt aus.');
+                else if (l.code === 'irregular') lines.push('Geändert (Vertretung oder Verlegung).');
+                if (l.note) lines.push(...(/^coaching/i.test(l.subject) ? ['', ...l.note.split(' · ')] : [l.note]));
+                lines.push('', 'Aus dem Stundenplan (Untis).');
+                ask(lines.join('\n'), [{ label: 'OK', value: null, cls: 'yes' }]);
+            }
+
+            function setView(v) {
+                view = ['agenda', 'week', 'month'].includes(v) ? v : 'agenda';
+                try { localStorage.setItem(VIEW_KEY, view); } catch (e) { }
+                render();
+            }
+            function step(dir) {
+                if (view === 'week') anchor = K.addDays(anchor, 7 * dir);
+                else if (view === 'month') {
+                    anchor = new Date(anchor.getFullYear(), anchor.getMonth() + dir, 1);
+                    const today = new Date();
+                    selDay = anchor.getMonth() === today.getMonth() && anchor.getFullYear() === today.getFullYear() ? K.startOfDay(today) : anchor;
+                }
+                render();
+            }
+            function goToday() {
+                anchor = K.startOfDay(new Date());
+                selDay = anchor;
+                render();
+            }
+
+            /* ---------- question dialog: buttons [{ label, cls, value }] -> the value of the tapped one (Escape: null) ---------- */
+            function ask(text, buttons) {
+                return new Promise(done => {
+                    $('dlgText').textContent = text;
+                    $('dlgBtns').innerHTML = buttons.map((b, i) => `<button type="button" class="${b.cls || ''}" data-i="${i}">${esc(b.label)}</button>`).join('');
+                    $('dlg').hidden = false;
+                    $('dlgBtns').firstChild.focus();
+                    const close = v => {
+                        $('dlg').hidden = true;
+                        document.removeEventListener('keydown', key, true);
+                        $('dlgBtns').onclick = $('dlg').onclick = null;
+                        done(v);
+                    };
+                    const key = e => {
+                        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(null); }
+                    };
+                    document.addEventListener('keydown', key, true);
+                    $('dlgBtns').onclick = e => { const b = e.target.closest('button'); if (b) close(buttons[+b.dataset.i].value); };
+                    $('dlg').onclick = e => { if (e.target === $('dlg')) close(null); };
+                });
+            }
+
+            /* ---------- the editor ---------- */
+            let edState = null;   // { ev (null = new), occ (the tapped occurrence of a series), remind: Set, color, extra }
+            let lastStart = '';   // the start time before an edit: a later start moves the end along
+            const pad = n => String(n).padStart(2, '0');
+            const timeVal = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+            const dateOf = v => { const [y, m, d] = v.split('-').map(Number); return new Date(y, m - 1, d); };
+            const at = (day, t) => { const [h, m] = t.split(':').map(Number); return new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m); };
+
+            /* a reminder time as a chip label: minutes before the start (all-day: before 00:00 of the day) */
+            function remindLabel(m, allDay) {
+                const hm = t => Math.floor(t / 60) + (t % 60 ? ':' + pad(t % 60) : '') + ' Uhr';
+                if (allDay) {
+                    if (m <= 0) return 'am Tag ' + hm(-m);
+                    const days = Math.ceil(m / 1440);
+                    return (days === 1 ? 'Vortag ' : days + ' Tage vorher ') + hm(days * 1440 - m);
+                }
+                if (m < 0) return -m + ' Min danach';
+                if (m === 0) return 'Beginn';
+                const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mi = m % 60;
+                return [d && d + (d === 1 ? ' Tag' : ' Tage'), h && h + ' Std', mi && mi + ' Min'].filter(Boolean).join(' ');
+            }
+            /* the chips: the fixed choices plus every reminder of the opened event that has none (e.g. 100 minutes,
+               written by an agent through tools/kalender/eintragen.mjs) - so saving in the app never drops it */
+            function remindChoices(allDay) {
+                const base = allDay ? REMIND_ALLDAY : REMIND_TIMED;
+                const extra = edState.extra.allDay !== allDay ? [] : edState.extra.mins
+                    .filter(m => !base.some(([x]) => x === m)).map(m => [m, remindLabel(m, allDay)]);
+                return base.concat(extra).sort((a, b) => b[0] - a[0]);
+            }
+            function renderRemind() {
+                const list = remindChoices($('fAllDay').checked);
+                $('fRemind').innerHTML = list.map(([m, l]) => `<button type="button" data-min="${m}" aria-pressed="${edState.remind.has(m)}">${esc(l)}</button>`).join('');
+            }
+            function renderColor() {
+                for (const b of $('fColor').children) b.setAttribute('aria-checked', String(+b.dataset.color === edState.color));
+            }
+            function syncAllDay() {
+                const on = $('fAllDay').checked;
+                $('timeRow').hidden = on;
+                $('endDateRow').hidden = !on;
+                if (on && !$('fEndDate').value) $('fEndDate').value = $('fDate').value;
+            }
+
+            /* open for a new appointment ({ draft: parseQuick result } or { day }) or for an existing one ({ occ }) */
+            function openEditor(o) {
+                $('settings').hidden = true;
+                const occ = o.occ || null;
+                const ev = occ ? occ.ev : null;
+                edState = { ev, occ, remind: new Set(), color: ev ? colorOf(ev) : 2, extra: { allDay: !!(ev && ev.all_day), mins: ev ? K.remindOf(ev) : [] } };
+                $('edTitle').textContent = ev ? 'Termin' : 'Neuer Termin';
+                $('edDel').hidden = !ev;
+                let start, end, allDay;
+                if (ev) {
+                    start = occ.start; end = occ.end; allDay = !!ev.all_day;
+                    $('fTitle').value = ev.title;
+                    $('fLoc').value = ev.location || '';
+                    $('fNotes').value = ev.notes || '';
+                    K.remindOf(ev).forEach(m => edState.remind.add(m));
+                } else {
+                    const q = o.draft || {};
+                    const day = q.date || o.day || K.startOfDay(new Date());
+                    allDay = !!q.allDay;
+                    const now = new Date();
+                    if (q.start) start = new Date(day.getFullYear(), day.getMonth(), day.getDate(), q.start.h, q.start.m);
+                    else if (o.hour !== undefined) start = new Date(day.getFullYear(), day.getMonth(), day.getDate(), o.hour, 0);
+                    else {   // the next full hour, on another day 9 o'clock
+                        start = K.sameDay(day, now) ? new Date(day.getFullYear(), day.getMonth(), day.getDate(), Math.min(23, now.getHours() + 1), 0)
+                            : new Date(day.getFullYear(), day.getMonth(), day.getDate(), 9, 0);
+                    }
+                    end = q.end ? new Date(day.getFullYear(), day.getMonth(), day.getDate(), q.end.h, q.end.m) : new Date(+start + 3600000);
+                    if (end <= start) end = K.addDays(end, 1);
+                    if (allDay) { start = K.startOfDay(day); end = K.addDays(start, 1); }
+                    $('fTitle').value = q.title || '';
+                    $('fLoc').value = '';
+                    $('fNotes').value = '';
+                    (allDay ? K.DEFAULT_REMIND_ALLDAY : K.DEFAULT_REMIND).forEach(m => edState.remind.add(m));
+                }
+                $('fAllDay').checked = allDay;
+                $('fDate').value = K.ymd(start);
+                $('fStart').value = timeVal(start);
+                $('fEnd').value = timeVal(end);
+                lastStart = $('fStart').value;
+                $('fEndDate').value = K.ymd(allDay ? K.addDays(end, -1) : start);
+                // the repetition: a known one in the list, an imported other one as its own entry
+                const sel = $('fRepeat');
+                [...sel.querySelectorAll('option[data-custom]')].forEach(x => x.remove());
+                const rule = ev && ev.rrule ? ev.rrule : '';
+                if (rule && ![...sel.options].some(x => x.value === rule)) {
+                    const opt = new Option('wie übernommen (' + rule + ')', rule);
+                    opt.dataset.custom = '1';
+                    sel.add(opt);
+                }
+                sel.value = rule;
+                $('edNote').textContent = ev && ev.rrule ? 'Wiederholt sich – Änderungen gelten für alle Termine der Reihe.' : '';
+                syncAllDay();
+                renderRemind();
+                renderColor();
+                $('ed').hidden = false;
+                if (!ev && !$('fTitle').value) setTimeout(() => $('fTitle').focus(), 30);
+            }
+            function closeEditor() { $('ed').hidden = true; edState = null; }
+
+            /* the form -> a row for calendar_event, or a message what is missing */
+            function formRow() {
+                const title = $('fTitle').value.replace(/\s+/g, ' ').trim();
+                if (!title) return { err: 'Bitte eintragen, was es ist.' };
+                if (!$('fDate').value) return { err: 'Bitte einen Tag wählen.' };
+                const day = dateOf($('fDate').value);
+                const allDay = $('fAllDay').checked;
+                let s, e;
+                if (allDay) {
+                    s = day;
+                    const last = $('fEndDate').value ? dateOf($('fEndDate').value) : day;
+                    e = K.addDays(last < day ? day : last, 1);
+                } else {
+                    if (!$('fStart').value) return { err: 'Bitte die Uhrzeit eintragen.' };
+                    s = at(day, $('fStart').value);
+                    e = $('fEnd').value ? at(day, $('fEnd').value) : new Date(+s + 3600000);
+                    if (e <= s) e = K.addDays(e, 1);   // over midnight
+                }
+                const choices = remindChoices(allDay);
+                const rmin = [...edState.remind].filter(m => choices.some(([x]) => x === m)).sort((a, b) => b - a);
+                return {
+                    row: {
+                        title, all_day: allDay, starts_at: s.toISOString(),
+                        ends_at: allDay ? (Math.round((e - s) / K.DAY) > 1 ? e.toISOString() : null) : e.toISOString(),
+                        location: $('fLoc').value.trim() || null, notes: $('fNotes').value.trim() || null,
+                        rrule: $('fRepeat').value || null, remind: rmin, color: edState.color
+                    }, s, e
+                };
+            }
+
+            async function save() {
+                const f = formRow();
+                if (f.err) { $('edNote').textContent = f.err; return; }
+                const { row } = f;
+                const st = edState;
+                if (st.ev && st.ev.rrule && row.rrule) {
+                    // a series: move its first date by as much as this occurrence moved
+                    const shift = f.s - st.occ.start;
+                    const s0 = new Date(+new Date(st.ev.starts_at) + shift);
+                    const first = row.all_day ? K.startOfDay(new Date(+s0 + 12 * 3600000)) : s0;
+                    row.starts_at = first.toISOString();
+                    row.ends_at = row.ends_at ? (row.all_day ? K.addDays(first, Math.round((f.e - f.s) / K.DAY)) : new Date(+first + (f.e - f.s))).toISOString() : null;
+                }
+                if (st.ev) {
+                    closeEditor();
+                    const ev = byId(st.ev.id) || st.ev, prev = Object.assign({}, ev);   // the list may have been reloaded meanwhile
+                    await write(() => Object.assign(ev, row), () => Object.assign(ev, prev),
+                        () => send(`calendar_event?id=eq.${ev.id}`, 'PATCH', row));
+                    return;
+                }
+                // a new one: the editor stays open until the server has it, so nothing typed is lost
+                $('edSave').disabled = true;
+                busy++;
+                try {
+                    const rows = await send('calendar_event', 'POST', [row]);
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    items.push(rows[0]);
+                    closeEditor();
+                    $('text').value = '';
+                    saveDraft();
+                    status('');
+                    // show where it landed
+                    if (view !== 'agenda') { anchor = K.startOfDay(new Date(rows[0].starts_at)); selDay = anchor; }
+                    render();
+                    cache();
+                } catch (e) {
+                    $('edNote').textContent = 'Nicht gespeichert (' + e.message + ') – bitte nochmal.';
+                } finally {
+                    busy--;
+                    $('edSave').disabled = false;
+                }
+            }
+
+            async function removeIt() {
+                const st = edState;
+                if (!st || !st.ev) return;
+                const ev = byId(st.ev.id) || st.ev;
+                if (ev.rrule) {
+                    const v = await ask('„' + ev.title + '“ wiederholt sich. Was soll weg?', [
+                        { label: 'Abbrechen', value: null }, { label: 'Nur dieser', value: 'one', cls: 'danger' }, { label: 'Alle', value: 'all', cls: 'danger' }]);
+                    if (!v) return;
+                    closeEditor();
+                    if (v === 'one') {
+                        const prev = (ev.exdates || []).slice();
+                        const next = prev.concat(st.occ.start.toISOString());
+                        await write(() => { ev.exdates = next; }, () => { ev.exdates = prev; },
+                            () => send(`calendar_event?id=eq.${ev.id}`, 'PATCH', { exdates: next }));
+                        return;
+                    }
+                } else {
+                    const v = await ask('„' + ev.title + '“ löschen?', [{ label: 'Abbrechen', value: null }, { label: 'Löschen', value: 'all', cls: 'danger' }]);
+                    if (!v) return;
+                    closeEditor();
+                }
+                await write(() => { items = items.filter(x => x.id !== ev.id); }, () => { items.push(ev); },
+                    () => send(`calendar_event?id=eq.${ev.id}`, 'DELETE'));
+            }
+
+            /* ---------- quick entry and dictation ---------- */
+            function quick() {
+                const text = $('text').value.trim();
+                const draft = text ? K.parseQuick(text, new Date()) : {};
+                if (!text && view === 'month') draft.date = selDay;
+                openEditor({ draft });
+            }
+
+            let ear = null, dictBase = '';
+            const join = (a, b) => (a && b ? a + ' ' + b : a || b);
+            function setMic(on) {
+                $('micBtn').classList.toggle('on', on);
+                $('micBtn').setAttribute('aria-label', on ? 'Diktat beenden' : 'Diktieren');
+            }
+            function dictated(t) {
+                const el = $('text');
+                el.value = join(dictBase, t);
+                el.scrollLeft = el.scrollWidth;
+                saveDraft();
+            }
+            function dictate() {
+                if (ear && ear.active) { ear.stop(); return; }
+                if (!window.SolitaListen) { status('Diktieren ist hier nicht geladen.', 'err'); return; }
+                if (!ear) ear = window.SolitaListen({
+                    lang: 'de-DE',
+                    onState: st => {
+                        if (st === 'unsupported') status('Diktieren geht in diesem Browser nicht – die Mikrofon-Taste der Tastatur geht immer.', 'err');
+                        setMic(st === 'listening');
+                    },
+                    onPartial: t => { if (t) dictated(t); },
+                    // said and done: the editor opens with what was understood, Doc only checks and saves
+                    onFinal: t => { dictated(t); setMic(false); if ($('text').value.trim()) quick(); },
+                    log: m => console.log('[kalender]', m)
+                });
+                dictBase = $('text').value.trim();
+                status('');
+                ear.start();
+            }
+
+            /* ---------- import from Google ---------- */
+            async function importFile(file) {
+                if (!file) return;
+                $('settings').hidden = true;
+                $('gearBtn').setAttribute('aria-expanded', 'false');
+                status('Lese ' + file.name + ' …');
+                let files;
+                try {
+                    const buf = await file.arrayBuffer();
+                    const head = new Uint8Array(buf.slice(0, 4));
+                    files = head[0] === 0x50 && head[1] === 0x4b ? await K.unzipIcs(buf) : [{ name: file.name, text: new TextDecoder().decode(buf) }];
+                } catch (e) { status('Die Datei ließ sich nicht lesen (' + e.message + ').', 'err'); return; }
+                if (!files.length) { status('In der Datei steht kein Kalender (.ics).', 'err'); return; }
+                const have = new Set(items.map(x => x.source_uid).filter(Boolean));
+                let added = 0, already = 0;
+                for (const f of files) {
+                    const p = K.parseIcs(f.text, { now: new Date() });
+                    const fresh = p.events.filter(e => !e.source_uid || !have.has(e.source_uid));
+                    already += p.events.length - fresh.length;
+                    if (!fresh.length) continue;
+                    const name = f.name.replace(/\.ics$/i, '').replace(/_[^_]*@.*$/, '').replace(/@(group\.calendar\.google\.com|gmail\.com|google\.com)$/i, '');
+                    const v = await ask(`„${name}“: ${fresh.length} Termin${fresh.length > 1 ? 'e' : ''}, davon ${p.upcoming} noch anstehend oder wiederkehrend.` +
+                        (already ? `\n${already} sind schon im Kalender.` : '') + '\nÜbernehmen?',
+                        [{ label: 'Überspringen', value: null }, { label: 'Übernehmen', value: 'yes', cls: 'yes' }]);
+                    if (!v) continue;
+                    status('Übernehme …');
+                    try {
+                        for (let i = 0; i < fresh.length; i += 100) {
+                            const rows = await send('calendar_event?on_conflict=user_id,source_uid', 'POST', fresh.slice(i, i + 100),
+                                'return=representation,resolution=ignore-duplicates');
+                            items.push(...rows);
+                            rows.forEach(r => r.source_uid && have.add(r.source_uid));
+                            added += rows.length;
+                        }
+                    } catch (e) { status('Abgebrochen nach ' + added + ' Terminen (' + e.message + ') – nochmal wählen, Doppelte kommen nicht zweimal.', 'err'); render(); cache(); return; }
+                }
+                render();
+                cache();
+                status(added ? added + ' Termin' + (added > 1 ? 'e' : '') + ' übernommen.' + (already ? ' ' + already + ' waren schon da.' : '')
+                    : already ? 'Alle ' + already + ' Termine sind schon im Kalender.' : 'Nichts übernommen.');
+            }
+
+            /* ---------- colour scheme (shared key with the SVP and the To-do app) ---------- */
+            const THEMES = ['dark', 'grey', 'light'];
+            function applyTheme(t) {
+                const theme = THEMES.includes(t) ? t : 'dark';
+                const root = document.documentElement;
+                root.classList.toggle('svp-light', theme === 'light');
+                root.classList.toggle('svp-grey', theme === 'grey');
+                for (const b of $('themeSeg').children) b.setAttribute('aria-checked', String(b.dataset.theme === theme));
+                const m = document.querySelector('meta[name=theme-color]');
+                if (m) m.content = getComputedStyle(document.body).backgroundColor;
+                try { localStorage.setItem('svp-theme', theme); } catch (e) { }
+            }
+            function showSettings(on) {
+                $('settings').hidden = !on;
+                $('gearBtn').setAttribute('aria-expanded', String(on));
+            }
+
+            async function refresh() {
+                try { await load(); status(''); } catch (e) { status(e.message, 'err'); }
+                render();
+            }
+
+            function showApp() {
+                $('gate').hidden = true;
+                $('entry').hidden = false;
+                $('main').hidden = false;
+                try { items = JSON.parse(localStorage.getItem(CACHE_KEY)) || []; } catch (e) { items = []; }
+                try { lessons = JSON.parse(localStorage.getItem(LESSON_KEY)) || []; } catch (e) { lessons = []; }
+                try { setting = JSON.parse(localStorage.getItem(SETTING_KEY)) || null; } catch (e) { setting = null; }
+                try { $('text').value = localStorage.getItem(DRAFT_KEY) || ''; } catch (e) { }
+                try { view = localStorage.getItem(VIEW_KEY) || 'agenda'; } catch (e) { }
+                setView(view);
+                refresh();
+            }
+
+            function init() {
+                try { applyTheme(localStorage.getItem('svp-theme')); } catch (e) { applyTheme('dark'); }
+                $('themeSeg').onclick = e => { const b = e.target.closest('button'); if (b) applyTheme(b.dataset.theme); };
+                $('gearBtn').onclick = () => showSettings($('settings').hidden);
+                document.addEventListener('pointerdown', e => {
+                    if (!$('settings').hidden && !e.target.closest('#settings, #gearBtn')) showSettings(false);
+                });
+                $('importBtn').onclick = () => $('importFile').click();
+                $('callEvents').onchange = e => toggleSetting('call_events', e.target.checked);
+                $('callLessons').onchange = e => toggleSetting('call_lessons', e.target.checked);
+                $('importFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; importFile(f); };
+
+                $('text').addEventListener('input', saveDraft);
+                $('text').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); quick(); } });
+                $('micBtn').onclick = dictate;
+                $('views').onclick = e => { const b = e.target.closest('button'); if (b) setView(b.dataset.view); };
+                $('prevBtn').onclick = () => step(-1);
+                $('nextBtn').onclick = () => step(1);
+                $('todayBtn').onclick = goToday;
+                $('period').onclick = goToday;
+                $('moreBtn').onclick = () => { agendaDays += 120; render(); };
+
+                // taps in the views: an appointment opens it, a "+" or an empty place in the week starts a new one there
+                $('main').addEventListener('click', e => {
+                    const add = e.target.closest('[data-add]');
+                    if (add) { openEditor({ day: dateOf(add.dataset.add) }); return; }
+                    const hit = e.target.closest('[data-key]');
+                    if (hit && shownOcc.has(hit.dataset.key)) { openOcc(shownOcc.get(hit.dataset.key)); return; }
+                    const cell = e.target.closest('.mo-cell');
+                    if (cell) {
+                        const d = dateOf(cell.dataset.day);
+                        // a second tap on the chosen day starts a new appointment there
+                        if (K.sameDay(d, selDay)) { openEditor({ day: d }); return; }
+                        selDay = d;
+                        if (d.getMonth() !== anchor.getMonth()) anchor = new Date(d.getFullYear(), d.getMonth(), 1);
+                        render();
+                        return;
+                    }
+                    const col = e.target.closest('.wk-col');
+                    if (col) {
+                        const r = col.getBoundingClientRect();
+                        const hourPx = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hour')) || 44;
+                        const h0 = Number(col.parentElement.dataset.h0) || 0;
+                        openEditor({ day: dateOf(col.dataset.day), hour: Math.max(0, Math.min(23, h0 + Math.floor((e.clientY - r.top) / hourPx))) });
+                    }
+                });
+                // swipe sideways in the week and the month: back and forward
+                let sx = null, sy = 0;
+                $('main').addEventListener('touchstart', e => { if (e.touches.length === 1) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; } }, { passive: true });
+                $('main').addEventListener('touchend', e => {
+                    if (sx === null || view === 'agenda') return;
+                    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+                    sx = null;
+                    if (Math.abs(dx) > 60 && Math.abs(dy) < 50) step(dx < 0 ? 1 : -1);
+                }, { passive: true });
+
+                $('edForm').onsubmit = e => { e.preventDefault(); save(); };
+                $('edCancel').onclick = closeEditor;
+                $('edDel').onclick = removeIt;
+                $('ed').addEventListener('pointerdown', e => { if (e.target === $('ed')) closeEditor(); });
+                $('fAllDay').onchange = () => {
+                    // switching changes which reminders fit: take the defaults of the new kind
+                    edState.remind = new Set($('fAllDay').checked ? K.DEFAULT_REMIND_ALLDAY : K.DEFAULT_REMIND);
+                    syncAllDay();
+                    renderRemind();
+                };
+                $('fDate').onchange = () => { if ($('fEndDate').value < $('fDate').value) $('fEndDate').value = $('fDate').value; };
+                // a later start moves the end along, the length stays
+                $('fStart').onfocus = () => { lastStart = $('fStart').value; };
+                $('fStart').onchange = () => {
+                    if (!lastStart || !$('fEnd').value || !$('fStart').value) return;
+                    const d = new Date(2000, 0, 1);
+                    const len = at(d, $('fEnd').value) - at(d, lastStart);
+                    const ne = new Date(+at(d, $('fStart').value) + (len > 0 ? len : 3600000));
+                    $('fEnd').value = timeVal(ne);
+                    lastStart = $('fStart').value;
+                };
+                $('fRemind').onclick = e => {
+                    const b = e.target.closest('button');
+                    if (!b) return;
+                    const m = Number(b.dataset.min);
+                    if (edState.remind.has(m)) edState.remind.delete(m); else edState.remind.add(m);
+                    b.setAttribute('aria-pressed', String(edState.remind.has(m)));
+                };
+                $('fColor').onclick = e => { const b = e.target.closest('button'); if (b) { edState.color = Number(b.dataset.color); renderColor(); } };
+
+                document.addEventListener('keydown', e => {
+                    if (e.key !== 'Escape') return;
+                    if (!$('ed').hidden) closeEditor();
+                    else if (!$('settings').hidden) showSettings(false);
+                });
+                // the arrow keys page the week and the month (Doc, 07.11.2026: "die Pfeiltasten blättern bitte") - not while
+                // typing (an empty entry field does not count), not with a dialog open, not with a modifier (browser history)
+                document.addEventListener('keydown', e => {
+                    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+                    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.defaultPrevented) return;
+                    if (view === 'agenda' || $('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('settings').hidden) return;
+                    const t = e.target;
+                    if (t && (t.isContentEditable || /^(TEXTAREA|SELECT)$/.test(t.tagName) || (t.tagName === 'INPUT' && !(t.id === 'text' && !t.value)))) return;
+                    e.preventDefault();
+                    step(e.key === 'ArrowRight' ? 1 : -1);
+                });
+                // back in the foreground (phone) or focused again (Mac): fetch what the other device changed
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden && auth.hasSession() && !$('main').hidden && $('ed').hidden && !busy) refresh();
+                });
+                // the countdown and the now line move on every 30 s; every minute a visible page also fetches what changed
+                // elsewhere (the phone, Solita, the timetable mirror) - quietly, a failure keeps the last list
+                let ticks = 0;
+                setInterval(() => {
+                    if ($('main').hidden || !$('ed').hidden || !$('dlg').hidden) return;
+                    if (++ticks % 2 === 0 && !document.hidden && !busy && auth.hasSession()) {
+                        load().then(() => { if (!busy && $('ed').hidden) render(); }, () => render());
+                    } else render();
+                }, 30000);
+                $('loginBtn').onclick = () => auth.loginDialog(showApp, 'Anmelden für deinen Kalender');
+
+                if (auth.hasSession()) showApp(); else $('gate').hidden = false;
+            }
+
+            init();
+        })();
+    </script>
+</body>
+
+</html>

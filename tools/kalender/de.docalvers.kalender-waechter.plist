@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The calendar's reminder watcher (tools/kalender/waechter.mjs), every minute. Install:
+       cp tools/kalender/de.docalvers.kalender-waechter.plist ~/Library/LaunchAgents/
+       launchctl bootstrap gui/501 ~/Library/LaunchAgents/de.docalvers.kalender-waechter.plist
+     AbandonProcessGroup: the details dialog outlives the round that opened it. -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>de.docalvers.kalender-waechter</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/node</string>
+        <string>/Users/malvers/IdeaProjects/forloop/tools/kalender/waechter.mjs</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>60</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>AbandonProcessGroup</key>
+    <true/>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>TZ</key>
+        <string>Europe/Berlin</string>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/malvers/Library/Logs/kalender-waechter.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/malvers/Library/Logs/kalender-waechter.log</string>
+</dict>
+</plist>
