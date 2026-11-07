@@ -22,9 +22,10 @@
     // (Doc, 27.10.2026: "für alle Bücher … das Grußwort und auch den PDF Download Button"); French sets a no-break space before a colon
     const tr = (de, en, es, it, fr) => Buch.t(de, en, es, it, fr);
     const colon = Buch.lang === 'fr' ? '\u00a0: ' : ': ';
-    // the page format: the book's own (kapitel.js format, default A4), or ?format=letter / ?format=a4 to try the other one.
+    // the page format: the book's own (kapitel.js format, default US Letter - Doc, 07.11.2026, after the first KDP book:
+    // "nie wieder A4, sondern immer Letter"; KDP prints Standard Color only in Letter), or ?format=letter / ?format=a4.
     // KDP offers Standard Color only in US Letter, not in A4 (Doc, 28.10.2026: "Wir machen das Letter fertig")
-    const OWN = B.format === 'letter' ? 'letter' : 'a4';
+    const OWN = B.format === 'a4' ? 'a4' : 'letter';
     const FORMAT = ({ letter: 'letter', a4: 'a4' })[new URLSearchParams(location.search).get('format')] || OWN;
     const LETTER = FORMAT === 'letter';
     // the overview sets the pages afresh instead of showing the pictures from R2 (they may be older than a local change)
@@ -165,6 +166,282 @@
             qs.forEach((q, i) => q.insertBefore(el('span', 'd-qno', (i + 1) + '.'), q.firstChild));
         });
         return any ? part : null;
+    }
+
+    // ---------- the index at the back: the terms of the "Merke" boxes, each with the page of its box ----------
+    // Doc, 07.11.2026: "das Schlagwortregister hinten auch" - for every book and every language. The terms are read from the
+    // boxes themselves (their bold words and the title after "·"), so a new or translated book needs no list of its own.
+    const LANG = Buch.lang || 'de';                                       // sorting, capitals and the word lists below
+    // Per language: articles · words that are no term on their own · openings of a phrase, not a term ("genau eine Lösung",
+    // "the same factor") · labels of steps and lists ("Vorgehen:", separated by |) · prepositions, which open no term except
+    // "mit"/"ohne" in a pair ("ohne Zurücklegen") · verbs that make a sentence of it · the word that joins two things in a title
+    const REG_WORDS = {
+        de: {
+            art: 'der die das den dem des ein eine einer eines einem einen',
+            fill: 'und oder in im an am auf aus bei mit nach von vom zu zum zur für über unter vor hinter neben als wie so ob wenn dann nur genau nicht ' +
+                'kein keine immer alle jede jeder jedes beide gleich viel viele mehr weniger null links rechts oben unten innen außen',
+            lead: 'genau nicht kein keine keiner nur immer alle jede jeder jedes demselben derselben denselben dieselbe derselbe dasselbe gleich gleiche ' +
+                'gleichen gleicher gleiches unendlich viele mehrere beliebig zwei drei vier fünf sechs sieben acht neun zehn ihr ihre ihren ihrem ihrer ' +
+                'sein seine seinen seinem seiner beiden andere anderer anderen anderes anderem letzte letzten letzter diese dieser dieses diesen mehr weniger',
+            label: 'vorgehen|fahrplan|beispiel|beispiele|hinweis|achtung|tipp|tipps|merke|merkhilfe|wichtig|regel|regeln|eigenschaften|schreibweise|' +
+                'werte|einheiten|abhängigkeiten|ablauf|idee|kurz|allgemein|vorsicht|sonderfall|sonderfälle|bedeutung|skizze|physik|hinweise|beachte|' +
+                'kontrolle|ziel|anwendung|anwendungen',
+            pre: 'in im an am auf aus bei mit nach von vom zu zum zur für über unter vor hinter neben als wie ohne durch zwischen gegen um bis seit und oder aber',
+            wo: 'mit ohne', verb: 'ist sind heißt heißen wird werden hat haben gilt gelten kann können muss',
+            and: 'und'
+        },
+        en: {
+            art: 'the a an',
+            fill: 'and or in on at of to for from with by as than then if so only exactly not no all every each both same equal more less left right up down inside outside',
+            lead: 'exactly not no only always all every each same equal infinitely many several any two three four five six seven eight nine ten',
+            label: 'method|procedure|example|examples|note|tip|tips|key point|remember|important|rule|rules|properties|notation|values|units|route map|' +
+                'add|subtract|multiply|divide|calculate|compute|compare|construct|evaluate|interpret|measure|mathematise|organise|present|represent|' +
+                'simplify|solve|swap|understand|validate|analyse|differentiate|factorise|draw|sketch|carry|carry out|determine|convert|substitute|' +
+                'expand|rearrange|test|try|plan|answer|name|look back|make a plan|find information|collect data|set up the equation|watch the signs|' +
+                'back|back again|backwards|otherwise',
+            pre: 'in on at of to for from with by as than without through between into onto and or but', wo: 'with without',
+            verb: 'is are means has have can must gives',
+            and: 'and'
+        },
+        es: {
+            art: 'el la los las lo un una unos unas',
+            fill: 'y e o u de del en con por para a al sin sobre entre como si solo exactamente no ningún ninguna todo toda todos todas cada ambos mismo misma ' +
+                'igual más menos izquierda derecha arriba abajo dentro fuera',
+            lead: 'exactamente no ningún ninguna ninguno solo siempre todo toda todos todas cada mismo misma mismos mismas igual infinitas infinitos ' +
+                'varios varias cualquier dos tres cuatro cinco seis siete ocho nueve diez',
+            label: 'procedimiento|ejemplo|ejemplos|nota|consejo|recuerda|importante|regla|reglas|propiedades|notación|valores|unidades|hoja de ruta|cálculo|si no|de lo contrario|en otro caso',
+            pre: 'de del en con por para a al sin sobre entre como hacia hasta y e o u', wo: 'con sin',
+            verb: 'es son significa tiene tienen puede pueden vale',
+            and: 'y e'
+        },
+        it: {
+            art: 'il lo la i gli le un uno una',
+            fill: 'e ed o di del della dei degli delle in con per a al alla da su tra fra come se solo esattamente non nessun nessuna ogni tutti tutte ' +
+                'entrambi stesso stessa uguale più meno sinistra destra sopra sotto dentro fuori',
+            lead: 'esattamente non nessun nessuna nessuno solo sempre tutti tutte ogni stesso stessa stessi stesse uguale infinite infiniti ' +
+                'diversi diverse qualsiasi due tre quattro cinque sei sette otto nove dieci',
+            label: 'procedimento|esempio|esempi|nota|consiglio|ricorda|importante|regola|regole|proprietà|notazione|valori|unità|tabella di marcia|calcolo|altrimenti',
+            pre: 'di del della dello dei degli delle in nel nella con per a al alla allo ai agli alle da dal dalla su sul sulla tra fra come senza e ed o',
+            wo: 'con senza', verb: 'è sono significa ha hanno può possono vale',
+            and: 'e ed'
+        },
+        fr: {
+            art: 'le la les un une des',
+            fill: 'et ou de du des en dans avec par pour à au aux sans sur entre comme si seulement exactement ne pas aucun aucune tout toute tous toutes ' +
+                'chaque deux même égal plus moins gauche droite haut bas dedans dehors alors donc',
+            lead: 'exactement ne pas aucun aucune seulement toujours tout toute tous toutes chaque même mêmes égal infinité plusieurs ' +
+                'deux trois quatre cinq six sept huit neuf dix d’abord d\'abord',
+            label: 'méthode|marche à suivre|exemple|exemples|remarque|conseil|à retenir|important|règle|règles|propriétés|notation|valeurs|unités|calcul|sinon|retour|' +
+                'comprendre|résoudre|mettre en équation',
+            pre: 'de du des en dans avec par pour à au aux sans sur entre comme vers et ou', wo: 'avec sans',
+            verb: 'est sont signifie a ont peut peuvent vaut',
+            and: 'et'
+        }
+    };
+    const RW = (() => {
+        const w = REG_WORDS[LANG] || REG_WORDS.de, set = (s, by) => new Set(s.split(by));
+        return { art: set(w.art, ' '), fill: set(w.fill, ' '), lead: set(w.lead, ' '), label: set(w.label, '|'), pre: set(w.pre, ' '), wo: set(w.wo, ' '),
+            verb: set(w.verb, ' '), andW: set(w.and, ' '), and: new RegExp('\\s(?:' + w.and.replace(/ /g, '|') + ')\\s', 'i') };
+    })();
+    const REG = { cands: [], words: new Map(), names: new Set(), toks: [], n: 0 };
+    const lc = s => s.toLocaleLowerCase(LANG);
+    const isCap = s => s[0] !== lc(s[0]);
+    const allCaps = s => s.length > 1 && s === s.toLocaleUpperCase(LANG);
+    // a block is a sentence of its own (a list item, a cell); a word inside a sentence follows a word or a comma
+    const REG_BLOCK = 'p, li, td, th, dt, dd, h1, h2, h3, h4, figcaption, div';
+    const REG_MID = /^[\p{L},;]/u;
+    const REG_ENUM = /^\d+(?:\s*\.\s*[ªº]?|[ªº]|st|nd|rd|th|re|er|e)?[.)]?\s+/;          // "1. Modell", "1st", "1.ª", "2e"
+
+    // one chapter, before KaTeX renders it (the formulas are still $…$): its candidates, and how each word is written
+    function regCollect(sec, k) {
+        // how often a word is written small or capitalised inside a sentence: "Linear" at the start of a line becomes "linear",
+        // "Gauß" stays as it is - in every language, without a dictionary
+        let text = '', prev = null;
+        const w = document.createTreeWalker(sec, NodeFilter.SHOW_TEXT);
+        while (w.nextNode()) {
+            const t = w.currentNode, p = t.parentElement;
+            if (p.closest('script, style, .b-box-title')) continue;
+            const b = p.closest(REG_BLOCK);
+            text += (b !== prev ? ' ¶ ' : '') + t.data;
+            prev = b;
+        }
+        text = text.replace(/\$\$[\s\S]*?\$\$/g, ' § ').replace(/\$\s*([a-zA-Z])\s*\$/g, '$1').replace(/\$[^$]*\$/g, ' § ');   // "$x$-Achse" stays a word
+        let before = '¶';
+        for (const m of text.matchAll(/[\p{L}\p{M}]+(?:[-'’][\p{L}\p{M}]+)*|[^\s\p{L}\p{M}]/gu)) {
+            const t = m[0], mid = REG_MID.test(before);
+            before = t;
+            if (!/\p{L}/u.test(t[0])) { REG.toks.push(t === '¶' ? null : { w: t, u: t, mid }); continue; }
+            REG.toks.push({ w: t, u: t.toLocaleUpperCase(LANG), mid });
+            if (allCaps(t)) continue;                                            // a title or an abbreviation
+            const key = lc(t), s = REG.words.get(key) || { low: 0, cap: 0 };
+            if (!isCap(t)) s.low++; else if (mid) s.cap++;
+            REG.words.set(key, s);
+            // names inside a sentence, also as part of a word ("Gauss-Jordan", "Vieta's"): their capital stays
+            if (mid) t.split(/[-'’]/).forEach(x => { if (x && isCap(x)) REG.names.add(lc(x)); });
+        }
+        REG.toks.push(null);
+        sec.querySelectorAll('.b-merk').forEach(box => {
+            const title = box.querySelector('.b-box-title');
+            const name = title ? title.textContent.split('·').slice(1).join(' ').trim() : '';
+            if (name) name.split(RW.and).forEach((raw, i, all) => REG.cands.push({ k, el: title, raw, title: true, joined: i < all.length - 1 }));
+            box.querySelectorAll('b').forEach(b => {
+                if (b.closest('.b-box-title')) return;
+                const blk = b.parentElement.closest(REG_BLOCK), r = document.createRange();
+                r.setStart(blk, 0); r.setEndBefore(b);
+                const pre = r.toString().replace(/\$[^$]*\$/g, 'x').trim();
+                REG.cands.push({ k, el: b, raw: b.textContent, start: !pre || /[.!?:•–—]$/.test(pre), after: lc(pre.split(/\s+/).pop() || '') });
+            });
+        });
+    }
+
+    // the plain words of a candidate: no colon, a remark in brackets as a term of its own ("Pfadregel (Produktregel)"), a
+    // variable kept ("y-Achse"), a formula dropped ("m × n-Matrix" → "Matrix"). A numbered step ("1. Modell:") is no term,
+    // only its bracket may be. Nothing left: an empty list
+    function regParts(raw) {
+        let s = raw.replace(/\s+/g, ' ').trim();
+        const step = REG_ENUM.test(s);
+        s = s.replace(REG_ENUM, '').replace(/[\s:;,.!·–—-]+$/u, '');
+        const out = [], m = s.match(/^(.+?)\s*\(([^()]+)\)$/);
+        if (m) { s = m[1]; out.push(m[2]); }
+        if (!step) out.unshift(s.replace(/\s*\([^()]*\)/g, ''));
+        const most = LANG === 'de' || LANG === 'en' ? 4 : 5;                  // "simétrica respecto al eje y" needs five words
+        return out.map(p => {
+            let bad = false;
+            p = p.replace(/(-?)\$([^$]+)\$(-?)/g, (all, h1, tex, h2, at, str) => {
+                const pre = str.slice(0, at), post = str.slice(at + all.length);
+                const glued = h1 || h2 || /\p{L}$/u.test(pre) || /^\p{L}/u.test(post);
+                if (!glued && pre.trim() && post.trim()) bad = true;           // a variable inside a phrase: "Zinsen für t Tage"
+                return /^\s*[a-zA-Z]\s*$/.test(tex) ? h1 + tex.trim() + h2 : '';
+            }).replace(/\s+/g, ' ').replace(/^[\s-]+|[\s-]+$/g, '');
+            // letters, hyphens and apostrophes only: no numbers, symbols or questions; a term is short
+            if (bad || !/^[\p{L}\p{M}][\p{L}\p{M}'’ -]*$/u.test(p)) return null;
+            return p.split(' ').length <= most && p.length <= 45 && p.replace(/[^\p{L}]/gu, '').length >= 3 ? p : null;
+        }).filter(Boolean);
+    }
+
+    // Italian adjectives that end like an infinitive ("funzione lineare")
+    const REG_ADJ_IT = /^(lineare|polare|scalare|regolare|particolare|angolare|rettangolare|triangolare|perpendicolare|circolare|singolare|molare|solare|modulare|elementare|complementare|supplementare|quadrangolare|tabulare)$/;
+    // a term as the index prints it, or null: articles off, emphasis, verbs and labels out, capitals as inside a sentence
+    function regTerm(p, start, after) {
+        const ws = p.split(' ');
+        while (ws.length > 1 && RW.art.has(lc(ws[0]))) ws.shift();
+        if (LANG === 'fr' || LANG === 'it') ws[0] = ws[0].replace(/^l['’](?=\p{L})/iu, '');
+        const low = ws.map(lc), f = ws[0], one = ws.length === 1;
+        if (low.every(x => RW.fill.has(x)) || RW.lead.has(low[0]) || RW.label.has(low.join(' '))) return null;
+        // a phrase, not a term: led by a preposition ("in Koordinatenform", "für Matrizen" - but "ohne Zurücklegen" is one),
+        // ending in one ("Abstand von", "disminución en un"; a variable may end it: "eje y"), or a sentence ("differenzierbar heißt stetig")
+        const end = low[low.length - 1];
+        if (RW.pre.has(low[0]) && !(RW.wo.has(low[0]) && ws.length === 2) || end.length > 1 && (RW.pre.has(end) || RW.fill.has(end) || RW.art.has(end)) ||
+            low.some(x => RW.verb.has(x))) return null;
+        // German verbs: an infinitive at the end ("grafisch lösen", "Analysieren"), a participle ("Winkel gesucht"), "viermal"
+        const last = ws[ws.length - 1];
+        if (LANG === 'de' && (!isCap(last) && (/(en|ern|eln)$/.test(end) || /^ge\p{L}+t$/u.test(end)) || /ieren$/.test(end) ||
+            /^(|ein|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|zig|ßig|hundert|viel)mal$/.test(end))) return null;
+        // an adverb ("geométricamente", "graphiquement"), an English participle ("added", "stretched")
+        if (one && ((LANG === 'es' || LANG === 'it') && /mente$/.test(low[0]) || LANG === 'fr' && /iquement$/.test(low[0]) ||
+            LANG === 'en' && (/ly$/.test(low[0]) || /ed$/.test(low[0]) && !/bounded$/.test(low[0])))) return null;
+        // a verb: after a reflexive pronoun ("se intercambian"), or an infinitive in front ("calcular", "modéliser")
+        if ((LANG === 'es' || LANG === 'it' || LANG === 'fr') && (/^(se|si|on|s['’])$/.test(after || '') || /^(se|si|on)$/.test(low[0]))) return null;
+        if (LANG === 'es' && /^\p{L}{3,}[aei]r$/u.test(low[0]) || LANG === 'fr' && /^\p{L}{3,}(er|ir)$/u.test(low[0]) && !/^(entier|premier|dernier|papier|cahier)$/.test(low[0]) ||
+            LANG === 'it' && /^\p{L}{3,}([aei]re|rre)$/u.test(low[0]) && !REG_ADJ_IT.test(low[0])) return null;
+        // capitals as inside a sentence - unless the word is a name (always capitalised there, or "Gauss-Jordan")
+        if (isCap(f) && !allCaps(f) && !/\p{Lu}/u.test(f.slice(1))) {
+            const st = REG.words.get(lc(f)) || { low: 0, cap: 0 };
+            // German: an adjective at the start of a line ("Geometrisch", "Skalare Multiplikation") - by its ending
+            const adj = LANG === 'de' && start && !st.cap && (one ? /(isch|lich|ig)$/.test(f) : /(e|er|es|en|em)$/.test(f) && isCap(ws[1]));
+            const small = LANG === 'de' ? st.low > st.cap : st.low ? st.low >= st.cap : start && !st.cap && !REG.names.has(lc(f.split(/[-'’]/)[0]));
+            if (small || adj) ws[0] = lc(f[0]) + f.slice(1);
+        }
+        // German writes every noun with a capital: a term without one is an adjective of a property ("periodisch", "monoton
+        // steigend") or emphasis ("genau ein", "vertauscht", "links") - only the first kind stays; a small word in -n before a
+        // preposition is a verb ("spiegeln an einer Ebene", but "Rotation um die x-Achse" stays)
+        if (LANG === 'de' && (!ws.some(isCap) && !ws.some(x => /(isch|ell|al|ar|är|iv|ig|lich|bar|end)$/.test(x)) ||
+            !isCap(ws[0]) && /n$/.test(low[0]) && ws.length > 1 && RW.pre.has(low[1]))) return null;
+        return ws.join(' ');
+    }
+
+    // a box title is in capitals: its spelling comes from the text of the book ("GAUSS-VERFAHREN" → "Gauß-Verfahren"),
+    // the way it is written inside a sentence first; not found in the text, it is left out. The first part of a title with
+    // "und" counts only where the text has it alone too: "Lösungsformel" yes, "Fläche zwischen Graph [und x-Achse]" no
+    function regTitle(p, joined) {
+        const up = p.toLocaleUpperCase(LANG).split(' ');
+        while (up.length > 1 && RW.art.has(lc(up[0]))) up.shift();
+        const forms = new Map(), T = REG.toks;
+        T.forEach((t, i) => {
+            if (!t || t.u !== up[0]) return;
+            for (let j = 1; j < up.length; j++) if (!T[i + j] || T[i + j].u !== up[j]) return;
+            const next = T[i + up.length];
+            if (joined && next && RW.andW.has(lc(next.w))) return;
+            const ws = T.slice(i, i + up.length).map(x => x.w);
+            if (ws.some(allCaps)) return;
+            const f = ws.join(' '), c = forms.get(f) || { n: 0, mid: 0 };
+            c.n++; if (t.mid) c.mid++;
+            forms.set(f, c);
+        });
+        let best = null, bc = null;
+        forms.forEach((c, f) => { if (!bc || c.mid > bc.mid || (c.mid === bc.mid && c.n > bc.n)) { best = f; bc = c; } });
+        return best ? regTerm(best, !bc.mid) : null;
+    }
+
+    // all chapters read: one entry per term, spelt as the book writes it most often, with one page per chapter (its first box).
+    // A plural beside its singular joins it ("Pfadregeln" → "Pfadregel", "porcentajes" → "porcentaje")
+    const REG_PLURAL = { de: ['n', 'en', 'e', 's', 'er'], en: ['s', 'es'], es: ['s', 'es'], it: [], fr: ['s', 'x'] };
+    // German declines its adjectives: "binomische Formeln" and "binomischen Formeln" are one entry, the first form wins
+    const regKey = t => LANG !== 'de' ? lc(t) : t.split(' ').map((x, i, a) => i < a.length - 1 && !isCap(x) ? lc(x).replace(/(e|er|es|en|em)$/, '') : lc(x)).join(' ');
+    const regScore = (f, n) => n + (LANG === 'de' && !isCap(f) && /(e|er|es)$/.test(f.split(' ')[0]) ? 0.5 : 0) + (!isCap(f) ? 0.1 : 0);
+    function regEntries() {
+        const map = new Map();
+        REG.cands.forEach(c => {
+            (c.title ? [c.raw.trim()] : regParts(c.raw)).forEach(p => {
+                const term = c.title ? regTitle(p, c.joined) : regTerm(p, c.start, c.after);
+                if (!term) return;
+                const key = regKey(term), e = map.get(key) || { forms: new Map(), refs: [] };
+                e.forms.set(term, (e.forms.get(term) || 0) + 1);
+                if (!e.refs.some(r => r.k === c.k)) e.refs.push({ k: c.k, id: c.el.id || (c.el.id = 'reg-' + (++REG.n)) });
+                map.set(key, e);
+            });
+        });
+        (REG_PLURAL[LANG] || []).forEach(end => map.forEach((e, key) => {
+            const one = map.get(key.slice(0, -end.length));
+            if (!key.endsWith(end) || !one || one === e || isCap(e.forms.keys().next().value) !== isCap(one.forms.keys().next().value)) return;
+            e.refs.forEach(r => { if (!one.refs.some(x => x.k === r.k)) one.refs.push(r); });
+            one.refs.sort((a, b) => a.k - b.k);
+            map.delete(key);
+        }));
+        const coll = new Intl.Collator(LANG);
+        return Array.from(map.values()).map(e => {
+            let term = null, n = 0;
+            e.forms.forEach((c, f) => { if (regScore(f, c) > n) { term = f; n = regScore(f, c); } });
+            return { term, refs: e.refs.map(r => r.id) };
+        }).sort((a, b) => coll.compare(a.term, b.term));
+    }
+
+    // the index pages: two columns, A to Z in the order of the book's language, a letter over each group (js/buch-druck.css).
+    // The numbers come from Paged.js (target-counter, as in the contents). Each has room for three digits from the start, so
+    // no line breaks anew when Paged.js writes the numbers in after the page is set
+    function register(entries) {
+        if (!entries.length) return null;                                    // a book without "Merke" boxes has no index
+        const sec = el('section', 'd-register');
+        sec.id = 'register';
+        sec.dataset.ziel = 'index.html|kapitel|';
+        sec.appendChild(el('h1', 'd-ktitle', tr('Register', 'Index', 'Índice alfabético', 'Indice analitico', 'Index')));
+        sec.appendChild(el('p', 'd-reg-intro', tr('Die Begriffe aus den Merkkästen, mit der Seite, auf der sie erklärt werden.',
+            'The terms from the key-point boxes, with the page where each is explained.', 'Los términos de los recuadros «Recuerda», con la página donde se explican.',
+            'I termini dei riquadri «Ricorda», con la pagina in cui sono spiegati.', 'Les termes des encadrés « À retenir », avec la page où ils sont expliqués.')));
+        const cols = sec.appendChild(el('div', 'd-reg')), base = new Intl.Collator(LANG, { sensitivity: 'base' });
+        let head = '', group = null;
+        entries.forEach(e => {
+            const c = e.term[0], plain = c.normalize('NFD').replace(/\p{M}/gu, '');
+            const letter = (base.compare(plain, c) ? c : plain).toLocaleUpperCase(LANG);   // "Ä" files under A, the Spanish "Ñ" stands alone
+            // the letter and its first term never part (Paged.js drops break-after from the sheets, break-inside stays)
+            if (letter !== head) { head = letter; group = cols.appendChild(el('div', 'd-reg-g')); group.appendChild(el('h3', 'd-reg-b', letter)); }
+            const row = (group || cols).appendChild(el('div', 'd-reg-e'));
+            group = null;
+            row.appendChild(el('span', 'd-reg-w')).textContent = e.term;
+            const pages = row.appendChild(el('span', 'd-reg-s', e.refs.map(id => '<a href="#' + id + '"></a>').join(', ')));
+            pages.style.minWidth = (e.refs.length * 1.9 + (e.refs.length - 1) * 0.55).toFixed(2) + 'em';
+        });
+        return sec;
     }
 
     // ---------- the foreword: one page before "So arbeitest du mit diesem Buch", the same in every book ----------
@@ -342,6 +619,9 @@
     if (window.Paged && Paged.Handler) Paged.registerHandlers(class KeepWithNext extends Paged.Handler {
         afterPageLayout(pageEl, page, breakToken, chunker) {
             if (!breakToken || !breakToken.node || !page.area) return;
+            // the index sets two columns: its last heading in the source may stand at the foot of the left column, and moving
+            // it would empty half the page; letter and first term are kept together by the index itself (register())
+            if (page.area.querySelector('.d-reg')) return;
             // a page that ends at a forced break (the next chapter) keeps its white space - the section simply ends there.
             // Moving a heading on would end the next page at the same break again: Paged.js 0.4.3 remembers every break
             // before this hook runs, sees this one twice and stops setting the book ("Layout repeated" - OS 10 ended after
@@ -500,7 +780,8 @@
         document.querySelectorAll('.pagedjs_page [data-split-to]').forEach(e => { if (!contentNodes(e).length) e.style.display = 'none'; });
         for (const pg of document.querySelectorAll('.pagedjs_page')) {
             const area = pg.querySelector('.pagedjs_area');
-            if (!area || pg.querySelector('.d-cover, .d-toc, .d-loes-kap, .d-gequetscht')) continue;
+            // the index pages stay as they are: white space at the end of the index is its end, not room for notes
+            if (!area || pg.querySelector('.d-cover, .d-widmung, .d-toc, .d-loes-kap, .d-gequetscht, .d-register')) continue;
             const nodes = contentNodes(area);
             if (!nodes.length) continue;
             // 5 mm kept free above the page number
@@ -541,8 +822,14 @@
         const gruss = await grusswort(), front = book.querySelector('.d-front'), imp = impressum();
         if (gruss && front) front.before(gruss);
         if (front) { front.before(imp); front.appendChild(onlineBuch()); }
-        // page 1 is the first sheet after the cover (js/buch-druck.css .d-p1)
-        (gruss || imp).classList.add('d-p1');
+        // page 1 is the first sheet after the cover (js/buch-druck.css .d-p1): the dedication page, in every book (Doc, 07.11.2026:
+        // "bitte in Zukunft bei jedem Buch eine Widmungsseite machen. Wenn mir nichts einfällt, dann lassen wir die eben weg, dann
+        // kann man sich da vorne Notizen machen") - the text from kapitel.js widmung, or the page stays empty. Its back is empty too,
+        // so the foreword still opens on a right-hand page.
+        const first = gruss || imp;
+        const w = el('section', 'd-widmung d-p1', '<p>' + (B.widmung || '\u200b') + '</p>');
+        first.before(w);
+        first.before(el('section', 'd-widmung d-widmung-leer', '<p>\u200b</p>'));
         const loesungen = tr('Lösungen', 'Solutions', 'Soluciones', 'Soluzioni', 'Solutions');
         const toc = el('section', 'd-toc');
         toc.appendChild(el('h1', 'd-toc-h', tr('Inhalt', 'Contents', 'Índice', 'Indice', 'Sommaire')));
@@ -573,6 +860,7 @@
                 'Caricamento e disegno del capitolo ' + c.k + ' …', 'Chargement et dessin du chapitre ' + c.k + '…'));
             const sec = await chapter(c, i);
             book.appendChild(sec);
+            regCollect(sec, i);                                            // the index reads the text while its formulas are still $…$
             Buch.render(sec, { print: true });
             await Buch.settled();                                          // widgets that load first (Three.js)
             await wait(700);                                               // widgets draw, KaTeX settles
@@ -584,6 +872,13 @@
             if (part) loes.appendChild(part);
         }
         book.appendChild(loes);
+        // the index after the solutions, with its line in the contents after "L" (none without "Merke" boxes)
+        const reg = register(regEntries());
+        if (reg) {
+            book.appendChild(reg);
+            list.appendChild(el('li', 'd-toc-reg', '<a href="#register"><span class="d-toc-k">' + tr('R', 'I', 'Í', 'I', 'I') + '</span><span class="d-toc-t">' +
+                reg.querySelector('h1').textContent + '</span></a>'));
+        }
         impressumFotos(imp, book);
         // Paged.js measures the pages: every photo has to be there with its real height first
         say(tr('Fotos werden geladen …', 'Loading photos …', 'Cargando fotos …', 'Caricamento delle foto …', 'Chargement des photos…'));

@@ -10,7 +10,7 @@
  *     --nur-lokal                     no upload, the files stay in the temp folder
  *     --parallel N                    set N books at a time (default 3: the M3 has four fast cores, one stays for the Mac)
  *     --letter | --a4                the other page format (druck.html?format=…) into buch/seiten/<buch>-letter|-a4/; a book's
- *                                     own format (kapitel.js format, default A4) goes into buch/seiten/<buch>/ as always
+ *                                     own format (kapitel.js format, default US Letter since 07.11.2026) goes into buch/seiten/<buch>/ as always
  *
  * In the R2 bucket "media" (as the book photos, tools/media_publish.mjs), folder buch/seiten/<buch>/, uploaded with a key
  * for that bucket alone from the keychain (see upload below):
@@ -38,7 +38,8 @@ import vm from 'node:vm';
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const MEDIA = 'https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/';        // the same bucket as MEDIA in js/buch.js
 const FORCE = process.argv.includes('--letter') ? 'letter' : process.argv.includes('--a4') ? 'a4' : '';
-const own = book => /format:\s*'letter'/.test(readFileSync(path.join(ROOT, 'HTML/buch', book, 'kapitel.js'), 'utf8')) ? 'letter' : 'a4';
+// a book's own format: US Letter unless kapitel.js says format: 'a4' (Doc, 07.11.2026: "nie wieder A4, sondern immer Letter")
+const own = book => /format:\s*'a4'/.test(readFileSync(path.join(ROOT, 'HTML/buch', book, 'kapitel.js'), 'utf8')) ? 'a4' : 'letter';
 const other = book => FORCE && FORCE !== own(book) ? FORCE : '';          // the format asked for, when it is not the book's own
 const KEY = book => 'buch/seiten/' + book + (other(book) ? '-' + other(book) : '') + '/';
 // what changes the pages besides the book itself

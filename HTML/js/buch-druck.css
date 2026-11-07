@@ -14,6 +14,10 @@
 /* the cover is always page 1 - :first is the sure way in Paged.js, the named page alone was not applied */
 @page :first { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
 @page front { @top-left { content: none; } }
+/* the dedication (kapitel.js widmung, Doc 07.11.2026): its own right-hand page and an empty back, both without head and number */
+@page widmung { @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
+.d-widmung { page: widmung; break-after: page; padding-top: 80mm; text-align: center; }
+.d-widmung p { font-family: Raleway, sans-serif; font-style: italic; font-size: 17pt; line-height: 1.6; color: #0e244e; margin: 0; }
 /* the cover does not count: the first sheet after it is page 1, as in the KDP interior, which starts without the cover
  * (Doc, 24.10.2026: "Wir beginnen auf Seite 2, weil wahrscheinlich der Einband die Seite 1 ist") */
 .d-p1 { counter-reset: page 1; }                     /* set by js/buch-druck.js: the foreword, else the how-to */
@@ -191,6 +195,22 @@ body.b-print .b-q-text { display: inline; }
 .d-loes-no { flex: 0 0 18pt; font-weight: 700; color: rgb(226, 120, 0); }
 .d-loes-body p { margin: 0 0 3pt; }
 .d-loes-body .b-table { font-size: 9pt; }
+
+/* ---- the index (js/buch-druck.js register, Doc 07.11.2026): two columns, a letter over each group, a dotted leader to
+ * the page. The columns are plain CSS columns, which Paged.js breaks like any block; break-after is dropped by Paged.js,
+ * so a letter is held to its first term by the box around both (.d-reg-g), break-inside stays */
+.d-register { break-before: page; }
+.d-reg-intro { color: #4c5b75; margin: 6pt 0 12pt; }
+.d-reg { columns: 2; column-gap: 9mm; font-family: Raleway, sans-serif; font-size: 9.5pt; line-height: 1.35; color: #18223a; }
+.d-reg-g { break-inside: avoid; }
+.d-reg-b { margin: 9pt 0 3pt; padding-bottom: 2pt; border-bottom: 1px solid #d5dce8; font-family: 'Orbitron', sans-serif; font-size: 10.5pt; color: rgb(226, 120, 0); }
+.d-reg > .d-reg-g:first-child .d-reg-b { margin-top: 0; }
+.d-reg-e { display: flex; align-items: baseline; gap: 3pt; margin: 0 0 1.5pt; break-inside: avoid; }
+.d-reg-e::after { content: ""; order: 1; flex: 1 1 6pt; border-bottom: 1px dotted #b8c3d4; }
+.d-reg-w { flex: 0 1 auto; min-width: 0; padding-left: 1.2em; text-indent: -1.2em; }      /* a long term wraps with a hanging indent */
+.d-reg-s { order: 2; flex: 0 0 auto; text-align: right; white-space: nowrap; font-weight: 600; color: #0e244e; font-variant-numeric: lining-nums tabular-nums; }
+.d-reg a { color: inherit; text-decoration: none; }
+.d-reg a::after { content: target-counter(attr(href), page); }
 
 /* ---- overview mode: druck.html?uebersicht in a frame over the online book (js/buch.js, key O) ----
  * Dark desk, the sheets as tiles (zoom --z, set by js/buch-druck.js), the reader's page in gold. Sizes inside a

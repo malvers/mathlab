@@ -8,13 +8,14 @@
  * the book, so they never go into the repo (default target: the system temp folder). Readers get their PDF
  * from buch/<buch>/druck.html.
  *
- *   <buch>-innenteil.pdf  the print edition (druck.html on the live site) without its cover page: A4, no bleed,
+ *   <buch>-innenteil.pdf  the print edition (druck.html on the live site) without its cover page: US Letter, no bleed,
  *                         canvases frozen at ~300 dpi (deviceScaleFactor 3.2 → 3.2 × 96 dpi)
  *   <buch>-umschlag.pdf   back + spine + front in one sheet with 0.125 in bleed all round; the front is the cover
  *                         of druck.html, the back lists the chapters of kapitel.js with a QR code to the online book;
  *                         the barcode field (bottom right of the back, 2 × 1.2 in) stays empty, KDP prints it
  *
- * Matching KDP settings: trim 8.27 x 11.69 in (A4), No Bleed, Premium Color (spine 0.002347 in per page);
+ * Matching KDP settings (since 07.11.2026 every book is US Letter + Standard Color unless kapitel.js says format: 'a4'):
+ * A4 = trim 8.27 x 11.69 in, No Bleed, Premium Color (spine 0.002347 in per page);
  * --standard for Standard Color or white paper (0.002252 in per page). Standard Color exists only in US Letter, not in A4:
  * a book whose kapitel.js says format: 'letter' (Mathe 11 since 28.10.2026) gets trim 8.5 x 11 in and the Standard Color
  * spine by itself (--premium for the other); --letter / --a4 try the other format (druck.html?format=…). --basis renders
@@ -32,7 +33,8 @@ const args = process.argv.slice(2), plain = args.filter(a => !a.startsWith('--')
 const BOOK = plain[0];
 if (!BOOK || !/^[a-z0-9-]+$/.test(BOOK)) { console.error('usage: node tools/kdp/kdp.mjs <buch> [zielordner] [--standard] [--letter] [--basis=url]'); process.exit(1); }
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
-const OWN = /format:\s*'letter'/.test(readFileSync(path.join(ROOT, 'HTML/buch', BOOK, 'kapitel.js'), 'utf8')) ? 'letter' : 'a4';
+// a book's own page format: US Letter unless its kapitel.js says format: 'a4' (Doc, 07.11.2026: "nie wieder A4, sondern immer Letter")
+const OWN = /format:\s*'a4'/.test(readFileSync(path.join(ROOT, 'HTML/buch', BOOK, 'kapitel.js'), 'utf8')) ? 'a4' : 'letter';
 const FORMAT = args.includes('--letter') ? 'letter' : args.includes('--a4') ? 'a4' : OWN, LETTER = FORMAT === 'letter';
 const OUT = path.resolve(plain[1] || path.join(os.tmpdir(), 'kdp-' + BOOK + (LETTER ? '-letter' : '')));
 const STANDARD = args.includes('--standard') || (LETTER && !args.includes('--premium'));
@@ -66,9 +68,39 @@ try {
     });
 
     // ---------- cover: back | spine | front ----------
+
+    // back-cover texts per book language (lang in kapitel.js, default de); terms as the books name them (tools/buch-*/glossar*)
+    const TEXTS = {
+        de: { lang: 'de', h: 'Ein Buch zum Ausprobieren',
+            p1: 'Dieses Buch gibt es zweimal: als Online-Buch, in dem du jede Formel ausprobieren, jeden Graphen verschieben und jeden Zufallsversuch tausendmal laufen lassen kannst, und als Druckausgabe in deiner Hand. Jedes Kapitel beginnt mit einem QR-Code, der direkt zu seiner interaktiven Fassung führt.',
+            p2: 'Erkundungen, Merkkästen, Beispiele, Aufgaben in drei Stufen, Selbsttests und ein Test in jedem Kapitel, alle Lösungen im Anhang.',
+            inh: 'INHALT', online: 'DAS ONLINE-BUCH' },
+        en: { lang: 'en', h: 'A book to try out',
+            p1: 'This book comes in two forms: as an online book, where you can try every formula, drag every graph and run every random experiment a thousand times, and as a printed copy in your hands. Every chapter begins with a QR code that leads straight to its interactive version.',
+            p2: 'Explorations, Remember boxes, examples, exercises on three levels, self-checks and a test in every chapter, all solutions in the appendix.',
+            inh: 'CONTENTS', online: 'THE ONLINE BOOK' },
+        es: { lang: 'es', h: 'Un libro para experimentar',
+            p1: 'Este libro existe en dos formas: como libro en línea, en el que puedes probar cada fórmula, mover cada gráfica y repetir cada experimento aleatorio mil veces, y como edición impresa en tus manos. Cada capítulo empieza con un código QR que lleva directamente a su versión interactiva.',
+            p2: 'Exploraciones, recuadros «Recuerda», ejemplos, ejercicios en tres niveles, autoevaluaciones y un test en cada capítulo, todas las soluciones en el apéndice.',
+            inh: 'CONTENIDO', online: 'EL LIBRO EN LÍNEA' },
+        fr: { lang: 'fr', h: 'Un livre pour expérimenter',
+            p1: 'Ce livre existe en deux versions : un livre en ligne, où tu peux essayer chaque formule, déplacer chaque graphique et répéter chaque expérience aléatoire mille fois, et une édition imprimée entre tes mains. Chaque chapitre commence par un code QR qui mène directement à sa version interactive.',
+            p2: 'Explorations, encadrés « À retenir », exemples, exercices à trois niveaux, autoévaluations et un test dans chaque chapitre, toutes les solutions en annexe.',
+            inh: 'SOMMAIRE', online: 'LE LIVRE EN LIGNE' },
+        it: { lang: 'it', h: 'Un libro da provare',
+            p1: 'Questo libro esiste in due versioni: come libro online, in cui puoi provare ogni formula, spostare ogni grafico e ripetere ogni esperimento casuale mille volte, e come edizione stampata tra le tue mani. Ogni capitolo inizia con un codice QR che porta direttamente alla sua versione interattiva.',
+            p2: 'Esplorazioni, riquadri «Ricorda», esempi, esercizi su tre livelli, autoverifiche e un test in ogni capitolo, tutte le soluzioni in appendice.',
+            inh: 'INDICE', online: 'IL LIBRO ONLINE' },
+        sw: { lang: 'sw', h: 'Kitabu cha kujaribu',
+            p1: 'Kitabu hiki kipo katika namna mbili: kama kitabu cha mtandaoni, ambamo unaweza kujaribu kila fomula, kusogeza kila grafu na kurudia kila jaribio la bahati nasibu mara elfu, na kama toleo lililochapishwa mikononi mwako. Kila sura huanza na msimbo wa QR unaokupeleka moja kwa moja kwenye toleo lake shirikishi.',
+            p2: 'Uchunguzi, visanduku vya «Kumbuka», mifano, mazoezi ya viwango vitatu, vipimo vya kujitathmini na mtihani katika kila sura, suluhisho zote kwenye kiambatisho.',
+            inh: 'YALIYOMO', online: 'KITABU CHA MTANDAONI' },
+    };
+    const LANG = /lang:\s*'([a-z]{2})'/.exec(readFileSync(path.join(ROOT, 'HTML/buch', BOOK, 'kapitel.js'), 'utf8'))?.[1];
+    const T = TEXTS[LANG] || TEXTS.de;
     const SPINE = +(pages * PER_PAGE).toFixed(6), BACK = BLEED + TW;
     const W = 2 * BACK + SPINE, H = TH + 2 * BLEED;
-    const html = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+    const html = `<!DOCTYPE html><html lang="${T.lang}"><head><meta charset="UTF-8">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../js/buch.css">
 <link rel="stylesheet" href="../../js/buch-titel.css">
@@ -112,15 +144,12 @@ html, body { margin: 0; padding: 0; background: #040a18; -webkit-print-color-adj
   <div class="k-back"><div class="b-titel">
     <div class="k-in">
       <div class="k-top"><span class="b-logo" aria-hidden="true"></span><span>DOC ALVERS MATHE-LABOR</span></div>
-      <h2 class="k-h">Ein Buch zum Ausprobieren</h2>
-      <p class="k-p">Dieses Buch gibt es zweimal: als Online-Buch, in dem du jede Formel ausprobieren, jeden Graphen verschieben und jeden
-        Zufallsversuch tausendmal laufen lassen kannst, und als Druckausgabe in deiner Hand. Jedes Kapitel beginnt mit einem QR-Code,
-        der direkt zu seiner interaktiven Fassung führt.</p>
-      <p class="k-p">Erkundungen, Merkkästen, Beispiele, Aufgaben in drei Stufen, Selbsttests und ein Test in jedem Kapitel,
-        alle Lösungen im Anhang.</p>
-      <p class="k-inh">INHALT</p>
+      <h2 class="k-h">${T.h}</h2>
+      <p class="k-p">${T.p1}</p>
+      <p class="k-p">${T.p2}</p>
+      <p class="k-inh">${T.inh}</p>
       <ul class="k-list" id="k-list"></ul>
-      <div class="k-qr"><i id="k-qr"></i><span><b>DAS ONLINE-BUCH</b><br>docalvers.de/buch/${BOOK}</span></div>
+      <div class="k-qr"><i id="k-qr"></i><span><b>${T.online}</b><br>docalvers.de/buch/${BOOK}</span></div>
     </div>
   </div></div>
   <div class="k-spine"><div class="k-sp"><span class="t" id="k-sp"></span><span class="v">DOC ALVERS MATHE-LABOR</span></div></div>

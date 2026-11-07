@@ -8,6 +8,8 @@ window.BUCH = {
     title: 'Matemáticas · Berufliches Gymnasium 11',
     short: 'Matemáticas 11',
     lang: 'es',
+    // the dedication page at the front of the print edition (js/buch-druck.js; Doc, 07.11.2026)
+    widmung: 'Para Liliana',
     description: 'Libro de texto interactivo de matemáticas para el Berufliches Gymnasium (bachillerato alemán de orientación profesional), 11.º curso, Sajonia: ecuaciones, funciones, sistemas de ecuaciones, probabilidad y métodos numéricos, con laboratorios, simulaciones y autoevaluaciones con respuesta inmediata.',
     chapters: [
         { file: 'lb2.html', lb: 'Área de aprendizaje 2', k: '2', title: 'Ecuaciones, fórmulas, figuras',
