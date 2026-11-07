@@ -7,6 +7,7 @@
 //   node tools/kalender/waechter.mjs --dry     what would ring now and in the next 7 days - no call, no state change
 //   node tools/kalender/waechter.mjs --setup   create the access token (keychain) and print the SQL line for it
 //   node tools/kalender/waechter.mjs --sync    only mirror the timetable into the database (no call)
+//   node tools/kalender/waechter.mjs --feeds   only mirror the linked Google / Outlook calendars now (with --dry: compare only)
 //
 // The timetable (07.11.2026, Doc: "dieser Kalender soll mein zentraler Kalender sein für alles ... fünf Minuten vor
 // Stundenbeginn", with a switch): the lessons come from the local Untis files HTML/svp/plandaten/w*.json. Each round
@@ -27,6 +28,10 @@
 // nie in den Ruf"). What it is appears in a dialog on the Mac and in the calendar app. Lessons say subject, class and
 // room - the timetable is no private matter.
 //
+// Google and Outlook (07.11.2026, Doc: "dauerhaft verknüpfen"): every 15 minutes each round also mirrors the calendars
+// linked with verknuepfen.mjs (secret iCal address in the keychain) into calendar_event - see feeds.mjs.
+// In the silent test the feeds are <dir>/feeds/<google|outlook>.ics and the database is <dir>/feeddb.json.
+//
 // The occurrences come from HTML/kalender/kalender-core.js - the same code the page uses.
 process.env.TZ = 'Europe/Berlin';
 
@@ -37,6 +42,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { FEEDS, FEED_EVERY, fetchFeed, readFeedUrl, reportLine, syncFeed, testRpc } from './feeds.mjs';
 
 const require = createRequire(import.meta.url);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -160,6 +166,40 @@ async function syncLessons(st, token, force) {
     return true;
 }
 
+/* ---------- Google and Outlook ---------- */
+
+/* mirror every linked calendar that is due (force: all of them now); a failure is logged and tried again in 15 min */
+async function syncFeeds(st, token, { force = false, dry = false } = {}) {
+    st.feeds = st.feeds || {};
+    const lines = [];
+    for (const name of Object.keys(FEEDS)) {
+        const fs0 = st.feeds[name] || (st.feeds[name] = {});
+        if (!force && Date.now() - (fs0.at || 0) < FEED_EVERY) continue;
+        let text = null;
+        if (TEST) { try { text = fs.readFileSync(path.join(TEST, 'feeds', name + '.ics'), 'utf8'); } catch (e) { continue; } }
+        else {
+            const url = readFeedUrl(name);
+            if (!url) continue;   // not linked
+            if (!dry) fs0.at = Date.now();
+            try { text = await fetchFeed(url); }
+            catch (e) { if (!dry) logError(st, FEEDS[name].label + ': ' + e.message); lines.push(FEEDS[name].label + ': ' + e.message); continue; }
+        }
+        if (!dry) fs0.at = Date.now();
+        try {
+            const r = await syncFeed(name, { rpc: TEST ? testRpc(path.join(TEST, 'feeddb.json')) : rpc, token, text, now, dry });
+            const line = reportLine(r, dry);
+            lines.push(line);
+            if (TEST) fs.appendFileSync(path.join(TEST, 'calls.txt'), '[feed] ' + line + '\n');
+            else if (!dry && (r.sent || r.removed || r.held || r.failed.length)) log(line);
+            if (dry) for (const ev of r.toSend.slice(0, 40)) lines.push('   ' + (new Date(ev.starts_at)).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) + '  ' + ev.title);
+        } catch (e) {
+            if (!dry) logError(st, FEEDS[name].label + ': ' + e.message);
+            lines.push(FEEDS[name].label + ': ' + e.message);
+        }
+    }
+    return lines;
+}
+
 /* what Solita says: appointments with their time only, lessons with subject, class and room */
 function speech(occs, lessons) {
     const sentences = [...new Set(occs.map(o => K.spokenSentence(o, now)))];
@@ -214,6 +254,13 @@ async function main() {
 
     const token = TEST ? 'test' : readToken();
     if (!TEST && !token) { logError(st, 'kein Token im Schlüsselbund - einmal --setup laufen lassen'); if (!dry) saveState(st); return; }
+
+    if (args.has('--feeds')) {
+        const lines = await syncFeeds(st, token, { force: true, dry });
+        if (!dry) saveState(st);
+        console.log(lines.length ? lines.join('\n') : 'Kein Kalender verknüpft (node tools/kalender/verknuepfen.mjs google|outlook).');
+        return;
+    }
 
     if (args.has('--sync')) {
         await syncLessons(st, token, true);
@@ -282,6 +329,9 @@ async function main() {
         if (occs.length) showDialog(details(occs));
         try { log('Ruf: ' + call(text) + ' - ' + occs.length + ' Termin(e), ' + dueLessons.length + ' Stunde(n)'); } catch (e) { log('Ruf fehlgeschlagen:', e.message); }
     }
+    // Google / Outlook, every 15 minutes - after the call, so a slow feed never delays a reminder
+    try { await syncFeeds(st, token); } catch (e) { logError(st, e.message); }
+
     // forget what lies more than 3 days back
     for (const [k, t] of Object.entries(st.sent)) if (t < +now - 3 * K.DAY) delete st.sent[k];
     st.last = +now;

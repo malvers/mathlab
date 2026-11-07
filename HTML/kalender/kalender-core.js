@@ -221,11 +221,24 @@
         return { date: new Date(ms), allDay: false };
     }
 
-    /* keep only what the calendar understands (FREQ, INTERVAL, COUNT, UNTIL, BYDAY), as written */
-    function cleanRule(v) {
-        const keep = String(v).replace(/^RRULE:/i, '').split(';').filter(p => /^(FREQ|INTERVAL|COUNT|UNTIL|BYDAY)=/i.test(p));
-        const s = keep.join(';').toUpperCase();
-        return parseRule(s) ? s : null;
+    /* keep only what the calendar understands (FREQ, INTERVAL, COUNT, UNTIL, BYDAY), as written. A part that only
+       repeats the start (WKST, BYMONTHDAY = its day, BYMONTH = its month) is dropped; any other part (BYSETPOS = "the
+       last Monday", several months ...) would make the series ring on wrong days if left out - then null, and the
+       caller keeps the first date only and notes the rule */
+    function cleanRule(v, start) {
+        const keep = [];
+        for (const p of String(v).replace(/^RRULE:/i, '').toUpperCase().split(';').filter(Boolean)) {
+            const [k, val] = p.split('=');
+            if (/^(FREQ|INTERVAL|COUNT|UNTIL|BYDAY)$/.test(k)) keep.push(p);
+            else if (k === 'WKST') continue;
+            else if (k === 'BYMONTHDAY' && start && val === String(start.getDate())) continue;
+            else if (k === 'BYMONTH' && start && val === String(start.getMonth() + 1)) continue;
+            else return null;
+        }
+        const s = keep.join(';');
+        const r = parseRule(s);
+        // the expansion knows BYDAY for weekly and monthly series only (DAILY / YEARLY would ignore it)
+        return r && !(r.byday.length && (r.freq === 'DAILY' || r.freq === 'YEARLY')) ? s : null;
     }
 
     /* Read an .ics file: [{ title, starts_at, ends_at, all_day, location, notes, rrule, exdates, remind, color,
@@ -284,7 +297,7 @@
                 all_day: st.allDay,
                 location: one('LOCATION') ? unescapeText(one('LOCATION').value).trim() || null : null,
                 notes: one('DESCRIPTION') ? unescapeText(one('DESCRIPTION').value).trim() || null : null,
-                rrule: rr ? cleanRule(rr.value) : null,
+                rrule: rr ? cleanRule(rr.value, st.date) : null,
                 exdates,
                 remind: ownRemind || (st.allDay ? DEFAULT_REMIND_ALLDAY.slice() : DEFAULT_REMIND.slice()),
                 color: 2,
@@ -296,7 +309,7 @@
                 continue;
             }
             if (status === 'CANCELLED') continue;
-            if (rr && !ev.rrule) ev.notes = (ev.notes ? ev.notes + '\n\n' : '') + 'Wiederholung aus Google: ' + rr.value;
+            if (rr && !ev.rrule) ev.notes = (ev.notes ? ev.notes + '\n\n' : '') + 'Wiederholung (hier nur der erste Termin): ' + rr.value.replace(/^RRULE:/i, '');
             if (uid) series.set(uid, ev);
             out.push(ev);
         }
