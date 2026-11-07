@@ -9,13 +9,19 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- the timetable: wake up a minute before each lesson, and set the alarms again after a restart -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- no INTERNET: the recordings only ever leave the phone over the USB cable to Doc's Mac -->
+    <!-- INTERNET only for the bridge (Doc, 06.11.2026): every piece leaves the phone AES-256-GCM encrypted,
+         to a private R2 bucket the Mac empties at once; the key lives only here and on Doc's Mac. -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="DocMitschrift"
+        android:label="DocNote"
         android:theme="@style/DocMitschrift">
 
         <activity
@@ -32,5 +38,13 @@
             android:name=".AufnahmeService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
+
+        <receiver
+            android:name=".TaktEmpfaenger"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

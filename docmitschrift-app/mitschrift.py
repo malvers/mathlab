@@ -36,7 +36,8 @@ ADB = Path.home() / "Library" / "Android" / "sdk" / "platform-tools" / "adb"
 PIXEL = "43211JEKB10668"
 PKG = "de.docalvers.docmitschrift"
 REMOTE = "files/aufnahmen"
-NAME = re.compile(r"^(\d{8})-(\d{6})\.m4a$")
+NAME = re.compile(r"^(\d{8})-(\d{6})(-hand)?\.m4a$")   # -hand: Doc tapped Start himself, no lesson (07.11.2026)
+TALK_GAP = dt.timedelta(minutes=11)  # recorded by hand: pieces start every 5 min, one silent piece may lie between
 
 EARLY = dt.timedelta(minutes=5)      # sentences this close before or after a lesson still belong to it
 MERGE_GAP = 20                       # minutes: the same class again after a short break is one block
@@ -224,9 +225,27 @@ def spoken(rows):
     return f"{round(s / 60)} min" if s >= 60 else f"{round(s)} s"
 
 
+def by_talk(rows):
+    """Sentences recorded by hand, one talk per recording: its pieces follow each other every five minutes."""
+    talks, last = [], None
+    for r in rows:
+        m = NAME.match(r["quelle"])
+        begin = dt.datetime.strptime(m.group(1) + m.group(2), "%Y%m%d%H%M%S")
+        if talks and begin - last <= TALK_GAP:
+            talks[-1].append(r)
+        else:
+            talks.append([r])
+        last = begin
+    return talks
+
+
 def build_day(root, day, cache, with_summary):
     store = root / "daten" / f"{day}.jsonl"
     rows = [json.loads(l) for l in store.read_text().splitlines()] if store.exists() else []
+    # recorded by hand ("Gespräch", Doc 07.11.2026: a talk on Monday at ten, while the timetable says
+    # Inf) - never part of a lesson, its summary or a class page, but a section of its own on the day
+    talks = [r for r in rows if NAME.match(r["quelle"]) and NAME.match(r["quelle"]).group(3)]
+    rows = [r for r in rows if r not in talks]
     blocks = lessons(day)
     groups = {id(b): [] for b in blocks}
     outside = []
@@ -251,6 +270,13 @@ def build_day(root, day, cache, with_summary):
         md += [p + "\n" for p in wording(g)] + ["</details>", ""]
         done.append({"start": b["start"].isoformat(timespec="minutes"), "end": b["end"].isoformat(timespec="minutes"),
                      "subject": b["subject"], "classes": b["classes"], "summary": summary, "words": words})
+    for g in by_talk(talks):
+        text = " ".join(r["text"] for r in g)
+        summary = summarize(text, cache) if with_summary else None
+        start, end = dt.datetime.fromisoformat(g[0]["t"]), dt.datetime.fromisoformat(g[-1]["bis"])
+        md += [f"## {start:%H:%M}–{end:%H:%M} · Gespräch", ""] + summary_md(summary) + [""]
+        md += [f"<details><summary>Wortlaut · {spoken(g)} gesprochen · {len(text.split()):,} Wörter</summary>".replace(",", "."), ""]
+        md += [p + "\n" for p in wording(g)] + ["</details>", ""]
     if outside:
         md += ["## Außerhalb der Stunden", "",
                f"<details><summary>Wortlaut · {spoken(outside)} gesprochen</summary>", ""]

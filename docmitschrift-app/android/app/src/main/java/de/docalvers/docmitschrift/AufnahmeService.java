@@ -31,26 +31,58 @@ import java.util.Locale;
  * so the Mac never fetches half a file, and a crash costs at most the piece being written.
  * The best microphone wins: USB (the DJI receiver) before Bluetooth before the phone's own,
  * and plugging one in or out starts a new piece on the new microphone.
+ *
+ * Start by hand records at once, whatever the timetable says, until Doc taps Stopp (Doc, 07.11.2026:
+ * "wenn ich das selber triggere, soll es definitiv auch aufnehmen" - a talk on Monday at ten). Such a
+ * recording is called "Gespräch HH:MM" and its pieces end in "-hand.m4a", so the Mac keeps it out of a
+ * lesson that happens to stand in the timetable at the same time.
+ *
+ * Start also makes DocMitschrift ready for the timetable (Plan, since 06.11.2026): the service stays in
+ * the foreground all day and opens the microphone a minute before each lesson and closes it two minutes
+ * after (Doc: "am Anfang jeder Stunde eine Minute vorher ... soll bitte die Aufzeichnung automatisch
+ * starten"). It has to stay running for that - Android only lets the microphone start from a tap, never
+ * from the background - so a ready service records without anybody touching it. Stopp ends only the
+ * recording: it stays ready for the next lesson, and a lesson stopped by hand does not start again before
+ * its end. "Aus" in the notification switches DocMitschrift off completely.
+ * Every finished piece goes encrypted over the bridge to the Mac (Bruecke); without network or without
+ * a bridge it waits here for the USB cable, as before.
  */
 public class AufnahmeService extends Service {
     static final String TAG = "DocMitschrift";
     static final String CH_REC = "aufnahme";
     static final String CH_ALARM = "alarm";
+    static final String CH_START = "stundenbeginn";
     static final int NOTE_REC = 1;
     static final int NOTE_ALARM = 2;
+    static final int NOTE_START = 3;
     static final long PIECE_MS = 5 * 60 * 1000;
-    static final String ACTION_STOP = "de.docalvers.docmitschrift.STOP";
+    static final long HOUR_MS = 60 * 60 * 1000;
+    static final String ACTION_STOP = "de.docalvers.docmitschrift.STOP";    // end the recording, stay ready
+    static final String ACTION_OFF = "de.docalvers.docmitschrift.OFF";      // switch off completely
+    static final String ACTION_HAND = "de.docalvers.docmitschrift.HAND";    // Start on the screen: record now
+    static final String ACTION_START = "de.docalvers.docmitschrift.START";  // the "Stunde beginnt" notification
+    static final String ACTION_TICK = "de.docalvers.docmitschrift.TICK";
+    static final String HAND_SUFFIX = "-hand";  // in the names of the pieces recorded by hand
 
     // read by the screen once a second
-    static volatile boolean recording;
-    static volatile long since;                 // ms when Doc pressed Start
+    static volatile boolean running;            // Doc pressed Start: ready (and recording in the lessons)
+    static volatile boolean recording;          // the microphone is open right now
+    static volatile boolean hand;               // the running recording was started by hand
+    static volatile String lesson = "";         // the window being recorded ("Gespräch 10:02" by hand)
+    static volatile long nextVon;               // the next window, 0 when none
+    static volatile String nextName = "";
+    static volatile long since;                 // ms when this recording began
     static volatile String mic = "";            // the input of the current piece
     static volatile String problem = "";        // the last thing that went wrong, empty when all is well
     static volatile long pieceSince;            // ms when the running piece began, 0 between pieces
     private static volatile MediaRecorder live; // the running recorder, for the level on the screen
 
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final Runnable rotate = this::nextPiece;
+    // every five minutes: a new piece - unless the lesson is over, then the timetable decides
+    private final Runnable rotate = () -> {
+        if (wanted() != null) nextPiece();
+        else evaluate();
+    };
     private AudioManager audio;
     private PowerManager.WakeLock wake;
     private MediaRecorder recorder;
@@ -75,10 +107,12 @@ public class AufnahmeService extends Service {
         }
     };
 
+    /** Start on the screen: record now, until Stopp - and be ready for the lessons afterwards. */
     public static void start(Context c) {
-        c.startForegroundService(new Intent(c, AufnahmeService.class));
+        c.startForegroundService(new Intent(c, AufnahmeService.class).setAction(ACTION_HAND));
     }
 
+    /** Stopp on the screen: end the recording, stay ready for the next lesson. */
     public static void stop(Context c) {
         c.startService(new Intent(c, AufnahmeService.class).setAction(ACTION_STOP));
     }
@@ -99,12 +133,43 @@ public class AufnahmeService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
-            stopping = true;
-            end();
-            stopForeground(STOP_FOREGROUND_REMOVE);
-            stopSelf();
+        String action = intent == null ? null : intent.getAction();
+        if (ACTION_OFF.equals(action)) {
+            off();
             return START_NOT_STICKY;
+        }
+        if (ACTION_STOP.equals(action)) {
+            if (!running) {                         // nothing to stop
+                stopSelf(startId);
+                return START_NOT_STICKY;
+            }
+            if (!recording) return START_STICKY;    // a second tap on Stopp: the first one did it
+            Log.i(TAG, "stop pressed: " + lesson);
+            // a lesson stopped by hand stays quiet until its end - also when a talk by hand ran into it
+            Plan.Fenster cur = Plan.current(Plan.load(this), System.currentTimeMillis());
+            if (cur != null) prefs(this).edit().putLong("pauseBis", cur.bis).apply();
+            end();
+            hand = false;
+            lesson = "";
+            getSystemService(NotificationManager.class).cancel(NOTE_START);
+            Bruecke.sendPieces(this);
+            if (!Plan.exists(this)) {               // no timetable: nothing to be ready for
+                off();
+                return START_NOT_STICKY;
+            }
+            evaluate();
+            return START_STICKY;
+        }
+        if (ACTION_TICK.equals(action)) {
+            // an alarm reached a service that is no longer in the foreground: it must not start one itself
+            if (!running) {
+                stopSelf(startId);
+                return START_NOT_STICKY;
+            }
+            Bruecke.fetchPlan(this, this::evaluate);
+            Bruecke.sendPieces(this);
+            evaluate();
+            return START_STICKY;
         }
         try {
             if (Build.VERSION.SDK_INT >= 30) startForeground(NOTE_REC, note(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE);
@@ -113,12 +178,26 @@ public class AufnahmeService extends Service {
             // Android only lets the microphone start while the app is on screen, so a restart from the
             // background fails here: then Doc must know at once that nothing is being recorded
             Log.w(TAG, "foreground refused", e);
+            running = false;
             recording = false;
             alarm("Aufnahme läuft nicht", "Öffne DocMitschrift und tippe auf Start.");
             stopSelf();
             return START_NOT_STICKY;
         }
-        if (!recording) begin();
+        Log.i(TAG, "start: " + action);
+        running = true;
+        stopping = false;
+        prefs(this).edit().putBoolean("bereit", true).apply();
+        getSystemService(NotificationManager.class).cancel(NOTE_ALARM);
+        if (ACTION_HAND.equals(action) && !recording) {
+            hand = true;
+            lesson = "Gespräch " + new SimpleDateFormat("HH:mm", Locale.GERMANY).format(new Date());
+            Log.i(TAG, "recording by hand: " + lesson);
+            begin();
+        }
+        Bruecke.fetchPlan(this, this::evaluate);
+        Bruecke.sendPieces(this);
+        evaluate();
         return START_STICKY;
     }
 
@@ -129,11 +208,147 @@ public class AufnahmeService extends Service {
 
     @Override
     public void onDestroy() {
-        if (recording && !stopping) {
+        if (running && !stopping) {
             end();
-            alarm("Aufnahme beendet", "Android hat die Aufnahme beendet. Öffne DocMitschrift und tippe auf Start.");
+            alarm("Aufnahme beendet", "Android hat DocMitschrift beendet. Öffne DocMitschrift und tippe auf Start.");
         }
+        running = false;
+        hand = false;
         super.onDestroy();
+    }
+
+    /** "Aus" in the notification: no recording, no lessons, no alarms until the next Start. */
+    private void off() {
+        Log.i(TAG, "off");
+        stopping = true;
+        prefs(this).edit().putBoolean("bereit", false).remove("pauseBis").apply();
+        unschedule(this);
+        end();
+        running = false;
+        hand = false;
+        lesson = "";
+        stopForeground(STOP_FOREGROUND_REMOVE);
+        getSystemService(NotificationManager.class).cancel(NOTE_START);
+        Bruecke.sendStatus(this, status());
+        stopSelf();
+    }
+
+    // ---- the timetable
+
+    /** The window to record now: by hand until Stopp, else the lesson from the timetable - unless Doc
+     *  stopped that lesson by hand. */
+    private Plan.Fenster wanted() {
+        if (!running) return null;
+        if (hand) return new Plan.Fenster(0, Long.MAX_VALUE, lesson);
+        long now = System.currentTimeMillis();
+        if (now < prefs(this).getLong("pauseBis", 0)) return null;
+        return Plan.current(Plan.load(this), now);
+    }
+
+    /** Opens or closes the microphone as the timetable says, and sets the alarm for the next edge. */
+    private void evaluate() {
+        if (!running) return;
+        long now = System.currentTimeMillis();
+        Plan.Fenster w = wanted();
+        Plan.Fenster n = Plan.next(Plan.load(this), now);
+        nextVon = n == null ? 0 : n.von;
+        nextName = n == null ? "" : n.name;
+        if (w != null && !recording) {
+            lesson = w.name;
+            Log.i(TAG, "lesson begins: " + w.name);
+            begin();
+            if (!w.name.isEmpty()) announce(w.name);
+        } else if (w != null && recording && !hand && !w.name.equals(lesson)) {
+            // the next lesson follows straight on: the microphone stays open, the name changes
+            lesson = w.name;
+            Log.i(TAG, "lesson begins: " + w.name);
+            announce(w.name);
+        } else if (w == null && recording) {
+            Log.i(TAG, "lesson over: " + lesson);
+            end();
+            lesson = "";
+            getSystemService(NotificationManager.class).cancel(NOTE_START);
+            Bruecke.sendPieces(this);
+        }
+        schedule(this);
+        refreshNote();
+        Bruecke.sendStatus(this, status());
+    }
+
+    /** The next alarm: the edge of the running or the next window, at the latest in an hour (fresh plan). */
+    static void schedule(Context c) {
+        long now = System.currentTimeMillis();
+        java.util.List<Plan.Fenster> plan = Plan.load(c);
+        Plan.Fenster cur = Plan.current(plan, now), nx = Plan.next(plan, now);
+        long t = now + HOUR_MS;
+        if (cur != null) t = Math.min(t, cur.bis);
+        if (nx != null) t = Math.min(t, nx.von);
+        t = Math.max(t, now + 5000);
+        android.app.AlarmManager am = c.getSystemService(android.app.AlarmManager.class);
+        PendingIntent pi = tickIntent(c);
+        if (Build.VERSION.SDK_INT >= 31 && !am.canScheduleExactAlarms())
+            am.setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, t, pi);
+        else am.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, t, pi);
+    }
+
+    static void unschedule(Context c) {
+        c.getSystemService(android.app.AlarmManager.class).cancel(tickIntent(c));
+    }
+
+    private static PendingIntent tickIntent(Context c) {
+        return PendingIntent.getBroadcast(c, 7, new Intent(c, TaktEmpfaenger.class),
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /** Android ended the service, but a lesson is on: ask Doc for the one tap Android insists on. */
+    static void askToStart(Context c) {
+        long now = System.currentTimeMillis();
+        Plan.Fenster w = Plan.current(Plan.load(c), now);
+        if (w == null || now < prefs(c).getLong("pauseBis", 0)) return;
+        channels(c);
+        PendingIntent go = PendingIntent.getForegroundService(c, 3,
+                new Intent(c, AufnahmeService.class).setAction(ACTION_START), PendingIntent.FLAG_IMMUTABLE);
+        Notification n = new Notification.Builder(c, CH_ALARM)
+                .setSmallIcon(R.drawable.ic_mic)
+                .setContentTitle("Stunde beginnt – DocMitschrift ist aus")
+                .setContentText("Tippe hier, dann nimmt sie auf: " + w.name)
+                .setContentIntent(go)
+                .setAutoCancel(true)
+                .setTimeoutAfter(Math.max(60000, w.bis - now))
+                .build();
+        c.getSystemService(NotificationManager.class).notify(NOTE_ALARM, n);
+    }
+
+    /** The message Doc wanted when a lesson's recording starts by itself (06.11.2026, 07:05). */
+    private void announce(String name) {
+        Notification n = new Notification.Builder(this, CH_START)
+                .setSmallIcon(R.drawable.ic_mic)
+                .setContentTitle("● Aufnahme läuft")
+                .setContentText(name)
+                .setContentIntent(openApp(this))
+                .setAutoCancel(true)
+                .setTimeoutAfter(90000)
+                .build();
+        getSystemService(NotificationManager.class).notify(NOTE_START, n);
+    }
+
+    /** For the Mac: is the phone ready, is it recording, which lesson, what comes next. */
+    static org.json.JSONObject status() {
+        org.json.JSONObject o = new org.json.JSONObject();
+        try {
+            o.put("bereit", running);
+            o.put("aufnahme", recording);
+            o.put("hand", hand);
+            o.put("stunde", lesson);
+            o.put("seit", recording ? since : 0);
+            o.put("mikro", mic);
+            o.put("naechste", nextVon);
+            o.put("naechsteName", nextName);
+            o.put("problem", problem.isEmpty() ? Bruecke.problem : problem);
+            o.put("stand", System.currentTimeMillis());
+        } catch (org.json.JSONException ignored) {
+        }
+        return o;
     }
 
     private void begin() {
@@ -179,15 +394,19 @@ public class AufnahmeService extends Service {
             alarm("Aufnahme gestoppt", "Das Mikrofon lässt sich nicht öffnen: " + problem);
             stopping = true;
             end();
+            running = false;
+            hand = false;
             stopForeground(STOP_FOREGROUND_REMOVE);
             stopSelf();
         }
         refreshNote();
+        Bruecke.sendStatus(this, status());            // every five minutes: the Mac knows the phone is alive
     }
 
     private boolean openPiece() {
         pieceStart = System.currentTimeMillis();
-        String name = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.GERMANY).format(new Date(pieceStart));
+        String name = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.GERMANY).format(new Date(pieceStart))
+                + (hand ? HAND_SUFFIX : "");
         current = new File(dir(this), name + ".m4a.part");
         AudioDeviceInfo input = bestInput(true);
         bluetooth = input != null && isBluetooth(input.getType()) && routeBluetooth();
@@ -248,6 +467,7 @@ public class AufnahmeService extends Service {
             String n = f.getName();
             f.renameTo(new File(f.getParentFile(), n.substring(0, n.length() - ".part".length())));
             addRecorded(System.currentTimeMillis() - pieceStart);
+            Bruecke.sendPieces(this);                   // off to the Mac at once, encrypted (no-op without bridge)
         } else {
             f.delete();
         }
@@ -387,8 +607,12 @@ public class AufnahmeService extends Service {
         NotificationChannel alarm = new NotificationChannel(CH_ALARM, "Aufnahme gestoppt", NotificationManager.IMPORTANCE_HIGH);
         alarm.enableVibration(true);
         alarm.setVibrationPattern(new long[]{0, 400, 200, 400, 200, 400});
+        // a short message when a lesson's recording starts by itself
+        NotificationChannel start = new NotificationChannel(CH_START, "Stundenbeginn", NotificationManager.IMPORTANCE_DEFAULT);
+        start.setShowBadge(false);
         nm.createNotificationChannel(rec);
         nm.createNotificationChannel(alarm);
+        nm.createNotificationChannel(start);
     }
 
     static PendingIntent openApp(Context c) {
@@ -399,9 +623,23 @@ public class AufnahmeService extends Service {
     private Notification note() {
         PendingIntent stop = PendingIntent.getService(this, 1,
                 new Intent(this, AufnahmeService.class).setAction(ACTION_STOP), PendingIntent.FLAG_IMMUTABLE);
+        if (!recording) {
+            // ready between the lessons: the microphone is closed, the next lesson is named; "Aus" ends it all
+            PendingIntent off = PendingIntent.getService(this, 4,
+                    new Intent(this, AufnahmeService.class).setAction(ACTION_OFF), PendingIntent.FLAG_IMMUTABLE);
+            return new Notification.Builder(this, CH_REC)
+                    .setSmallIcon(R.drawable.ic_mic)
+                    .setContentTitle("DocMitschrift bereit")
+                    .setContentText(nextVon == 0 ? "Keine Stunde mehr im Plan" : "Nächste Stunde: " + when(nextVon) + " · " + nextName)
+                    .setShowWhen(false)
+                    .setOngoing(true)
+                    .setContentIntent(openApp(this))
+                    .addAction(new Notification.Action.Builder(null, "Aus", off).build())
+                    .build();
+        }
         return new Notification.Builder(this, CH_REC)
                 .setSmallIcon(R.drawable.ic_mic)
-                .setContentTitle("DocMitschrift nimmt auf")
+                .setContentTitle("DocMitschrift nimmt auf" + (lesson.isEmpty() ? "" : " · " + lesson))
                 .setContentText(mic.isEmpty() ? "Mikrofon wird geöffnet …" : mic)
                 .setWhen(since == 0 ? System.currentTimeMillis() : since)
                 .setUsesChronometer(true)
@@ -413,7 +651,15 @@ public class AufnahmeService extends Service {
     }
 
     private void refreshNote() {
-        if (recording) getSystemService(NotificationManager.class).notify(NOTE_REC, note());
+        if (running) getSystemService(NotificationManager.class).notify(NOTE_REC, note());
+    }
+
+    /** "Mo 07:59" for a time this week, "heute 09:49" for today. */
+    static String when(long ms) {
+        Date d = new Date(ms);
+        boolean today = new SimpleDateFormat("yyyyMMdd", Locale.GERMANY).format(d).equals(today());
+        return (today ? "heute " : new SimpleDateFormat("EE dd.MM. ", Locale.GERMANY).format(d))
+                + new SimpleDateFormat("HH:mm", Locale.GERMANY).format(d);
     }
 
     private void alarm(String title, String text) {

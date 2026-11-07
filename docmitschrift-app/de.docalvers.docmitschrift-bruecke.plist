@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>de.docalvers.docmitschrift-bruecke</string>
+
+  <!-- DocMitschrift without the cable (Doc, 06.11.2026): once a minute bruecke.mjs takt puts the timetable on the
+       bridge when it changed, reads the phone's status (live.json for the plans' "Notizen" button) and fetches the
+       encrypted pieces, deletes them on the bridge and writes them down on this Mac (mitschrift.py, background
+       priority). Quiet when nothing happens. Runs only while the Mac is awake; it catches up on waking.
+       Installed copy: ~/Library/LaunchAgents/de.docalvers.docmitschrift-bruecke.plist (this file is its source). -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/node</string>
+    <string>/Users/malvers/IdeaProjects/forloop/docmitschrift-app/bruecke.mjs</string>
+    <string>takt</string>
+  </array>
+
+  <key>StartInterval</key><integer>60</integer>
+  <key>RunAtLoad</key><true/>
+  <key>ProcessType</key><string>Background</string>
+
+  <key>StandardOutPath</key><string>/Users/malvers/Library/Logs/docmitschrift-bruecke.log</string>
+  <key>StandardErrorPath</key><string>/Users/malvers/Library/Logs/docmitschrift-bruecke.log</string>
+</dict>
+</plist>
