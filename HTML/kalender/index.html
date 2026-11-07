@@ -42,8 +42,10 @@
             --btn-rim-a: 1;
             --pill-a: .75;
             --hour: 44px;   /* one hour in the week view */
+            --on-lambda: var(--ink-navy);   /* text on a full λ area (today's circle, the yes button) */
         }
-        html.svp-light { --btn-a: .3; --btn-rim-a: .85; --pill-a: .38; }
+        /* in Hell λ is dark blue, so what sits on it turns white (Doc, 07.11.2026: the 7 in today's circle was unreadable) */
+        html.svp-light { --btn-a: .3; --btn-rim-a: .85; --pill-a: .38; --on-lambda: rgb(255, 255, 255); }
         @media (max-width: 480px) { :root { --hour: 40px; } }
 
         * { box-sizing: border-box; }
@@ -222,35 +224,72 @@
         .more { display: block; margin: 0 auto 12px; }
 
         /* ---------- Woche ---------- */
-        .wk { padding: 8px 6px 10px; }
-        .wk-head, .wk-allday, .wk-grid { display: grid; grid-template-columns: 34px repeat(7, minmax(0, 1fr)); }
+        .wk { padding: 8px 12px 10px 0; }   /* the table a little to the left, some air on the right (Doc, 07.11.2026) */
+        .wk-head, .wk-allday, .wk-grid, .wk-lines { display: grid; grid-template-columns: 34px repeat(7, minmax(0, 1fr)); }
         .wk-dayname {
             padding: 4px 0 8px; text-align: center; cursor: pointer; border: 0; background: transparent; color: var(--text);
-            font: 700 11px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase;
+            font: 700 12px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase;
         }
         .wk-dayname b {
             display: block; margin: 4px auto 0; width: 32px; height: 32px; border-radius: 50%;
             font: 700 15px/32px Orbitron, sans-serif; letter-spacing: 0;
         }
-        .wk-dayname.today b { background: var(--lambda); color: var(--ink-navy); }
-        .wk-dayname.weekend { color: var(--muted); }
-        .wk-allday { border-top: 1px solid var(--line); min-height: 6px; }
+        .wk-dayname.today b { background: var(--lambda); color: var(--on-lambda); }
+        /* the weekday in full where the column has room (Doc, 07.11.2026: "wenn genug Platz ist, bitte aus"), else short;
+           in full text colour and a size up, the small grey ones looked blurred (Doc: "total unscharf");
+           124px = DONNERSTAG at 13px, the longest, plus a little air */
+        .wk-dayname, .mo-head > span { container-type: inline-size; }
+        .dn-l { display: none; }
+        @container (min-width: 124px) { .dn-l { display: inline; font-size: 13px; } .dn-s { display: none; } }
+        .wk-allday { min-height: 6px; }
+        /* the line under the day names (and under the all-day row): like the table's lines and from the table edge, and
+           it stays put while the hours scroll beneath it - scrolled up it is the 0:00 line (Doc, 07.11.2026: "Die oben
+           muss bleiben und die muss so aussehen wie die Tabelle") */
+        .wk-sep { padding-left: 34px; }
+        .wk-sep i { display: block; height: 1px; background: var(--line); }
+        /* all 24 hours in a box of their own under the day names, opened at 8:00, one hour a 13th of the box so 8 to 21
+           fill it (Doc, 07.11.2026: "alle Stunden des Tages sehen, aber den Ausschnitt von 8 bis 21 Uhr rausgezoomt ist gut") */
+        .wk-body { position: relative; overflow-y: auto; overscroll-behavior: contain; }
+        /* the rubber band at the ends stays (Doc, 07.11.2026: "Ich will den ja haben, aber die Linien sollen keine Lücke
+           nach oben haben"): a still copy of the vertical lines lies behind the opaque hours and shows only in the gap
+           the band opens at the top; scrolled into the lower half it is hidden, below 24:00 the lines never go on
+           ("unten brauchst du die nie verlängern"). Same grid, gutter and padding, so it lies exactly on the columns */
+        .wk-frame { position: relative; }
+        .wk-frame.low .wk-lines { visibility: hidden; }
+        .wk-lines { position: absolute; inset: 0; pointer-events: none; }
+        .wk-lines > div + div { border-left: 1px solid var(--line); }
+        .wk-lines > div:last-child { border-right: 1px solid var(--line); }
+        .wk-lines > .today { background: rgba(var(--c-gold), .06); }
+        /* the rows above the box keep the same slim gutter as its scrollbar, so the columns line up; the bar is quiet
+           (no grey track), and where a mouse brings visible scroll bars (Doc's Mac) the table keeps some air before it
+           (Doc, 07.11.2026: "geht die Tabelle immer noch bis an die Scrollbar ran") */
+        .wk-head, .wk-allday, .wk-sep, .wk-lines { overflow-y: hidden; }
+        .wk-head, .wk-allday, .wk-sep, .wk-lines, .wk-body { scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--muted) 40%, transparent) transparent; }
+        @media (pointer: fine) { .wk-head, .wk-allday, .wk-sep, .wk-lines, .wk-grid { padding-right: 8px; } }
+        body[data-view="week"] { padding-bottom: env(safe-area-inset-bottom); }
         .wk-allday > div { padding: 3px 2px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
         .chip {
             display: block; padding: 2px 6px; border-radius: 5px; cursor: pointer; text-align: left; border: 0; width: 100%;
             background: rgb(var(--c)); color: var(--on);
             font: 600 12px/1.35 Raleway, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .wk-grid { position: relative; border-top: 1px solid var(--line); }
+        /* the lines lie in the day columns only, from the table edge, each at the end of its hour, so the table draws no
+           0:00 line of its own (the one under the day names is it) and closes with the 24:00 line, which scrolled down
+           ends flush with the box and its scrollbar (Doc, 07.11.2026); so 00 sits just under the top line, 24 just
+           over the bottom one; the last column closes the table on the right */
+        .wk-grid { position: relative; background: var(--card); }
+        .wk-hours > div:first-child span { top: 2px; }
         .wk-hours > div { height: var(--hour); position: relative; }
         .wk-hours span {
             position: absolute; top: -7px; right: 6px; font: 500 10px Orbitron, sans-serif; color: var(--muted); font-variant-numeric: tabular-nums;
         }
+        .wk-hours span.end { top: auto; bottom: 2px; }
+        .wk-col:last-child { border-right: 1px solid var(--line); }
+        .wk-col.today { background-color: rgba(var(--c-gold), .06); }
         .wk-col {
             position: relative; border-left: 1px solid var(--line); cursor: pointer;
-            background-image: linear-gradient(var(--line) 1px, transparent 1px); background-size: 100% var(--hour);
+            background-image: linear-gradient(transparent calc(var(--hour) - 1px), var(--line) 0); background-size: 100% var(--hour);
         }
-        .wk-col.today { background-color: rgba(var(--c-gold), .06); }
         .wk-ev {
             position: absolute; z-index: 1; overflow: hidden; border-radius: 6px; padding: 2px 4px; cursor: pointer;
             background: rgb(var(--c)); color: var(--on); border: 1px solid var(--card);
@@ -271,7 +310,7 @@
         /* ---------- Monat ---------- */
         .mo { padding: 8px 6px 6px; }
         .mo-head, .mo-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-        .mo-head span { padding: 4px 0 8px; text-align: center; font: 700 11px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+        .mo-head > span { padding: 4px 0 8px; text-align: center; font: 700 12px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--text); }
         .mo-cell {
             display: flex; flex-direction: column; align-items: stretch; gap: 3px; min-width: 0; min-height: 92px; padding: 4px 3px;
             border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--text); cursor: pointer; text-align: left; border-radius: 0;
@@ -282,7 +321,7 @@
         }
         .mo-cell.out { color: var(--muted); }
         .mo-cell.out .chip { opacity: .55; }
-        .mo-cell.today .n { background: var(--lambda); color: var(--ink-navy); }
+        .mo-cell.today .n { background: var(--lambda); color: var(--on-lambda); }
         .mo-cell.sel { background: rgba(var(--tint), .14); border-radius: 8px; }
         .mo-cell .evs { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
         .mo-cell .chip { font-size: 11px; padding: 1px 5px; pointer-events: none; }
@@ -319,7 +358,7 @@
             font: 700 13px Orbitron, sans-serif; letter-spacing: .04em;
             background: transparent; color: var(--text); border: 1px solid var(--line);
         }
-        .dlg-btns button.yes { background: var(--lambda); color: var(--ink-navy); border: 0; }
+        .dlg-btns button.yes { background: var(--lambda); color: var(--on-lambda); border: 0; }
         .dlg-btns button.danger { background: rgb(var(--c-red)); color: var(--ink-light); border: 0; }
         .dlg-btns button.left { flex: 0 0 auto; margin-right: auto; }
 
@@ -396,7 +435,7 @@
             </button>
             <div class="row2">
                 <div class="seg views" id="views" role="tablist" aria-label="Ansicht">
-                    <button type="button" role="tab" data-view="agenda" aria-selected="true">Agenda</button>
+                    <button type="button" role="tab" data-view="agenda" aria-selected="true">Tag</button>
                     <button type="button" role="tab" data-view="week" aria-selected="false">Woche</button>
                     <button type="button" role="tab" data-view="month" aria-selected="false">Monat</button>
                 </div>
@@ -625,6 +664,8 @@
             /* ---------- words for times ---------- */
             const dayLabel = d => K.WEEKDAY_SHORT[d.getDay()] + ' ' + d.getDate() + '. ' + K.MONTH_SHORT[d.getMonth()];
             const longDay = d => K.WEEKDAY_LONG[d.getDay()] + ', ' + d.getDate() + '. ' + K.MONTH_LONG[d.getMonth()];
+            // a column head: both names, the CSS shows the long one where the column has room (.dn-l / .dn-s)
+            const dayName = i => `<span class="dn-l">${K.WEEKDAY_LONG[i]}</span><span class="dn-s">${K.WEEKDAY_SHORT[i]}</span>`;
             function relDay(d) {
                 const diff = Math.round((K.startOfDay(d) - K.startOfDay(new Date())) / K.DAY);
                 return diff === 0 ? 'Heute' : diff === 1 ? 'Morgen' : diff === 2 ? 'Übermorgen' : diff === -1 ? 'Gestern' : null;
@@ -739,29 +780,27 @@
                 const mon = mondayOf(anchor);
                 const days = [...Array(7)].map((_, i) => K.addDays(mon, i));
                 const sun = days[6];
-                $('period').innerHTML = esc(mon.getDate() + '.' + (mon.getMonth() !== sun.getMonth() ? ' ' + K.MONTH_SHORT[mon.getMonth()] + ' ' : '') +
-                    '–' + sun.getDate() + '. ' + K.MONTH_SHORT[sun.getMonth()]) + `<small>KW ${K.isoWeek(mon)} · ${sun.getFullYear()}</small>`;
+                // the months in full (Doc, 07.11.2026: "Können wir gerne November schreiben"), short only where they don't fit
+                const span = M => mon.getDate() + '.' + (mon.getMonth() !== sun.getMonth() ? ' ' + M[mon.getMonth()] + ' ' : '') + '–' + sun.getDate() + '. ' + M[sun.getMonth()];
+                const kw = `<small>KW ${K.isoWeek(mon)} · ${sun.getFullYear()}</small>`;
+                $('period').innerHTML = esc(span(K.MONTH_LONG)) + kw;
+                if ($('period').scrollWidth > $('period').clientWidth + 1) $('period').innerHTML = esc(span(K.MONTH_SHORT)) + kw;
                 const occs = occsIn(mon, K.addDays(mon, 7));
                 const timed = occs.filter(o => !o.ev.all_day), allday = occs.filter(o => o.ev.all_day);
-                // hours shown: 7 to 22, wider when an appointment lies outside
-                let h0 = 7, h1 = 22;
-                for (const o of timed) {
-                    const s = K.sameDay(o.start, o.end) || o.start >= mon ? o.start.getHours() : 0;
-                    const e = K.sameDay(o.start, o.end) ? o.end.getHours() + (o.end.getMinutes() ? 1 : 0) : 24;
-                    h0 = Math.min(h0, s); h1 = Math.max(h1, e);
-                }
-                const H = h1 - h0;
+                const h0 = 0, H = 24;   // the whole day; fitWeek opens the box at 8:00
                 shownOcc = new Map();
                 let html = '<div class="wk-head"><div></div>' + days.map(d =>
-                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${K.WEEKDAY_SHORT[d.getDay()]}<b>${d.getDate()}</b></button>`).join('') + '</div>';
+                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${dayName(d.getDay())}<b>${d.getDate()}</b></button>`).join('') + '</div>';
                 if (allday.length) {
-                    html += '<div class="wk-allday"><div></div>' + days.map(d => {
+                    html += WK_SEP + '<div class="wk-allday"><div></div>' + days.map(d => {
                         const here = allday.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                         here.forEach(o => shownOcc.set(o.key, o));
                         return '<div>' + here.map(o => `<button type="button" class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}" title="${esc(o.ev.title)}">${esc(o.ev.title)}</button>`).join('') + '</div>';
                     }).join('') + '</div>';
                 }
-                html += `<div class="wk-grid" data-h0="${h0}"><div class="wk-hours">` + [...Array(H)].map((_, i) => `<div>${i ? `<span>${String(h0 + i).padStart(2, '0')}</span>` : ''}</div>`).join('') + '</div>';
+                html += WK_SEP + '<div class="wk-frame"><div class="wk-lines" aria-hidden="true"><div></div>' +
+                    days.map(d => `<div${K.sameDay(d, now) ? ' class="today"' : ''}></div>`).join('') + '</div>' +
+                    `<div class="wk-body"><div class="wk-grid" data-h0="${h0}"><div class="wk-hours">` + [...Array(H)].map((_, i) => `<div><span>${String(h0 + i).padStart(2, '0')}</span>${i === H - 1 ? `<span class="end">${h0 + H}</span>` : ''}</div>`).join('') + '</div>';
                 html += days.map(d => {
                     const dEnd = K.addDays(d, 1);
                     const here = timed.filter(o => o.start < dEnd && o.end > d).map(o => {
@@ -797,8 +836,31 @@
                         if (nm >= 0 && nm <= H * 60) col += `<div class="now-line" style="top:calc(var(--hour) * ${nm / 60})"></div>`;
                     }
                     return col + '</div>';
-                }).join('') + '</div>';
+                }).join('') + '</div></div></div>';
                 $('wk').innerHTML = html;
+                fitWeek();
+            }
+            /* the hour box: it fills what the window leaves below the day names - only the box scrolls, never the page;
+               one hour = a 13th of it (8 to 21) less room for the 08 label above and the grid's padding below. It opens
+               at 8:00 and then stays where Doc scrolled it, through the half-minute redraws and other weeks */
+            const WK_FROM = 8, WK_TO = 21, WK_LABEL = 10;   // WK_LABEL: px kept above the top hour line for its label
+            const WK_SEP = '<div class="wk-sep"><i></i></div>';
+            let wkTop = WK_FROM;   // the hour whose line sits WK_LABEL below the top of the box
+            function fitWeek() {
+                const box = $('wk').querySelector('.wk-body');
+                if (!box || $('vWeek').hidden) return;
+                const padB = parseFloat(getComputedStyle(box.firstElementChild).paddingBottom) || 0;
+                const room = Math.floor(innerHeight - (box.getBoundingClientRect().top + scrollY) - 14);   // 14 = card padding + border + air
+                // a status line coming and going in the header changes the box, not the size of the hours
+                const st = $('status').offsetHeight + (parseFloat(getComputedStyle($('status')).marginTop) || 0);
+                const hour = Math.max(22, Math.floor((room + st - WK_LABEL - padB) / (WK_TO - WK_FROM)));
+                $('wk').style.setProperty('--hour', hour + 'px');
+                box.style.height = Math.max(room, 4 * hour) + 'px';
+                box.scrollTop = Math.max(0, wkTop * hour - WK_LABEL);
+                // the still lines behind (for the rubber band at the top) only while in the upper half
+                const low = () => box.parentElement.classList.toggle('low', box.scrollTop > (box.scrollHeight - box.clientHeight) / 2);
+                low();
+                box.onscroll = () => { wkTop = (box.scrollTop + WK_LABEL) / hour; low(); };
             }
 
             /* ---------- Monat ---------- */
@@ -809,7 +871,7 @@
                 $('period').innerHTML = esc(K.MONTH_LONG[first.getMonth()]) + `<small>${first.getFullYear()}</small>`;
                 const occs = K.expand(items, start, K.addDays(start, 42));
                 shownOcc = new Map();
-                let html = '<div class="mo-head">' + [1, 2, 3, 4, 5, 6, 0].map(i => `<span>${K.WEEKDAY_SHORT[i]}</span>`).join('') + '</div><div class="mo-grid">';
+                let html = '<div class="mo-head">' + [1, 2, 3, 4, 5, 6, 0].map(i => `<span>${dayName(i)}</span>`).join('') + '</div><div class="mo-grid">';
                 for (const d of cells) {
                     const here = occs.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                     const school = lessonOccs(d, K.addDays(d, 1)).some(o => !isOff(o));   // one quiet mark for the lessons
@@ -1283,7 +1345,7 @@
                     const col = e.target.closest('.wk-col');
                     if (col) {
                         const r = col.getBoundingClientRect();
-                        const hourPx = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hour')) || 44;
+                        const hourPx = parseFloat(getComputedStyle(col).getPropertyValue('--hour')) || 44;
                         const h0 = Number(col.parentElement.dataset.h0) || 0;
                         openEditor({ day: dateOf(col.dataset.day), hour: Math.max(0, Math.min(23, h0 + Math.floor((e.clientY - r.top) / hourPx))) });
                     }
@@ -1344,6 +1406,17 @@
                     e.preventDefault();
                     step(e.key === 'ArrowRight' ? 1 : -1);
                 });
+                // another window size: the week fits its hour box and the month names again - on the phone not for the
+                // address bar sliding in and out, that would make the hours jump while scrolling
+                let lastW = innerWidth, lastH = innerHeight;
+                window.addEventListener('resize', () => {
+                    if (innerWidth === lastW && Math.abs(innerHeight - lastH) < 120 && matchMedia('(pointer: coarse)').matches) return;
+                    lastW = innerWidth; lastH = innerHeight;
+                    if (view === 'week' && !$('main').hidden) render();
+                });
+                // the header grows or shrinks (a status line, the web font arriving): the hour box follows, the page never scrolls
+                if (window.ResizeObserver) new ResizeObserver(() => { if (view === 'week' && !$('main').hidden) fitWeek(); }).observe($('entry'));
+                if (document.fonts) document.fonts.ready.then(() => { if (view === 'week' && !$('main').hidden) render(); });
                 // back in the foreground (phone) or focused again (Mac): fetch what the other device changed
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden && auth.hasSession() && !$('main').hidden && $('ed').hidden && !busy) refresh();
