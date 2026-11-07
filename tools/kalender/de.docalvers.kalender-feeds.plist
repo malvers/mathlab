@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Doc's calendar: mirror his Google and IBB/Outlook calendars into his own every 15 minutes (Doc, 07.11.2026:
+     "alle 15 Minuten nachsehen ... Ja, machen wir so"). Only the mirror - no Solita calls; those come with the full
+     reminder watcher (de.docalvers.kalender-waechter), which mirrors on its own - once that one is loaded, unload this
+     one: launchctl bootout gui/501/de.docalvers.kalender-feeds. Install:
+       cp tools/kalender/de.docalvers.kalender-feeds.plist ~/Library/LaunchAgents/
+       launchctl bootstrap gui/501 ~/Library/LaunchAgents/de.docalvers.kalender-feeds.plist -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>de.docalvers.kalender-feeds</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/node</string>
+        <string>/Users/malvers/IdeaProjects/forloop/tools/kalender/waechter.mjs</string>
+        <string>--feeds</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>900</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>TZ</key>
+        <string>Europe/Berlin</string>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/malvers/Library/Logs/kalender-feeds.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/malvers/Library/Logs/kalender-feeds.log</string>
+</dict>
+</plist>

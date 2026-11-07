@@ -2,8 +2,10 @@
 // Link Doc's Google or Outlook calendar with his own calendar (HTML/kalender/) - Doc, 07.11.2026: "Ich möchte
 // [Google] bitte dauerhaft verknüpfen … Und dann müssten wir den Outlook-Kalender auch noch irgendwie mit verbinden."
 //
-//   node tools/kalender/verknuepfen.mjs google     a dialog on the Mac asks for Google's "Geheime Adresse im iCal-Format"
+//   node tools/kalender/verknuepfen.mjs google     a dialog on the Mac asks for Google's "Privatadresse im iCal-Format"
 //   node tools/kalender/verknuepfen.mjs outlook    the same for the ICS link of a calendar published in Outlook on the web
+//   ... google|outlook --clipboard                 take the address from the clipboard instead (an agent copied it from
+//                                                  the settings page in Doc's browser); the clipboard is emptied after
 //   node tools/kalender/verknuepfen.mjs --status   which calendars are linked and how many appointments they hold
 //
 // The address is a secret (whoever has it reads the whole calendar): Doc pastes it into a hidden field, it is checked
@@ -38,6 +40,13 @@ function askAddress(name) {
     return (r.stdout || '').replace(/\n$/, '');
 }
 
+/* the address straight from the clipboard - never echoed, and the clipboard is emptied after use */
+function fromClipboard() {
+    const r = spawnSync('/usr/bin/pbpaste', [], { encoding: 'utf8' });
+    return r.status === 0 && r.stdout.trim() ? r.stdout.trim() : null;
+}
+const emptyClipboard = () => spawnSync('/usr/bin/pbcopy', [], { input: '' });
+
 /* how many appointments the feed holds, and how many of them still lie ahead (or repeat) */
 function count(text) {
     const { events, upcoming } = K.parseIcs(text, { now: new Date() });
@@ -53,9 +62,10 @@ async function status() {
     }
 }
 
-async function link(name) {
-    const raw = askAddress(name);
-    if (raw === null) { console.log('Abgebrochen – nichts gespeichert.'); return; }
+async function link(name, clip) {
+    const raw = clip ? fromClipboard() : askAddress(name);
+    if (clip) emptyClipboard();
+    if (raw === null) { console.log(clip ? 'Zwischenablage leer – nichts gespeichert.' : 'Abgebrochen – nichts gespeichert.'); return; }
     const { url, err } = checkUrl(name, raw);
     if (err) { console.error('Nicht gespeichert: ' + err); process.exitCode = 1; return; }
     let text;
@@ -68,8 +78,8 @@ async function link(name) {
 
 const arg = process.argv[2];
 if (arg === '--status') await status();
-else if (FEEDS[arg]) await link(arg);
+else if (FEEDS[arg]) await link(arg, process.argv.includes('--clipboard'));
 else {
-    console.log('node tools/kalender/verknuepfen.mjs google|outlook   oder   --status');
+    console.log('node tools/kalender/verknuepfen.mjs google|outlook [--clipboard]   oder   --status');
     process.exitCode = arg ? 1 : 0;
 }

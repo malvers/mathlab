@@ -160,7 +160,13 @@ function same(a, b) {
 /* what to send (new or changed) and which ids to delete (no longer in the feed) */
 export function diffRows(rows, dbRows, present) {
     const byUid = new Map(dbRows.map(r => [r.source_uid, r]));
-    const send = rows.filter(r => { const d = byUid.get(r.source_uid); return !d || !same(r, d); });
+    // reminders and colour are Doc's own (chosen when he put an appointment into Google from his calendar): a row the
+    // mirror knows keeps them, only new rows get the defaults
+    const send = rows.filter(r => {
+        const d = byUid.get(r.source_uid);
+        if (d) { r.remind = d.remind || []; r.color = d.color; }
+        return !d || !same(r, d);
+    });
     const remove = dbRows.filter(d => !present.has(d.source_uid)).map(d => d.id);
     return { send, remove, same: rows.length - send.length };
 }

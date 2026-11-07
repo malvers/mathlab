@@ -528,6 +528,10 @@
                     <option value="FREQ=YEARLY">jedes Jahr</option>
                 </select>
             </label>
+            <div class="fld" id="googleRow">
+                <label class="switch"><input id="fGoogle" type="checkbox"><i></i>auch in Google eintragen</label>
+                <input id="fPass" type="password" autocomplete="current-password" placeholder="Solitas Passwort (nur einmal)" aria-label="Solitas Passwort" hidden>
+            </div>
             <div class="fld"><span class="fld-label" id="remLabel">Solita erinnert</span><div class="chips" id="fRemind" role="group" aria-labelledby="remLabel"></div></div>
             <div class="fld"><span class="fld-label" id="colLabel">Farbe</span>
                 <div class="colors" id="fColor" role="radiogroup" aria-labelledby="colLabel">
@@ -1019,6 +1023,40 @@
             let lastStart = '';   // the start time before an edit: a later start moves the end along
             const pad = n => String(n).padStart(2, '0');
             const timeVal = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+
+            /* "auch in Google eintragen" (Doc, 07.11.2026: "wenn wir in unseren Kalender Sachen eintragen könnten, die dann auch
+               im Google-Kalender auftauchen ... wenn ich das will"): the appointment goes into his Google calendar through
+               Solita's calendar function (supabase/functions/calendar, action "create", its own write token) and from then
+               on belongs to Google - here it is marked G and comes back through the mirror. Its source_uid
+               "google:<id>@google.com" is the UID Google gives it in the feed, so the mirror takes this row as that one
+               (were it ever different, the mirror would replace the row, no double). The function's gate is Solita's
+               password, kept in this browser like Solita keeps it (dev_access); asked for once where it is missing. */
+            const CAL_FN = auth.DB_URL + '/functions/v1/calendar';
+            const appPass = () => { try { return localStorage.getItem('dev_access') || ''; } catch (e) { return ''; } };
+            function syncGoogle() {
+                $('googleRow').hidden = !edState || !edState.googleOk || !!$('fRepeat').value;   // single appointments only
+                $('fPass').hidden = $('googleRow').hidden || !$('fGoogle').checked || !!appPass();
+            }
+            async function toGoogle(row, f) {
+                const pass = appPass() || $('fPass').value.trim();
+                if (!pass) return { err: 'Solitas Passwort fehlt' };
+                const local = d => K.ymd(d) + 'T' + timeVal(d) + ':00';   // Berlin wall-clock time, the function adds the zone
+                const body = { action: 'create', title: row.title, allDay: row.all_day,
+                    start: row.all_day ? K.ymd(f.s) : local(f.s), end: row.all_day ? K.ymd(f.e) : local(f.e) };   // all-day: end exclusive
+                if (row.location) body.location = row.location;
+                if (row.notes) body.description = row.notes;
+                try {
+                    const res = await fetch(CAL_FN, {
+                        method: 'POST', body: JSON.stringify(body),
+                        headers: { 'Content-Type': 'application/json', apikey: auth.DB_KEY, Authorization: 'Bearer ' + auth.DB_KEY, 'x-app-pass': pass }
+                    });
+                    const d = await res.json().catch(() => ({}));
+                    if (res.status === 401) { try { localStorage.removeItem('dev_access'); } catch (e) { } return { err: 'Solitas Passwort stimmt nicht' }; }
+                    if (!res.ok || !d.created || !d.created.id) return { err: d.error || 'HTTP ' + res.status };
+                    try { localStorage.setItem('dev_access', pass); } catch (e) { }
+                    return { uid: 'google:' + d.created.id + '@google.com' };
+                } catch (e) { return { err: 'keine Verbindung zu Google' }; }
+            }
             const dateOf = v => { const [y, m, d] = v.split('-').map(Number); return new Date(y, m - 1, d); };
             const at = (day, t) => { const [h, m] = t.split(':').map(Number); return new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m); };
 
@@ -1062,7 +1100,10 @@
                 $('settings').hidden = true;
                 const occ = o.occ || null;
                 const ev = occ ? occ.ev : null;
-                edState = { ev, occ, remind: new Set(), color: ev ? colorOf(ev) : 2, extra: { allDay: !!(ev && ev.all_day), mins: ev ? K.remindOf(ev) : [] } };
+                edState = { ev, occ, remind: new Set(), color: ev ? colorOf(ev) : 2, extra: { allDay: !!(ev && ev.all_day), mins: ev ? K.remindOf(ev) : [] },
+                    googleOk: !ev || !feedOf(ev) };
+                $('fGoogle').checked = false;
+                $('fPass').value = '';
                 $('edTitle').textContent = ev ? 'Termin' : 'Neuer Termin';
                 $('edDel').hidden = !ev;
                 let start, end, allDay;
@@ -1109,6 +1150,7 @@
                 sel.value = rule;
                 $('edNote').textContent = ev && ev.rrule ? 'Wiederholt sich – Änderungen gelten für alle Termine der Reihe.' : '';
                 syncAllDay();
+                syncGoogle();
                 renderRemind();
                 renderColor();
                 $('ed').hidden = false;
@@ -1151,6 +1193,18 @@
                 if (f.err) { $('edNote').textContent = f.err; return; }
                 const { row } = f;
                 const st = edState;
+                let gMsg = '';
+                if (st.gUid) row.source_uid = st.gUid;   // already in Google (saving here failed once): never twice
+                else if (!$('googleRow').hidden && $('fGoogle').checked && !row.rrule) {
+                    if (!appPass() && !$('fPass').value.trim()) { $('edNote').textContent = 'Für Google bitte einmal Solitas Passwort eintragen.'; $('fPass').focus(); return; }
+                    $('edSave').disabled = true;
+                    $('edNote').textContent = 'Trage in Google ein …';
+                    const g = await toGoogle(row, f);
+                    $('edSave').disabled = false;
+                    if (g.uid) { row.source_uid = st.gUid = g.uid; gMsg = 'Auch in Google eingetragen.'; }
+                    else gMsg = 'Nur hier gespeichert – in Google ging es nicht (' + g.err + ').';
+                    $('edNote').textContent = '';
+                }
                 if (st.ev && st.ev.rrule && row.rrule) {
                     // a series: move its first date by as much as this occurrence moved
                     const shift = f.s - st.occ.start;
@@ -1164,6 +1218,7 @@
                     const ev = byId(st.ev.id) || st.ev, prev = Object.assign({}, ev);   // the list may have been reloaded meanwhile
                     await write(() => Object.assign(ev, row), () => Object.assign(ev, prev),
                         () => send(`calendar_event?id=eq.${ev.id}`, 'PATCH', row));
+                    if (gMsg) status(gMsg, row.source_uid ? '' : 'err');
                     return;
                 }
                 // a new one: the editor stays open until the server has it, so nothing typed is lost
@@ -1176,7 +1231,7 @@
                     closeEditor();
                     $('text').value = '';
                     saveDraft();
-                    status('');
+                    status(gMsg, gMsg && !row.source_uid ? 'err' : '');
                     // show where it landed
                     if (view !== 'agenda') { anchor = K.startOfDay(new Date(rows[0].starts_at)); selDay = anchor; }
                     render();
@@ -1390,6 +1445,8 @@
                 $('edCancel').onclick = closeEditor;
                 $('edDel').onclick = removeIt;
                 $('ed').addEventListener('pointerdown', e => { if (e.target === $('ed')) closeEditor(); });
+                $('fRepeat').addEventListener('change', syncGoogle);
+                $('fGoogle').onchange = syncGoogle;
                 $('fAllDay').onchange = () => {
                     // switching changes which reminders fit: take the defaults of the new kind
                     edState.remind = new Set($('fAllDay').checked ? K.DEFAULT_REMIND_ALLDAY : K.DEFAULT_REMIND);
