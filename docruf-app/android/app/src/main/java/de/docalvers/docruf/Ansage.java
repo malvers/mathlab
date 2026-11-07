@@ -27,7 +27,14 @@ import java.util.Locale;
  */
 final class Ansage {
     private static final float LOUD = 0.7f;
+    private static final long STUCK_MS = 120000;  // the portrait goes even when a voice never reports back
     private static Ansage one;
+
+    // How many calls are being spoken right now, and who wants to hear about it (the screen shows Solita's
+    // portrait meanwhile). Both are touched on the main thread only.
+    static int speaking;
+    static String saying = "";   // the sentence she speaks right now, shown under the circle
+    static Runnable listener;
 
     private final Context app;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -37,6 +44,9 @@ final class Ansage {
             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
             .build();
     private TextToSpeech tts;
+    // held here: a MediaPlayer only referenced from a local variable can be garbage-collected mid-sentence,
+    // which cuts her off (07.11.2026, "MediaPlayer finalized without being released" right after a choppy call)
+    private final java.util.Set<MediaPlayer> playing = new java.util.HashSet<>();
     private boolean ttsReady;
     private String pending;
     private Runnable pendingDone;
@@ -64,17 +74,39 @@ final class Ansage {
 
     /** From any thread. audio may be empty or expired, then the text is read instead. */
     void say(String text, String audio) {
+        boolean[] over = {false};
+        Runnable end = () -> {
+            if (over[0]) return;
+            over[0] = true;
+            speaking = Math.max(0, speaking - 1);
+            changed();
+        };
+        main.post(() -> {
+            speaking++;
+            saying = text == null ? "" : text;
+            changed();
+            main.postDelayed(end, STUCK_MS);
+        });
         new Thread(() -> {
             PowerManager.WakeLock wl = app.getSystemService(PowerManager.class)
                     .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "docruf:ansage");
             wl.acquire(120000);
             File f = audio == null || audio.isEmpty() ? null : download(audio);
             main.post(() -> {
-                Runnable done = louder(wl);
+                Runnable restore = louder(wl);
+                Runnable done = () -> {
+                    restore.run();
+                    main.removeCallbacks(end);
+                    end.run();
+                };
                 if (f != null) play(f, text, done);
                 else read(text, done);
             });
         }, "docruf-ansage").start();
+    }
+
+    private static void changed() {
+        if (listener != null) listener.run();
     }
 
     private File download(String url) {
@@ -98,24 +130,30 @@ final class Ansage {
 
     private void play(File f, String text, Runnable done) {
         MediaPlayer mp = new MediaPlayer();
+        playing.add(mp);
         try {
             mp.setAudioAttributes(speech);
             mp.setDataSource(f.getPath());
             mp.setOnCompletionListener(p -> {
-                p.release();
+                release(p);
                 done.run();
             });
             mp.setOnErrorListener((p, what, extra) -> {
-                p.release();
+                release(p);
                 read(text, done);
                 return true;
             });
             mp.prepare();
             mp.start();
         } catch (Exception e) {
-            mp.release();
+            release(mp);
             read(text, done);
         }
+    }
+
+    private void release(MediaPlayer p) {
+        p.release();
+        playing.remove(p);
     }
 
     private void read(String text, Runnable done) {

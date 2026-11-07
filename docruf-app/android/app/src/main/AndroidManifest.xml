@@ -8,6 +8,16 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- answers are heard in the app itself, without Google's dialog (since 1.3) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- a call on a locked phone brings DocCall up like an incoming call (since 1.3) -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="false"
@@ -29,13 +39,6 @@
             android:name=".RufService"
             android:exported="false"
             android:foregroundServiceType="remoteMessaging" />
-
-        <activity
-            android:name=".Sprechen"
-            android:exported="false"
-            android:excludeFromRecents="true"
-            android:taskAffinity=""
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <receiver
             android:name=".Antwort"

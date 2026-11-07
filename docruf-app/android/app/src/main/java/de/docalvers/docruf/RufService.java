@@ -4,10 +4,21 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Person;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -61,7 +72,7 @@ public class RufService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Notification n = new Notification.Builder(this, CH_LINE)
                 .setSmallIcon(R.drawable.ic_ruf)
-                .setContentTitle("DocRuf hört zu")
+                .setContentTitle("DocCall hört zu")
                 .setContentText("Solita kann Dich hier rufen.")
                 .setOngoing(true)
                 .setContentIntent(openApp(this))
@@ -165,26 +176,89 @@ public class RufService extends Service {
         Rufe.add(this, id, time, title, text, audio);
         if (System.currentTimeMillis() / 1000 - time > STALE_S) return;
 
-        Notification n = new Notification.Builder(this, CH_CALL)
+        NotificationManager nm = getSystemService(NotificationManager.class);
+        boolean speak = Rufe.speak(this);
+        // DocCall in front and speaking aloud: no banner, Solita appears in the circle with her sentence under it
+        // (Doc, 07.11.2026); otherwise a message from her, with her face, and on a dark phone her call screen
+        boolean inApp = MainActivity.visible && speak;
+        if (!inApp) nm.notify(id.hashCode(), callNote(id, time, title, text));
+        // a receipt promises that Doc notices the call, otherwise the Mac falls back to its speakers
+        if ((inApp || nm.areNotificationsEnabled() || speak) && receipt(topic, id)) Rufe.acked(this, id);
+        if (speak) Ansage.get(this).say(text, audio);
+    }
+
+    /**
+     * The call as a message from Solita, with her round portrait (a conversation, so Android shows her face),
+     * and a full-screen intent: on a locked or dark phone DocCall itself comes up like an incoming call
+     * ("Denk an den Film Her", Doc, 07.11.2026). With the phone in use Android shows the banner instead.
+     */
+    private Notification callNote(String id, long time, String title, String text) {
+        Notification.Builder b = new Notification.Builder(this, CH_CALL)
                 .setSmallIcon(R.drawable.ic_ruf)
                 .setColor(0xFFF5C242)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setStyle(new Notification.BigTextStyle().bigText(text))
                 .setCategory(Notification.CATEGORY_MESSAGE)
                 .setWhen(time * 1000)
                 .setShowWhen(true)
                 .setAutoCancel(true)
                 .setContentIntent(openApp(this))
+                .setFullScreenIntent(PendingIntent.getActivity(this, id.hashCode() + 2,
+                        new Intent(this, MainActivity.class).setAction(MainActivity.ACTION_CALL)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE), true)
                 .addAction(Sprechen.action(this, id, id.hashCode()))
-                .addAction(Antwort.action(this, id, id.hashCode()))
-                .build();
-        NotificationManager nm = getSystemService(NotificationManager.class);
-        nm.notify(id.hashCode(), n);
-        boolean speak = Rufe.speak(this);
-        // a receipt promises that Doc notices the call, otherwise the Mac falls back to its speakers
-        if ((nm.areNotificationsEnabled() || speak) && receipt(topic, id)) Rufe.acked(this, id);
-        if (speak) Ansage.get(this).say(text, audio);
+                .addAction(Antwort.action(this, id, id.hashCode()));
+        if (Build.VERSION.SDK_INT >= 30) {
+            Person her = solita(this);
+            conversation(this, her);
+            Person doc = new Person.Builder().setName("Doc").build();
+            Notification.MessagingStyle style = new Notification.MessagingStyle(doc)
+                    .addMessage(new Notification.MessagingStyle.Message(text, time * 1000, her));
+            if (!title.equals("Solita")) style.setConversationTitle(title);   // e.g. "Probe"
+            b.setStyle(style).setShortcutId(SHORTCUT);
+        } else {
+            b.setContentTitle(title).setContentText(text).setStyle(new Notification.BigTextStyle().bigText(text));
+        }
+        return b.build();
+    }
+
+    static final String SHORTCUT = "solita";
+    private static Icon face;
+
+    /** Solita's portrait cut round, for her messages and her conversation. */
+    static synchronized Icon solitaIcon(Context c) {
+        if (face != null) return face;
+        Bitmap src = BitmapFactory.decodeResource(c.getResources(), R.drawable.solita);
+        int n = 256;
+        Bitmap out = Bitmap.createBitmap(n, n, Bitmap.Config.ARGB_8888);
+        Canvas cv = new Canvas(out);
+        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        cv.drawCircle(n / 2f, n / 2f, n / 2f, p);
+        p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        cv.drawBitmap(src, null, new Rect(0, 0, n, n), p);
+        src.recycle();
+        face = Icon.createWithBitmap(out);
+        return face;
+    }
+
+    static Person solita(Context c) {
+        return new Person.Builder().setName("Solita").setKey(SHORTCUT).setIcon(solitaIcon(c)).setImportant(true).build();
+    }
+
+    /** Android shows a message with a face only for a conversation, which needs a long-lived shortcut. */
+    private static void conversation(Context c, Person her) {
+        if (Build.VERSION.SDK_INT < 30) return;
+        try {
+            ShortcutInfo si = new ShortcutInfo.Builder(c, SHORTCUT)
+                    .setShortLabel("Solita")
+                    .setLongLived(true)
+                    .setPerson(her)
+                    .setIcon(solitaIcon(c))
+                    .setIntent(new Intent(c, MainActivity.class).setAction(Intent.ACTION_MAIN))
+                    .build();
+            c.getSystemService(ShortcutManager.class).pushDynamicShortcut(si);
+        } catch (Exception e) {
+            Log.w(TAG, "no conversation shortcut: " + e);
+        }
     }
 
     /** Tells the Mac that this call reached the phone, so it does not fall back to its speakers. */
