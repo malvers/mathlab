@@ -24,7 +24,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry1.outputs.page_url || steps.deployment_retry2.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -79,6 +79,30 @@ jobs:
         with:
           path: _site
 
+      # Auto-retry (Doc, 2026-11-07: "Ja, bau das bitte so", the idea parked since 2026-07-06). Pages now and
+      # then hangs in "syncing_files" until deploy-pages gives up after 10 min ("Timeout reached, aborting!",
+      # 3 of 21 deploys on 06./07.11.2026) - GitHub's side: the same artifact synced in 13 s an hour before.
+      # Instead of failing and mailing Doc, wait a minute and deploy the same artifact again, up to two times.
       - name: Deploy to GitHub Pages
         id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: Wait before retry 1
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 60
+
+      - name: Deploy to GitHub Pages (retry 1)
+        id: deployment_retry1
+        if: steps.deployment.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: Wait before retry 2
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry1.outcome == 'failure'
+        run: sleep 120
+
+      - name: Deploy to GitHub Pages (retry 2)
+        id: deployment_retry2
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry1.outcome == 'failure'
         uses: actions/deploy-pages@v5
