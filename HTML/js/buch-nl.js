@@ -19,9 +19,10 @@
  * Numbers are NOT converted: Dutch writes them like German, with a decimal comma (Buch.dot is false). Every rule needs
  * "\mid" or ";\," around the numbers - an SVG path "88,4 66,2" or "88.4,664.6" can never match (tools/buch-es/auftrag.md,
  * section 5). Canvas text keeps its decimal comma.
- * TODO nl: the point and interval notation of Dutch schools is still the provisional one of js/buch-pt.js
- *   (points (1, 2), with a decimal comma (1,5; 2); intervals [1, 2], ]1, 2[; the set bar stays) - decide it and change
- *   RULE below (Dutch schools write open intervals with angle brackets, ⟨1, 2⟩ and [1, 2⟩, and points (1, 2); decide what the BGY 11 pupils should see).
+ * Points and intervals the Dutch school way (havo/vwo): points (1, 2), with a decimal comma (1,5; 2); closed intervals
+ * [1, 2], open ends with angle brackets: ]1;\,2[ → ⟨1, 2⟩, [1;\,2[ → [1, 2⟩; the set bar stays ({x ∈ ℝ | x ≥ 0}); percent
+ * without a space (30%), as Dutch writes it. The letters of the Dutch school formulas (y = ax + b, b · g^x, a(x - p)^2 + q
+ * with the top T(p, q), a + b sin(c(x - d)), ^g log, the solution set V) are in the module files.
  * node tools/buch-en/check.mjs --lang nl finds German widget sentences without Dutch, and with ?debug every string
  * that still looks German is listed in the debug window ("[nl] still German: …").
  * Only pages with <html lang="nl"> load this file, before js/buch.js. The other books never see it.
@@ -31,41 +32,39 @@
     if (!/^nl/i.test(document.documentElement.lang || '')) return;
 
     // ---------- whole labels, shared ----------
-    // TODO nl: every Dutch word below is still the English placeholder - translate (the keys stay German)
     const WORD = {
         // js/buch-plot.js, shared
-        'Funktionsgraph': 'Graph of the function', 'Funktion': 'Function', 'Beispiel': 'Example', 'Summe': 'Total',
-        'Zurücksetzen': 'Reset', 'Zurück': 'Undo', 'Tipp': 'Hint', 'Prüfen': 'Check', 'Umformung': 'Transformation',
-        'linear': 'linear', 'exponentiell': 'exponential', 'quadratisch': 'quadratic', 'Modell': 'Model',
-        // the header: "Fehler melden" (js/buch-feedback.js) and Solita (js/buch-solita.js, js/solita-frage.js); TODO nl
-        'Fehler melden': 'Report an error', 'Fehler melden: einsprechen oder tippen': 'Report an error: speak or type',
-        'Schließen (Esc)': 'Close (Esc)', 'Schließen': 'Close', 'Einsprechen': 'Speak', 'Zuhören beenden': 'Stop listening',
-        'Was ist falsch oder unklar? Sprich einfach los oder tippe.': 'What is wrong or unclear? Just start speaking or type.',
-        'Zum Beispiel: In Aufgabe 3 muss es 12 heißen, nicht 21.': 'For example: in exercise 3 it should say 12, not 21.',
+        'Funktionsgraph': 'Grafiek van de functie', 'Funktion': 'Functie', 'Beispiel': 'Voorbeeld', 'Summe': 'Som',
+        'Zurücksetzen': 'Opnieuw', 'Zurück': 'Ongedaan maken', 'Tipp': 'Tip', 'Prüfen': 'Controleren', 'Umformung': 'Bewerking',
+        'linear': 'lineair', 'exponentiell': 'exponentieel', 'quadratisch': 'kwadratisch', 'Modell': 'Model',
+        // the header: "Fehler melden" (js/buch-feedback.js) and Solita (js/buch-solita.js, js/solita-frage.js)
+        'Fehler melden': 'Fout melden', 'Fehler melden: einsprechen oder tippen': 'Fout melden: inspreken of typen',
+        'Schließen (Esc)': 'Sluiten (Esc)', 'Schließen': 'Sluiten', 'Einsprechen': 'Inspreken', 'Zuhören beenden': 'Stoppen met luisteren',
+        'Was ist falsch oder unklar? Sprich einfach los oder tippe.': 'Wat klopt er niet of is onduidelijk? Begin gewoon te praten of typ.',
+        'Zum Beispiel: In Aufgabe 3 muss es 12 heißen, nicht 21.': 'Bijvoorbeeld: in opgave 3 moet het 12 zijn, niet 21.',
         'Die Spracherkennung macht dein Browser. Gespeichert wird nur der Text mit der Stelle im Buch, keine Aufnahme und kein Name.':
-            'Your browser does the speech recognition. Only the text and the place in the book are saved, no recording and no name.',
-        'Senden': 'Send', 'Ich höre zu …': 'Listening …', 'Bitte erst etwas einsprechen oder tippen.': 'Please say or type something first.',
-        'Wird gesendet …': 'Sending …', 'Danke! Deine Meldung ist angekommen.': 'Thank you! Your report has arrived.',
-        'Gerade sind es zu viele Meldungen. Bitte später noch einmal.': 'There are too many reports right now. Please try again later.',
-        'Das hat nicht geklappt. Bitte später noch einmal.': 'That did not work. Please try again later.',
-        'Keine Verbindung. Bitte später noch einmal.': 'No connection. Please try again later.',
-        'Frage sprechen': 'Speak your question', 'Passwort zeigen': 'Show password', 'Passwort verbergen': 'Hide password',
-        'Stimme anhalten': 'Stop the voice', 'Frage senden': 'Send question', 'Passwort': 'Password',
-        'Passwort – wird auf diesem Gerät gemerkt': 'Password – remembered on this device', 'Passwort bestätigen': 'Confirm password',
-        'Das Passwort gilt nicht mehr.': 'The password is no longer valid.',
-        // the colour scheme button in the header (js/farbschema.js): its label names the next scheme; TODO nl
-        'Blau': 'Blue', 'Grau': 'Grey', 'Hell': 'Light', 'Farbschema Blau einschalten': 'Switch to the blue colours',
-        'Farbschema Grau einschalten': 'Switch to the grey colours', 'Farbschema Hell einschalten': 'Switch to the light colours'
+            'De spraakherkenning doet je browser. Alleen de tekst met de plek in het boek wordt opgeslagen, geen opname en geen naam.',
+        'Senden': 'Versturen', 'Ich höre zu …': 'Ik luister …', 'Bitte erst etwas einsprechen oder tippen.': 'Spreek eerst iets in of typ iets.',
+        'Wird gesendet …': 'Wordt verstuurd …', 'Danke! Deine Meldung ist angekommen.': 'Bedankt! Je melding is aangekomen.',
+        'Gerade sind es zu viele Meldungen. Bitte später noch einmal.': 'Er zijn nu te veel meldingen. Probeer het later nog eens.',
+        'Das hat nicht geklappt. Bitte später noch einmal.': 'Dat is niet gelukt. Probeer het later nog eens.',
+        'Keine Verbindung. Bitte später noch einmal.': 'Geen verbinding. Probeer het later nog eens.',
+        'Frage sprechen': 'Vraag inspreken', 'Passwort zeigen': 'Wachtwoord tonen', 'Passwort verbergen': 'Wachtwoord verbergen',
+        'Stimme anhalten': 'Stem stoppen', 'Frage senden': 'Vraag versturen', 'Passwort': 'Wachtwoord',
+        'Passwort – wird auf diesem Gerät gemerkt': 'Wachtwoord – wordt op dit apparaat onthouden', 'Passwort bestätigen': 'Wachtwoord bevestigen',
+        'Das Passwort gilt nicht mehr.': 'Het wachtwoord is niet meer geldig.',
+        // the colour scheme button in the header (js/farbschema.js): its label names the next scheme
+        'Blau': 'Blauw', 'Grau': 'Grijs', 'Hell': 'Licht', 'Farbschema Blau einschalten': 'Kleurenschema blauw inschakelen',
+        'Farbschema Grau einschalten': 'Kleurenschema grijs inschakelen', 'Farbschema Hell einschalten': 'Kleurenschema licht inschakelen'
     };
 
     // ---------- pieces of sentences, shared ----------
-    // TODO nl: English placeholders
     const PHRASE = [
         // used by more than one module: graphquiz (funktionen), vierfeld-trainer (stochastik)
-        ['richtig', 'correct'],
+        ['richtig', 'goed'],
         // header; Solita's invitations "Frag Solita zu dieser Stelle im Buch" (the rule below turns "Frag Solita" first)
-        ['Fehler<br>melden', 'Report<br>an error'], ['Zur Markierung in ', 'On the selection in '], ['Deine Frage an ', 'Your question to '],
-        [' zu dieser Stelle im Buch', ' about this part of the book'], [' zu dieser Stelle', ' about this part'], [' zur Markierung', ' about the selection']
+        ['Fehler<br>melden', 'Fout<br>melden'], ['Zur Markierung in ', 'Over je markering in '], ['Deine Frage an ', 'Je vraag aan '],
+        [' zu dieser Stelle im Buch', ' over deze plek in het boek'], [' zu dieser Stelle', ' over deze plek'], [' zur Markierung', ' over je markering']
     ];
 
     // ---------- word order and notation ----------
@@ -76,27 +75,27 @@
     const DEC = /\{,\}|\d,\d/;            // a decimal comma in a coordinate → the coordinates are separated by a semicolon
     const sep = parts => parts.some(p => DEC.test(p)) ? '; ' : ', ';
     const RULE = [
-        // sets keep their bar here: {x ∈ ℝ | x ≥ 0} (TODO nl: or a colon, as in js/buch-pt.js?)
+        // sets keep their bar: {x ∈ ℝ | x ≥ 0}
         // points: every \mid inside round brackets (one level of brackets inside, Q(x \mid f(x)); \left( … \right) too)
         [/\(((?:[^()$]|\([^()$]*\))*?\\mid(?![A-Za-z])(?:[^()$]|\([^()$]*\))*)\)/g, (m, inner) => {
             const parts = inner.split(/ ?\\mid(?![A-Za-z]) ?/);
             return '(' + parts.join(sep(parts)) + ')';
         }],
-        // intervals: [1;\,2] → [1, 2], ]1;\,2[ → ]1, 2[, [0{,}5;\,3] → [0{,}5; 3]
-        // TODO nl: Dutch schools write open intervals with angle brackets, ⟨1, 2⟩ and [1, 2⟩, and points (1, 2); decide what the BGY 11 pupils should see
-        [new RegExp('([\\[\\]])(' + END + ');\\\\,(' + END + ')([\\[\\]])', 'g'), (m, a, x, y, b) => a + x + sep([x, y]) + y + b]
+        // intervals the Dutch way, open ends with angle brackets: [1;\,2] → [1, 2], ]1;\,2[ → ⟨1, 2⟩, [1;\,2[ → [1, 2⟩,
+        // [0{,}5;\,3] → [0{,}5; 3]
+        [new RegExp('([\\[\\]])(' + END + ');\\\\,(' + END + ')([\\[\\]])', 'g'),
+            (m, a, x, y, b) => (a === '[' ? '[' : '\\langle ') + x + sep([x, y]) + y + (b === ']' ? ']' : ' \\rangle')]
     ];
     // after the rules of the module files
-    // TODO nl: English placeholders
     const RULE_LAST = [
         // header
-        [/^Zu (?=\S)/, 'On '], [/\bFrag (Solita|Doc)\b/g, 'Ask $1'], [/Klick: zu (Solita|Doc) wechseln/g, 'Click: switch to $1'],
-        [/Einmal das Passwort, dann kann (Solita|Doc) antworten\./g, 'Enter the password once, then $1 can answer.'],
+        [/^Zu (?=\S)/, 'Over '], [/\bFrag (Solita|Doc)\b/g, 'Vraag het $1'], [/Klick: zu (Solita|Doc) wechseln/g, 'Klik: naar $1 wisselen'],
+        [/Einmal das Passwort, dann kann (Solita|Doc) antworten\./g, 'Eén keer het wachtwoord, dan kan $1 antwoorden.'],
         // the AI marks in Solita's field (js/solita-frage.js): "Es antwortet Claude Haiku und DeepSeek"
-        [/^Es antwortet (.+)$/, (m, w) => 'Answering: ' + w.replace(/ und /g, ' and ')]
+        [/^Es antwortet (.+)$/, (m, w) => (/ und /.test(w) ? 'Er antwoorden ' : 'Er antwoordt ') + w.replace(/ und /g, ' en ')]
     ];
-    // after the pieces: nothing - Dutch keeps the German decimal comma (TODO nl: and the space before percent, "30 %"?)
-    const POST = [];
+    // after the pieces: Dutch keeps the decimal comma, but writes percent without a space ("30 %" → "30%", "30\,\%" → "30\%")
+    const POST = [[/(\d)[ \u00a0\u202f]%/g, '$1%'], [/\\,\\%/g, '\\%']];
 
     // ---------- the module files ----------
     const DICTS = [];
