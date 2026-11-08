@@ -1711,6 +1711,47 @@
             filter: grayscale(1) brightness(0.85);
             opacity: 0.5;
         }
+        /* the card: the cover large on the left, title and text on the right (Doc, 08.11.2026: "dass die linke Seite das Cover ist
+           und rechts der Text, dann wird das Cover nämlich deutlich größer"); ?karte=ecke tries his other idea, the cover in the
+           top right corner with the text flowing round it ("rechts oben in die Ecke und lassen den Text unten drumherum fließen") */
+        #tool-container .card.book-one-card {
+            display: grid !important;   /* the filter shows a card with an inline display: flex */
+            grid-template-columns: auto 1fr;
+            grid-template-rows: auto 1fr;
+            column-gap: 18px;
+            align-items: start;
+        }
+        #tool-container .card.book-one-card .card-icon {
+            grid-row: 1 / span 2;
+            margin: 0;
+            min-height: 0;
+        }
+        #tool-container .card.book-one-card .book-one img {
+            height: 168px;
+        }
+        #tool-container .card.book-one-card h3,
+        #tool-container .card.book-one-card .card-desc {
+            grid-column: 2;
+        }
+        #tool-container .card.book-one-card .card-desc {
+            -webkit-line-clamp: 7;
+            line-clamp: 7;
+        }
+        body.bk-ecke #tool-container .card.book-one-card {
+            display: block !important;
+        }
+        body.bk-ecke #tool-container .card.book-one-card .card-icon {
+            float: right;
+            margin: 0 0 8px 16px;
+        }
+        body.bk-ecke #tool-container .card.book-one-card .book-one img {
+            height: 132px;
+        }
+        body.bk-ecke #tool-container .card.book-one-card .card-desc {
+            display: block;   /* a -webkit-box would not flow round the float */
+            max-height: calc(1.45em * 10);
+            overflow: hidden;
+        }
         #tool-container .book-one .book-soon {
             position: absolute;
             left: 50%;
@@ -2652,6 +2693,7 @@
             const icon = card.querySelector('.card-icon');
             const langs = BOOK_LANGS[(card.dataset.labId || '').replace(/^lehrbuch-/, '')];
             if (!icon || !langs) return;
+            card.classList.toggle('book-one-card', on);
             if (!on) {
                 if (card.dataset.icons === undefined) return;
                 icon.innerHTML = card.dataset.icons;
@@ -2678,6 +2720,8 @@
             const box = document.getElementById('tool-container');
             if (!box || typeof LABS_DATA === 'undefined') return;
             box.querySelectorAll('.book-school-head, .book-kino, .book-sw').forEach(h => h.remove());
+            // the card layout to try: ?karte=ecke puts the cover in the top right corner (see the CSS of .book-one-card)
+            document.body.classList.toggle('bk-ecke', on && new URLSearchParams(location.search).get('karte') === 'ecke');
             if (!on) {
                 box.querySelectorAll('.card[data-icons]').forEach(card => bookOneCover(card, false));
                 if (box.dataset.grouped) {
