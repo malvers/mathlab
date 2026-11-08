@@ -30,6 +30,10 @@ window.BuchPT && BuchPT.add('analysis', {
         'Oben: f mit Tangente. Ziehe den Punkt P. Unten: Jede Tangentensteigung wird zu einem Punkt des Graphen von f′.':
             'Em cima: f com a tangente. Arrasta o ponto P. Em baixo: cada declive da tangente torna-se um ponto do gráfico de f′.',
         'Graph von f mit Tangente': 'Gráfico de f com a tangente', 'Graph der Ableitung f Strich': 'Gráfico da derivada f linha',
+        // ableiten (lb2-3): ableiten = derivar ("Deriva"); the parser of the widget reads "sin", not "sen" (the help on the page says so)
+        'Potenzen': 'Potências', 'Summen': 'Somas', 'Wurzeln und Brüche': 'Raízes e frações', 'eˣ und sin x': 'eˣ e sen x', 'Produkte': 'Produtos',
+        'Gemischt': 'Misto', 'Aufgabenart': 'Tipo de exercício', 'z. B. 6x^2 - 2 oder cos x': 'p. ex. 6x^2 - 2 ou cos x', 'Lösung': 'Solução',
+        'Neue Aufgabe': 'Novo exercício',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -69,11 +73,16 @@ window.BuchPT && BuchPT.add('analysis', {
         ['$ mit $h = ', '$ com $h = '], ['Sekantensteigung (Differenzenquotient): $', 'Declive da secante (razão incremental): $'],
         ['Tangentensteigung: $f', 'Declive da tangente: $f'], ['· Für $h \\to 0$ wird aus der Sekante die Tangente.', '· Para $h \\to 0$, a secante transforma-se na tangente.'],
         ['· Mach $h$ kleiner.', '· Diminui $h$.'], ['$ · Steigung in $P', '$ · declive em $P'],
+        // ableiten
+        ['Leite ab: $f(x) = ', 'Deriva: $f(x) = '], ['Das kann ich nicht lesen. Schreibe zum Beispiel ', 'Não consigo ler isto. Escreve, por exemplo, '],
+        ['<b>Richtig!</b>', '<b>Certo!</b>'], ['Noch nicht. Tipp: ', 'Ainda não. Dica: '],
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-2 mathe12-pt:
         // grenzwert: Portuguese schools write x → +∞ (never a bare ∞ after an arrow)
         [/\\to \\infty/g, '\\to +\\infty'],
+        // ableiten: "· 3 von 5 gelöst" → "· 3 de 5 resolvidos"
+        [/ · (\d+) von (\d+) gelöst/g, ' · $1 de $2 resolvidos'],
     ]
 });
