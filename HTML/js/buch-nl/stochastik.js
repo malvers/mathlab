@@ -82,7 +82,7 @@ window.BuchNL && BuchNL.add('stochastik', {
         ['Du hast gewechselt.', 'Je hebt gewisseld.'], ['Du bist geblieben.', 'Je bent gebleven.'],
         // book nl-2 mathe12-nl:
         // unabhaengig
-        ['$ und $P(A \\cap B) = ', '$ en $P(A \\cap B) = '],
+        ['$ und $', '$ en $'],
         ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.',
             '<b>Onafhankelijk:</b> of $B$ nu optreedt of niet, het aandeel van $A$ blijft gelijk. In het vierkant ligt de grens in beide kolommen even hoog.'],
         ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.',

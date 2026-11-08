@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiskunde 12 · Hoofdstuk 1.3 · De binomiale verdeling | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Bernoulli-experimenten, binomiaalcoëfficiënt, cumulatieve kansen. Hoofdstuk 1.3 van het interactieve leerboek Wiskunde · Berufliches Gymnasium 12: uitleg, voorbeelden, opgaven op drie niveaus, zelftoetsen en labs om uit te proberen.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">WISKUNDE · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Hoofdstuk"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhoud van het hoofdstuk">
+        <p class="b-toc-title">HOOFDSTUK 1.3 · LEERGEBIED 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introductie" data-toc-k="I" data-toc-short="Introductie" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">HOOFDSTUK 1.3 · LEERGEBIED 1 · OKTOBER · NOVEMBER</p>
+            <h1>De binomiale verdeling</h1>
+            <p class="b-hero-lead">Succes of mislukking, steeds opnieuw, onafhankelijk van elkaar: een meerkeuzetoets waarbij je gokt. Een luchtvaartmaatschappij die meer tickets verkoopt dan er stoelen zijn.
+                Een levering waarin een paar onderdelen defect zijn. Achter dit alles zit <b>dezelfde</b> verdeling. Met één formule en een histogram
+                beantwoord je vragen als „Hoe groot is de kans op hoogstens twee fouten?”.</p>
+            <div class="b-chips"><span class="b-chip">20 LESUREN</span><span class="b-chip">3 PARAGRAFEN</span><span class="b-chip">1 LAB</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="20" data-p="0.35" data-lo="5" data-hi="9"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DIT LEER JE IN DIT HOOFDSTUK</div>
+            <div class="b-text"><ul>
+                <li><b>Bernoulli-experimenten</b> en <b>herhaalde Bernoulli-experimenten</b> herkennen</li>
+                <li>met <b>faculteit</b> en <b>binomiaalcoëfficiënt</b> routes tellen</li>
+                <li>met de <b>formule van Bernoulli</b> losse en <b>cumulatieve</b> kansen berekenen, ook met een tabel en de GR</li>
+                <li>de <b>verwachtingswaarde</b> $n \cdot p$ en de <b>standaardafwijking</b> gebruiken en histogrammen interpreteren</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: KUN JE DIT AL?</div>
+            <div class="b-q" data-ans="1/8" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Je gooit een munt drie keer op. Hoe groot is de kans op drie keer kop?</p><div class="b-sol"><p>$\left(\tfrac12\right)^3 = \tfrac18$</p></div></div>
+            <div class="b-q" data-ans="0,5177" data-tol="0.002" data-ph="P ="><p class="b-q-text">Hoe groot is de kans op minstens één zes in vier worpen?</p><div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 \approx 0{,}518$</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="getal"><p class="b-q-text">Op hoeveel manieren kun je vier boeken naast elkaar zetten?</p><div class="b-sol"><p>$4 \cdot 3 \cdot 2 \cdot 1 = 24$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="μ ="><p class="b-q-text">Hoe groot is de verwachtingswaarde als $X$ de waarden 4 en 8 aanneemt, elk met kans 0,5?</p><div class="b-sol"><p>$2 + 4 = 6$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Verkenningen" data-toc-k="V" data-toc-short="Verkenningen">
+    <div class="b-band"><span class="b-band-tag">VERKENNINGEN</span><span class="b-band-sub">OM TE BEGINNEN · IN GROEPJES</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">DE GOKTOETS</div>
+            <div class="b-text"><p>Een toets heeft 10 vragen met elk 4 antwoorden, precies één is goed. Jullie kruisen alles willekeurig aan.</p>
+                <ul><li>Hoeveel goede antwoorden verwachten jullie? Hoe groot is de kans op 5 of meer?</li><li>Simuleer: iedereen gooit met een viervlak of trekt kaarten.</li></ul></div>
+            <span class="b-pair">→ Paragraaf 1 en 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">OVERBOEKT</div>
+            <div class="b-text"><p>Een vliegtuig heeft 100 stoelen. Uit ervaring komt 95% van de mensen met een boeking echt opdagen. De maatschappij verkoopt 103 tickets.</p>
+                <ul><li>Wat pleit ervoor, wat ertegen?</li><li>Hoe zou je kunnen berekenen hoe vaak passagiers geweigerd worden?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">HET BORD VAN GALTON</div>
+            <div class="b-text"><p>Knikkers vallen door rijen spijkers en springen bij elke spijker naar links of naar rechts.</p>
+                <ul><li>In welke bakjes komen de meeste terecht?</li><li>Hoeveel routes leiden naar elk bakje?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 1 en 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Bernoulli-experimenten" data-toc-k="1" data-toc-short="1 Bernoulli">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 1</span><span class="b-band-sub">6 LESUREN</span></div>
+    <h2><span class="b-no">1</span>Herhaalde Bernoulli-experimenten en de formule van Bernoulli</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Je gooit vijf keer met een dobbelsteen. Hoe groot is de kans op <b>precies twee keer</b> een zes?</p></div></div>
+            <div class="b-text">
+                <p>Een route met precies twee zessen, bijvoorbeeld 66NNN (N: geen zes), heeft de kans $\left(\tfrac16\right)^2 \cdot \left(\tfrac56\right)^3$.
+                    Hoeveel van zulke routes zijn er? Je moet 2 van de 5 worpen kiezen voor de zessen: 66NNN, 6N6NN, …, NNN66. Dat zijn 10 mogelijkheden.
+                    Dus $P(X = 2) = 10 \cdot \tfrac{1}{36} \cdot \tfrac{125}{216} \approx 0{,}161$.</p>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · BERNOULLI-EXPERIMENT EN BINOMIALE VERDELING</div>
+                <div class="b-text">
+                    <p>Een <b>Bernoulli-experiment</b> heeft precies twee uitkomsten: succes (kans $p$) en mislukking ($1 - p$).
+                        Een <b>herhaald Bernoulli-experiment</b> met lengte $n$ bestaat uit $n$ onafhankelijke herhalingen met dezelfde $p$.</p>
+                    <p>De <b>binomiaalcoëfficiënt</b> $\binom{n}{k} = \dfrac{n!}{k! \cdot (n - k)!}$ (spreek uit: „$n$ boven $k$”) telt de routes met precies $k$ successen, met $n! = 1 \cdot 2 \cdot \ldots \cdot n$ en $0! = 1$.</p>
+                    <p><b>Formule van Bernoulli:</b> voor het aantal successen $X$ geldt $$P(X = k) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n - k}.$$
+                        $X$ heet dan <b>binomiaal verdeeld</b> met de parameters $n$ en $p$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>GR:</b> $\binom{n}{k}$ heet daar meestal nCr, de binomiale verdeling binompdf (losse kans) en binomcdf (cumulatief).</p>
+            <p class="b-note"><b>Pakken zonder terugleggen</b> is geen herhaald Bernoulli-experiment, want $p$ verandert bij elke trekking. Bij grote aantallen is het er wel bijna een.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · ALLE ROUTES MET PRECIES k SUCCESSEN</div>
+        <p class="b-help" style="margin:0 0 12px">Kies de lengte, het aantal successen $k$ en $p$. De oplichtende routes worden geteld: dat is $\binom{n}{k}$.</p>
+        <div data-widget="bernoulli-baum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 1 · DE GOKTOETS</div>
+            <div class="b-text"><p>10 vragen, elk 4 antwoorden, één goed, alles gegokt. Hoe groot is de kans op precies 3 goede antwoorden? En op geen enkel goed antwoord?</p></div>
+            <div class="b-sol"><p>$n = 10$, $p = 0{,}25$: $P(X = 3) = \binom{10}{3} \cdot 0{,}25^3 \cdot 0{,}75^7 = 120 \cdot 0{,}015625 \cdot 0{,}1335 \approx 0{,}250$</p>
+                <p>$P(X = 0) = 0{,}75^{10} \approx 0{,}056$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 2 · BINOMIAALCOËFFICIËNTEN</div>
+            <div class="b-text"><p>Bereken $\binom{5}{2}$, $\binom{7}{3}$ en $\binom{49}{6}$. Wat telt de laatste?</p></div>
+            <div class="b-sol"><p>$\binom52 = \tfrac{5 \cdot 4}{2 \cdot 1} = 10$, $\binom73 = \tfrac{7 \cdot 6 \cdot 5}{3 \cdot 2 \cdot 1} = 35$, $\binom{49}{6} = 13\,983\,816$:
+                het aantal mogelijke invullingen bij de Duitse lotto „6 uit 49”.</p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Is dit een herhaald Bernoulli-experiment? Geef zo ja $n$ en $p$. a) 20 keer gooien met een dobbelsteen, succes: zes &nbsp; b) uit 5 loten zonder terugleggen er 3 trekken &nbsp; c) 50 onderdelen controleren, 2% afkeur</p></div>
+            <div class="b-sol"><p>a) ja, $n = 20$, $p = \tfrac16$ &nbsp; b) nee, $p$ verandert &nbsp; c) ja (bij benadering, bij een grote productie), $n = 50$, $p = 0{,}02$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bereken $\binom{6}{2}$, $\binom{8}{4}$ en $\binom{10}{0}$.</p></div>
+            <div class="b-sol"><p>15, 70, 1</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Je gooit een munt 10 keer op. Hoe groot is de kans op precies vijf keer kop? Waarom is dat helemaal niet zo waarschijnlijk?</p></div>
+            <div class="b-sol"><p>$\binom{10}{5} \cdot 0{,}5^{10} = \tfrac{252}{1024} \approx 0{,}246$. „Precies 5” is maar één van de 11 mogelijke waarden, de buren 4 en 6 zijn bijna even waarschijnlijk.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>12 keer gooien met een dobbelsteen. Hoe groot is de kans op precies twee zessen?</p></div>
+            <div class="b-sol"><p>$\binom{12}{2} \cdot \left(\tfrac16\right)^2 \cdot \left(\tfrac56\right)^{10} = 66 \cdot \tfrac{1}{36} \cdot 0{,}1615 \approx 0{,}296$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Leg met routes uit waarom $\binom{n}{k} = \binom{n}{n - k}$ geldt. Wat betekent dat voor de binomiale verdeling met $p = 0{,}5$?</p></div>
+            <div class="b-sol"><p>Wie de $k$ plaatsen voor de successen kiest, legt daarmee ook de $n - k$ plaatsen voor de mislukkingen vast. Bij $p = 0{,}5$ is daarom $P(X = k) = P(X = n - k)$: het histogram is symmetrisch.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="35" data-ph="getal"><p class="b-q-text">Bereken $\binom{7}{3}$.</p><div class="b-sol"><p>$\tfrac{7 \cdot 6 \cdot 5}{6} = 35$</p></div></div>
+        <div class="b-q" data-ans="0,441" data-tol="0.001" data-ph="P ="><p class="b-q-text">$n = 3$, $p = 0{,}3$. Bereken $P(X = 1)$.</p><div class="b-sol"><p>$3 \cdot 0{,}3 \cdot 0{,}7^2 = 0{,}441$</p></div></div>
+        <div class="b-q" data-ans="0,1536" data-tol="0.0005" data-ph="P ="><p class="b-q-text">$n = 4$, $p = 0{,}2$. Bereken $P(X = 2)$.</p><div class="b-sol"><p>$6 \cdot 0{,}04 \cdot 0{,}64 = 0{,}1536$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Cumulatieve kansen" data-toc-k="2" data-toc-short="2 Cumulatief">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 2</span><span class="b-band-sub">8 LESUREN</span></div>
+    <h2><span class="b-no">2</span>Hoogstens, minstens, tussen</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Een levering van 50 onderdelen wordt geaccepteerd als er <b>hoogstens 2</b> defect zijn. De machine produceert 2% afkeur. Hoe vaak wordt een levering geaccepteerd?</p></div></div>
+            <div class="b-text"><p>Gevraagd is $P(X \le 2) = P(X = 0) + P(X = 1) + P(X = 2)$ met $n = 50$, $p = 0{,}02$. Zulke sommen heten <b>cumulatieve</b> kansen.
+                Je berekent ze met de GR (binomcdf) of leest ze af in een tabel.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · CUMULATIEVE KANSEN</div>
+                <div class="b-text">
+                    <p>$P(X \le k) = \sum\limits_{i=0}^{k} \binom{n}{i} \cdot p^i \cdot (1 - p)^{n - i}$</p>
+                    <p>„minstens $k$”: $P(X \ge k) = 1 - P(X \le k - 1)$ · „meer dan $k$”: $P(X > k) = 1 - P(X \le k)$ · „minder dan $k$”: $P(X < k) = P(X \le k - 1)$</p>
+                    <p>„tussen $a$ en $b$” (grenzen inbegrepen): $P(a \le X \le b) = P(X \le b) - P(X \le a - 1)$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Let op bij „minstens”:</b> $P(X \ge 3) = 1 - P(X \le 2)$, niet $1 - P(X \le 3)$. De 3 hoort bij „minstens 3”.</p>
+            <p class="b-note"><b>Controle:</b> teken de staven die bedoeld zijn. Het interactieve onderdeel hieronder kleurt ze goud.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · DE BINOMIALE VERDELING</div>
+        <p class="b-help" style="margin:0 0 12px">Stel $n$ en $p$ in en kies wat er berekend moet worden. Goud zijn de staven die worden opgeteld. Rood: de verwachtingswaarde, gestippeld: $\mu \pm \sigma$.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 3 · DE LEVERING</div>
+            <div class="b-text"><p>$n = 50$, $p = 0{,}02$. Hoe groot is de kans dat de levering wordt geaccepteerd? Hoe groot is de kans dat ze helemaal foutloos is?</p></div>
+            <div class="b-sol"><p>$P(X \le 2) \approx 0{,}922$. Ongeveer 92% van de leveringen wordt geaccepteerd.</p>
+                <p>$P(X = 0) = 0{,}98^{50} \approx 0{,}364$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 4 · OVERBOEKT</div>
+            <div class="b-text"><p>103 tickets, 100 stoelen, elke persoon komt onafhankelijk met kans 95% opdagen. Hoe groot is de kans dat er niet genoeg stoelen zijn?</p></div>
+            <div class="b-sol"><p>$X$: aantal mensen dat opdaagt, $n = 103$, $p = 0{,}95$. $P(X > 100) = 1 - P(X \le 100) \approx 0{,}106$.
+                <span class="b-res">Ongeveer bij elke tiende vlucht</span> moet iemand worden omgeboekt. Bij 102 tickets zou dat maar ruim 3% zijn.</p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ is binomiaal verdeeld met $n = 20$ en $p = 0{,}3$. Bereken met het interactieve onderdeel of de GR $P(X = 6)$, $P(X \le 6)$, $P(X \ge 8)$ en $P(4 \le X \le 8)$.</p></div>
+            <div class="b-sol"><p>$0{,}192$; $0{,}608$; $0{,}228$; $0{,}780$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Vertaal in een kans met $X \le$: a) „minstens 4” &nbsp; b) „meer dan 4” &nbsp; c) „minder dan 4” &nbsp; d) „hoogstens 4”</p></div>
+            <div class="b-sol"><p>a) $1 - P(X \le 3)$ &nbsp; b) $1 - P(X \le 4)$ &nbsp; c) $P(X \le 3)$ &nbsp; d) $P(X \le 4)$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bij de goktoets uit voorbeeld 1 heb je minstens 5 goede antwoorden nodig om te slagen. Hoe groot is de kans dat je door gokken slaagt?</p></div>
+            <div class="b-sol"><p>$P(X \ge 5) = 1 - P(X \le 4) \approx 0{,}078$. Ongeveer 8% zou slagen.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>10% van alle smartphones van een bepaald model heeft een accufout. In een klas hebben 20 leerlingen dit model. Hoe groot is de kans dat geen enkele de fout heeft? Minstens één? Hoogstens twee?</p></div>
+            <div class="b-sol"><p>$0{,}9^{20} \approx 0{,}122$; $1 - 0{,}122 = 0{,}878$; $P(X \le 2) \approx 0{,}677$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Hoe vaak moet je minstens gooien om met een kans van minstens 90% ten minste één zes te gooien?</p></div>
+            <div class="b-hint"><p>Los $1 - \left(\tfrac56\right)^n \ge 0{,}9$ op, met de logaritme uit klas 11 of door proberen.</p></div>
+            <div class="b-sol"><p>$\left(\tfrac56\right)^n \le 0{,}1 \Rightarrow n \ge \dfrac{\ln 0{,}1}{\ln \frac56} \approx 12{,}6$. <span class="b-res">Minstens 13 worpen.</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="0,1719" data-tol="0.0005" data-ph="P ="><p class="b-q-text">$n = 10$, $p = 0{,}5$. Bereken $P(X \le 3)$.</p><div class="b-sol"><p>$\tfrac{1 + 10 + 45 + 120}{1024} = \tfrac{176}{1024} \approx 0{,}1719$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">„Minstens 7 successen” is gelijk aan …</p>
+            <div class="b-mc"><button>$1 - P(X \le 7)$</button><button>$P(X \le 7)$</button><button>$1 - P(X \le 6)$</button></div>
+            <div class="b-sol"><p>De complementaire gebeurtenis van „minstens 7” is „hoogstens 6”.</p></div></div>
+        <div class="b-q" data-ans="0,8784" data-tol="0.001" data-ph="P ="><p class="b-q-text">$n = 20$, $p = 0{,}1$. Hoe groot is $P(X \ge 1)$?</p><div class="b-sol"><p>$1 - 0{,}9^{20} \approx 0{,}878$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Verwachtingswaarde en histogram" data-toc-k="3" data-toc-short="3 μ en σ">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 3</span><span class="b-band-sub">6 LESUREN</span></div>
+    <h2><span class="b-no">3</span>Verwachtingswaarde, standaardafwijking en de vorm van het histogram</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Wie 60 keer met een dobbelsteen gooit, verwacht ongeveer 10 zessen. Maar hoe ver mag je daarvan afwijken voordat je achterdochtig wordt?</p></div></div>
+            <div class="b-text"><p>Bij de binomiale verdeling hoef je verwachtingswaarde en variantie niet via de lange som te berekenen: elke afzonderlijke stap draagt $p$ bij aan de verwachtingswaarde
+                en $p(1 - p)$ aan de variantie. Bij $n$ stappen geeft dat eenvoudige formules.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · KENGETALLEN VAN DE BINOMIALE VERDELING</div>
+                <div class="b-text">
+                    <p>$\mu = E(X) = n \cdot p$ &nbsp; · &nbsp; $V(X) = n \cdot p \cdot (1 - p)$ &nbsp; · &nbsp; $\sigma = \sqrt{n \cdot p \cdot (1 - p)}$</p>
+                    <p>Het histogram heeft zijn maximum bij of naast $\mu$. Hoe groter $n$, hoe breder en platter het wordt, maar in verhouding tot $n$ steeds smaller.
+                        Bij $p = 0{,}5$ is het symmetrisch, bij een kleine $p$ scheef naar rechts, bij een grote $p$ scheef naar links.</p>
+                    <p>Vuistregel: is $\sigma > 3$, dan ligt ongeveer 68% van de waarden in het interval $[\mu - \sigma, \mu + \sigma]$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Wortel-n-wet:</b> vier keer zoveel herhalingen verdubbelen $\sigma$. De <b>relatieve</b> spreiding $\tfrac{\sigma}{n}$ wordt daarbij gehalveerd.</p>
+            <p class="b-note"><b>In het interactieve onderdeel hierboven</b> tonen de gestippelde lijnen $\mu - \sigma$ en $\mu + \sigma$. Verander $n$ en kijk wat er gebeurt.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 5 · 60 KEER GOOIEN</div>
+            <div class="b-text"><p>$X$: aantal zessen bij 60 worpen. Bereken $\mu$ en $\sigma$.</p></div>
+            <div class="b-sol"><p>$\mu = 60 \cdot \tfrac16 = 10$, $\sigma = \sqrt{60 \cdot \tfrac16 \cdot \tfrac56} = \sqrt{8{,}33} \approx 2{,}89$. Waarden tussen ongeveer 7 en 13 zijn heel normaal.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 6 · 100 KEER EEN MUNT OPGOOIEN</div>
+            <div class="b-text"><p>$X$: aantal keer kop bij 100 worpen. Bereken $\mu$, $\sigma$ en $P(45 \le X \le 55)$.</p></div>
+            <div class="b-sol"><p>$\mu = 50$, $\sigma = \sqrt{25} = 5$, $P(45 \le X \le 55) \approx 0{,}729$. Dat past goed bij de vuistregel.</p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BORD VAN GALTON</span><span class="b-lab-what">De binomiale verdeling valt uit de lucht</span></span></a>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bereken $\mu$ en $\sigma$ voor a) $n = 50$, $p = 0{,}1$ &nbsp; b) $n = 20$, $p = 0{,}3$ &nbsp; c) $n = 400$, $p = 0{,}5$.</p></div>
+            <div class="b-sol"><p>a) $5$; $\sqrt{4{,}5} \approx 2{,}12$ &nbsp; b) $6$; $\sqrt{4{,}2} \approx 2{,}05$ &nbsp; c) $200$; $10$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Stel in het interactieve onderdeel $n = 20$ in en vergelijk de histogrammen voor $p = 0{,}1$, $p = 0{,}5$ en $p = 0{,}9$. Beschrijf ligging en vorm.</p></div>
+            <div class="b-sol"><p>$p = 0{,}1$: maximum bij 2, scheef naar rechts. $p = 0{,}5$: symmetrisch rond 10. $p = 0{,}9$: spiegelbeeld van $p = 0{,}1$, maximum bij 18, scheef naar links.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Een munt hoort zuiver te zijn. Bij 100 worpen valt 62 keer kop. Ligt dat nog in het gebied $[\mu - 2\sigma, \mu + 2\sigma]$? Wat concludeer je?</p></div>
+            <div class="b-sol"><p>$[50 - 10, 50 + 10] = [40, 60]$. 62 ligt erbuiten. Dat is voor een zuivere munt ongewoon, je zou haar beter moeten onderzoeken. Bewijzen kun je daarmee alleen nog niets.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Voor welke $p$ is de variantie $n \cdot p \cdot (1 - p)$ bij vaste $n$ het grootst? Leg uit zonder afgeleide.</p></div>
+            <div class="b-sol"><p>$p(1 - p) = p - p^2$ is een bergparabool met nulpunten 0 en 1, de top ligt bij $p = 0{,}5$. Daar is de onzekerheid het grootst.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="12" data-ph="μ ="><p class="b-q-text">$n = 40$, $p = 0{,}3$. Hoe groot is $\mu$?</p><div class="b-sol"><p>$40 \cdot 0{,}3 = 12$</p></div></div>
+        <div class="b-q" data-ans="3" data-tol="0.0001" data-ph="σ ="><p class="b-q-text">$n = 100$, $p = 0{,}1$. Hoe groot is $\sigma$?</p><div class="b-sol"><p>$\sqrt{100 \cdot 0{,}1 \cdot 0{,}9} = \sqrt9 = 3$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Hoe ziet het histogram voor $n = 30$, $p = 0{,}5$ eruit?</p>
+            <div class="b-mc"><button>symmetrisch rond 15</button><button>scheef naar rechts</button><button>scheef naar links</button></div>
+            <div class="b-sol"><p>Bij $p = 0{,}5$ is $P(X = k) = P(X = 30 - k)$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Herhalen · verdiepen · verbinden" data-toc-k="H" data-toc-short="Oefenen">
+    <div class="b-band"><span class="b-band-tag">HERHALEN · VERDIEPEN · VERBINDEN</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Een basketballer scoort 70% van zijn vrije worpen. Hij gooit 10 keer. Hoeveel treffers zijn te verwachten? Hoe groot is de kans dat hij alles raak gooit?</p></div>
+            <div class="b-sol"><p>$\mu = 7$; $0{,}7^{10} \approx 0{,}028$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Er worden 15 mensen ondervraagd, 40% van de bevolking kent een bepaald product. Bereken $P(X = 6)$, $P(X \le 4)$ en $P(X \ge 9)$.</p></div>
+            <div class="b-sol"><p>$0{,}207$; $0{,}217$; $0{,}095$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Verbinden met hoofdstuk 1.2:</b> bij de goktoets krijg je voor elk goed antwoord 1 punt, voor elk fout antwoord gaat er $\tfrac13$ punt af. Welke score verwacht je bij gokken?</p></div>
+            <div class="b-sol"><p>Per vraag: $1 \cdot 0{,}25 - \tfrac13 \cdot 0{,}75 = 0$. Gokken levert gemiddeld niets op, precies daarom bestaat deze aftrek.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Een luchtvaartmaatschappij heeft 100 stoelen en rekent erop dat 95% opdaagt. Ze wil bij hoogstens 5% van de vluchten te weinig stoelen hebben. Hoeveel tickets mag ze verkopen? Gebruik het interactieve onderdeel.</p></div>
+            <div class="b-sol"><p>Bij 102 tickets: $P(X > 100) \approx 0{,}034$, bij 103 al $\approx 0{,}106$. <span class="b-res">Hoogstens 102 tickets.</span></p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursie: het bord van Galton" data-toc-k="X" data-toc-short="Galton">
+    <div class="b-band"><span class="b-band-tag">EXCURSIE</span><span class="b-band-sub">DE BINOMIALE VERDELING OM AAN TE RAKEN</span></div>
+    <h2>Het bord van Galton</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>De Engelse natuuronderzoeker Francis Galton bouwde een bord met veel rijen spijkers. Knikkers die van boven vallen, springen bij elke spijker toevallig naar links
+                of naar rechts. Onderaan verzamelen ze zich in bakjes, en steeds weer ontstaat dezelfde klokvorm.</p>
+            <p>Met de binomiale verdeling verklaard: bij $n$ rijen spijkers is elke knikker een herhaald Bernoulli-experiment met lengte $n$ en $p = 0{,}5$, „rechts” is een succes.
+                Bakje $k$ wordt via $\binom{n}{k}$ routes bereikt. Bij 10 rijen komt in het middelste bakje ongeveer $\binom{10}{5} \cdot 0{,}5^{10} \approx 24{,}6\%$ van de knikkers terecht,
+                in elk van de twee buitenste maar net geen 0,1%.</p>
+            <p>Galton noemde zijn bord „quincunx” en gebruikte het om uit te leggen waarom veel kenmerken in de natuur op een vergelijkbare manier verdeeld zijn.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Bron:</b> Francis Galton: Natural Inheritance. Macmillan, Londen 1889.</p></aside>
+    </div>
+    <div class="b-labs"><a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BORD VAN GALTON</span><span class="b-lab-what">Knikkers laten vallen en tellen</span></span></a></div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Samenvatting" data-toc-k="S" data-toc-short="Samenvatting">
+    <div class="b-band"><span class="b-band-tag">SAMENVATTING</span><span class="b-band-sub">HET BELANGRIJKSTE IN ÉÉN OOGOPSLAG</span></div>
+    <div class="b-rueck"><div><h4>HERHAALD BERNOULLI-EXPERIMENT</h4><p>$n$ onafhankelijke herhalingen, steeds succes met kans $p$.</p></div>
+        <div><p>20 keer gooien met een dobbelsteen, succes: zes</p></div></div>
+    <div class="b-rueck"><div><h4>BINOMIAALCOËFFICIËNT</h4><p>$\binom{n}{k} = \dfrac{n!}{k!\,(n - k)!}$ routes met precies $k$ successen.</p></div>
+        <div><p>$\binom52 = 10$ · $\binom{49}{6} = 13\,983\,816$</p></div></div>
+    <div class="b-rueck"><div><h4>FORMULE VAN BERNOULLI</h4><p>$P(X = k) = \binom{n}{k}\, p^k\, (1 - p)^{n - k}$</p></div>
+        <div><p>Goktoets: $P(X = 3) \approx 0{,}250$</p></div></div>
+    <div class="b-rueck"><div><h4>CUMULATIEF</h4><p>$P(X \ge k) = 1 - P(X \le k - 1)$ · $P(a \le X \le b) = P(X \le b) - P(X \le a - 1)$</p></div>
+        <div><p>Levering: $P(X \le 2) \approx 0{,}922$</p></div></div>
+    <div class="b-rueck"><div><h4>KENGETALLEN</h4><p>$\mu = np$, $\sigma = \sqrt{np(1 - p)}$</p></div>
+        <div><p>60 keer gooien: $\mu = 10$, $\sigma \approx 2{,}89$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Toets" data-toc-k="T" data-toc-short="Toets">
+    <div class="b-band"><span class="b-band-tag">TOETS</span><span class="b-band-sub">TWEE RONDES · METEEN FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDE 1</div>
+            <div class="b-q" data-ans="10" data-ph="getal"><p class="b-q-text">Bereken $\binom{5}{3}$.</p><div class="b-sol"><p>$\binom53 = \binom52 = 10$</p></div></div>
+            <div class="b-q" data-ans="0,2734" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Je gooit een munt 8 keer op. Hoe groot is de kans op precies vier keer kop?</p><div class="b-sol"><p>$70 \cdot 0{,}5^8 = \tfrac{70}{256} \approx 0{,}2734$</p></div></div>
+            <div class="b-q" data-ans="15" data-ph="μ ="><p class="b-q-text">$n = 60$, $p = 0{,}25$. Hoe groot is de verwachtingswaarde?</p><div class="b-sol"><p>$60 \cdot 0{,}25 = 15$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDE 2</div>
+            <div class="b-q" data-ans="0,0781" data-tol="0.001" data-ph="P ="><p class="b-q-text">$n = 10$, $p = 0{,}25$. Hoe groot is $P(X \ge 5)$?</p><div class="b-sol"><p>$1 - P(X \le 4) \approx 0{,}078$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Welke situatie is <b>geen</b> herhaald Bernoulli-experiment?</p>
+                <div class="b-mc"><button>10 keer een munt opgooien</button><button>3 kaarten uit een spel van 32 kaarten trekken zonder terugleggen, succes: aas</button><button>20 keer gooien met een dobbelsteen, succes: even getal</button></div>
+                <div class="b-sol"><p>Zonder terugleggen verandert $p$ na elke trekking.</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="σ ="><p class="b-q-text">$n = 64$, $p = 0{,}5$. Hoe groot is $\sigma$?</p><div class="b-sol"><p>$\sqrt{64 \cdot 0{,}25} = 4$</p></div></div>
+        </div>
+    </div>
+    <h3>MEER OEFENEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos11-bernoulli.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BERNOULLI-EXPERIMENTEN</span><span class="b-lab-what">Formule van Bernoulli, cumulatief (in het Duits)</span></span></a>
+        <a class="b-lab" href="../../mathetestfos11-kombination-variation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COMBINATORIEK</span><span class="b-lab-what">Faculteit en binomiaalcoëfficiënt (in het Duits)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Wiskunde, Berufliches Gymnasium klas 12 · leergebied 1, volgens het leerplan wiskunde van het Berufliches Gymnasium in Saksen.</p>
+    <p>Alle teksten, opgaven en afbeeldingen zijn eigen materiaal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-nl.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-nl/stochastik.js"></script>
+</body>
+</html>
