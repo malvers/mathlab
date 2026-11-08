@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiskunde 12 · Hoofdstuk 1.1 · Voorwaardelijke kans | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Kansbomen, kruistabellen, onafhankelijke gebeurtenissen. Hoofdstuk 1.1 van het interactieve leerboek Wiskunde · Berufliches Gymnasium 12: uitleg, voorbeelden, opgaven op drie niveaus, zelftoetsen en labs om uit te proberen.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">WISKUNDE · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Hoofdstuk"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhoud van het hoofdstuk">
+        <p class="b-toc-title">HOOFDSTUK 1.1 · LEERGEBIED 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introductie" data-toc-k="I" data-toc-short="Introductie" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">HOOFDSTUK 1.1 · LEERGEBIED 1 · AUGUSTUS · SEPTEMBER</p>
+            <h1>Voorwaardelijke kans</h1>
+            <p class="b-hero-lead">Een medische test is positief. Hoe zeker is het dan dat iemand ziek is? Wie met de bus komt, is vaker te laat. Is dat toeval?
+                Zodra je <b>iets weet</b>, veranderen kansen. In dit hoofdstuk reken je met die kennis en onderzoek je
+                wanneer twee gebeurtenissen echt <b>niets met elkaar te maken</b> hebben.</p>
+            <div class="b-chips"><span class="b-chip">8 LESUREN</span><span class="b-chip">2 PARAGRAFEN</span><span class="b-chip">VERVOLG OP KLAS 11</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DIT LEER JE IN DIT HOOFDSTUK</div>
+            <div class="b-text"><ul>
+                <li><b>voorwaardelijke kansen</b> $P(A \mid B)$ bepalen uit kansbomen en kruistabellen</li>
+                <li>kansbomen <b>omkeren</b>: van $P(B \mid A)$ naar $P(A \mid B)$</li>
+                <li><b>onafhankelijkheid</b> van gebeurtenissen controleren en onderscheiden van <b>disjunct</b> zijn</li>
+                <li>uitkomsten in een context <b>interpreteren</b>, bijvoorbeeld bij medische tests</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: KUN JE DIT AL?</div>
+            <div class="b-q" data-ans="1/36" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Je gooit met twee dobbelstenen. Hoe groot is de kans op twee zessen?</p><div class="b-sol"><p>Productregel: $\tfrac16 \cdot \tfrac16 = \tfrac{1}{36}$</p></div></div>
+            <div class="b-q" data-ans="0,65" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}35$. Hoe groot is $P(\overline{A})$?</p><div class="b-sol"><p>$1 - 0{,}35 = 0{,}65$</p></div></div>
+            <div class="b-q" data-ans="3/10" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Uit een vaas met 3 rode en 2 blauwe knikkers pak je er twee zonder terugleggen. Hoe groot is de kans dat ze allebei rood zijn?</p><div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p></div></div>
+            <div class="b-q" data-ans="0,6" data-tol="0.0001" data-ph="aandeel"><p class="b-q-text">120 van de 200 ondervraagden hebben een kenmerk. Hoe groot is dat aandeel als kommagetal?</p><div class="b-sol"><p>$\tfrac{120}{200} = 0{,}6$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Verkenningen" data-toc-k="V" data-toc-short="Verkenningen">
+    <div class="b-band"><span class="b-band-tag">VERKENNINGEN</span><span class="b-band-sub">OM TE BEGINNEN · IN GROEPJES</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">DE POSITIEVE TEST</div>
+            <div class="b-text"><p>2% van de bevolking heeft een bepaalde ziekte. Een test herkent 90% van de zieken, maar slaat ook bij 5% van de gezonden aan.</p>
+                <ul><li>Schat: hoe groot is de kans dat iemand met een positieve test echt ziek is?</li><li>Reken het na met 10.000 personen. Verrast de uitkomst jullie?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">BUS EN TE LAAT</div>
+            <div class="b-text"><p>Vraag in jullie klas: wie komt met de bus? Wie was deze week minstens één keer te laat?</p>
+                <ul><li>Zet de antwoorden in een kruistabel.</li><li>Zijn busreizigers vaker te laat dan de anderen? Hoe kunnen jullie dat met getallen onderbouwen?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 1 en 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">MERKT DE DOBBELSTEEN IETS?</div>
+            <div class="b-text"><p>Je gooit met twee dobbelstenen. $A$: de eerste dobbelsteen geeft een zes. $B$: de som van de ogen is 7.</p>
+                <ul><li>Wordt $B$ waarschijnlijker als jullie al weten dat $A$ is gebeurd?</li><li>En bij som 8 in plaats van 7?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Voorwaardelijke kans" data-toc-k="1" data-toc-short="1 Voorwaardelijk">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 1</span><span class="b-band-sub">4 LESUREN</span></div>
+    <h2><span class="b-no">1</span>Kans onder een voorwaarde</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Op een school zijn 250 leerlingen ondervraagd: kom je met de bus ($B$)? Was je deze week te laat ($L$)?</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:420px">
+                    <tr><th></th><th>$L$</th><th>$\overline{L}$</th><th>totaal</th></tr>
+                    <tr><th>$B$</th><td>30</td><td>120</td><td>150</td></tr>
+                    <tr><th>$\overline{B}$</th><td>10</td><td>90</td><td>100</td></tr>
+                    <tr><th>totaal</th><td>40</td><td>210</td><td>250</td></tr></table></div></div></div>
+            <div class="b-text">
+                <p>In totaal was $\tfrac{40}{250} = 16\%$ te laat. Kijk je <b>alleen naar de busreizigers</b>, dan is het $\tfrac{30}{150} = 20\%$,
+                    bij de anderen maar $\tfrac{10}{100} = 10\%$. De voorwaarde „komt met de bus” verkleint de groep waar je naar kijkt tot 150 personen.</p>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · VOORWAARDELIJKE KANS</div>
+                <div class="b-text">
+                    <p>De kans op $A$ <b>onder de voorwaarde</b> $B$ (met $P(B) > 0$) is
+                        $$P(A \mid B) = \frac{P(A \cap B)}{P(B)}.$$</p>
+                    <p>Omgewerkt krijg je de <b>productregel</b> $P(A \cap B) = P(B) \cdot P(A \mid B)$. In de kansboom staan in de tweede stap precies deze voorwaardelijke kansen.</p>
+                    <p>Let op: $P(A \mid B)$ en $P(B \mid A)$ zijn in het algemeen <b>verschillend</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notatie:</b> je leest $P(A \mid B)$ als „de kans op A, gegeven B”. In Duitse boeken staat vaak $P_B(A)$.</p>
+            <p class="b-note"><b>Omgekeerde boom:</b> uit een kruistabel kun je twee kansbomen tekenen, een met eerst $B$ en een met eerst $L$. Beide beschrijven dezelfde vier kansen op een doorsnede.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · DE SNELTEST</div>
+        <p class="b-help" style="margin:0 0 12px">Stel in hoe vaak de ziekte voorkomt en hoe goed de test werkt. Kijk hoeveel van de positief geteste mensen echt ziek zijn.</p>
+        <div data-widget="schnelltest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 1 · BUS EN TE LAAT</div>
+            <div class="b-text"><p>Bepaal met de tabel hierboven $P(L \mid B)$ en $P(B \mid L)$. Wat betekenen beide getallen?</p></div>
+            <div class="b-sol"><p>$P(L \mid B) = \tfrac{30}{150} = 0{,}2$: van de busreizigers was 20% te laat.</p>
+                <p>$P(B \mid L) = \tfrac{30}{40} = 0{,}75$: van de laatkomers kwam 75% met de bus. <span class="b-res">Twee verschillende vragen, twee verschillende antwoorden.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 2 · DE POSITIEVE TEST</div>
+            <div class="b-text"><p>2% is ziek ($Z$). De test herkent 90% van de zieken en is bij 5% van de gezonden ten onrechte positief ($T^+$). Hoe groot is $P(Z \mid T^+)$?</p></div>
+            <div class="b-sol"><p>$P(Z \cap T^+) = 0{,}02 \cdot 0{,}9 = 0{,}018$ en $P(\overline{Z} \cap T^+) = 0{,}98 \cdot 0{,}05 = 0{,}049$, dus $P(T^+) = 0{,}067$.</p>
+                <p>$P(Z \mid T^+) = \dfrac{0{,}018}{0{,}067} \approx 0{,}269$. <span class="b-res">Maar ruim één op de vier mensen met een positieve test is ziek.</span> De reden: er zijn veel meer gezonden dan zieken.</p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Van 300 ondervraagden dragen er 120 een bril ($B$). 45 brildragers en 54 mensen zonder bril lezen elke dag ($D$). Maak de kruistabel en bereken $P(D)$, $P(D \mid B)$ en $P(B \mid D)$.</p></div>
+            <div class="b-sol"><p>$B$: 45 | 75 | 120 · $\overline{B}$: 54 | 126 | 180 · totaal: 99 | 201 | 300.</p>
+                <p>$P(D) = \tfrac{99}{300} = 0{,}33$, $P(D \mid B) = \tfrac{45}{120} = 0{,}375$, $P(B \mid D) = \tfrac{45}{99} \approx 0{,}455$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>In de kansboom is $P(A) = 0{,}6$, $P(B \mid A) = 0{,}3$ en $P(B \mid \overline{A}) = 0{,}5$. Bereken $P(B)$ en $P(A \mid B)$.</p></div>
+            <div class="b-sol"><p>$P(B) = 0{,}6 \cdot 0{,}3 + 0{,}4 \cdot 0{,}5 = 0{,}18 + 0{,}2 = 0{,}38$, $P(A \mid B) = \tfrac{0{,}18}{0{,}38} \approx 0{,}474$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Machine M1 maakt 70% van alle onderdelen, daarvan is 2% defect. Machine M2 maakt 30%, daarvan is 5% defect. Een onderdeel is defect. Hoe groot is de kans dat het van M2 komt?</p></div>
+            <div class="b-sol"><p>$P(D) = 0{,}7 \cdot 0{,}02 + 0{,}3 \cdot 0{,}05 = 0{,}014 + 0{,}015 = 0{,}029$, $P(M_2 \mid D) = \tfrac{0{,}015}{0{,}029} \approx 0{,}517$.
+                Hoewel M2 minder maakt, komt meer dan de helft van de defecte onderdelen daarvandaan.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Gegeven zijn $P(A) = 0{,}4$, $P(B \mid A) = 0{,}25$ en $P(B) = 0{,}3$. Vul de kruistabel in en teken de omgekeerde boom (eerst $B$). Hoe groot zijn $P(A \mid B)$ en $P(A \mid \overline{B})$?</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}1$, $P(A \cap \overline{B}) = 0{,}3$, $P(\overline{A} \cap B) = 0{,}2$, $P(\overline{A} \cap \overline{B}) = 0{,}4$.</p>
+                <p>$P(A \mid B) = \tfrac{0{,}1}{0{,}3} = \tfrac13$, $P(A \mid \overline{B}) = \tfrac{0{,}3}{0{,}7} \approx 0{,}429$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Volgens voorbeeld 2 is iemand met een positieve test maar met een kans van ongeveer 26,9% ziek. De persoon doet een tweede, onafhankelijke test van dezelfde soort, die weer positief is. Hoe groot is de kans nu dat hij ziek is?</p></div>
+            <div class="b-hint"><p>Neem 0,269 als nieuwe beginkans voor $Z$ en reken zoals in voorbeeld 2.</p></div>
+            <div class="b-sol"><p>$\dfrac{0{,}269 \cdot 0{,}9}{0{,}269 \cdot 0{,}9 + 0{,}731 \cdot 0{,}05} = \dfrac{0{,}2421}{0{,}2421 + 0{,}03655} \approx 0{,}869$.
+                <span class="b-res">Na twee positieve tests ongeveer 87%.</span> Daarom wordt een positieve sneltest meestal met een tweede test bevestigd.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="0,6" data-tol="0.0001" data-ph="P ="><p class="b-q-text">Van 50 personen hebben er 20 een hond. 12 van de hondenbezitters joggen elke dag. Hoe groot is de kans dat een hondenbezitter elke dag jogt?</p><div class="b-sol"><p>$\tfrac{12}{20} = 0{,}6$</p></div></div>
+        <div class="b-q" data-ans="0,4" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}5$ en $P(A \cap B) = 0{,}2$. Hoe groot is $P(B \mid A)$?</p><div class="b-sol"><p>$\tfrac{0{,}2}{0{,}5} = 0{,}4$</p></div></div>
+        <div class="b-q" data-ans="0,29" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}3$, $P(B \mid A) = 0{,}5$, $P(B \mid \overline{A}) = 0{,}2$. Hoe groot is $P(B)$?</p><div class="b-sol"><p>$0{,}3 \cdot 0{,}5 + 0{,}7 \cdot 0{,}2 = 0{,}15 + 0{,}14 = 0{,}29$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Onafhankelijke gebeurtenissen" data-toc-k="2" data-toc-short="2 Onafhankelijk">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 2</span><span class="b-band-sub">4 LESUREN</span></div>
+    <h2><span class="b-no">2</span>Onafhankelijke gebeurtenissen</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Je gooit met een dobbelsteen. $A$: een even getal. $B$: hoogstens 2. Verandert de kans op een even getal als je weet dat er hoogstens 2 is gegooid?</p></div></div>
+            <div class="b-text"><p>$P(A) = \tfrac12$. Onder de voorwaarde $B = \{1, 2\}$ is alleen de 2 even, dus $P(A \mid B) = \tfrac12$. Wat je over $B$ weet, verandert niets aan $A$.
+                Zulke gebeurtenissen heten <b>onafhankelijk</b>. Bij bus en te laat was dat anders: $P(L \mid B) = 0{,}2$, maar $P(L) = 0{,}16$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · ONAFHANKELIJKHEID</div>
+                <div class="b-text">
+                    <p>Twee gebeurtenissen $A$ en $B$ heten <b>onafhankelijk</b> als geldt: $$P(A \cap B) = P(A) \cdot P(B).$$</p>
+                    <p>Voor $P(B) > 0$ is dat gelijkwaardig met $P(A \mid B) = P(A)$. Anders heten $A$ en $B$ <b>afhankelijk</b>.</p>
+                    <p><b>Disjunct</b> betekent iets anders: $A \cap B = \emptyset$, de gebeurtenissen kunnen niet samen optreden. Disjuncte gebeurtenissen met $P(A) > 0$ en $P(B) > 0$ zijn altijd <b>afhankelijk</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>In de kansboom:</b> $A$ en $B$ zijn onafhankelijk als op beide takken van de tweede stap dezelfde kans op $B$ staat: $P(B \mid A) = P(B \mid \overline{A})$.</p>
+            <p class="b-note"><b>Afhankelijk betekent niet oorzakelijk:</b> afhankelijkheid laat een verband zien, maar niet wat de oorzaak is.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · ONAFHANKELIJK OF NIET?</div>
+        <p class="b-help" style="margin:0 0 12px">Verander $P(A)$, $P(B)$ en $P(A \cap B)$. In het eenheidsvierkant is de linkerkolom $B$ en de rechterkolom $\overline{B}$. Goud is steeds het aandeel van $A$.</p>
+        <div data-widget="unabhaengig"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 3 · BUS EN TE LAAT</div>
+            <div class="b-text"><p>Zijn $B$ (bus) en $L$ (te laat) uit paragraaf 1 onafhankelijk?</p></div>
+            <div class="b-sol"><p>$P(B) \cdot P(L) = 0{,}6 \cdot 0{,}16 = 0{,}096$, maar $P(B \cap L) = \tfrac{30}{250} = 0{,}12$. <span class="b-res">Afhankelijk.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 4 · DE SOM 7</div>
+            <div class="b-text"><p>Twee dobbelstenen. $A$: de eerste geeft een zes. $B$: de som van de ogen is 7. Onafhankelijk?</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac16$, $P(B) = \tfrac{6}{36} = \tfrac16$, $P(A \cap B) = P(\{(6, 1)\}) = \tfrac{1}{36} = \tfrac16 \cdot \tfrac16$. <span class="b-res">Onafhankelijk.</span>
+                Wat de eerste dobbelsteen ook geeft: precies één getal van de tweede vult aan tot 7.</p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">HET DOBBELSPEL</span><span class="b-lab-what">Kansbomen, productregel en somregel</span></span></a>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Er geldt $P(A) = 0{,}4$ en $P(B) = 0{,}5$. Zijn $A$ en $B$ onafhankelijk als a) $P(A \cap B) = 0{,}2$ &nbsp; b) $P(A \cap B) = 0{,}25$?</p></div>
+            <div class="b-sol"><p>$P(A) \cdot P(B) = 0{,}2$. a) onafhankelijk &nbsp; b) afhankelijk</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Eén dobbelsteen: $A$ = „1”, $B$ = „6”. Zijn de gebeurtenissen disjunct? Zijn ze onafhankelijk?</p></div>
+            <div class="b-sol"><p>Disjunct, want allebei tegelijk kan niet. $P(A \cap B) = 0 \neq \tfrac16 \cdot \tfrac16$, dus afhankelijk: wie weet dat er een 6 is gegooid, weet zeker dat er geen 1 is gegooid.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$A$ en $B$ zijn onafhankelijk met $P(A) = 0{,}3$ en $P(B) = 0{,}6$. Vul de kruistabel met kansen in.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}18$, $P(A \cap \overline{B}) = 0{,}12$, $P(\overline{A} \cap B) = 0{,}42$, $P(\overline{A} \cap \overline{B}) = 0{,}28$. Elk vakje is het product van zijn totalen in de rand.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Twee dobbelstenen: $A$ = „som van de ogen 8”, $B$ = „eerste dobbelsteen geeft 6”. Onderzoek of ze onafhankelijk zijn en vergelijk met voorbeeld 4.</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac{5}{36}$, $P(B) = \tfrac16$, $P(A \cap B) = P(\{(6, 2)\}) = \tfrac{1}{36} = \tfrac{6}{216}$, maar $P(A) \cdot P(B) = \tfrac{5}{216}$.
+                Afhankelijk: met een 1 als eerste worp is de som 8 onmogelijk, met een 6 niet.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Twee pompen vallen onafhankelijk van elkaar uit, elk met een kans van 5%. Hoe groot is de kans dat het systeem uitvalt als a) één pomp genoeg is, b) beide pompen moeten werken? Waarom is de aanname van onafhankelijkheid hier kritisch?</p></div>
+            <div class="b-sol"><p>a) beide vallen uit: $0{,}05^2 = 0{,}0025$ &nbsp; b) minstens één valt uit: $1 - 0{,}95^2 = 0{,}0975$.</p>
+                <p>Een gemeenschappelijke oorzaak (stroomuitval, hoogwater) legt vaak allebei tegelijk stil. Dan zijn de uitvallen afhankelijk en is a) veel te optimistisch.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="0,2" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$ en $B$ zijn onafhankelijk, $P(A) = 0{,}5$, $P(B) = 0{,}4$. Hoe groot is $P(A \cap B)$?</p><div class="b-sol"><p>$0{,}5 \cdot 0{,}4 = 0{,}2$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$P(A) = 0{,}2$, $P(B) = 0{,}3$ en $P(A \cap B) = 0{,}1$. Dan zijn $A$ en $B$ …</p>
+            <div class="b-mc"><button>onafhankelijk</button><button>afhankelijk</button><button>disjunct</button></div>
+            <div class="b-sol"><p>$0{,}2 \cdot 0{,}3 = 0{,}06 \neq 0{,}1$</p></div></div>
+        <div class="b-q" data-ans="0,05" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$ en $B$ zijn onafhankelijk met $P(A) = 0{,}25$ en $P(B) = 0{,}8$. Hoe groot is $P(A \cap \overline{B})$?</p><div class="b-sol"><p>Ook $A$ en $\overline{B}$ zijn onafhankelijk: $0{,}25 \cdot 0{,}2 = 0{,}05$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Herhalen · verdiepen · verbinden" data-toc-k="H" data-toc-short="Oefenen">
+    <div class="b-band"><span class="b-band-tag">HERHALEN · VERDIEPEN · VERBINDEN</span></div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">TRAINING · KRUISTABELLEN AANVULLEN</div>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>In een jaargroep van 120 leerlingen volgen er 48 informatica ($I$), 30 daarvan zitten ook bij de toneelclub ($T$). In totaal zitten er 50 bij de toneelclub. Bereken $P(T \mid I)$ en $P(I \mid T)$. Zijn $I$ en $T$ onafhankelijk?</p></div>
+            <div class="b-sol"><p>$P(T \mid I) = \tfrac{30}{48} = 0{,}625$, $P(I \mid T) = \tfrac{30}{50} = 0{,}6$. $P(I) \cdot P(T) = 0{,}4 \cdot \tfrac{5}{12} \approx 0{,}167$, maar $P(I \cap T) = 0{,}25$: afhankelijk.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>40% van alle e-mails is spam. Het woord „gewonnen” staat in 30% van de spammails, maar maar in 2% van de andere. Een mail bevat „gewonnen”. Hoe groot is de kans dat het spam is?</p></div>
+            <div class="b-sol"><p>$\dfrac{0{,}4 \cdot 0{,}3}{0{,}4 \cdot 0{,}3 + 0{,}6 \cdot 0{,}02} = \dfrac{0{,}12}{0{,}132} \approx 0{,}909$. Zo werken eenvoudige spamfilters.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Verbinden met klas 11:</b> bij het geitenprobleem kies je deur 1, de presentator opent deur 3 met een geit. Leg met voorwaardelijke kansen uit waarom wisselen met kans $\tfrac23$ wint.</p></div>
+            <div class="b-sol"><p>Staat de auto achter deur 2 (kans $\tfrac13$), dan moet de presentator deur 3 openen. Staat hij achter deur 1 ($\tfrac13$), dan opent hij deur 3 maar met kans $\tfrac12$.
+                $P(\text{auto achter 2} \mid \text{opent 3}) = \dfrac{\frac13 \cdot 1}{\frac13 \cdot 1 + \frac13 \cdot \frac12} = \tfrac23$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Bewijs: als $A$ en $B$ onafhankelijk zijn, dan zijn ook $A$ en $\overline{B}$ onafhankelijk.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = P(A) - P(A \cap B) = P(A) - P(A) \cdot P(B) = P(A) \cdot (1 - P(B)) = P(A) \cdot P(\overline{B})$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursie: de zaak-Sally Clark" data-toc-k="X" data-toc-short="Sally Clark">
+    <div class="b-band"><span class="b-band-tag">EXCURSIE</span><span class="b-band-sub">ALS JE TEN ONRECHTE ONAFHANKELIJKHEID AANNEEMT</span></div>
+    <h2>De zaak-Sally Clark</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In 1999 werd in Engeland de advocate Sally Clark veroordeeld, omdat haar twee zoontjes kort na de geboorte waren overleden. Een kinderarts verklaarde als deskundige
+                dat in een gezin zoals het hare de kans op wiegendood ongeveer 1 op 8543 was. Voor twee gevallen vermenigvuldigde hij:
+                $\left(\tfrac{1}{8543}\right)^2 \approx \tfrac{1}{73\,000\,000}$.</p>
+            <p>Dat vermenigvuldigen gaat ervan uit dat de twee sterfgevallen <b>onafhankelijk</b> zijn. Gemeenschappelijke genetische of huiselijke oorzaken maken een tweede geval echter
+                veel waarschijnlijker. Daar kwam een tweede fout bij: zelfs een kleine kans op deze gegevens als je aanneemt dat iemand onschuldig is, is niet de
+                kans dat iemand onschuldig is. $P(\text{gegevens} \mid \text{onschuldig})$ en $P(\text{onschuldig} \mid \text{gegevens})$ zijn verschillende dingen, net als $P(L \mid B)$ en $P(B \mid L)$.</p>
+            <p>De Royal Statistical Society wees in 2001 publiekelijk op deze fouten. In 2003 werd het vonnis vernietigd.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Bronnen:</b> Royal Statistical Society, verklaring over de zaak-Sally Clark van 23 oktober 2001; Court of Appeal, R v Clark [2003] EWCA Crim 1020.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Samenvatting" data-toc-k="S" data-toc-short="Samenvatting">
+    <div class="b-band"><span class="b-band-tag">SAMENVATTING</span><span class="b-band-sub">HET BELANGRIJKSTE IN ÉÉN OOGOPSLAG</span></div>
+    <div class="b-rueck"><div><h4>VOORWAARDELIJKE KANS</h4><p>$P(A \mid B) = \dfrac{P(A \cap B)}{P(B)}$, je kijkt alleen nog naar $B$.</p></div>
+        <div><p>Bus: $P(L \mid B) = \tfrac{30}{150} = 0{,}2$ · $P(B \mid L) = \tfrac{30}{40} = 0{,}75$</p></div></div>
+    <div class="b-rueck"><div><h4>PRODUCTREGEL EN KANSBOOM</h4><p>$P(A \cap B) = P(A) \cdot P(B \mid A)$. Tweede stap van de boom: voorwaardelijke kansen.</p></div>
+        <div><p>Omgekeerde boom uit dezelfde kruistabel</p></div></div>
+    <div class="b-rueck"><div><h4>ONAFHANKELIJKHEID</h4><p>$P(A \cap B) = P(A) \cdot P(B)$, gelijkwaardig met $P(A \mid B) = P(A)$.</p></div>
+        <div><p>Eerste dobbelsteen 6 en som 7: onafhankelijk</p></div></div>
+    <div class="b-rueck"><div><h4>DISJUNCT ≠ ONAFHANKELIJK</h4><p>$A \cap B = \emptyset$. Met positieve kansen altijd afhankelijk.</p></div>
+        <div><p>„1” en „6” bij één dobbelsteen</p></div></div>
+    <div class="b-rueck"><div><h4>INTERPRETEREN</h4><p>Positieve tests bij zeldzame ziekten zijn vaak vals-positief.</p></div>
+        <div><p>2% ziek, 90% / 5%: $P(Z \mid T^+) \approx 27\%$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Toets" data-toc-k="T" data-toc-short="Toets">
+    <div class="b-band"><span class="b-band-tag">TOETS</span><span class="b-band-sub">TWEE RONDES · METEEN FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDE 1</div>
+            <div class="b-q" data-ans="0,3" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A \cap B) = 0{,}12$ en $P(B) = 0{,}4$. Hoe groot is $P(A \mid B)$?</p><div class="b-sol"><p>$\tfrac{0{,}12}{0{,}4} = 0{,}3$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$A$ en $B$ zijn disjunct en hebben allebei een positieve kans. Dan zijn ze …</p>
+                <div class="b-mc"><button>onafhankelijk</button><button>afhankelijk</button><button>dat hangt van de getallen af</button></div>
+                <div class="b-sol"><p>$P(A \cap B) = 0$, maar $P(A) \cdot P(B) > 0$.</p></div></div>
+            <div class="b-q" data-ans="0,75" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}5$, $P(B \mid A) = 0{,}6$, $P(B \mid \overline{A}) = 0{,}2$. Hoe groot is $P(A \mid B)$?</p><div class="b-sol"><p>$P(B) = 0{,}3 + 0{,}1 = 0{,}4$, $P(A \mid B) = \tfrac{0{,}3}{0{,}4} = 0{,}75$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDE 2</div>
+            <div class="b-q" data-ans="0,8" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$, $B$ onafhankelijk, $P(A) = 0{,}6$, $P(B) = 0{,}5$. Hoe groot is $P(A \cup B)$?</p><div class="b-sol"><p>$0{,}6 + 0{,}5 - 0{,}6 \cdot 0{,}5 = 0{,}8$</p></div></div>
+            <div class="b-q" data-ans="0,4706" data-tol="0.005" data-ph="P ="><p class="b-q-text">10% is ziek. Een test herkent 80% van de zieken en is bij 10% van de gezonden vals-positief. Hoe groot is $P(Z \mid T^+)$?</p><div class="b-sol"><p>$\dfrac{0{,}08}{0{,}08 + 0{,}09} = \tfrac{8}{17} \approx 0{,}471$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Er geldt $P(A) = 0{,}3$ en $P(A \mid B) = 0{,}3$. Dan zijn $A$ en $B$ …</p>
+                <div class="b-mc"><button>onafhankelijk</button><button>afhankelijk</button><button>disjunct</button></div>
+                <div class="b-sol"><p>De voorwaarde $B$ verandert de kans op $A$ niet.</p></div></div>
+        </div>
+    </div>
+    <h3>MEER OEFENEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">KRUISTABELLEN</span><span class="b-lab-what">Voorwaardelijke kans (in het Duits)</span></span></a>
+        <a class="b-lab" href="../../mathetest11-baumdiagramme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">KANSBOMEN</span><span class="b-lab-what">Kansexperimenten in meerdere stappen (in het Duits)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Wiskunde, Berufliches Gymnasium klas 12 · leergebied 1, volgens het leerplan wiskunde van het Berufliches Gymnasium in Saksen.</p>
+    <p>Alle teksten, opgaven en afbeeldingen zijn eigen materiaal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-nl.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-nl/stochastik.js"></script>
+</body>
+</html>

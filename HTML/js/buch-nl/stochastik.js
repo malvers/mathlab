@@ -45,6 +45,9 @@ window.BuchNL && BuchNL.add('stochastik', {
         'Strategie': 'Strategie', 'Spiele': 'Spellen', 'Autos': 'Auto\u2019s', 'Gewinnquote': 'Winstpercentage',
         'du: bleiben': 'jij: blijven', 'du: wechseln': 'jij: wisselen', 'Rechner: bleiben': 'computer: blijven', 'Rechner: wechseln': 'computer: wisselen',
         // book nl-2 mathe12-nl:
+        // unabhaengig (lb1-1): "unvereinbar" = "disjunct" as in nl0, "abhängig" = "afhankelijk"
+        'Unabhängig machen': 'Maak onafhankelijk', 'Unvereinbar machen': 'Maak disjunct',
+        'Einheitsquadrat: Anteil von A in B und in nicht B': 'Eenheidsvierkant: aandeel van A in B en in niet B',
     },
     phrase: [
         // nl0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -68,6 +71,12 @@ window.BuchNL && BuchNL.add('stochastik', {
         ['TÜR', 'DEUR'], ['Tür', 'Deur'], ['Gewonnen – das Auto! ', 'Gewonnen – de auto! '], ['Leider eine Ziege. ', 'Helaas een geit. '],
         ['Du hast gewechselt.', 'Je hebt gewisseld.'], ['Du bist geblieben.', 'Je bent gebleven.'],
         // book nl-2 mathe12-nl:
+        // unabhaengig
+        ['$ und $P(A \\cap B) = ', '$ en $P(A \\cap B) = '],
+        ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.',
+            '<b>Onafhankelijk:</b> of $B$ nu optreedt of niet, het aandeel van $A$ blijft gelijk. In het vierkant ligt de grens in beide kolommen even hoog.'],
+        ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.',
+            '<b>Disjunct</b> ($A \\cap B = \\emptyset$) en dus <b>afhankelijk</b>: als $B$ optreedt, kan $A$ niet meer optreden.'],
     ],
     rule: [
         // nl0: notation of the module, for every book
@@ -85,5 +94,10 @@ window.BuchNL && BuchNL.add('stochastik', {
             'De presentator weet waar de auto staat, en opent deur $1: een geit. Blijf je of wissel je?'],
         [/Bei Tür (\d) bleiben/g, 'Bij deur $1 blijven'], [/Zu Tür (\d) wechseln/g, 'Naar deur $1 wisselen'],
         // book nl-2 mathe12-nl:
+        // unabhaengig: the conditional probability the Dutch way, P_B(A) → P(A | B) (after the point rule of js/buch-nl.js,
+        // so the \mid stays); "B verändert die Wahrscheinlichkeit von A nach oben" → "B maakt de kans op A groter"
+        [/\$P_B\(A\) = /g, '$P(A \\mid B) = '], [/\$P_\{\\overline\{B\}\}\(A\)/g, '$P(A \\mid \\overline{B})'],
+        [/<b>Abhängig:<\/b> \$B\$ verändert die Wahrscheinlichkeit von \$A\$ nach (oben|unten)\./g,
+            (m, d) => '<b>Afhankelijk:</b> $B$ maakt de kans op $A$ ' + (d === 'oben' ? 'groter' : 'kleiner') + '.'],
     ]
 });
