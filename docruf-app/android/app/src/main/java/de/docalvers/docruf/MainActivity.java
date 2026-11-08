@@ -21,8 +21,12 @@ import android.provider.Settings;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.text.Layout;
+import android.text.Spannable;
+import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.TextUtils;
+import android.text.style.BackgroundColorSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -49,10 +53,11 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Lean screen (Doc, 07.11.2026): "DocCall" centred, in the middle one round button for Doc's voice -
- * "Antworten" when Solita asked something, otherwise "Frag Solita" - with a green dot under it while the line
- * stands, and a small gear at the bottom. While Solita speaks a call, her portrait fills that circle, her sentence
- * runs under it, and both fade slowly when she is done. The answer is heard right in the circle - Android's speech recognition
+ * Lean screen (Doc, 07.11.2026; 08.11.: no name any more, her portrait always in the circle): at the top
+ * "Antworten" when Solita asked something, otherwise "Frag Solita"; in the middle one round button with her portrait
+ * for Doc's voice, a green dot under it while the line stands, and a small gear at the bottom. While Solita speaks
+ * a call, her sentence runs under the circle with karaoke and fades slowly when she is done. The answer is heard
+ * right there - Android's speech recognition
  * without Google's dialog (Doc: "dieser widerliche Dialog von Google"); the words appear while Doc speaks.
  * Behind the gear: the line in words, speak aloud, test call and the last calls.
  */
@@ -78,7 +83,6 @@ public class MainActivity extends Activity {
     private TextView lineWord;
     private Button akku;
     private ImageView face;
-    private ImageView mic;
     private TextView label;
     private View halo;
     private GradientDrawable ring;
@@ -110,6 +114,21 @@ public class MainActivity extends Activity {
         if (mode.equals("listening") && ear != null) ear.startListening(ask());
     };
     private final Handler tick = new Handler(Looper.getMainLooper());
+    // karaoke: her sentence as words, the word lit now (-2 = none yet), the slide of a long call
+    // the web's lit word, #7E8FB5 (js/solita-frage.css .sf-w.on) - at 75 % instead of 30 %, on the dark caption
+    // 30 % was hardly to be seen (Doc, 08.11.2026: "sollte etwas heller sein")
+    private static final int LIT = 0xBF7E8FB5;
+    private final BackgroundColorSpan litSpan = new BackgroundColorSpan(LIT);
+    private Karaoke words;
+    private int lit = -2;
+    private ValueAnimator scroller;
+    private final Runnable sing = new Runnable() {
+        @Override
+        public void run() {
+            karaoke();
+            tick.postDelayed(this, 50);
+        }
+    };
     private final Runnable refresh = new Runnable() {
         @Override
         public void run() {
@@ -278,10 +297,7 @@ public class MainActivity extends Activity {
 
         @Override
         public void onRmsChanged(float db) {
-            if (!mode.equals("listening")) return;
-            float s = 1f + Math.max(0f, Math.min(db, 10f)) / 40f;   // the microphone moves a little with his voice
-            mic.setScaleX(s);
-            mic.setScaleY(s);
+            // the microphone that moved with his voice is gone (her portrait fills the circle); the halo breathes
         }
 
         @Override
@@ -369,7 +385,7 @@ public class MainActivity extends Activity {
         }, "docruf-sprechen").start();
     }
 
-    /** One message in the circle; `thenIdle` = back to "Antworten" / "Frag Solita" a moment later. */
+    /** One message at the top; `thenIdle` = back to "Antworten" / "Frag Solita" a moment later. */
     private void show(String s, int color, boolean thenIdle) {
         label.setText(s);
         label.setTextColor(color);
@@ -385,7 +401,7 @@ public class MainActivity extends Activity {
         breathe(false);
         String w = idleWord();
         label.setText(w);
-        label.setTextColor(TEXT);
+        label.setTextColor(LAMBDA);   // gold like the name it replaced
         circleView.setContentDescription(w);
         if (!faceOn) {
             caption.animate().cancel();
@@ -400,9 +416,70 @@ public class MainActivity extends Activity {
      */
     private void mine(String text) {
         caption.animate().cancel();
+        words = null;   // the caption is his now: no karaoke, back to the top
+        if (scroller != null) scroller.cancel();
+        caption.scrollTo(0, 0);
         caption.setEllipsize(null);
         caption.setText(tail(text));
         caption.setAlpha(1f);
+    }
+
+    /**
+     * Karaoke under the circle (Doc, 08.11.2026): the word Solita says right now lights up as on docalvers.de, and
+     * a long call moves up so her word stays in the middle of the caption - nothing is cut off any more.
+     * Runs 20 times a second while DocCall is in front; the span is moved in place, so the text is not laid out anew.
+     */
+    private void karaoke() {
+        if (!faceOn) {
+            // she is done: no word stays lit while her sentence fades
+            if (lit >= 0 && caption.getText() instanceof Spannable) ((Spannable) caption.getText()).removeSpan(litSpan);
+            lit = -2;
+            return;
+        }
+        String s = Ansage.saying == null ? "" : Ansage.saying;
+        if (words == null || !words.text.equals(s)) {
+            words = new Karaoke(s);
+            lit = -2;
+            if (scroller != null) scroller.cancel();
+            caption.setText(s, TextView.BufferType.SPANNABLE);
+            caption.scrollTo(0, 0);
+        }
+        int i = -1;
+        android.media.MediaPlayer v = Ansage.voice;
+        if (v != null) {
+            try {
+                i = words.at(v.getCurrentPosition(), v.getDuration());
+            } catch (IllegalStateException e) {
+                i = -1;
+            }
+        } else if (Ansage.readAt >= 0) {
+            i = words.wordAt(Ansage.readAt);
+        }
+        if (i == lit) return;
+        lit = i;
+        if (!(caption.getText() instanceof Spannable)) return;
+        Spannable sp = (Spannable) caption.getText();
+        sp.removeSpan(litSpan);
+        if (i < 0 || i >= words.size()) return;   // before her first word and after her last: nothing lit
+        sp.setSpan(litSpan, words.from(i), words.to(i), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        follow(words.from(i));
+    }
+
+    /** Her word's line slides to the middle of the caption, as far as the text reaches (as on the web). */
+    private void follow(int offset) {
+        Layout l = caption.getLayout();
+        if (l == null) return;
+        int line = l.getLineForOffset(offset);
+        int box = caption.getHeight() - caption.getTotalPaddingTop() - caption.getTotalPaddingBottom();
+        int want = (l.getLineTop(line) + l.getLineBottom(line)) / 2 - box / 2;
+        want = Math.max(0, Math.min(want, l.getHeight() - box));
+        if (Math.abs(want - caption.getScrollY()) <= 2) return;
+        if (scroller != null) scroller.cancel();
+        scroller = ValueAnimator.ofInt(caption.getScrollY(), want);
+        scroller.setDuration(350);
+        scroller.setInterpolator(new DecelerateInterpolator());
+        scroller.addUpdateListener(a -> caption.scrollTo(0, (int) a.getAnimatedValue()));
+        scroller.start();
     }
 
     /** As much of the end of `text` as fits the caption, "… " in front when the start had to go. */
@@ -425,8 +502,6 @@ public class MainActivity extends Activity {
     private void breathe(boolean on) {
         if (pulse != null) pulse.cancel();
         pulse = null;
-        mic.setScaleX(1f);
-        mic.setScaleY(1f);
         if (!on) {
             halo.setAlpha(0f);
             return;
@@ -443,28 +518,34 @@ public class MainActivity extends Activity {
         pulse.start();
     }
 
-    /** Listening starts while she may still be on: her portrait makes room quickly. */
+    /** Listening starts while she may still be on: her sentence makes room quickly (her portrait stays). */
     private void hideFace() {
         faceOn = false;
-        face.animate().cancel();
-        face.animate().setStartDelay(0).alpha(0f).setDuration(300).withEndAction(() -> face.setVisibility(View.INVISIBLE)).start();
         caption.animate().cancel();
         caption.animate().setStartDelay(0).alpha(0f).setDuration(300).start();
     }
 
-    /** The title centred, the round button (its microphone shows the line), the small gear at the bottom. */
+    /** At the top "Frag Solita" (or what the circle is doing), the round button with her portrait, the small gear. */
     private View mainLayer() {
         LinearLayout col = new LinearLayout(this);
         col.setOrientation(LinearLayout.VERTICAL);
         col.setPadding(dp(16), dp(12), dp(16), dp(16));
 
+        // "Frag Solita" / "Antworten" / "Ich höre …" stand where the name "DocCall" stood; the name is gone
+        // (Doc, 08.11.2026). One line exactly as high as the old name, so the circle - and DocNote's Start button,
+        // which is placed by these measures - stays where it is; a longer message gets a smaller font instead.
         FrameLayout top = new FrameLayout(this);
-        TextView title = text("DocCall", 28, LAMBDA);
-        title.setOnClickListener(v -> Toast.makeText(this, word, Toast.LENGTH_SHORT).show());
-        FrameLayout.LayoutParams tp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        TextView probe = text("DocCall", 28, LAMBDA);
+        probe.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        label = text(idleWord(), 28, LAMBDA);
+        label.setGravity(Gravity.CENTER);
+        label.setMaxLines(1);
+        label.setAutoSizeTextTypeUniformWithConfiguration(14, 28, 1, TypedValue.COMPLEX_UNIT_SP);
+        label.setOnClickListener(v -> Toast.makeText(this, word, Toast.LENGTH_SHORT).show());
+        FrameLayout.LayoutParams tp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                probe.getMeasuredHeight(), Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         tp.topMargin = dp(28);
-        top.addView(title, tp);
+        top.addView(label, tp);
         col.addView(top, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         FrameLayout middle = new FrameLayout(this);
@@ -494,6 +575,9 @@ public class MainActivity extends Activity {
         caption.setGravity(Gravity.CENTER);
         caption.setMaxLines(8);
         caption.setEllipsize(TextUtils.TruncateAt.END);
+        // a long call slides up (karaoke): the lines leaving and coming fade softly instead of being cut in half
+        caption.setVerticalFadingEdgeEnabled(true);
+        caption.setFadingEdgeLength(dp(28));
         caption.setAlpha(0f);
         caption.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) ->
                 v.setTranslationY(lift + circleSize() / 2f + dp(52) + v.getHeight() / 2f));
@@ -528,7 +612,10 @@ public class MainActivity extends Activity {
         return col;
     }
 
-    /** The round button: microphone and "Antworten"; Solita's portrait lies on top while she speaks. */
+    /**
+     * The round button: Solita's portrait, always - not only while she speaks (Doc, 08.11.2026); the words that
+     * used to stand in it ("Frag Solita", "Ich höre …") are at the top now. A tap asks or answers her.
+     */
     private View circle() {
         FrameLayout c = new FrameLayout(this);
         ring = new GradientDrawable();
@@ -544,21 +631,6 @@ public class MainActivity extends Activity {
         c.setContentDescription("Antworten");
         c.setOnClickListener(v -> tap());
 
-        LinearLayout inner = new LinearLayout(this);
-        inner.setOrientation(LinearLayout.VERTICAL);
-        inner.setGravity(Gravity.CENTER);
-        inner.setPadding(dp(24), 0, dp(24), 0);
-        mic = icon(R.drawable.ic_mic, 44, LAMBDA, null);
-        inner.addView(mic, new LinearLayout.LayoutParams(dp(56), dp(56)));
-        label = text(idleWord(), 15, TEXT);
-        label.setGravity(Gravity.CENTER);
-        label.setMaxLines(3);   // only short words in the circle; sentences go under it
-        label.setEllipsize(TextUtils.TruncateAt.END);
-        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        sp.topMargin = dp(10);
-        inner.addView(label, sp);
-        c.addView(inner, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
-
         // her portrait, the first frame of the welcome video behind her avatar on docalvers.de
         face = new ImageView(this);
         face.setImageResource(R.drawable.solita);
@@ -569,8 +641,6 @@ public class MainActivity extends Activity {
         face.setBackground(round);
         face.setOutlineProvider(ViewOutlineProvider.BACKGROUND);
         face.setClipToOutline(true);
-        face.setAlpha(0f);
-        face.setVisibility(View.INVISIBLE);
         face.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         fp.setMargins(dp(4), dp(4), dp(4), dp(4));   // the golden ring stays around her
@@ -674,12 +744,10 @@ public class MainActivity extends Activity {
         super.onResume();
         visible = true;
         tick.post(refresh);
+        tick.post(sing);
         Ansage.listener = () -> face(true);
         if (Ansage.speaking == 0) {
             faceOn = false;
-            face.animate().cancel();
-            face.setAlpha(0f);
-            face.setVisibility(View.INVISIBLE);
             caption.animate().cancel();
             caption.setAlpha(0f);
         } else {
@@ -691,6 +759,7 @@ public class MainActivity extends Activity {
     protected void onPause() {
         visible = false;
         tick.removeCallbacks(refresh);
+        tick.removeCallbacks(sing);
         Ansage.listener = null;
         if (mode.equals("listening")) {
             // screen off or another app in front: stop listening, nothing half-heard goes out
@@ -723,38 +792,40 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
-    /** Solita appears with a small pop like her video window on docalvers.de and fades slowly when she is done. */
+    /**
+     * Her portrait is always in the circle (Doc, 08.11.2026); when she starts a call it gives a small pop, like
+     * her video window on docalvers.de, and her sentence appears under it - and fades slowly when she is done.
+     */
     private void face(boolean animate) {
         boolean on = Ansage.speaking > 0;
-        // while Doc speaks or his words go out the circle stays his; a call right after (his check mark still
-        // showing) gets her face at once (Doc, 07.11.2026: "dein hübsches Gesicht nicht gesehen")
+        // while Doc speaks or his words go out the caption stays his; a call right after (his check mark still
+        // showing) gets her sentence at once (Doc, 07.11.2026: "dein hübsches Gesicht nicht gesehen")
         if (on && (mode.equals("listening") || mode.equals("sending"))) return;
         if (on && mode.equals("shown")) {
             tick.removeCallbacks(backToIdle);
             mode = "idle";
             label.setText(idleWord());
-            label.setTextColor(TEXT);
+            label.setTextColor(LAMBDA);
         }
         if (on == faceOn) return;
         faceOn = on;
-        face.animate().cancel();
         caption.animate().cancel();
         if (on) {
-            face.setVisibility(View.VISIBLE);
-            face.setAlpha(0f);
-            face.setScaleX(0.4f);
-            face.setScaleY(0.4f);
-            face.animate().setStartDelay(0).alpha(1f).scaleX(1f).scaleY(1f).setDuration(animate ? FADE_IN_MS : 0)
-                    .setInterpolator(new OvershootInterpolator(1.1f)).start();
-            caption.setEllipsize(TextUtils.TruncateAt.END);
-            caption.setText(Ansage.saying);
+            if (animate) {
+                face.animate().cancel();
+                face.setScaleX(0.94f);
+                face.setScaleY(0.94f);
+                face.animate().setStartDelay(0).scaleX(1f).scaleY(1f).setDuration(FADE_IN_MS)
+                        .setInterpolator(new OvershootInterpolator(2.5f)).start();
+            }
+            caption.setEllipsize(null);   // a long call scrolls instead of being cut off
+            words = null;
+            karaoke();
             caption.animate().setStartDelay(0).alpha(1f).setDuration(animate ? FADE_IN_MS : 0).start();
         } else {
             long hold = animate ? HOLD_MS : 0;
-            face.animate().setStartDelay(hold).alpha(0f).setDuration(animate ? FADE_OUT_MS : 0)
-                    .setInterpolator(new DecelerateInterpolator())
-                    .withEndAction(() -> face.setVisibility(View.INVISIBLE)).start();
-            caption.animate().setStartDelay(hold).alpha(0f).setDuration(animate ? FADE_OUT_MS : 0).start();
+            caption.animate().setStartDelay(hold).alpha(0f).setDuration(animate ? FADE_OUT_MS : 0)
+                    .setInterpolator(new DecelerateInterpolator()).start();
         }
     }
 
@@ -765,14 +836,13 @@ public class MainActivity extends Activity {
         int color = s.equals("verbunden") ? PHI : s.equals("verbinde") ? LAMBDA : UPSILON;
         word = s.equals("verbunden") ? "Leitung steht" : s.equals("verbinde") ? "Verbinde …"
                 : s.equals("kein Kanal") ? "Kein Kanal eingebaut" : "Keine Leitung";
-        // the line: green dot under the circle while it stands; the microphone gold, grey without a line
+        // the line: green dot under the circle while it stands, nothing otherwise
         // (Doc, 07.11.2026, after trying a dot next to the title, in the gear's hub and a green microphone)
         boolean up = s.equals("verbunden");
         GradientDrawable d = new GradientDrawable();
         d.setShape(GradientDrawable.OVAL);
         d.setColor(up ? PHI : 0x00000000);
         dot.setBackground(d);
-        mic.setImageTintList(ColorStateList.valueOf(up ? LAMBDA : MUTED));
         lineWord.setText("● " + word);
         lineWord.setTextColor(color);
 

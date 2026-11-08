@@ -35,6 +35,9 @@ final class Ansage {
     static int speaking;
     static String saying = "";   // the sentence she speaks right now, shown under the circle
     static Runnable listener;
+    // for the karaoke under the circle (Karaoke): her MP3 while it plays, or where the phone's voice is
+    static MediaPlayer voice;
+    static int readAt = -1;
 
     private final Context app;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -145,6 +148,7 @@ final class Ansage {
             });
             mp.prepare();
             mp.start();
+            voice = mp;
         } catch (Exception e) {
             release(mp);
             read(text, done);
@@ -152,6 +156,7 @@ final class Ansage {
     }
 
     private void release(MediaPlayer p) {
+        if (voice == p) voice = null;
         p.release();
         playing.remove(p);
     }
@@ -170,12 +175,19 @@ final class Ansage {
             }
 
             @Override
+            public void onRangeStart(String u, int start, int end, int frame) {
+                main.post(() -> readAt = start);   // the word the phone's voice says now
+            }
+
+            @Override
             public void onDone(String u) {
+                main.post(() -> readAt = -1);
                 if (done != null) main.post(done);
             }
 
             @Override
             public void onError(String u) {
+                main.post(() -> readAt = -1);
                 if (done != null) main.post(done);
             }
         });
