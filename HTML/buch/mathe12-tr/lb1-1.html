@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik 12 · Bölüm 1.1 · Koşullu olasılık | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Ağaç diyagramları, dört gözlü tablolar, bağımsız olaylar. Bölüm 1.1, etkileşimli ders kitabı Matematik · Berufliches Gymnasium 12: açıklamalar, örnekler, üç düzeyde alıştırmalar, öz değerlendirme testleri ve denemek için laboratuvarlar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATİK · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Bölüm"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Bölümün içeriği">
+        <p class="b-toc-title">BÖLÜM 1.1 · ÖĞRENME ALANI 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Giriş" data-toc-k="G" data-toc-short="Giriş" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">BÖLÜM 1.1 · ÖĞRENME ALANI 1 · AĞUSTOS · EYLÜL</p>
+            <h1>Koşullu olasılık</h1>
+            <p class="b-hero-lead">Bir tıbbi test pozitif çıktı. Hastalık ne kadar kesin? Otobüsle gelenler daha sık geç kalıyor. Bu bir tesadüf mü?
+                <b>Bir şey bildiğin</b> anda olasılıklar değişir. Bu bölümde bu bilgiyle hesap yapacak ve iki olayın ne zaman gerçekten
+                <b>birbiriyle hiçbir ilgisi olmadığını</b> sınayacaksın.</p>
+            <div class="b-chips"><span class="b-chip">8 DERS SAATİ</span><span class="b-chip">2 KONU</span><span class="b-chip">11. SINIFIN DEVAMI</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">BU BÖLÜMDE ÖĞRENECEKLERİN</div>
+            <div class="b-text"><ul>
+                <li>ağaç diyagramlarından ve dört gözlü tablolardan <b>koşullu olasılıkları</b> $P(A \,|\, B)$ bulmak</li>
+                <li>ağaçları <b>tersine çevirmek</b>: $P(B \,|\, A)$'dan $P(A \,|\, B)$'ye</li>
+                <li><b>bağımsızlığı</b> sınamak ve onu <b>ayrık olmaktan</b> ayırt etmek</li>
+                <li>sonuçları gerçek yaşam bağlamlarında, örneğin tıbbi testlerde <b>yorumlamak</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">ÖN KONTROL: BUNLARI BİLİYOR MUSUN?</div>
+            <div class="b-q" data-ans="1/36" data-tol="0.0005" data-ph="P ="><p class="b-q-text">İki zar atılıyor. İki altı gelme olasılığı nedir?</p><div class="b-sol"><p>Dal kuralı: $\tfrac16 \cdot \tfrac16 = \tfrac{1}{36}$</p></div></div>
+            <div class="b-q" data-ans="0,65" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}35$. $P(A')$ kaçtır?</p><div class="b-sol"><p>$1 - 0{,}35 = 0{,}65$</p></div></div>
+            <div class="b-q" data-ans="3/10" data-tol="0.0005" data-ph="P ="><p class="b-q-text">İçinde 3 kırmızı ve 2 mavi top bulunan bir torbadan geri koymadan iki top çekiliyor. İkisinin de kırmızı olma olasılığı nedir?</p><div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p></div></div>
+            <div class="b-q" data-ans="0,6" data-tol="0.0001" data-ph="Oran"><p class="b-q-text">Ankete katılan 200 kişiden 120'sinde bir özellik var. Bu oran ondalık sayı olarak kaçtır?</p><div class="b-sol"><p>$\tfrac{120}{200} = 0{,}6$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Keşifler" data-toc-k="K" data-toc-short="Keşifler">
+    <div class="b-band"><span class="b-band-tag">KEŞİFLER</span><span class="b-band-sub">BAŞLANGIÇ İÇİN · GRUPÇA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">POZİTİF TEST</div>
+            <div class="b-text"><p>Bir hastalık nüfusun %2'sinde görülüyor. Bir test hastaların %90'ını tanıyor ama sağlıklıların %5'inde de pozitif sonuç veriyor.</p>
+                <ul><li>Tahmin edin: Testi pozitif çıkan biri gerçekten ne olasılıkla hastadır?</li><li>10.000 kişiyle hesaplayarak kontrol edin. Sonuç sizi şaşırttı mı?</li></ul></div>
+            <span class="b-pair">→ Konu 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">OTOBÜS VE GECİKME</div>
+            <div class="b-text"><p>Sınıfınızda sorun: Kim otobüsle geliyor? Kim bu hafta en az bir kez geç kaldı?</p>
+                <ul><li>Cevapları bir dört gözlü tabloya yazın.</li><li>Otobüsle gelenler ötekilerden daha mı sık geç kalıyor? Bunu sayılarla nasıl gerekçelendirebilirsiniz?</li></ul></div>
+            <span class="b-pair">→ Konu 1 ve 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">ZAR BİR ŞEY FARK EDER Mİ?</div>
+            <div class="b-text"><p>İki zar atılıyor. $A$: Birinci zar altı gösteriyor. $B$: Üst yüzlerin toplamı 7.</p>
+                <ul><li>$A$'nın gerçekleştiğini biliyorsanız $B$ daha olası hâle gelir mi?</li><li>Toplam 7 yerine 8 olsaydı?</li></ul></div>
+            <span class="b-pair">→ Konu 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Koşullu olasılık" data-toc-k="1" data-toc-short="1 Koşullu">
+    <div class="b-band"><span class="b-band-tag">KONU 1</span><span class="b-band-sub">4 DERS SAATİ</span></div>
+    <h2><span class="b-no">1</span>Bir koşul altında olasılık</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Bir okulda 250 öğrenciye soruldu: Okula otobüsle mi geliyorsun ($O$)? Bu hafta geç kaldın mı ($G$)?</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:420px">
+                    <tr><th></th><th>$G$</th><th>$G'$</th><th>Toplam</th></tr>
+                    <tr><th>$O$</th><td>30</td><td>120</td><td>150</td></tr>
+                    <tr><th>$O'$</th><td>10</td><td>90</td><td>100</td></tr>
+                    <tr><th>Toplam</th><td>40</td><td>210</td><td>250</td></tr></table></div></div></div>
+            <div class="b-text">
+                <p>Toplamda $\tfrac{40}{250} = \%16$ geç kaldı. <b>Yalnızca otobüsle gelenlere</b> bakılırsa bu oran $\tfrac{30}{150} = \%20$,
+                    ötekilerde ise yalnızca $\tfrac{10}{100} = \%10$. “Otobüsle geliyor” koşulu, temel kümeyi 150 kişiye küçültür.</p>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · KOŞULLU OLASILIK</div>
+                <div class="b-text">
+                    <p>$B$ <b>koşulu altında</b> ($P(B) > 0$ olmak üzere) $A$'nın olasılığı
+                        $$P(A \,|\, B) = \frac{P(A \cap B)}{P(B)}$$ olur.</p>
+                    <p>Eşitlik düzenlenince <b>çarpma kuralı</b> elde edilir: $P(A \cap B) = P(B) \cdot P(A \,|\, B)$. Ağaç diyagramının ikinci aşamasında tam olarak bu koşullu olasılıklar yazar.</p>
+                    <p>Dikkat: $P(A \,|\, B)$ ile $P(B \,|\, A)$ genel olarak <b>farklıdır</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Yazılış:</b> $P(A \,|\, B)$, “$B$ olduğuna göre $A$'nın olasılığı” diye okunur. Almanca kitaplarda bunun yerine $P_B(A)$ yazımı da görülür.</p>
+            <p class="b-note"><b>Ters ağaç:</b> Bir dört gözlü tablodan iki ağaç çizebilirsin: biri önce $O$ ile, biri önce $G$ ile. İkisi de aynı dört kesişim olasılığını anlatır.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · HIZLI TEST</div>
+        <p class="b-help" style="margin:0 0 12px">Hastalığın ne kadar yaygın olduğunu ve testin ne kadar iyi çalıştığını ayarla. Testi pozitif çıkanlardan kaçının gerçekten hasta olduğunu izle.</p>
+        <div data-widget="schnelltest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 1 · OTOBÜS VE GECİKME</div>
+            <div class="b-text"><p>Yukarıdaki tabloyla $P(G \,|\, O)$ ve $P(O \,|\, G)$ olasılıklarını bul. İki sayıyı da yorumla.</p></div>
+            <div class="b-sol"><p>$P(G \,|\, O) = \tfrac{30}{150} = 0{,}2$: Otobüsle gelenlerin %20'si geç kaldı.</p>
+                <p>$P(O \,|\, G) = \tfrac{30}{40} = 0{,}75$: Geç kalanların %75'i otobüsle geldi. <span class="b-res">İki farklı soru, iki farklı cevap.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 2 · POZİTİF TEST</div>
+            <div class="b-text"><p>İnsanların %2'si hasta ($H$). Test hastaların %90'ını tanıyor ve sağlıklıların %5'inde yanlışlıkla pozitif çıkıyor. $P(H \,|\, T^+)$ kaçtır?</p></div>
+            <div class="b-sol"><p>$P(H \cap T^+) = 0{,}02 \cdot 0{,}9 = 0{,}018$ ve $P(H' \cap T^+) = 0{,}98 \cdot 0{,}05 = 0{,}049$, yani $P(T^+) = 0{,}067$.</p>
+                <p>$P(H \,|\, T^+) = \dfrac{0{,}018}{0{,}067} \approx 0{,}269$. <span class="b-res">Testi pozitif çıkanların ancak dörtte birinden biraz fazlası hastadır.</span> Nedeni: Sağlıklıların sayısı hastalardan çok daha fazladır.</p></div>
+        </div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Ankete katılan 300 kişiden 120'si gözlük takıyor ($Z$). Gözlük takanlardan 45'i ve gözlük takmayanlardan 54'ü her gün kitap okuyor ($K$). Dört gözlü tabloyu oluştur ve $P(K)$, $P(K \,|\, Z)$ ile $P(Z \,|\, K)$ olasılıklarını hesapla.</p></div>
+            <div class="b-sol"><p>$Z$: 45 | 75 | 120 · $Z'$: 54 | 126 | 180 · Toplam: 99 | 201 | 300.</p>
+                <p>$P(K) = \tfrac{99}{300} = 0{,}33$, $P(K \,|\, Z) = \tfrac{45}{120} = 0{,}375$, $P(Z \,|\, K) = \tfrac{45}{99} \approx 0{,}455$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Ağaçta $P(A) = 0{,}6$, $P(B \,|\, A) = 0{,}3$ ve $P(B \,|\, A') = 0{,}5$ veriliyor. $P(B)$ ve $P(A \,|\, B)$ olasılıklarını hesapla.</p></div>
+            <div class="b-sol"><p>$P(B) = 0{,}6 \cdot 0{,}3 + 0{,}4 \cdot 0{,}5 = 0{,}18 + 0{,}2 = 0{,}38$, $P(A \,|\, B) = \tfrac{0{,}18}{0{,}38} \approx 0{,}474$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>M1 makinesi tüm parçaların %70'ini üretiyor, bunların %2'si kusurlu. M2 makinesi %30'unu üretiyor, bunların %5'i kusurlu. Bir parça kusurlu çıkıyor. Bu parça hangi olasılıkla M2'den gelmiştir?</p></div>
+            <div class="b-sol"><p>$P(K) = 0{,}7 \cdot 0{,}02 + 0{,}3 \cdot 0{,}05 = 0{,}014 + 0{,}015 = 0{,}029$, $P(M_2 \,|\, K) = \tfrac{0{,}015}{0{,}029} \approx 0{,}517$.
+                M2 daha az üretmesine rağmen kusurlu parçaların yarısından fazlası oradan gelir.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$P(A) = 0{,}4$, $P(B \,|\, A) = 0{,}25$ ve $P(B) = 0{,}3$ veriliyor. Dört gözlü tabloyu doldur ve ters ağacı (önce $B$) çiz. $P(A \,|\, B)$ ve $P(A \,|\, B')$ kaçtır?</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}1$, $P(A \cap B') = 0{,}3$, $P(A' \cap B) = 0{,}2$, $P(A' \cap B') = 0{,}4$.</p>
+                <p>$P(A \,|\, B) = \tfrac{0{,}1}{0{,}3} = \tfrac13$, $P(A \,|\, B') = \tfrac{0{,}3}{0{,}7} \approx 0{,}429$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Örnek 2'ye göre testi pozitif çıkan biri yalnızca yaklaşık %26,9 olasılıkla hastadır. Bu kişi aynı türden ikinci, bağımsız bir test yaptırıyor ve test yine pozitif çıkıyor. Şimdi hasta olma olasılığı nedir?</p></div>
+            <div class="b-hint"><p>0,269'u $H$ için yeni başlangıç olasılığı olarak al ve Örnek 2'deki gibi hesapla.</p></div>
+            <div class="b-sol"><p>$\dfrac{0{,}269 \cdot 0{,}9}{0{,}269 \cdot 0{,}9 + 0{,}731 \cdot 0{,}05} = \dfrac{0{,}2421}{0{,}2421 + 0{,}03655} \approx 0{,}869$.
+                <span class="b-res">İki pozitif testten sonra yaklaşık %87.</span> Bu yüzden pozitif bir hızlı test çoğunlukla ikinci bir testle doğrulanır.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="0,6" data-tol="0.0001" data-ph="P ="><p class="b-q-text">50 kişiden 20'sinin köpeği var. Köpek sahiplerinden 12'si her gün koşuyor. Bir köpek sahibinin her gün koşma olasılığı nedir?</p><div class="b-sol"><p>$\tfrac{12}{20} = 0{,}6$</p></div></div>
+        <div class="b-q" data-ans="0,4" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}5$ ve $P(A \cap B) = 0{,}2$. $P(B \,|\, A)$ kaçtır?</p><div class="b-sol"><p>$\tfrac{0{,}2}{0{,}5} = 0{,}4$</p></div></div>
+        <div class="b-q" data-ans="0,29" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}3$, $P(B \,|\, A) = 0{,}5$, $P(B \,|\, A') = 0{,}2$. $P(B)$ kaçtır?</p><div class="b-sol"><p>$0{,}3 \cdot 0{,}5 + 0{,}7 \cdot 0{,}2 = 0{,}15 + 0{,}14 = 0{,}29$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Bağımsız olaylar" data-toc-k="2" data-toc-short="2 Bağımsız">
+    <div class="b-band"><span class="b-band-tag">KONU 2</span><span class="b-band-sub">4 DERS SAATİ</span></div>
+    <h2><span class="b-no">2</span>Bağımsız olaylar</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Bir zar atılıyor. $A$: çift sayı. $B$: en çok 2. En çok 2 geldiğini bilirsen çift sayı gelme şansı değişir mi?</p></div></div>
+            <div class="b-text"><p>$P(A) = \tfrac12$. $B = \{1, 2\}$ koşulu altında yalnızca 2 çifttir, yani $P(A \,|\, B) = \tfrac12$. $B$ hakkındaki bilgi $A$ için hiçbir şeyi değiştirmez.
+                Böyle olaylara <b>bağımsız</b> denir. Otobüs ve gecikmede durum farklıydı: $P(G \,|\, O) = 0{,}2$, ama $P(G) = 0{,}16$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · BAĞIMSIZLIK</div>
+                <div class="b-text">
+                    <p>$$P(A \cap B) = P(A) \cdot P(B)$$ eşitliği sağlanıyorsa $A$ ve $B$ olaylarına <b>bağımsız</b> denir.</p>
+                    <p>$P(B) > 0$ için bu, $P(A \,|\, B) = P(A)$ ile denktir. Aksi hâlde $A$ ve $B$ <b>bağımlıdır</b>.</p>
+                    <p><b>Ayrık</b> başka bir şey demektir: $A \cap B = \emptyset$, olaylar birlikte gerçekleşemez. $P(A) > 0$ ve $P(B) > 0$ olan ayrık olaylar her zaman <b>bağımlıdır</b>.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Ağaçta:</b> İkinci aşamanın iki dalında da $B$ için aynı olasılık yazıyorsa $A$ ve $B$ bağımsızdır: $P(B \,|\, A) = P(B \,|\, A')$.</p>
+            <p class="b-note"><b>Bağımlı, neden-sonuç demek değildir:</b> Bağımlılık bir ilişkiyi gösterir, ama nedenin ne olduğunu göstermez.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · BAĞIMSIZ MI, DEĞİL Mİ?</div>
+        <p class="b-help" style="margin:0 0 12px">$P(A)$, $P(B)$ ve $P(A \cap B)$ değerlerini değiştir. Birim karede sol sütun $B$, sağ sütun $B'$. Altın renkli kısım her sütunda $A$'nın payıdır.</p>
+        <div data-widget="unabhaengig"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 3 · OTOBÜS VE GECİKME</div>
+            <div class="b-text"><p>Konu 1'deki $O$ (otobüs) ve $G$ (geç kaldı) olayları bağımsız mıdır?</p></div>
+            <div class="b-sol"><p>$P(O) \cdot P(G) = 0{,}6 \cdot 0{,}16 = 0{,}096$, ama $P(O \cap G) = \tfrac{30}{250} = 0{,}12$. <span class="b-res">Bağımlı.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 4 · TOPLAM 7</div>
+            <div class="b-text"><p>İki zar. $A$: Birinci zar altı gösteriyor. $B$: Üst yüzlerin toplamı 7. Bağımsız mı?</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac16$, $P(B) = \tfrac{6}{36} = \tfrac16$, $P(A \cap B) = P(\{(6, 1)\}) = \tfrac{1}{36} = \tfrac16 \cdot \tfrac16$. <span class="b-res">Bağımsız.</span>
+                Birinci zar ne gösterirse göstersin: İkinci zarın tam bir sayısı toplamı 7'ye tamamlar.</p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ZAR OYUNU</span><span class="b-lab-what">Ağaç diyagramları ve dal kuralları</span></span></a>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$P(A) = 0{,}4$ ve $P(B) = 0{,}5$ veriliyor. a) $P(A \cap B) = 0{,}2$ &nbsp; b) $P(A \cap B) = 0{,}25$ ise $A$ ve $B$ bağımsız mıdır?</p></div>
+            <div class="b-sol"><p>$P(A) \cdot P(B) = 0{,}2$. a) bağımsız &nbsp; b) bağımlı</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bir zar: $A$ = “1”, $B$ = “6”. Olaylar ayrık mıdır? Bağımsız mıdır?</p></div>
+            <div class="b-sol"><p>Ayrıktır, çünkü ikisi aynı anda olamaz. $P(A \cap B) = 0 \neq \tfrac16 \cdot \tfrac16$, yani bağımlıdır: 6 geldiğini bilen, kesinlikle 1 gelmediğini de bilir.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$A$ ve $B$ bağımsız, $P(A) = 0{,}3$ ve $P(B) = 0{,}6$. Dört gözlü tabloyu olasılıklarla doldur.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}18$, $P(A \cap B') = 0{,}12$, $P(A' \cap B) = 0{,}42$, $P(A' \cap B') = 0{,}28$. Her göz, kenar değerlerinin çarpımıdır.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>İki zar: $A$ = “toplam 8”, $B$ = “birinci zar 6 gösteriyor”. Bağımsızlığı sına ve Örnek 4 ile karşılaştır.</p></div>
+            <div class="b-sol"><p>$P(A) = \tfrac{5}{36}$, $P(B) = \tfrac16$, $P(A \cap B) = P(\{(6, 2)\}) = \tfrac{1}{36} = \tfrac{6}{216}$, ama $P(A) \cdot P(B) = \tfrac{5}{216}$.
+                Bağımlı: Birinci atışta 1 gelirse toplam 8 imkânsızdır, 6 gelirse değildir.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>İki pompa birbirinden bağımsız olarak, her biri %5 olasılıkla arızalanıyor. a) bir pompa yetiyorsa, b) iki pompanın da çalışması gerekiyorsa sistemin devre dışı kalma olasılığı nedir? Bağımsızlık varsayımı burada neden tartışmalıdır?</p></div>
+            <div class="b-sol"><p>a) ikisi de arızalanır: $0{,}05^2 = 0{,}0025$ &nbsp; b) en az biri arızalanır: $1 - 0{,}95^2 = 0{,}0975$.</p>
+                <p>Ortak bir neden (elektrik kesintisi, sel) çoğu zaman ikisini birden durdurur. O zaman arızalar bağımlıdır ve a) çok fazla iyimserdir.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="0,2" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$ ve $B$ bağımsız, $P(A) = 0{,}5$, $P(B) = 0{,}4$. $P(A \cap B)$ kaçtır?</p><div class="b-sol"><p>$0{,}5 \cdot 0{,}4 = 0{,}2$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$P(A) = 0{,}2$, $P(B) = 0{,}3$ ve $P(A \cap B) = 0{,}1$. Bu durumda $A$ ve $B$ …</p>
+            <div class="b-mc"><button>bağımsızdır</button><button>bağımlıdır</button><button>ayrıktır</button></div>
+            <div class="b-sol"><p>$0{,}2 \cdot 0{,}3 = 0{,}06 \neq 0{,}1$</p></div></div>
+        <div class="b-q" data-ans="0,05" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$ ve $B$ bağımsız, $P(A) = 0{,}25$ ve $P(B) = 0{,}8$. $P(A \cap B')$ kaçtır?</p><div class="b-sol"><p>$A$ ve $B'$ de bağımsızdır: $0{,}25 \cdot 0{,}2 = 0{,}05$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Tekrar Et · Derinleştir · İlişkilendir" data-toc-k="A" data-toc-short="Alıştırma">
+    <div class="b-band"><span class="b-band-tag">TEKRAR ET · DERİNLEŞTİR · İLİŞKİLENDİR</span></div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">ANTRENMAN · DÖRT GÖZLÜ TABLOLARI TAMAMLAMAK</div>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>120 öğrencilik bir sınıf düzeyinde 48 öğrenci bilişim dersi alıyor ($B$), bunların 30'u tiyatro kulübünde de ($T$). Tiyatro kulübünde toplam 50 öğrenci var. $P(T \,|\, B)$ ve $P(B \,|\, T)$ olasılıklarını hesapla. $B$ ve $T$ bağımsız mıdır?</p></div>
+            <div class="b-sol"><p>$P(T \,|\, B) = \tfrac{30}{48} = 0{,}625$, $P(B \,|\, T) = \tfrac{30}{50} = 0{,}6$. $P(B) \cdot P(T) = 0{,}4 \cdot \tfrac{5}{12} \approx 0{,}167$, ama $P(B \cap T) = 0{,}25$: bağımlı.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Tüm e-postaların %40'ı spam. “Kazandınız” sözcüğü spam e-postaların %30'unda, ötekilerin ise yalnızca %2'sinde geçiyor. Bir e-postada “Kazandınız” geçiyor. Spam olma olasılığı nedir?</p></div>
+            <div class="b-sol"><p>$\dfrac{0{,}4 \cdot 0{,}3}{0{,}4 \cdot 0{,}3 + 0{,}6 \cdot 0{,}02} = \dfrac{0{,}12}{0{,}132} \approx 0{,}909$. Basit spam filtreleri böyle çalışır.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>11. sınıfla ilişkilendir:</b> Keçi probleminde 1. kapıyı seçiyorsun, sunucu arkasında keçi olan 3. kapıyı açıyor. Kapı değiştirmenin neden $\tfrac23$ olasılıkla kazandırdığını koşullu olasılıklarla gerekçelendir.</p></div>
+            <div class="b-sol"><p>Otomobil 2. kapının arkasındaysa (olasılık $\tfrac13$), sunucu 3. kapıyı açmak zorundadır. 1. kapının arkasındaysa ($\tfrac13$), 3. kapıyı yalnızca $\tfrac12$ olasılıkla açar.
+                $P(\text{otomobil 2'de} \,|\, \text{3 açıldı}) = \dfrac{\frac13 \cdot 1}{\frac13 \cdot 1 + \frac13 \cdot \frac12} = \tfrac23$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Kanıtla: $A$ ve $B$ bağımsızsa $A$ ve $B'$ de bağımsızdır.</p></div>
+            <div class="b-sol"><p>$P(A \cap B') = P(A) - P(A \cap B) = P(A) - P(A) \cdot P(B) = P(A) \cdot (1 - P(B)) = P(A) \cdot P(B')$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Gezinti: Sally Clark davası" data-toc-k="X" data-toc-short="Sally Clark">
+    <div class="b-band"><span class="b-band-tag">GEZİNTİ</span><span class="b-band-sub">BAĞIMSIZLIK YANLIŞ VARSAYILDIĞINDA</span></div>
+    <h2>Sally Clark davası</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>1999'da İngiltere'de avukat Sally Clark, iki oğlu doğumdan kısa süre sonra öldüğü için mahkûm edildi. Bilirkişi olarak dinlenen bir çocuk doktoru,
+                onunki gibi bir ailede ani bebek ölümü olasılığının yaklaşık 8.543'te 1 olduğunu söyledi. İki ölüm için bu sayıyı kendisiyle çarptı:
+                $\left(\tfrac{1}{8543}\right)^2 \approx \tfrac{1}{73.000.000}$.</p>
+            <p>Çarpmak, iki ölümün <b>bağımsız</b> olmasını gerektirir. Oysa ortak genetik ya da ev ortamından kaynaklanan nedenler ikinci bir ölümü
+                belirgin biçimde daha olası kılar. Buna ikinci bir hata eklendi: Masumiyet varsayımı altında verilerin olasılığı küçük olsa bile bu,
+                masumiyetin olasılığı değildir. $P(\text{veriler} \,|\, \text{masum})$ ile $P(\text{masum} \,|\, \text{veriler})$, tıpkı $P(G \,|\, O)$ ile $P(O \,|\, G)$ gibi farklı şeylerdir.</p>
+            <p>Royal Statistical Society 2001'de bu hatalara kamuoyu önünde dikkat çekti. 2003'te karar bozuldu.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Kaynaklar:</b> Royal Statistical Society, Sally Clark davası hakkında 23 Ekim 2001 tarihli açıklama; Court of Appeal, R v Clark [2003] EWCA Crim 1020.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Özet" data-toc-k="Ö" data-toc-short="Özet">
+    <div class="b-band"><span class="b-band-tag">ÖZET</span><span class="b-band-sub">EN ÖNEMLİLER BİR BAKIŞTA</span></div>
+    <div class="b-rueck"><div><h4>KOŞULLU OLASILIK</h4><p>$P(A \,|\, B) = \dfrac{P(A \cap B)}{P(B)}$, temel küme $B$'ye küçülür.</p></div>
+        <div><p>Otobüs: $P(G \,|\, O) = \tfrac{30}{150} = 0{,}2$ · $P(O \,|\, G) = \tfrac{30}{40} = 0{,}75$</p></div></div>
+    <div class="b-rueck"><div><h4>ÇARPMA KURALI VE AĞAÇ</h4><p>$P(A \cap B) = P(A) \cdot P(B \,|\, A)$. Ağacın ikinci aşaması: koşullu olasılıklar.</p></div>
+        <div><p>Aynı dört gözlü tablodan ters ağaç</p></div></div>
+    <div class="b-rueck"><div><h4>BAĞIMSIZLIK</h4><p>$P(A \cap B) = P(A) \cdot P(B)$, buna denk olarak $P(A \,|\, B) = P(A)$.</p></div>
+        <div><p>Birinci zar 6 ve toplam 7: bağımsız</p></div></div>
+    <div class="b-rueck"><div><h4>AYRIK ≠ BAĞIMSIZ</h4><p>$A \cap B = \emptyset$. Olasılıklar pozitifse her zaman bağımlı.</p></div>
+        <div><p>Bir zarda “1” ve “6”</p></div></div>
+    <div class="b-rueck"><div><h4>YORUMLAMAK</h4><p>Nadir hastalıklarda pozitif testler çoğu zaman yanlış pozitiftir.</p></div>
+        <div><p>%2 hasta, %90 / %5: $P(H \,|\, T^+) \approx \%27$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">İKİ TUR · ANINDA GERİ BİLDİRİM</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">TUR 1</div>
+            <div class="b-q" data-ans="0,3" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A \cap B) = 0{,}12$ ve $P(B) = 0{,}4$. $P(A \,|\, B)$ kaçtır?</p><div class="b-sol"><p>$\tfrac{0{,}12}{0{,}4} = 0{,}3$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$A$ ve $B$ ayrık, ikisinin de olasılığı pozitif. Bu durumda olaylar …</p>
+                <div class="b-mc"><button>bağımsızdır</button><button>bağımlıdır</button><button>sayılara bağlıdır</button></div>
+                <div class="b-sol"><p>$P(A \cap B) = 0$, ama $P(A) \cdot P(B) > 0$.</p></div></div>
+            <div class="b-q" data-ans="0,75" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$P(A) = 0{,}5$, $P(B \,|\, A) = 0{,}6$, $P(B \,|\, A') = 0{,}2$. $P(A \,|\, B)$ kaçtır?</p><div class="b-sol"><p>$P(B) = 0{,}3 + 0{,}1 = 0{,}4$, $P(A \,|\, B) = \tfrac{0{,}3}{0{,}4} = 0{,}75$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">TUR 2</div>
+            <div class="b-q" data-ans="0,8" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$A$, $B$ bağımsız, $P(A) = 0{,}6$, $P(B) = 0{,}5$. $P(A \cup B)$ kaçtır?</p><div class="b-sol"><p>$0{,}6 + 0{,}5 - 0{,}6 \cdot 0{,}5 = 0{,}8$</p></div></div>
+            <div class="b-q" data-ans="0,4706" data-tol="0.005" data-ph="P ="><p class="b-q-text">İnsanların %10'u hasta. Bir test hastaların %80'ini tanıyor ve sağlıklıların %10'unda yanlış pozitif çıkıyor. $P(H \,|\, T^+)$ kaçtır?</p><div class="b-sol"><p>$\dfrac{0{,}08}{0{,}08 + 0{,}09} = \tfrac{8}{17} \approx 0{,}471$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">$P(A) = 0{,}3$ ve $P(A \,|\, B) = 0{,}3$. Bu durumda $A$ ve $B$ …</p>
+                <div class="b-mc"><button>bağımsızdır</button><button>bağımlıdır</button><button>ayrıktır</button></div>
+                <div class="b-sol"><p>$B$ koşulu $A$'nın olasılığını değiştirmiyor.</p></div></div>
+        </div>
+    </div>
+    <h3>ÇEVRİMİÇİ DAHA FAZLA ALIŞTIRMA (ALMANCA)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DÖRT GÖZLÜ TABLOLAR</span><span class="b-lab-what">Koşullu olasılık</span></span></a>
+        <a class="b-lab" href="../../mathetest11-baumdiagramme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">AĞAÇ DİYAGRAMLARI</span><span class="b-lab-what">Çok aşamalı rastgele deneyler</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematik, Berufliches Gymnasium 12. sınıf · Saksonya Berufliches Gymnasium matematik öğretim programına göre öğrenme alanı 1.</p>
+    <p>Tüm metinler, alıştırmalar ve şekiller özgün içeriktir.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-tr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-tr/stochastik.js"></script>
+</body>
+</html>

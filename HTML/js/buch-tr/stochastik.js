@@ -45,6 +45,9 @@ window.BuchTR && BuchTR.add('stochastik', {
         'Strategie': 'Strateji', 'Spiele': 'Oyun', 'Autos': 'Otomobil', 'Gewinnquote': 'Kazanma oranı',
         'du: bleiben': 'sen: kal', 'du: wechseln': 'sen: değiştir', 'Rechner: bleiben': 'bilgisayar: kal', 'Rechner: wechseln': 'bilgisayar: değiştir',
         // book tr-2 mathe12-tr:
+        // unabhaengig (lb1-1): unabhängig = bağımsız, abhängig = bağımlı, unvereinbar = ayrık (tr0)
+        'Unabhängig machen': 'Bağımsız yap', 'Unvereinbar machen': 'Ayrık yap',
+        'Einheitsquadrat: Anteil von A in B und in nicht B': "Birim kare: A'nın B içindeki ve B' içindeki payı",
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -67,6 +70,12 @@ window.BuchTR && BuchTR.add('stochastik', {
         ['TÜR', 'KAPI'], ['Tür', 'Kapı'], ['Gewonnen – das Auto! ', 'Kazandın – otomobil! '], ['Leider eine Ziege. ', 'Maalesef bir keçi. '],
         ['Du hast gewechselt.', 'Kapını değiştirdin.'], ['Du bist geblieben.', 'Kapında kaldın.'],
         // book tr-2 mathe12-tr:
+        // unabhaengig
+        ['$ und $', '$ ve $'],
+        ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.',
+            '<b>Bağımsız:</b> $B$ gerçekleşse de gerçekleşmese de $A$\'nın payı aynı kalır. Karede sınır iki sütunda da aynı yüksekliktedir.'],
+        ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.',
+            '<b>Ayrık</b> ($A \\cap B = \\emptyset$) ve dolayısıyla <b>bağımlı</b>: $B$ gerçekleşirse $A$ artık gerçekleşemez.'],
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -92,5 +101,13 @@ window.BuchTR && BuchTR.add('stochastik', {
             (m, d) => 'Sunucu otomobilin nerede olduğunu biliyor ve ' + d + '. kapıyı açıyor: bir keçi. Kapında mı kalırsın, değiştirir misin?'],
         [/Bei Tür (\d) bleiben/g, (m, d) => d + '. kapıda kal'], [/Zu Tür (\d) wechseln/g, (m, d) => d + '. kapıya geç'],
         // book tr-2 mathe12-tr:
+        // unabhaengig: "B verändert die Wahrscheinlichkeit von A nach oben" → "B, A'nın olasılığını artırır"
+        [/<b>Abhängig:<\/b> \$B\$ verändert die Wahrscheinlichkeit von \$A\$ nach (oben|unten)\./g,
+            (m, d) => '<b>Bağımlı:</b> $B$, $A$\'nın olasılığını ' + (d === 'oben' ? 'artırır' : 'azaltır') + '.'],
+        // unabhaengig: the column label B̄ in the square → B' (as the complement rule of tr-1 does in TeX)
+        [/B\u0304/g, "B'"],
+        // conditional probability the Turkish way (sozluk.md): P_B(A) → P(A | B), also P_{B'}(A) after the complement rule
+        // of tr-1; a plain bar with thin spaces, never \mid
+        [/P_\{([^{}]+)\}\(([^()]+)\)/g, 'P($2 \\,|\\, $1)'], [/P_([A-Z])\(([^()]+)\)/g, 'P($2 \\,|\\, $1)'],
     ]
 });
