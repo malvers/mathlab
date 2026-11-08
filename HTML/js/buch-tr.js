@@ -16,12 +16,13 @@
  *   PHRASE  German words and sentence pieces inside longer strings, exactly as the widget source writes them
  *   RULE    patterns that change the word order or the notation; order: the rules here, then the rules of the module
  *           files in load order, then the header rules here
- * Numbers are NOT converted: Turkish writes them like German, with a decimal comma (Buch.dot is false). Every rule needs
+ * Numbers are NOT converted: Turkish writes them like German, with a decimal comma (Buch.dot is false), only the
+ * percent sign moves in front of the number (POST below). Every rule needs
  * "\mid" or ";\," around the numbers - an SVG path "88,4 66,2" or "88.4,664.6" can never match (tools/buch-es/auftrag.md,
  * section 5). Canvas text keeps its decimal comma.
- * TODO tr: the point and interval notation of Turkish schools is still the provisional one of js/buch-pt.js
- *   (points (1, 2), with a decimal comma (1,5; 2); intervals [1, 2], ]1, 2[; the set bar stays) - decide it and change
- *   RULE below (Turkish schools write open intervals with round brackets, (1, 2) and [1, 2), and points (1, 2); decide what the BGY 11 pupils should see).
+ * Turkish school notation (tools/buch-tr/sozluk.md): points (1, 2), with a decimal comma inside (1,5; 2); intervals with
+ *   a round bracket at an open end, [1, 2], (1, 2), [1, 2); sets keep their bar {x | x ≥ 0}; the percent sign before the
+ *   number, %30 (POST). The pupil is addressed with "sen".
  * node tools/buch-en/check.mjs --lang tr finds German widget sentences without Turkish, and with ?debug every string
  * that still looks German is listed in the debug window ("[tr] still German: …").
  * Only pages with <html lang="tr"> load this file, before js/buch.js. The other books never see it.
@@ -31,41 +32,40 @@
     if (!/^tr/i.test(document.documentElement.lang || '')) return;
 
     // ---------- whole labels, shared ----------
-    // TODO tr: every Turkish word below is still the English placeholder - translate (the keys stay German)
     const WORD = {
         // js/buch-plot.js, shared
-        'Funktionsgraph': 'Graph of the function', 'Funktion': 'Function', 'Beispiel': 'Example', 'Summe': 'Total',
-        'Zurücksetzen': 'Reset', 'Zurück': 'Undo', 'Tipp': 'Hint', 'Prüfen': 'Check', 'Umformung': 'Transformation',
-        'linear': 'linear', 'exponentiell': 'exponential', 'quadratisch': 'quadratic', 'Modell': 'Model',
-        // the header: "Fehler melden" (js/buch-feedback.js) and Solita (js/buch-solita.js, js/solita-frage.js); TODO tr
-        'Fehler melden': 'Report an error', 'Fehler melden: einsprechen oder tippen': 'Report an error: speak or type',
-        'Schließen (Esc)': 'Close (Esc)', 'Schließen': 'Close', 'Einsprechen': 'Speak', 'Zuhören beenden': 'Stop listening',
-        'Was ist falsch oder unklar? Sprich einfach los oder tippe.': 'What is wrong or unclear? Just start speaking or type.',
-        'Zum Beispiel: In Aufgabe 3 muss es 12 heißen, nicht 21.': 'For example: in exercise 3 it should say 12, not 21.',
+        'Funktionsgraph': 'Fonksiyonun grafiği', 'Funktion': 'Fonksiyon', 'Beispiel': 'Örnek', 'Summe': 'Toplam',
+        'Zurücksetzen': 'Sıfırla', 'Zurück': 'Geri al', 'Tipp': 'İpucu', 'Prüfen': 'Kontrol et', 'Umformung': 'Dönüşüm',
+        // growth curves and regression models
+        'linear': 'doğrusal', 'exponentiell': 'üstel', 'quadratisch': 'ikinci dereceden', 'Modell': 'Model',
+        // the header: "Fehler melden" (js/buch-feedback.js) and Solita (js/buch-solita.js, js/solita-frage.js)
+        'Fehler melden': 'Hata bildir', 'Fehler melden: einsprechen oder tippen': 'Hata bildir: söyle ya da yaz',
+        'Schließen (Esc)': 'Kapat (Esc)', 'Schließen': 'Kapat', 'Einsprechen': 'Söyle', 'Zuhören beenden': 'Dinlemeyi bitir',
+        'Was ist falsch oder unklar? Sprich einfach los oder tippe.': 'Yanlış ya da anlaşılmayan ne? Konuşmaya başla ya da yaz.',
+        'Zum Beispiel: In Aufgabe 3 muss es 12 heißen, nicht 21.': "Örneğin: 3. alıştırmada 21 değil, 12 yazmalı.",
         'Die Spracherkennung macht dein Browser. Gespeichert wird nur der Text mit der Stelle im Buch, keine Aufnahme und kein Name.':
-            'Your browser does the speech recognition. Only the text and the place in the book are saved, no recording and no name.',
-        'Senden': 'Send', 'Ich höre zu …': 'Listening …', 'Bitte erst etwas einsprechen oder tippen.': 'Please say or type something first.',
-        'Wird gesendet …': 'Sending …', 'Danke! Deine Meldung ist angekommen.': 'Thank you! Your report has arrived.',
-        'Gerade sind es zu viele Meldungen. Bitte später noch einmal.': 'There are too many reports right now. Please try again later.',
-        'Das hat nicht geklappt. Bitte später noch einmal.': 'That did not work. Please try again later.',
-        'Keine Verbindung. Bitte später noch einmal.': 'No connection. Please try again later.',
-        'Frage sprechen': 'Speak your question', 'Passwort zeigen': 'Show password', 'Passwort verbergen': 'Hide password',
-        'Stimme anhalten': 'Stop the voice', 'Frage senden': 'Send question', 'Passwort': 'Password',
-        'Passwort – wird auf diesem Gerät gemerkt': 'Password – remembered on this device', 'Passwort bestätigen': 'Confirm password',
-        'Das Passwort gilt nicht mehr.': 'The password is no longer valid.',
-        // the colour scheme button in the header (js/farbschema.js): its label names the next scheme; TODO tr
-        'Blau': 'Blue', 'Grau': 'Grey', 'Hell': 'Light', 'Farbschema Blau einschalten': 'Switch to the blue colours',
-        'Farbschema Grau einschalten': 'Switch to the grey colours', 'Farbschema Hell einschalten': 'Switch to the light colours'
+            'Konuşma tanımayı tarayıcın yapar. Yalnızca metin ve kitaptaki yeri kaydedilir; ses kaydı da ad da kaydedilmez.',
+        'Senden': 'Gönder', 'Ich höre zu …': 'Dinliyorum …', 'Bitte erst etwas einsprechen oder tippen.': 'Lütfen önce bir şey söyle ya da yaz.',
+        'Wird gesendet …': 'Gönderiliyor …', 'Danke! Deine Meldung ist angekommen.': 'Teşekkürler! Bildirimin ulaştı.',
+        'Gerade sind es zu viele Meldungen. Bitte später noch einmal.': 'Şu anda çok fazla bildirim var. Lütfen daha sonra yeniden dene.',
+        'Das hat nicht geklappt. Bitte später noch einmal.': 'Olmadı. Lütfen daha sonra yeniden dene.',
+        'Keine Verbindung. Bitte später noch einmal.': 'Bağlantı yok. Lütfen daha sonra yeniden dene.',
+        'Frage sprechen': 'Sorunu söyle', 'Passwort zeigen': 'Parolayı göster', 'Passwort verbergen': 'Parolayı gizle',
+        'Stimme anhalten': 'Sesi durdur', 'Frage senden': 'Soruyu gönder', 'Passwort': 'Parola',
+        'Passwort – wird auf diesem Gerät gemerkt': 'Parola – bu cihazda hatırlanır', 'Passwort bestätigen': 'Parolayı onayla',
+        'Das Passwort gilt nicht mehr.': 'Parola artık geçerli değil.',
+        // the colour scheme button in the header (js/farbschema.js): its label names the next scheme
+        'Blau': 'Mavi', 'Grau': 'Gri', 'Hell': 'Açık', 'Farbschema Blau einschalten': 'Mavi renk düzenine geç',
+        'Farbschema Grau einschalten': 'Gri renk düzenine geç', 'Farbschema Hell einschalten': 'Açık renk düzenine geç'
     };
 
     // ---------- pieces of sentences, shared ----------
-    // TODO tr: English placeholders
     const PHRASE = [
         // used by more than one module: graphquiz (funktionen), vierfeld-trainer (stochastik)
-        ['richtig', 'correct'],
+        ['richtig', 'doğru'],
         // header; Solita's invitations "Frag Solita zu dieser Stelle im Buch" (the rule below turns "Frag Solita" first)
-        ['Fehler<br>melden', 'Report<br>an error'], ['Zur Markierung in ', 'On the selection in '], ['Deine Frage an ', 'Your question to '],
-        [' zu dieser Stelle im Buch', ' about this part of the book'], [' zu dieser Stelle', ' about this part'], [' zur Markierung', ' about the selection']
+        ['Fehler<br>melden', 'Hata<br>bildir'], ['Zur Markierung in ', 'Seçtiğin yer hakkında: '], 
+        [' zu dieser Stelle im Buch', ' – kitabın bu yeri hakkında'], [' zu dieser Stelle', ' – bu yer hakkında'], [' zur Markierung', ' – seçtiğin yer hakkında']
     ];
 
     // ---------- word order and notation ----------
@@ -76,27 +76,37 @@
     const DEC = /\{,\}|\d,\d/;            // a decimal comma in a coordinate → the coordinates are separated by a semicolon
     const sep = parts => parts.some(p => DEC.test(p)) ? '; ' : ', ';
     const RULE = [
-        // sets keep their bar here: {x ∈ ℝ | x ≥ 0} (TODO tr: or a colon, as in js/buch-pt.js?)
+        // sets keep their bar, as Turkish schools write them: {x ∈ ℝ | x ≥ 0}
         // points: every \mid inside round brackets (one level of brackets inside, Q(x \mid f(x)); \left( … \right) too)
         [/\(((?:[^()$]|\([^()$]*\))*?\\mid(?![A-Za-z])(?:[^()$]|\([^()$]*\))*)\)/g, (m, inner) => {
             const parts = inner.split(/ ?\\mid(?![A-Za-z]) ?/);
             return '(' + parts.join(sep(parts)) + ')';
         }],
-        // intervals: [1;\,2] → [1, 2], ]1;\,2[ → ]1, 2[, [0{,}5;\,3] → [0{,}5; 3]
-        // TODO tr: Turkish schools write open intervals with round brackets, (1, 2) and [1, 2), and points (1, 2); decide what the BGY 11 pupils should see
-        [new RegExp('([\\[\\]])(' + END + ');\\\\,(' + END + ')([\\[\\]])', 'g'), (m, a, x, y, b) => a + x + sep([x, y]) + y + b]
+        // intervals the Turkish school way, an open end with a round bracket: [1;\,2] → [1, 2], ]1;\,2[ → (1, 2),
+        // [1;\,2[ → [1, 2), ]-\infty;\,0] → (-\infty, 0], [0{,}5;\,3] → [0{,}5; 3]
+        [new RegExp('([\\[\\]])(' + END + ');\\\\,(' + END + ')([\\[\\]])', 'g'),
+            (m, a, x, y, b) => (a === '[' ? '[' : '(') + x + sep([x, y]) + y + (b === ']' ? ']' : ')')]
     ];
     // after the rules of the module files
-    // TODO tr: English placeholders
     const RULE_LAST = [
         // header
-        [/^Zu (?=\S)/, 'On '], [/\bFrag (Solita|Doc)\b/g, 'Ask $1'], [/Klick: zu (Solita|Doc) wechseln/g, 'Click: switch to $1'],
-        [/Einmal das Passwort, dann kann (Solita|Doc) antworten\./g, 'Enter the password once, then $1 can answer.'],
+        // the dative of the two names: Solita'ya, Doc'a
+        [/^Zu (?=\S)/, 'Hakkında: '], [/\bFrag (Solita|Doc)\b/g, (m, n) => (n === 'Solita' ? "Solita'ya" : "Doc'a") + ' sor'],
+        [/Klick: zu (Solita|Doc) wechseln/g, (m, n) => 'Tıkla: ' + (n === 'Solita' ? "Solita'ya" : "Doc'a") + ' geç'],
+        [/Deine Frage an (Solita|Doc)/g, (m, n) => (n === 'Solita' ? "Solita'ya" : "Doc'a") + ' soracağın soru'],
+        [/Einmal das Passwort, dann kann (Solita|Doc) antworten\./g, 'Parolayı bir kez gir, sonra $1 cevap verebilir.'],
         // the AI marks in Solita's field (js/solita-frage.js): "Es antwortet Claude Haiku und DeepSeek"
-        [/^Es antwortet (.+)$/, (m, w) => 'Answering: ' + w.replace(/ und /g, ' and ')]
+        [/^Es antwortet (.+)$/, (m, w) => 'Cevap veren: ' + w.replace(/ und /g, ' ve ')]
     ];
-    // after the pieces: nothing - Turkish keeps the German decimal comma (TODO tr: and the space before percent, "30 %"?)
-    const POST = [];
+    // after the pieces: the percent sign before the number, as Turkish writes it ("30 %" → "%30", "27,9\,\%" → "\%27,9",
+    // "−2,5 %" → "−%2,5"). Only with a space before the sign, as the widgets write it (Buch.pct: a narrow space): the
+    // colour scheme (js/farbschema.js) writes whole style sheets through textContent, and "width:50%" must stay as it is.
+    const POST = [
+        [/(\d+(?:(?:\{,\}|,)\d+)?)\s*(?:\\,|\\;|~)?\s*\\%/g, '\\%$1'],
+        [/(\d+(?:,\d+)?)[   ]%(?![\w{])/g, '%$1'],
+        // thousands with a narrow space (Buch.pct, toLocaleString('de-DE') with the dot replaced) → the Turkish dot: 1 111 → 1.111
+        [/(\d) (?=\d{3}(?!\d))/g, '$1.']
+    ];
 
     // ---------- the module files ----------
     const DICTS = [];
@@ -167,8 +177,9 @@
     // remembered: a widget draws the same labels again and again
     const memo = { p: new Map(), h: new Map() };
     function tr(s, kind) {
-        // one difference to js/buch-en.js: a backslash counts too, so a bare interval "$[1;\,2]$" gets its comma
-        if (typeof s !== 'string' || !s || s.length > 20000 || !/[A-Za-zÄÖÜäöüß {\\]/.test(s)) return s;
+        // one difference to js/buch-en.js: a backslash counts too, so a bare interval "$[1;\,2]$" gets its comma; and (Turkish
+        // only) the percent sign and the narrow space, so a bare "2 %" of Buch.pct becomes "%2" and "1 111" becomes "1.111"
+        if (typeof s !== 'string' || !s || s.length > 20000 || !/[A-Za-zÄÖÜäöüß {\\%\u202f]/.test(s)) return s;
         if (dirty) compile();
         const m = memo[kind];
         let r = m.get(s);

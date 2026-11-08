@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik 11 · Bölüm 1 · Çok aşamalı rastgele deneylerde olasılık | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Ağaç diyagramları, dört gözlü tablolar, simülasyon. Bölüm 1, etkileşimli ders kitabı Matematik · Berufliches Gymnasium 11: açıklamalar, örnekler, üç düzeyde alıştırmalar, öz değerlendirme testleri ve denemek için laboratuvarlar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATİK · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Bölüm"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Bölümün içeriği">
+        <p class="b-toc-title">BÖLÜM 1 · ÖĞRENME ALANI 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<!-- ================================================================ AUFTAKT -->
+<section class="b-sec" id="auftakt" data-toc="Giriş" data-toc-k="G" data-toc-short="Giriş" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">BÖLÜM 1 · ÖĞRENME ALANI 1 · NİSAN</p>
+            <h1>Çok aşamalı rastgele deneylerde olasılık</h1>
+            <p class="b-hero-lead">İki kez çekmek, üç kez zar atmak, önce test edip sonra kontrol etmek: Pek çok rastgele deney aşama aşama ilerler.
+                Bu bölümde böyle deneyleri <b>ağaç diyagramları</b> ve <b>dört gözlü tablolar</b> yardımıyla çözümlemeyi –
+                ve onları bilgisayarla binlerce kez <b>simüle etmeyi</b> öğreneceksin.</p>
+            <div class="b-chips">
+                <span class="b-chip">15 DERS SAATİ</span>
+                <span class="b-chip">3 KONU</span>
+                <span class="b-chip">4 LAB</span>
+                <span class="b-chip">ETKİLEŞİMLİ</span>
+            </div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">BU BÖLÜMDE ÖĞRENECEKLERİN</div>
+            <div class="b-text">
+                <ul>
+                    <li>Ağaç diyagramı çizmek ve <b>dal kurallarıyla</b> olasılık hesaplamak</li>
+                    <li><b>Geri koyarak ve geri koymadan</b> çekmeyi birbirinden ayırmak</li>
+                    <li><b>Dört gözlü tablo</b> oluşturmak, tamamlamak ve yorumlamak</li>
+                    <li>Rastgele deneyleri dijital araçlarla <b>simüle etmek</b>, simülasyonu ve hesabı karşılaştırmak</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">ÖN KONTROL: BUNLARI BİLİYOR MUSUN?</div>
+            <div class="b-q" data-ans="1/3">
+                <p class="b-q-text">Bir zar bir kez atılıyor. Üst yüze 4'ten büyük bir sayı gelme olasılığı nedir?</p>
+                <div class="b-sol"><p>Uygun durumlar 5 ve 6'dır, yani $\tfrac26 = \tfrac13 \approx 0{,}33$.</p></div>
+            </div>
+            <div class="b-q" data-ans="3/10">
+                <p class="b-q-text">$\tfrac34 \cdot \tfrac25$ çarpımını hesapla.</p>
+                <div class="b-sol"><p>Pay ile pay, payda ile payda çarpılır: $\tfrac{3 \cdot 2}{4 \cdot 5} = \tfrac{6}{20} = \tfrac{3}{10}$.</p></div>
+            </div>
+            <div class="b-q" data-ans="0,65">
+                <p class="b-q-text">$P(A) = 0{,}35$ veriliyor. $A'$ tümleyen olayının olasılığı nedir?</p>
+                <div class="b-sol"><p>$P(A') = 1 - P(A) = 1 - 0{,}35 = 0{,}65$.</p></div>
+            </div>
+            <div class="b-q" data-ans="0,12" data-tol="0.0001">
+                <p class="b-q-text">%12'yi ondalık sayı olarak yaz.</p>
+                <div class="b-sol"><p>Yüzde, “her 100'de” anlamına gelir: $\%12 = \tfrac{12}{100} = 0{,}12$.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ ERKUNDUNGEN -->
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Keşifler" data-toc-k="K" data-toc-short="Keşifler">
+    <div class="b-band"><span class="b-band-tag">KEŞİFLER</span><span class="b-band-sub">BAŞLANGIÇ İÇİN · GRUPÇA</span></div>
+    <div class="b-text"><p>Kurallardan önce: Tahmin edin, deneyin, tartışın. Keşifler için ön bilgiye ihtiyacınız yok.
+        Lab'lar denemenize yardımcı olur; kenarda da cevabın hangi konuda saklı olduğu yazıyor.</p></div>
+
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">ELİF'İN ZARLARI</div>
+            <div class="b-text">
+                <p>Elif, yüzlerine sayıları kendisi yazdığı iki zarla oynuyor: Daha büyük sayıyı atan kazanır, sayılar eşit gelirse oyun berabere biter.</p>
+                <ul>
+                    <li>Lab'daki zar açınımlarına bakın. Kimin şansı daha yüksek? Önce tahmin edin.</li>
+                    <li>20 tur oynayın ve galibiyetleri sayın.</li>
+                    <li>Oynamadan kazanma şansı <b>tam olarak</b> nasıl bulunabilir?</li>
+                </ul>
+            </div>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ZAR OYUNU</span><span class="b-lab-what">Zarlara sayı yaz, ağaç ve sonuç anında hesaplanır</span></span></a>
+            <span class="b-pair">→ Konu 1</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">TORBADAN İKİ TOP</div>
+            <div class="b-text">
+                <p>Bir torbada <span class="st-urn"><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball b"></span><span class="st-ball b"></span></span>
+                    – üç kırmızı ve iki mavi top var. Bakmadan art arda iki top çekiyorsunuz ve ilk topu torbaya <b>geri koymuyorsunuz</b>.</p>
+                <ul>
+                    <li>Hangisi daha olası: iki aynı renk mi, iki farklı renk mi? Oylayın.</li>
+                    <li>Kâğıt parçalarıyla 20 kez deneyin ve sayın.</li>
+                    <li>Tüm olasılıkları çizin. Şansları nasıl hesaplayabilirsiniz?</li>
+                </ul>
+            </div>
+            <span class="b-pair">→ Konu 1, Örnek 2</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">ÇİVİLİ TAHTA</div>
+            <div class="b-text">
+                <p>Bir top, birkaç sıra çivinin arasından aşağı düşüyor. Top her çivide eşit şansla sola ya da sağa sapıyor.</p>
+                <ul>
+                    <li>Lab'da çok sayıda top bırakın. Topların çoğu neden ortaya düşüyor?</li>
+                    <li>En soldaki bölmeye kaç yol gidiyor, ortadaki bir bölmeye kaç yol?</li>
+                </ul>
+            </div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON TAHTASI</span><span class="b-lab-what">Histogramlı çivili tahta – çan eğrisi canlı olarak oluşuyor</span></span></a>
+            <span class="b-pair">→ Konu 1 ve 3</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">POZİTİF – AMA YİNE DE SAĞLIKLI?</div>
+            <div class="b-text">
+                <p>Bir hızlı test hastaların %95'ini ve sağlıklıların %95'ini doğru tanıyor. 10.000 kişiden 200'ü hasta.</p>
+                <ul>
+                    <li>Testin pozitif çıktı. Hasta olduğundan ne kadar eminsin: %95 mi? %50 mi? Daha mı az? Tahmin edin.</li>
+                    <li>Hesaplayın: Kaç hasta ve kaç sağlıklı kişi pozitif sonuç alıyor? Bir tablo işinizi kolaylaştırır.</li>
+                </ul>
+            </div>
+            <span class="b-pair">→ Konu 2</span>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ LE 1 -->
+<section class="b-sec" id="le1" data-kind="le" data-toc="Ağaç diyagramları ve dal kuralları" data-toc-k="1" data-toc-short="1 Ağaç diyagramları">
+    <div class="b-band"><span class="b-band-tag">KONU 1</span><span class="b-band-sub">5 DERS SAATİ</span></div>
+    <h2><span class="b-no">1</span>Ağaç diyagramları ve dal kuralları</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>Ayşe, üç eş parçalı bir çarkıfeleği iki kez çeviriyor: Parçalardan ikisi kırmızı, biri mavi.
+                    İki seferde de <b>kırmızı</b> gelirse kazanıyor. Ayşe oyunların yarısından fazlasını kazanır mı?</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>Art arda gerçekleşen birkaç alt deneyden oluşan bir rastgele deneye <b>çok aşamalı rastgele deney</b> denir.
+                    Böyle bir deney bir <b>ağaç diyagramıyla</b> gösterilir: Her aşama bir dallanmadır ve her kolun üzerine
+                    o alt sonucun olasılığı yazılır.</p>
+                <p>Deneyin her çıktısı, başlangıçtan bir uca giden tam olarak bir <b>dala</b> karşılık gelir.
+                    Bir <b>olay</b> birkaç çıktıyı, yani birkaç dalı bir araya getirir.</p>
+                <p>Ayşe'nin çarkında her aşamada $P(\text{kırmızı}) = \tfrac23$ olur. Oyunların üçte ikisinde önce kırmızı gelir; bu oyunların da
+                    üçte ikisinde yine kırmızı gelir. Dolayısıyla
+                    $$P(\text{KK}) = \tfrac23 \cdot \tfrac23 = \tfrac49 \approx 0{,}44.$$
+                    Yani Ayşe oyunların yarısından <b>azını</b> kazanır.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · DAL KURALLARI</div>
+                <div class="b-text">
+                    <p>Her dallanmada olasılıkların toplamı $1$'dir.</p>
+                    <p><b>1. dal kuralı (çarpma kuralı):</b> Bir çıktının olasılığı, onun dalı boyunca yer alan
+                        olasılıkların <b>çarpımıdır</b>.</p>
+                    <p><b>2. dal kuralı (toplama kuralı):</b> Bir olayın olasılığı, o olaya ait tüm dalların
+                        olasılıklarının <b>toplamıdır</b>.</p>
+                </div>
+            </div>
+
+            <div class="b-text">
+                <p>Torbadan çekerken çekilen topun geri konup konmadığı önemlidir.
+                    <b>Geri koyarak</b> çekmede olasılıklar her aşamada aynı kalır.
+                    <b>Geri koymadan</b> çekmede torbanın içeriği değişir ve böylece bir sonraki aşamanın olasılıkları da değişir.</p>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Gösterim:</b> K kırmızı, M mavi demektir. KM: önce kırmızı, sonra mavi.</p>
+            <p class="b-note"><b>Sağlama:</b> Tüm dal uçlarının olasılıklarının toplamı $1$ eder.</p>
+            <p class="b-note"><b>Lab:</b> Zar oyununda iki zarın ağacını aşama aşama kendin kurarsın.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · AĞAÇ DİYAGRAMI ATÖLYESİ</div>
+        <p class="b-help" style="margin:0 0 12px">Torbayı ayarla, geri koyarak ya da geri koymadan çekmeyi seç ve sağda dalların uçlarına tıkla.
+            Atölye iki dal kuralıyla da hesabı adım adım gösterir.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-bsp">
+                <div class="b-box-title">ÖRNEK 1 · EN AZ BİR KEZ</div>
+                <div class="b-text">
+                    <p>Ayşe çarkını yine iki kez çeviriyor. <b>En az bir kez</b> kırmızı gelme olasılığı nedir?</p>
+                </div>
+                <div class="b-sol">
+                        <p>“En az bir kez kırmızı” olayına KK, KM ve MK olmak üzere üç dal aittir. <b>Tümleyen olay</b>
+                            “hiç kırmızı gelmemesi” üzerinden daha hızlı gidilir; bu yalnızca MM dalıdır:</p>
+                        <p>$$P(\text{MM}) = \tfrac13 \cdot \tfrac13 = \tfrac19, \qquad P(\text{en az bir kez kırmızı}) = 1 - \tfrac19 = \tfrac89 \approx 0{,}89.$$</p>
+                    </div>
+            </div>
+
+            <div class="b-box b-bsp">
+                <div class="b-box-title">ÖRNEK 2 · GERİ KOYMADAN</div>
+                <div class="b-text">
+                    <p>Üç kırmızı ve iki mavi top bulunan torbadan geri koymadan iki top çekiliyor.
+                        a) İki kırmızı top, b) iki farklı renk gelme olasılığını hesapla.</p>
+                </div>
+                <div class="b-sol">
+                        <p>Kırmızı bir toptan sonra torbada 2 kırmızı ve 2 mavi, mavi bir toptan sonra 3 kırmızı ve 1 mavi top kalır.</p>
+                        <p>a) $P(\text{KK}) = \tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p>
+                        <p>b) $P(\text{KM}) + P(\text{MK}) = \tfrac35 \cdot \tfrac24 + \tfrac25 \cdot \tfrac34 = \tfrac{6}{20} + \tfrac{6}{20} = \tfrac35$</p>
+                        <p>Demek ki iki farklı renk ($\tfrac35$), iki aynı renkten ($\tfrac25$) daha olasıdır. Keşifteki sorunun cevabı budur.</p>
+                    </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>İpucu:</b> “En az bir kez” neredeyse her zaman tümleyen olay “hiç” üzerinden hesaplanır:
+                $P(E) = 1 - P(E')$.</p>
+        </aside>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bir madeni para üç kez atılıyor. Ağaç diyagramını çiz ve
+                a) üç kez yazı, b) tam iki kez tura gelme olasılığını hesapla.</p></div>
+            <div class="b-sol"><p>Ağaçta 8 dal vardır; her birinin olasılığı $\left(\tfrac12\right)^3 = \tfrac18$.</p>
+                <p>a) $P(\text{YYY}) = \tfrac18$ &nbsp; b) TTY, TYT, YTT dalları: $3 \cdot \tfrac18 = \tfrac38$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bir çarkıfelekte kırmızı $\tfrac12$, sarı $\tfrac13$, mavi $\tfrac16$ olasılıkla geliyor. Çark iki kez çevriliyor.
+                a) İki kez aynı renk, b) iki farklı renk gelme olasılığı nedir?</p></div>
+            <div class="b-sol"><p>a) $\tfrac12 \cdot \tfrac12 + \tfrac13 \cdot \tfrac13 + \tfrac16 \cdot \tfrac16 = \tfrac{9}{36} + \tfrac{4}{36} + \tfrac{1}{36} = \tfrac{14}{36} = \tfrac{7}{18} \approx 0{,}389$</p>
+                <p>b) Tümleyen olay: $1 - \tfrac{7}{18} = \tfrac{11}{18} \approx 0{,}611$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bir torbada 4 kırmızı ve 6 beyaz top var. Geri koymadan iki top çekiliyor.</p>
+                <p>a) İki topun da beyaz olma olasılığını hesapla. b) En az bir kırmızı top gelme olasılığını hesapla.
+                    c) a) şıkkını geri koyarak çekmeyle karşılaştır ve farkı açıkla.</p></div>
+            <div class="b-hint"><p>b) için: “En az bir kırmızı” olayının tümleyeni nedir?</p></div>
+            <div class="b-sol"><p>a) $\tfrac{6}{10} \cdot \tfrac59 = \tfrac{30}{90} = \tfrac13$ &nbsp; b) $1 - \tfrac13 = \tfrac23$</p>
+                <p>c) Geri koyarak: $0{,}6 \cdot 0{,}6 = 0{,}36 > \tfrac13$. Geri koymadan çekmede beyaz bir toptan sonra torbada bir beyaz top eksilir,
+                    bu yüzden ikinci topun da beyaz olma şansı düşer.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bir parça, birbirinden bağımsız iki kontrolle denetleniyor. 1. kontrol var olan bir hatayı
+                %90, 2. kontrol %80 olasılıkla buluyor. Parça hatalı.</p>
+                <p>a) Hatanın bulunma olasılığı nedir? b) Hatayı ancak 2. kontrolün bulma olasılığı nedir?</p></div>
+            <div class="b-hint"><p>Hata ancak <b>iki</b> kontrol de onu gözden kaçırırsa bulunmadan kalır.</p></div>
+            <div class="b-sol"><p>a) $1 - 0{,}1 \cdot 0{,}2 = 1 - 0{,}02 = 0{,}98$ &nbsp; b) $0{,}1 \cdot 0{,}8 = 0{,}08$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>En az bir kez 6 gelme olasılığının en az %90 olması için
+                bir zar en az kaç kez atılmalıdır?</p></div>
+            <div class="b-hint"><p>Tümleyen olay: $n$ atışta hiç 6 gelmemesi, yani $\left(\tfrac56\right)^n$. Hesap makinesiyle ya da bir değer tablosuyla dene.</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^n \geq 0{,}9$, yani $\left(\tfrac56\right)^n \leq 0{,}1$ koşulunu sağlayan en küçük $n$ aranıyor.</p>
+                <p>$\left(\tfrac56\right)^{12} \approx 0{,}112$ hâlâ çok büyük, $\left(\tfrac56\right)^{13} \approx 0{,}093$ yeterli.
+                    <span class="b-res">En az 13 atış gerekir.</span></p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Can, Örnek 2 için şöyle hesaplıyor: “İki top da kırmızı: $\tfrac35 \cdot \tfrac35 = \tfrac{9}{25}$.”
+                Hatayı bul ve bir sınıf arkadaşına açıkla.</p></div>
+            <div class="b-sol"><p>Can, ilk top geri konuyormuş gibi hesaplamış. Geri koymadan çekmede ikinci çekilişte torbada yalnızca
+                4 top kalır, bunların 2'si kırmızıdır: $\tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="1/36">
+            <p class="b-q-text">Bir zar iki kez atılıyor. İki kez 6 gelme olasılığı nedir?</p>
+            <div class="b-sol"><p>$\tfrac16 \cdot \tfrac16 = \tfrac{1}{36} \approx 0{,}028$</p></div>
+        </div>
+        <div class="b-q" data-ans="3/10">
+            <p class="b-q-text">Bir torbada 2 kırmızı ve 3 mavi top var. Geri koymadan iki top çekiliyor. İkisinin de mavi olma olasılığı nedir?</p>
+            <div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p></div>
+        </div>
+        <div class="b-q" data-ans="0,488">
+            <p class="b-q-text">Bir şans oyununda kazanma olasılığı $0{,}2$. Oyun üç kez oynanıyor.
+                En az bir kez kazanma olasılığı nedir?</p>
+            <div class="b-sol"><p>$1 - 0{,}8^3 = 1 - 0{,}512 = 0{,}488$</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ LE 2 -->
+<section class="b-sec" id="le2" data-kind="le" data-toc="Dört gözlü tablolar" data-toc-k="2" data-toc-short="2 Dört gözlü tablo">
+    <div class="b-band"><span class="b-band-tag">KONU 2</span><span class="b-band-sub">5 DERS SAATİ</span></div>
+    <h2><span class="b-no">2</span>Dört gözlü tablolar</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>Bir Berufliches Gymnasium'da 200 öğrenciyle anket yapıldı: 80'i bir spor kulübünde spor yapıyor,
+                    70'i okula bisikletle geliyor, 35'i ikisini de yapıyor. Kulüpte spor yapanlar diğerlerine göre daha mı çok bisiklete biniyor?</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>Her kişide ikişer durumu olan iki özellik kaydediliyorsa, sayılar bir
+                    <b>dört gözlü tabloya</b> yerleştirilir. İçteki dört göz birleşimleri içerir, kenarlarda toplamlar yer alır.
+                    Burada $S$ “kulüpte spor yapıyor”, $B$ “bisiklete biniyor” demektir:</p>
+            </div>
+            <div class="b-table-wrap" style="margin:0 0 14px">
+                <table class="b-table" style="max-width:520px;min-width:0">
+                    <thead><tr><th></th><th>$B$</th><th>$B'$</th><th class="b-sum">Toplam</th></tr></thead>
+                    <tbody>
+                        <tr><th>$S$</th><td class="b-hot">35</td><td>45</td><td class="b-sum">80</td></tr>
+                        <tr><th>$S'$</th><td>35</td><td>85</td><td class="b-sum">120</td></tr>
+                        <tr><th class="b-sum">Toplam</th><td class="b-sum">70</td><td class="b-sum">130</td><td class="b-sum">200</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="b-text">
+                <p>Tablodaki tüm sayıları 200'e bölersek olasılıkları elde ederiz: Rastgele seçilen bir kişinin kulüpte spor yapması
+                    <b>ve</b> bisiklete binmesi olasılığı $\tfrac{35}{200} = 0{,}175$ olur.</p>
+                <p>Sorumuza gelince: 80 sporcudan 35'i bisiklete biniyor, bu $\tfrac{35}{80} \approx \%44$ eder. Diğer 120 kişide bu oran yalnızca
+                    $\tfrac{35}{120} \approx \%29$. Demek ki kulüpte spor yapanlar belirgin biçimde daha sık bisiklete biniyor.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · DÖRT GÖZLÜ TABLO</div>
+                <div class="b-table-wrap" style="margin:0 0 12px">
+                    <table class="b-table" style="min-width:0">
+                        <thead><tr><th></th><th>$B$</th><th>$B'$</th><th class="b-sum">Toplam</th></tr></thead>
+                        <tbody>
+                            <tr><th>$A$</th><td>$P(A \cap B)$</td><td>$P(A \cap B')$</td><td class="b-sum">$P(A)$</td></tr>
+                            <tr><th>$A'$</th><td>$P(A' \cap B)$</td><td>$P(A' \cap B')$</td><td class="b-sum">$P(A')$</td></tr>
+                            <tr><th class="b-sum">Toplam</th><td class="b-sum">$P(B)$</td><td class="b-sum">$P(B')$</td><td class="b-sum">$1$</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="b-text">
+                    <p>Her satır ve her sütun kendi kenar değerini verir. İçteki dört gözün toplamı $1$'dir
+                        (sayılarla çalışırken toplam kişi sayısı).</p>
+                    <p>$A \cap B$, “$A$ ve $B$” anlamına gelir. $A'$, “$A$ değil” tümleyen olayıdır.</p>
+                </div>
+            </div>
+
+            <div class="b-text">
+                <p>Her dört gözlü tabloya, hangi özelliğe önce bakıldığına göre iki ağaç diyagramı karşılık gelir.
+                    Dal uçlarındaki olasılıklar tam olarak tablonun içteki dört gözüdür.</p>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sağlama:</b> Kenar değerlerini bir kez satırlar boyunca, bir kez de sütunlar boyunca topla. Sağ altta
+                iki seferde de aynı sonuç çıkmalı.</p>
+            <p class="b-note"><b>Okunuşu:</b> $A \cap B$, “$A$ kesişim $B$” ya da kısaca “$A$ ve $B$” diye okunur.</p>
+            <p class="b-note"><b>Dikkat:</b> $P(S \cap B) = 0{,}175$, sporcular arasındaki bisikletlilerin oranı değildir. Bu oran
+                $\tfrac{35}{80}$ olur.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">ÖRNEK 3 · TABLOYU TAMAMLAMAK</div>
+        <div class="b-text">
+            <p>Bir bisiklet mağazasında müşterilerin %30'u elektrikli bisiklet ($A$) alıyor, %60'ı kartla ödüyor ($B$) ve %12'si ikisini de yapıyor.
+                Dört gözlü tabloyu tamamla. Müşterilerin yüzde kaçı elektrikli bisiklet almıyor ve nakit ödüyor?</p>
+        </div>
+        <div class="b-sol">
+                <p>Verilenler: $P(A) = 0{,}3$, $P(B) = 0{,}6$ ve $P(A \cap B) = 0{,}12$. Önce kenarlar, sonra içteki gözler:</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <thead><tr><th></th><th>$B$</th><th>$B'$</th><th class="b-sum">Toplam</th></tr></thead>
+                    <tbody>
+                        <tr><th>$A$</th><td>0,12</td><td>0,18</td><td class="b-sum">0,3</td></tr>
+                        <tr><th>$A'$</th><td>0,48</td><td class="b-hot">0,22</td><td class="b-sum">0,7</td></tr>
+                        <tr><th class="b-sum">Toplam</th><td class="b-sum">0,6</td><td class="b-sum">0,4</td><td class="b-sum">1</td></tr>
+                    </tbody>
+                </table></div>
+                <p>$P(A' \cap B') = 0{,}4 - 0{,}18 = 0{,}22$: <span class="b-res">Müşterilerin %22'si elektrikli bisiklet almıyor ve nakit ödüyor.</span></p>
+            </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · HIZLI TEST</div>
+        <p class="b-help" style="margin:0 0 12px">10.000 kişi hızlı test yaptırıyor. Kaydırıcıları hareket ettir ve sarı gözleri izle:
+            Pozitif çıkanların kaçı gerçekten hasta? Keşifteki sorunun çözümü bu.</p>
+        <div data-widget="schnelltest"></div>
+    </div>
+
+    <div class="b-box b-ausblick">
+        <div class="b-box-title">İLERİ BAKIŞ · KOŞULLU OLASILIK</div>
+        <div class="b-text">
+            <p>Hızlı testte “hasta <b>ve</b> pozitif” olma olasılığı değil, “pozitif <b>ise</b> hasta” olma olasılığı sorulur.
+                Bu olasılık $P(H \,|\, T^+)$ biçiminde yazılır ve <b>koşullu olasılık</b> olarak adlandırılır. Dört gözlü tablodan okunabilir:</p>
+            <p>$$P(H \,|\, T^+) = \frac{P(H \cap T^+)}{P(T^+)}$$</p>
+            <p>$P(A \cap B) = P(A) \cdot P(B)$ eşitliği sağlanıyorsa $A$ ve $B$ olaylarına <b>bağımsız</b> denir, aksi hâlde bağımlıdır.
+                Bisiklet mağazasında $0{,}3 \cdot 0{,}6 = 0{,}18 \neq 0{,}12$: Elektrikli bisiklet almak ile kartla ödemek bağımlıdır.
+                Bu iki kavramla ileride daha ayrıntılı çalışacaksın.</p>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · DÖRT GÖZLÜ TABLO ANTRENÖRÜ</div>
+        <p class="b-help" style="margin:0 0 12px">Dört göz verilmiş (sarı). Diğerlerini doldur ve kontrol et. “Yeni tablo” yeni bir soru üretir.</p>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>500 öğrenciyle anket yapıldı: 220'si 11. sınıfta, diğerleri 12. sınıfta.
+                150'si otobüs ya da trenle geliyor, bunların 90'ı 11. sınıftan.</p>
+                <p>a) Dört gözlü tabloyu oluştur. b) Rastgele seçilen bir kişinin 11. sınıftan olup
+                    otobüs ya da trenle <b>gelmeme</b> olasılığı nedir? c) İki sınıf düzeyinde otobüs ve trenle gelenlerin oranlarını karşılaştır.</p></div>
+            <div class="b-sol">
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <thead><tr><th></th><th>Otobüs/tren</th><th>değil</th><th class="b-sum">Toplam</th></tr></thead>
+                    <tbody>
+                        <tr><th>11. sınıf</th><td>90</td><td>130</td><td class="b-sum">220</td></tr>
+                        <tr><th>12. sınıf</th><td>60</td><td>220</td><td class="b-sum">280</td></tr>
+                        <tr><th class="b-sum">Toplam</th><td class="b-sum">150</td><td class="b-sum">350</td><td class="b-sum">500</td></tr>
+                    </tbody>
+                </table></div>
+                <p>b) $\tfrac{130}{500} = 0{,}26$ &nbsp; c) 11. sınıf: $\tfrac{90}{220} \approx \%41$, 12. sınıf: $\tfrac{60}{280} \approx \%21$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$P(A) = 0{,}45$, $P(A \cap B) = 0{,}15$ ve $P(A' \cap B') = 0{,}35$ veriliyor.
+                Dört gözlü tabloyu tamamla.</p></div>
+            <div class="b-sol"><p>$P(A \cap B') = 0{,}30$, $P(A') = 0{,}55$, $P(A' \cap B) = 0{,}20$,
+                $P(B) = 0{,}35$, $P(B') = 0{,}65$. Sağlama: $0{,}35 + 0{,}65 = 1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bir ağaç diyagramında $P(A) = 0{,}4$. $A$ olan durumların %75'inde $B$ özelliği de var,
+                $A$ olmayan durumlarda ise yalnızca %25'inde. Ağacı çiz, dört gözlü tabloyu oluştur ve $P(B)$ değerini bul.</p></div>
+            <div class="b-hint"><p>Ağacın dal uçları tablonun içteki gözleridir, örneğin $P(A \cap B) = 0{,}4 \cdot 0{,}75$.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}3$, $P(A \cap B') = 0{,}1$, $P(A' \cap B) = 0{,}6 \cdot 0{,}25 = 0{,}15$,
+                $P(A' \cap B') = 0{,}45$.</p>
+                <p><span class="b-res">$P(B) = 0{,}3 + 0{,}15 = 0{,}45$</span></p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bir test hastaların %90'ını ve sağlıklıların %90'ını doğru tanıyor. Nüfusun %1'i hasta.
+                Pozitif çıkanların yüzde kaçı hastadır? 10.000 kişiyle hesapla ve yukarıdaki hızlı testle kontrol et.</p></div>
+            <div class="b-sol"><p>100 hasta, bunların 90'ı pozitif. 9.900 sağlıklı, bunların 990'ı pozitif. Toplam 1.080 pozitif.</p>
+                <p><span class="b-res">$\tfrac{90}{1080} \approx \%8{,}3$</span>. Test iyi, ama hastalık nadir. Pozitif sonuçların çoğu yanlış alarm.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$P(A) = 0{,}5$ ve $P(B) = 0{,}4$ veriliyor. $P(A \cap B)$ en çok hangi değeri, en az hangi değeri alabilir?
+                Dört gözlü tabloyla gerekçelendir.</p></div>
+            <div class="b-hint"><p>$P(A \cap B) = x$ al ve içteki diğer üç gözü $x$ cinsinden yaz. Hiçbiri negatif olamaz.</p></div>
+            <div class="b-sol"><p>$P(A \cap B') = 0{,}5 - x$, $P(A' \cap B) = 0{,}4 - x$, $P(A' \cap B') = 0{,}1 + x$.
+                Hepsi $\geq 0$ olmalı, yani $0 \leq x \leq 0{,}4$.</p>
+                <p><span class="b-res">En çok $0{,}4$</span> (bu durumda her $B$ aynı zamanda $A$'ya da aittir), <span class="b-res">en az $0$</span>.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="130" data-ph="Adet">
+            <p class="b-q-text">300 kişiden 120'sinde $A$ özelliği, 90'ında $B$ özelliği, 40'ında ikisi de var. Kaç kişide ikisi de yok?</p>
+            <div class="b-sol"><p>$300 - 120 - 90 + 40 = 130$. Bu 40 kişi hem $A$'da hem $B$'de sayıldı, yani bir kez fazla çıkarıldı.</p></div>
+        </div>
+        <div class="b-q" data-ans="0,25">
+            <p class="b-q-text">$P(A) = 0{,}6$, $P(B) = 0{,}5$ ve $P(A \cap B) = 0{,}35$ veriliyor. $P(A' \cap B')$ değerini hesapla.</p>
+            <div class="b-sol"><p>$P(A \cap B') = 0{,}25$, dolayısıyla $P(A' \cap B') = P(B') - 0{,}25 = 0{,}5 - 0{,}25 = 0{,}25$.</p></div>
+        </div>
+        <div class="b-q" data-ans="40" data-ph="Adet">
+            <p class="b-q-text">1.000 kişi test ediliyor, %5'i hasta. Test hastaların %80'ini tanıyor.
+                Kaç hasta pozitif çıkar?</p>
+            <div class="b-sol"><p>50 hasta, bunların %80'i: $50 \cdot 0{,}8 = 40$.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ LE 3 -->
+<section class="b-sec" id="le3" data-kind="le" data-toc="Simülasyon" data-toc-k="3" data-toc-short="3 Simülasyon">
+    <div class="b-band"><span class="b-band-tag">KONU 3</span><span class="b-band-sub">5 DERS SAATİ</span></div>
+    <h2><span class="b-no">3</span>Rastgele deneylerin simülasyonu</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>Okul şenliğinde iki zar atılıyor. Önceden zarların toplamı üzerine bahse giriliyor.
+                    6 ya da 8 yerine 7'ye oynamak mantıklı mı? 1.000 kez zar atacak vaktiniz yok.</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>Bir rastgele deney $n$ kez yapılır ve bir $E$ olayı bu sırada $k$ kez gerçekleşirse
+                    $$h_n(E) = \frac{k}{n}$$ sayısına $E$ olayının <b>göreli sıklığı</b> denir.</p>
+                <p>Az sayıda denemede $h_n$ çok dalgalanır. Deneme sayısı arttıkça dalgalanma azalır: Göreli sıklık
+                    $P(E)$ olasılığının yakınında dengelenir. Buna <b>deneysel büyük sayılar yasası</b> denir.</p>
+                <p>1.000 kez gerçekten zar atmak yerine bilgisayara rastgele sayılar ürettirilir ve deney yeniden canlandırılır.
+                    Buna <b>simülasyon</b> denir.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · ÜÇ ADIMDA SİMÜLASYON</div>
+                <div class="b-text">
+                    <p><b>1. Model:</b> Deneyin çıktılarına rastgele sayılar karşılık getirilir, örneğin zarın üst yüzündeki sayı ↔ 1 ile 6 arasında bir rastgele sayı.</p>
+                    <p><b>2. Uygulama:</b> Deney bilgisayarla çok sayıda tekrarlanır.</p>
+                    <p><b>3. Değerlendirme:</b> Göreli sıklık bulunur. Bu sıklık, $P(E)$ için bir <b>tahmini değerdir</b>.
+                        Her yeni simülasyon biraz farklı bir tahmini değer verir.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Okul şenliği:</b> 7 için 36 durumdan 6'sı uygun, 6 ve 8 için ise yalnızca 5'er durum.
+                Simülatörde “İki zar” seçeneğiyle dene.</p>
+            <p class="b-note"><b>Tarih:</b> Chevalier de Méré olarak bilinen Antoine Gombaud, “dört atışta en az bir altı” bahsinin
+                uzun vadede kazandırdığını deneyimlerinden biliyordu. Şans oyunlarıyla ilgili soruları 1654'te Blaise Pascal ile
+                Pierre de Fermat arasındaki mektuplaşmayı başlattı. Bu mektuplaşma olasılık hesabının başlangıcı sayılır.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · SİMÜLATÖR</div>
+        <p class="b-help" style="margin:0 0 12px">Bir rastgele deney seç ve 1, 10, 100 ya da 1.000 kez çalıştır.
+            Mavi eğri göreli sıklığı, sarı çizgi olasılığı gösterir.</p>
+        <div data-widget="simulation"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">YÖNTEM · ELEKTRONİK TABLO VE GEOGEBRA İLE SİMÜLASYON</div>
+        <div class="b-text">
+            <p><b>Elektronik tablo</b> (Excel, LibreOffice): İki zar, toplam 7, 1.000 deneme.</p>
+            <p><code class="b-codeline">A1:  =RASTGELEARADA(1;6)+RASTGELEARADA(1;6)</code>
+                Formülü A1000'e kadar aşağı sürükle. 7 gelenleri say ve deneme sayısına böl:
+                <code class="b-codeline">B1:  =EĞERSAY(A1:A1000;7)/1000</code>
+                <code>F9</code> tuşuyla (Excel) zarlar yeniden atılır.</p>
+            <p><b>GeoGebra:</b>
+                <code class="b-codeline">L = Sequence(RandomBetween(1, 6) + RandomBetween(1, 6), i, 1, 1000)</code>
+                <code class="b-codeline">CountIf(x == 7, L) / 1000</code></p>
+        </div>
+    </div>
+
+    <div class="b-box b-warn">
+        <div class="b-box-title">YÖNTEM BİLİNCİ · HESAPLAMAK MI, SİMÜLE ETMEK Mİ?</div>
+        <div class="b-text">
+            <p>Ağaç ya da tabloyla <b>hesaplamak</b> kesin değeri verir, ama kolayca kavranabilen bir model gerektirir.</p>
+            <p><b>Simülasyon</b>, hesaplanamayacak kadar karmaşık deneylerde de işe yarar; örneğin bekleme kuyruklarında ya da bir hastalığın
+                yayılmasında. Ancak simülasyon yalnızca tahmini değerler verir ve bu değerler ancak yavaş yavaş kesinleşir: Bir basamak daha fazla
+                kesinlik için yaklaşık yüz kat daha fazla deneme gerekir.</p>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">Monte Carlo: Rastgele isabetler $\pi$ sayısını tahmin ediyor</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON TAHTASI</span><span class="b-lab-what">Çok sayıda top, çok sayıda aşama – histogram büyüyor</span></span></a>
+        <a class="b-lab" data-lab="infektionssimulation" href="../../infektionssimulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SALGIN SİMÜLASYONU</span><span class="b-lab-what">Hesaplamak için fazla karmaşık, o hâlde simülasyon</span></span></a>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="12">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Simülatörde “Zar: altı” deneyini art arda beş kez 100'er atışla çalıştır (aralarda sıfırla) ve her seferinde $h_{100}$ değerini not et.
+                Aynısını 1.000 atışla yap. Ne dikkatini çekiyor?</p></div>
+            <div class="b-sol"><p>100 atışta değerler çoğunlukla yaklaşık $0{,}10$ ile $0{,}24$ arasında bir yerdedir. 1.000 atışta değerler
+                $\tfrac16 \approx 0{,}167$ çevresinde çok daha sıkı toplanır. Daha çok deneme, daha az dalgalanma.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bir zarla şunlar nasıl simüle edilebilir: a) bir madeni para atışı, b) $P(\text{kırmızı}) = \tfrac13$ olan bir çarkıfelek,
+                c) $P(\text{kırmızı}) = \tfrac14$ olan bir çarkıfelek?</p></div>
+            <div class="b-hint"><p>c) için: Bazı atışları geçersiz sayıp zarı yeniden atabilirsin.</p></div>
+            <div class="b-sol"><p>a) çift sayı ↔ tura &nbsp; b) 1 ya da 2 ↔ kırmızı &nbsp; c) 5 ya da 6 gelirse yeniden at. 1 ile 4 arasındaki sonuçlarda 1 kırmızı demektir.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Simülatörde “De Méré” deneyini en az 2.000 kez çalıştır ve dört atışta en az bir altı gelme olasılığını
+                tahmin et. Sonra olasılığı tümleyen olay yardımıyla hesapla ve karşılaştır.</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 = 1 - \tfrac{625}{1296} = \tfrac{671}{1296} \approx 0{,}518$.
+                Simülasyon bu değerin yakınına düşer. Değer $\tfrac12$ değerinin biraz üzerinde olduğu için de Méré uzun vadede kazanıyordu.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bir elektronik tabloyla iki zarın 1.000 atışını simüle et. 6, 7 ve 8 toplamlarının
+                göreli sıklıklarını bul ve olasılıklarla karşılaştır.</p></div>
+            <div class="b-sol"><p>A sütunu yöntem kutusundaki gibi. Sonra <code>=EĞERSAY(A1:A1000;6)/1000</code>, 7 ve 8 için de aynı şekilde.</p>
+                <p>Yaklaşık olarak $\tfrac{5}{36} \approx 0{,}139$, $\tfrac{6}{36} \approx 0{,}167$ ve $\tfrac{5}{36} \approx 0{,}139$ beklenir.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Zeynep 20 kez zar atmış ve beş kez altı gelmiş. Şöyle diyor: “Bu zarda altı gelme olasılığı
+                $0{,}25$. Zar hileli.” Bu görüşü değerlendir.</p></div>
+            <div class="b-sol"><p>$h_{20} = 0{,}25$ yalnızca kaba bir tahmindir. 20 atışta göreli sıklık çok dalgalanır.
+                Hilesiz bir zarla bile 20 atışlık serilerin yaklaşık %23'ünde beş ya da daha fazla altı gelir.
+                Zarı değerlendirmek için Zeynep'in çok daha fazla atış yapması gerekir.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="112/600" data-tol="0.002">
+            <p class="b-q-text">600 atışta 112 kez altı geldi. Göreli sıklık nedir?</p>
+            <div class="b-sol"><p>$h_{600} = \tfrac{112}{600} \approx 0{,}187$; bu, $\tfrac16 \approx 0{,}167$ değerinden çok uzak değil.</p></div>
+        </div>
+        <div class="b-q" data-mc="1">
+            <p class="b-q-text">$P(\text{kırmızı}) = 0{,}3$ olan bir çarkıfeleğe hangi simülasyon uyar?</p>
+            <div class="b-mc">
+                <button>RASTGELEARADA(1;3), 1 gelirse kırmızı</button>
+                <button>RASTGELEARADA(1;10), 1, 2 ya da 3 gelirse kırmızı</button>
+                <button>RASTGELEARADA(1;6), 1 ya da 2 gelirse kırmızı</button>
+            </div>
+            <div class="b-sol"><p>Eşit olasılıklı on sayıdan üçü kırmızıyı temsil ediyor: $\tfrac{3}{10} = 0{,}3$. Diğer iki seçenek $\tfrac13$ verir.</p></div>
+        </div>
+        <div class="b-q" data-ans="200" data-ph="Adet">
+            <p class="b-q-text">İki zar 1.200 kez atılıyor. Toplamın yaklaşık kaç kez 7 olmasını beklersin?</p>
+            <div class="b-sol"><p>$1200 \cdot \tfrac16 = 200$. Simülasyonda çoğunlukla 200'e yakın değerler çıkar, tam 200 nadiren.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ WIEDERHOLEN -->
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Tekrar Et · Derinleştir · İlişkilendir" data-toc-k="A" data-toc-short="Alıştırma">
+    <div class="b-band"><span class="b-band-tag">TEKRAR ET · DERİNLEŞTİR · İLİŞKİLENDİR</span></div>
+    <div class="b-tasks" data-start="17">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bir şifreli kilidin üzerinde 0'dan 9'a kadar rakamlar bulunan üç çark var. Rastgele bir denemeyle kilidi açma olasılığı nedir?
+                İlk rakam biliniyorsa olasılık nasıl değişir?</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{10} \cdot \tfrac{1}{10} \cdot \tfrac{1}{10} = \tfrac{1}{1000}$. İlk rakam biliniyorsa: $\tfrac{1}{100}$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bir zar iki kez atılıyor. a) İki atışta da aynı sayının gelmesi, b) toplamın 10 olması,
+                c) en az bir kez 1 gelmesi olasılığını hesapla.</p></div>
+            <div class="b-sol"><p>a) $\tfrac{6}{36} = \tfrac16$ &nbsp; b) (4, 6), (5, 5), (6, 4): $\tfrac{3}{36} = \tfrac{1}{12}$ &nbsp;
+                c) $1 - \tfrac{25}{36} = \tfrac{11}{36}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bir firma parçalarının %30'unu A tedarikçisinden, %70'ini B tedarikçisinden alıyor. A'dan gelenlerin %4'ü, B'den gelenlerin %2'si hatalı.</p>
+                <p>a) Ağacı çiz ve dört gözlü tabloyu oluştur. b) Tüm parçaların yüzde kaçı hatalı?
+                    c) Bir parça hatalı. Bu parça daha çok A'dan mı, yoksa B'den mi gelmiştir?</p></div>
+            <div class="b-sol"><p>a) A ve hatalı: $0{,}3 \cdot 0{,}04 = 0{,}012$, A ve sağlam: $0{,}288$,
+                B ve hatalı: $0{,}7 \cdot 0{,}02 = 0{,}014$, B ve sağlam: $0{,}686$.</p>
+                <p>b) $0{,}012 + 0{,}014 = 0{,}026$, yani %2,6.</p>
+                <p>c) Az farkla B'den ($0{,}014 > 0{,}012$); oysa A'nın parçaları iki kat daha sık hatalı: B çok daha fazla parça gönderiyor.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Üç kişi buluşuyor. Üçünün de doğum gününün farklı günlerde olma olasılığı nedir
+                (365 gün, hepsi eşit olasılıklı)? En az ikisinin doğum gününün aynı gün olma olasılığı nedir?</p></div>
+            <div class="b-sol"><p>$\tfrac{365}{365} \cdot \tfrac{364}{365} \cdot \tfrac{363}{365} \approx 0{,}9918$, yani en az ikisinin aynı olması: $\approx 0{,}0082$.</p>
+                <p>Biraz daha düşünürsek: 23 kişiden itibaren ortak bir doğum günü olması, olmamasından daha olasıdır. Buna <b>doğum günü paradoksu</b> denir.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Bir basketbolcu serbest atışlarda %70 isabet sağlıyor. İsabet edene kadar, ama en fazla üç kez atış yapıyor.</p>
+                <p>a) Sonunda isabet ettirme olasılığı nedir? b) Tam iki atışa ihtiyaç duyma olasılığı nedir? c) Üç kez atış yapma olasılığı nedir?</p></div>
+            <div class="b-hint"><p>Ağaç tam değil: İsabetten sonra dal biter.</p></div>
+            <div class="b-sol"><p>a) $1 - 0{,}3^3 = 0{,}973$ &nbsp; b) $0{,}3 \cdot 0{,}7 = 0{,}21$ &nbsp;
+                c) Üçüncü atış ancak iki başarısız atıştan sonra gelir: $0{,}3 \cdot 0{,}3 = 0{,}09$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>3. öğrenme alanıyla ilişkilendir:</b> $f(n) = 1 - \left(\tfrac56\right)^n$ fonksiyonu, $n$ atışta en az bir altı gelme
+                olasılığını verir.</p>
+                <p>a) $f(1)$, $f(4)$ ve $f(10)$ değerlerini hesapla. b) Hangi $n$ değerinden itibaren $f(n) > 0{,}5$ olur? c)
+                    $n \mapsto \left(\tfrac56\right)^n$ ne tür bir fonksiyondur? Çok büyük $n$ değerlerinde $f(n)$ nasıl davranır?</p></div>
+            <div class="b-sol"><p>a) $f(1) = \tfrac16 \approx 0{,}167$, $f(4) \approx 0{,}518$, $f(10) \approx 0{,}838$ &nbsp; b) $n = 4$'ten itibaren, çünkü $f(3) \approx 0{,}421$.</p>
+                <p>c) Çarpanı $\tfrac56$ olan bir üstel fonksiyon, yani üstel azalma. $f(n)$, $1$'e istendiği kadar yaklaşır ama ona hiçbir zaman ulaşmaz.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ EXKURSION -->
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Gezinti: Keçi problemi" data-toc-k="X" data-toc-short="Keçi problemi">
+    <div class="b-band"><span class="b-band-tag">GEZİNTİ</span><span class="b-band-sub">DÜŞÜNMEYİ SÜRDÜR</span></div>
+    <h2>Keçi problemi</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Bir yarışma programında üç kapı var. Birinin arkasında bir otomobil, diğer ikisinin arkasında birer keçi duruyor. Bir kapı seçiyorsun.
+                Sunucu otomobilin nerede olduğunu biliyor. Diğer iki kapıdan birini açıyor, hem de her zaman keçi olan bir kapıyı. Sonra soruyor:
+                “Kapınızı değiştirmek ister misiniz?”</p>
+            <p>1990'da Marilyn vos Savant bu soruyu ABD'de yayımlanan <i>Parade</i> dergisindeki “Ask Marilyn” köşesinde yanıtladı:
+                Değiştirmek kazanma şansını ikiye katlar, $\tfrac13$ yerine $\tfrac23$ olur. Bunun üzerine 10.000'den fazla okur mektubu aldı.
+                Yazanların çoğu, aralarında doktora unvanlı pek çok kişi de olmak üzere, onun yanıldığından emindi.</p>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Kaynaklar:</b> Steve Selvin, okur mektubu, <i>The American Statistician</i> 29 (1975), s. 67.
+                Marilyn vos Savant, “Ask Marilyn”, <i>Parade</i>, 9 Eylül 1990.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · KENDİN OYNA</div>
+        <div data-widget="ziegen"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">DEĞİŞTİRMEK NEDEN KAZANDIRIR?</div>
+        <div class="b-text"><p>İki aşamalı bir ağaçla açıkla: Birinci aşama senin seçimin, ikinci aşama stratejin.</p></div>
+            <div class="b-sol">
+                <p>İlk seçimin $\tfrac13$ olasılıkla otomobili, $\tfrac23$ olasılıkla bir keçiyi bulur.</p>
+                <p><b>Kalmak</b> yalnızca ilk seçim zaten doğruysa kazandırır: $\tfrac13$.</p>
+                <p><b>Değiştirmek</b> tam olarak ilk seçim bir keçiyse kazandırır. Diğer keçiyi sunucu zaten göstermiştir,
+                    dolayısıyla son kapının arkasında otomobil olmak zorundadır: $\tfrac23$.</p>
+                <p>Belirleyici olan, sunucunun otomobilin nerede olduğunu <b>bilmesi</b> ve otomobilin bulunduğu kapıyı asla açmamasıdır.</p>
+            </div>
+    </div>
+</section>
+
+<!-- ================================================================ RÜCKBLICK -->
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Özet" data-toc-k="Ö" data-toc-short="Özet">
+    <div class="b-band"><span class="b-band-tag">ÖZET</span><span class="b-band-sub">EN ÖNEMLİLER BİR BAKIŞTA</span></div>
+
+    <div class="b-rueck">
+        <div><h4>ÇOK AŞAMALI RASTGELE DENEY</h4>
+            <p>Art arda birkaç alt deney. Ağaç diyagramında her aşama bir dallanma, her çıktı bir daldır.
+                Her dallanmada olasılıkların toplamı $1$'dir.</p></div>
+        <div><p><span class="st-urn"><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball b"></span><span class="st-ball b"></span></span>
+            içinden geri koymadan iki top: KK, KM, MK, MM dalları.</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>1. DAL KURALI</h4><p>Bir çıktının olasılığı = dal boyunca <b>çarpım</b>.</p></div>
+        <div><p>$P(\text{KM}) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>2. DAL KURALI</h4><p>Bir olayın olasılığı = ilgili dalların <b>toplamı</b>.</p></div>
+        <div><p>$P(\text{farklı renk}) = \tfrac{3}{10} + \tfrac{3}{10} = \tfrac35$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>TÜMLEYEN OLAY</h4><p>$P(E) = 1 - P(E')$. Özellikle “en az bir kez” sorularında çok pratik.</p></div>
+        <div><p>Çarkıfelek iki kez, $P(\text{kırmızı}) = \tfrac23$: $P(\text{en az bir kez kırmızı}) = 1 - \tfrac19 = \tfrac89$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>GERİ KOYARAK / GERİ KOYMADAN</h4><p>Geri koyarak çekmede olasılıklar aynı kalır, geri koymadan çekmede aşamadan aşamaya değişir.</p></div>
+        <div><p>geri koyarak: $\tfrac35 \cdot \tfrac35 = \tfrac{9}{25}$ &nbsp; geri koymadan: $\tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>DÖRT GÖZLÜ TABLO</h4><p>İkişer durumu olan iki özellik. İçte dört göz, kenarlarda toplamlar, sağ altta $1$ ya da toplam sayı.
+            İçteki gözler, ilgili ağacın dal uçlarıdır.</p></div>
+        <div><p>$P(A' \cap B') = 1 - P(A) - P(B) + P(A \cap B)$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>GÖRELİ SIKLIK</h4><p>$h_n(E) = \tfrac{k}{n}$. $n$ büyüdükçe $P(E)$ yakınında dengelenir
+            (deneysel büyük sayılar yasası).</p></div>
+        <div><p>600 atış, 112 kez altı: $h_{600} \approx 0{,}187$, $\tfrac16$ değerine yakın.</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>SİMÜLASYON</h4><p>Rastgele sayılarla model kur, çok sayıda tekrarla, göreli sıklığı tahmini değer olarak al. Kesin değer değil, tahmini değer verir.</p></div>
+        <div><p><code>=RASTGELEARADA(1;6)</code> bir zar atışını simüle eder.</p></div>
+    </div>
+</section>
+
+<!-- ================================================================ TEST -->
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">İKİ TUR · ANINDA GERİ BİLDİRİM</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">TUR 1</div>
+            <div class="b-q" data-ans="1/8">
+                <p class="b-q-text">Bir madeni para üç kez atılıyor. Üç kez tura gelme olasılığı nedir?</p>
+                <div class="b-sol"><p>$\left(\tfrac12\right)^3 = \tfrac18$</p></div>
+            </div>
+            <div class="b-q" data-ans="16/25">
+                <p class="b-q-text">4 kırmızı ve 1 mavi top bulunan bir torbadan geri koyarak iki kez top çekiliyor. İkisinin de kırmızı olma olasılığı nedir?</p>
+                <div class="b-sol"><p>$\tfrac45 \cdot \tfrac45 = \tfrac{16}{25} = 0{,}64$</p></div>
+            </div>
+            <div class="b-q" data-ans="0,2">
+                <p class="b-q-text">$P(A) = 0{,}7$, $P(B) = 0{,}4$ ve $P(A \cap B) = 0{,}3$ veriliyor. $P(A' \cap B')$ değerini hesapla.</p>
+                <div class="b-sol"><p>$1 - 0{,}7 - 0{,}4 + 0{,}3 = 0{,}2$</p></div>
+            </div>
+            <div class="b-q" data-mc="1">
+                <p class="b-q-text">50 atışta 12 kez altı geldi. Hangi ifade doğrudur?</p>
+                <div class="b-mc">
+                    <button>Zar kesinlikle hileli.</button>
+                    <button>$h_{50} = 0{,}24$ yalnızca bir tahmindir. $\tfrac16$ değerinden bu kadarlık sapmalar 50 atışta normaldir.</button>
+                    <button>Sonraki 50 atışta altı daha seyrek gelir, böylece denge sağlanır.</button>
+                </div>
+                <div class="b-sol"><p>Zarın hafızası yoktur. Az sayıda atışta $h_n$ çok dalgalanır, tahmin ancak çok sayıda atışta güvenilir hâle gelir.</p></div>
+            </div>
+        </div>
+
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">TUR 2</div>
+            <div class="b-q" data-ans="1/10">
+                <p class="b-q-text">2 kırmızı ve 3 mavi top bulunan bir torbadan geri koymadan üç top çekiliyor. Hepsinin mavi olma olasılığı nedir?</p>
+                <div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 \cdot \tfrac13 = \tfrac{6}{60} = \tfrac{1}{10}$</p></div>
+            </div>
+            <div class="b-q" data-ans="0,40951">
+                <p class="b-q-text">Bir piyango bileti $0{,}1$ olasılıkla kazanıyor. Beş bilet alıyorsun. En az birinin kazanma olasılığı nedir? (virgülden sonra iki basamak)</p>
+                <div class="b-sol"><p>$1 - 0{,}9^5 = 1 - 0{,}59049 \approx 0{,}41$</p></div>
+            </div>
+            <div class="b-q" data-ans="540" data-ph="Adet">
+                <p class="b-q-text">2.000 kişi test ediliyor, %10'u hasta. Test hastaların %90'ını, sağlıklıların %80'ini doğru tanıyor.
+                    Toplam kaç kişi pozitif çıkar?</p>
+                <div class="b-sol"><p>200 hasta: 180'i pozitif. 1.800 sağlıklı: %20'si yanlış pozitif, yani 360. Toplam 540.</p></div>
+            </div>
+            <div class="b-q" data-ans="0,25">
+                <p class="b-q-text">$P(B) = 0{,}45$ ve $P(A \cap B) = 0{,}2$ veriliyor. $P(A' \cap B)$ değerini hesapla.</p>
+                <div class="b-sol"><p>$B$ sütununun toplamı $P(B)$ eder: $0{,}45 - 0{,}2 = 0{,}25$.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <h3>ÇEVRİMİÇİ DAHA FAZLA ALIŞTIRMA (ALMANCA)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-baumdiagramme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">AĞAÇ DİYAGRAMLARI</span><span class="b-lab-what">geri bildirimli 20 alıştırma</span></span></a>
+        <a class="b-lab" href="../../mathetest11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DÖRT GÖZLÜ TABLOLAR</span><span class="b-lab-what">geri bildirimli 20 alıştırma</span></span></a>
+        <a class="b-lab" href="../../mathetest11-simulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SİMÜLASYON</span><span class="b-lab-what">geri bildirimli 20 alıştırma</span></span></a>
+        <a class="b-lab" href="../../mathetest11-stochastik-uebung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">KARIŞIK OLASILIK</span><span class="b-lab-what">Keçi problemi, doğum günleri ve daha fazlası</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematik, Berufliches Gymnasium 11. sınıf · Saksonya Berufliches Gymnasium matematik öğretim programına
+        göre öğrenme alanı 1.</p>
+    <p>Tüm metinler, alıştırmalar ve şekiller özgün içeriktir. Emoji: Apple, iamcal'ın emoji-data projesi üzerinden.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-tr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-tr/stochastik.js"></script>
+</body>
+</html>

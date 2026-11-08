@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik 11 · Bölüm 4 · Doğrusal denklem sistemleri ve matrisler | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Gauss yöntemi, çözüm kümeleri, matris işlemleri. Bölüm 4, etkileşimli ders kitabı Matematik · Berufliches Gymnasium 11: açıklamalar, örnekler, üç düzeyde alıştırmalar, öz değerlendirme testleri ve denemek için laboratuvarlar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATİK · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Bölüm"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Bölümün içeriği">
+        <p class="b-toc-title">BÖLÜM 4 · ÖĞRENME ALANI 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Giriş" data-toc-k="G" data-toc-short="Giriş" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">BÖLÜM 4 · ÖĞRENME ALANI 4 · MART · NİSAN</p>
+            <h1>Doğrusal denklem sistemleri ve matrisler</h1>
+            <p class="b-hero-lead">Sinema her türden kaç bilet sattı? Bir işletme, bütün hammaddeler tükensin diye ne kadar üretmeli?
+                Birden fazla bilinmeyen, birden fazla koşul: bir <b>doğrusal denklem sistemi</b>. <b>Matrislerle</b> onu kısaca yazar ve Gauss yöntemiyle adım adım,
+                büyük sistemlerde ise CAS ile çözersin.</p>
+            <div class="b-chips"><span class="b-chip">20 DERS SAATİ</span><span class="b-chip">4 KONU</span><span class="b-chip">EKONOMİ VE TEKNİK</span><span class="b-chip">BİLİŞİM EĞİTİMİ</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["4-x","x","(6-x)/2"]' data-labels='["","",""]' data-x="-2,6" data-y="-2,6" data-pts="[[2,2]]" data-equal data-h="240" data-aria="Ortak bir noktası olan üç doğru"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">BU BÖLÜMDE ÖĞRENECEKLERİN</div>
+            <div class="b-text"><ul>
+                <li>doğrusal denklem sistemlerini <b>matris biçiminde</b> $A \cdot \vec{x} = \vec{b}$ yazmak ve <b>özel matrisleri</b> tanımak</li>
+                <li>3 denklemli, 3 bilinmeyenli sistemleri <b>hesap makinesiz</b>, <b>Gauss eleme yöntemiyle</b> çözmek</li>
+                <li><b>çözüm kümelerini</b> tartışmak: çözüm yok, bir çözüm, sonsuz çok çözüm</li>
+                <li>büyük sistemleri <b>CAS</b> ile çözmek ve matrislerle <b>işlem yapmak</b>: toplama, bir sayıyla çarpma, devriğini alma</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">ÖN KONTROL: BUNLARI BİLİYOR MUSUN?</div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">$x + y = 5$ ve $x - y = 1$ veriliyor. $x$ kaçtır?</p><div class="b-sol"><p>Taraf tarafa topla: $2x = 6$, yani $x = 3$ ve $y = 2$.</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="Sayı"><p class="b-q-text">$2 \cdot 3 + (-1) \cdot 7$ işlemini hesapla.</p><div class="b-sol"><p>$6 - 7 = -1$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Birbirinden farklı iki paralel doğrunun kaç ortak noktası vardır?</p><div class="b-mc"><button>hiç yok</button><button>tam bir</button><button>sonsuz çok</button></div><div class="b-sol"><p>Hiç yok.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Keşifler" data-toc-k="K" data-toc-short="Keşifler">
+    <div class="b-band"><span class="b-band-tag">KEŞİFLER</span><span class="b-band-sub">BAŞLANGIÇ İÇİN · GRUPÇA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">SİNEMA AKŞAMI</div>
+            <div class="b-text"><p>Tam bilet 8 €, indirimli 6 €, çocuk 4 €. Bir akşam toplam 1.280 € karşılığında 200 bilet satılıyor; indirimli bilet sayısı çocuk biletlerinin iki katı.</p>
+                <ul><li>Üç denklem kurun. Her türden kaç bilet satılmış?</li><li>Hangi stratejiyi kullandınız? Her zaman işe yarar mı?</li></ul></div>
+            <span class="b-pair">→ Konu 1 ve 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TABLOLARLA HESAP</div>
+            <div class="b-text"><p>İki şube, üç ürünün aylık satışlarını bir tabloya yazıyor.</p>
+                <ul><li>Ocak ve şubat için toplam satışları nasıl bulursunuz? %10'luk bir artıştan sonraki satışları nasıl bulursunuz?</li><li>Tablonun satırlarıyla sütunlarının yerini değiştirirseniz ne olur?</li></ul></div>
+            <span class="b-pair">→ Konu 4</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">ÜÇ DOĞRU</div>
+            <div class="b-text"><p>$x + y = 4$, $x - y = 0$ ve $x + 2y = 6$ doğrularını çizin.</p>
+                <ul><li>Üçünün ortak bir noktası var mı? Denklemlerden birini, ortak nokta kalmayacak şekilde değiştirin.</li></ul></div>
+            <a class="b-lab" data-lab="gleichungssysteme" href="../../gleichungssysteme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DENKLEM SİSTEMLERİ</span><span class="b-lab-what">Kesişim noktaları ve doğrusal cebir</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Matrisler" data-toc-k="1" data-toc-short="1 Matrisler">
+    <div class="b-band"><span class="b-band-tag">KONU 1</span><span class="b-band-sub">5 DERS SAATİ</span></div>
+    <h2><span class="b-no">1</span>Matrisler ve bir denklem sisteminin matris biçimi</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Sinema akşamı için $x$ tam, $y$ indirimli ve $z$ çocuk bileti ile şu sistem elde edilir:</p>
+                <p>$$\begin{array}{rcrcrcl} x &+& y &+& z &=& 200 \\ 8x &+& 6y &+& 4z &=& 1280 \\ && y &-& 2z &=& 0 \end{array}$$</p>
+                <p>Aslında önemli olan yalnızca sayılardır. Harfler hep aynı yerlerde durur.</p></div></div>
+            <div class="b-text"><p>Yalnızca sayıları dikdörtgen bir tabloya yazarsak bir <b>matris</b> elde ederiz. Sistem bu durumda $A \cdot \vec{x} = \vec{b}$ biçimini alır:</p>
+                <p>$$\underbrace{\begin{pmatrix} 1 & 1 & 1 \\ 8 & 6 & 4 \\ 0 & 1 & -2 \end{pmatrix}}_{A} \cdot \underbrace{\begin{pmatrix} x \\ y \\ z \end{pmatrix}}_{\vec{x}} = \underbrace{\begin{pmatrix} 200 \\ 1280 \\ 0 \end{pmatrix}}_{\vec{b}}
+                    \qquad \text{kısaca:} \qquad \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)$$</p>
+                <p>Sağdaki biçime <b>genişletilmiş katsayılar matrisi</b> denir.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · MATRİSLER</div>
+                <div class="b-text">
+                    <p>Bir <b>$m \times n$ matrisin</b> $m$ satırı ve $n$ sütunu vardır. $i$. satır ile $j$. sütundaki elemana $a_{ij}$ denir.</p>
+                    <p><b>Özel matrisler:</b> <b>kare matris</b> ($m = n$) · <b>üst üçgen matris</b> (köşegenin altında yalnızca sıfırlar) · <b>köşegen matris</b> (köşegen dışındaki bütün elemanlar sıfır) ·
+                        <b>birim matris</b> $I$ (köşegende birler, diğer yerlerde sıfırlar) · <b>sıfır matrisi</b> (yalnızca sıfırlar) · <b>sütun matrisi</b> ($m \times 1$) · <b>satır matrisi</b> ($1 \times n$)</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Örnekler:</b> $I = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$ · üst üçgen matris $\begin{pmatrix} 2 & 1 & 4 \\ 0 & 3 & 1 \\ 0 & 0 & 5 \end{pmatrix}$</p>
+            <p class="b-note"><b>Bilişim:</b> Gri tonlamalı bir görüntü bir matristir: Her eleman bir pikselin parlaklığıdır.</p>
+        </aside>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Matrisin boyutunu ve $a_{23}$ elemanını belirt: $A = \begin{pmatrix} 4 & -1 & 0 & 2 \\ 3 & 5 & 7 & -2 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>$2 \times 4$ matris, $a_{23} = 7$ (2. satır, 3. sütun)</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Bunlar hangi özel matrislerdir? a) $\begin{pmatrix} 3 & 0 \\ 0 & -1 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} 1 \\ 4 \\ 2 \end{pmatrix}$ &nbsp; c) $\begin{pmatrix} 1 & 5 \\ 0 & 2 \end{pmatrix}$ &nbsp; d) $\begin{pmatrix} 0 & 0 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>a) köşegen matris (aynı zamanda kare ve üçgen matris) &nbsp; b) sütun matrisi &nbsp; c) üst üçgen matris &nbsp; d) sıfır matrisi ve satır matrisi</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Genişletilmiş katsayılar matrisi olarak yaz: $\;2x - z = 4$, $\;x + 3y = 7$, $\;y + z = 1$</p></div>
+            <div class="b-hint"><p>Denklemde bulunmayan değişkenlerin katsayısı 0'dır.</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{rrr|r} 2 & 0 & -1 & 4 \\ 1 & 3 & 0 & 7 \\ 0 & 1 & 1 & 1 \end{array}\right)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Bir işletme üç hammaddeden P1, P2, P3 adlı üç ürün üretiyor. Ürün başına gereken miktarlar (kg):
+                H1: 1, 2, 1 · H2: 2, 1, 3 · H3: 1, 1, 1. Stokta 90 kg H1, 110 kg H2, 60 kg H3 var. Bütün stoklar tükenecek şekilde sistemi matris biçiminde kur.</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 1 & 2 & 1 \\ 2 & 1 & 3 \\ 1 & 1 & 1 \end{pmatrix} \cdot \begin{pmatrix} x_1 \\ x_2 \\ x_3 \end{pmatrix} = \begin{pmatrix} 90 \\ 110 \\ 60 \end{pmatrix}$. Sistem Konu 2'de çözülecek.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="6" data-ph="Adet"><p class="b-q-text">Bir $2 \times 3$ matrisin kaç elemanı vardır?</p><div class="b-sol"><p>$2 \cdot 3 = 6$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Hangisi birim matristir?</p><div class="b-mc"><button>$\begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}$</button><button>$\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$</button><button>$\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$</button></div><div class="b-sol"><p>Köşegende birler, diğer yerlerde sıfırlar.</p></div></div>
+        <div class="b-q" data-ans="-2" data-ph="Sayı"><p class="b-q-text">Sinema sisteminde $A$ matrisinin $a_{33}$ elemanı kaçtır?</p><div class="b-sol"><p>3. satır, 3. sütun: $-2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Gauss eleme yöntemi" data-toc-k="2" data-toc-short="2 Gauss">
+    <div class="b-band"><span class="b-band-tag">KONU 2</span><span class="b-band-sub">HESAP MAKİNESİZ · 5 DERS SAATİ</span></div>
+    <h2><span class="b-no">2</span>Gauss eleme yöntemi</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Üst üçgen biçimdeki bir sistem kolay çözülür: $\;x + y + z = 6$, $\;y + z = 5$, $\;z = 3$ sisteminde $z = 3$ doğrudan okunur, ikinci satırda yerine konur ($y = 2$), sonra da birincide ($x = 1$).
+                Gauss'un fikri: Her sistemi bu <b>basamak biçimine</b> gelecek şekilde dönüştürmek.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · GAUSS ELEME YÖNTEMİ</div>
+                <div class="b-text">
+                    <p>Şu işlemler çözüm kümesini değiştirmez:</p>
+                    <ul><li>iki satırın <b>yerini değiştirmek</b>,</li><li>bir satırı <b>sıfırdan farklı bir sayıyla çarpmak</b>,</li><li>bir satırın <b>bir katını başka bir satıra eklemek</b>.</li></ul>
+                    <p><b>Gauss:</b> Bu dönüşümlerle önce 1. sütunda, sonra 2. sütunda köşegenin altında sıfırlar elde et (basamak biçimi), sonra aşağıdan yukarıya doğru yerine koy.</p>
+                    <p><b>Gauss-Jordan:</b> Solda birim matris oluşana kadar dönüştürmeye devam et. O zaman çözüm doğrudan sağ tarafta okunur.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Gösterim:</b> “$\text{II} - 8 \cdot \text{I}$” şu demektir: II. satırın yerine, II. satırdan I. satırın 8 katı çıkarılarak elde edilen satırı yaz.</p>
+            <p class="b-note"><b>Sağlama:</b> Sonucu her zaman <b>başlangıçtaki</b> denklemlerin hepsinde yerine koy.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">ÖRNEK 1 · SİNEMA AKŞAMI</div>
+        <div class="b-text"><p>Sinema sistemini Gauss eleme yöntemiyle çöz.</p></div>
+        <div class="b-sol">
+            <p>$$\left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)
+                \xrightarrow{\;\text{II} - 8 \cdot \text{I}\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & -2 & -4 & -320 \\ 0 & 1 & -2 & 0 \end{array}\right)
+                \xrightarrow{\;\text{II} : (-2)\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & 1 & 2 & 160 \\ 0 & 1 & -2 & 0 \end{array}\right)$$</p>
+            <p>$$\xrightarrow{\;\text{III} - \text{II}\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & 1 & 2 & 160 \\ 0 & 0 & -4 & -160 \end{array}\right)$$</p>
+            <p>Geriye doğru: $z = 40$, $y = 160 - 80 = 80$, $x = 200 - 80 - 40 = 80$. <span class="b-res">80 tam, 80 indirimli, 40 çocuk bileti.</span></p>
+            <p>Sağlama: $80 + 80 + 40 = 200$ · $640 + 480 + 160 = 1280$ · $80 = 2 \cdot 40$.</p>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · GAUSS ATÖLYESİ</div>
+        <p class="b-help" style="margin:0 0 12px">Bir dönüşüm, hedef satır, ikinci satır ve $k$ çarpanı seç, sonra “Uygula” düğmesine bas. Ya da “Sonraki adım” ile bir sonraki Gauss adımını gör.
+            “Yeni sistem” tam sayı çözümlü rastgele bir sistem üretir.</p>
+        <div data-widget="gauss"></div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Çöz: $\;x + y + z = 6$, $\;2x - y + z = 3$, $\;x + 2y - z = 2$</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $-3y - z = -9$ · $\text{III} - \text{I}$: $y - 2z = -4$ · sonra $3 \cdot \text{III} + \text{II}$: $-7z = -21$.
+                <span class="b-res">$z = 3$, $y = 2$, $x = 1$</span></p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Çöz: $\;2x + y - z = 1$, $\;x - y + 2z = 5$, $\;3x + 2y + z = 10$</p></div>
+            <div class="b-hint"><p>Sol üstte 1 olması için önce I ile II'nin yerini değiştir.</p></div>
+            <div class="b-sol"><p><span class="b-res">$x = 1$, $y = 2$, $z = 3$</span>. Sağlama: $2 + 2 - 3 = 1$ · $1 - 2 + 6 = 5$ · $3 + 4 + 3 = 10$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Konu 1'deki hammadde sistemini çöz. P1, P2 ve P3'ten kaçar adet üretilir?</p></div>
+            <div class="b-hint"><p>$\text{I} - \text{III}$ hemen $x_2$ değerini verir.</p></div>
+            <div class="b-sol"><p>$\text{I} - \text{III}$: $x_2 = 30$. Sonra $x_1 + x_3 = 30$ ve $2x_1 + 3x_3 = 80$, yani $x_3 = 20$, $x_1 = 10$.
+                <span class="b-res">10 adet P1, 30 adet P2, 20 adet P3.</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$f(x) = ax^2 + bx + c$ parabolü $(0, 1)$, $(1, 4)$ ve $(2, 9)$ noktalarından geçiyor. Bir denklem sistemi kur ve $a$, $b$, $c$ değerlerini bul.</p></div>
+            <div class="b-sol"><p>$c = 1$, $a + b + c = 4$, $4a + 2b + c = 9$ $\Rightarrow$ $a + b = 3$, $4a + 2b = 8$ $\Rightarrow$ $a = 1$, $b = 2$. <span class="b-res">$f(x) = x^2 + 2x + 1 = (x + 1)^2$</span></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">$\;x + y + z = 6$, $\;y + z = 5$, $\;z = 3$ basamak biçiminden $x$ değerini bul.</p><div class="b-sol"><p>$y = 2$, $x = 6 - 2 - 3 = 1$</p></div></div>
+        <div class="b-q" data-ans="40" data-ph="Adet"><p class="b-q-text">Sinema akşamında kaç çocuk bileti satıldı?</p><div class="b-sol"><p>$z = 40$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Hangi dönüşüme izin <b>verilmez</b>?</p><div class="b-mc"><button>satırların yerini değiştirmek</button><button>bir satırı $-3$ ile çarpmak</button><button>bir satırı $0$ ile çarpmak</button></div><div class="b-sol"><p>0 ile çarpmak denklemi yok eder.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Çözüm kümeleri" data-toc-k="3" data-toc-short="3 Çözüm kümeleri">
+    <div class="b-band"><span class="b-band-tag">KONU 3</span><span class="b-band-sub">5 DERS SAATİ</span></div>
+    <h2><span class="b-no">3</span>Çözüm yok, bir çözüm ya da sonsuz çok çözüm</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Her sistem tek bir çözüme ulaşmaz. Gauss yönteminin sonunda solda yalnızca sıfırların bulunduğu bir satır çıkabilir.
+                O zaman her şey sağ tarafa bağlıdır.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · ÇÖZÜM KÜMELERİ</div>
+                <div class="b-text">
+                    <p><b>Tam bir çözüm:</b> Denklem sayısı bilinmeyen sayısına eşitse basamak biçiminde her satırda bir pivot (sıfırdan farklı ilk eleman) bulunur.</p>
+                    <p><b>Çözüm yok:</b> $c \neq 0$ olmak üzere bir $(0 \;\; 0 \;\; 0 \;|\; c)$ satırı, yani $0 = c$ çelişkisi ortaya çıkar.</p>
+                    <p><b>Sonsuz çok çözüm:</b> Bir sıfır satırı $(0 \;\; 0 \;\; 0 \;|\; 0)$ çıkar ve çelişki oluşmaz. Bir değişken serbest kalır; onu $t$ parametresi olarak alırsın.</p>
+                    <p><b>Geometrik olarak</b> (iki bilinmeyen): iki doğru bir noktada kesişir, paraleldir ya da çakışıktır.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>İleri bakış:</b> Üç bilinmeyende her denklem uzayda bir düzlem belirtir. Üç düzlem bir noktada ya da bir doğru boyunca kesişebilir veya hiç ortak noktaları olmayabilir. Ayrıntılar vektörel geometride.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · İKİ DOĞRU</div>
+        <div data-widget="geraden"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 2 · SONSUZ ÇOK ÇÖZÜM</div>
+            <div class="b-text"><p>Çöz: $\;x + y + z = 3$, $\;x - y + z = 1$, $\;2x + 2z = 4$.</p></div>
+            <div class="b-sol"><p>$\text{II} - \text{I}$: $-2y = -2$ · $\text{III} - 2\,\text{I}$: $-2y = -2$ · sonra $\text{III} - \text{II}$: $0 = 0$, bir sıfır satırı.</p>
+                <p>$y = 1$, $z = t$ serbest, $x = 2 - t$: <span class="b-res">$\text{Ç} = \{(2 - t, 1, t) \mid t \in \mathbb{R}\}$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 3 · ÇÖZÜM YOK</div>
+            <div class="b-text"><p>Çöz: $\;x + 2y = 3$, $\;2x + 4y = 5$.</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $0 = -1$. Bu bir çelişki: <span class="b-res">$\text{Ç} = \varnothing$</span>. İki doğru paraleldir.</p></div>
+        </div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Basamak biçimi aşağıdaki gibi olan sistemin kaç çözümü vardır? a) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 0 & 5 \end{array}\right)$ &nbsp; b) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 0 & 0 \end{array}\right)$ &nbsp; c) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 2 & 2 \end{array}\right)$</p></div>
+            <div class="b-sol"><p>a) çözüm yok ($0 = 5$) &nbsp; b) sonsuz çok &nbsp; c) tam bir: $z = 1$, $y = -1$, $x = 5$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$a$'nın hangi değeri için $\;x + y = 1$, $\;2x + ay = 2$ sisteminin sonsuz çok çözümü vardır? Diğer bütün $a$ değerleri için ne söylenebilir?</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $(a - 2)y = 0$. $a = 2$ için bu $0 = 0$ olur: sonsuz çok çözüm. Aksi hâlde $y = 0$, $x = 1$: tam bir çözüm.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$b$'nin hangi değerleri için $\;x + 2y = 3$, $\;2x + 4y = b$ sisteminin çözümü yoktur?</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $0 = b - 6$. $b \neq 6$ için çözüm yok, $b = 6$ için sonsuz çok çözüm.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Bir tüccar kilogramı 8 € ve 12 € olan iki kahve türünü karıştırarak 100 € değerinde 10 kg karışım hazırlıyor. Toplam fiyat ne olursa anlamlı bir çözüm olmaz? Gerekçelendir.</p></div>
+            <div class="b-sol"><p>$x + y = 10$, $8x + 12y = P$ sisteminin her zaman tam bir çözümü vardır: $y = \tfrac{P - 80}{4}$. Ama bu çözüm yalnızca $0 \leq y \leq 10$, yani $80 \leq P \leq 120$ için anlamlıdır.
+                $P = 100$ için her türden 5 kg. $P$ bu aralığın dışında olursa miktarlar negatif çıkar. Matematiksel olarak çözülebilir olmak, her zaman problem bağlamında anlamlı olmak demek değildir.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Gauss yönteminin sonunda $(0 \;\; 0 \;\; 0 \;|\; 7)$ satırı çıkıyor. Sistemin …</p><div class="b-mc"><button>çözümü yoktur</button><button>tam bir çözümü vardır</button><button>sonsuz çok çözümü vardır</button></div><div class="b-sol"><p>$0 = 7$ bir çelişkidir.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="a ="><p class="b-q-text">$a$'nın hangi değeri için $\;x + y = 1$, $\;2x + ay = 2$ sisteminin sonsuz çok çözümü vardır?</p><div class="b-sol"><p>$a = 2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="CAS ve matris işlemleri" data-toc-k="4" data-toc-short="4 CAS &amp; İşlemler">
+    <div class="b-band"><span class="b-band-tag">KONU 4</span><span class="b-band-sub">DİJİTAL ARAÇLARLA · 5 DERS SAATİ</span></div>
+    <h2><span class="b-no">4</span>CAS ile büyük sistemler, matrislerle işlemler</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Uygulamada denklem sistemlerinin çoğu zaman düzinelerce ya da binlerce bilinmeyeni olur; örneğin bir köprünün statik hesabında ya da görüntü işlemede.
+                Bunun için dijital araçlar kullanılır. Derste bir CAS (bilgisayar cebir sistemi) ya da GeoGebra yeterlidir.</p></div></div>
+            <div class="b-text"><p>GeoGebra'da:<code class="b-codeline">Solve({w+x+y+z=10, w-x+y-z=-2, 2w+x-y+z=5, w+2x+3y-z=10}, {w,x,y,z})</code></p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · MATRİS İŞLEMLERİ</div>
+                <div class="b-text">
+                    <p><b>Toplama ve çıkarma:</b> yalnızca aynı boyuttaki matrisler için, eleman eleman: $(A + B)_{ij} = a_{ij} + b_{ij}$.</p>
+                    <p><b>Skalerle çarpma:</b> Her eleman $r$ sayısıyla çarpılır: $(r \cdot A)_{ij} = r \cdot a_{ij}$.</p>
+                    <p><b>Devriğini alma:</b> Satırlar sütun olur: $(A^T)_{ij} = a_{ji}$. Bir $m \times n$ matristen bir $n \times m$ matris elde edilir.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Bilişim:</b> Elektronik tablolar, veri tabanları ve görüntü biçimleri verileri matris olarak saklar. Bir görüntüyü 90° döndürmek özünde devriğini alıp yansıtmak demektir.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · MATRİS HESAPLAYICI</div>
+        <div data-widget="matrizen"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">ÖRNEK 4 · İKİ ŞUBE</div>
+        <div class="b-text"><p>Satışlar (satırlar: 1. ve 2. şube, sütunlar: X, Y, Z ürünleri) ocakta $A = \begin{pmatrix} 12 & 8 & 5 \\ 7 & 10 & 4 \end{pmatrix}$, şubatta $B = \begin{pmatrix} 10 & 9 & 6 \\ 8 & 12 & 3 \end{pmatrix}$.
+            Toplam satışları ve ocaktakinden %10 fazla satılması planlanıyorsa mart için hedef sayıları hesapla.</p></div>
+        <div class="b-sol"><p>$A + B = \begin{pmatrix} 22 & 17 & 11 \\ 15 & 22 & 7 \end{pmatrix}$ · $1{,}1 \cdot A = \begin{pmatrix} 13{,}2 & 8{,}8 & 5{,}5 \\ 7{,}7 & 11 & 4{,}4 \end{pmatrix}$</p>
+            <p>$A^T = \begin{pmatrix} 12 & 7 \\ 8 & 10 \\ 5 & 4 \end{pmatrix}$ aynı sayıları gösterir; ama bu kez ürünler satırlardadır.</p></div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="13">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Yukarıdaki GeoGebra komutundaki sistemi bir CAS ile çöz.</p></div>
+            <div class="b-sol"><p>$w = 1$, $x = 2$, $y = 3$, $z = 4$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Örnek 4'teki $A$ ve $B$ ile $B - A$, $3B$ ve $B^T$ matrislerini hesapla. $B - A$ neyi ifade eder?</p></div>
+            <div class="b-sol"><p>$B - A = \begin{pmatrix} -2 & 1 & 1 \\ 1 & 2 & -1 \end{pmatrix}$: ocaktan şubata değişim. $3B = \begin{pmatrix} 30 & 27 & 18 \\ 24 & 36 & 9 \end{pmatrix}$, $B^T = \begin{pmatrix} 10 & 8 \\ 9 & 12 \\ 6 & 3 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Bir $2 \times 3$ matris neden bir $3 \times 2$ matrisle toplanamaz? Önce ne yapmak gerekirdi?</p></div>
+            <div class="b-sol"><p>Elemanların aynı konumda karşılıkları yoktur. İçerik açısından uygunsa matrislerden birinin devriği alınabilir.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Bir örnek üzerinde göster: $(A + B)^T = A^T + B^T$ ve $(r \cdot A)^T = r \cdot A^T$.</p></div>
+            <div class="b-sol"><p>Örnek 4 ile: $(A + B)^T = \begin{pmatrix} 22 & 15 \\ 17 & 22 \\ 11 & 7 \end{pmatrix} = A^T + B^T$. Devrik alınırken her eleman aynı yeni konuma geçer; dolayısıyla toplamlar da onunla birlikte taşınır.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="3" data-ph="Adet"><p class="b-q-text">$A$ bir $2 \times 3$ matris. Devriği $A^T$ kaç satırlıdır?</p><div class="b-sol"><p>3</p></div></div>
+        <div class="b-q" data-ans="22" data-ph="Sayı"><p class="b-q-text">Örnek 4'te $A + B$ matrisinin 2. satır, 2. sütunundaki sayı kaçtır?</p><div class="b-sol"><p>$10 + 12 = 22$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Tekrar et · Derinleştir · İlişkilendir" data-toc-k="A" data-toc-short="Alıştırma">
+    <div class="b-band"><span class="b-band-tag">TEKRAR ET · DERİNLEŞTİR · İLİŞKİLENDİR</span></div>
+    <div class="b-tasks" data-start="17">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Üç arkadaş içecek alıyor. Ayşe: 2 kola, 1 meyve suyu, 1 su, toplam 8 €. Burak: 1 kola, 2 meyve suyu, toplam 6,50 €. Cem: 1 meyve suyu, 3 su, toplam 5 €. Her içeceğin fiyatı nedir?</p></div>
+            <div class="b-sol"><p>$2k + m + s = 8$, $k + 2m = 6{,}5$, $m + 3s = 5$ sisteminden <span class="b-res">kola 2,50 €, meyve suyu 2 €, su 1 €</span> bulunur.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Bölüm 3.3 ile ilişkilendir:</b> $(-1, 6)$, $(1, 2)$ ve $(2, 3)$ noktalarından geçen parabolü bul.</p></div>
+            <div class="b-sol"><p>$a - b + c = 6$, $a + b + c = 2$, $4a + 2b + c = 3$. I ve II'den: $b = -2$, $a + c = 4$; III'ten: $4a + c = 7$, yani $a = 1$, $c = 3$. <span class="b-res">$f(x) = x^2 - 2x + 3$</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>3 denklemli bir doğrusal denklem sisteminin $(1, 2, 3)$ ve $(3, 2, 1)$ çözümleri var. Bu durumda sistemin sonsuz çok çözümü olduğunu gerekçelendir.</p></div>
+            <div class="b-sol"><p>Tam bir çözümü olsaydı ikinci bir çözüm olmazdı. Doğrusal denklemlerde iki çözüm varsa bu iki noktayı birleştiren doğrunun üzerindeki her nokta da bir çözümdür; örneğin $(2, 2, 2)$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Gezinti: PageRank" data-toc-k="X" data-toc-short="PageRank">
+    <div class="b-band"><span class="b-band-tag">GEZİNTİ</span><span class="b-band-sub">BİLİŞİM EĞİTİMİ</span></div>
+    <h2>Bir arama motoru sayfaları nasıl sıralar?</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>1990'ların sonunda Sergey Brin ve Larry Page'in aklına bir fikir geldi: Önemli sayfalar bir web sayfasına bağlantı veriyorsa o sayfa önemlidir. Bir “rastgele gezgin” ağda tıklayarak dolaşır:
+                %85 olasılıkla bulunduğu sayfadaki bağlantılardan birini izler, %15 olasılıkla herhangi bir sayfaya atlar. Uzun vadede bir sayfaya ne sıklıkta ulaştığı, o sayfanın <b>PageRank</b> değeridir.</p>
+            <p>Matematiksel olarak bu, bir vektörün tekrar tekrar çarpıldığı bir matristir. Birkaç adımdan sonra vektör neredeyse hiç değişmez.
+                Aşağıdaki örnekte A'ya yalnızca tek bir sayfa bağlantı verdiği hâlde A, C ile neredeyse başa baş: Bu tek bağlantı, en önemli sayfa olan C'den geliyor.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Kaynak:</b> S. Brin, L. Page, “The Anatomy of a Large-Scale Hypertextual Web Search Engine”, Computer Networks 30 (1998).</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · DÖRT SAYFA</div>
+        <p class="b-help" style="margin:0 0 12px">Bağlantılar: A → B, A → C, B → C, C → A, D → C. Dairenin büyüklüğü güncel sıralamayı gösterir. Hiçbir şey değişmeyene kadar “1 adım” düğmesine tıkla.</p>
+        <div data-widget="pagerank"></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Özet" data-toc-k="Ö" data-toc-short="Özet">
+    <div class="b-band"><span class="b-band-tag">ÖZET</span><span class="b-band-sub">EN ÖNEMLİLER BİR BAKIŞTA</span></div>
+    <div class="b-rueck"><div><h4>MATRİS BİÇİMİ</h4><p>$A \cdot \vec{x} = \vec{b}$ · genişletilmiş katsayılar matrisi $(A \,|\, \vec{b})$</p></div><div><p>Sinema: $\left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)$</p></div></div>
+    <div class="b-rueck"><div><h4>ÖZEL MATRİSLER</h4><p>kare, üçgen, köşegen, birim, sıfır, sütun ve satır matrisi</p></div><div><p>$I = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$</p></div></div>
+    <div class="b-rueck"><div><h4>GAUSS</h4><p>satırların yerini değiştirmek, $\neq 0$ bir sayıyla çarpmak, katlarını eklemek · basamak biçimi · geriye doğru yerine koymak</p></div><div><p>Sinema: $z = 40$, $y = 80$, $x = 80$</p></div></div>
+    <div class="b-rueck"><div><h4>ÇÖZÜM KÜMELERİ</h4><p>çelişki satırı: çözüm yok · sıfır satırı: sonsuz çok (parametre) · aksi hâlde tam bir çözüm</p></div><div><p>$\text{Ç} = \{(2 - t, 1, t)\}$</p></div></div>
+    <div class="b-rueck"><div><h4>İŞLEMLER</h4><p>$A \pm B$ eleman eleman (aynı boyut) · $r \cdot A$ · $A^T$: satırlar ↔ sütunlar</p></div><div><p>Şubeler: ocak + şubat</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">İKİ TUR · ANINDA GERİ BİLDİRİM</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">TUR 1 · HESAP MAKİNESİZ</div>
+            <div class="b-q" data-ans="2" data-ph="z ="><p class="b-q-text">$\;x + y + z = 4$, $\;y - z = -1$, $\;3z = 6$ sistemini çöz. $z$ kaçtır?</p><div class="b-sol"><p>$z = 2$ (buradan $y = 1$, $x = 1$)</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">Aynı sistemde $x$ kaçtır?</p><div class="b-sol"><p>$y = 1$, $x = 4 - 1 - 2 = 1$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$\;x + y = 2$, $\;3x + 3y = 6$ sisteminin …</p><div class="b-mc"><button>çözümü yoktur</button><button>tam bir çözümü vardır</button><button>sonsuz çok çözümü vardır</button></div><div class="b-sol"><p>İkinci denklem birincinin üç katıdır.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">TUR 2 · DİJİTAL ARAÇLARLA</div>
+            <div class="b-q" data-ans="30" data-ph="Adet"><p class="b-q-text">Konu 1'deki hammadde işletmesi kaç adet P2 üretir?</p><div class="b-sol"><p>$x_2 = 30$</p></div></div>
+            <div class="b-q" data-ans="2,5" data-tol="0.001" data-ph="Avro"><p class="b-q-text">17. alıştırmada bir kolanın fiyatı nedir?</p><div class="b-sol"><p>2,50 €</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="z ="><p class="b-q-text">Konu 4'teki sistemde (CAS) $z$ kaçtır?</p><div class="b-sol"><p>$z = 4$</p></div></div>
+        </div>
+    </div>
+    <h3>ÇEVRİMİÇİ DAHA FAZLA ALIŞTIRMA (ALMANCA)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-matrizen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MATRİSLER</span><span class="b-lab-what">Kavram, özel matrisler</span></span></a>
+        <a class="b-lab" href="../../mathetest11-gauss.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GAUSS</span><span class="b-lab-what">Hesap makinesiz 3 × 3</span></span></a>
+        <a class="b-lab" href="../../mathetest11-loesungsmengen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ÇÖZÜM KÜMELERİ</span><span class="b-lab-what">çözüm yok, bir, sonsuz çok</span></span></a>
+        <a class="b-lab" href="../../mathetest11-cas-lgs.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CAS VE İŞLEMLER</span><span class="b-lab-what">büyük sistemler, matrislerle işlemler</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematik, Berufliches Gymnasium 11. sınıf · Saksonya Berufliches Gymnasium matematik öğretim programına göre öğrenme alanı 4.</p>
+    <p>Tüm metinler, alıştırmalar ve şekiller özgün içeriktir.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-tr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-tr/funktionen.js"></script>
+<script src="../../js/buch-lgs.js"></script>
+<script src="../../js/buch-tr/lgs.js"></script>
+</body>
+</html>

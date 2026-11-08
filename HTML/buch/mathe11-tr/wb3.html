@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik 11 · Bölüm S · Sayısal yöntemler ve simülasyonlar | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="İkiye bölme yöntemi, yaklaşık alan hesabı, Monte Carlo yöntemi. Bölüm S, etkileşimli ders kitabı Matematik · Berufliches Gymnasium 11: açıklamalar, örnekler, üç düzeyde alıştırmalar, öz değerlendirme testleri ve denemek için laboratuvarlar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATİK · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Bölüm"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Bölümün içeriği">
+        <p class="b-toc-title">SEÇMELİ ALAN 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Giriş" data-toc-k="G" data-toc-short="Giriş" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">BÖLÜM S · SEÇMELİ ALAN 3 · MAYIS · HAZİRAN</p>
+            <h1>Sayısal yöntemler ve simülasyonlar</h1>
+            <p class="b-hero-lead">Pek çok denklem tam olarak çözülemez, pek çok alan tam olarak hesaplanamaz. Bu yüzden bilgisayarlar <b>sayısal</b> hesap yapar:
+                Çözüme küçük adımlarla, gerektiği kadar yaklaşırlar. Burada her hesap makinesinde, her simülasyonda ve her mühendislik bürosunda
+                kullanılan üç yöntemi tanıyacak ve bunlar için kendin küçük programlar yazacaksın.</p>
+            <div class="b-chips"><span class="b-chip">10 DERS SAATİ</span><span class="b-chip">3 KONU</span><span class="b-chip">PROGRAMLAMA</span><span class="b-chip">BİLİŞİM EĞİTİMİ</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3-x-2"]' data-labels='["f"]' data-lat="[1.9]" data-x="-0.5,2.5" data-y="-3,5" data-pts="[[1.5214,0]]" data-h="240" data-aria="Yaklaşık 1,52'de bir kökü olan fonksiyon"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">BU BÖLÜMDE ÖĞRENECEKLERİN</div>
+            <div class="b-text"><ul>
+                <li>Kökleri <b>ikiye bölme yöntemiyle</b> istenen doğrulukta bulmak</li>
+                <li>Grafiklerin altındaki alanları <b>dikdörtgen ve yamuklarla</b> yaklaşık olarak hesaplamak</li>
+                <li>Alanları <b>Monte Carlo yöntemiyle</b>, rastgelelik yardımıyla tahmin etmek</li>
+                <li>Bu yöntemleri küçük <b>programlar</b> ya da tablolar olarak uygulamak</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">ÖN KONTROL: BUNLARI BİLİYOR MUSUN?</div>
+            <div class="b-q" data-ans="-2" data-ph="Sayı"><p class="b-q-text">$f(x) = x^3 - x - 2$ için $f(1)$ değerini hesapla.</p><div class="b-sol"><p>$1 - 1 - 2 = -2$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="Sayı"><p class="b-q-text">$f(x) = x^3 - x - 2$ için $f(2)$ değerini hesapla.</p><div class="b-sol"><p>$8 - 2 - 2 = 4$</p></div></div>
+            <div class="b-q" data-ans="1,5" data-tol="0.001" data-ph="Sayı"><p class="b-q-text">$[1, 2]$ aralığının orta noktası nedir?</p><div class="b-sol"><p>$\tfrac{1 + 2}{2} = 1{,}5$</p></div></div>
+            <div class="b-q" data-ans="12" data-ph="Alan"><p class="b-q-text">Bir yamuğun paralel kenarları 4 ve 8, yüksekliği 2'dir. Alanı kaçtır?</p><div class="b-sol"><p>$\tfrac{4 + 8}{2} \cdot 2 = 12$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Keşifler" data-toc-k="K" data-toc-short="Keşifler">
+    <div class="b-band"><span class="b-band-tag">KEŞİFLER</span><span class="b-band-sub">BAŞLANGIÇ İÇİN · GRUPÇA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">SAYI TAHMİNİ</div>
+            <div class="b-text"><p>Biri 1 ile 1.000 arasında bir tam sayı tutuyor. Diğerleri tahmin ediyor, o ise yalnızca “daha büyük” ya da “daha küçük” diye cevap veriyor.</p>
+                <ul><li>Hangi stratejiyle en az denemeye ihtiyaç duyarsınız? En fazla kaç deneme gerekir?</li></ul></div>
+            <span class="b-pair">→ Konu 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">KARE SAYMAK</div>
+            <div class="b-text"><p>$y = x^2$ grafiğini $x = 0$ ile $x = 2$ arasında kareli kâğıda çizin (1 cm = 2 kare).</p>
+                <ul><li>Eğrinin altındaki alanı kareleri sayarak tahmin edin. Sonucu nasıl daha kesin hâle getirebilirsiniz?</li></ul></div>
+            <span class="b-pair">→ Konu 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">PİRİNÇ ATMAK</div>
+            <div class="b-text"><p>İçinde bir çeyrek daire olan bir kare çizin. Üzerine bir avuç pirinci eşit dağılacak şekilde atın, içteki ve dıştaki taneleri sayın.</p>
+                <ul><li>Bu oranın $\pi$ ile ne ilgisi var?</li></ul></div>
+            <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">Kareye dartlar yağıyor ve π'yi tahmin ediyor</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Kökler: ikiye bölme" data-toc-k="1" data-toc-short="1 İkiye bölme">
+    <div class="b-band"><span class="b-band-tag">KONU 1</span><span class="b-band-sub">4 DERS SAATİ</span></div>
+    <h2><span class="b-no">1</span>Aralığı ikiye bölerek kök bulma</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = x^3 - x - 2$ için basit bir çözüm formülü yoktur. Ama: $f(1) = -2 < 0$ ve $f(2) = 4 > 0$.
+                Grafik kesintisiz bir çizgi olduğuna göre 1 ile 2 arasında $x$ eksenini kesmek zorundadır.</p></div></div>
+            <div class="b-text"><p>Orta nokta kontrol edilir: $f(1{,}5) = 3{,}375 - 1{,}5 - 2 = -0{,}125 < 0$. Demek ki işaret değişimi 1,5 ile 2 arasındadır. Yine ikiye böl, yine kontrol et ve böyle devam et.
+                Her adımda aralığın genişliği yarıya iner.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · İKİYE BÖLME YÖNTEMİ</div>
+                <div class="b-text">
+                    <p>$f$ kesintisizse (sıçramasızsa) ve $f(a)$ ile $f(b)$ farklı işaretliyse, $[a, b]$ aralığında en az bir kök vardır.</p>
+                    <ol><li>Orta nokta $m = \tfrac{a + b}{2}$ hesaplanır.</li>
+                        <li>$f(m)$, $f(a)$ ile aynı işaretliyse $a := m$, değilse $b := m$ olur.</li>
+                        <li>$b - a$ yeterince küçülene kadar tekrarlanır.</li></ol>
+                    <p>$n$ adımdan sonra aralığın genişliği yalnızca $\tfrac{b - a}{2^n}$ olur. Yani on adım aralığı bin kattan biraz daha fazla küçültür.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sayı tahmini:</b> İkiye bölerek 1 ile 1.000 arasındaki her sayıyı en fazla 10 denemede bulursun, çünkü $2^{10} = 1024$.</p>
+            <p class="b-note"><b>İleri bakış:</b> Newton yöntemi çok daha hızlıdır, ama 12. sınıfın konusu olan türevi gerektirir.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · İKİYE BÖLME</div>
+        <p class="b-help" style="margin:0 0 12px">Bir fonksiyon seç ve aralığı adım adım ikiye böl. Mavi çizgiler aralığı sınırlar, beyaz nokta orta noktadır.</p>
+        <div data-widget="bisektion"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">YÖNTEM · PROGRAM</div>
+        <div class="b-text"><p>JavaScript ile (her tarayıcının konsolunda çalışır, F12):</p></div>
+<pre class="b-pre"><code>const f = x => x ** 3 - x - 2;
+let a = 1, b = 2;
+while (b - a > 1e-6) {
+  const m = (a + b) / 2;
+  if (Math.sign(f(m)) === Math.sign(f(a))) a = m; else b = m;
+}
+console.log((a + b) / 2);   // 1.5213797…</code></pre>
+        <div class="b-text"><p>Elektronik tabloda: $a$, $b$, $m$ ve $f(m)$ için sütunlar. Bir sonraki satırda <code>=EĞER(…)</code> ile hangi sınırın değiştirileceğine karar ver, sonra aşağı sürükle.</p></div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$f(x) = x^2 - 2$ için $[1, 2]$ aralığında ikiye bölme yönteminin üç adımını elle uygula. Böylece hangi sayıya yaklaşılır?</p></div>
+            <div class="b-sol"><p>$m = 1{,}5$: $f > 0$ → $[1;\ 1{,}5]$ · $m = 1{,}25$: $f < 0$ → $[1{,}25;\ 1{,}5]$ · $m = 1{,}375$: $f < 0$ → $[1{,}375;\ 1{,}5]$. Yaklaşılan sayı $\sqrt2 \approx 1{,}414$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$[0, 1]$ aralığındaki bir kökü $0{,}001$ doğrulukla sınırlamak için kaç adım gerekir?</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{2^n} \leq 0{,}001 \Rightarrow 2^n \geq 1000 \Rightarrow n = 10$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Etkileşimli araç yardımıyla $\cos x = x$ denkleminin çözümünü virgülden sonra üç basamağa kadar bul.</p></div>
+            <div class="b-sol"><p>$\cos x - x$ fonksiyonunun kökü: $x \approx 0{,}739$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$2^x - 3x$ fonksiyonunun iki kökü vardır. Her ikisi için birer aralık bul ve ikinci kökü sayısal olarak belirle.</p></div>
+            <div class="b-sol"><p>$f(0) = 1$, $f(1) = -1$: birincisi $[0, 1]$ aralığında ($\approx 0{,}458$). $f(3) = -1$, $f(4) = 4$: ikincisi $[3, 4]$ aralığında, yaklaşık $3{,}31$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$f(-1) < 0 < f(1)$ olmasına rağmen ikiye bölme yöntemi $f(x) = \tfrac1x$ için $[-1, 1]$ aralığında neden başarısız olur? Peki $f(x) = x^2$ için $[-1, 1]$ aralığında neden başarısız olur?</p></div>
+            <div class="b-sol"><p>$\tfrac1x$ fonksiyonu $0$'da sıçrar ve hiç kökü yoktur; “kesintisiz” koşulu sağlanmıyor. $x^2$ fonksiyonunun bir kökü vardır, ama işaret değişimi yoktur: $f(-1) = f(1) = 1 > 0$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="1,521" data-tol="0.002" data-ph="x ≈"><p class="b-q-text">$x^3 - x - 2$ fonksiyonunun kökü, virgülden sonra üç basamağa kadar kaçtır?</p><div class="b-sol"><p>$x \approx 1{,}521$</p></div></div>
+        <div class="b-q" data-ans="10" data-ph="Adım"><p class="b-q-text">Genişliği 1 olan bir aralık kaç kez ikiye bölündükten sonra 0,001'den dar olur?</p><div class="b-sol"><p>$2^{10} = 1024 > 1000$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Sayısal alan hesabı" data-toc-k="2" data-toc-short="2 Alanlar">
+    <div class="b-band"><span class="b-band-tag">KONU 2</span><span class="b-band-sub">3 DERS SAATİ</span></div>
+    <h2><span class="b-no">2</span>Alanlara şeritlerle yaklaşmak</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$y = x^2$ grafiğinin altında, $x = 0$ ile $x = 2$ arasında kalan alan ne kadardır? Böyle bir eğri için alan formülü yoktur.
+                Bu yüzden alan ince <b>şeritlere</b> ayrılır ve her şeridin yerine bir dikdörtgen ya da bir yamuk konur.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · ŞERİT YÖNTEMİ</div>
+                <div class="b-text">
+                    <p>$[a, b]$ aralığını genişliği $h = \tfrac{b - a}{n}$ olan $n$ eş şeride böl.</p>
+                    <p><b>Dikdörtgenler:</b> Yükseklik = her şeridin sol kenarındaki (ya da ortasındaki) fonksiyon değeri. Tüm dikdörtgen alanları toplanır.</p>
+                    <p><b>Yamuklar:</b> Her şerit, iki kenarındaki fonksiyon değerleriyle bir yamuğa dönüşür: $A \approx \tfrac{h}{2}\big(f(x_0) + 2f(x_1) + \ldots + 2f(x_{n-1}) + f(x_n)\big)$.</p>
+                    <p>Şerit sayısı arttıkça sonuç kesinleşir. Orta nokta dikdörtgenleri ve yamuklar, kenardan alınan dikdörtgenlerden çok daha kesindir.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>İleri bakış:</b> Kesin değere integral denir: $\int_0^2 x^2\,dx = \tfrac83$. İntegral hesabı 13. sınıfın büyük konularından biridir.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · ŞERİT ATÖLYESİ</div>
+        <p class="b-help" style="margin:0 0 12px">Fonksiyonu, yöntemi ve şerit sayısını seç. Sağda yaklaşık değeri, kesin değeri ve hatayı görürsün.</p>
+        <div data-widget="flaeche"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">ÖRNEK 1 · DÖRT ŞERİT</div>
+        <div class="b-text"><p>$y = x^2$ grafiğinin altında $[0, 2]$ aralığında kalan alanı $n = 4$ şeritle hesapla: sol dikdörtgenlerle, orta nokta dikdörtgenleriyle ve yamuklarla.</p></div>
+        <div class="b-sol"><p>$h = 0{,}5$. Sol: $0{,}5 \cdot (0 + 0{,}25 + 1 + 2{,}25) = 1{,}75$.
+            Orta: $0{,}5 \cdot (0{,}0625 + 0{,}5625 + 1{,}5625 + 3{,}0625) = 2{,}625$.
+            Yamuklar: $0{,}25 \cdot (0 + 2 \cdot 0{,}25 + 2 \cdot 1 + 2 \cdot 2{,}25 + 4) = 2{,}75$.</p>
+            <p>Kesin değer: $\tfrac83 \approx 2{,}667$. Hata: $-0{,}917$ · $-0{,}042$ · $+0{,}083$.</p></div>
+    </div>
+    <div class="b-labs"><a class="b-lab" data-lab="integralreaktor" href="../../integralreaktor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">İNTEGRAL REAKTÖRÜ</span><span class="b-lab-what">Riemann toplamları ve yaklaşım yöntemleri</span></span></a></div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$y = x^2$ için sol dikdörtgenlerin neden her zaman eksik alan verdiğini şekil üzerinde açıkla.</p></div>
+            <div class="b-sol"><p>Fonksiyon artandır. Sol kenarda en düşük değerini alır, yani her dikdörtgen tamamen eğrinin altında kalır.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$x^2$ için $[0, 2]$ aralığında hatanın 0,01'in altında kalması için yamuk yöntemi kaç şerit gerektirir? Etkileşimli araçla dene.</p></div>
+            <div class="b-sol"><p>$n = 10$ için hata $0{,}013$; $n = 12$'den itibaren hata $0{,}01$'in altındadır. Hata yaklaşık $\tfrac{1}{n^2}$ ile orantılı olarak azalır.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Bir sinüs yayının ($0$ ile $\pi$ arası) altındaki alanı etkileşimli araçla bul. Hangi kesin değer ortaya çıkıyor?</p></div>
+            <div class="b-sol"><p>Yaklaşık değerler 2 sayısına yaklaşır. Sinüs yayının alanı tam olarak 2'dir.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Yamuk yöntemi için küçük bir program yaz (elektronik tablo ya da JavaScript) ve bununla $y = \sqrt{x}$ grafiğinin altında $[0, 4]$ aralığında kalan alanı $n = 100$ ile hesapla.</p></div>
+            <div class="b-sol"><p>Sonuç yaklaşık $5{,}33$, kesin değer $\tfrac{16}{3} \approx 5{,}333$. JavaScript ile: <code>let s = 0; for (let i = 0; i &lt; n; i++) s += (f(a+i*h) + f(a+(i+1)*h)) / 2 * h;</code></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="2,75" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">$x^2$ için $[0, 2]$ aralığında 4 şeritle yamuk yöntemi hangi değeri verir?</p><div class="b-sol"><p>$2{,}75$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Aynı şerit sayısında genellikle en az kesin olan yöntem hangisidir?</p><div class="b-mc"><button>Orta nokta dikdörtgenleri</button><button>Kenardan dikdörtgenler</button><button>Yamuklar</button></div><div class="b-sol"><p>Kenardan dikdörtgenler.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Monte Carlo yöntemi" data-toc-k="3" data-toc-short="3 Monte Carlo">
+    <div class="b-band"><span class="b-band-tag">KONU 3</span><span class="b-band-sub">3 DERS SAATİ</span></div>
+    <h2><span class="b-no">3</span>Rastgelelikle alan: Monte Carlo yöntemi</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Aranan alanı içine alan bir dikdörtgene rastgele noktalar at. Alanın içine düşen isabetlerin oranı, yaklaşık olarak alanın dikdörtgen içindeki payına eşittir.
+                Kulağa şans oyunu gibi geliyor, ama şaşırtıcı derecede iyi işliyor.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · MONTE CARLO YÖNTEMİ</div>
+                <div class="b-text">
+                    <p>$$A \approx \frac{\text{isabet sayısı}}{\text{tüm noktaların sayısı}} \cdot A_{\text{dikdörtgen}}$$</p>
+                    <p>Sonuç, her simülasyonda olduğu gibi bir <b>tahmini değerdir</b> (bkz. Bölüm 1). Kesinlik ancak yavaş artar: Bir basamak daha fazla kesinlik için yaklaşık yüz kat daha fazla nokta gerekir.</p>
+                    <p>Yöntem, şerit yöntemlerinin artık pek işe yaramadığı karmaşık şekillerde ve çok boyutlu problemlerde güçlüdür.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Ad:</b> Yöntem 1940'larda Los Alamos'ta ortaya çıktı ve adını Monte Carlo'daki kumarhaneden aldı.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · PARABOLÜN ALTINDAKİ ALAN</div>
+        <p class="b-help" style="margin:0 0 12px">$2 \times 4$ boyutlu dikdörtgende rastgele noktalar: $y = x^2$ eğrisinin altındakiler sarı, üstündekiler gri.</p>
+        <div data-widget="mc-flaeche"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">YÖNTEM · YEDİ SATIRDA $\pi$ TAHMİNİ</div>
+<pre class="b-pre"><code>const n = 1000000;
+let isabet = 0;
+for (let i = 0; i &lt; n; i++) {
+  const x = Math.random(), y = Math.random();
+  if (x * x + y * y &lt; 1) isabet++;       // çeyrek dairenin içinde
+}
+console.log(4 * isabet / n);               // yaklaşık 3.14…</code></pre>
+        <div class="b-text"><p>Çeyrek dairenin alanı $\tfrac{\pi}{4}$, birim karenin alanı 1'dir. Dolayısıyla isabet oranı $\tfrac{\pi}{4}$ değerini tahmin eder.</p></div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$2 \times 4$ boyutlu dikdörtgendeki 1.000 rastgele noktadan 338'i $y = x^2$ eğrisinin altında. Hangi alan tahmin edilir? Hata ne kadardır?</p></div>
+            <div class="b-sol"><p>$\tfrac{338}{1000} \cdot 8 = 2{,}704$. Kesin değer $\tfrac83 \approx 2{,}667$, hata yaklaşık $0{,}04$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$\pi$ programını $n = 100$, $10.000$ ve $1.000.000$ ile çalıştır. Her seferinde yaklaşık kaç basamak doğru çıkıyor?</p></div>
+            <div class="b-sol"><p>100 noktada çoğu zaman yalnızca 3, 10.000 noktada genellikle $3{,}1$, bir milyon noktada genellikle $3{,}14$. Yüz kat daha fazla nokta yaklaşık bir basamak kazandırır.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>$x^2$ eğrisinin altındaki alan için Monte Carlo yöntemini ve yamuk yöntemini karşılaştır: 100 hesaplama adımında hangisi daha kesindir? Yine de Monte Carlo'yu ne zaman seçerdin?</p></div>
+            <div class="b-sol"><p>$n = 100$ ile yamuklar: hata yaklaşık $0{,}0001$. 100 noktayla Monte Carlo: hata tipik olarak $0{,}2$ ile $0{,}4$ arası. Monte Carlo, şeritlere ayrılması zor şekillerde ya da çok boyutlu hacimlerde işe yarar.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="3,2" data-tol="0.001" data-ph="π ≈"><p class="b-q-text">Birim karedeki 1.000 noktadan 800'ü çeyrek dairenin içinde. $\pi$ için hangi tahmini değer elde edilir?</p><div class="b-sol"><p>$4 \cdot 0{,}8 = 3{,}2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Bir basamak daha fazla kesinlik için yaklaşık kaç nokta gerekir?</p><div class="b-mc"><button>yüz kat daha fazla</button><button>iki kat daha fazla</button><button>on kat daha fazla</button></div><div class="b-sol"><p>Hata $\tfrac{1}{\sqrt{n}}$ gibi azalır.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Gezinti: Hilbert'in oteli" data-toc-k="X" data-toc-short="Hilbert'in oteli">
+    <div class="b-band"><span class="b-band-tag">GEZİNTİ</span><span class="b-band-sub">SONSUZ BÜYÜKLÜK</span></div>
+    <h2>Hilbert'in oteli</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Bir otelin 1, 2, 3, … diye numaralandırılmış sonsuz sayıda odası var. Hepsi dolu. Yeni bir misafir geliyor. Resepsiyon görevlisi her misafirden $n$ numaralı odadan $n + 1$ numaralı odaya geçmesini rica ediyor.
+                Daha önce her yer dolu olduğu hâlde 1 numaralı oda boşalıyor.</p>
+            <p>Sonra sonsuz sayıda misafir taşıyan bir otobüs geliyor. Bu kez her misafir $n$ numaralı odadan $2n$ numaralı odaya geçiyor. Tüm tek numaralı odalar, yani sonsuz sayıda oda boşalıyor.</p>
+            <p>Demek ki sonsuz kümelerde sonlu kümelerdeki gibi sayamayız: Çift sayılar doğal sayılar kadar çoktur, çünkü $n \mapsto 2n$ onları birebir eşler.
+                Ama Georg Cantor şunu da gösterdi: Gerçek sayılar doğal sayılardan <b>daha çoktur</b>. Sonsuz, sonsuza eşit değildir.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Kaynak:</b> David Hilbert bu düşünce deneyini 1924'te bir derste sundu. Deney, George Gamow'un “One Two Three … Infinity” (1947) kitabıyla tanındı.</p></aside>
+    </div>
+    <div class="b-box b-check" data-check="hilbert">
+        <div class="b-box-title">SEN DE DÜŞÜN</div>
+        <div class="b-q" data-ans="7" data-ph="Oda"><p class="b-q-text">Dolu otele 3 yeni misafir geliyor. 4 numaralı odadaki misafir hangi odaya geçer?</p><div class="b-sol"><p>Herkes 3 oda ilerler: $n$ numaralı odadan $n + 3$ numaralı odaya, yani 7 numaralı odaya.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Özet" data-toc-k="Ö" data-toc-short="Özet">
+    <div class="b-band"><span class="b-band-tag">ÖZET</span><span class="b-band-sub">EN ÖNEMLİLER BİR BAKIŞTA</span></div>
+    <div class="b-rueck"><div><h4>İKİYE BÖLME</h4><p>İşaret değişimini ara, aralığı ikiye böl, işaret değişimi olan yarıyı tut. $n$ adımdan sonraki genişlik: $\tfrac{b - a}{2^n}$.</p></div><div><p>$x^3 - x - 2 = 0$: $x \approx 1{,}5214$</p></div></div>
+    <div class="b-rueck"><div><h4>ŞERİT YÖNTEMİ</h4><p>Dikdörtgenler (kenar ya da orta) veya yamuklar, genişlik $h = \tfrac{b - a}{n}$. Daha çok şerit, daha çok kesinlik.</p></div><div><p>$x^2$, $[0, 2]$ aralığında, $n = 4$: 1,75 · 2,625 · 2,75 (kesin değer 2,667)</p></div></div>
+    <div class="b-rueck"><div><h4>MONTE CARLO</h4><p>İsabet oranı · dikdörtgenin alanı. Tahmini değer, hata yaklaşık $\tfrac{1}{\sqrt{n}}$.</p></div><div><p>$\pi \approx 4 \cdot \tfrac{\text{isabet}}{n}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">ANINDA GERİ BİLDİRİM</span></div>
+    <div class="b-box b-check" data-check="test1">
+        <div class="b-box-title">TEST</div>
+        <div class="b-q" data-ans="1,25" data-tol="0.001" data-ph="m ="><p class="b-q-text">$x^2 - 2$ için ikiye bölme: İlk adımdan sonra aralık $[1;\ 1{,}5]$ oluyor. Sırada hangi orta nokta kontrol edilir?</p><div class="b-sol"><p>$1{,}25$</p></div></div>
+        <div class="b-q" data-ans="1,75" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">$x^2$ için $[0, 2]$ aralığında 4 şeritle sol dikdörtgenler hangi değeri verir?</p><div class="b-sol"><p>$0{,}5 \cdot (0 + 0{,}25 + 1 + 2{,}25) = 1{,}75$</p></div></div>
+        <div class="b-q" data-ans="2,4" data-tol="0.001" data-ph="A ≈"><p class="b-q-text">Alanı 8 olan bir dikdörtgendeki 1.000 rastgele noktadan 300'ü isabet. Hangi alan tahmin edilir?</p><div class="b-sol"><p>$0{,}3 \cdot 8 = 2{,}4$</p></div></div>
+    </div>
+    <h3>ÇEVRİMİÇİ DAHA FAZLA ALIŞTIRMA (ALMANCA)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-numerik.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SAYISAL YÖNTEMLER</span><span class="b-lab-what">İkiye bölme ve alanlar</span></span></a>
+        <a class="b-lab" href="../../mathetest11-montecarlo.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MONTE CARLO</span><span class="b-lab-what">Rastgelelikle alanlar ve π</span></span></a>
+        <a class="b-lab" href="../../mathetest11-unendlich.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SONSUZ BÜYÜKLÜK</span><span class="b-lab-what">Hilbert'in oteli, Cantor</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematik, Berufliches Gymnasium 11. sınıf · Saksonya Berufliches Gymnasium matematik öğretim programına göre seçmeli alan 3.</p>
+    <p>Tüm metinler, alıştırmalar ve şekiller özgün içeriktir.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-tr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-tr/funktionen.js"></script>
+<script src="../../js/buch-numerik.js"></script>
+<script src="../../js/buch-tr/numerik.js"></script>
+</body>
+</html>
