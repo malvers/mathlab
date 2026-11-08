@@ -382,8 +382,9 @@
 
     /* ---------- derivative trainer ---------- */
     // what a student types: "3x^2+2", "1/(2√x)", "e^x+cos x", "x e^x + e^x", "(3x-1)cos(x)+3sin(x)" → a JS function
+    // "sen" is the sine in Portuguese and Spanish school notation (Silva's report, 08.11.2026)
     function parseTerm(raw) {
-        let s = String(raw).toLowerCase().replace(/\s+/g, '').replace(/,/g, '.').replace(/[·⋅×]/g, '*').replace(/[−–]/g, '-')
+        let s = String(raw).toLowerCase().replace(/\s+/g, '').replace(/sen/g, 'sin').replace(/,/g, '.').replace(/[·⋅×]/g, '*').replace(/[−–]/g, '-')
             .replace(/²/g, '^2').replace(/³/g, '^3').replace(/√/g, 'sqrt').replace(/f'\(x\)=|y'=/g, '');
         const toks = [], re = /\d*\.?\d+|sqrt|sin|cos|tan|exp|ln|pi|e|x|[+\-*/^()]/y;
         let m;
