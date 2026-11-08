@@ -24,22 +24,33 @@ final class Gait {
 
     static final double G = 9.80665;
 
+    /*
+     * The numbers below were chosen offline on the public WISDM v1.1 walking data (36 people, phone in the front
+     * trouser pocket, about 20 Hz, 2010 phones): learn from 30 s of one recording, recognise 12 s pieces of
+     * another recording of the same person (27 of the 36 had two). Results with these settings: the right
+     * person first among all 36 in 85.5 % of the pieces, equal error rate 7.0 %. The paper's own setting
+     * (magnitude only, m = 12, tau = 2, p = 6) gave 69 % and 13 % on the same split.
+     */
+
     /** Analysis rate after resampling (Hz). The paper ran at about 25 Hz on a 2009 phone. */
     static final double RATE = 25;
-    /** Embedding dimension m and delay tau (samples): one point spans (M-1)*TAU/RATE = 0.88 s, about a stride. */
-    static final int M = 12, TAU = 2;
-    /** Dimensions kept after PCA and nearest neighbours per step, as in the paper (p = 6 there, n = 4). */
-    static final int P = 8, K = 4;
+    /**
+     * Embedding dimension m and delay tau (samples) per channel: a point spans (M-1)*TAU/RATE = 0.36 s, a good
+     * part of one step. Longer spans (0.88 s, the paper's) were clearly worse on WISDM.
+     */
+    static final int M = 10, TAU = 1;
+    /** Dimensions kept after PCA (of 2 x M) and nearest neighbours per step (n = 4 as in the paper). */
+    static final int P = 10, K = 4;
 
     /**
-     * A person counts as recognised when the best template scores at least this. Chosen on the public WISDM
-     * walking data (36 people, phone in the trouser pocket, 20 Hz): equal error rate there at about 0.55-0.56.
-     * A first guess for the Pixel, whose sensor is cleaner: check it with Doc's own walks (the result screen
-     * shows the raw score).
+     * A person counts as recognised when the best template scores at least this. On WISDM, households of four
+     * learned people with everybody else walking past: 81 % of the learned people named correctly, 9 % of the
+     * strangers taken for somebody (equal error rate at 0.67). A first value for the Pixel, whose sensor is far
+     * cleaner than those of 2010: check it with Doc's own walks (the result screen shows the raw score).
      */
-    static final double THRESHOLD = 0.56;
-    /** Width of the logistic step from score to confidence around THRESHOLD. */
-    static final double CONF_WIDTH = 0.04;
+    static final double THRESHOLD = 0.70;
+    /** Width of the logistic step from score to confidence around THRESHOLD (genuine minus stranger mean ~0.2). */
+    static final double CONF_WIDTH = 0.03;
     /** Softmax temperature between enrolled people (two equal scores give each 50 %). */
     static final double SHARE_TEMP = 0.03;
 
@@ -105,7 +116,7 @@ final class Gait {
     /**
      * Two channels independent of how the phone lies in the pocket: the acceleration along gravity (gravity =
      * moving average over 1 s) minus g, and the size of what is left (sideways and forwards together).
-     * On WISDM these two beat the plain magnitude a little (top-1 0.75 against 0.69 for 36 people).
+     * On WISDM these two beat the plain magnitude (equal error rate 7.0 % against 8.4 % at their best settings).
      */
     static float[][] channels(float[][] xyz) {
         int n = xyz[0].length;
