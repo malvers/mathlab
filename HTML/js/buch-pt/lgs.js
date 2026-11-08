@@ -13,13 +13,42 @@ window.BuchPT && BuchPT.add('lgs', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs lgs/*)
         // book pt-1 mathe11-pt:
+        // gauss, geraden, matrizen, pagerank (the button names as lb4 writes them: «Executar», «Próximo passo», «Novo sistema», «1 passo»)
+        'Ausführen': 'Executar', 'Nächster Schritt': 'Próximo passo', 'Neues LGS': 'Novo sistema',
+        'Zeile + k · Zeile': 'linha + k · linha', 'Zeile · k': 'linha · k', 'tauschen': 'trocar', 'Zielzeile': 'Linha alvo', 'zweite Zeile': 'Segunda linha', 'Faktor k': 'Fator k',
+        'Ziel I': 'alvo I', 'Ziel II': 'alvo II', 'Ziel III': 'alvo III', 'mit I': 'com I', 'mit II': 'com II', 'mit III': 'com III',
+        'eine Lösung': 'uma solução', 'keine Lösung': 'nenhuma solução', 'unendlich viele': 'uma infinidade', 'Zwei Geraden': 'Duas retas',
+        'mit $r =$': 'com $r =$', 'Neue Matrizen': 'Novas matrizes', 'Wähle eine Rechnung.': 'Escolhe um cálculo.',
+        '1 Schritt': '1 passo', '10 Schritte': '10 passos', 'Vier Webseiten und ihre Links': 'Quatro páginas web e as suas ligações',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs lgs/*)
         // book pt-1 mathe11-pt:
+        // gauss, geraden, matrizen, pagerank
+        ['Fertig: $x = ', 'Concluído: $x = '],
+        ['Stufenform erreicht. Jetzt kannst du von unten nach oben einsetzen oder mit „Nächster Schritt“ weiter umformen (Gauß-Jordan).',
+            'Forma escalonada obtida. Agora podes substituir de baixo para cima ou continuar a transformar com «Próximo passo» (Gauss-Jordan).'],
+        ['Wähle eine Umformung und führe sie aus, oder lass dir mit „Nächster Schritt“ helfen.', 'Escolhe uma operação e executa-a, ou pede ajuda com «Próximo passo».'],
+        ['Wähle zwei verschiedene Zeilen.', 'Escolhe duas linhas diferentes.'], ['Gib für $k$ eine Zahl ein, z. B. -2 oder 1/3.', 'Escreve um número para $k$, p. ex. -2 ou 1/3.'],
+        ['Mit $0$ multiplizieren ist keine Äquivalenzumformung.', 'Multiplicar por $0$ não é uma operação de equivalência.'],
+        ['Eine Zeile zu sich selbst zu addieren ändert die Lösungsmenge. Wähle eine andere Zeile.', 'Somar uma linha a si própria altera o conjunto-solução. Escolhe outra linha.'],
+        ['Gleichung I ist fest: ', 'A equação I está fixa: '], ['. Verändere Gleichung II: ', '. Altera a equação II: '],
+        ['Gleichung II lautet $0 = 0$, sie schränkt nichts ein.', 'A equação II fica $0 = 0$: não impõe nenhuma condição.'], ['Gleichung II lautet $0 = ', 'A equação II fica $0 = '],
+        ['$: ein Widerspruch, keine Lösung.', '$: uma contradição, nenhuma solução.'],
+        ['<b>Genau eine Lösung</b>: Die Geraden schneiden sich in $S(', '<b>Exatamente uma solução</b>: as retas intersetam-se em $S('],
+        ['<b>Unendlich viele Lösungen</b>: Beide Gleichungen beschreiben dieselbe Gerade.', '<b>Uma infinidade de soluções</b>: as duas equações descrevem a mesma reta.'],
+        ['<b>Keine Lösung</b>: Die Geraden sind parallel und verschieden.', '<b>Nenhuma solução</b>: as retas são paralelas e distintas.'],
+        ['Gleiche Stellen werden addiert.', 'Somam-se os elementos na mesma posição.'], ['Gleiche Stellen werden subtrahiert.', 'Subtraem-se os elementos na mesma posição.'],
+        ['Jeder Eintrag wird mit $r$ multipliziert.', 'Cada elemento é multiplicado por $r$.'],
+        ['Aus Zeilen werden Spalten: aus einer $2 \\times 3$- wird eine $3 \\times 2$-Matrix.', 'As linhas passam a colunas: uma matriz $2 \\times 3$ passa a ser uma matriz $3 \\times 2$.'],
+        ['Summe: $', 'Soma: $'],
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-1 mathe11-pt:
+        // gauss, pagerank
+        [/In Spalte (\d) gibt es keinen Pivot mehr: Das LGS hat keine oder unendlich viele Lösungen\./g,
+            'Na coluna $1 já não há pivô: o sistema não tem nenhuma solução ou tem uma infinidade de soluções.'],
+        [/Schritt (\d+):/g, 'Passo $1:'],
     ]
 });
