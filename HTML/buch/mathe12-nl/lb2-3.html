@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiskunde 12 · Hoofdstuk 2.3 · Differentieerregels | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Machtsregel, somregel en constante-factorregel, eˣ en sin x, eenvoudige producten. Hoofdstuk 2.3 van het interactieve leerboek Wiskunde · Berufliches Gymnasium 12: uitleg, voorbeelden, opgaven op drie niveaus, zelftoetsen en labs om uit te proberen.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">WISKUNDE · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Hoofdstuk"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhoud van het hoofdstuk">
+        <p class="b-toc-title">HOOFDSTUK 2.3 · LEERGEBIED 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introductie" data-toc-k="I" data-toc-short="Introductie" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">HOOFDSTUK 2.3 · LEERGEBIED 2 · JANUARI</p>
+            <h1>Differentieerregels</h1>
+            <p class="b-hero-lead">Elke keer de limiet van het differentiequotiënt uitrekenen is lastig. Gelukkig zijn er <b>regels</b> waarmee je
+                de afgeleide van bijna elke functie in een paar seconden opschrijft, zonder hulpmiddelen. Hier leer je de belangrijkste, van de machtsregel tot de
+                productregel, en ontmoet je de enige functie die bij het differentiëren gelijk blijft.</p>
+            <div class="b-chips"><span class="b-chip">12 LESUREN</span><span class="b-chip">3 PARAGRAFEN</span><span class="b-chip">ZONDER HULPMIDDELEN</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3","3*x^2"]' data-labels='["f(x) = x³","f′(x) = 3x²"]' data-lat="[1.55,-2.2]" data-x="-2.6,2.6" data-y="-4,6" data-h="240" data-aria="Grafiek van x tot de derde en van zijn afgeleide"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DIT LEER JE IN DIT HOOFDSTUK</div>
+            <div class="b-text"><ul>
+                <li>de <b>machtsregel, de regel van de constante factor en de somregel</b> toepassen, ook voor wortels en breuken</li>
+                <li>$\mathrm{e}^x$, $\sin x$ en $\cos x$ differentiëren</li>
+                <li>eenvoudige producten zoals $x \cdot \mathrm{e}^x$ differentiëren met de <b>productregel</b></li>
+                <li>afgeleiden in toepassingen interpreteren als <b>verandering</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: KUN JE DIT AL?</div>
+            <div class="b-q" data-ans="0,5" data-tol="0.0001" data-ph="r ="><p class="b-q-text">Schrijf $\sqrt{x} = x^r$. Hoe groot is $r$?</p><div class="b-sol"><p>$\sqrt{x} = x^{\frac12}$</p></div></div>
+            <div class="b-q" data-ans="-2" data-ph="r ="><p class="b-q-text">Schrijf $\tfrac{1}{x^2} = x^r$. Hoe groot is $r$?</p><div class="b-sol"><p>$x^{-2}$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="exponent"><p class="b-q-text">$x^3 \cdot x^2 = x^{?}$</p><div class="b-sol"><p>Exponenten optellen: $x^5$</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="f'(5) ="><p class="b-q-text">Uit hoofdstuk 2.2: $f(x) = x^2$ heeft $f'(x) = 2x$. Hoe groot is $f'(5)$?</p><div class="b-sol"><p>10</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Verkenningen" data-toc-k="V" data-toc-short="Verkenningen">
+    <div class="b-band"><span class="b-band-tag">VERKENNINGEN</span><span class="b-band-sub">OM TE BEGINNEN · IN GROEPJES</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">EEN PATROON</div>
+            <div class="b-text"><p>Jullie weten: $(x^2)' = 2x$ en $(x^3)' = 3x^2$.</p>
+                <ul><li>Wat is volgens jullie $(x^4)'$ en $(x^{10})'$?</li><li>Controleer jullie vermoeden voor $x^4$ met het differentiequotiënt in $x = 1$.</li></ul></div>
+            <span class="b-pair">→ Paragraaf 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">VERMENIGVULDIGEN EN VERSCHUIVEN</div>
+            <div class="b-text"><p>De grafiek van $g(x) = 3x^2$ is drie keer zo steil als die van $f(x) = x^2$. De grafiek van $h(x) = x^2 + 5$ is alleen verschoven.</p>
+                <ul><li>Wat betekent dat voor $g'$ en $h'$?</li><li>Formuleer twee regels.</li></ul></div>
+            <span class="b-pair">→ Paragraaf 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DE TROUWE FUNCTIE</div>
+            <div class="b-text"><p>Teken $f(x) = 2^x$ en $g(x) = 3^x$ nauwkeurig en meet de helling van de raaklijn in $x = 0$.</p>
+                <ul><li>Bij 2 is die kleiner dan 1, bij 3 groter. Is er een grondtal daartussen waarbij ze precies 1 is?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Machtsregel, factorregel, somregel" data-toc-k="1" data-toc-short="1 Machten">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 1</span><span class="b-band-sub">4 LESUREN</span></div>
+    <h2><span class="b-no">1</span>Machtsregel, regel van de constante factor en somregel</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$(x^2)' = 2x$, $(x^3)' = 3x^2$, en met het differentiequotiënt vind je $(x^4)' = 4x^3$. De exponent schuift als factor naar voren en wordt 1 kleiner.</p></div></div>
+            <div class="b-text"><p>Vermenigvuldig je een functie met een factor, dan worden alle hellingen met die factor vermenigvuldigd. Verschuif je haar omhoog, dan veranderen de hellingen helemaal niet.
+                En een som verandert even snel als haar termen samen.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · DIFFERENTIEERREGELS</div>
+                <div class="b-text">
+                    <p><b>Machtsregel:</b> $(x^n)' = n \cdot x^{n - 1}$ &nbsp; · &nbsp; <b>Constante:</b> $(c)' = 0$</p>
+                    <p><b>Regel van de constante factor:</b> $(c \cdot f(x))' = c \cdot f'(x)$ &nbsp; · &nbsp; <b>Somregel:</b> $(f(x) + g(x))' = f'(x) + g'(x)$</p>
+                    <p>Daarmee differentieer je elke veeltermfunctie term voor term: $(a_n x^n + \ldots + a_1 x + a_0)' = n\,a_n x^{n-1} + \ldots + a_1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Haakjes:</b> producten zoals $(2x - 1)(x + 3)$ of kwadraten zoals $(x + 2)^2$ eerst uitwerken, dan differentiëren.</p>
+            <p class="b-note"><b>Lineaire functie:</b> $(ax + b)' = a$. Dat past bij hoofdstuk 2.2.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · DIFFERENTIEERTRAINER</div>
+        <p class="b-help" style="margin:0 0 12px">Differentieer en typ je antwoord in, bijvoorbeeld <code>6x^2 - 2</code>, <code>1/(2sqrt(x))</code>, <code>e^x + cos x</code>. Er wordt in meerdere punten gecontroleerd, de schrijfwijze maakt niet uit.</p>
+        <div data-widget="ableiten"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 1 · TERM VOOR TERM</div>
+            <div class="b-text"><p>Differentieer $f(x) = 4x^5 - 3x^2 + 7x - 2$.</p></div>
+            <div class="b-sol"><p><span class="b-res">$f'(x) = 20x^4 - 6x + 7$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 2 · EERST HAAKJES WEGWERKEN</div>
+            <div class="b-text"><p>Differentieer $f(x) = (x + 2)^2$.</p></div>
+            <div class="b-sol"><p>$f(x) = x^2 + 4x + 4$, dus <span class="b-res">$f'(x) = 2x + 4$</span>. Pas op met afkortingen: bij $(2x + 2)^2 = 4x^2 + 8x + 4$ is de afgeleide $8x + 8$, niet $2(2x + 2)$.</p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Differentieer: a) $x^7$ &nbsp; b) $5x^4$ &nbsp; c) $-2x^3$ &nbsp; d) $\tfrac12 x^2$ &nbsp; e) $9$</p></div>
+            <div class="b-sol"><p>a) $7x^6$ &nbsp; b) $20x^3$ &nbsp; c) $-6x^2$ &nbsp; d) $x$ &nbsp; e) $0$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$f(x) = x^3 - 6x^2 + 2$. Bepaal $f'(x)$ en $f'(2)$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 3x^2 - 12x$, $f'(2) = 12 - 24 = -12$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Differentieer $f(x) = (2x - 1)(x + 3)$.</p></div>
+            <div class="b-sol"><p>$f(x) = 2x^2 + 5x - 3$, $f'(x) = 4x + 5$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>In welk punt heeft de grafiek van $f(x) = x^2 - 4x$ helling 2? In welk punt is de raaklijn horizontaal?</p></div>
+            <div class="b-sol"><p>$2x - 4 = 2 \Rightarrow x = 3$; $2x - 4 = 0 \Rightarrow x = 2$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Laat met het differentiequotiënt zien dat $(x^3)' = 3x^2$ geldt.</p></div>
+            <div class="b-sol"><p>$\dfrac{(x + h)^3 - x^3}{h} = \dfrac{3x^2h + 3xh^2 + h^3}{h} = 3x^2 + 3xh + h^2 \to 3x^2$</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="12" data-ph="f'(1) ="><p class="b-q-text">$f(x) = 2x^6$. Hoe groot is $f'(1)$?</p><div class="b-sol"><p>$f'(x) = 12x^5$, $f'(1) = 12$</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="f'(2) ="><p class="b-q-text">$f(x) = x^3 - 5x + 4$. Hoe groot is $f'(2)$?</p><div class="b-sol"><p>$3 \cdot 4 - 5 = 7$</p></div></div>
+        <div class="b-q" data-ans="-3" data-ph="x ="><p class="b-q-text">Waar heeft $f(x) = x^2 + 6x$ een horizontale raaklijn?</p><div class="b-sol"><p>$2x + 6 = 0 \Rightarrow x = -3$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Wortels en breuken" data-toc-k="2" data-toc-short="2 Wortels">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 2</span><span class="b-band-sub">2 LESUREN</span></div>
+    <h2><span class="b-no">2</span>Machten met rationale en negatieve exponenten</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>In hoofdstuk 2.2 kwam voor $f(x) = \tfrac1x$ in $x = 1$ de afgeleide $-1$ uit. Past dat bij de machtsregel als je $\tfrac1x = x^{-1}$ schrijft?</p></div></div>
+            <div class="b-text"><p>$(x^{-1})' = -1 \cdot x^{-2} = -\tfrac{1}{x^2}$, in $x = 1$ dus $-1$. Het klopt. De machtsregel geldt niet alleen voor natuurlijke exponenten.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · MACHTSREGEL VOOR ALLE EXPONENTEN</div>
+                <div class="b-text">
+                    <p>Voor elk reëel getal $r$ geldt (voor $x > 0$): $(x^r)' = r \cdot x^{r - 1}$.</p>
+                    <p>$\left(\sqrt{x}\right)' = \left(x^{\frac12}\right)' = \tfrac12 x^{-\frac12} = \dfrac{1}{2\sqrt{x}}$ &nbsp; · &nbsp; $\left(\dfrac1x\right)' = -\dfrac{1}{x^2}$ &nbsp; · &nbsp; $\left(\dfrac{1}{x^2}\right)' = -\dfrac{2}{x^3}$</p>
+                    <p>Werkwijze: wortels en breuken eerst als macht schrijven, dan differentiëren, dan terugschrijven.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Let op:</b> $\sqrt{x}$ is in $x = 0$ niet differentieerbaar, de raaklijn staat daar verticaal.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 3 · WORTEL EN BREUK</div>
+            <div class="b-text"><p>Differentieer $f(x) = 6\sqrt{x} - \dfrac{2}{x}$.</p></div>
+            <div class="b-sol"><p>$f(x) = 6x^{\frac12} - 2x^{-1}$, dus $f'(x) = 3x^{-\frac12} + 2x^{-2} = $ <span class="b-res">$\dfrac{3}{\sqrt{x}} + \dfrac{2}{x^2}$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 4 · GEBROKEN EXPONENT</div>
+            <div class="b-text"><p>Differentieer $f(x) = x\sqrt{x}$.</p></div>
+            <div class="b-sol"><p>$x \cdot x^{\frac12} = x^{\frac32}$, dus $f'(x) = \tfrac32 x^{\frac12} = $ <span class="b-res">$\tfrac32 \sqrt{x}$</span></p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Differentieer: a) $x^{-3}$ &nbsp; b) $\dfrac{4}{x}$ &nbsp; c) $8\sqrt{x}$ &nbsp; d) $x^{\frac13}$</p></div>
+            <div class="b-sol"><p>a) $-3x^{-4}$ &nbsp; b) $-\tfrac{4}{x^2}$ &nbsp; c) $\tfrac{4}{\sqrt{x}}$ &nbsp; d) $\tfrac13 x^{-\frac23}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bereken de helling van $f(x) = \sqrt{x}$ in $x = 1$, $x = 4$ en $x = 100$. Wat zie je?</p></div>
+            <div class="b-sol"><p>$f'(x) = \tfrac{1}{2\sqrt{x}}$: $0{,}5$; $0{,}25$; $0{,}05$. De grafiek wordt steeds vlakker.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Differentieer $f(x) = \dfrac{x^2 + 1}{x}$ zonder een quotiëntregel te gebruiken.</p></div>
+            <div class="b-sol"><p>$f(x) = x + x^{-1}$, $f'(x) = 1 - \tfrac{1}{x^2}$</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="0,25" data-tol="0.0001" data-ph="f'(4) ="><p class="b-q-text">$f(x) = \sqrt{x}$. Hoe groot is $f'(4)$?</p><div class="b-sol"><p>$\tfrac{1}{2 \cdot 2} = 0{,}25$</p></div></div>
+        <div class="b-q" data-ans="-1/9" data-tol="0.0005" data-ph="f'(3) ="><p class="b-q-text">$f(x) = \tfrac1x$. Hoe groot is $f'(3)$?</p><div class="b-sol"><p>$-\tfrac19$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="eˣ, sin x en producten" data-toc-k="3" data-toc-short="3 eˣ, sin">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 3</span><span class="b-band-sub">4 LESUREN</span></div>
+    <h2><span class="b-no">3</span>De e-macht, sinus en cosinus, eenvoudige producten</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Bij $2^x$ is de helling in $x = 0$ ongeveer 0,69, bij $3^x$ ongeveer 1,10. Voor het grondtal $\mathrm{e} \approx 2{,}718$ is ze precies 1.
+                En nog meer: de functie $\mathrm{e}^x$ heeft in elk punt een helling die even groot is als haar functiewaarde.</p></div></div>
+            <div class="b-text"><p>Bij het grafisch differentiëren in hoofdstuk 2.2 ontstond uit de sinuskromme de cosinuskromme. Differentieer je de cosinus, dan krijg je de in de $x$-as gespiegelde sinuskromme.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · e-MACHT, SINUS, PRODUCTREGEL</div>
+                <div class="b-text">
+                    <p>$(\mathrm{e}^x)' = \mathrm{e}^x$ &nbsp; · &nbsp; $(\sin x)' = \cos x$ &nbsp; · &nbsp; $(\cos x)' = -\sin x$</p>
+                    <p><b>Productregel:</b> $(u \cdot v)' = u' \cdot v + u \cdot v'$</p>
+                    <p>De afgeleide van een product is <b>niet</b> het product van de afgeleiden: $(x \cdot x)' = 2x$, maar $1 \cdot 1 = 1$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Radialen:</b> $(\sin x)' = \cos x$ geldt alleen als $x$ in radialen wordt gemeten. Zet de GR op RAD.</p>
+            <p class="b-note"><b>Met een CAS</b> kun je ook willekeurige andere functies differentiëren, bijvoorbeeld ter controle.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGUUR · SINUS EN ZIJN AFGELEIDE</div>
+        <p class="b-help" style="margin:0 0 12px">Goud: $\sin x$, cyaan: $\cos x$. Waar de sinus een maximum of minimum heeft, is de cosinus 0.</p>
+        <div data-widget="graph" data-fns='["sin(x)","cos(x)"]' data-labels='["sin x","cos x"]' data-lat="[1.2,5.9]" data-pi data-x="-0.5,7" data-y="-1.5,1.5" data-h="240" data-aria="Sinus en cosinus"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 5 · SOM</div>
+            <div class="b-text"><p>Differentieer $f(x) = 3\mathrm{e}^x - 2\sin x + x^2$.</p></div>
+            <div class="b-sol"><p><span class="b-res">$f'(x) = 3\mathrm{e}^x - 2\cos x + 2x$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 6 · PRODUCTEN</div>
+            <div class="b-text"><p>Differentieer a) $f(x) = x \cdot \mathrm{e}^x$ &nbsp; b) $g(x) = (3x - 1) \cdot \sin x$.</p></div>
+            <div class="b-sol"><p>a) $u = x$, $v = \mathrm{e}^x$: $f'(x) = 1 \cdot \mathrm{e}^x + x \cdot \mathrm{e}^x = (1 + x)\,\mathrm{e}^x$</p>
+                <p>b) $u = 3x - 1$, $v = \sin x$: $g'(x) = 3\sin x + (3x - 1)\cos x$</p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Differentieer: a) $5\mathrm{e}^x$ &nbsp; b) $\sin x + \cos x$ &nbsp; c) $\mathrm{e}^x - x^3$ &nbsp; d) $4\cos x$</p></div>
+            <div class="b-sol"><p>a) $5\mathrm{e}^x$ &nbsp; b) $\cos x - \sin x$ &nbsp; c) $\mathrm{e}^x - 3x^2$ &nbsp; d) $-4\sin x$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Welke helling heeft de grafiek van $f(x) = \mathrm{e}^x$ in $x = 0$, $x = 1$ en $x = -2$?</p></div>
+            <div class="b-sol"><p>$1$; $\mathrm{e} \approx 2{,}718$; $\mathrm{e}^{-2} \approx 0{,}135$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Differentieer met de productregel: a) $x^2 \cdot \mathrm{e}^x$ &nbsp; b) $x \cdot \sin x$ &nbsp; c) $(2x + 1) \cdot \mathrm{e}^x$</p></div>
+            <div class="b-sol"><p>a) $(x^2 + 2x)\,\mathrm{e}^x$ &nbsp; b) $\sin x + x\cos x$ &nbsp; c) $2\mathrm{e}^x + (2x + 1)\mathrm{e}^x = (2x + 3)\,\mathrm{e}^x$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>In welke punten op $[0, 2\pi]$ heeft $f(x) = \sin x$ een horizontale raaklijn?</p></div>
+            <div class="b-sol"><p>$\cos x = 0$ bij $x = \tfrac{\pi}{2}$ en $x = \tfrac{3\pi}{2}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Voor welke $x$ heeft $f(x) = x \cdot \mathrm{e}^x$ een horizontale raaklijn? Leg uit dat er maar één zo'n punt is.</p></div>
+            <div class="b-sol"><p>$(1 + x)\,\mathrm{e}^x = 0$. Omdat altijd $\mathrm{e}^x > 0$ geldt, moet $1 + x = 0$ zijn: alleen $x = -1$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="1" data-ph="f'(0) ="><p class="b-q-text">$f(x) = \mathrm{e}^x$. Hoe groot is $f'(0)$?</p><div class="b-sol"><p>$\mathrm{e}^0 = 1$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="f'(0) ="><p class="b-q-text">$f(x) = x \cdot \mathrm{e}^x + \sin x$. Hoe groot is $f'(0)$?</p><div class="b-sol"><p>$f'(x) = (1 + x)\mathrm{e}^x + \cos x$, $f'(0) = 1 + 1 = 2$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Wat is $(\cos x)'$?</p>
+            <div class="b-mc"><button>$\sin x$</button><button>$-\sin x$</button><button>$-\cos x$</button></div>
+            <div class="b-sol"><p>De gespiegelde sinuskromme.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Herhalen · verdiepen · verbinden" data-toc-k="H" data-toc-short="Oefenen">
+    <div class="b-band"><span class="b-band-tag">HERHALEN · VERDIEPEN · VERBINDEN</span></div>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Een auto remt, de afgelegde weg is $s(t) = 20t - 2t^2$ (m, s). Hoe snel rijdt hij na 0 s en na 3 s? Wanneer staat hij stil?</p></div>
+            <div class="b-sol"><p>$v(t) = s'(t) = 20 - 4t$: 20 m/s en 8 m/s. Hij staat stil bij $v(t) = 0$, dus na 5 s.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Een bacteriecultuur groeit volgens $N(t) = 500 \cdot \mathrm{e}^t$ ($t$ in uren). Bereken de groeisnelheid na 2 uur. Wat valt op aan de verhouding tot $N(2)$?</p></div>
+            <div class="b-sol"><p>$N'(t) = 500\,\mathrm{e}^t$, $N'(2) \approx 3695$ bacteriën per uur, precies evenveel als $N(2)$: de groeisnelheid is evenredig met de hoeveelheid.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Verbinden met klas 11:</b> bij de sinusfunctie $f(x) = 2\sin x$: hoe groot is de grootste helling, en in welke punten wordt die bereikt?</p></div>
+            <div class="b-sol"><p>$f'(x) = 2\cos x$, dus hoogstens 2, in $x = 0, \pm 2\pi, \ldots$ (waar de grafiek stijgend door de evenwichtsstand gaat).</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Zoek een functie $f$ met $f'(x) = 6x^2 - \cos x$ en $f(0) = 3$.</p></div>
+            <div class="b-sol"><p>$f(x) = 2x^3 - \sin x + 3$. Controle: $f'(x) = 6x^2 - \cos x$, $f(0) = 3$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursie: het getal e" data-toc-k="X" data-toc-short="Getal e">
+    <div class="b-band"><span class="b-band-tag">EXCURSIE</span><span class="b-band-sub">EEN GETAL UIT DE RENTEREKENING</span></div>
+    <h2>Het getal e van Euler</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In 1690 vroeg Jakob Bernoulli zich af: wat gebeurt er met 1 daalder bij 100% rente per jaar, als je de rente niet één keer, maar elk halfjaar, elke maand, elke dag, ja op elk moment bijschrijft?
+                Per halfjaar geeft $\left(1 + \tfrac12\right)^2 = 2{,}25$, per maand $\left(1 + \tfrac{1}{12}\right)^{12} \approx 2{,}613$, per dag $\left(1 + \tfrac{1}{365}\right)^{365} \approx 2{,}715$.</p>
+            <p>De waarden groeien, maar niet onbeperkt. Ze naderen een getal dat Leonhard Euler later $\mathrm{e}$ noemde:
+                $\mathrm{e} = \lim\limits_{n \to \infty} \left(1 + \tfrac1n\right)^n = 2{,}718\,281\,828\ldots$</p>
+            <p>Dat juist $\mathrm{e}^x$ haar eigen afgeleide is, maakt haar tot de belangrijkste functie voor groei en verval in natuur, techniek en economie.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Bronnen:</b> Jakob Bernoulli: Quaestiones nonnullae de usuris. Acta Eruditorum, 1690. Leonhard Euler: Mechanica, Sint-Petersburg 1736.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Samenvatting" data-toc-k="S" data-toc-short="Samenvatting">
+    <div class="b-band"><span class="b-band-tag">SAMENVATTING</span><span class="b-band-sub">HET BELANGRIJKSTE IN ÉÉN OOGOPSLAG</span></div>
+    <div class="b-rueck"><div><h4>MACHTSREGEL</h4><p>$(x^r)' = r \cdot x^{r - 1}$, voor alle exponenten.</p></div>
+        <div><p>$(x^7)' = 7x^6$ · $(\sqrt{x})' = \tfrac{1}{2\sqrt{x}}$ · $(\tfrac1x)' = -\tfrac{1}{x^2}$</p></div></div>
+    <div class="b-rueck"><div><h4>FACTORREGEL EN SOMREGEL</h4><p>Factoren blijven staan, termen apart differentiëren, constanten vallen weg.</p></div>
+        <div><p>$(4x^5 - 3x^2 + 7x - 2)' = 20x^4 - 6x + 7$</p></div></div>
+    <div class="b-rueck"><div><h4>e-MACHT EN SINUS</h4><p>$(\mathrm{e}^x)' = \mathrm{e}^x$ · $(\sin x)' = \cos x$ · $(\cos x)' = -\sin x$</p></div>
+        <div><p>Radialen!</p></div></div>
+    <div class="b-rueck"><div><h4>PRODUCTREGEL</h4><p>$(u \cdot v)' = u'v + uv'$</p></div>
+        <div><p>$(x\,\mathrm{e}^x)' = (1 + x)\,\mathrm{e}^x$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Toets" data-toc-k="T" data-toc-short="Toets">
+    <div class="b-band"><span class="b-band-tag">TOETS</span><span class="b-band-sub">TWEE RONDES · METEEN FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDE 1</div>
+            <div class="b-q" data-ans="-8" data-ph="f'(1) ="><p class="b-q-text">$f(x) = -2x^4 + 3$. Hoe groot is $f'(1)$?</p><div class="b-sol"><p>$-8x^3$ bij 1: $-8$</p></div></div>
+            <div class="b-q" data-ans="0,5" data-tol="0.0001" data-ph="f'(9) ="><p class="b-q-text">$f(x) = 3\sqrt{x}$. Hoe groot is $f'(9)$?</p><div class="b-sol"><p>$\tfrac{3}{2\sqrt9} = 0{,}5$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="f'(π) ="><p class="b-q-text">$f(x) = \sin x$. Hoe groot is $f'(\pi)$?</p><div class="b-sol"><p>$\cos \pi = -1$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDE 2</div>
+            <div class="b-q" data-ans="13" data-ph="f'(2) ="><p class="b-q-text">$f(x) = (x + 1)(2x + 3)$. Hoe groot is $f'(2)$?</p><div class="b-sol"><p>$f(x) = 2x^2 + 5x + 3$, $f'(x) = 4x + 5$, $f'(2) = 13$</p></div></div>
+            <div class="b-q" data-ans="-0,25" data-tol="0.0001" data-ph="f'(2) ="><p class="b-q-text">$f(x) = \tfrac{1}{x}$. Hoe groot is $f'(2)$?</p><div class="b-sol"><p>$-\tfrac14$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="f'(0) ="><p class="b-q-text">$f(x) = (2x + 1) \cdot \mathrm{e}^x$. Hoe groot is $f'(0)$?</p><div class="b-sol"><p>$f'(x) = (2x + 3)\,\mathrm{e}^x$, $f'(0) = 3$</p></div></div>
+        </div>
+    </div>
+    <h3>MEER OEFENEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-ableitungsregeln.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DIFFERENTIEERREGELS</span><span class="b-lab-what">Machtsregel, somregel, factorregel (in het Duits)</span></span></a>
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DIFFERENTIAALLAB</span><span class="b-lab-what">Functies en hun afgeleiden</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Wiskunde, Berufliches Gymnasium klas 12 · leergebied 2, volgens het leerplan wiskunde van het Berufliches Gymnasium in Saksen.</p>
+    <p>Alle teksten, opgaven en afbeeldingen zijn eigen materiaal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-nl.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-nl/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-nl/analysis.js"></script>
+</body>
+</html>
