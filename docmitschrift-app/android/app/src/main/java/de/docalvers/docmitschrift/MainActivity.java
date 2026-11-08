@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -22,6 +23,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,10 +41,13 @@ import java.util.List;
  */
 public class MainActivity extends Activity {
     private static final int LAMBDA = 0xFFF5C242, UPSILON = 0xFFB02418, PHI = 0xFF799E31;
-    private static final int TEXT = 0xFFEEEEEE, BG = 0xFF121212;
+    private static final int TEXT = 0xFFEEEEEE, BG = 0xFF121212, MUTED = 0xFF8A93A6;
 
     private Typeface orbitron;
     private Button toggle, akku;
+    private TextView title, micLine;
+    private PillView pill;
+    private int side, callTitle;
     private Boolean shownOn;                    // what the button shows now, null before the first update
     private final Handler tick = new Handler(Looper.getMainLooper());
     private final Runnable refresh = new Runnable() {
@@ -60,25 +65,25 @@ public class MainActivity extends Activity {
 
         // sizes from the screen, so the button stays big in portrait and still fits in landscape
         DisplayMetrics m = getResources().getDisplayMetrics();
-        int side = Math.round(Math.min(m.widthPixels * 0.56f, m.heightPixels * 0.34f));
+        // the round button is as big as Solita's circle in DocCall: half way between DocCall's old circle and
+        // this old button (Doc, 08.11.2026) - DocCall's circleSize() has the same line, change both together
+        side = Math.round((Math.min(dp(280), m.widthPixels * 0.72f) + Math.min(m.widthPixels * 0.56f, m.heightPixels * 0.34f)) / 2f);
         int pillW = Math.min(m.widthPixels - dp(32), dp(420));
         int pillH = Math.min(dp(96), Math.round(m.heightPixels * 0.18f));
 
-        LinearLayout col = new LinearLayout(this);
-        col.setOrientation(LinearLayout.VERTICAL);
-        col.setGravity(Gravity.CENTER_HORIZONTAL);
-        col.setPadding(dp(16), dp(24), dp(16), dp(24));
-        col.setBackgroundColor(BG);
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(BG);
 
-        TextView title = new TextView(this);
+        title = new TextView(this);
         title.setText("DocNote");
         title.setTypeface(orbitron);
         title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
         title.setTextColor(LAMBDA);
         title.setGravity(Gravity.CENTER);
-        col.addView(title, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        col.addView(new View(this), new LinearLayout.LayoutParams(1, 0, 1f));
+        FrameLayout.LayoutParams tp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP);
+        tp.topMargin = dp(12 + 28);   // the name at the height of "DocCall" in DocCall (Doc, 08.11.2026)
+        root.addView(title, tp);
 
         toggle = new Button(this);
         toggle.setAllCaps(false);
@@ -90,13 +95,14 @@ public class MainActivity extends Activity {
             v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             press();
         });
-        col.addView(toggle, new LinearLayout.LayoutParams(side, side));
+        // button and pill are placed in place() once the screen's height is known
+        root.addView(toggle, new FrameLayout.LayoutParams(side, side, Gravity.TOP | Gravity.CENTER_HORIZONTAL));
+        pill = new PillView(this);
+        root.addView(pill, new FrameLayout.LayoutParams(pillW, pillH, Gravity.TOP | Gravity.CENTER_HORIZONTAL));
 
-        LinearLayout.LayoutParams pp = new LinearLayout.LayoutParams(pillW, pillH);
-        pp.topMargin = dp(40);
-        col.addView(new PillView(this), pp);
-
-        col.addView(new View(this), new LinearLayout.LayoutParams(1, 0, 1f));
+        LinearLayout bottom = new LinearLayout(this);
+        bottom.setOrientation(LinearLayout.VERTICAL);
+        bottom.setGravity(Gravity.CENTER_HORIZONTAL);
 
         // only while Android may still put DocNote to sleep - gone for good once allowed
         akku = new Button(this);
@@ -110,12 +116,53 @@ public class MainActivity extends Activity {
         akku.setMinHeight(dp(58));
         akku.setOnClickListener(v -> startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
                 Uri.parse("package:" + getPackageName()))));
-        col.addView(akku, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        bottom.addView(akku, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        setContentView(col);
+        // which microphone, very small at the bottom (Doc, 08.11.2026), so a Bluetooth microphone that did not
+        // connect shows as "Telefon-Mikro" before a hike or a lesson, not afterwards in the transcript
+        micLine = new TextView(this);
+        micLine.setTypeface(orbitron);
+        micLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        micLine.setTextColor(MUTED);
+        micLine.setGravity(Gravity.CENTER);
+        micLine.setSingleLine(true);
+        micLine.setEllipsize(TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams mp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        mp.topMargin = dp(12);
+        bottom.addView(micLine, mp);
+
+        FrameLayout.LayoutParams bp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM);
+        bp.setMargins(dp(16), 0, dp(16), dp(24));
+        root.addView(bottom, bp);
+
+        root.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> place(v.getHeight()));
+        setContentView(root);
 
         askPermissions();
         probeRecognizer();
+    }
+
+    /**
+     * The button's centre goes exactly where Solita's circle sits in DocCall, the pill under it (Doc, 08.11.2026:
+     * "den Startknopf und die Waveline so hoch bitte wie Solita"). DocCall's screen: 12 dp padding, its title
+     * (28 sp) under a 28 dp margin, the gear row (56 dp) and 16 dp padding at the bottom, the circle centred in
+     * between and lifted by 80 dp (DocCall MainActivity: LIFT_DP). Both apps have the same theme and window.
+     */
+    private void place(int h) {
+        if (callTitle == 0) {
+            TextView t = new TextView(this);
+            t.setTypeface(orbitron);
+            t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 28);
+            t.setLineSpacing(0, 1.15f);
+            t.setText("DocCall");
+            t.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+            callTitle = t.getMeasuredHeight();
+        }
+        float centre = (dp(12) + dp(28) + callTitle + h - dp(16) - dp(56)) / 2f - dp(80);
+        centre = Math.max(centre, title.getBottom() + dp(16) + side / 2f);   // landscape: never over the name
+        toggle.setTranslationY(centre - side / 2f);
+        pill.setTranslationY(centre + side / 2f + dp(40));
     }
 
     /** For the planned live text: can this phone recognise German on the device, without the internet? Log only. */
@@ -193,6 +240,8 @@ public class MainActivity extends Activity {
         }
         boolean free = getSystemService(PowerManager.class).isIgnoringBatteryOptimizations(getPackageName());
         akku.setVisibility(free ? View.GONE : View.VISIBLE);
+        String mic = AufnahmeService.shownMic(this);
+        if (!mic.contentEquals(micLine.getText())) micLine.setText(mic);
     }
 
     private GradientDrawable shape(int kind, int color) {

@@ -510,6 +510,26 @@ public class AufnahmeService extends Service {
         return best;
     }
 
+    /**
+     * The microphone the screen names at the bottom (Doc, 08.11.2026): while recording the one really in use
+     * (a Bluetooth one that would not open shows as "Telefon-Mikro"), otherwise the best one connected now.
+     */
+    static String shownMic(Context c) {
+        if (recording && !mic.isEmpty()) return mic;
+        AudioDeviceInfo best = null;
+        int rank = -1;
+        for (AudioDeviceInfo d : c.getSystemService(AudioManager.class).getDevices(AudioManager.GET_DEVICES_INPUTS)) {
+            int r = rank(d.getType());
+            if (r > rank) {
+                rank = r;
+                best = d;
+            }
+        }
+        if (best == null || rank < 2) return "Telefon-Mikro";
+        String name = deviceName(best);
+        return (rank == 3 ? "USB" : "Bluetooth") + (name.isEmpty() ? "" : " · " + name);
+    }
+
     private static int rank(int type) {
         switch (type) {
             case AudioDeviceInfo.TYPE_USB_DEVICE:
@@ -567,11 +587,17 @@ public class AufnahmeService extends Service {
 
     private String label(AudioDeviceInfo d) {
         if (d == null) return "Telefon-Mikro";
-        String name = d.getProductName() == null ? "" : d.getProductName().toString().trim();
+        String name = deviceName(d);
         int t = d.getType();
         if (rank(t) == 3) return "USB" + (name.isEmpty() ? "" : " · " + name);
         if (bluetooth) return "Bluetooth" + (name.isEmpty() ? "" : " · " + name);
         return "Telefon-Mikro";
+    }
+
+    /** The device's own name, without Android's "USB-Audio - " in front ("USB · Wireless Mic Rx"). */
+    private static String deviceName(AudioDeviceInfo d) {
+        String n = d.getProductName() == null ? "" : d.getProductName().toString().trim();
+        return n.startsWith("USB-Audio - ") ? n.substring("USB-Audio - ".length()).trim() : n;
     }
 
     // ---- how much today
