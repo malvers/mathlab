@@ -118,6 +118,7 @@
         s = s.replace(/^[a-zA-Z][a-zA-Z0-9_]*=/, '').replace(/^\+/, '').replace(/^€/, '');
         let percent = false;
         if (s.endsWith('%')) { percent = true; s = s.slice(0, -1); }
+        else if (s.startsWith('%')) { percent = true; s = s.slice(1); }   // Turkish writes the sign first: "%30" (Arf, 08.11.2026)
         const unit = s.match(/^(.*\d)([a-zA-ZäöüÄÖÜß°€²³µ\/.]{1,12})$/);
         if (unit && !/^e-?\d/i.test(unit[2])) s = unit[1];
         if (DOT && /^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s = s.replace(/,/g, '');  // English (and Kenyan) "1,500" is fifteen hundred
