@@ -1693,9 +1693,38 @@
             }
         }
 
-        /* Books view: only the book languages (Doc, 14.10.2026: "nur hier"; IT + FR added 26.10.2026: "noch ergänzen bitte") */
-        body.view-buecher .index-lang-switcher .lang-flag:not([data-lang="de"]):not([data-lang="es"]):not([data-lang="en"]):not([data-lang="it"]):not([data-lang="fr"]) {
-            display: none;
+        /* Books view: all nine languages of the hub - a book card shows the edition of the chosen flag, or its cover grey with
+           "kommt noch" (Doc, 08.11.2026: "dass die Sprachen oben tatsächlich umstellen, welches Exemplar zu sehen ist"); until then
+           only de/es/en/it/fr showed here. One cover instead of a row of five, so it may be larger (bookOneCover in the script) */
+        #tool-container .book-one {
+            position: relative;
+            display: block;
+        }
+        #tool-container .book-one img {
+            height: 104px;
+            width: auto;
+            display: block;
+            border-radius: 2px 6px 6px 2px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+        #tool-container .book-one.is-soon img {
+            filter: grayscale(1) brightness(0.85);
+            opacity: 0.5;
+        }
+        #tool-container .book-one .book-soon {
+            position: absolute;
+            left: 50%;
+            bottom: 10px;
+            transform: translateX(-50%);
+            padding: 3px 7px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            white-space: nowrap;
         }
 
         .index-lang-switcher::-webkit-scrollbar {
@@ -2584,11 +2613,73 @@
             return a;
         }
 
+        /* The editions of every book by language: folder HTML/buch/<book>[-<lang>]/, cover resources/og/buch-<book>[-<lang>]-cover.jpg
+           (German without a suffix). Add the language here when an edition goes live. */
+        const BOOK_LANGS = {
+            mathe11: ['de', 'en', 'es', 'fr', 'it', 'sw'],
+            mathe12: ['de', 'en', 'es', 'fr', 'it', 'sw'],
+            mathe13: ['de', 'en', 'es', 'fr', 'it', 'sw'],
+            mathe12lk: ['de', 'en', 'es', 'fr', 'it', 'sw'],
+            mathe13lk: ['de', 'en', 'es', 'fr', 'it', 'sw'],
+            mathefos11: ['de', 'en', 'es', 'fr', 'it'],
+            mathefos12: ['de', 'en', 'es', 'fr', 'it'],
+            mathe5: ['de', 'en', 'es', 'fr', 'it'],
+            mathe6: ['de', 'en', 'es', 'fr', 'it'],
+            mathe7: ['de', 'en', 'es', 'fr', 'it'],
+            mathe8: ['de', 'en', 'es', 'fr', 'it'],
+            mathe9: ['de', 'en', 'es', 'fr', 'it'],
+            mathe10: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy5: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy6: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy7: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy8: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy9: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy10: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy11: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy12: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy11lk: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy12lk: ['de', 'en', 'es', 'fr', 'it'],
+            pruefung: ['de']
+        };
+        const BOOK_SOON = { de: 'kommt noch', en: 'coming soon', es: 'próximamente', fr: 'bientôt', it: 'in arrivo',
+            pt: 'em breve', nl: 'binnenkort', sw: 'inakuja', tr: 'yakında' };
+
+        /* In the books view a book card shows ONE cover, the edition in the language of the flag chosen above, and opens it; a
+           book without that edition shows its German cover grey with "kommt noch" and opens the English edition, else the German
+           one (Doc, 08.11.2026: "wenn keins da ist, dann machen wir da irgendwie so kleine Platzhalter, mit dem Cover, aber
+           irgendwie grau, schwarz-weiß ... die kommen noch"). Leaving the view gives the card its row of covers and link back. */
+        function bookOneCover(card, on) {
+            const icon = card.querySelector('.card-icon');
+            const langs = BOOK_LANGS[(card.dataset.labId || '').replace(/^lehrbuch-/, '')];
+            if (!icon || !langs) return;
+            if (!on) {
+                if (card.dataset.icons === undefined) return;
+                icon.innerHTML = card.dataset.icons;
+                card.setAttribute('href', card.dataset.href0);
+                delete card.dataset.icons;
+                delete card.dataset.href0;
+                return;
+            }
+            if (card.dataset.icons === undefined) {
+                card.dataset.icons = icon.innerHTML;
+                card.dataset.href0 = card.getAttribute('href');
+            }
+            const book = card.dataset.labId.replace(/^lehrbuch-/, '');
+            const lang = (typeof CyberI18n !== 'undefined' && CyberI18n.current) || 'de';
+            const has = langs.includes(lang);
+            const edition = (l) => book + (l === 'de' ? '' : '-' + l);
+            card.setAttribute('href', 'buch/' + edition(has ? lang : langs.includes('en') ? 'en' : 'de') + '/index.html');
+            icon.innerHTML = '<span class="book-one' + (has ? '' : ' is-soon') + '">'
+                + '<img src="resources/og/buch-' + edition(has ? lang : 'de') + '-cover.jpg" alt="" loading="lazy" decoding="async">'
+                + (has ? '' : '<span class="book-soon">' + (BOOK_SOON[lang] || BOOK_SOON.en) + '</span>') + '</span>';
+        }
+
         function groupBooksBySchool(on) {
             const box = document.getElementById('tool-container');
             if (!box || typeof LABS_DATA === 'undefined') return;
             box.querySelectorAll('.book-school-head, .book-kino, .book-sw').forEach(h => h.remove());
             if (!on) {
+                box.querySelectorAll('.card[data-icons]').forEach(card => bookOneCover(card, false));
                 if (box.dataset.grouped) {
                     LABS_DATA.forEach(lab => {
                         const card = box.querySelector(`.card[data-lab-id="${lab.id}"]`);
@@ -2630,7 +2721,9 @@
                 frag.appendChild(head);
                 books.forEach(lab => {
                     const card = box.querySelector(`.card[data-lab-id="${lab.id}"]`);
-                    if (card) frag.appendChild(card);
+                    if (!card) return;
+                    bookOneCover(card, true);
+                    frag.appendChild(card);
                 });
             });
             box.prepend(frag);
