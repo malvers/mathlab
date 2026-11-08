@@ -43,11 +43,12 @@ window.BuchPT && BuchPT.add('analysis', {
         // tangente (lb2-5): Normale = reta normal, Berührpunkt = ponto de tangência
         'Tangente und Normale an einen Graphen': 'Tangente e normal a um gráfico',
         // steckbrief, optimieren (lb2-6): Steckbrief = função a partir de condições, Ansatz = forma geral, Zielfunktion = função objetivo,
-        // Nebenbedingung = condição; the surface of the tin is A (área total) in Portuguese schools, German O (rule below)
+        // Nebenbedingung = condição ("Zaun an der Mauer" is in funktionen: "Vedação junto a um muro"); the surface of the tin is A
+        // (área total) in Portuguese schools, German O (rule below)
         'Parabel durch 3 Punkte': 'Parábola por 3 pontos', 'Kubisch: Extrempunkt + 2 Punkte': '3.º grau: extremo + 2 pontos',
         'Kubisch: Wendepunkt mit Tangente + Punkt': '3.º grau: ponto de inflexão com tangente + ponto', 'Bedingungen': 'Condições',
         'Steigung im Wendepunkt $m$': 'Declive no ponto de inflexão $m$', 'Funktion aus Bedingungen': 'Função a partir de condições',
-        'Schachtel': 'Caixa', 'Dose': 'Lata', 'Zaun an der Mauer': 'Vedação junto ao muro', 'Problem': 'Problema', 'Zielfunktion': 'Função objetivo',
+        'Schachtel': 'Caixa', 'Dose': 'Lata', 'Problem': 'Problema', 'Zielfunktion': 'Função objetivo',
         'Lösung mit der Ableitung': 'Solução com a derivada', 'x in cm': 'x em cm', 'V in cm³': 'V em cm³', 'r in cm': 'r em cm',
         'O in cm²': 'A em cm²', 'x in m': 'x em m', 'A in m²': 'A em m²',
     },
