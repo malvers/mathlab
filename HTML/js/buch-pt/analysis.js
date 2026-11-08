@@ -34,6 +34,12 @@ window.BuchPT && BuchPT.add('analysis', {
         'Potenzen': 'Potências', 'Summen': 'Somas', 'Wurzeln und Brüche': 'Raízes e frações', 'eˣ und sin x': 'eˣ e sen x', 'Produkte': 'Produtos',
         'Gemischt': 'Misto', 'Aufgabenart': 'Tipo de exercício', 'z. B. 6x^2 - 2 oder cos x': 'p. ex. 6x^2 - 2 ou cos x', 'Lösung': 'Solução',
         'Neue Aufgabe': 'Novo exercício',
+        // kurve (lb2-4): Hochpunkt / Tiefpunkt = máximo / mínimo relativo, Wendepunkt = ponto de inflexão I, Sattelpunkt = ponto de sela;
+        // the letters on the canvas by the rule below
+        '$a$ (vor $x^3$)': '$a$ (coeficiente de $x^3$)', '$b$ (vor $x^2$)': '$b$ (coeficiente de $x^2$)', '$c$ (vor $x$)': '$c$ (coeficiente de $x$)',
+        'Zeige auch:': 'Mostrar também:', 'nur f': 'só f', 'f′ und f″': 'f′ e f″', 'Ableitungen zeigen': 'Mostrar as derivadas',
+        'Graph einer Funktion dritten Grades mit Extrem- und Wendepunkten': 'Gráfico de uma função de 3.º grau com extremos e pontos de inflexão',
+        'Intervall': 'Intervalo', 'konstant': 'constante', 'steigt ↗': 'cresce ↗', 'fällt ↘': 'decresce ↘',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -76,6 +82,12 @@ window.BuchPT && BuchPT.add('analysis', {
         // ableiten
         ['Leite ab: $f(x) = ', 'Deriva: $f(x) = '], ['Das kann ich nicht lesen. Schreibe zum Beispiel ', 'Não consigo ler isto. Escreve, por exemplo, '],
         ['<b>Richtig!</b>', '<b>Certo!</b>'], ['Noch nicht. Tipp: ', 'Ainda não. Dica: '],
+        // kurve (the point rule has already written H(1, 4); Portuguese names the extremes without a letter)
+        ['Hochpunkt $H', 'Máximo relativo $'], ['Tiefpunkt $T', 'Mínimo relativo $'], ['keine Extrempunkte', 'não há extremos'],
+        [' · Sattelpunkt bei $x = ', ' · ponto de sela em $x = '], ['Wendepunkt $W', 'Ponto de inflexão $I'],
+        ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am kleinsten.', '$: aí $f\'\'(x) = 0$ e o declive é mínimo.'],
+        ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am größten.', '$: aí $f\'\'(x) = 0$ e o declive é máximo.'],
+        ['Für $a = 0$ ist $f$ eine Parabel (oder Gerade) ohne Wendepunkt.', 'Para $a = 0$, $f$ é uma parábola (ou uma reta) sem ponto de inflexão.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -84,5 +96,8 @@ window.BuchPT && BuchPT.add('analysis', {
         [/\\to \\infty/g, '\\to +\\infty'],
         // ableiten: "· 3 von 5 gelöst" → "· 3 de 5 resolvidos"
         [/ · (\d+) von (\d+) gelöst/g, ' · $1 de $2 resolvidos'],
+        // kurve: the letters drawn alone on the canvas, H/T/W (Hochpunkt, Tiefpunkt, Wendepunkt) → Máx/Mín/I; only a string that is
+        // nothing but the letter (no widget sentence is), the sentences have their phrases; the sign table ends at +∞
+        [/^H$/, 'Máx'], [/^T$/, 'Mín'], [/^W$/, 'I'], [/(< )\\infty/g, '$1+\\infty'],
     ]
 });
