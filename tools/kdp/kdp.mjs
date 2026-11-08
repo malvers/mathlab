@@ -5,12 +5,12 @@
  *
  * Doc, 09.10.2026: first proof print of "Mathematik · Berufliches Gymnasium 11" through KDP —
  * "Die Scripts, die brauchen wir." The PDFs themselves are made for KDP only and change with every edit of
- * the book, so they never go into the repo (default target: the system temp folder). Readers get their PDF
+ * the book, so they never go into the repo (default target: ~/Documents/kdp/<buch>/, all languages together). Readers get their PDF
  * from buch/<buch>/druck.html.
  *
- *   <buch>-innenteil.pdf  the print edition (druck.html on the live site) without its cover page: US Letter, no bleed,
+ *   <buch>-manuskript.pdf the print edition (KDP calls it "manuscript"; Doc, 07.11.2026: same words as Amazon) (druck.html on the live site) without its cover page: US Letter, no bleed,
  *                         canvases frozen at ~300 dpi (deviceScaleFactor 3.2 → 3.2 × 96 dpi)
- *   <buch>-umschlag.pdf   back + spine + front in one sheet with 0.125 in bleed all round; the front is the cover
+ *   <buch>-cover.pdf      back + spine + front in one sheet with 0.125 in bleed all round; the front is the cover
  *                         of druck.html, the back lists the chapters of kapitel.js with a QR code to the online book;
  *                         the barcode field (bottom right of the back, 2 × 1.2 in) stays empty, KDP prints it
  *
@@ -36,14 +36,16 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 // a book's own page format: US Letter unless its kapitel.js says format: 'a4' (Doc, 07.11.2026: "nie wieder A4, sondern immer Letter")
 const OWN = /format:\s*'a4'/.test(readFileSync(path.join(ROOT, 'HTML/buch', BOOK, 'kapitel.js'), 'utf8')) ? 'a4' : 'letter';
 const FORMAT = args.includes('--letter') ? 'letter' : args.includes('--a4') ? 'a4' : OWN, LETTER = FORMAT === 'letter';
-const OUT = path.resolve(plain[1] || path.join(os.tmpdir(), 'kdp-' + BOOK + (LETTER ? '-letter' : '')));
+// default target: one folder per book for all its languages, ~/Documents/kdp/<buch>/ (Doc, 07.11.2026: "packt die alle in eins
+// rein" - one place to pick from in KDP's file dialog); never the repo
+const OUT = path.resolve(plain[1] || path.join(os.homedir(), 'Documents', 'kdp', BOOK.replace(/-(en|es|fr|it|sw)$/, '')));
 const STANDARD = args.includes('--standard') || (LETTER && !args.includes('--premium'));
 const PER_PAGE = STANDARD ? 0.002252 : 0.002347;                        // spine thickness per page in inch (KDP)
 const BLEED = 0.125, TW = LETTER ? 8.5 : 8.27, TH = LETTER ? 11 : 11.69; // KDP trim US Letter or "A4", inch
 const SITE = (args.find(a => a.startsWith('--basis='))?.slice(8) || 'https://docalvers.de').replace(/\/$/, '');
 const BASE = SITE + '/buch/' + BOOK + '/', LIVE = 'https://docalvers.de/buch/' + BOOK + '/';
 mkdirSync(OUT, { recursive: true });
-const raw = path.join(OUT, BOOK + '-roh.pdf'), interior = path.join(OUT, BOOK + '-innenteil.pdf'), coverPdf = path.join(OUT, BOOK + '-umschlag.pdf');
+const raw = path.join(OUT, BOOK + '-roh.pdf'), interior = path.join(OUT, BOOK + '-manuskript.pdf'), coverPdf = path.join(OUT, BOOK + '-cover.pdf');
 
 const browser = await chromium.launch({ headless: true, args: ['--mute-audio'] });
 try {
@@ -177,8 +179,8 @@ html, body { margin: 0; padding: 0; background: #040a18; -webkit-print-color-adj
     if (!await page.evaluate(() => !!document.querySelector('.k-front .b-titel-art svg'))) console.log('WARNING: no cover art on the front');
     await page.pdf({ path: coverPdf, preferCSSPageSize: true, printBackground: true });
 
-    console.log('Innenteil:', interior, '·', pages, 'Seiten');
-    console.log('Umschlag: ', coverPdf, '·', W.toFixed(3), '×', H.toFixed(3), 'in · Rücken', (SPINE * 25.4).toFixed(1), 'mm');
+    console.log('Manuskript:', interior, '·', pages, 'Seiten');
+    console.log('Cover:     ', coverPdf, '·', W.toFixed(3), '×', H.toFixed(3), 'in · Rücken', (SPINE * 25.4).toFixed(1), 'mm');
 } finally {
     await browser.close();
 }

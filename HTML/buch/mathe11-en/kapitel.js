@@ -8,6 +8,8 @@ window.BUCH = {
     title: 'Mathematics · Vocational Grammar School 11',
     short: 'Mathematics 11',
     lang: 'en',
+    // the dedication page at the front of the print edition (js/buch-druck.js; Doc, 07.11.2026)
+    widmung: 'For Melanie',
     description: 'Interactive mathematics textbook for the Berufliches Gymnasium (vocational grammar school), Year 11, Saxony: equations, functions, linear systems, probability and numerical methods, with labs, simulations and self-checks with instant feedback.',
     chapters: [
         { file: 'lb2.html', lb: 'Learning area 2', k: '2', title: 'Equations, formulas, figures',

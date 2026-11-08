@@ -54,7 +54,7 @@ nur dem Link „Anwendungen: Wurf, Brücke, Extremwerte“.
 ## 5. Der Einband zählt nicht mit
 
 Die erste Seite nach dem Einband ist Seite 1 (`.d-front { counter-reset: page 1; }`). KDP bekommt den
-Innenteil ohne Einband, Seite 1 ist eine rechte Seite, also stehen ungerade Zahlen rechts, wie in jedem Buch.
+Manuskript (so nennt es KDP) ohne Einband, Seite 1 ist eine rechte Seite, also stehen ungerade Zahlen rechts, wie in jedem Buch.
 
 ## 6. Links im Druck
 
