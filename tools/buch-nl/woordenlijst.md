@@ -91,3 +91,41 @@ Mathe-Labor“, Solita.
 ## mathe12-nl (BGY 12, block nl-2)
 
 Terms the book adds (Grenzwert, Ableitung, Extremum, Wendepunkt, Vektor im Raum, Skalarprodukt …) go here.
+
+Festgelegt von Huygens (nl-2, 08.11.2026). Schreibweisen wie in BGY 11; neu: bedingte Wahrscheinlichkeit immer
+`P(A \mid B)` (deutsch `P_B(A)`, das Widget `unabhaengig` per Regel), Skalarprodukt `\vec{a} \cdot \vec{b}` (deutsch
+`\circ`, Widgets per Regel), Punkte im Raum `P(1, 2, 3)`, mit Dezimalkomma `M(2,5; 4; 3)`. Steigung einer Kurve / Tangente /
+Normale = helling `m` (wie die Widgets `m_t`, `m_n`), eine Gerade bleibt `y = ax + b` (richtingscoëfficiënt, startgetal).
+
+| Deutsch | Nederlands |
+|---|---|
+| Zufallsgröße · Wahrscheinlichkeitsverteilung · Stabdiagramm | toevalsvariabele (stochast) · kansverdeling · staafdiagram |
+| Erwartungswert · Varianz · Standardabweichung | verwachtingswaarde `E(X)` · variantie `V(X)` · standaardafwijking `σ` |
+| faires Spiel · Einsatz · Auszahlung · Gewinn | eerlijk spel · inzet · uitbetaling · winst |
+| Glücksrad | rad van fortuin |
+| stochastisch unabhängig · abhängig · unvereinbar | onafhankelijk · afhankelijk · disjunct |
+| Bernoulli-Experiment · Bernoulli-Kette | Bernoulli-experiment · herhaald Bernoulli-experiment |
+| Treffer · Niete (Baumbuchstaben T/N) | succes · mislukking (S/M) |
+| Fakultät · Binomialkoeffizient · binomialverteilt · kumuliert | faculteit · binomiaalcoëfficiënt („n boven k”) · binomiaal verdeeld · cumulatief |
+| Grenzwert · Verhalten im Unendlichen | limiet · gedrag op oneindig |
+| waagerechte / senkrechte Asymptote · Polstelle · (hebbare) Lücke | horizontale / verticale asymptoot · pool · perforatie (gat) |
+| stetig · Stetigkeit · stetige Ergänzung | continu · continuïteit · continu opvullen |
+| ganzrationale / gebrochenrationale Funktion · Zählergrad | veeltermfunctie / gebroken functie · graad van de teller |
+| Sekante · Tangente · Normale · Berührpunkt | koorde · raaklijn · normaal · raakpunt |
+| mittlere / lokale Änderungsrate · Differenzenquotient · Differenzialquotient | gemiddelde / momentane verandering · differentiequotiënt · differentiaalquotiënt |
+| Ableitung · ableiten · differenzierbar · f Strich | afgeleide · differentiëren · differentieerbaar · f-accent |
+| Potenz-, Faktor-, Summen-, Produktregel · Kettenregel | machtsregel, regel van de constante factor, somregel, productregel · kettingregel |
+| Bogenmaß | radialen |
+| streng monoton steigend / fallend | strikt stijgend / dalend |
+| Hochpunkt H · Tiefpunkt T · Extrempunkt | maximum `H` (hoogste punt) · minimum `L` (laagste punt) · top |
+| Wendepunkt W · Sattelpunkt S · Wendetangente | buigpunt `B` · zadelpunt `Z` · buigraaklijn |
+| notwendige / hinreichende Bedingung · Randextremum | nodige / voldoende voorwaarde · extreem in een randpunt |
+| Linkskurve / Rechtskurve (links-/rechtsgekrümmt) | linksbocht / rechtsbocht (linksgekromd, convex / rechtsgekromd, concaaf) |
+| Steckbriefaufgabe · Ansatz · Probe | functie opstellen uit voorwaarden · aanzet · controle |
+| Extremwertproblem · Zielfunktion · Nebenbedingung | optimaliseringsprobleem · doelfunctie · nevenvoorwaarde |
+| räumliches Koordinatensystem | assenstelsel in de ruimte |
+| Ortsvektor · Verbindungsvektor · Gegenvektor · Nullvektor | plaatsvector · verbindingsvector · tegengestelde vector · nulvector |
+| Betrag · Einheitsvektor · Linearkombination · kollinear | lengte · eenheidsvector · lineaire combinatie · evenwijdig (collineair) |
+| Mittelpunkt M · Schwerpunkt S · Raumdiagonale · Quader | midden `M` · zwaartepunt `Z` · lichaamsdiagonaal · balk |
+| Skalarprodukt · orthogonal · spitz / stumpf | inproduct · loodrecht · scherp / stomp |
+| Raute · Drachen · Trapez | ruit · vlieger · trapezium |
