@@ -37,6 +37,8 @@ window.BuchTR && BuchTR.add('analysis', {
         'nur f': 'yalnızca f', 'f′ und f″': 'f′ ve f″', 'Ableitungen zeigen': 'Türevleri göster',
         'Graph einer Funktion dritten Grades mit Extrem- und Wendepunkten': 'Ekstremum ve büküm noktalarıyla üçüncü dereceden bir fonksiyonun grafiği',
         'Intervall': 'Aralık', 'konstant': 'sabit', 'steigt ↗': 'artar ↗', 'fällt ↘': 'azalır ↘',
+        // tangente (lb2-5): Normale = normal doğrusu, Berührpunkt = değme noktası
+        'Tangente und Normale an einen Graphen': 'Bir grafiğe teğet ve normal',
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -85,6 +87,9 @@ window.BuchTR && BuchTR.add('analysis', {
         ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am kleinsten.', '$: Orada $f\'\'(x) = 0$\'dır ve eğim en küçüktür.'],
         ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am größten.', '$: Orada $f\'\'(x) = 0$\'dır ve eğim en büyüktür.'],
         ['Für $a = 0$ ist $f$ eine Parabel (oder Gerade) ohne Wendepunkt.', '$a = 0$ için $f$, büküm noktası olmayan bir paraboldür (ya da doğrudur).'],
+        // tangente
+        ['$ · Berührpunkt $P', '$ · değme noktası $P'], ['Tangente: $', 'Teğet: $'],
+        ['Normale (senkrecht zur Tangente, $m_n = -\\tfrac{1}{m_t}$): $', 'Normal (teğete dik, $m_n = -\\tfrac{1}{m_t}$): $'],
     ],
     rule: [
         // tr0: notation of the module, for every book
