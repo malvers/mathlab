@@ -34,7 +34,7 @@
     // ---------- whole labels, shared ----------
     const WORD = {
         // js/buch-plot.js, shared
-        'Funktionsgraph': 'Grafiek van de functie', 'Funktion': 'Functie', 'Beispiel': 'Voorbeeld', 'Summe': 'Som',
+        'Funktionsgraph': 'Grafiek van de functie', 'Funktion': 'Functie', 'Beispiel': 'Voorbeeld', 'Summe': 'Totaal',
         'Zurücksetzen': 'Opnieuw', 'Zurück': 'Ongedaan maken', 'Tipp': 'Tip', 'Prüfen': 'Controleren', 'Umformung': 'Bewerking',
         'linear': 'lineair', 'exponentiell': 'exponentieel', 'quadratisch': 'kwadratisch', 'Modell': 'Model',
         // the header: "Fehler melden" (js/buch-feedback.js) and Solita (js/buch-solita.js, js/solita-frage.js)
