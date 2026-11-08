@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiskunde 12 · Hoofdstuk 2.1 · Limieten | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Gedrag op oneindig, asymptoten, continuïteit. Hoofdstuk 2.1 van het interactieve leerboek Wiskunde · Berufliches Gymnasium 12: uitleg, voorbeelden, opgaven op drie niveaus, zelftoetsen en labs om uit te proberen.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">WISKUNDE · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Hoofdstuk"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhoud van het hoofdstuk">
+        <p class="b-toc-title">HOOFDSTUK 2.1 · LEERGEBIED 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introductie" data-toc-k="I" data-toc-short="Introductie" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">HOOFDSTUK 2.1 · LEERGEBIED 2 · NOVEMBER · DECEMBER</p>
+            <h1>Limieten</h1>
+            <p class="b-hero-lead">Hete koffie koelt af, maar nooit tot onder kamertemperatuur. Een kromme vlijt zich tegen een rechte lijn aan zonder haar ooit te bereiken.
+                Een functie heeft ergens een gat, en toch weet je precies waar ze daar naartoe wil. <b>Limieten</b> beschrijven wat er gebeurt
+                als je ergens steeds dichter bij komt. Ze zijn het fundament van de hele differentiaalrekening.</p>
+            <div class="b-chips"><span class="b-chip">8 LESUREN</span><span class="b-chip">2 PARAGRAFEN</span><span class="b-chip">BASIS VOOR DE AFGELEIDE</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["(2*x+1)/(x-1)"]' data-labels='["f"]' data-lat="[5]" data-hl="2" data-x="-6,8" data-y="-6,9" data-h="240" data-aria="Grafiek met een horizontale en een verticale asymptoot"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DIT LEER JE IN DIT HOOFDSTUK</div>
+            <div class="b-text"><ul>
+                <li>het <b>gedrag op oneindig</b> bepalen en <b>horizontale asymptoten</b> geven</li>
+                <li><b>limieten in een punt</b> onderzoeken, ook van links en van rechts</li>
+                <li><b>polen</b> (verticale asymptoten) en <b>perforaties</b> (gaten) onderscheiden</li>
+                <li>begrijpen wat <b>continuïteit</b> betekent</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: KUN JE DIT AL?</div>
+            <div class="b-q" data-ans="0,001" data-tol="0.000001" data-ph="getal"><p class="b-q-text">Hoeveel is $\tfrac{1}{1000}$ als kommagetal?</p><div class="b-sol"><p>$0{,}001$</p></div></div>
+            <div class="b-q" data-ans="0,125" data-tol="0.0001" data-ph="getal"><p class="b-q-text">Bereken $2^{-3}$.</p><div class="b-sol"><p>$\tfrac{1}{2^3} = \tfrac18 = 0{,}125$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Voor welke $x$ is $\tfrac{1}{x - 2}$ niet gedefinieerd?</p><div class="b-sol"><p>Voor $x = 2$ zou de noemer 0 zijn.</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="getal"><p class="b-q-text">Vereenvoudig $\tfrac{x^2 - 9}{x - 3}$ en vul daarna $x = 3$ in.</p><div class="b-sol"><p>$\tfrac{(x - 3)(x + 3)}{x - 3} = x + 3$, bij $x = 3$ dus 6.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Verkenningen" data-toc-k="V" data-toc-short="Verkenningen">
+    <div class="b-band"><span class="b-band-tag">VERKENNINGEN</span><span class="b-band-sub">OM TE BEGINNEN · IN GROEPJES</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">DE KOFFIE</div>
+            <div class="b-text"><p>De temperatuur van een kop koffie na $t$ minuten wordt beschreven door $T(t) = 20 + 60 \cdot 0{,}9^t$ (in °C).</p>
+                <ul><li>Bereken $T(0)$, $T(10)$, $T(30)$, $T(60)$.</li><li>Welke temperatuur bereikt de koffie nooit? Wat betekent de 20?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">STEEDS DICHTER BIJ 1</div>
+            <div class="b-text"><p>Vul in $f(x) = \tfrac{x^2 - 1}{x - 1}$ de waarden 0,9; 0,99; 0,999 en 1,1; 1,01; 1,001 in.</p>
+                <ul><li>Wat zien jullie? Wat gebeurt er bij $x = 1$?</li><li>Teken de grafiek. Hoe ziet die eruit bij $x = 1$?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">HET PAKKETTARIEF</div>
+            <div class="b-text"><p>Een pakketdienst vraagt tot 2 kg € 5, tot 5 kg € 7 en tot 10 kg € 10.</p>
+                <ul><li>Teken de prijs als functie van het gewicht.</li><li>Waar „springt” de grafiek? Wat kost een pakket van precies 2 kg?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Gedrag op oneindig" data-toc-k="1" data-toc-short="1 Oneindig">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 1</span><span class="b-band-sub">4 LESUREN</span></div>
+    <h2><span class="b-no">1</span>Gedrag op oneindig</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Bij de koffie is $T(60) = 20 + 60 \cdot 0{,}9^{60} \approx 20{,}11$. Hoe langer je wacht, hoe kleiner $0{,}9^t$ wordt, en $T(t)$ komt willekeurig dicht bij 20.</p></div></div>
+            <div class="b-text"><p>Je schrijft $\lim\limits_{t \to \infty} T(t) = 20$ (lees: „de limiet van $T(t)$ voor $t$ naar oneindig is 20”). De lijn $y = 20$ heet <b>horizontale asymptoot</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · LIMIET OP ONEINDIG</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to \infty} f(x) = g$ betekent: $f(x)$ komt willekeurig dicht bij $g$, als $x$ maar groot genoeg is. Dan is $y = g$ een <b>horizontale asymptoot</b>.</p>
+                    <p><b>Veeltermfuncties</b> (polynomen) vanaf graad 1 gedragen zich voor $x \to \pm\infty$ als hun term met de hoogste macht, ze gaan naar $+\infty$ of $-\infty$.</p>
+                    <p><b>Gebroken functies</b> $\tfrac{T(x)}{N(x)}$: graad van de teller kleiner dan graad van de noemer → limiet 0. Graden gelijk → quotiënt van de coëfficiënten van de hoogste macht.
+                        Graad van de teller groter → geen horizontale asymptoot.</p>
+                    <p>Verder: $\tfrac1x \to 0$, $\mathrm{e}^{-x} \to 0$ en $g^x \to 0$ voor $0 < g < 1$, steeds voor $x \to \infty$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Truc:</b> deel teller en noemer door de hoogste macht van de noemer. Alle termen zoals $\tfrac{1}{x}$ of $\tfrac{3}{x^2}$ verdwijnen voor $x \to \infty$.</p>
+            <p class="b-note"><b>Asymptoot</b> komt uit het Grieks en betekent „niet samenvallend”.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · STAP VOOR STAP NAAR DE LIMIET</div>
+        <p class="b-help" style="margin:0 0 12px">Kies een functie en de richting waarin je nadert. Bij elke stap $k$ gaat $x$ tien keer zo ver naar buiten of tien keer zo dicht naar het punt toe.</p>
+        <div data-widget="grenzwert"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 1 · GELIJKE GRADEN</div>
+            <div class="b-text"><p>Bepaal $\lim\limits_{x \to \infty} \dfrac{3x^2 + 1}{x^2 + 2}$.</p></div>
+            <div class="b-sol"><p>Delen door $x^2$: $\dfrac{3 + \frac{1}{x^2}}{1 + \frac{2}{x^2}} \to \dfrac{3 + 0}{1 + 0} = 3$. <span class="b-res">Horizontale asymptoot $y = 3$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 2 · VEELTERMFUNCTIE</div>
+            <div class="b-text"><p>Hoe gedraagt $f(x) = -2x^3 + 5x^2 + 1$ zich voor $x \to \infty$ en voor $x \to -\infty$?</p></div>
+            <div class="b-sol"><p>Beslissend is $-2x^3$: voor $x \to \infty$ gaat $f(x) \to -\infty$, voor $x \to -\infty$ gaat $f(x) \to +\infty$.</p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bepaal voor $x \to \infty$: a) $5 - \tfrac1x$ &nbsp; b) $3 \cdot 0{,}5^x$ &nbsp; c) $\dfrac{4x + 1}{2x - 3}$ &nbsp; d) $x^3 - 100x^2$</p></div>
+            <div class="b-sol"><p>a) 5 &nbsp; b) 0 &nbsp; c) 2 &nbsp; d) $+\infty$ (voor grote $x$ wint $x^3$)</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bereken $f(10)$, $f(100)$ en $f(1000)$ voor $f(x) = \tfrac{x + 1}{x}$. Naar welke waarde gaat $f$?</p></div>
+            <div class="b-sol"><p>$1{,}1$; $1{,}01$; $1{,}001$. Limiet 1, want $\tfrac{x + 1}{x} = 1 + \tfrac1x$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Verkenning „De koffie”: bereken $T(10)$. Na hoeveel minuten is de koffie kouder dan 30 °C?</p></div>
+            <div class="b-sol"><p>$T(10) = 20 + 60 \cdot 0{,}9^{10} \approx 40{,}9$ °C. $60 \cdot 0{,}9^t < 10 \Rightarrow 0{,}9^t < \tfrac16 \Rightarrow t > \tfrac{\ln(1/6)}{\ln 0{,}9} \approx 17{,}01$, dus na ruim 17 minuten.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Geef de horizontale asymptoten, als die er zijn: a) $\dfrac{6x^2}{2x^2 + 5}$ &nbsp; b) $\dfrac{x + 4}{x^2 + 1}$ &nbsp; c) $\dfrac{x^3}{x + 1}$</p></div>
+            <div class="b-sol"><p>a) $y = 3$ &nbsp; b) $y = 0$ &nbsp; c) geen, de graad van de teller is groter</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Geef een gebroken functie waarvan de grafiek de horizontale asymptoot $y = -3$ en de verticale asymptoot $x = 2$ heeft.</p></div>
+            <div class="b-sol"><p>Bijvoorbeeld $f(x) = \dfrac{-3x}{x - 2}$ of $f(x) = -3 + \dfrac{1}{x - 2}$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="5" data-ph="limiet"><p class="b-q-text">Bepaal $\lim\limits_{x \to \infty} \dfrac{5x^2 - x}{x^2 + 4}$.</p><div class="b-sol"><p>Gelijke graden: $\tfrac51 = 5$</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="limiet"><p class="b-q-text">Bepaal $\lim\limits_{x \to \infty} \dfrac{7}{x + 1}$.</p><div class="b-sol"><p>De noemer groeit onbeperkt: 0</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="limiet"><p class="b-q-text">Bepaal $\lim\limits_{x \to \infty} \left(4 + 2\mathrm{e}^{-x}\right)$.</p><div class="b-sol"><p>$\mathrm{e}^{-x} \to 0$, dus 4</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Limiet in een punt, continuïteit" data-toc-k="2" data-toc-short="2 Punt">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 2</span><span class="b-band-sub">4 LESUREN</span></div>
+    <h2><span class="b-no">2</span>Limiet in een punt en continuïteit</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = \tfrac{x^2 - 1}{x - 1}$ is bij $x = 1$ niet gedefinieerd. De waarden $f(0{,}999) = 1{,}999$ en $f(1{,}001) = 2{,}001$ laten echter zien: van beide kanten nadert $f(x)$ het getal 2.</p></div></div>
+            <div class="b-text"><p>Voor $x \neq 1$ is $f(x) = \tfrac{(x - 1)(x + 1)}{x - 1} = x + 1$. De grafiek is de lijn $y = x + 1$ met een <b>gat</b> (perforatie) in $(1, 2)$.
+                Anders bij $g(x) = \tfrac{1}{x - 1}$: hier groeien de waarden bij $x \to 1$ onbeperkt, de lijn $x = 1$ is een <b>verticale asymptoot</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · LIMIET IN EEN PUNT EN CONTINUÏTEIT</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to a} f(x) = g$ betekent: $f(x)$ komt willekeurig dicht bij $g$, als $x$ dicht genoeg bij $a$ ligt, en wel van <b>links en van rechts</b>.</p>
+                    <p><b>Pool:</b> $|f(x)|$ groeit bij $x \to a$ onbeperkt; $x = a$ is een verticale asymptoot, met of zonder tekenwisseling.
+                        <b>Perforatie:</b> $f(a)$ is niet gedefinieerd, maar de limiet bestaat wel.</p>
+                    <p>$f$ heet <b>continu</b> in $a$ als $f(a)$ gedefinieerd is en $\lim\limits_{x \to a} f(x) = f(a)$ geldt. Aanschouwelijk: je kunt de grafiek daar tekenen zonder je pen op te tillen.
+                        Veeltermfuncties, $\mathrm{e}^x$ en $\sin x$ zijn overal continu.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Van links, van rechts:</b> komen er van links en van rechts verschillende waarden uit, dan is er in dat punt geen limiet, bijvoorbeeld bij het pakkettarief.</p>
+            <p class="b-note"><b>In het interactieve onderdeel hierboven</b> vind je een pool ($x \to 1$ bij de eerste functie) en twee perforaties.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGUUR · POLEN MET EN ZONDER TEKENWISSELING</div>
+        <p class="b-help" style="margin:0 0 12px">Goud: $f(x) = \tfrac{1}{x - 2}$ wisselt bij $x = 2$ van $-\infty$ naar $+\infty$. Cyaan: $g(x) = \tfrac{1}{(x - 2)^2}$ gaat van beide kanten naar $+\infty$.</p>
+        <div data-widget="graph" data-fns='["1/(x-2)","1/((x-2)^2)"]' data-labels='["f","g"]' data-lat="[3.4,0.6]" data-x="-2,6" data-y="-5,6" data-h="280" data-aria="Twee polen bij x = 2"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 3 · PERFORATIE OF POOL?</div>
+            <div class="b-text"><p>Onderzoek $f(x) = \dfrac{x^2 - 4}{x - 2}$ en $g(x) = \dfrac{x + 2}{x - 2}$ bij $x = 2$.</p></div>
+            <div class="b-sol"><p>$f(x) = x + 2$ voor $x \neq 2$: perforatie, $\lim\limits_{x \to 2} f(x) = 4$.</p>
+                <p>Bij $g$ gaat de teller naar 4, de noemer naar 0: pool met tekenwisseling, verticale asymptoot $x = 2$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 4 · HET PAKKETTARIEF</div>
+            <div class="b-text"><p>Is de prijsfunctie van de pakketdienst continu bij 2 kg?</p></div>
+            <div class="b-sol"><p>Van links (net onder 2 kg): € 5. Van rechts (net boven 2 kg): € 7. De eenzijdige limieten zijn verschillend: <span class="b-res">geen limiet, dus niet continu.</span> De grafiek springt.</p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bepaal waar de functie niet gedefinieerd is en wat daar gebeurt: a) $\dfrac{3}{x + 4}$ &nbsp; b) $\dfrac{x^2 - 9}{x + 3}$ &nbsp; c) $\dfrac{1}{x^2}$</p></div>
+            <div class="b-sol"><p>a) $x = -4$: pool met tekenwisseling &nbsp; b) $x = -3$: perforatie, limiet $-6$ &nbsp; c) $x = 0$: pool zonder tekenwisseling</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bepaal $\lim\limits_{x \to 2} (x^2 + 3x)$ en $\lim\limits_{x \to 0} \dfrac{x^2 + 5x}{x}$.</p></div>
+            <div class="b-sol"><p>Continu, dus invullen: $4 + 6 = 10$. Vereenvoudigen: $x + 5 \to 5$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$f(x) = \dfrac{|x|}{x}$ voor $x \neq 0$. Bereken $f(0{,}1)$, $f(-0{,}1)$, $f(0{,}001)$, $f(-0{,}001)$. Heeft $f$ bij 0 een limiet?</p></div>
+            <div class="b-sol"><p>Voor $x > 0$ is $f(x) = 1$, voor $x < 0$ is $f(x) = -1$. Links $-1$, rechts $1$: geen limiet.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Voor welke $c$ is $f(x) = \begin{cases} x^2 & \text{voor } x \le 1 \\ 2x + c & \text{voor } x > 1 \end{cases}$ continu bij $x = 1$?</p></div>
+            <div class="b-sol"><p>Van links komt $1^2 = 1$, van rechts $2 + c$. Gelijk bij $c = -1$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="6" data-ph="limiet"><p class="b-q-text">Bepaal $\lim\limits_{x \to 3} \dfrac{x^2 - 9}{x - 3}$.</p><div class="b-sol"><p>$x + 3 \to 6$</p></div></div>
+        <div class="b-q" data-ans="-5" data-ph="x ="><p class="b-q-text">Waar heeft $f(x) = \dfrac{1}{x + 5}$ een pool?</p><div class="b-sol"><p>$x = -5$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Wat heeft $f(x) = \dfrac{1}{x^2}$ bij $x = 0$?</p>
+            <div class="b-mc"><button>een perforatie</button><button>een pool met tekenwisseling</button><button>een pool zonder tekenwisseling</button></div>
+            <div class="b-sol"><p>$x^2 > 0$ aan beide kanten, dus $f(x) \to +\infty$ van links en van rechts.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Herhalen · verdiepen · verbinden" data-toc-k="H" data-toc-short="Oefenen">
+    <div class="b-band"><span class="b-band-tag">HERHALEN · VERDIEPEN · VERBINDEN</span></div>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Geef alle asymptoten van de grafiek van $f(x) = \dfrac{2x - 1}{x + 1}$.</p></div>
+            <div class="b-sol"><p>Horizontaal $y = 2$, verticaal $x = -1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>De concentratie van een medicijn in het bloed is $c(t) = \dfrac{8t}{t^2 + 4}$ ($t$ in uren). Bepaal $\lim\limits_{t \to \infty} c(t)$ en interpreteer.</p></div>
+            <div class="b-sol"><p>Graad van de teller kleiner dan graad van de noemer: limiet 0. Het medicijn wordt op den duur volledig afgebroken.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Verbinden met klas 11:</b> van 1000 jodium-131-kernen is na $t$ dagen nog $N(t) = 1000 \cdot 0{,}5^{t/8}$ over. Bepaal de limiet voor $t \to \infty$. Wanneer is er volgens de berekening minder dan één kern over?</p></div>
+            <div class="b-sol"><p>Limiet 0. $0{,}5^{t/8} < 0{,}001 \Rightarrow t > 8 \cdot \tfrac{\ln 0{,}001}{\ln 0{,}5} \approx 79{,}7$ dagen. Voor zulke kleine aantallen is het model wel nog maar een gemiddelde.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$f(x) = \dfrac{x^2 + x}{x}$ is bij 0 niet gedefinieerd. Hoe moet je $f(0)$ kiezen zodat $f$ overal continu is?</p></div>
+            <div class="b-sol"><p>$f(x) = x + 1$ voor $x \neq 0$, dus $f(0) := 1$. Dat heet de perforatie <b>continu opvullen</b>.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursie: Achilles en de schildpad" data-toc-k="X" data-toc-short="Achilles">
+    <div class="b-band"><span class="b-band-tag">EXCURSIE</span><span class="b-band-sub">ONEINDIG VEEL STAPPEN, EEN EINDIG DOEL</span></div>
+    <h2>Achilles en de schildpad</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>De Griekse filosoof Zeno van Elea beweerde in de 5e eeuw voor Christus: de snelle Achilles kan een schildpad met een voorsprong nooit inhalen.
+                Want als hij aankomt waar zij was, is zij alweer een stukje verder. Komt hij daar aan, dan is zij weer verder, en zo oneindig vaak.</p>
+            <p>Met limieten is het raadsel opgelost. Is Achilles twee keer zo snel en heeft de schildpad 1 meter voorsprong, dan loopt hij achtereenvolgens
+                $1 + \tfrac12 + \tfrac14 + \tfrac18 + \ldots$ meter. Die oneindig veel deelstukken hebben de <b>limiet</b> 2: na 2 meter heeft hij haar ingehaald.</p>
+            <p>Oneindig veel stappen kunnen dus samen een eindige afstand en een eindige tijd opleveren. Precies dat idee zit in elke limiet.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Bron:</b> overgeleverd door Aristoteles, Physica, boek VI, hoofdstuk 9 (239b).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Samenvatting" data-toc-k="S" data-toc-short="Samenvatting">
+    <div class="b-band"><span class="b-band-tag">SAMENVATTING</span><span class="b-band-sub">HET BELANGRIJKSTE IN ÉÉN OOGOPSLAG</span></div>
+    <div class="b-rueck"><div><h4>OP ONEINDIG</h4><p>$\lim\limits_{x \to \infty} f(x) = g$: horizontale asymptoot $y = g$.</p></div>
+        <div><p>$\tfrac{3x^2 + 1}{x^2 + 2} \to 3$ · $20 + 60 \cdot 0{,}9^t \to 20$</p></div></div>
+    <div class="b-rueck"><div><h4>GEBROKEN FUNCTIES</h4><p>Graad teller &lt; graad noemer: 0 · gelijk: quotiënt van de coëfficiënten · groter: geen horizontale asymptoot.</p></div>
+        <div><p>$\tfrac{6x^2}{2x^2 + 5} \to 3$</p></div></div>
+    <div class="b-rueck"><div><h4>IN EEN PUNT</h4><p>Dezelfde waarde van links en van rechts. Pool: verticale asymptoot. Perforatie: de limiet bestaat.</p></div>
+        <div><p>$\tfrac{x^2 - 1}{x - 1}$: perforatie bij 1, limiet 2</p></div></div>
+    <div class="b-rueck"><div><h4>CONTINUÏTEIT</h4><p>$\lim\limits_{x \to a} f(x) = f(a)$: te tekenen zonder de pen op te tillen.</p></div>
+        <div><p>Pakkettarief: sprongen, niet continu</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Toets" data-toc-k="T" data-toc-short="Toets">
+    <div class="b-band"><span class="b-band-tag">TOETS</span><span class="b-band-sub">TWEE RONDES · METEEN FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDE 1</div>
+            <div class="b-q" data-ans="2" data-ph="limiet"><p class="b-q-text">Bepaal $\lim\limits_{x \to \infty} \dfrac{6x + 1}{3x - 2}$.</p><div class="b-sol"><p>$\tfrac63 = 2$</p></div></div>
+            <div class="b-q" data-ans="0" data-ph="limiet"><p class="b-q-text">Bepaal $\lim\limits_{x \to \infty} \dfrac{1}{x^3}$.</p><div class="b-sol"><p>0</p></div></div>
+            <div class="b-q" data-ans="8" data-ph="limiet"><p class="b-q-text">Bepaal $\lim\limits_{x \to 4} \dfrac{x^2 - 16}{x - 4}$.</p><div class="b-sol"><p>$x + 4 \to 8$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDE 2</div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Hoe gedraagt $f(x) = \dfrac{2x^3 + 1}{x^2 + 1}$ zich voor $x \to \infty$?</p>
+                <div class="b-mc"><button>$f(x) \to 2$</button><button>$f(x) \to 0$</button><button>$f(x) \to \infty$</button></div>
+                <div class="b-sol"><p>De graad van de teller is groter, $f(x)$ gedraagt zich ongeveer als $2x$.</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="x ="><p class="b-q-text">Waar ligt de verticale asymptoot van $f(x) = \dfrac{x + 1}{x - 6}$?</p><div class="b-sol"><p>$x = 6$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="c ="><p class="b-q-text">$f(x) = x^2$ voor $x \le 2$ en $f(x) = x + c$ voor $x > 2$. Voor welke $c$ is $f$ continu?</p><div class="b-sol"><p>$4 = 2 + c \Rightarrow c = 2$</p></div></div>
+        </div>
+    </div>
+    <h3>MEER OEFENEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-grenzwerte.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LIMIETEN</span><span class="b-lab-what">Op oneindig en in een punt (in het Duits)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Wiskunde, Berufliches Gymnasium klas 12 · leergebied 2, volgens het leerplan wiskunde van het Berufliches Gymnasium in Saksen.</p>
+    <p>Alle teksten, opgaven en afbeeldingen zijn eigen materiaal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-nl.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-nl/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-nl/analysis.js"></script>
+</body>
+</html>
