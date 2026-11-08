@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiskunde 11 · Hoofdstuk 1 · Kansen bij kansexperimenten in meerdere stappen | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Kansbomen, kruistabellen, simulatie. Hoofdstuk 1 van het interactieve leerboek Wiskunde · Berufliches Gymnasium 11: uitleg, voorbeelden, opgaven op drie niveaus, zelftoetsen en labs om uit te proberen.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">WISKUNDE · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Hoofdstuk"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhoud van het hoofdstuk">
+        <p class="b-toc-title">HOOFDSTUK 1 · LEERGEBIED 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<!-- ================================================================ AUFTAKT -->
+<section class="b-sec" id="auftakt" data-toc="Introductie" data-toc-k="I" data-toc-short="Introductie" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">HOOFDSTUK 1 · LEERGEBIED 1 · APRIL</p>
+            <h1>Kansen bij kansexperimenten in meerdere stappen</h1>
+            <p class="b-hero-lead">Twee keer trekken, drie keer gooien, eerst testen en dan kijken: veel kansexperimenten verlopen in stappen. In dit hoofdstuk leer je zulke experimenten te doorzien met <b>kansbomen</b> en <b>kruistabellen</b> – en ze met de computer duizenden keren <b>na te spelen</b>.</p>
+            <div class="b-chips">
+                <span class="b-chip">15 LESUREN</span>
+                <span class="b-chip">3 PARAGRAFEN</span>
+                <span class="b-chip">4 LABS</span>
+                <span class="b-chip">INTERACTIEF</span>
+            </div>
+        </div>
+        <div class="b-hero-art" data-widget="baum-hero"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DIT LEER JE IN DIT HOOFDSTUK</div>
+            <div class="b-text">
+                <ul>
+                    <li>kansbomen tekenen en met de <b>productregel en de somregel</b> kansen berekenen</li>
+                    <li>trekken <b>met en zonder terugleggen</b> onderscheiden</li>
+                    <li><b>kruistabellen</b> opstellen, aanvullen en analyseren</li>
+                    <li>kansexperimenten met digitale hulpmiddelen <b>simuleren</b> en simulatie en berekening vergelijken</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: KUN JE DIT AL?</div>
+            <div class="b-q" data-ans="1/3">
+                <p class="b-q-text">Je gooit één keer met een dobbelsteen. Hoe groot is de kans op meer dan 4 ogen?</p>
+                <div class="b-sol"><p>Gunstig zijn 5 en 6, dus $\tfrac26 = \tfrac13 \approx 0{,}33$.</p></div>
+            </div>
+            <div class="b-q" data-ans="3/10">
+                <p class="b-q-text">Bereken $\tfrac34 \cdot \tfrac25$.</p>
+                <div class="b-sol"><p>Teller keer teller, noemer keer noemer: $\tfrac{3 \cdot 2}{4 \cdot 5} = \tfrac{6}{20} = \tfrac{3}{10}$.</p></div>
+            </div>
+            <div class="b-q" data-ans="0,65">
+                <p class="b-q-text">Gegeven is $P(A) = 0{,}35$. Hoe groot is de kans op de complementaire gebeurtenis $\overline{A}$?</p>
+                <div class="b-sol"><p>$P(\overline{A}) = 1 - P(A) = 1 - 0{,}35 = 0{,}65$.</p></div>
+            </div>
+            <div class="b-q" data-ans="0,12" data-tol="0.0001">
+                <p class="b-q-text">Schrijf 12% als decimaal getal.</p>
+                <div class="b-sol"><p>Procent betekent „per honderd”: $12\% = \tfrac{12}{100} = 0{,}12$.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ ERKUNDUNGEN -->
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Verkenningen" data-toc-k="V" data-toc-short="Verkenningen">
+    <div class="b-band"><span class="b-band-tag">VERKENNINGEN</span><span class="b-band-sub">OM TE BEGINNEN · IN GROEPJES</span></div>
+    <div class="b-text"><p>Voordat er regels zijn: schat, probeer uit, discussieer. Voor de verkenningen heb je geen voorkennis nodig. De labs helpen bij het uitproberen, en in de kantlijn staat in welke paragraaf het antwoord zit.</p></div>
+
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">LOTTES DOBBELSTENEN</div>
+            <div class="b-text">
+                <p>Lotte gooit met twee dobbelstenen waarop ze zelf de getallen heeft gezet: wie het hoogste getal gooit, wint, bij gelijkspel is het onbeslist.</p>
+                <ul>
+                    <li>Bekijk de uitslagen van de dobbelstenen in het lab. Wie heeft de betere kansen? Schat eerst.</li>
+                    <li>Speel 20 rondes en tel de overwinningen.</li>
+                    <li>Hoe kun je de winkans <b>precies</b> bepalen zonder te spelen?</li>
+                </ul>
+            </div>
+            <a class="b-lab" data-lab="wuerfelspiel" href="../../wuerfelspiel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">HET DOBBELSPEL</span><span class="b-lab-what">Zelf getallen op dobbelstenen zetten, boom en uitkomst rekenen meteen mee</span></span></a>
+            <span class="b-pair">→ Paragraaf 1</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">TWEE KNIKKERS UIT DE ZAK</div>
+            <div class="b-text">
+                <p>In een zak zitten <span class="st-urn"><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball b"></span><span class="st-ball b"></span></span>
+                    – drie rode en twee blauwe knikkers. Je trekt blind twee knikkers na elkaar en legt de eerste <b>niet</b> terug.</p>
+                <ul>
+                    <li>Wat is waarschijnlijker: twee dezelfde kleuren of twee verschillende? Stem af.</li>
+                    <li>Speel het 20 keer met papiertjes en tel.</li>
+                    <li>Teken alle mogelijkheden. Hoe kun je de kansen berekenen?</li>
+                </ul>
+            </div>
+            <span class="b-pair">→ Paragraaf 1, voorbeeld 2</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">HET SPIJKERBORD</div>
+            <div class="b-text">
+                <p>Een knikker valt door een aantal rijen spijkers. Bij elke spijker springt hij met gelijke kans naar links of naar rechts.</p>
+                <ul>
+                    <li>Laat in het lab veel knikkers vallen. Waarom komen de meeste in het midden terecht?</li>
+                    <li>Hoeveel routes leiden naar het bakje helemaal links, hoeveel naar een bakje in het midden?</li>
+                </ul>
+            </div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BORD VAN GALTON</span><span class="b-lab-what">Spijkerbord met histogram – de klokvorm ontstaat live</span></span></a>
+            <span class="b-pair">→ Paragraaf 1 en 3</span>
+        </div>
+
+        <div class="b-box b-erk">
+            <div class="b-box-title">POSITIEF – EN TOCH GEZOND?</div>
+            <div class="b-text">
+                <p>Een sneltest herkent 95% van de zieken en 95% van de gezonden juist. Van 10.000 mensen zijn er 200 ziek.</p>
+                <ul>
+                    <li>Je test is positief. Hoe zeker ben je ziek: 95%? 50%? Minder? Schat.</li>
+                    <li>Reken na: hoeveel zieken en hoeveel gezonden krijgen een positieve uitslag? Een tabel helpt.</li>
+                </ul>
+            </div>
+            <span class="b-pair">→ Paragraaf 2</span>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ LE 1 -->
+<section class="b-sec" id="le1" data-kind="le" data-toc="Kansbomen en rekenregels" data-toc-k="1" data-toc-short="1 Kansbomen">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 1</span><span class="b-band-sub">5 LESUREN</span></div>
+    <h2><span class="b-no">1</span>Kansbomen, productregel en somregel</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>Fleur draait twee keer aan een rad van fortuin met drie even grote vakken: twee zijn rood, één is blauw. Ze wint als het beide keren <b>rood</b> wordt. Wint ze in meer dan de helft van alle spellen?</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>Een kansexperiment dat bestaat uit meerdere deelexperimenten na elkaar, heet een <b>kansexperiment in meerdere stappen</b>. Je stelt het voor met een <b>kansboom</b>: elke stap is een vertakking, en bij elke tak staat de kans op die deeluitkomst.</p>
+                <p>Elke uitkomst van het hele experiment hoort bij precies één <b>route</b> van het begin tot een eindpunt. Een <b>gebeurtenis</b> neemt meerdere uitkomsten samen, dus meerdere routes.</p>
+                <p>Bij Fleur is in elke stap $P(\text{rood}) = \tfrac23$. In $\tfrac23$ van alle spellen komt eerst rood, en van die spellen komt in $\tfrac23$ van de gevallen weer rood. Dus is $$P(\text{RR}) = \tfrac23 \cdot \tfrac23 = \tfrac49 \approx 0{,}44.$$ Fleur wint dus in <b>minder</b> dan de helft van de spellen.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · PRODUCTREGEL EN SOMREGEL</div>
+                <div class="b-text">
+                    <p>Bij elke vertakking is de som van de kansen $1$.</p>
+                    <p><b>Productregel:</b> de kans op een uitkomst is het <b>product</b> van de kansen langs zijn route.</p>
+                    <p><b>Somregel:</b> de kans op een gebeurtenis is de <b>som</b> van de kansen van alle routes die bij die gebeurtenis horen.</p>
+                </div>
+            </div>
+
+            <div class="b-text">
+                <p>Bij trekken uit een vaas maakt het uit of de getrokken knikker wordt teruggelegd. <b>Met terugleggen</b> blijven de kansen in elke stap gelijk. <b>Zonder terugleggen</b> verandert de inhoud van de vaas, en daarmee veranderen de kansen in de volgende stap.</p>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notatie:</b> R staat voor rood, B voor blauw. RB betekent: eerst rood, dan blauw.</p>
+            <p class="b-note"><b>Controle:</b> de kansen van alle eindpunten samen zijn $1$.</p>
+            <p class="b-note"><b>Lab:</b> in het dobbelspel bouw je de boom voor twee dobbelstenen stap voor stap zelf.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · KANSBOOMWERKPLAATS</div>
+        <p class="b-help" style="margin:0 0 12px">Stel de vaas in, kies met of zonder terugleggen en klik rechts op de eindpunten van de routes. De werkplaats rekent beide regels voor.</p>
+        <div data-widget="baum"></div>
+    </div>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-bsp">
+                <div class="b-box-title">VOORBEELD 1 · MINSTENS ÉÉN KEER</div>
+                <div class="b-text">
+                    <p>Fleur draait weer twee keer aan haar rad. Hoe groot is de kans dat er <b>minstens één keer</b> rood komt?</p>
+                </div>
+                <div class="b-sol">
+                        <p>Bij „minstens één keer rood” horen de drie routes RR, RB en BR. Sneller gaat het via de <b>complementaire gebeurtenis</b> „geen enkele keer rood”, dat is alleen de route BB:</p>
+                        <p>$$P(\text{BB}) = \tfrac13 \cdot \tfrac13 = \tfrac19, \qquad P(\text{minstens één keer rood}) = 1 - \tfrac19 = \tfrac89 \approx 0{,}89.$$</p>
+                    </div>
+            </div>
+
+            <div class="b-box b-bsp">
+                <div class="b-box-title">VOORBEELD 2 · ZONDER TERUGLEGGEN</div>
+                <div class="b-text">
+                    <p>Uit de zak met drie rode en twee blauwe knikkers worden twee knikkers zonder terugleggen getrokken. Bereken de kans op a) twee rode knikkers, b) twee verschillende kleuren.</p>
+                </div>
+                <div class="b-sol">
+                        <p>Na een rode knikker zitten er nog 2 rode en 2 blauwe in de zak, na een blauwe nog 3 rode en 1 blauwe.</p>
+                        <p>a) $P(\text{RR}) = \tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p>
+                        <p>b) $P(\text{RB}) + P(\text{BR}) = \tfrac35 \cdot \tfrac24 + \tfrac25 \cdot \tfrac34 = \tfrac{6}{20} + \tfrac{6}{20} = \tfrac35$</p>
+                        <p>Twee verschillende kleuren zijn dus waarschijnlijker ($\tfrac35$) dan twee dezelfde ($\tfrac25$). Dat is het antwoord op de verkenning.</p>
+                    </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Tip:</b> „minstens één keer” reken je bijna altijd uit via de complementaire gebeurtenis „geen enkele keer”: $P(E) = 1 - P(\overline{E})$.</p>
+        </aside>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Een munt wordt drie keer opgegooid. Teken de kansboom en bereken de kans op a) drie keer munt, b) precies twee keer kop.</p></div>
+            <div class="b-sol"><p>De boom heeft 8 routes, elke route heeft kans $\left(\tfrac12\right)^3 = \tfrac18$.</p>
+                <p>a) $P(\text{MMM}) = \tfrac18$ &nbsp; b) routes KKM, KMK, MKK: $3 \cdot \tfrac18 = \tfrac38$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Een rad van fortuin geeft rood met kans $\tfrac12$, geel met $\tfrac13$ en blauw met $\tfrac16$. Er wordt twee keer gedraaid. Hoe groot is de kans op a) twee keer dezelfde kleur, b) twee verschillende kleuren?</p></div>
+            <div class="b-sol"><p>a) $\tfrac12 \cdot \tfrac12 + \tfrac13 \cdot \tfrac13 + \tfrac16 \cdot \tfrac16 = \tfrac{9}{36} + \tfrac{4}{36} + \tfrac{1}{36} = \tfrac{14}{36} = \tfrac{7}{18} \approx 0{,}389$</p>
+                <p>b) Complement: $1 - \tfrac{7}{18} = \tfrac{11}{18} \approx 0{,}611$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Een vaas bevat 4 rode en 6 witte knikkers. Er worden twee knikkers zonder terugleggen getrokken.</p>
+                <p>a) Bereken de kans dat beide wit zijn. b) Bereken de kans op minstens één rode knikker. c) Vergelijk a) met trekken met terugleggen en verklaar het verschil.</p></div>
+            <div class="b-hint"><p>Voor b): wat is de complementaire gebeurtenis van „minstens één rode”?</p></div>
+            <div class="b-sol"><p>a) $\tfrac{6}{10} \cdot \tfrac59 = \tfrac{30}{90} = \tfrac13$ &nbsp; b) $1 - \tfrac13 = \tfrac23$</p>
+                <p>c) Met terugleggen: $0{,}6 \cdot 0{,}6 = 0{,}36 > \tfrac13$. Zonder terugleggen zit er na een witte knikker één witte minder in de vaas, daarom daalt de kans op de tweede witte.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Een onderdeel wordt in twee onafhankelijke keuringen gecontroleerd. Keuring 1 ontdekt een aanwezige fout met 90%, keuring 2 met 80%. Een onderdeel is defect.</p>
+                <p>a) Hoe groot is de kans dat de fout wordt ontdekt? b) Hoe groot is de kans dat pas keuring 2 hem ontdekt?</p></div>
+            <div class="b-hint"><p>De fout blijft alleen onontdekt als <b>beide</b> keuringen hem missen.</p></div>
+            <div class="b-sol"><p>a) $1 - 0{,}1 \cdot 0{,}2 = 1 - 0{,}02 = 0{,}98$ &nbsp; b) $0{,}1 \cdot 0{,}8 = 0{,}08$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Hoe vaak moet je minstens met een dobbelsteen gooien om met een kans van minstens 90% ten minste één zes te gooien?</p></div>
+            <div class="b-hint"><p>Complement: $n$ keer geen zes, dus $\left(\tfrac56\right)^n$. Probeer het met de rekenmachine of een tabel.</p></div>
+            <div class="b-sol"><p>Gezocht is de kleinste $n$ met $1 - \left(\tfrac56\right)^n \geq 0{,}9$, dus $\left(\tfrac56\right)^n \leq 0{,}1$.</p>
+                <p>$\left(\tfrac56\right)^{12} \approx 0{,}112$ is nog te groot, $\left(\tfrac56\right)^{13} \approx 0{,}093$ is genoeg.
+                    <span class="b-res">Je hebt minstens 13 worpen nodig.</span></p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Thijs rekent bij voorbeeld 2: „Beide knikkers rood: $\tfrac35 \cdot \tfrac35 = \tfrac{9}{25}$.” Zoek de fout en leg die uit aan een klasgenoot.</p></div>
+            <div class="b-sol"><p>Thijs rekent alsof de eerste knikker wordt teruggelegd. Zonder terugleggen zitten er bij de tweede trekking nog maar 4 knikkers in de zak, waarvan 2 rode: $\tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="1/36">
+            <p class="b-q-text">Je gooit twee keer met een dobbelsteen. Hoe groot is de kans op twee keer zes?</p>
+            <div class="b-sol"><p>$\tfrac16 \cdot \tfrac16 = \tfrac{1}{36} \approx 0{,}028$</p></div>
+        </div>
+        <div class="b-q" data-ans="3/10">
+            <p class="b-q-text">Een vaas bevat 2 rode en 3 blauwe knikkers. Er worden er twee zonder terugleggen getrokken. Hoe groot is de kans dat beide blauw zijn?</p>
+            <div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 = \tfrac{6}{20} = \tfrac{3}{10}$</p></div>
+        </div>
+        <div class="b-q" data-ans="0,488">
+            <p class="b-q-text">Bij een kansspel win je met kans $0{,}2$. Je speelt drie keer. Hoe groot is de kans dat je minstens één keer wint?</p>
+            <div class="b-sol"><p>$1 - 0{,}8^3 = 1 - 0{,}512 = 0{,}488$</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ LE 2 -->
+<section class="b-sec" id="le2" data-kind="le" data-toc="Kruistabellen" data-toc-k="2" data-toc-short="2 Kruistabel">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 2</span><span class="b-band-sub">5 LESUREN</span></div>
+    <h2><span class="b-no">2</span>Kruistabellen</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>Op het Berufliches Gymnasium zijn 200 leerlingen ondervraagd: 80 sporten bij een club, 70 komen op de fiets naar school, 35 doen allebei. Fietsen clubsporters vaker dan de anderen?</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>Als bij elke persoon twee kenmerken met elk twee mogelijkheden worden genoteerd, zet je de aantallen in een <b>kruistabel</b>. De vier binnenste vakjes bevatten de combinaties, aan de rand staan de totalen. Hier is $S$ „sport bij een club” en $F$ „fietst”:</p>
+            </div>
+            <div class="b-table-wrap" style="margin:0 0 14px">
+                <table class="b-table" style="max-width:520px;min-width:0">
+                    <thead><tr><th></th><th>$F$</th><th>$\overline{F}$</th><th class="b-sum">Totaal</th></tr></thead>
+                    <tbody>
+                        <tr><th>$S$</th><td class="b-hot">35</td><td>45</td><td class="b-sum">80</td></tr>
+                        <tr><th>$\overline{S}$</th><td>35</td><td>85</td><td class="b-sum">120</td></tr>
+                        <tr><th class="b-sum">Totaal</th><td class="b-sum">70</td><td class="b-sum">130</td><td class="b-sum">200</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="b-text">
+                <p>Deel je alle getallen door 200, dan krijg je kansen: een willekeurig gekozen persoon sport met kans $\tfrac{35}{200} = 0{,}175$ bij een club <b>en</b> fietst.</p>
+                <p>Over de vraag: van de 80 sporters fietsen er 35, dat is $\tfrac{35}{80} \approx 44\%$. Van de 120 anderen zijn het er maar $\tfrac{35}{120} \approx 29\%$. Clubsporters fietsen dus duidelijk vaker.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · KRUISTABEL</div>
+                <div class="b-table-wrap" style="margin:0 0 12px">
+                    <table class="b-table" style="min-width:0">
+                        <thead><tr><th></th><th>$B$</th><th>$\overline{B}$</th><th class="b-sum">Totaal</th></tr></thead>
+                        <tbody>
+                            <tr><th>$A$</th><td>$P(A \cap B)$</td><td>$P(A \cap \overline{B})$</td><td class="b-sum">$P(A)$</td></tr>
+                            <tr><th>$\overline{A}$</th><td>$P(\overline{A} \cap B)$</td><td>$P(\overline{A} \cap \overline{B})$</td><td class="b-sum">$P(\overline{A})$</td></tr>
+                            <tr><th class="b-sum">Totaal</th><td class="b-sum">$P(B)$</td><td class="b-sum">$P(\overline{B})$</td><td class="b-sum">$1$</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="b-text">
+                    <p>Elke rij en elke kolom geeft haar randtotaal. De vier binnenste vakjes samen geven $1$ (bij aantallen het totaal).</p>
+                    <p>$A \cap B$ betekent „$A$ en $B$”. $\overline{A}$ is de complementaire gebeurtenis „niet $A$”.</p>
+                </div>
+            </div>
+
+            <div class="b-text">
+                <p>Bij elke kruistabel horen twee kansbomen, afhankelijk van welk kenmerk je eerst bekijkt. De kansen bij de eindpunten zijn precies de vier binnenste vakjes van de tabel.</p>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Controle:</b> tel de randtotalen een keer over de rijen en een keer over de kolommen op. Rechtsonder moet beide keren hetzelfde uitkomen.</p>
+            <p class="b-note"><b>Uitspraak:</b> $A \cap B$ lees je als „$A$ doorsnede $B$” of gewoon „$A$ en $B$”.</p>
+            <p class="b-note"><b>Let op:</b> $P(S \cap F) = 0{,}175$ is niet het aandeel fietsers onder de sporters. Dat is $\tfrac{35}{80}$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">VOORBEELD 3 · TABEL AANVULLEN</div>
+        <div class="b-text">
+            <p>In een fietsenwinkel koopt 30% van de klanten een e-bike ($A$), 60% betaalt met de pin ($B$), en 12% doet allebei. Vul de kruistabel aan. Hoeveel procent koopt geen e-bike en betaalt contant?</p>
+        </div>
+        <div class="b-sol">
+                <p>Gegeven zijn $P(A) = 0{,}3$, $P(B) = 0{,}6$ en $P(A \cap B) = 0{,}12$. Eerst de randen, dan de binnenste vakjes:</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <thead><tr><th></th><th>$B$</th><th>$\overline{B}$</th><th class="b-sum">Totaal</th></tr></thead>
+                    <tbody>
+                        <tr><th>$A$</th><td>0,12</td><td>0,18</td><td class="b-sum">0,3</td></tr>
+                        <tr><th>$\overline{A}$</th><td>0,48</td><td class="b-hot">0,22</td><td class="b-sum">0,7</td></tr>
+                        <tr><th class="b-sum">Totaal</th><td class="b-sum">0,6</td><td class="b-sum">0,4</td><td class="b-sum">1</td></tr>
+                    </tbody>
+                </table></div>
+                <p>$P(\overline{A} \cap \overline{B}) = 0{,}4 - 0{,}18 = 0{,}22$: <span class="b-res">22% koopt geen e-bike en betaalt contant.</span></p>
+            </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · DE SNELTEST</div>
+        <p class="b-help" style="margin:0 0 12px">10.000 mensen doen een sneltest. Verschuif de schuifjes en let op de gele vakjes: hoeveel van de positief geteste mensen zijn echt ziek? Dat is de oplossing van de verkenning.</p>
+        <div data-widget="schnelltest"></div>
+    </div>
+
+    <div class="b-box b-ausblick">
+        <div class="b-box-title">VOORUITBLIK · VOORWAARDELIJKE KANS</div>
+        <div class="b-text">
+            <p>Bij de sneltest vraag je niet naar „ziek <b>en</b> positief”, maar naar „ziek, <b>als</b> positief”. Je schrijft $P(Z \mid T^+)$ en spreekt van een <b>voorwaardelijke kans</b>. Je kunt haar uit de kruistabel aflezen:</p>
+            <p>$$P(Z \mid T^+) = \frac{P(Z \cap T^+)}{P(T^+)}$$</p>
+            <p>Geldt $P(A \cap B) = P(A) \cdot P(B)$, dan heten $A$ en $B$ <b>onafhankelijk</b>, anders afhankelijk. In de fietsenwinkel is $0{,}3 \cdot 0{,}6 = 0{,}18 \neq 0{,}12$: een e-bike kopen en pinnen zijn afhankelijk. Met beide begrippen werk je later preciezer.</p>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · KRUISTABELTRAINER</div>
+        <p class="b-help" style="margin:0 0 12px">Vier vakjes zijn gegeven (geel). Vul de andere in en controleer. „Nieuwe tabel” geeft een nieuwe opgave.</p>
+        <div data-widget="vierfeld-trainer"></div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="7">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>500 leerlingen zijn ondervraagd: 220 zitten in klas 11, de anderen in klas 12. 150 gaan met bus of trein, van wie 90 uit klas 11.</p>
+                <p>a) Stel de kruistabel op. b) Hoe groot is de kans dat een willekeurig gekozen persoon uit klas 11 komt en <b>niet</b> met bus of trein gaat? c) Vergelijk het aandeel bus- en treinreizigers in beide klassen.</p></div>
+            <div class="b-sol">
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <thead><tr><th></th><th>bus/trein</th><th>niet</th><th class="b-sum">Totaal</th></tr></thead>
+                    <tbody>
+                        <tr><th>klas 11</th><td>90</td><td>130</td><td class="b-sum">220</td></tr>
+                        <tr><th>klas 12</th><td>60</td><td>220</td><td class="b-sum">280</td></tr>
+                        <tr><th class="b-sum">Totaal</th><td class="b-sum">150</td><td class="b-sum">350</td><td class="b-sum">500</td></tr>
+                    </tbody>
+                </table></div>
+                <p>b) $\tfrac{130}{500} = 0{,}26$ &nbsp; c) klas 11: $\tfrac{90}{220} \approx 41\%$, klas 12: $\tfrac{60}{280} \approx 21\%$.</p>
+            </div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Gegeven is $P(A) = 0{,}45$, $P(A \cap B) = 0{,}15$ en $P(\overline{A} \cap \overline{B}) = 0{,}35$. Vul de kruistabel aan.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0{,}30$, $P(\overline{A}) = 0{,}55$, $P(\overline{A} \cap B) = 0{,}20$, $P(B) = 0{,}35$, $P(\overline{B}) = 0{,}65$. Controle: $0{,}35 + 0{,}65 = 1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>In een kansboom is $P(A) = 0{,}4$. Van de gevallen met $A$ heeft 75% ook het kenmerk $B$, van de gevallen zonder $A$ maar 25%. Teken de boom, stel de kruistabel op en bepaal $P(B)$.</p></div>
+            <div class="b-hint"><p>De eindpunten van de boom zijn de binnenste vakjes van de tabel, bijvoorbeeld $P(A \cap B) = 0{,}4 \cdot 0{,}75$.</p></div>
+            <div class="b-sol"><p>$P(A \cap B) = 0{,}3$, $P(A \cap \overline{B}) = 0{,}1$, $P(\overline{A} \cap B) = 0{,}6 \cdot 0{,}25 = 0{,}15$,
+                $P(\overline{A} \cap \overline{B}) = 0{,}45$.</p>
+                <p><span class="b-res">$P(B) = 0{,}3 + 0{,}15 = 0{,}45$</span></p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Een test herkent 90% van de zieken en 90% van de gezonden juist. 1% van de bevolking is ziek. Hoeveel procent van de positief geteste mensen is ziek? Reken met 10.000 personen en controleer met de sneltest hierboven.</p></div>
+            <div class="b-sol"><p>100 zieken, van wie 90 positief. 9900 gezonden, van wie 990 positief. In totaal 1080 positief.</p>
+                <p><span class="b-res">$\tfrac{90}{1080} \approx 8{,}3\%$</span>. De test is goed, maar de ziekte is zeldzaam. De meeste positieve uitslagen zijn vals alarm.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Gegeven is $P(A) = 0{,}5$ en $P(B) = 0{,}4$. Welke waarde kan $P(A \cap B)$ hoogstens, welke minstens aannemen? Licht toe met de kruistabel.</p></div>
+            <div class="b-hint"><p>Stel $P(A \cap B) = x$ en druk de andere drie binnenste vakjes uit in $x$. Geen enkel vakje mag negatief worden.</p></div>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0{,}5 - x$, $P(\overline{A} \cap B) = 0{,}4 - x$, $P(\overline{A} \cap \overline{B}) = 0{,}1 + x$. Alle moeten $\geq 0$ zijn, dus $0 \leq x \leq 0{,}4$.</p>
+                <p><span class="b-res">Hoogstens $0{,}4$</span> (dan hoort elke $B$ ook bij $A$), <span class="b-res">minstens $0$</span>.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="130" data-ph="aantal">
+            <p class="b-q-text">Van 300 personen hebben er 120 het kenmerk $A$, 90 het kenmerk $B$, 40 allebei. Hoeveel hebben geen van beide?</p>
+            <div class="b-sol"><p>$300 - 120 - 90 + 40 = 130$. De 40 zijn bij $A$ en bij $B$ geteld, dus één keer te veel afgetrokken.</p></div>
+        </div>
+        <div class="b-q" data-ans="0,25">
+            <p class="b-q-text">Gegeven is $P(A) = 0{,}6$, $P(B) = 0{,}5$ en $P(A \cap B) = 0{,}35$. Bereken $P(\overline{A} \cap \overline{B})$.</p>
+            <div class="b-sol"><p>$P(A \cap \overline{B}) = 0{,}25$, dus $P(\overline{A} \cap \overline{B}) = P(\overline{B}) - 0{,}25 = 0{,}5 - 0{,}25 = 0{,}25$.</p></div>
+        </div>
+        <div class="b-q" data-ans="40" data-ph="aantal">
+            <p class="b-q-text">1000 personen worden getest, 5% is ziek. De test herkent 80% van de zieken. Hoeveel zieken worden positief getest?</p>
+            <div class="b-sol"><p>50 zieken, daarvan 80%: $50 \cdot 0{,}8 = 40$.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ LE 3 -->
+<section class="b-sec" id="le3" data-kind="le" data-toc="Simulatie" data-toc-k="3" data-toc-short="3 Simulatie">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 3</span><span class="b-band-sub">5 LESUREN</span></div>
+    <h2><span class="b-no">3</span>Kansexperimenten simuleren</h2>
+
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg">
+                <div class="b-text"><p>Op het schoolfeest worden twee dobbelstenen gegooid. Vooraf zet je in op een som van de ogen. Loont het om op 7 in te zetten in plaats van op 6 of 8? Je hebt geen tijd om 1000 keer te gooien.</p></div>
+            </div>
+
+            <div class="b-text">
+                <p>Voer je een kansexperiment $n$ keer uit en treedt een gebeurtenis $E$ daarbij $k$ keer op, dan heet $$h_n(E) = \frac{k}{n}$$ de <b>relatieve frequentie</b> van $E$.</p>
+                <p>Bij weinig herhalingen schommelt $h_n$ sterk. Hoe vaker je het experiment uitvoert, hoe minder ze schommelt: ze stabiliseert zich in de buurt van de kans $P(E)$. Dat heet de <b>empirische wet van de grote aantallen</b>.</p>
+                <p>In plaats van 1000 keer echt te gooien, laat je de computer toevalsgetallen maken en het experiment naspelen. Dat is een <b>simulatie</b>.</p>
+            </div>
+
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · SIMULEREN IN DRIE STAPPEN</div>
+                <div class="b-text">
+                    <p><b>1. Model:</b> koppel de uitkomsten van het experiment aan toevalsgetallen, bijvoorbeeld aantal ogen ↔ toevalsgetal van 1 tot 6.</p>
+                    <p><b>2. Uitvoeren:</b> herhaal het experiment heel vaak met de computer.</p>
+                    <p><b>3. Analyseren:</b> bepaal de relatieve frequentie. Die is een <b>schatting</b> van $P(E)$. Elke nieuwe simulatie geeft een iets andere schatting.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Schoolfeest:</b> voor 7 zijn er 6 van de 36 mogelijkheden, voor 6 en 8 elk maar 5. Probeer het uit in de simulator bij „Twee dobbelstenen”.</p>
+            <p class="b-note"><b>Geschiedenis:</b> Antoine Gombaud, Chevalier de Méré, wist uit ervaring dat de weddenschap op „minstens één zes in vier worpen” op den duur wint. Zijn vragen over kansspelen leidden in 1654 tot de briefwisseling tussen Blaise Pascal en Pierre de Fermat. Die geldt als het begin van de kansrekening.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · SIMULATOR</div>
+        <p class="b-help" style="margin:0 0 12px">Kies een kansexperiment en laat het 1, 10, 100 of 1000 keer lopen. De blauwe kromme is de relatieve frequentie, de gele lijn de kans.</p>
+        <div data-widget="simulation"></div>
+    </div>
+
+    <div class="b-box b-methode">
+        <div class="b-box-title">METHODE · SIMULEREN MET EEN SPREADSHEET EN GEOGEBRA</div>
+        <div class="b-text">
+            <p><b>Spreadsheet</b> (Excel, LibreOffice): twee dobbelstenen, som van de ogen 7, 1000 herhalingen.</p>
+            <p><code class="b-codeline">A1: =ASELECTTUSSEN(1;6)+ASELECTTUSSEN(1;6)</code> Trek de formule naar beneden tot A1000. Tel de treffers en deel door het aantal: <code class="b-codeline">B1: =AANTAL.ALS(A1:A1000;7)/1000</code> Met <code>F9</code> (Excel) wordt opnieuw gegooid.</p>
+            <p><b>GeoGebra:</b> <code class="b-codeline">L = Sequence(RandomBetween(1, 6) + RandomBetween(1, 6), i, 1, 1000)</code> <code class="b-codeline">CountIf(x == 7, L) / 1000</code></p>
+        </div>
+    </div>
+
+    <div class="b-box b-warn">
+        <div class="b-box-title">BEWUST KIEZEN · REKENEN OF SIMULEREN?</div>
+        <div class="b-text">
+            <p><b>Rekenen</b> met een boom of een tabel geeft de precieze waarde, maar vraagt een overzichtelijk model.</p>
+            <p><b>Simuleren</b> kan ook bij experimenten die te ingewikkeld zijn om te berekenen, zoals wachtrijen of de verspreiding van een ziekte. Een simulatie geeft echter alleen schattingen, en die worden maar langzaam nauwkeuriger: voor één cijfer meer nauwkeurigheid heb je ongeveer honderd keer zoveel herhalingen nodig.</p>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">Monte Carlo: toevallige treffers schatten het getal $\pi$</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BORD VAN GALTON</span><span class="b-lab-what">Veel knikkers, veel stappen – het histogram groeit</span></span></a>
+        <a class="b-lab" data-lab="infektionssimulation" href="../../infektionssimulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">BESMETTINGSSIMULATIE</span><span class="b-lab-what">Te ingewikkeld om te berekenen, dus simuleren</span></span></a>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="12">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Laat in de simulator vijf keer na elkaar 100 worpen „Dobbelsteen: zes” lopen (tussendoor terugzetten) en noteer telkens $h_{100}$. Doe hetzelfde met 1000 worpen. Wat valt je op?</p></div>
+            <div class="b-sol"><p>Bij 100 worpen liggen de waarden meestal ergens tussen ongeveer $0{,}10$ en $0{,}24$. Bij 1000 worpen liggen ze veel dichter rond $\tfrac16 \approx 0{,}167$. Meer herhalingen, minder schommeling.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Hoe kun je met een dobbelsteen simuleren: a) het opgooien van een munt, b) een rad van fortuin met $P(\text{rood}) = \tfrac13$, c) een rad van fortuin met $P(\text{rood}) = \tfrac14$?</p></div>
+            <div class="b-hint"><p>Voor c): je mag worpen ook ongeldig verklaren en gewoon opnieuw gooien.</p></div>
+            <div class="b-sol"><p>a) even getal ↔ kop &nbsp; b) 1 of 2 ↔ rood &nbsp; c) bij 5 of 6 opnieuw gooien. Van 1 tot 4 betekent de 1 rood.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Simuleer in de simulator „De Méré” minstens 2000 keer en schat de kans op minstens één zes in vier worpen. Bereken haar daarna met de complementaire gebeurtenis en vergelijk.</p></div>
+            <div class="b-sol"><p>$1 - \left(\tfrac56\right)^4 = 1 - \tfrac{625}{1296} = \tfrac{671}{1296} \approx 0{,}518$. De simulatie komt daar in de buurt. Omdat de waarde net boven $\tfrac12$ ligt, won de Méré op den duur.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Simuleer met een spreadsheet 1000 worpen met twee dobbelstenen. Bepaal de relatieve frequenties van de sommen 6, 7 en 8 en vergelijk met de kansen.</p></div>
+            <div class="b-sol"><p>Kolom A zoals in het methodekader. Dan <code>=AANTAL.ALS(A1:A1000;6)/1000</code>, net zo voor 7 en 8.</p>
+                <p>Te verwachten is ongeveer $\tfrac{5}{36} \approx 0{,}139$, $\tfrac{6}{36} \approx 0{,}167$ en $\tfrac{5}{36} \approx 0{,}139$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Noor heeft 20 keer gegooid en vijf zessen gekregen. Ze zegt: „De kans op een zes is bij deze dobbelsteen $0{,}25$. De dobbelsteen is vals.” Geef je mening.</p></div>
+            <div class="b-sol"><p>$h_{20} = 0{,}25$ is maar een ruwe schatting. Bij 20 worpen schommelt de relatieve frequentie sterk. Ook met een eerlijke dobbelsteen komen in zo'n 23% van alle reeksen van 20 worpen vijf of meer zessen voor. Om de dobbelsteen te beoordelen heeft Noor veel meer worpen nodig.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="112/600" data-tol="0.002">
+            <p class="b-q-text">Bij 600 worpen viel 112 keer een zes. Hoe groot is de relatieve frequentie?</p>
+            <div class="b-sol"><p>$h_{600} = \tfrac{112}{600} \approx 0{,}187$, niet ver van $\tfrac16 \approx 0{,}167$.</p></div>
+        </div>
+        <div class="b-q" data-mc="1">
+            <p class="b-q-text">Welke simulatie past bij een rad van fortuin met $P(\text{rood}) = 0{,}3$?</p>
+            <div class="b-mc">
+                <button>ASELECTTUSSEN(1;3), rood bij 1</button>
+                <button>ASELECTTUSSEN(1;10), rood bij 1, 2 of 3</button>
+                <button>ASELECTTUSSEN(1;6), rood bij 1 of 2</button>
+            </div>
+            <div class="b-sol"><p>Van tien even waarschijnlijke getallen staan er drie voor rood: $\tfrac{3}{10} = 0{,}3$. De andere twee geven $\tfrac13$.</p></div>
+        </div>
+        <div class="b-q" data-ans="200" data-ph="aantal">
+            <p class="b-q-text">Twee dobbelstenen worden 1200 keer gegooid. Hoe vaak verwacht je ongeveer de som 7?</p>
+            <div class="b-sol"><p>$1200 \cdot \tfrac16 = 200$. In de simulatie komen meestal waarden in de buurt van 200 uit, zelden precies 200.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ WIEDERHOLEN -->
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Herhalen · verdiepen · verbinden" data-toc-k="H" data-toc-short="Oefenen">
+    <div class="b-band"><span class="b-band-tag">HERHALEN · VERDIEPEN · VERBINDEN</span></div>
+    <div class="b-tasks" data-start="17">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Een cijferslot heeft drie wieltjes met de cijfers 0 tot en met 9. Hoe groot is de kans dat je het met één willekeurige poging opent? Hoe verandert de kans als je het eerste cijfer weet?</p></div>
+            <div class="b-sol"><p>$\tfrac{1}{10} \cdot \tfrac{1}{10} \cdot \tfrac{1}{10} = \tfrac{1}{1000}$. Met bekend eerste cijfer: $\tfrac{1}{100}$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Je gooit twee keer met een dobbelsteen. Bereken de kans op a) dubbel (twee keer hetzelfde), b) som 10, c) minstens één 1.</p></div>
+            <div class="b-sol"><p>a) $\tfrac{6}{36} = \tfrac16$ &nbsp; b) (4|6), (5|5), (6|4): $\tfrac{3}{36} = \tfrac{1}{12}$ &nbsp;
+                c) $1 - \tfrac{25}{36} = \tfrac{11}{36}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Een bedrijf koopt 30% van zijn onderdelen bij leverancier A en 70% bij leverancier B. Van A is 4% defect, van B 2%.</p>
+                <p>a) Teken de boom en stel de kruistabel op. b) Hoeveel procent van alle onderdelen is defect? c) Een onderdeel is defect. Komt het eerder van A of van B?</p></div>
+            <div class="b-sol"><p>a) A en defect: $0{,}3 \cdot 0{,}04 = 0{,}012$, A en in orde: $0{,}288$, B en defect: $0{,}7 \cdot 0{,}02 = 0{,}014$, B en in orde: $0{,}686$.</p>
+                <p>b) $0{,}012 + 0{,}014 = 0{,}026$, dus 2,6%.</p>
+                <p>c) Net iets eerder van B ($0{,}014 > 0{,}012$), hoewel de onderdelen van A twee keer zo vaak defect zijn: B levert veel meer onderdelen.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Drie personen ontmoeten elkaar. Hoe groot is de kans dat alle drie op verschillende dagen jarig zijn (365 dagen, allemaal even waarschijnlijk)? Hoe groot is de kans dat minstens twee op dezelfde dag jarig zijn?</p></div>
+            <div class="b-sol"><p>$\tfrac{365}{365} \cdot \tfrac{364}{365} \cdot \tfrac{363}{365} \approx 0{,}9918$, dus minstens twee hetzelfde: $\approx 0{,}0082$.</p>
+                <p>Verder gedacht: vanaf 23 personen is een gemeenschappelijke verjaardag waarschijnlijker dan geen. Dat is de <b>verjaardagsparadox</b>.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Een basketbalspeelster scoort bij een vrije worp met 70%. Ze gooit tot ze scoort, maar hoogstens drie keer.</p>
+                <p>a) Hoe groot is de kans dat ze überhaupt scoort? b) Hoe groot is de kans dat ze precies twee worpen nodig heeft? c) Hoe groot is de kans dat ze drie keer gooit?</p></div>
+            <div class="b-hint"><p>De boom is niet volledig: na een treffer stopt de route.</p></div>
+            <div class="b-sol"><p>a) $1 - 0{,}3^3 = 0{,}973$ &nbsp; b) $0{,}3 \cdot 0{,}7 = 0{,}21$ &nbsp; c) de derde worp komt alleen na twee missers: $0{,}3 \cdot 0{,}3 = 0{,}09$</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Verbinden met leergebied 3:</b> de functie $f(n) = 1 - \left(\tfrac56\right)^n$ geeft de kans op minstens één zes in $n$ worpen.</p>
+                <p>a) Bereken $f(1)$, $f(4)$ en $f(10)$. b) Vanaf welke $n$ is $f(n) > 0{,}5$? c) Wat voor functie is $n \mapsto \left(\tfrac56\right)^n$? Wat gebeurt er met $f(n)$ voor heel grote $n$?</p></div>
+            <div class="b-sol"><p>a) $f(1) = \tfrac16 \approx 0{,}167$, $f(4) \approx 0{,}518$, $f(10) \approx 0{,}838$ &nbsp; b) vanaf $n = 4$, want $f(3) \approx 0{,}421$.</p>
+                <p>c) Een exponentiële functie met groeifactor $\tfrac56$, dus exponentiële afname. $f(n)$ komt willekeurig dicht bij $1$, maar bereikt het nooit.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================ EXKURSION -->
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursie: het geitenprobleem" data-toc-k="X" data-toc-short="Geitenprobleem">
+    <div class="b-band"><span class="b-band-tag">EXCURSIE</span><span class="b-band-sub">OM VERDER TE DENKEN</span></div>
+    <h2>Het geitenprobleem</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>In een spelshow zijn er drie deuren. Achter één staat een auto, achter de twee andere elk een geit. Je kiest een deur. De presentator weet waar de auto staat. Hij opent een van de twee andere deuren, en wel altijd een met een geit. Dan vraagt hij: „Wilt u wisselen?”</p>
+            <p>In 1990 beantwoordde Marilyn vos Savant deze vraag in haar column „Ask Marilyn” in het Amerikaanse tijdschrift <i>Parade</i>: wisselen verdubbelt de winkans van $\tfrac13$ naar $\tfrac23$. Daarop kreeg ze meer dan 10.000 brieven van lezers. De meeste schrijvers waren ervan overtuigd dat ze zich vergiste, onder wie veel gepromoveerden.</p>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Bronnen:</b> Steve Selvin, lezersbrief in <i>The American Statistician</i> 29 (1975), p. 67. Marilyn vos Savant, „Ask Marilyn”, <i>Parade</i>, 9 september 1990.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · SPEEL HET ZELF</div>
+        <div data-widget="ziegen"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">WAAROM WISSELEN WINT</div>
+        <div class="b-text"><p>Leg het uit met een kansboom in twee stappen: eerste stap je keuze, tweede stap je strategie.</p></div>
+            <div class="b-sol">
+                <p>Je eerste keuze treft met kans $\tfrac13$ de auto en met $\tfrac23$ een geit.</p>
+                <p><b>Blijven</b> wint alleen als de eerste keuze al goed was: $\tfrac13$.</p>
+                <p><b>Wisselen</b> wint precies dan als de eerste keuze een geit was. De andere geit heeft de presentator immers al laten zien, achter de laatste deur moet dus de auto staan: $\tfrac23$.</p>
+                <p>Beslissend is dat de presentator <b>weet</b> waar de auto staat, en nooit de deur met de auto opent.</p>
+            </div>
+    </div>
+</section>
+
+<!-- ================================================================ RÜCKBLICK -->
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Samenvatting" data-toc-k="S" data-toc-short="Samenvatting">
+    <div class="b-band"><span class="b-band-tag">SAMENVATTING</span><span class="b-band-sub">HET BELANGRIJKSTE IN ÉÉN OOGOPSLAG</span></div>
+
+    <div class="b-rueck">
+        <div><h4>KANSEXPERIMENT IN MEERDERE STAPPEN</h4>
+            <p>Meerdere deelexperimenten na elkaar. In de kansboom is elke stap een vertakking, elke uitkomst een route. Bij elke vertakking zijn de kansen samen $1$.</p></div>
+        <div><p>Twee knikkers uit <span class="st-urn"><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball r"></span><span class="st-ball b"></span><span class="st-ball b"></span></span>
+            zonder terugleggen: routes RR, RB, BR, BB.</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>PRODUCTREGEL</h4><p>Kans op een uitkomst = <b>product</b> langs de route.</p></div>
+        <div><p>$P(\text{RB}) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>SOMREGEL</h4><p>Kans op een gebeurtenis = <b>som</b> van de bijbehorende routes.</p></div>
+        <div><p>$P(\text{verschillende kleuren}) = \tfrac{3}{10} + \tfrac{3}{10} = \tfrac35$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>COMPLEMENTREGEL</h4><p>$P(E) = 1 - P(\overline{E})$. Vooral handig bij „minstens één keer”.</p></div>
+        <div><p>Twee keer het rad, $P(\text{rood}) = \tfrac23$: $P(\text{min. één keer rood}) = 1 - \tfrac19 = \tfrac89$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>MET / ZONDER TERUGLEGGEN</h4><p>Met terugleggen blijven de kansen gelijk, zonder terugleggen veranderen ze van stap tot stap.</p></div>
+        <div><p>met: $\tfrac35 \cdot \tfrac35 = \tfrac{9}{25}$ &nbsp; zonder: $\tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>KRUISTABEL</h4><p>Twee kenmerken met elk twee mogelijkheden. Vier binnenste vakjes, totalen aan de rand, rechtsonder $1$ of het totale aantal. De binnenste vakjes zijn de eindpunten van de bijbehorende boom.</p></div>
+        <div><p>$P(\overline{A} \cap \overline{B}) = 1 - P(A) - P(B) + P(A \cap B)$</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>RELATIEVE FREQUENTIE</h4><p>$h_n(E) = \tfrac{k}{n}$. Bij groeiende $n$ stabiliseert ze zich dicht bij $P(E)$ (empirische wet van de grote aantallen).</p></div>
+        <div><p>600 worpen, 112 zessen: $h_{600} \approx 0{,}187$, dicht bij $\tfrac16$.</p></div>
+    </div>
+    <div class="b-rueck">
+        <div><h4>SIMULATIE</h4><p>Model met toevalsgetallen, heel vaak uitvoeren, relatieve frequentie als schatting. Geeft schattingen, geen exacte waarden.</p></div>
+        <div><p><code>=ASELECTTUSSEN(1;6)</code> simuleert een worp met een dobbelsteen.</p></div>
+    </div>
+</section>
+
+<!-- ================================================================ TEST -->
+<section class="b-sec" id="test" data-kind="test" data-toc="Toets" data-toc-k="T" data-toc-short="Toets">
+    <div class="b-band"><span class="b-band-tag">TOETS</span><span class="b-band-sub">TWEE RONDES · METEEN FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDE 1</div>
+            <div class="b-q" data-ans="1/8">
+                <p class="b-q-text">Een munt wordt drie keer opgegooid. Hoe groot is de kans op drie keer kop?</p>
+                <div class="b-sol"><p>$\left(\tfrac12\right)^3 = \tfrac18$</p></div>
+            </div>
+            <div class="b-q" data-ans="16/25">
+                <p class="b-q-text">Uit een vaas met 4 rode en 1 blauwe knikker wordt twee keer met terugleggen getrokken. Hoe groot is de kans dat beide rood zijn?</p>
+                <div class="b-sol"><p>$\tfrac45 \cdot \tfrac45 = \tfrac{16}{25} = 0{,}64$</p></div>
+            </div>
+            <div class="b-q" data-ans="0,2">
+                <p class="b-q-text">Gegeven is $P(A) = 0{,}7$, $P(B) = 0{,}4$ en $P(A \cap B) = 0{,}3$. Bereken $P(\overline{A} \cap \overline{B})$.</p>
+                <div class="b-sol"><p>$1 - 0{,}7 - 0{,}4 + 0{,}3 = 0{,}2$</p></div>
+            </div>
+            <div class="b-q" data-mc="1">
+                <p class="b-q-text">Bij 50 worpen kwam er 12 keer een zes. Welke uitspraak klopt?</p>
+                <div class="b-mc">
+                    <button>De dobbelsteen is zeker vals.</button>
+                    <button>$h_{50} = 0{,}24$ is maar een schatting. Zulke afwijkingen van $\tfrac16$ zijn bij 50 worpen normaal.</button>
+                    <button>In de volgende 50 worpen komt de zes minder vaak, zodat het uitmiddelt.</button>
+                </div>
+                <div class="b-sol"><p>De dobbelsteen heeft geen geheugen. Bij weinig worpen schommelt $h_n$ sterk, pas bij veel worpen wordt de schatting betrouwbaar.</p></div>
+            </div>
+        </div>
+
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDE 2</div>
+            <div class="b-q" data-ans="1/10">
+                <p class="b-q-text">Uit een vaas met 2 rode en 3 blauwe knikkers worden er drie zonder terugleggen getrokken. Hoe groot is de kans dat ze allemaal blauw zijn?</p>
+                <div class="b-sol"><p>$\tfrac35 \cdot \tfrac24 \cdot \tfrac13 = \tfrac{6}{60} = \tfrac{1}{10}$</p></div>
+            </div>
+            <div class="b-q" data-ans="0,40951">
+                <p class="b-q-text">Een lot wint met kans $0{,}1$. Je koopt vijf loten. Hoe groot is de kans dat er minstens één wint? (op twee decimalen)</p>
+                <div class="b-sol"><p>$1 - 0{,}9^5 = 1 - 0{,}59049 \approx 0{,}41$</p></div>
+            </div>
+            <div class="b-q" data-ans="540" data-ph="aantal">
+                <p class="b-q-text">2000 personen worden getest, 10% is ziek. De test herkent 90% van de zieken en 80% van de gezonden juist. Hoeveel personen worden in totaal positief getest?</p>
+                <div class="b-sol"><p>200 zieken: 180 positief. 1800 gezonden: 20% vals positief, dus 360. Samen 540.</p></div>
+            </div>
+            <div class="b-q" data-ans="0,25">
+                <p class="b-q-text">Gegeven is $P(B) = 0{,}45$ en $P(A \cap B) = 0{,}2$. Bereken $P(\overline{A} \cap B)$.</p>
+                <div class="b-sol"><p>De kolom $B$ geeft samen $P(B)$: $0{,}45 - 0{,}2 = 0{,}25$.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <h3>MEER OEFENEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-baumdiagramme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">KANSBOMEN</span><span class="b-lab-what">20 opgaven met feedback</span></span></a>
+        <a class="b-lab" href="../../mathetest11-vierfeldertafel.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">KRUISTABELLEN</span><span class="b-lab-what">20 opgaven met feedback</span></span></a>
+        <a class="b-lab" href="../../mathetest11-simulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SIMULATIE</span><span class="b-lab-what">20 opgaven met feedback</span></span></a>
+        <a class="b-lab" href="../../mathetest11-stochastik-uebung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">KANSREKENING GEMENGD</span><span class="b-lab-what">Geitenprobleem, verjaardagen en meer</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Wiskunde, Berufliches Gymnasium klas 11 · leergebied 1 volgens het Saksische leerplan Berufliches Gymnasium Wiskunde.</p>
+    <p>Alle teksten, opgaven en afbeeldingen zijn eigen materiaal. Emoji: Apple, via emoji-data van iamcal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-nl.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-nl/stochastik.js"></script>
+</body>
+</html>
