@@ -50,6 +50,18 @@ window.BuchPT && BuchPT.add('stochastik', {
         // unabhaengig (lb1-1): unabhängig = independentes, unvereinbar = incompatíveis (as pt0), abhängig = dependentes
         'Unabhängig machen': 'Tornar independentes', 'Unvereinbar machen': 'Tornar incompatíveis',
         'Einheitsquadrat: Anteil von A in B und in nicht B': 'Quadrado unitário: parte de A em B e em não B',
+        // histo-hero, zufallsgroesse (lb1-2): Zufallsgröße = variável aleatória, Erwartungswert = valor médio, Varianz = variância,
+        // Standardabweichung = desvio padrão, Einsatz = aposta, Auszahlung = prémio, Gewinn = ganho, fair = equitativo; the die button is a rule
+        'Histogramm einer Wahrscheinlichkeitsverteilung': 'Histograma de uma distribuição de probabilidades', 'Histogramm einer Binomialverteilung': 'Histograma de uma distribuição binomial',
+        'Drei Münzen': 'Três moedas', 'Augensumme': 'Soma das pintas', 'Glücksrad': 'Roleta', 'Zufallsgröße': 'Variável aleatória', 'Einsatz': 'Aposta',
+        'Wahrscheinlichkeitsverteilung als Stabdiagramm': 'Distribuição de probabilidades num diagrama de barras', 'Spielen:': 'Jogar:',
+        'SPIELE n': 'JOGOS n', 'MITTELWERT': 'MÉDIA', 'ERWARTUNGSWERT': 'VALOR MÉDIO', 'LETZTE': 'ÚLTIMOS',
+        // bernoulli-baum, binomial (lb1-3): Bernoulli-Kette = sequência de provas de Bernoulli, Treffer / Niete = sucesso / insucesso
+        // (the tree letters T/N → S/I, rule below)
+        'Stufen $n$:': 'Etapas $n$:', 'Anzahl der Stufen': 'Número de etapas', 'Trefferwahrscheinlichkeit $p$': 'Probabilidade de sucesso $p$',
+        'Genau $k$ Treffer:': 'Exatamente $k$ sucessos:', 'Anzahl der Treffer': 'Número de sucessos',
+        'Baumdiagramm einer Bernoulli-Kette': 'Diagrama em árvore de uma sequência de provas de Bernoulli',
+        'Anzahl der Versuche $n$': 'Número de provas $n$', 'Was wird berechnet?': 'O que se calcula?', 'Histogramm der Binomialverteilung': 'Histograma da distribuição binomial',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -79,6 +91,18 @@ window.BuchPT && BuchPT.add('stochastik', {
             '<b>Independentes:</b> quer $B$ aconteça quer não, a parte de $A$ mantém-se igual. No quadrado, a fronteira está à mesma altura nas duas colunas.'],
         ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.',
             '<b>Incompatíveis</b> ($A \\cap B = \\emptyset$) e, portanto, <b>dependentes</b>: se $B$ acontecer, $A$ já não pode acontecer.'],
+        // zufallsgroesse: the help "$X$ = …." and the results
+        ['Augensumme zweier Würfel', 'soma das pintas de dois dados'], ['Augenzahl', 'número de pintas'], ['Anzahl Wappen', 'número de faces nacionais'],
+        ['Gewinn = Auszahlung − Einsatz', 'ganho = prémio − aposta'], ['Gewinn bei 1 € Einsatz', 'ganho com uma aposta de 1 €'],
+        [' Auszahlungen 0 €, 1 €, 2 €, 10 € mit den Wahrscheinlichkeiten ', ' Prémios de 0 €, 1 €, 2 €, 10 € com as probabilidades '],
+        [' Du setzt 1 € auf eine Zahl, dann werden drei Würfel geworfen. Für jeden Würfel mit deiner Zahl bekommst du 1 € Gewinn, sonst ist der Einsatz weg.',
+            ' Apostas 1 € num número e depois lançam-se três dados. Por cada dado com o teu número ganhas 1 €; caso contrário, perdes a aposta.'],
+        ['Erwartungswert: ', 'Valor médio: '], ['Varianz: ', 'Variância: '], [' · Standardabweichung: ', ' · Desvio padrão: '],
+        [' · Das Spiel ist <b>fair</b>.', ' · O jogo é <b>equitativo</b>.'],
+        // bernoulli-baum, binomial
+        ['$ · jeder hat die Wahrscheinlichkeit $', '$ · cada um tem a probabilidade $'], ['Formel von Bernoulli: $', 'Fórmula de Bernoulli: $'],
+        ['$X$ ist binomialverteilt mit $n = ', '$X$ segue uma distribuição binomial com $n = '],
+        ['Erwartungswert $\\mu', 'Valor médio $\\mu'], [' · Standardabweichung $\\sigma', ' · Desvio padrão $\\sigma'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -107,5 +131,15 @@ window.BuchPT && BuchPT.add('stochastik', {
             (m, d) => '<b>Dependentes:</b> $B$ ' + (d === 'oben' ? 'aumenta' : 'diminui') + ' a probabilidade de $A$.'],
         // unabhaengig: the German conditional probability P_B(A) is P(A|B) in Portuguese schools (with a bar, never \mid)
         [/P_B\(A\)/g, 'P(A|B)'], [/P_\{\\overline\{B\}\}\(A\)/g, 'P(A|\\overline{B})'],
+        // zufallsgroesse: the die button ("Würfel" has two meanings, so no global word, as the simulator of pt-1)
+        [/(data-v="wuerfel">)Würfel</g, '$1Dado<'],
+        [/ · Auf lange Sicht <b>(verlierst|gewinnst)<\/b> du im Mittel (\$[^$]*\$) € pro Spiel\./g,
+            (m, w, x) => ' · A longo prazo, ' + (w === 'verlierst' ? '<b>perdes</b>' : '<b>ganhas</b>') + ' em média ' + x + ' € por jogo.'],
+        // bernoulli-baum: "Pfade mit genau 2 Treffern: …" → "Caminhos com exatamente 2 sucessos: …"
+        [/Pfade mit genau (\d+) Treffern: /g, (m, k) => 'Caminhos com exatamente ' + k + (k === '1' ? ' sucesso: ' : ' sucessos: ')],
+        // bernoulli-baum: the letters of the tree T/N (Treffer/Niete) → S/I (sucesso/insucesso), only inside this tree
+        [/^(<svg class="st-tree"[^>]*aria-label="Baumdiagramm einer Bernoulli-Kette">)([\s\S]*)$/, (m, head, body) => head + body
+            .replace(/(font-weight:700">)([TN])(<\/text>)/g, (x, a, l, b) => a + (l === 'T' ? 'S' : 'I') + b)
+            .replace(/(<text x="10" y="20">)([TN]+)(<\/text>)/g, (x, a, k, b) => a + k.replace(/[TN]/g, l => (l === 'T' ? 'S' : 'I')) + b)],
     ]
 });
