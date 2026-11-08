@@ -20,6 +20,9 @@ window.BuchPT && BuchPT.add('analysis', {
         // the cover of the start page (BGY 12)
         'Titelbild: Kurve mit Wendetangente und Ableitung, Binomialverteilung und ein Vektor im Raum':
             'Imagem da capa: curva com a tangente no ponto de inflexão e a derivada, distribuição binomial e um vetor no espaço',
+        // grenzwert (lb2-1): Grenzwert = limite, waagerechte / senkrechte Asymptote = assíntota horizontal / vertical, Loch = buraco
+        'Annäherung, Schritt $k$': 'Aproximação, passo $k$', 'Graph mit Annäherung an einen Grenzwert': 'Gráfico a aproximar-se de um limite',
+        'Annäherung:': 'Aproximação:', 'Richtung': 'Sentido', '$x$ links': '$x$ à esquerda', '$x$ rechts': '$x$ à direita', 'sin(x)/x': 'sen(x)/x',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -46,9 +49,20 @@ window.BuchPT && BuchPT.add('analysis', {
         ['$: erst die Stammfunktion von $\\sin$, dann durch die innere Ableitung $a$ teilen.', '$: primeiro a primitiva de $\\operatorname{sen}$, depois dividir pela derivada interior $a$.'],
         ['$: Potenzregel für die Klammer, dann durch die innere Ableitung teilen.', '$: regra da potência para o parêntese, depois dividir pela derivada interior.'],
         // book pt-2 mathe12-pt:
+        // grenzwert (the rule below has already written x → +∞)
+        ['links gegen $-\\infty$, rechts gegen $+\\infty$: kein Grenzwert, senkrechte Asymptote $x = 1$',
+            'tende para $-\\infty$ à esquerda e para $+\\infty$ à direita: não há limite, assíntota vertical $x = 1$'],
+        ['wächst über alle Grenzen: $f(x) \\to +\\infty$, kein Grenzwert', 'cresce sem limite: $f(x) \\to +\\infty$, não há limite'],
+        ['An der Stelle $x = 1$ ist $f$ nicht definiert, der Graph hat dort ein Loch. Der Grenzwert existiert trotzdem: Kürzen gibt $',
+            'No ponto $x = 1$, $f$ não está definida e o gráfico tem aí um buraco. Mesmo assim, o limite existe: simplificando, obtém-se $'],
+        ['Bei $x = 0$ ist $f$ nicht definiert. Die Werte kommen trotzdem beliebig nah an 1 heran.', 'Em $x = 0$, $f$ não está definida. Mesmo assim, os valores aproximam-se de 1 tanto quanto se queira.'],
+        ['Der Graph pendelt um die $x$-Achse, die Ausschläge werden immer kleiner.', 'O gráfico oscila em torno do eixo $Ox$ e as oscilações são cada vez menores.'],
+        ['$ für $', '$ para $'], ['Waagerechte Asymptote: $y = ', 'Assíntota horizontal: $y = '],
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-2 mathe12-pt:
+        // grenzwert: Portuguese schools write x → +∞ (never a bare ∞ after an arrow)
+        [/\\to \\infty/g, '\\to +\\infty'],
     ]
 });
