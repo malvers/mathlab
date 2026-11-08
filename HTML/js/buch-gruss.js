@@ -171,24 +171,24 @@
             ],
         },
 
-        // Turkish (package arch3, 08.11.2026, block tr): still the English letter - TODO tr: translate this block only
-        // (name the header button as js/buch-tr.js writes it)
+        // Turkish for Turkey (package arch3, 08.11.2026, block tr, translated by tr-1); the header button reads "Hata bildir"
+        // there (js/buch-tr.js); the pupil is addressed with "sen", the teachers with "siz"
         tr: {
             foto, name, zeile,
             text: [
-                'Dear student,',
-                'This book grew out of a simple conviction: a good education must never fail for lack of money. That is why everything on ' +
-                'docalvers.de is free, without ads and without signing up. Nobody collects your data. The videos on my YouTube channel ' +
-                '(youtube.com/@docalvers) are free for you as well.',
-                'I am a physicist, I founded a software company, and today I teach mathematics and computer science in Dresden, Saxony, Germany. I build the ' +
-                'Mathe-Labor of my own free will. I put time and money into it because I am convinced that the investment pays off: in you and in ' +
-                'better education for everyone. An unusual team has helped me – AI agents that program, draw, calculate and translate to my ' +
-                'specifications. This is how well over 100 interactive labs and more than 20 textbooks in several languages came about. And there are more every day!',
-                'Mathematics is not only for reading, it is for handling. In the online book you can drag every graph and run every random ' +
-                'experiment a thousand times; the QR codes in this book take you straight there. Try things out, make mistakes – that is exactly how you learn the most.',
-                'And if you find a mistake in the book, tell me. With the red “Fehler melden” button (report an error) in the online book, every report comes straight to me.',
-                'To teachers: please use all of it in your lessons – that is exactly what it is for.',
-                'Enjoy it, and every success!',
+                'Sevgili öğrenci,',
+                'Bu kitap basit bir inançtan doğdu: İyi bir eğitim asla para yüzünden engellenmemeli. Bu yüzden ' +
+                'docalvers.de\'deki her şey ücretsiz, reklamsız ve üyeliksizdir. Kimse verilerini toplamıyor. YouTube kanalımdaki videolar ' +
+                '(youtube.com/@docalvers) da senin için ücretsiz.',
+                'Ben bir fizikçiyim, bir yazılım şirketi kurdum ve bugün Almanya\'nın Saksonya eyaletindeki Dresden\'de matematik ve bilgisayar bilimi öğretiyorum. ' +
+                'Mathe-Labor\'u kendi isteğimle kuruyorum. Ona zaman ve para ayırıyorum, çünkü bu yatırımın karşılığını vereceğine inanıyorum: sende ve ' +
+                'herkes için daha iyi bir eğitimde. Bana sıra dışı bir ekip yardım etti: benim yönergelerime göre program yazan, çizen, hesaplayan ve ' +
+                'çeviren yapay zekâ ajanları. 100\'ü aşkın etkileşimli laboratuvar ve birkaç dilde 20\'den fazla ders kitabı böyle ortaya çıktı. Ve her gün yenileri ekleniyor!',
+                'Matematik yalnızca okunmak için değil, elle tutulmak içindir. Çevrimiçi kitapta her grafiği sürükleyebilir, her rastgele deneyi bin kez ' +
+                'tekrarlayabilirsin; bu kitaptaki QR kodları seni doğrudan oraya götürür. Dene, yanıl: En çok tam da böyle öğrenirsin.',
+                'Kitapta bir hata bulursan bana söyle. Çevrimiçi kitaptaki kırmızı “Hata bildir” düğmesiyle her bildirim doğrudan bana ulaşır.',
+                'Öğretmenlere: Lütfen bunların hepsini derslerinizde kullanın – zaten bunun için var.',
+                'Keyifle kullan, başarılar dilerim!',
             ],
         },
     };
