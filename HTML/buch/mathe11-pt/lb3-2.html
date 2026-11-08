@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática 11 · Capítulo 3.2 · Crescimento e decrescimento | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Funções afins e funções exponenciais. Capítulo 3.2 do manual interativo Matemática · Berufliches Gymnasium 11: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO 3.2 · ÁREA DE APRENDIZAGEM 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 3.2 · ÁREA DE APRENDIZAGEM 3 · OUTUBRO · NOVEMBRO</p>
+            <h1>Crescimento e decrescimento</h1>
+            <p class="b-hero-lead">Uma conta poupança, uma vela a arder, iodo radioativo, a população mundial: umas coisas crescem <b>sempre o mesmo</b>,
+                outras <b>pelo mesmo fator</b>. No início, a diferença parece pequena, mas com o tempo torna-se enorme.
+                Aqui vais aprender os dois modelos mais importantes: funções afins e funções exponenciais.</p>
+            <div class="b-chips"><span class="b-chip">10 AULAS</span><span class="b-chip">2 UNIDADES</span><span class="b-chip">3 LABS</span><span class="b-chip">EDUCAÇÃO PARA O DESENVOLVIMENTO SUSTENTÁVEL</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["1000+50*x","1000*1.04^x"]' data-labels='["+ 50 € por ano","+ 4 % ao ano"]' data-lat="[22,24]" data-x="-1,32" data-y="0,3500" data-pts="[[12,1600]]" data-xl="Anos" data-yl="€" data-h="240" data-aria="Poupança linear e exponencial em comparação"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a escrever <b>funções afins</b> $f(x) = mx + b$ e a <b>interpretar</b> o declive e a ordenada na origem em aplicações</li>
+                <li>a usar <b>funções exponenciais</b> $f(x) = a \cdot q^x$ como modelo de crescimento e de decrescimento</li>
+                <li>a calcular com <b>juro composto</b>, <b>tempo de meia-vida</b> e <b>tempo de duplicação</b></li>
+                <li>a <b>avaliar criticamente</b> modelos para o futuro</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="2" data-ph="m ="><p class="b-q-text">Uma reta passa por $(0, 1)$ e $(2, 5)$. Qual é o seu declive?</p><div class="b-sol"><p>$\tfrac{5 - 1}{2 - 0} = 2$</p></div></div>
+            <div class="b-q" data-ans="210" data-ph="Número"><p class="b-q-text">Calcula $200 \cdot 1{,}05$.</p><div class="b-sol"><p>$210$, ou seja, mais 5 % do que 200.</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="Número"><p class="b-q-text">Quanto é $2^0$?</p><div class="b-sol"><p>Qualquer número (exceto 0) elevado a 0 dá 1.</p></div></div>
+            <div class="b-q" data-ans="20" data-ph="Número"><p class="b-q-text">Tira metade de 80 e, do resultado, outra vez metade.</p><div class="b-sol"><p>$80 \cdot 0{,}5 \cdot 0{,}5 = 20$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">DOIS PLANOS DE POUPANÇA</div>
+            <div class="b-text"><p>Ambos começam com 1 000 €. No plano A juntam-se 50 € todos os anos; no plano B há juros de 4 % sobre o saldo de cada momento.</p>
+                <ul><li>Qual dos planos é melhor ao fim de 10 anos? E ao fim de 30?</li><li>A partir de que ano o plano B ultrapassa o plano A? A imagem da introdução revela-o.</li></ul></div>
+            <span class="b-pair">→ Unidades 1 e 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">A LENDA DOS GRÃOS DE TRIGO</div>
+            <div class="b-text"><p>Um inventor do xadrez pede como recompensa: um grão na primeira casa, dois na segunda, quatro na terceira, e assim por diante, sempre o dobro.</p>
+                <ul><li>Quantos grãos estão na 10.ª, na 20.ª e na 64.ª casa? Comecem por estimar.</li><li>Quanto pesaria tudo isso, se um grão pesar 0,05 g?</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DECAIMENTO COM DADOS</div>
+            <div class="b-text"><p>Lancem 60 dados. Todos os seis «decaem» e são retirados. Lancem de novo os restantes, e assim sucessivamente.</p>
+                <ul><li>Depois de cada lançamento, registem o número de dados que restam e desenhem a evolução.</li><li>Ao fim de quantos lançamentos desapareceu cerca de metade?</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Funções afins" data-toc-k="1" data-toc-short="1 Afim">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">5 AULAS</span></div>
+    <h2><span class="b-no">1</span>Crescimento linear: interpretar retas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Uma vela com 20 cm de altura diminui 1,5 cm em cada hora. Que altura tem ao fim de 4 horas? Quando fica completamente consumida?</p></div></div>
+            <div class="b-text">
+                <p>Em cada hora, a vela fica <b>sempre o mesmo</b> mais baixa. A sua altura é uma <b>função afim</b> do tempo:
+                    $h(t) = 20 - 1{,}5t$. Ao fim de 4 horas, $h(4) = 14$ cm. Fica consumida quando $h(t) = 0$, ou seja, ao fim de $t = \tfrac{20}{1{,}5} \approx 13{,}3$ horas.</p>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · FUNÇÃO AFIM</div>
+                <div class="b-text">
+                    <p>$f(x) = m x + b$. O gráfico é uma reta.</p>
+                    <p><b>Declive</b> $m = \dfrac{y_2 - y_1}{x_2 - x_1}$: a variação de $y$ quando $x$ aumenta 1. <b>Ordenada na origem</b> $b = f(0)$: o valor inicial.</p>
+                    <p><b>Crescimento linear:</b> em intervalos iguais junta-se sempre <b>o mesmo valor</b> (se $m < 0$, retira-se sempre o mesmo). As <b>diferenças</b> entre valores consecutivos são constantes.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Interpretar unidades:</b> em $h(t) = 20 - 1{,}5t$, $m = -1{,}5$ tem a unidade cm por hora e $b = 20$ tem a unidade cm.</p>
+            <p class="b-note"><b>Economia:</b> na depreciação linear, um equipamento perde todos os anos o mesmo valor contabilístico.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · RETA QUE PASSA POR DOIS PONTOS</div>
+        <p class="b-help" style="margin:0 0 12px">Arrasta os dois pontos. O triângulo de declive verde mostra $\Delta x$ e $\Delta y$.</p>
+        <div data-widget="gerade"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · RETA QUE PASSA POR DOIS PONTOS</div>
+            <div class="b-text"><p>Determina a reta que passa por $P(1, 3)$ e $Q(4, 9)$.</p></div>
+            <div class="b-sol"><p>$m = \tfrac{9 - 3}{4 - 1} = 2$. Substituindo $P$: $3 = 2 \cdot 1 + b \Rightarrow b = 1$. <span class="b-res">$f(x) = 2x + 1$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · DEPRECIAÇÃO</div>
+            <div class="b-text"><p>Um portátil de uma empresa custa 2 400 € e é depreciado linearmente ao longo de 8 anos. Indica o valor contabilístico $V(t)$. O que significam $m$ e $b$?</p></div>
+            <div class="b-sol"><p>$V(t) = 2400 - 300t$ para $0 \leq t \leq 8$. $b = 2400$ € é o preço de aquisição; $m = -300$ € por ano é a perda de valor anual.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Indica o declive, a ordenada na origem e o zero de $f(x) = -2x + 5$.</p></div>
+            <div class="b-sol"><p>$m = -2$, $b = 5$, zero $x_0 = 2{,}5$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Determina a reta que passa por $A(-1, 4)$ e $B(3, -4)$.</p></div>
+            <div class="b-sol"><p>$m = \tfrac{-4 - 4}{3 - (-1)} = -2$, $4 = -2 \cdot (-1) + b \Rightarrow b = 2$. $f(x) = -2x + 2$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Um tarifário de eletricidade custa $C(x) = 0{,}29x + 12{,}90$ (em € por mês, $x$ em kWh). Interpreta os dois números. Quanto custa um mês com 250 kWh?</p></div>
+            <div class="b-sol"><p>12,90 € de valor fixo por mês, 0,29 € por kWh. $C(250) = 72{,}50 + 12{,}90 = 85{,}40$ €.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Uma máquina custa 48 000 € e, ao fim de 6 anos, ainda tem um valor contabilístico de 12 000 €. Escreve a depreciação linear. Quando é que o valor contabilístico é 0?</p></div>
+            <div class="b-sol"><p>$m = \tfrac{12\,000 - 48\,000}{6} = -6000$. $V(t) = 48\,000 - 6000t$, $V(t) = 0$ para $t = 8$ anos.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>A vela A tem 24 cm de altura e diminui 2 cm por hora; a vela B tem 18 cm de altura e diminui 1,2 cm por hora. As duas são acesas ao mesmo tempo. Quando é que têm a mesma altura?</p></div>
+            <div class="b-sol"><p>$24 - 2t = 18 - 1{,}2t \Rightarrow 6 = 0{,}8t \Rightarrow t = 7{,}5$. Ao fim de 7,5 horas, ambas têm <span class="b-res">9 cm</span>.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="2" data-ph="m ="><p class="b-q-text">Qual é o declive da reta que passa por $(0, 2)$ e $(4, 10)$?</p><div class="b-sol"><p>$\tfrac{8}{4} = 2$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="x ="><p class="b-q-text">Qual é o zero de $f(x) = 3x - 12$?</p><div class="b-sol"><p>$x = 4$</p></div></div>
+        <div class="b-q" data-ans="2400" data-ph="euros"><p class="b-q-text">Um equipamento de 3 600 € é depreciado linearmente até 0 em 6 anos. Qual é o seu valor contabilístico ao fim de 2 anos?</p><div class="b-sol"><p>600 € por ano: $3600 - 1200 = 2400$ €</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Funções exponenciais" data-toc-k="2" data-toc-short="2 Exponencial">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">5 AULAS</span></div>
+    <h2><span class="b-no">2</span>Crescimento e decrescimento exponencial</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>No plano de poupança B, o dinheiro cresce 4 % todos os anos, ou seja, pelo <b>fator</b> 1,04. Ao fim de um ano há 1 040 €,
+                ao fim de dois anos $1000 \cdot 1{,}04^2 = 1081{,}60$ €. Quanto há ao fim de $n$ anos?</p></div></div>
+            <div class="b-text"><p>Ao fim de $n$ anos, o saldo é $C(n) = 1000 \cdot 1{,}04^n$. A variável está no <b>expoente</b>; por isso, uma função destas chama-se <b>função exponencial</b>.
+                Como os próprios juros também rendem juros, fala-se de <b>juro composto</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · FUNÇÃO EXPONENCIAL</div>
+                <div class="b-text">
+                    <p>$f(x) = a \cdot q^x$, com valor inicial $a$ e <b>fator de crescimento</b> $q > 0$, $q \neq 1$.</p>
+                    <p>$q > 1$: <b>crescimento</b> de $p\,\% = (q - 1) \cdot 100\,\%$ por passo · $0 < q < 1$: <b>decrescimento</b> de $(1 - q) \cdot 100\,\%$ por passo.</p>
+                    <p><b>Crescimento exponencial:</b> em intervalos iguais multiplica-se sempre pelo <b>mesmo fator</b>. Os <b>quocientes</b> entre valores consecutivos são constantes.</p>
+                    <p><b>Tempo de meia-vida</b> $T_{1/2}$: o tempo ao fim do qual só resta metade. <b>Tempo de duplicação</b>: o tempo que a quantidade demora a duplicar.</p>
+                    <p><b>Juro composto:</b> $C_n = C_0 \cdot \left(1 + \tfrac{p}{100}\right)^n$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Regra prática:</b> tempo de duplicação $\approx \tfrac{72}{p}$ anos. Com 3 %, portanto, cerca de 24 anos.</p>
+            <p class="b-note"><b>Gráfico:</b> todos os gráficos de $a \cdot q^x$ intersetam o eixo $Oy$ no ponto de ordenada $a$ e têm o eixo $Ox$ como assíntota.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · LINEAR CONTRA EXPONENCIAL</div>
+        <p class="b-help" style="margin:0 0 12px">Escolhe um exemplo e altera o valor inicial, o aumento e o fator. Repara em quem fica à frente no fim.</p>
+        <div data-widget="wachstum"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · JURO COMPOSTO</div>
+            <div class="b-text"><p>5 000 € rendem juros de 2,5 % durante 10 anos. Qual é o saldo final?</p></div>
+            <div class="b-sol"><p>$C_{10} = 5000 \cdot 1{,}025^{10} \approx 6400{,}42$ €. Sem juro composto (125 € por ano), seriam apenas 6 250 €.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · TEMPO DE MEIA-VIDA</div>
+            <div class="b-text"><p>O iodo-131 radioativo tem um tempo de meia-vida de 8 dias. Quanto resta de 100 mg ao fim de 24 dias? Em que percentagem diminui por dia?</p></div>
+            <div class="b-sol"><p>24 dias são 3 meias-vidas: $100 \cdot 0{,}5^3 = 12{,}5$ mg.</p>
+                <p>Fator por dia: $q = 0{,}5^{1/8} \approx 0{,}917$, ou seja, cerca de <span class="b-res">menos 8,3 % por dia</span>. Modelo: $m(t) = 100 \cdot 0{,}5^{t/8}$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-ausblick">
+        <div class="b-box-title">SUSTENTABILIDADE · PODE ALGO CRESCER PARA SEMPRE?</div>
+        <div class="b-text">
+            <p>Em 1972, um grupo de investigação do MIT publicou, por encomenda do Clube de Roma, o estudo «Os Limites do Crescimento». A sua mensagem central:
+                num mundo finito, a população, a produção e o consumo de recursos não podem crescer exponencialmente de forma duradoura.</p>
+            <p>Por isso, os processos de crescimento reais acabam por abrandar. Em matemática, isso descreve-se com o <b>crescimento limitado</b> ou o <b>crescimento logístico</b>.
+                Discutam: onde encontram hoje crescimento exponencial? Onde é desejado e onde é perigoso?</p>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="potenzlabor" href="../../potenzlabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">POTENZLABOR</span><span class="b-lab-what">Expoentes, crescimento, curvas (os laboratórios estão em alemão)</span></span></a>
+        <a class="b-lab" data-lab="infektionssimulation" href="../../infektionssimulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INFEKTIONSSIMULATION</span><span class="b-lab-what">Primeiro exponencial, depois travado</span></span></a>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Crescimento ou decrescimento? Em que percentagem por passo? a) $f(x) = 1{,}07^x$ &nbsp; b) $f(x) = 0{,}85^x$ &nbsp; c) $f(x) = 2 \cdot 1{,}5^x$</p></div>
+            <div class="b-sol"><p>a) crescimento de 7 % &nbsp; b) decrescimento de 15 % &nbsp; c) crescimento de 50 %, valor inicial 2</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Linear, exponencial ou nenhum dos dois? Analisa as diferenças e os quocientes.</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:420px">
+                    <tr><th>$x$</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                    <tr><th>a)</th><td>3</td><td>6</td><td>12</td><td>24</td></tr>
+                    <tr><th>b)</th><td>3</td><td>6</td><td>9</td><td>12</td></tr>
+                    <tr><th>c)</th><td>80</td><td>40</td><td>20</td><td>10</td></tr>
+                    <tr><th>d)</th><td>1</td><td>2</td><td>4</td><td>7</td></tr></table></div></div>
+            <div class="b-sol"><p>a) exponencial, $q = 2$ &nbsp; b) linear, $m = 3$ &nbsp; c) exponencial, $q = 0{,}5$ &nbsp; d) nenhum: diferenças 1, 2, 3, quocientes 2; 2; 1,75</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>2 000 € rendem juros de 3 %. Quanto há ao fim de 5 anos? Ao fim de quantos anos é que o dinheiro duplicou, aproximadamente? Experimenta com o gráfico interativo ou com uma tabela.</p></div>
+            <div class="b-sol"><p>$2000 \cdot 1{,}03^5 \approx 2318{,}55$ €. Duplica ao fim de cerca de 23,4 anos, ou seja, ao fim de <span class="b-res">24 anos</span>. A regra prática $72 : 3 = 24$ confirma-o.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>O césio-137 tem um tempo de meia-vida de cerca de 30 anos. Que percentagem de uma quantidade ainda existe ao fim de 90 anos? Em que percentagem diminui por ano?</p></div>
+            <div class="b-sol"><p>90 anos = 3 meias-vidas: 12,5 %. Por ano: $q = 0{,}5^{1/30} \approx 0{,}9772$, ou seja, cerca de menos 2,3 %.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Resolve a lenda dos grãos de trigo: quantos grãos estão na 64.ª casa? Quanto pesariam, com 0,05 g por grão?</p></div>
+            <div class="b-hint"><p>Na casa $n$ estão $2^{n-1}$ grãos.</p></div>
+            <div class="b-sol"><p>$2^{63} \approx 9{,}2 \cdot 10^{18}$ grãos, ou seja, cerca de $4{,}6 \cdot 10^{17}$ g $= 4{,}6 \cdot 10^{11}$ t, isto é, cerca de 460 mil milhões de toneladas.
+                O mundo inteiro colhe por ano menos de mil milhões de toneladas de trigo: seriam várias centenas de colheitas anuais. Só para a última casa.</p>
+                <p>A lenda aparece registada pela primeira vez no século XIII, na obra do erudito árabe Ibn Khallikan.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Em boas condições, as bactérias duplicam a cada 20 minutos. Quantas haveria ao fim de 24 horas, a partir de uma só? O que diz isto sobre o modelo?</p></div>
+            <div class="b-sol"><p>72 duplicações: $2^{72} \approx 4{,}7 \cdot 10^{21}$. Tantas bactérias pesariam muitas toneladas. Na realidade, os nutrientes e o espaço esgotam-se,
+                e o modelo exponencial só é válido durante pouco tempo.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="562,43" data-tol="0.01" data-ph="euros"><p class="b-q-text">500 € rendem juros de 4 % durante 3 anos. Qual é o saldo final (ao cêntimo)?</p><div class="b-sol"><p>$500 \cdot 1{,}04^3 = 562{,}43$ €</p></div></div>
+        <div class="b-q" data-ans="10" data-ph="gramas"><p class="b-q-text">Uma substância tem um tempo de meia-vida de 5 dias. Quantos gramas restam de 80 g ao fim de 15 dias?</p><div class="b-sol"><p>$80 \cdot 0{,}5^3 = 10$ g</p></div></div>
+        <div class="b-q" data-ans="0,8" data-tol="0.0001" data-ph="q ="><p class="b-q-text">Que fator $q$ corresponde a uma diminuição de 20 % por ano?</p><div class="b-sol"><p>$q = 1 - 0{,}2 = 0{,}8$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="12">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Um carro perde 15 % do seu valor todos os anos. Preço em novo: 30 000 €. Indica o valor ao fim de $t$ anos e calcula-o ao fim de 5 anos.</p></div>
+            <div class="b-sol"><p>$V(t) = 30\,000 \cdot 0{,}85^t$, $V(5) \approx 13\,311$ €.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Resolve a exploração «Dois planos de poupança»: em que ano é que o plano B ultrapassa o plano A?</p></div>
+            <div class="b-sol"><p>Ao fim de 11 anos: A 1 550 €, B 1 539,45 €. Ao fim de 12 anos: A 1 600 €, B 1 601,03 €. <span class="b-res">No décimo segundo ano</span> o B ultrapassa, e a partir daí a vantagem cresce cada vez mais depressa.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Na exploração com dados, depois de cada lançamento ficam cerca de $\tfrac56$ dos dados. Escreve uma função para o número de dados. Ao fim de quantos lançamentos resta cerca de metade?</p></div>
+            <div class="b-sol"><p>$N(k) = 60 \cdot \left(\tfrac56\right)^k$. $N(3) \approx 34{,}7$, $N(4) \approx 28{,}9$: a meia-vida é de quase 4 lançamentos (mais exatamente, cerca de 3,8).</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Relacionar com o capítulo 3.1:</b> indica, para $f(x) = 3 \cdot 0{,}5^x$, o domínio, o contradomínio, a monotonia e a assíntota. A função $f$ tem algum zero?</p></div>
+            <div class="b-sol"><p>$D_f = \mathbb{R}$, $D'_f = ]0, +\infty[$, estritamente decrescente, assíntota $y = 0$ quando $x \to +\infty$. Não tem zeros, porque $0{,}5^x$ nunca é 0.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: Fibonacci" data-toc-k="X" data-toc-short="Fibonacci">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">OS COELHOS E O NÚMERO DE OURO</span></div>
+    <h2>Os coelhos de Fibonacci</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Leonardo de Pisa, conhecido por Fibonacci, propôs em 1202, no seu livro de cálculo «Liber Abaci», um problema sobre coelhos: um casal jovem atinge a maturidade sexual ao fim de um mês
+                e, a partir daí, tem todos os meses um novo casal, que faz exatamente o mesmo. Quantos casais há ao longo do tempo?</p>
+            <p>Obtém-se a sucessão $1,\ 1,\ 2,\ 3,\ 5,\ 8,\ 13,\ 21,\ 34,\ 55,\ 89,\ 144,\ \ldots$ Cada número é a soma dos dois anteriores.</p>
+            <p>Dividindo cada número pelo anterior, aproximamo-nos cada vez mais do <b>número de ouro</b> $\varphi = \tfrac{1 + \sqrt5}{2} \approx 1{,}618$:
+                $\tfrac{89}{55} \approx 1{,}6182$, $\tfrac{144}{89} \approx 1{,}6180$. A longo prazo, a sucessão cresce, portanto, de forma quase <b>exponencial</b>, com o fator $\varphi$.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> Leonardo de Pisa, Liber Abaci (1202), capítulo 12.</p></aside>
+    </div>
+    <div class="b-labs"><a class="b-lab" data-lab="fibonacci" href="../../fibonacci.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FIBONACCI</span><span class="b-lab-what">Número de ouro e crescimento orgânico</span></span></a></div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>FUNÇÃO AFIM</h4><p>$f(x) = mx + b$ · $m = \tfrac{y_2 - y_1}{x_2 - x_1}$ · $b = f(0)$. Diferenças iguais.</p></div>
+        <div><p>Vela: $h(t) = 20 - 1{,}5t$ · depreciação $V(t) = 2400 - 300t$</p></div></div>
+    <div class="b-rueck"><div><h4>FUNÇÃO EXPONENCIAL</h4><p>$f(x) = a \cdot q^x$ · $q > 1$ crescimento, $0 < q < 1$ decrescimento. Quocientes iguais.</p></div>
+        <div><p>$1000 \cdot 1{,}04^n$ · $100 \cdot 0{,}5^{t/8}$</p></div></div>
+    <div class="b-rueck"><div><h4>PERCENTAGEM E FATOR</h4><p>$+p\,\%$: $q = 1 + \tfrac{p}{100}$ · $-p\,\%$: $q = 1 - \tfrac{p}{100}$</p></div>
+        <div><p>$+7\,\% \to 1{,}07$ · $-15\,\% \to 0{,}85$</p></div></div>
+    <div class="b-rueck"><div><h4>MEIA-VIDA E TEMPO DE DUPLICAÇÃO</h4><p>Ao fim de uma meia-vida resta metade; ao fim de duas, um quarto; ao fim de três, um oitavo.</p></div>
+        <div><p>Iodo-131: 8 dias · regra prática para a duplicação $\approx \tfrac{72}{p}$ anos</p></div></div>
+    <div class="b-rueck"><div><h4>CRÍTICA DO MODELO</h4><p>Na realidade, o crescimento exponencial só é válido durante um tempo limitado.</p></div>
+        <div><p>Bactérias, grãos de trigo, «Os Limites do Crescimento»</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="-3" data-ph="m ="><p class="b-q-text">Qual é o declive da reta que passa por $(1, 5)$ e $(3, -1)$?</p><div class="b-sol"><p>$\tfrac{-1 - 5}{3 - 1} = -3$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Uma grandeza cresce 3 % todos os anos. Que expressão é a adequada?</p>
+                <div class="b-mc"><button>$f(t) = 100 + 3t$</button><button>$f(t) = 100 \cdot 1{,}03^t$</button><button>$f(t) = 100 \cdot 0{,}03^t$</button></div>
+                <div class="b-sol"><p>O mesmo fator 1,03 em cada ano.</p></div></div>
+            <div class="b-q" data-ans="25" data-ph="percentagem"><p class="b-q-text">Que percentagem ainda existe ao fim de dois tempos de meia-vida?</p><div class="b-sol"><p>$0{,}5 \cdot 0{,}5 = 0{,}25$, ou seja, 25 %.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="13310" data-tol="1" data-ph="euros"><p class="b-q-text">10 000 € crescem 10 % ao ano durante 3 anos. Quanto dinheiro há então?</p><div class="b-sol"><p>$10\,000 \cdot 1{,}1^3 = 13\,310$ €</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="dias"><p class="b-q-text">De 64 mg restam 8 mg ao fim de 18 dias. Qual é o tempo de meia-vida?</p><div class="b-sol"><p>$64 \to 32 \to 16 \to 8$: 3 meias-vidas em 18 dias, portanto 6 dias.</p></div></div>
+            <div class="b-q" data-ans="1500" data-ph="euros"><p class="b-q-text">Um equipamento é depreciado linearmente: $V(t) = 6000 - 750t$. Qual é o seu valor ao fim de 6 anos?</p><div class="b-sol"><p>$6000 - 4500 = 1500$ €</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-linear.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LINEARE FUNKTIONEN</span><span class="b-lab-what">Interpretar o declive e a ordenada na origem</span></span></a>
+        <a class="b-lab" href="../../mathetest11-exponential.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXPONENTIALFUNKTIONEN</span><span class="b-lab-what">Juro composto, tempo de meia-vida</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Berufliches Gymnasium, 11.º ano · Área de aprendizagem 3 segundo o programa de Matemática do Berufliches Gymnasium da Saxónia.</p>
+    <p>Todos os textos, exercícios e ilustrações são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-pt/funktionen.js"></script>
+</body>
+</html>
