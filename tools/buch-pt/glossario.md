@@ -39,6 +39,7 @@ Die Schülerin, der Schüler wird mit „tu“ angesprochen.
 | Scheitelpunktform $a(x - d)^2 + e$, $S(d \mid e)$ | forma canónica $a(x - h)^2 + k$, vértice $V(h, k)$ | |
 | p-q-Formel | fórmula resolvente mit $a, b, c$ | binómio discriminante $\Delta = b^2 - 4ac$ |
 | $\lg x$ | $\log x$ | Logarithmus zur Basis 10 |
+| $\sin x$ | $\operatorname{sen} x$ | wie in portugiesischen Schulen; auch in den Widgets (Regel in `js/buch-pt/funktionen.js`) |
 | $P_B(A)$ | $P(A \mid B)$ | im Seitentext mit `|`, nie `\mid` (die Regel macht daraus ein Komma) |
 | Dezimalkomma, $30\,\%$, $10\,000$ | wie im Deutschen | |
 

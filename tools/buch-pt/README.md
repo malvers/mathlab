@@ -13,7 +13,7 @@ is the single source. The terms are in `glossario.md`.
   `A(2, 3)`, with a decimal comma a semicolon `A(1,5; 2)`; intervals with outward brackets `[1, 2]`, `]1, 2[`, `[0,5; 3[`;
   set-builder with a colon `{x ∈ ℝ : x ≥ 0}`; lines `y = mx + b` (declive, ordenada na origem); the vertex form
   `a(x − h)² + k` with the vertex `V(h, k)`; the quadratic formula (fórmula resolvente) with `a, b, c` instead of the
-  German p-q formula; `log` for the common logarithm (not `lg`); the domain `D_f` and the range `D'_f` (contradomínio);
+  German p-q formula; `log` for the common logarithm (not `lg`); `sen` for the sine (`\operatorname{sen}`, also in the widgets); the domain `D_f` and the range `D'_f` (contradomínio);
   the solution set `C.S.`; conditional probability `P(A|B)` (write `|`, never `\mid`: the engine turns every `\mid` in
   round brackets into a comma). Answers (`data-ans`) keep their values.
 - **Letters for events come from Portuguese words** (sick/healthy D/S doente/saudável, the two faces of a euro coin N/E face nacional/face europeia …, see the glossary).
