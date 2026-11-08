@@ -5,14 +5,12 @@
 //
 // The app posts an answer to <topic>-antwort on ntfy.sh, from a call's notification ("Antworten") or from its
 // own field. This follows that topic and prints one line per answer, so an agent can watch it (Claude Code's
-// Monitor turns every line into a notice), and keeps them in ~/Library/Logs/docruf-antwort.log. The topic is
+// Monitor turns every line into a notice). Since 08.11.2026 the Mithörer (docruf-mithoerer.mjs) listens for good,
+// keeps the log ~/Library/Logs/docruf-antwort.log and hands every answer to one agent; this is for a look back. The topic is
 // the channel's only secret and comes from the Keychain (doc-ruf / ntfy-topic), never from the source; this
 // script never prints it. --since reaches back (ntfy.sh keeps 12 h, default 10m), --once stops after the
 // first answer.
 import { execFileSync } from 'node:child_process';
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
 
 const args = process.argv.slice(2);
 const opt = (name, dflt) => {
@@ -21,7 +19,6 @@ const opt = (name, dflt) => {
 };
 const since = opt('--since', '10m');
 const once = args.includes('--once');
-const LOG = path.join(os.homedir(), 'Library/Logs/docruf-antwort.log');
 
 let topic;
 try {
@@ -42,9 +39,6 @@ function answer(m) {
     // one line, the text as Doc dictated it; the call's id only for the log
     const text = String(m.message || '').replace(/\s+/g, ' ').trim();
     console.log('ANTWORT ' + hhmm(m.time) + ': ' + text);
-    try {
-        fs.appendFileSync(LOG, new Date(m.time * 1000).toISOString() + '\t' + (m.title || '') + '\t' + text + '\n');
-    } catch { /* the log is a convenience */ }
     return true;
 }
 

@@ -48,12 +48,24 @@ the answer in the notification. The app's round "Antworten" answers the newest c
 answer goes to `<topic>-antwort`, with the id of the call as its title, and shows under its
 call in the app's list.
 
-On the Mac an agent follows that topic:
+On the Mac the **Mithörer** follows that topic for good (since 08.11.2026, Doc: "absolut brillante Idee"):
+`docruf-mithoerer.mjs`, run by the launchd agent `de.docalvers.docruf-mithoerer` (KeepAlive; plist in
+`~/Library/LaunchAgents`, log `~/Library/Logs/docruf-mithoerer.log`). For every answer it
+
+1. appends a line to `~/Library/Logs/docruf-antwort.log`,
+2. drops it as a JSON file into the inbox `~/.claude/docruf/eingang/`,
+3. lets Solita say "Angekommen" on the phone (her recorded `~/.claude/docruf/angekommen.mp3`, no TTS cost).
+
+A Claude Code hook in `~/.claude/settings.json` hands each answer to exactly one agent:
+`~/.claude/hooks/docruf-eingang.sh` (with `docruf-eingang.mjs`) runs on UserPromptSubmit, PostToolUse and Stop.
+Doc's own prompt marks the agent he works with (`~/.claude/docruf/aktiv.json`); that one gets an answer at once,
+any other agent only after 20 s. A busy agent gets it with its next tool result, an idle one is woken by its Stop
+hook (async, `asyncRewake`). Claiming is a rename, so no answer reaches two agents; every hand-over is logged in
+`~/.claude/docruf/zustellung.log`. Hook scripts and plist live outside the repo, like `solita-ruf.mjs`.
+
+For a look back, by hand:
 
     node docruf-app/docruf-antwort.mjs [--since 30m] [--once]
-
-One line per answer (`ANTWORT 20:06: …`), kept in `~/Library/Logs/docruf-antwort.log`. Run as
-a Claude Code Monitor, every answer arrives in the agent's chat.
 
 ## The secret
 
