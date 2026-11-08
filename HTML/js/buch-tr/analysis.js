@@ -31,6 +31,12 @@ window.BuchTR && BuchTR.add('analysis', {
         'Potenzen': 'Kuvvetler', 'Summen': 'Toplamlar', 'Wurzeln und Brüche': 'Kökler ve kesirler', 'eˣ und sin x': 'eˣ ve sin x', 'Produkte': 'Çarpımlar',
         'Gemischt': 'Karışık', 'Aufgabenart': 'Alıştırma türü', 'z. B. 6x^2 - 2 oder cos x': 'örn. 6x^2 - 2 ya da cos x', 'Lösung': 'Çözüm',
         'Neue Aufgabe': 'Yeni alıştırma',
+        // kurve (lb2-4): Hochpunkt / Tiefpunkt / Wendepunkt / Sattelpunkt = yerel maksimum noktası T (tepe) / yerel minimum noktası D (dip) /
+        // büküm noktası B / eyer noktası; the letters on the canvas by the rule below
+        '$a$ (vor $x^3$)': '$a$ ($x^3$\'ün katsayısı)', '$b$ (vor $x^2$)': '$b$ ($x^2$\'nin katsayısı)', '$c$ (vor $x$)': '$c$ ($x$\'in katsayısı)', 'Zeige auch:': 'Ayrıca göster:',
+        'nur f': 'yalnızca f', 'f′ und f″': 'f′ ve f″', 'Ableitungen zeigen': 'Türevleri göster',
+        'Graph einer Funktion dritten Grades mit Extrem- und Wendepunkten': 'Ekstremum ve büküm noktalarıyla üçüncü dereceden bir fonksiyonun grafiği',
+        'Intervall': 'Aralık', 'konstant': 'sabit', 'steigt ↗': 'artar ↗', 'fällt ↘': 'azalır ↘',
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -73,6 +79,12 @@ window.BuchTR && BuchTR.add('analysis', {
         // ableiten
         ['Leite ab: $f(x) = ', 'Türevini al: $f(x) = '], ['Das kann ich nicht lesen. Schreibe zum Beispiel ', 'Bunu okuyamıyorum. Örneğin şöyle yaz: '],
         ['<b>Richtig!</b>', '<b>Doğru!</b>'], ['Noch nicht. Tipp: ', 'Henüz değil. İpucu: '],
+        // kurve
+        ['Hochpunkt $H', 'Yerel maksimum noktası $T'], ['Tiefpunkt $T', 'Yerel minimum noktası $D'], ['keine Extrempunkte', 'ekstremum noktası yok'],
+        [' · Sattelpunkt bei $x = ', ' · eyer noktası: $x = '], ['Wendepunkt $W', 'Büküm noktası $B'],
+        ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am kleinsten.', '$: Orada $f\'\'(x) = 0$\'dır ve eğim en küçüktür.'],
+        ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am größten.', '$: Orada $f\'\'(x) = 0$\'dır ve eğim en büyüktür.'],
+        ['Für $a = 0$ ist $f$ eine Parabel (oder Gerade) ohne Wendepunkt.', '$a = 0$ için $f$, büküm noktası olmayan bir paraboldür (ya da doğrudur).'],
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -83,5 +95,8 @@ window.BuchTR && BuchTR.add('analysis', {
         [/\$ · Steigung in \$P([^$]*)\$: /g, '$ · $P$1$ noktasındaki eğim: '],
         // ableiten: "· 3 von 5 gelöst" → "· 5 alıştırmadan 3'ü çözüldü"
         [/ · (\d+) von (\d+) gelöst/g, (m, a, b) => ' · ' + b + ' alıştırmadan ' + a + ' tanesi çözüldü'],
+        // kurve, schar, steckbrief: the letters drawn alone on the canvas, H/T/W (Hochpunkt, Tiefpunkt, Wendepunkt) → T/D/B (tepe, dip,
+        // büküm), in one pass so that the new T is not turned into D; only a string that is nothing but the letter
+        [/^([HTW])$/, (m, l) => ({ H: 'T', T: 'D', W: 'B' }[l])],
     ]
 });
