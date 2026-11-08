@@ -140,6 +140,9 @@ window.BuchNL && BuchNL.add('funktionen', {
         // parabel
         [/keine Nullstellen: Der Scheitel liegt (über|unter) der \$x\$-Achse und die Parabel ist nach (oben|unten) geöffnet\./g,
             (m, a, b) => 'geen nulpunten: de top ligt ' + (a === 'über' ? 'boven' : 'onder') + ' de $x$-as en het is een ' + (b === 'oben' ? 'dalparabool' : 'bergparabool') + '.'],
+        // sinus: the Dutch order a + b sin(c(x - d)), "$f(x) = 2\sin(x) + 3$" → "$f(x) = 3 + 2\sin(x)$"
+        [/\$f\(x\) = (-?)((?:\d+(?:\{,\}\d+)?)?\\sin\((?:[^()$]|\([^()$]*\))*\)) ([+-]) (\d+(?:\{,\}\d+)?)\$/g,
+            (m, neg, part, s, d) => '$f(x) = ' + (s === '-' ? '-' : '') + d + (neg ? ' - ' : ' + ') + part + '$'],
         // wurf: "… in $8,84\,\text{m}$ Höhe."
         [/\$ in \$([^$]*)\$ Höhe\. /g, (m, h) => '$ op een hoogte van $' + h + '$. '],
         // expgleichung: "2^x ist immer positiv, kann also nie -3 werden."
