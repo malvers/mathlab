@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiskunde 12 · Hoofdstuk 2.2 · De afgeleide | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Veranderingen, van koorde naar raaklijn, grafisch differentiëren. Hoofdstuk 2.2 van het interactieve leerboek Wiskunde · Berufliches Gymnasium 12: uitleg, voorbeelden, opgaven op drie niveaus, zelftoetsen en labs om uit te proberen.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">WISKUNDE · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Hoofdstuk"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhoud van het hoofdstuk">
+        <p class="b-toc-title">HOOFDSTUK 2.2 · LEERGEBIED 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introductie" data-toc-k="I" data-toc-short="Introductie" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">HOOFDSTUK 2.2 · LEERGEBIED 2 · DECEMBER</p>
+            <h1>De afgeleide</h1>
+            <p class="b-hero-lead">Een snelheidsmeter laat niet zien hoe snel je gemiddeld hebt gereden, maar hoe snel je <b>op dit moment</b> rijdt. Hoe kun je uit een afstand
+                die van de tijd afhangt, een snelheid op één enkel ogenblik berekenen? Het antwoord is een van de grootste ideeën van de wiskunde:
+                je laat een koorde een <b>raaklijn</b> worden. De helling daarvan heet de <b>afgeleide</b>.</p>
+            <div class="b-chips"><span class="b-chip">8 LESUREN</span><span class="b-chip">3 PARAGRAFEN</span><span class="b-chip">2 LABS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["0.25*x^3-x+1","2*x-3"]' data-labels='["f","raaklijn"]' data-lat="[-2.6,2.8]" data-pts="[[2,1]]" data-x="-3,4" data-y="-3,5" data-h="240" data-aria="Kromme met raaklijn in het punt (2, 1)"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DIT LEER JE IN DIT HOOFDSTUK</div>
+            <div class="b-text"><ul>
+                <li>de <b>gemiddelde verandering</b> berekenen als helling van een koorde en interpreteren</li>
+                <li>de <b>momentane verandering</b> bepalen als limiet van het differentiequotiënt</li>
+                <li>de <b>afgeleide</b> $f'(x_0)$ begrijpen als helling van de <b>raaklijn</b></li>
+                <li>de afgeleide functie <b>grafisch</b> afleiden uit de grafiek van $f$</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: KUN JE DIT AL?</div>
+            <div class="b-q" data-ans="3" data-ph="rc ="><p class="b-q-text">Wat is de richtingscoëfficiënt van de lijn door $(1, 2)$ en $(3, 8)$?</p><div class="b-sol"><p>$\tfrac{8 - 2}{3 - 1} = 3$</p></div></div>
+            <div class="b-q" data-ans="80" data-ph="km/h"><p class="b-q-text">Een auto rijdt 120 km in 1,5 uur. Hoe groot is de gemiddelde snelheid?</p><div class="b-sol"><p>$\tfrac{120}{1{,}5} = 80$ km/h</p></div></div>
+            <div class="b-q" data-ans="4,1" data-tol="0.0001" data-ph="getal"><p class="b-q-text">Vereenvoudig $\dfrac{(2 + h)^2 - 4}{h}$ en vul $h = 0{,}1$ in.</p><div class="b-sol"><p>$\tfrac{4h + h^2}{h} = 4 + h = 4{,}1$</p></div></div>
+            <div class="b-q" data-ans="9" data-ph="getal"><p class="b-q-text">$f(x) = x^2$. Hoe groot is $f(-3)$?</p><div class="b-sol"><p>$(-3)^2 = 9$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Verkenningen" data-toc-k="V" data-toc-short="Verkenningen">
+    <div class="b-band"><span class="b-band-tag">VERKENNINGEN</span><span class="b-band-sub">OM TE BEGINNEN · IN GROEPJES</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">DE VALLENDE STEEN</div>
+            <div class="b-text"><p>Een steen valt na $t$ seconden ongeveer $s(t) = 5t^2$ meter diep.</p>
+                <ul><li>Hoe snel is hij gemiddeld in de eerste, tweede, derde seconde?</li><li>Hoe snel is hij precies na 2 seconden? Benader dat met steeds kleinere tijdsintervallen.</li></ul></div>
+            <span class="b-pair">→ Paragraaf 1 en 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DE TEMPERATUURGRAFIEK</div>
+            <div class="b-text"><p>Zoek op internet de temperaturen van jullie woonplaats voor één dag, uur voor uur.</p>
+                <ul><li>Wanneer steeg de temperatuur het snelst? Wanneer daalde ze?</li><li>Hoeveel graden per uur was het gemiddeld tussen 8 en 14 uur?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">MET DE LINIAAL LANGS DE KROMME</div>
+            <div class="b-text"><p>Teken de standaardparabool groot. Leg bij verschillende punten een liniaal zo neer dat die de kromme alleen raakt.</p>
+                <ul><li>Meet de helling van de liniaal. Zet de helling boven de $x$-waarde in een tweede assenstelsel.</li><li>Welke vorm hebben de nieuwe punten?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 3</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Gemiddelde verandering" data-toc-k="1" data-toc-short="1 Gemiddeld">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 1</span><span class="b-band-sub">3 LESUREN</span></div>
+    <h2><span class="b-no">1</span>Gemiddelde verandering: de koorde</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>De steen valt in de eerste 3 seconden $s(3) = 45$ m diep, na 1 seconde was dat $s(1) = 5$ m. Hoe snel was hij gemiddeld tussen $t = 1$ en $t = 3$?</p></div></div>
+            <div class="b-text"><p>Gemiddeld legde hij in 2 seconden 40 m af: $\tfrac{45 - 5}{3 - 1} = 20$ m/s. Meetkundig is dat de helling van de lijn door de punten
+                $(1, 5)$ en $(3, 45)$ van de kromme. Zo'n lijn door twee punten van een grafiek heet een <b>koorde</b> (ook: snijlijn).</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · GEMIDDELDE VERANDERING</div>
+                <div class="b-text">
+                    <p>De <b>gemiddelde verandering</b> van $f$ op het interval $[a, b]$ is het <b>differentiequotiënt</b>
+                        $$\frac{f(b) - f(a)}{b - a}.$$</p>
+                    <p>Dat is de helling van de <b>koorde</b> door $(a, f(a))$ en $(b, f(b))$. De eenheid is „eenheid van $f$ per eenheid van $x$”, bijvoorbeeld m/s of °C per uur.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Delta:</b> vaak schrijf je $\tfrac{\Delta y}{\Delta x}$, met $\Delta$ (delta) voor „verschil”.</p>
+            <p class="b-note"><b>Klas 11:</b> bij een rechte lijn is de verandering overal gelijk, dat is haar richtingscoëfficiënt $a$. Bij krommen hangt ze van het interval af.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 1 · TEMPERATUUR</div>
+            <div class="b-text"><p>Om 8 uur was het 12 °C, om 14 uur 21 °C. Bereken de gemiddelde verandering.</p></div>
+            <div class="b-sol"><p>$\tfrac{21 - 12}{14 - 8} = 1{,}5$ °C per uur. Of het gelijkmatig warmer werd, zegt dit getal niet.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 2 · STANDAARDPARABOOL</div>
+            <div class="b-text"><p>Bereken de gemiddelde verandering van $f(x) = x^2$ op $[1, 3]$ en op $[-1, 1]$.</p></div>
+            <div class="b-sol"><p>$\tfrac{9 - 1}{2} = 4$ en $\tfrac{1 - 1}{2} = 0$. De tweede koorde is horizontaal, hoewel de parabool daar niet constant is.</p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bereken de gemiddelde verandering van $f(x) = x^3$ op a) $[0, 2]$ &nbsp; b) $[1, 2]$ &nbsp; c) $[-2, 2]$.</p></div>
+            <div class="b-sol"><p>a) $\tfrac{8}{2} = 4$ &nbsp; b) $\tfrac{8 - 1}{1} = 7$ &nbsp; c) $\tfrac{8 - (-8)}{4} = 4$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Een watertank bevat om 10 uur 800 l, om 10.20 uur nog 500 l. Hoe groot is de gemiddelde verandering in liter per minuut? Wat betekent het teken?</p></div>
+            <div class="b-sol"><p>$\tfrac{500 - 800}{20} = -15$ l/min. Negatief: de tank loopt leeg.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Vallende steen: bereken de gemiddelde snelheid op de intervallen $[2, 3]$, $[2; 2{,}5]$ en $[2; 2{,}1]$. Wat valt op?</p></div>
+            <div class="b-sol"><p>$\tfrac{45 - 20}{1} = 25$; $\tfrac{31{,}25 - 20}{0{,}5} = 22{,}5$; $\tfrac{22{,}05 - 20}{0{,}1} = 20{,}5$ m/s. De waarden naderen 20.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Laat zien: bij $f(x) = x^2$ is de gemiddelde verandering op $[a, b]$ altijd gelijk aan $a + b$.</p></div>
+            <div class="b-sol"><p>$\dfrac{b^2 - a^2}{b - a} = \dfrac{(b - a)(b + a)}{b - a} = a + b$</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="5" data-ph="verandering"><p class="b-q-text">Gemiddelde verandering van $f(x) = x^2$ op $[2, 3]$?</p><div class="b-sol"><p>$\tfrac{9 - 4}{1} = 5$</p></div></div>
+        <div class="b-q" data-ans="-2" data-ph="verandering"><p class="b-q-text">$f(0) = 10$ en $f(4) = 2$. Gemiddelde verandering op $[0, 4]$?</p><div class="b-sol"><p>$\tfrac{2 - 10}{4} = -2$</p></div></div>
+        <div class="b-q" data-ans="15" data-ph="m/s"><p class="b-q-text">$s(t) = 5t^2$. Gemiddelde snelheid tussen $t = 1$ en $t = 2$?</p><div class="b-sol"><p>$\tfrac{20 - 5}{1} = 15$ m/s</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Momentane verandering" data-toc-k="2" data-toc-short="2 Raaklijn">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 2</span><span class="b-band-sub">3 LESUREN</span></div>
+    <h2><span class="b-no">2</span>Momentane verandering: van koorde naar raaklijn</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Hoe snel is de steen <b>precies</b> na 2 seconden? Op het interval $[2, 2 + h]$ geldt:
+                $\dfrac{s(2 + h) - s(2)}{h} = \dfrac{5(4 + 4h + h^2) - 20}{h} = \dfrac{20h + 5h^2}{h} = 20 + 5h.$</p></div></div>
+            <div class="b-text"><p>Hoe kleiner $h$, hoe dichter dat bij 20 ligt. Voor $h \to 0$ krijg je de <b>momentane snelheid</b> 20 m/s.
+                Meetkundig schuift het tweede punt van de koorde steeds dichter naar het eerste toe, tot de koorde de <b>raaklijn</b> wordt.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · AFGELEIDE</div>
+                <div class="b-text">
+                    <p>Bestaat de limiet $$f'(x_0) = \lim_{h \to 0} \frac{f(x_0 + h) - f(x_0)}{h},$$ dan heet $f$ in $x_0$ <b>differentieerbaar</b>.
+                        $f'(x_0)$ heet de <b>afgeleide</b> van $f$ in $x_0$ (differentiaalquotiënt).</p>
+                    <p>$f'(x_0)$ is de <b>momentane verandering</b> en de <b>helling van de raaklijn</b> aan de grafiek in het punt $(x_0, f(x_0))$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Uitspraak:</b> $f'(x_0)$ lees je als „f-accent van x nul”.</p>
+            <p class="b-note"><b>Raaklijn:</b> die raakt de grafiek in het punt $P$ en heeft daar dezelfde richting als de kromme. Verder weg mag ze de grafiek best nog een keer snijden.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · VAN KOORDE NAAR RAAKLIJN</div>
+        <p class="b-help" style="margin:0 0 12px">Sleep het punt $P$ en maak $h$ kleiner. Groen is de hellingsdriehoek van de koorde. Vergelijk aan het eind met de raaklijn.</p>
+        <div data-widget="sekante"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 3 · STANDAARDPARABOOL</div>
+            <div class="b-text"><p>Bepaal $f'(3)$ voor $f(x) = x^2$.</p></div>
+            <div class="b-sol"><p>$\dfrac{(3 + h)^2 - 9}{h} = \dfrac{6h + h^2}{h} = 6 + h \to 6$. <span class="b-res">$f'(3) = 6$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 4 · HYPERBOOL</div>
+            <div class="b-text"><p>Bepaal $f'(1)$ voor $f(x) = \tfrac1x$.</p></div>
+            <div class="b-sol"><p>$\dfrac{\frac{1}{1 + h} - 1}{h} = \dfrac{\frac{1 - (1 + h)}{1 + h}}{h} = \dfrac{-1}{1 + h} \to -1$. <span class="b-res">$f'(1) = -1$</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="steigung" href="../../steigung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">HELLINGSLAB</span><span class="b-lab-what">Afgeleide en raaklijn</span></span></a>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bepaal met het differentiequotiënt $f'(1)$ en $f'(-2)$ voor $f(x) = x^2$.</p></div>
+            <div class="b-sol"><p>$\tfrac{(1 + h)^2 - 1}{h} = 2 + h \to 2$; $\tfrac{(-2 + h)^2 - 4}{h} = -4 + h \to -4$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Leg zonder berekening uit: voor $f(x) = 3x + 1$ is $f'(x_0) = 3$ in elk punt.</p></div>
+            <div class="b-sol"><p>De grafiek is een rechte lijn met richtingscoëfficiënt 3. Elke koorde en dus ook elke raaklijn is de lijn zelf.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bepaal $f'(2)$ voor $f(x) = x^3$.</p></div>
+            <div class="b-hint"><p>$(2 + h)^3 = 8 + 12h + 6h^2 + h^3$</p></div>
+            <div class="b-sol"><p>$\tfrac{12h + 6h^2 + h^3}{h} = 12 + 6h + h^2 \to 12$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$f(x) = |x|$. Bereken het differentiequotiënt in $x = 0$ voor $h = 0{,}1$ en $h = -0{,}1$. Is $f$ in 0 differentieerbaar?</p></div>
+            <div class="b-sol"><p>$\tfrac{0{,}1}{0{,}1} = 1$ en $\tfrac{0{,}1}{-0{,}1} = -1$. Van rechts 1, van links $-1$: geen limiet. De grafiek heeft daar een <b>knik</b>, $f$ is in 0 niet differentieerbaar.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Laat algemeen zien: voor $f(x) = x^2$ geldt $f'(x) = 2x$ voor elke $x$.</p></div>
+            <div class="b-sol"><p>$\dfrac{(x + h)^2 - x^2}{h} = \dfrac{2xh + h^2}{h} = 2x + h \to 2x$</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="8" data-ph="f'(4) ="><p class="b-q-text">$f(x) = x^2$. Hoe groot is $f'(4)$?</p><div class="b-sol"><p>$2 \cdot 4 = 8$</p></div></div>
+        <div class="b-q" data-ans="30" data-ph="m/s"><p class="b-q-text">$s(t) = 5t^2$. Hoe snel is de steen na 3 seconden?</p><div class="b-sol"><p>$\tfrac{5(3 + h)^2 - 45}{h} = 30 + 5h \to 30$ m/s</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Wat beschrijft $f'(x_0)$ meetkundig?</p>
+            <div class="b-mc"><button>de helling van een koorde</button><button>de helling van de raaklijn in $(x_0, f(x_0))$</button><button>de functiewaarde in $x_0$</button></div>
+            <div class="b-sol"><p>De limiet van de hellingen van de koorden is de helling van de raaklijn.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Grafisch differentiëren" data-toc-k="3" data-toc-short="3 Grafisch">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 3</span><span class="b-band-sub">2 LESUREN</span></div>
+    <h2><span class="b-no">3</span>De afgeleide functie grafisch</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Bij $f(x) = x^2$ is $f'(-2) = -4$, $f'(1) = 2$, $f'(3) = 6$. Zet je al deze hellingen van raaklijnen uit boven $x$, dan ontstaat een rechte lijn: $f'(x) = 2x$.</p></div></div>
+            <div class="b-text"><p>Koppel je aan elke $x$ de afgeleide $f'(x)$, dan ontstaat een nieuwe functie, de <b>afgeleide functie</b> $f'$.
+                Haar grafiek kun je vaak al uit de grafiek van $f$ schetsen, helemaal zonder formule.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · GRAFISCH DIFFERENTIËREN</div>
+                <div class="b-text">
+                    <p>Waar $f$ <b>stijgt</b>, is $f'(x) > 0$, de grafiek van $f'$ ligt boven de $x$-as. Waar $f$ <b>daalt</b>, is $f'(x) < 0$.</p>
+                    <p>Waar $f$ een <b>horizontale raaklijn</b> heeft (maximum of minimum), heeft $f'$ een <b>nulpunt</b>.</p>
+                    <p>Waar $f$ het <b>steilst</b> stijgt of daalt, heeft $f'$ een maximum of minimum.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Werkwijze:</b> markeer eerst de punten met een horizontale raaklijn, dan voor elk stuk het teken, en tot slot de steilste plekken.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · f′ ONTSTAAT PUNT VOOR PUNT</div>
+        <div data-widget="ableitungsgraph"></div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DIFFERENTIAALLAB</span><span class="b-lab-what">Afgeleiden, raaklijnen, functieonderzoek</span></span></a>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Kies in het interactieve onderdeel $\sin x$. Sleep $P$ één keer helemaal door en beschrijf de grafiek van $f'$. Welke bekende functie is dat?</p></div>
+            <div class="b-sol"><p>Een sinuskromme die $\tfrac{\pi}{2}$ naar links is verschoven: de cosinusfunctie. Bij $x = \tfrac{\pi}{2}$ (maximum van $\sin$) heeft ze een nulpunt.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>De grafiek van $f$ heeft een maximum bij $x = -1$ en een minimum bij $x = 2$, daartussen daalt hij, verder stijgt hij. Schets een mogelijke grafiek van $f'$.</p></div>
+            <div class="b-sol"><p>Een dalparabool met nulpunten bij $-1$ en $2$: positief erbuiten, negatief ertussen.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>De grafiek van $f'$ is een rechte lijn door $(0, 0)$ met richtingscoëfficiënt $-1$. Wat weet je over $f$?</p></div>
+            <div class="b-sol"><p>Voor $x < 0$ is $f' > 0$, $f$ stijgt; voor $x > 0$ daalt $f$. Bij $x = 0$ heeft $f$ een maximum. Bijvoorbeeld $f(x) = -\tfrac12 x^2 + c$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Kies in het interactieve onderdeel $x^4 - 4x^2$. In hoeveel punten heeft de grafiek van $f'$ nulpunten? Waar liggen de toppen van $f'$ en wat betekenen ze voor $f$?</p></div>
+            <div class="b-sol"><p>Nulpunten van $f'$ bij $x = -\sqrt2$, $0$, $\sqrt2$: daar heeft $f$ horizontale raaklijnen (twee minima, één maximum). De toppen van $f'$
+                bij $x = \pm\sqrt{\tfrac23} \approx \pm 0{,}82$ zijn de plekken waar $f$ het steilst is.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$f$ heeft bij $x = 3$ een minimum. Dan geldt …</p>
+            <div class="b-mc"><button>$f'(3) = 0$</button><button>$f(3) = 0$</button><button>$f'(3) > 0$</button></div>
+            <div class="b-sol"><p>In een minimum is de raaklijn horizontaal.</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">$f$ daalt op het interval $[1, 4]$. Dan ligt de grafiek van $f'$ daar …</p>
+            <div class="b-mc"><button>boven de $x$-as</button><button>op de $x$-as</button><button>onder de $x$-as</button></div>
+            <div class="b-sol"><p>Dalende functie: negatieve hellingen van de raaklijnen.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Herhalen · verdiepen · verbinden" data-toc-k="H" data-toc-short="Oefenen">
+    <div class="b-band"><span class="b-band-tag">HERHALEN · VERDIEPEN · VERBINDEN</span></div>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Een ballon stijgt in de eerste 10 minuten van 200 m naar 1400 m. Bereken de gemiddelde stijgsnelheid in m/min en in m/s.</p></div>
+            <div class="b-sol"><p>$\tfrac{1200}{10} = 120$ m/min $= 2$ m/s</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Voor $f(x) = x^2 + 2x$: bepaal $f'(1)$ met het differentiequotiënt.</p></div>
+            <div class="b-sol"><p>$\dfrac{(1 + h)^2 + 2(1 + h) - 3}{h} = \dfrac{4h + h^2}{h} = 4 + h \to 4$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Verbinden met hoofdstuk 2.1:</b> waarom kun je in $\tfrac{f(x_0 + h) - f(x_0)}{h}$ niet gewoon $h = 0$ invullen? Hoe helpt de limiet?</p></div>
+            <div class="b-sol"><p>Voor $h = 0$ staat er $\tfrac00$, niet gedefinieerd. Het quotiënt heeft bij $h = 0$ een gat. De limiet $h \to 0$ zegt waar het daar naartoe gaat.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>De hoogte van een raket is $h(t) = 2t^3$ (m, s) voor $0 \le t \le 10$. Hoe snel stijgt ze na 1 s, 5 s, 10 s? Gebruik dat voor $x^3$ geldt $f'(x) = 3x^2$.</p></div>
+            <div class="b-sol"><p>$h'(t) = 6t^2$: 6 m/s, 150 m/s, 600 m/s.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursie: Newton tegen Leibniz" data-toc-k="X" data-toc-short="Newton">
+    <div class="b-band"><span class="b-band-tag">EXCURSIE</span><span class="b-band-sub">WIE HEEFT DE AFGELEIDE UITGEVONDEN?</span></div>
+    <h2>Newton tegen Leibniz</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Isaac Newton ontwikkelde zijn „fluxierekening” vanaf 1665 in Cambridge, maar publiceerde die lange tijd niet. Gottfried Wilhelm Leibniz vond dezelfde ideeën
+                onafhankelijk daarvan en publiceerde ze in oktober 1684 in het Leipziger tijdschrift Acta Eruditorum onder de titel „Nova methodus pro maximis et minimis”.</p>
+            <p>Er volgde een van de bitterste ruzies uit de geschiedenis van de wetenschap. Een rapport van de Royal Society verklaarde Newton in 1712 tot uitvinder en beschuldigde Leibniz van overschrijven.
+                Het rapport was grotendeels door Newton zelf geschreven, toen voorzitter van de Royal Society. Tegenwoordig gelden beiden als onafhankelijke ontdekkers.</p>
+            <p>Vooral de notatie van Leibniz heeft zich doorgezet, bijvoorbeeld $\tfrac{\mathrm{d}y}{\mathrm{d}x}$ voor de afgeleide. Het accent in $f'(x)$ komt van Joseph-Louis Lagrange.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Bronnen:</b> G. W. Leibniz: Nova methodus pro maximis et minimis. Acta Eruditorum, oktober 1684. Royal Society: Commercium epistolicum, Londen 1712.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Samenvatting" data-toc-k="S" data-toc-short="Samenvatting">
+    <div class="b-band"><span class="b-band-tag">SAMENVATTING</span><span class="b-band-sub">HET BELANGRIJKSTE IN ÉÉN OOGOPSLAG</span></div>
+    <div class="b-rueck"><div><h4>GEMIDDELDE VERANDERING</h4><p>$\dfrac{f(b) - f(a)}{b - a}$: helling van de koorde.</p></div>
+        <div><p>Steen op $[1, 3]$: 20 m/s</p></div></div>
+    <div class="b-rueck"><div><h4>AFGELEIDE</h4><p>$f'(x_0) = \lim\limits_{h \to 0} \dfrac{f(x_0 + h) - f(x_0)}{h}$: momentane verandering, helling van de raaklijn.</p></div>
+        <div><p>$x^2$ bij 3: $6 + h \to 6$</p></div></div>
+    <div class="b-rueck"><div><h4>DIFFERENTIEERBAAR</h4><p>De limiet bestaat. In een knik is een functie niet differentieerbaar.</p></div>
+        <div><p>$|x|$ bij 0: links $-1$, rechts $1$</p></div></div>
+    <div class="b-rueck"><div><h4>GRAFISCH</h4><p>$f$ stijgt → $f' > 0$ · horizontale raaklijn → $f' = 0$ · steilste plek → top van $f'$.</p></div>
+        <div><p>$(x^2)' = 2x$ · $(\sin x)' = \cos x$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Toets" data-toc-k="T" data-toc-short="Toets">
+    <div class="b-band"><span class="b-band-tag">TOETS</span><span class="b-band-sub">TWEE RONDES · METEEN FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDE 1</div>
+            <div class="b-q" data-ans="7" data-ph="verandering"><p class="b-q-text">Gemiddelde verandering van $f(x) = x^2$ op $[3, 4]$?</p><div class="b-sol"><p>$16 - 9 = 7$</p></div></div>
+            <div class="b-q" data-ans="-6" data-ph="f'(-3) ="><p class="b-q-text">$f(x) = x^2$. Hoe groot is $f'(-3)$?</p><div class="b-sol"><p>$2 \cdot (-3) = -6$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="f'(1) ="><p class="b-q-text">$f(x) = x^3$. Bepaal $f'(1)$ met $\tfrac{(1 + h)^3 - 1}{h} = 3 + 3h + h^2$.</p><div class="b-sol"><p>Voor $h \to 0$: 3</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDE 2</div>
+            <div class="b-q" data-ans="40" data-ph="m/s"><p class="b-q-text">$s(t) = 5t^2$. Momentane snelheid na 4 seconden?</p><div class="b-sol"><p>$s'(t) = 10t$, dus 40 m/s</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">De grafiek van $f'$ heeft bij $x = 2$ een nulpunt met tekenwisseling van $+$ naar $-$. Wat heeft $f$ daar?</p>
+                <div class="b-mc"><button>een minimum</button><button>een maximum</button><button>een nulpunt</button></div>
+                <div class="b-sol"><p>Eerst stijgt $f$, dan daalt $f$.</p></div></div>
+            <div class="b-q" data-ans="-0,25" data-tol="0.0001" data-ph="f'(2) ="><p class="b-q-text">$f(x) = \tfrac1x$. Het differentiequotiënt in $x = 2$ is $\dfrac{-1}{2(2 + h)}$. Bepaal $f'(2)$.</p><div class="b-sol"><p>$-\tfrac{1}{4} = -0{,}25$</p></div></div>
+        </div>
+    </div>
+    <h3>MEER OEFENEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-differenzialquotient.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DIFFERENTIAALQUOTIËNT</span><span class="b-lab-what">Van koorde naar raaklijn (in het Duits)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Wiskunde, Berufliches Gymnasium klas 12 · leergebied 2, volgens het leerplan wiskunde van het Berufliches Gymnasium in Saksen.</p>
+    <p>Alle teksten, opgaven en afbeeldingen zijn eigen materiaal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-nl.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-nl/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-nl/analysis.js"></script>
+</body>
+</html>
