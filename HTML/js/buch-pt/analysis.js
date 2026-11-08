@@ -42,6 +42,14 @@ window.BuchPT && BuchPT.add('analysis', {
         'Intervall': 'Intervalo', 'konstant': 'constante', 'steigt ↗': 'cresce ↗', 'fällt ↘': 'decresce ↘',
         // tangente (lb2-5): Normale = reta normal, Berührpunkt = ponto de tangência
         'Tangente und Normale an einen Graphen': 'Tangente e normal a um gráfico',
+        // steckbrief, optimieren (lb2-6): Steckbrief = função a partir de condições, Ansatz = forma geral, Zielfunktion = função objetivo,
+        // Nebenbedingung = condição; the surface of the tin is A (área total) in Portuguese schools, German O (rule below)
+        'Parabel durch 3 Punkte': 'Parábola por 3 pontos', 'Kubisch: Extrempunkt + 2 Punkte': '3.º grau: extremo + 2 pontos',
+        'Kubisch: Wendepunkt mit Tangente + Punkt': '3.º grau: ponto de inflexão com tangente + ponto', 'Bedingungen': 'Condições',
+        'Steigung im Wendepunkt $m$': 'Declive no ponto de inflexão $m$', 'Funktion aus Bedingungen': 'Função a partir de condições',
+        'Schachtel': 'Caixa', 'Dose': 'Lata', 'Zaun an der Mauer': 'Vedação junto ao muro', 'Problem': 'Problema', 'Zielfunktion': 'Função objetivo',
+        'Lösung mit der Ableitung': 'Solução com a derivada', 'x in cm': 'x em cm', 'V in cm³': 'V em cm³', 'r in cm': 'r em cm',
+        'O in cm²': 'A em cm²', 'x in m': 'x em m', 'A in m²': 'A em m²',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -93,6 +101,23 @@ window.BuchPT && BuchPT.add('analysis', {
         // tangente
         ['$ · Berührpunkt $P', '$ · ponto de tangência $P'], ['Tangente: $', 'Tangente: $'],
         ['Normale (senkrecht zur Tangente, $m_n = -\\tfrac{1}{m_t}$): $', 'Normal (perpendicular à tangente, $m_n = -\\tfrac{1}{m_t}$): $'],
+        // steckbrief
+        ['Lösung: $f(x) = ', 'Solução: $f(x) = '], ['Ansatz: $f(x) = ', 'Forma geral: $f(x) = '], ['Probe: $', 'Verificação: $'],
+        ['Achtung: Bei $E$ ist $f\'\'(x) = 0$, das ist ein Sattelpunkt, kein Extrempunkt.', 'Atenção: em $E$ tem-se $f\'\'(x) = 0$; é um ponto de sela, não um extremo.'],
+        ['< 0$, also ein Hochpunkt.', '< 0$, logo é um máximo.'], ['> 0$, also ein Tiefpunkt.', '> 0$, logo é um mínimo.'],
+        ['Mit diesen Bedingungen hat das Gleichungssystem keine eindeutige Lösung. Zwei Punkte mit gleichem $x$?',
+            'Com estas condições, o sistema de equações não tem uma solução única. Dois pontos com o mesmo $x$?'],
+        // optimieren
+        ['Aus einem Karton von 30 cm × 20 cm werden an den Ecken Quadrate mit der Seite $x$ ausgeschnitten und die Ränder hochgeklappt. Für welches $x$ wird das Volumen der offenen Schachtel am größten?',
+            'Num cartão de 30 cm × 20 cm recortam-se, nos cantos, quadrados de lado $x$ e dobram-se as abas para cima. Para que valor de $x$ é máximo o volume da caixa aberta?'],
+        ['Eine zylindrische Dose soll 1 Liter fassen ($V = \\pi r^2 h = 1000\\,\\text{cm}^3$). Für welchen Radius $r$ braucht man am wenigsten Blech?',
+            'Uma lata cilíndrica deve levar 1 litro ($V = \\pi r^2 h = 1000\\,\\text{cm}^3$). Para que raio $r$ é precisa menos chapa?'],
+        ['Mit 60 m Zaun soll an einer Mauer ein rechteckiges Gehege abgesteckt werden. Die Mauer bildet eine Seite. Wie groß wird die Fläche höchstens?',
+            'Com 60 m de rede quer-se vedar um cercado retangular junto a um muro. O muro forma um dos lados. Qual é a maior área possível?'],
+        ['Bei $', 'Para $'], ['$ ergibt $', '$ dá $'], ['$ mit $', '$, com $'], ['(Maximum)', '(máximo)'], ['(Minimum)', '(mínimo)'],
+        [' Die zweite Lösung $x \\approx ', ' A segunda solução, $x \\approx '], ['$ liegt außerhalb von $0 < x < 10$.', '$, fica fora de $0 < x < 10$.'],
+        [' Dann ist $h = ', ' Então $h = '], ['\\,\\text{cm} = 2r$: Die beste Dose ist so hoch wie breit.', '\\,\\text{cm} = 2r$: a melhor lata é tão alta como larga.'],
+        [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' O lado paralelo ao muro mede então $60 - 2 \\cdot 15 = 30\\,\\text{m}$.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -104,5 +129,7 @@ window.BuchPT && BuchPT.add('analysis', {
         // kurve: the letters drawn alone on the canvas, H/T/W (Hochpunkt, Tiefpunkt, Wendepunkt) → Máx/Mín/I; only a string that is
         // nothing but the letter (no widget sentence is), the sentences have their phrases; the sign table ends at +∞
         [/^H$/, 'Máx'], [/^T$/, 'Mín'], [/^W$/, 'I'], [/(< )\\infty/g, '$1+\\infty'],
+        // optimieren: the surface of the tin is A in Portuguese schools (German O): "$O(r)", "$O'(r)", "$O \approx"
+        [/(^|\$)O('?\(r\)| \\approx)/g, '$1A$2'],
     ]
 });
