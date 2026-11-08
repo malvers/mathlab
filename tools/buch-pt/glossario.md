@@ -93,4 +93,56 @@ Die Schülerin, der Schüler wird mit „tu“ angesprochen.
 
 ## mathe12-pt (BGY 12, block pt-2)
 
-Terms the book adds (Grenzwert, Ableitung, Extremum, Wendepunkt, Vektor im Raum, Skalarprodukt …) go here.
+Die Begriffe, die BGY 12 (`mathe12-pt`, 08.11.2026) dazubringt. Schreibweisen wie in portugiesischen Schulbüchern; was die
+Widgets anders schreiben, biegen die Regeln in `js/buch-pt/analysis.js`, `stochastik.js` und `vektoren.js` um.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| bedingte Wahrscheinlichkeit $P_B(A)$ | probabilidade condicionada $P(A \mid B)$ | „probabilidade de A sabendo que B“, auf den Seiten mit senkrechtem Strich (nie \mid); Regel im Widget `unabhaengig` |
+| Multiplikationssatz | teorema da probabilidade composta | $P(A \cap B) = P(B) \cdot P(A \mid B)$ |
+| (stochastisch) unabhängig / abhängig | independentes / dependentes | unvereinbar = incompatíveis (wie pt-1) |
+| Bus / verspätet (lb1-1) | autocarro $A$ / chegou tarde $T$ | Buchstaben aus portugiesischen Wörtern; krank $K$ → doente $D$ |
+| Zufallsgröße | variável aleatória | |
+| Wahrscheinlichkeitsverteilung · Stabdiagramm | distribuição de probabilidades · diagrama de barras | |
+| Erwartungswert $E(X) = \mu$ | valor médio (valor esperado) $E(X) = \mu$ | |
+| Varianz · Standardabweichung | variância $V(X)$ · desvio padrão $\sigma$ | |
+| faires Spiel · Einsatz · Auszahlung · Gewinn | jogo equitativo · aposta · prémio · ganho | |
+| Glücksrad · Tombola | roleta · tômbola (rifas) | |
+| Bernoulli-Experiment / -Kette | prova de Bernoulli / sequência de provas de Bernoulli | |
+| Treffer / Niete | sucesso / insucesso | Baumbuchstaben T/N → S/I (Regel) |
+| Binomialkoeffizient · Fakultät | coeficiente binomial $\binom{n}{k}$ (também ${}^nC_k$) · fatorial | |
+| binomialverteilt | segue uma distribuição binomial | |
+| kumulierte Wahrscheinlichkeit | probabilidade acumulada | |
+| rechtsschief / linksschief | assimétrico à direita / à esquerda | |
+| Grenzwert · $x \to \infty$ | limite · $x \to +\infty$ | immer mit Vorzeichen (Regel in analysis) |
+| waagerechte / senkrechte Asymptote | assíntota horizontal / vertical | |
+| Polstelle · (hebbare) Lücke | polo · lacuna (descontinuidade removível) | Loch im Graphen = buraco |
+| ganzrationale / gebrochenrationale Funktion | função polinomial / função racional | Zähler-/Nennergrad = grau do numerador / denominador |
+| stetig · stetige Ergänzung | contínua · prolongamento por continuidade | links-/rechtsseitig = à esquerda / à direita |
+| mittlere Änderungsrate · Differenzenquotient | taxa média de variação · razão incremental | |
+| lokale Änderungsrate · Momentangeschwindigkeit | taxa de variação instantânea · velocidade instantânea | |
+| Ableitung · Ableitungsfunktion · differenzierbar | derivada · função derivada · derivável | $f'(x_0)$ = „f linha de x zero“ |
+| Sekante · Tangente · Normale | (reta) secante · (reta) tangente · (reta) normal | Berührpunkt = ponto de tangência |
+| Knick | ponto anguloso | |
+| Potenz-, Faktor-, Summen-, Produktregel | regra da potência, do fator constante, da soma, do produto | Ableitungstrainer: Parser liest nur „sin“ |
+| e-Funktion · Eulersche Zahl | função exponencial · número de Neper $\mathrm{e}$ | Bogenmaß = radianos |
+| Monotonie(intervall) · streng monoton steigend | (intervalo de) monotonia · estritamente crescente | Vorzeichentabelle = quadro de sinal e de variação |
+| Hochpunkt / Tiefpunkt (lokal / global) | máximo / mínimo relativo / absoluto | ohne Buchstaben („máximo relativo em (1, 4)“); auf der Leinwand Máx/Mín |
+| notwendige / hinreichende Bedingung | condição necessária / suficiente | Randwerte = valores nos extremos do intervalo |
+| links- / rechtsgekrümmt | concavidade voltada para cima / para baixo | |
+| Wendepunkt · Wendetangente · Sattelpunkt | ponto de inflexão $I$ · tangente de inflexão · ponto de sela | W → I (Leinwand und Text) |
+| achsensymmetrisch / punktsymmetrisch | função par / ímpar (simétrica em relação a $Oy$ / à origem) | |
+| Achsenabschnitt $n$ | ordenada na origem $b$ | $t(x) = mx + b$ |
+| Steckbrief(aufgabe) · Ansatz | determinar funções a partir de condições · forma geral | Probe = verificação |
+| Extremwertproblem · Zielfunktion · Nebenbedingung | problema de otimização · função objetivo · condição | Randextremum = extremo na fronteira |
+| Oberfläche der Dose $O$ | área total $A$ | Regel in analysis |
+| räumliches Koordinatensystem | referencial do espaço | Ebene $xy$ = plano $xOy$ |
+| Vektor (Spalte) | vetor $\vec{a} = (a_1, a_2, a_3)$ | Koordinaten in einer Zeile, auch in den Widgets (Regel) |
+| Ortsvektor · Verbindungsvektor $\vec{AB}$ | vetor posição · vetor $\overrightarrow{AB}$ | „extremidade menos origem“, $\overrightarrow{AB} = B - A$ |
+| Betrag $\lvert\vec{a}\rvert$ · Einheitsvektor | norma $\lVert\vec{a}\rVert$ · vetor unitário | |
+| parallel (kollinear) · Linearkombination · Nullvektor | colineares · combinação linear · vetor nulo | Gegenvektor = vetor simétrico |
+| Mittelpunkt · Schwerpunkt $S$ | ponto médio $M$ · baricentro $G$ | |
+| Skalarprodukt $\vec{a} \circ \vec{b}$ | produto escalar $\vec{a} \cdot \vec{b}$ | |
+| orthogonal · spitz / stumpf | perpendiculares · agudo / obtuso | |
+| Parallelogramm · Rechteck · Raute · Quadrat · Trapez | paralelogramo · retângulo · losango · quadrado · trapézio | Viereck $ABCD$ = quadrilátero $[ABCD]$ |
+| Satz des Thales (Halbkreis) | ângulo inscrito numa semicircunferência (teorema de Tales) | |
