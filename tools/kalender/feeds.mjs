@@ -133,13 +133,25 @@ function toRow(ev, prefix) {
     };
 }
 
+/* Appointments Doc does not want mirrored although they stay in Google / Outlook (Doc, 08.11.2026: the IBB invite
+   "Personalgespräch" at 12:30 - the real time is his own entry at 10:00). A local file next to the watcher's state
+   (~/Library/Application Support/doc-kalender/feed-hide.json, not in the public repo): [{ "uid": "outlook:…", "title",
+   "day", "why" }] or plain uid strings. A hidden uid counts as gone from the feed, so its row is deleted and stays out. */
+export function readHidden(file) {
+    try {
+        const list = JSON.parse(fs.readFileSync(file, 'utf8'));
+        return new Set((Array.isArray(list) ? list : []).map(x => (typeof x === 'string' ? x : x && x.uid)).filter(Boolean));
+    } catch (e) { return new Set(); }
+}
+
 /* the feed's rows (within the mirrored range) and every source_uid it still holds (for deleting what vanished) */
-export function feedRows(text, prefix, now = new Date()) {
+export function feedRows(text, prefix, now = new Date(), hide = new Set()) {
     const { events, skipped } = K.parseIcs(text, { now });
     const cutoff = +K.addDays(K.startOfDay(now), -BACK_DAYS);
     const rows = new Map(), present = new Set();
     for (const ev of events) {
         const row = toRow(ev, prefix);
+        if (hide.has(row.source_uid)) continue;
         present.add(row.source_uid);
         const r = row.rrule && K.parseRule(row.rrule);
         const alive = r ? !(r.until && +r.until < cutoff) : +new Date(row.ends_at || row.starts_at) >= cutoff;
@@ -174,9 +186,9 @@ export function diffRows(rows, dbRows, present) {
 /* ---------- one sync ---------- */
 
 /* rpc(name, body) -> parsed JSON (the watcher's, or testRpc below). Returns a report; dry = compare only. */
-export async function syncFeed(name, { rpc, token, text, now = new Date(), dry = false }) {
+export async function syncFeed(name, { rpc, token, text, now = new Date(), dry = false, hide }) {
     const f = FEEDS[name];
-    const { rows, present, skipped, total } = feedRows(text, f.prefix, now);
+    const { rows, present, skipped, total } = feedRows(text, f.prefix, now, hide);
     const db = [];
     for (let after = 0; ;) {
         const page = await rpc('calendar_feed_rows', { p_token: token, p_prefix: f.prefix, p_after: after });

@@ -42,7 +42,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { FEEDS, FEED_EVERY, fetchFeed, readFeedUrl, reportLine, syncFeed, testRpc } from './feeds.mjs';
+import { FEEDS, FEED_EVERY, fetchFeed, readFeedUrl, readHidden, reportLine, syncFeed, testRpc } from './feeds.mjs';
 
 const require = createRequire(import.meta.url);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -126,7 +126,7 @@ const mondayOf = d => K.addDays(K.startOfDay(d), -((d.getDay() + 6) % 7));
 const compact = d => K.ymd(d).replace(/-/g, '');
 
 /* the lesson blocks of the Untis files from `from` on (whole weeks), up to `maxDays` days, with the coaching talks of
-   termine.json in the same range (first names only, see K.coachingBlocks) */
+   termine.json in the same range (first names only, see K.coachingBlocks) and its other blocks (IA, K.terminBlocks) */
 function readLessons(from, maxDays) {
     let files = [];
     try { files = fs.readdirSync(PLAN_DIR).filter(f => /^w\d{8}\.json$/.test(f)).sort(); } catch (e) { return null; }
@@ -141,7 +141,7 @@ function readLessons(from, maxDays) {
     try {
         const termine = JSON.parse(fs.readFileSync(path.join(PLAN_DIR, 'termine.json'), 'utf8')).termine || [];
         const lo = K.ymd(mondayOf(from)), hi = K.ymd(K.addDays(mondayOf(from), maxDays + 6));
-        out.push(...K.coachingBlocks(termine).filter(c => c.day >= lo && c.day <= hi));
+        out.push(...K.coachingBlocks(termine).concat(K.terminBlocks(termine)).filter(c => c.day >= lo && c.day <= hi));
     } catch (e) { if (e.code !== 'ENOENT') log('termine.json unlesbar:', e.message); }
     return out.sort((a, b) => (a.starts_at < b.starts_at ? -1 : a.starts_at > b.starts_at ? 1 : 0));
 }
@@ -186,7 +186,8 @@ async function syncFeeds(st, token, { force = false, dry = false } = {}) {
         }
         if (!dry) fs0.at = Date.now();
         try {
-            const r = await syncFeed(name, { rpc: TEST ? testRpc(path.join(TEST, 'feeddb.json')) : rpc, token, text, now, dry });
+            const r = await syncFeed(name, { rpc: TEST ? testRpc(path.join(TEST, 'feeddb.json')) : rpc, token, text, now, dry,
+                hide: readHidden(path.join(STATE_DIR, 'feed-hide.json')) });
             const line = reportLine(r, dry);
             lines.push(line);
             if (TEST) fs.appendFileSync(path.join(TEST, 'calls.txt'), '[feed] ' + line + '\n');
@@ -257,6 +258,12 @@ async function main() {
 
     if (args.has('--feeds')) {
         const lines = await syncFeeds(st, token, { force: true, dry });
+        /* the 15-minute job (de.docalvers.kalender-feeds) runs only this branch, so it mirrors the timetable too -
+           otherwise the phone keeps the lessons of the last full round (no call either way) */
+        if (!dry) {
+            try { if (await syncLessons(st, token, false)) lines.push('Stundenplan gespiegelt.'); }
+            catch (e) { logError(st, e.message); lines.push('Stundenplan: ' + e.message); }
+        }
         if (!dry) saveState(st);
         console.log(lines.length ? lines.join('\n') : 'Kein Kalender verknüpft (node tools/kalender/verknuepfen.mjs google|outlook).');
         return;

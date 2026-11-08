@@ -541,6 +541,20 @@
         }));
     }
 
+    /* Doc's other own Untis appointments - the ones without a person, like "IA KES BGY" on Wednesday and Thursday -
+       as blocks of their own (Doc, 08.11.2026: "da stehen die IA-Stunden nicht drin"). The same split as the SVP
+       timetable: an appointment without `who` is a block (svp-timetable.js terminTile, .tt-block). */
+    function terminBlocks(termine) {
+        return (termine || []).filter(t => t && t.title && !/coaching/i.test(t.title) && !t.who && t.date && t.endTime > t.startTime)
+            .map(t => {
+                const start = untisAt(t.date, t.startTime), end = untisAt(t.date, t.endTime);
+                return {
+                    day: ymd(start), starts_at: start.toISOString(), ends_at: end.toISOString(),
+                    subject: String(t.title).trim(), classes: [], rooms: [], code: null, note: t.info ? String(t.info) : null
+                };
+            });
+    }
+
     /* "Inf · FOG25-1" */
     const lessonTitle = l => l.subject + (l.classes && l.classes.length ? ' · ' + l.classes.join(', ') : '');
 
@@ -577,6 +591,6 @@
         parseRule, occurrences, expand, remindOf, reminders,
         parseIcs, unzipIcs, parseQuick,
         spokenSentence, spokenTime, spokenIn,
-        lessonBlocks, coachingBlocks, lessonTitle, lessonSentence, subjectSpoken
+        lessonBlocks, coachingBlocks, terminBlocks, lessonTitle, lessonSentence, subjectSpoken
     };
 });
