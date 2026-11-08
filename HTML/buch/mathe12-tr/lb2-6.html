@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik 12 · Bölüm 2.6 · Koşullardan fonksiyonlar ve optimizasyon problemleri | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Koşullardan fonksiyon kurmak, en iyisini bulmak. Bölüm 2.6, etkileşimli ders kitabı Matematik · Berufliches Gymnasium 12: açıklamalar, örnekler, üç düzeyde alıştırmalar, öz değerlendirme testleri ve denemek için laboratuvarlar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATİK · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Bölüm"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Bölümün içeriği">
+        <p class="b-toc-title">BÖLÜM 2.6 · ÖĞRENME ALANI 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Giriş" data-toc-k="G" data-toc-short="Giriş" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">BÖLÜM 2.6 · ÖĞRENME ALANI 2 · NİSAN · MAYIS</p>
+            <h1>Koşullardan fonksiyonlar ve optimizasyon problemleri</h1>
+            <p class="b-hero-lead">Şimdi türev bir araca dönüşüyor. Bir yol, kırılmadan bir başkasına bağlanmalı: Bağlantı parçasını hangi fonksiyon anlatır?
+                Bir kartondan hacmi olabildiğince büyük bir kutu yapılmalı, bir konserve kutusu olabildiğince az tenekeyle yetinmeli.
+                Fonksiyonları <b>koşullardan</b> kurmayı ve birçok olasılık arasından <b>en iyisini</b> bulmayı öğreneceksin.</p>
+            <div class="b-chips"><span class="b-chip">20 DERS SAATİ</span><span class="b-chip">2 KONU</span><span class="b-chip">UYGULAMAK · MODELLEMEK</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x*(30-2*x)*(20-2*x)"]' data-labels='["V"]' data-lat="[7.6]" data-pts="[[3.92,1056.3]]" data-x="-0.5,10.5" data-y="-100,1250" data-xl="x" data-yl="V" data-h="240" data-aria="Kutunun hacim fonksiyonu ve maksimumu"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">BU BÖLÜMDE ÖĞRENECEKLERİN</div>
+            <div class="b-text"><ul>
+                <li>bir grafiğin özelliklerini <b>denklemlere</b> çevirmek ve polinom fonksiyonları koşullardan bulmak (<b>koşullardan fonksiyon problemleri</b>)</li>
+                <li>ortaya çıkan <b>denklem sistemlerini</b>, dijital araçlarla da çözmek</li>
+                <li><b>optimizasyon problemlerinde</b> amaç fonksiyonunu, kısıtı ve tanım kümesini kurmak</li>
+                <li><b>uç noktalardaki ekstremumlara</b> dikkat etmek ve modelleri <b>eleştirel biçimde değerlendirmek</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">ÖN KONTROL: BUNLARI BİLİYOR MUSUN?</div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">$x + y = 5$, $x - y = -1$ sistemini çöz. $x$ kaçtır?</p><div class="b-sol"><p>Taraf tarafa topla: $2x = 4$, $x = 2$ (ve $y = 3$)</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="Sayı"><p class="b-q-text">$a = 1$, $b = 2$, $c = 2$ olmak üzere $f(x) = ax^2 + bx + c$. $f(1)$ kaçtır?</p><div class="b-sol"><p>$1 + 2 + 2 = 5$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">$f(x) = -x^2 + 6x$'in maksimumu hangi $x$'tedir?</p><div class="b-sol"><p>$-2x + 6 = 0$</p></div></div>
+            <div class="b-q" data-ans="18" data-ph="cm²"><p class="b-q-text">Bir dikdörtgenin uzunluğu 6 cm, genişliği uzunluğunun yarısı. Alanı kaçtır?</p><div class="b-sol"><p>$6 \cdot 3 = 18$ cm²</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Keşifler" data-toc-k="K" data-toc-short="Keşifler">
+    <div class="b-band"><span class="b-band-tag">KEŞİFLER</span><span class="b-band-sub">BAŞLANGIÇ İÇİN · GRUPÇA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">BOŞLUĞU KAPATMAK</div>
+            <div class="b-text"><p>İki düz yol kaydırılmış olarak bitiyor: biri $(0 \mid 0)$'da $x$ ekseni yönünde, öbürü $(4 \mid 2)$'de, o da yatay.</p>
+                <ul><li>Kırıksız bir bağlantı parçası çizin. Hangi koşulları sağlamalı?</li><li>Bunlar kaç koşul eder? Hangi fonksiyon türü uyar?</li></ul></div>
+            <span class="b-pair">→ Konu 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">KUTU</div>
+            <div class="b-text"><p>Bir A4 kâğıdının dört köşesinden eşit büyüklükte kareler kesin ve üstü açık bir kutu katlayın.</p>
+                <ul><li>Farklı kare büyüklüklerini deneyin. En çok hangi kutu alır?</li><li>Hacim neye bağlı? Bir formül kurun.</li></ul></div>
+            <span class="b-pair">→ Konu 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">SÜPERMARKETTEKİ KONSERVE</div>
+            <div class="b-text"><p>Üç konserve kutusunun çapını ve yüksekliğini ölçün ve hacimlerini hesaplayın.</p>
+                <ul><li>Aynı hacimde başka ölçüler daha az malzeme gerektirir miydi?</li><li>Gerçek kutular neden yine de çoğu zaman farklıdır?</li></ul></div>
+            <span class="b-pair">→ Konu 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Koşullardan fonksiyon" data-toc-k="1" data-toc-short="1 Koşullar">
+    <div class="b-band"><span class="b-band-tag">KONU 1</span><span class="b-band-sub">8 DERS SAATİ</span></div>
+    <h2><span class="b-no">1</span>Koşullardan fonksiyon bulmak</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$(0 \mid 1)$, $(1 \mid 0)$ ve $(3 \mid 4)$ noktalarından geçen bir parabol aranıyor. Başlangıç: üç bilinmeyen sayıyla $f(x) = ax^2 + bx + c$.</p></div></div>
+            <div class="b-text"><p>Her nokta bir denklem verir: $f(0) = 1 \Rightarrow c = 1$; $f(1) = 0 \Rightarrow a + b + c = 0$; $f(3) = 4 \Rightarrow 9a + 3b + c = 4$.
+                Denklem sistemi (11. sınıftaki Gauss yöntemi) $a = 1$, $b = -2$, $c = 1$ verir, yani $f(x) = x^2 - 2x + 1 = (x - 1)^2$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · KOŞULLARI DENKLEMLERE ÇEVİRMEK</div>
+                <div class="b-text">
+                    <p>$n$. dereceden bir polinom fonksiyonun $n + 1$ katsayısı vardır. Bunun için $n + 1$ koşul gerekir.</p>
+                    <div class="b-table-wrap"><table class="b-table" style="min-width:0">
+                        <tr><th>Özellik</th><th>Denklem</th></tr>
+                        <tr><td>$P(x_0 \mid y_0)$ noktası grafiğin üzerinde</td><td>$f(x_0) = y_0$</td></tr>
+                        <tr><td>$x_0$'da ekstremum (yatay teğet)</td><td>$f'(x_0) = 0$</td></tr>
+                        <tr><td>$x_0$'da büküm</td><td>$f''(x_0) = 0$</td></tr>
+                        <tr><td>$x_0$'da eğim $m$ (teğet)</td><td>$f'(x_0) = m$</td></tr>
+                        <tr><td>$y$ eksenine göre simetrik / orijine göre simetrik</td><td>başlangıçta yalnızca çift / tek üsler</td></tr></table></div>
+                    <p>Yöntem: $f$, $f'$, $f''$ ile başlangıç · koşulları çevir · denklem sistemini çöz · bütün koşulların sağlanıp sağlanmadığını <b>sağlama</b> ile denetle.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Bir yerel maksimum noktası iki koşuldur:</b> $T(2 \mid 4)$, $f(2) = 4$ <b>ve</b> $f'(2) = 0$ demektir.</p>
+            <p class="b-note"><b>Dijital araçlar:</b> Dört bilinmeyenden itibaren hesap makinesi işe yarar (denklem sistemi ya da matris işlevi).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · KOŞULLARDAN FONKSİYON</div>
+        <p class="b-help" style="margin:0 0 12px">Bir koşul kümesi seç ve noktaları sürükle. Denklem sistemi ve çözüm anında uyum sağlar.</p>
+        <div data-widget="steckbrief"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 1 · YEREL MAKSİMUM VE MİNİMUM</div>
+            <div class="b-text"><p>Üçüncü dereceden bir fonksiyon orijinden geçiyor, yerel maksimum noktası $T(1 \mid 2)$ ve $x = 3$'te bir ekstremumu var. $f$'yi bul.</p></div>
+            <div class="b-sol"><p>$f(0) = 0 \Rightarrow d = 0$ · $f(1) = 2$: $a + b + c = 2$ · $f'(1) = 0$: $3a + 2b + c = 0$ · $f'(3) = 0$: $27a + 6b + c = 0$.</p>
+                <p>Çözüm: $a = 0{,}5$, $b = -3$, $c = 4{,}5$. <span class="b-res">$f(x) = 0{,}5x^3 - 3x^2 + 4{,}5x$</span>. Sağlama: $f'(x) = 1{,}5(x - 1)(x - 3)$, $f''(1) = -3 < 0$. ✓</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 2 · SİMETRİYLE</div>
+            <div class="b-text"><p>$y$ eksenine göre simetrik dördüncü dereceden bir fonksiyon $y$ eksenini 2'de kesiyor ve $(1 \mid 0)$'da bir yerel minimum noktası var.</p></div>
+            <div class="b-sol"><p>Başlangıç $f(x) = ax^4 + bx^2 + c$. $c = 2$, $f(1) = a + b + 2 = 0$, $f'(1) = 4a + 2b = 0$. Yani $b = -2a$, $a = 2$, $b = -4$.
+                <span class="b-res">$f(x) = 2x^4 - 4x^2 + 2 = 2(x^2 - 1)^2$</span></p></div>
+        </div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Denklemlere çevir: Üçüncü dereceden bir fonksiyonun grafiğinin büküm noktası $B(1 \mid 3)$ ve grafik $y$ eksenini $-1$'de kesiyor.</p></div>
+            <div class="b-sol"><p>$f(1) = 3$, $f''(1) = 0$, $f(0) = -1$. Bunlar üç koşuldur, 3. derece için bir koşul daha eksik.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$(0 \mid 3)$, $(1 \mid 2)$ ve $(2 \mid 3)$ noktalarından geçen parabolü bul.</p></div>
+            <div class="b-sol"><p>$c = 3$, $a + b = -1$, $4a + 2b = 0$: $a = 1$, $b = -2$. $f(x) = x^2 - 2x + 3$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>“Boşluğu kapatmak” keşfini çöz: $f(0) = 0$, $f'(0) = 0$, $f(4) = 2$, $f'(4) = 0$ olan üçüncü dereceden bir fonksiyon bul.</p></div>
+            <div class="b-sol"><p>$d = 0$, $c = 0$; $64a + 16b = 2$, $48a + 8b = 0$ ⇒ $b = -6a$, $64a - 96a = 2$, $a = -\tfrac{1}{16}$, $b = \tfrac38$.
+                <span class="b-res">$f(x) = -\tfrac{1}{16}x^3 + \tfrac38 x^2$</span>; büküm noktası tam ortada, $(2 \mid 1)$'dedir.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Orijine göre simetrik üçüncü dereceden bir fonksiyonun $(1 \mid -2)$'de yerel minimum noktası var. Fonksiyonu bul.</p></div>
+            <div class="b-sol"><p>Başlangıç $f(x) = ax^3 + cx$. $a + c = -2$, $3a + c = 0$: $a = 1$, $c = -3$. $f(x) = x^3 - 3x$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Bir köprü, 40 m genişliğindeki bir nehrin üzerinden ortada 8 m yükseklikte bir parabol kemeri olarak geçecek. Orijin ortada, su seviyesinde ise bir denklem bul. Kemer kıyıda ne kadar dik yükselir?</p></div>
+            <div class="b-sol"><p>Simetrik: $f(x) = ax^2 + 8$, $f(20) = 0 \Rightarrow a = -0{,}02$. $f'(x) = -0{,}04x$, $f'(-20) = 0{,}8$: eğim %80, açı $\arctan 0{,}8 \approx 38{,}7°$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="4" data-ph="Adet"><p class="b-q-text">Üçüncü dereceden bir fonksiyon için kaç koşul gerekir?</p><div class="b-sol"><p>Dört katsayı $a, b, c, d$.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="Adet"><p class="b-q-text">“Yerel maksimum noktası $T(2 \mid 5)$” kaç denklem verir?</p><div class="b-sol"><p>$f(2) = 5$ ve $f'(2) = 0$</p></div></div>
+        <div class="b-q" data-ans="-0,02" data-tol="0.0001" data-ph="a ="><p class="b-q-text">$f(x) = ax^2 + 8$, $(20 \mid 0)$'dan geçmeli. $a$ kaçtır?</p><div class="b-sol"><p>$400a = -8$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Optimizasyon problemleri" data-toc-k="2" data-toc-short="2 Optimizasyon">
+    <div class="b-band"><span class="b-band-tag">KONU 2</span><span class="b-band-sub">12 DERS SAATİ</span></div>
+    <h2><span class="b-no">2</span>Optimizasyon problemleri</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>30 cm × 20 cm'lik bir kartonun köşelerinden kenarı $x$ olan kareler kesiliyor. Kutu hangi $x$ için en çok alır?</p></div></div>
+            <div class="b-text"><p>Kutunun uzunluğu $30 - 2x$, genişliği $20 - 2x$, yüksekliği $x$'tir. Hacmi <b>amaç fonksiyonudur</b>: $V(x) = x(30 - 2x)(20 - 2x) = 4x^3 - 100x^2 + 600x$,
+                tanım kümesi $0 < x < 10$. $V'(x) = 12x^2 - 200x + 600 = 0$, $x \approx 3{,}92$ cm verir (ikinci çözüm 12,74 tanım kümesinin dışındadır). Hacim o zaman yaklaşık 1.056 cm³ olur.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · OPTİMİZASYON PROBLEMLERİNİ ÇÖZMEK</div>
+                <div class="b-text">
+                    <p><b>1. Amaç fonksiyonu:</b> Hangi büyüklük en büyük ya da en küçük olmalı? Onun formülünü kur, çoğu zaman iki değişkenle.</p>
+                    <p><b>2. Kısıt:</b> Ne sabit (çevre, hacim, malzeme)? Bununla bir değişkeni yok et, amaç fonksiyonu tek değişkene bağlı kalsın.</p>
+                    <p><b>3. Tanım kümesini</b> bağlamdan belirle.</p>
+                    <p><b>4. Ekstremumu</b> $f' = 0$ ve yeter koşulla bul. <b>Uç değerleri</b> karşılaştır.</p>
+                    <p><b>5. Cevabı</b> bağlamda, birimiyle ver ve modeli eleştirel olarak sına.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Uçta ekstremum:</b> $f' = 0$ olan değer tanım kümesinin dışındaysa en iyi değer bir uçta olabilir.</p>
+            <p class="b-note"><b>Türevsiz:</b> Bir amaç fonksiyonu çok karmaşıksa bilgisayarlar en iyi değeri akıllıca deneyerek arar, örneğin parçacık sürüleriyle.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · OPTİMİZASYON</div>
+        <p class="b-help" style="margin:0 0 12px">Bir problem seç ve sürgüyle en iyi değeri ara. Sonra türevle bulunan çözümle karşılaştır.</p>
+        <div data-widget="optimieren"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 3 · PARABOLÜN ALTINDA DİKDÖRTGEN</div>
+            <div class="b-text"><p>$f(x) = 9 - x^2$ parabolünün altında, bir kenarı $x$ ekseninde ve iki köşesi parabolün üzerinde olan bir dikdörtgen var. Alanı ne zaman en büyüktür?</p></div>
+            <div class="b-sol"><p>Köşeler $\pm u$'da: genişlik $2u$, yükseklik $9 - u^2$. $A(u) = 2u(9 - u^2) = 18u - 2u^3$, $0 < u < 3$.</p>
+                <p>$A'(u) = 18 - 6u^2 = 0 \Rightarrow u = \sqrt3 \approx 1{,}73$, $A''(u) = -12u < 0$. <span class="b-res">$A_{\max} = 12\sqrt3 \approx 20{,}8$</span> birim kare.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 4 · KONSERVE KUTUSU</div>
+            <div class="b-text"><p>Bir konserve kutusu 1 litre almalı. Hangi ölçüler en az tenekeyi gerektirir?</p></div>
+            <div class="b-sol"><p>Kısıt $\pi r^2 h = 1000 \Rightarrow h = \tfrac{1000}{\pi r^2}$. Amaç fonksiyonu $A(r) = 2\pi r^2 + 2\pi r h = 2\pi r^2 + \tfrac{2000}{r}$.</p>
+                <p>$A'(r) = 4\pi r - \tfrac{2000}{r^2} = 0 \Rightarrow r^3 = \tfrac{500}{\pi}$, $r \approx 5{,}42$ cm, $h \approx 10{,}84$ cm. <span class="b-res">En tasarruflu kutunun yüksekliği genişliğine eşittir.</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="particleswarm" href="../../particleswarm.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PARÇACIK SÜRÜSÜ</span><span class="b-lab-what">Türevsiz optimizasyon</span></span></a>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>İki sayının toplamı 20. Çarpımları ne zaman en büyüktür?</p></div>
+            <div class="b-sol"><p>$P(x) = x(20 - x)$, $P'(x) = 20 - 2x = 0$: $x = 10$, iki sayı da 10, çarpım 100.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>60 m çitle bir duvarın kenarında dikdörtgen bir alan çevriliyor (duvar bir kenar). En büyük alanı bul.</p></div>
+            <div class="b-sol"><p>$A(x) = x(60 - 2x)$, $A'(x) = 60 - 4x = 0$: $x = 15$ m, duvar tarafındaki kenar 30 m, $A = 450$ m².</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>7. alıştırmadaki gibi, ama duvar yalnızca 20 m uzunluğunda. Ne değişir?</p></div>
+            <div class="b-sol"><p>Şimdi $60 - 2x \le 20$, yani $x \ge 20$ olmalı. $[20, 30)$'da $A$ azalır, en iyi değer <b>uçta</b>, $x = 20$'dedir: $A = 20 \cdot 20 = 400$ m².</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bir işletmenin kârı $G(x) = -x^3 + 6x^2 + 15x - 20$'dir (1000 € cinsinden, $x$ 100 adet cinsinden, $0 \le x \le 8$). Kâr hangi miktarda en büyüktür?</p></div>
+            <div class="b-sol"><p>$G'(x) = -3x^2 + 12x + 15 = 0 \Rightarrow x^2 - 4x - 5 = 0 \Rightarrow x = 5$. $G''(5) = -18 < 0$. $G(5) = 80$, yani 500 adette 80.000 €. Uçlar: $G(0) = -20$, $G(8) = -28$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Bir pencere, üstüne yarım çember eklenmiş bir dikdörtgenden oluşuyor. Çevresi 6 m. Hangi yarıçapta en çok ışık geçirir?</p></div>
+            <div class="b-hint"><p>Genişlik $2r$, dikdörtgenin yüksekliği $h$. Çevre $2r + 2h + \pi r = 6$. Alan $A = 2rh + \tfrac{\pi}{2} r^2$.</p></div>
+            <div class="b-sol"><p>$h = 3 - r - \tfrac{\pi}{2} r$, $A(r) = 6r - 2r^2 - \tfrac{\pi}{2} r^2$, $A'(r) = 6 - (4 + \pi) r = 0$: $r = \tfrac{6}{4 + \pi} \approx 0{,}84$ m.
+                O zaman $h \approx 0{,}84$ m olur: Dikdörtgenin yüksekliği yarıçapa eşittir.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="450" data-ph="m²"><p class="b-q-text">Duvar kenarındaki çitte (60 m çit) en büyük alan nedir?</p><div class="b-sol"><p>$15 \cdot 30 = 450$ m²</p></div></div>
+        <div class="b-q" data-ans="25" data-ph="Çarpım"><p class="b-q-text">İki pozitif sayının toplamı 10. Çarpımları en çok kaçtır?</p><div class="b-sol"><p>$5 \cdot 5 = 25$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$f'(x) = 0$'ın çözümü tanım kümesinin dışında. En iyi değer nerededir?</p>
+            <div class="b-mc"><button>yoktur</button><button>tanım kümesinin bir ucunda</button><button>yine de $f'(x) = 0$'ın çözümünde</button></div>
+            <div class="b-sol"><p>O zaman uç değerler karşılaştırılır.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Tekrar Et · Derinleştir · İlişkilendir" data-toc-k="A" data-toc-short="Alıştırma">
+    <div class="b-band"><span class="b-band-tag">TEKRAR ET · DERİNLEŞTİR · İLİŞKİLENDİR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Tepe noktası $T(2 \mid -1)$ olan ve $(0 \mid 3)$'ten geçen ikinci dereceden fonksiyonu bul.</p></div>
+            <div class="b-sol"><p>$f(x) = a(x - 2)^2 - 1$, $f(0) = 4a - 1 = 3 \Rightarrow a = 1$. $f(x) = (x - 2)^2 - 1 = x^2 - 4x + 3$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>“Kutu” keşfini bir A4 kâğıdı (29,7 cm × 21 cm) için çöz. Hangi $x$ en iyisidir?</p></div>
+            <div class="b-sol"><p>$V(x) = x(29{,}7 - 2x)(21 - 2x)$, $V'(x) = 12x^2 - 202{,}8x + 623{,}7 = 0$. $0 < x < 10{,}5$'teki çözüm: $x \approx 4{,}04$ cm, $V \approx 1128$ cm³.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>2.4. bölümle ilişkilendir:</b> Kutuda gerçekten bir maksimum olduğunu ikinci türev kullanmadan gerekçelendir.</p></div>
+            <div class="b-sol"><p>$x = 0$ ve $x = 10$ uçlarında $V = 0$'dır, arada $V > 0$'dır. İçerideki $V' = 0$ olan tek nokta maksimum olmak zorundadır.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Konserve kutusu için model eleştirisi: Gerçek konserve kutuları çoğu zaman $h = 2r$ hesabının önerdiğinden daha yüksektir. Modelin gerçeği neden yalnızca kısmen yakaladığına dair nedenler say.</p></div>
+            <div class="b-sol"><p>Örneğin: Kapak ve taban yan yüzeyden daha kalındır ya da malzeme gerektiren bir kıvrımları vardır. Kutular rafa, ele ve makinelere sığmalıdır.
+                Teneke fiyatları maliyetin yalnızca bir parçasıdır. Etiket ve istifleme de rol oynar.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Gezinti: Dido problemi" data-toc-k="X" data-toc-short="Dido">
+    <div class="b-band"><span class="b-band-tag">GEZİNTİ</span><span class="b-band-sub">EN ESKİ OPTİMİZASYON PROBLEMİ</span></div>
+    <h2>Dido problemi</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Efsaneye göre Fenikeli prenses Dido, Kuzey Afrika kıyılarına kaçtı. Orada bir öküz postuyla çevrelenebilecek kadar toprak satın almasına izin verildi.
+                Postu uzun, ince bir şerit hâlinde kesti ve şeridi olabildiğince çok toprağı çevreleyecek biçimde yere serdi. Kartaca böyle kuruldu.</p>
+            <p>Verilen uzunlukta hangi biçim en büyük alanı çevreler? Dikdörtgenler için bu bölümdeki hesap gösterir: kare. Bütün biçimler arasında ise <b>çemberdir</b>,
+                düz bir kıyıda da <b>yarım çember</b>. Bu “eş çevre problemi” ancak 19. yüzyılda tam olarak kanıtlandı.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Kaynak:</b> Vergilius: Aeneis, I. kitap, 365–368. dizeler.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Özet" data-toc-k="Ö" data-toc-short="Özet">
+    <div class="b-band"><span class="b-band-tag">ÖZET</span><span class="b-band-sub">EN ÖNEMLİLER BİR BAKIŞTA</span></div>
+    <div class="b-rueck"><div><h4>KOŞULLAR</h4><p>Derece $n$: $n + 1$ koşul. Nokta → $f(x_0) = y_0$, ekstremum → $f'(x_0) = 0$, büküm → $f''(x_0) = 0$.</p></div>
+        <div><p>Boşluğu kapatmak: $f(x) = -\tfrac{1}{16}x^3 + \tfrac38 x^2$</p></div></div>
+    <div class="b-rueck"><div><h4>SAĞLAMA</h4><p>Bütün koşulları, ekstremumun türünü de kontrol et.</p></div>
+        <div><p>$f''(1) = -3 < 0$: gerçekten bir yerel maksimum noktası</p></div></div>
+    <div class="b-rueck"><div><h4>OPTİMİZASYON PROBLEMİ</h4><p>Amaç fonksiyonu, kısıt, tanım kümesi, $f' = 0$, uçlar, cevap.</p></div>
+        <div><p>Kutu: $x \approx 3{,}92$ cm · konserve kutusu: $h = 2r$</p></div></div>
+    <div class="b-rueck"><div><h4>UÇTA EKSTREMUM</h4><p>$f' = 0$ dışarıdaysa uç karar verir.</p></div>
+        <div><p>20 m'lik duvarda çit: 400 m²</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">İKİ TUR · ANINDA GERİ BİLDİRİM</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">TUR 1</div>
+            <div class="b-q" data-ans="3" data-ph="Adet"><p class="b-q-text">Bir parabol için kaç koşul gerekir?</p><div class="b-sol"><p>$a$, $b$, $c$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="a ="><p class="b-q-text">$f(x) = ax^2 + bx + c$ parabolü $(0 \mid 0)$, $(1 \mid 1)$ ve $(2 \mid 4)$'ten geçiyor. $a$ kaçtır?</p><div class="b-sol"><p>Bu temel paraboldür: $a = 1$, $b = c = 0$.</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="x ="><p class="b-q-text">$x(20 - x)$ hangi $x$ için en büyüktür?</p><div class="b-sol"><p>$20 - 2x = 0$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">TUR 2</div>
+            <div class="b-q" data-ans="1,732" data-tol="0.005" data-ph="u ="><p class="b-q-text">$f(x) = 9 - x^2$'nin altındaki dikdörtgen: $A(u) = 18u - 2u^3$ hangi $u$ için en büyüktür?</p><div class="b-sol"><p>$u = \sqrt3 \approx 1{,}732$</p></div></div>
+            <div class="b-q" data-ans="80" data-ph="Bin €"><p class="b-q-text">$G(x) = -x^3 + 6x^2 + 15x - 20$. Bin avro cinsinden en büyük kâr nedir?</p><div class="b-sol"><p>$G(5) = 80$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">En tasarruflu konserve kutusunda …</p>
+                <div class="b-mc"><button>$h = 2r$</button><button>$h = r$</button><button>$h = \pi r$</button></div>
+                <div class="b-sol"><p>Yükseklik çapa eşittir.</p></div></div>
+        </div>
+    </div>
+    <h3>ÇEVRİMİÇİ DAHA FAZLA ALIŞTIRMA (ALMANCA)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-extremalaufgaben.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">OPTİMİZASYON ALIŞTIRMALARI</span><span class="b-lab-what">Amaç fonksiyonu ve kısıt</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematik, Berufliches Gymnasium 12. sınıf · Saksonya Berufliches Gymnasium matematik öğretim programına göre öğrenme alanı 2.</p>
+    <p>Tüm metinler, alıştırmalar ve şekiller özgün içeriktir.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-tr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-tr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-tr/analysis.js"></script>
+</body>
+</html>

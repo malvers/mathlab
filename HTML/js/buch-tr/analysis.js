@@ -13,6 +13,9 @@
 window.BuchTR && BuchTR.add('analysis', {
     word: {
         // tr0: the helpers of the module (outside every widget; check.mjs analysis/*)
+        // the pictures of the optimisation problems (optimieren): box, tin, pen at a wall
+        'Karton mit ausgeschnittenen Ecken': 'Köşeleri kesilmiş karton', 'Zylindrische Dose': 'Silindir biçimli konserve kutusu',
+        'Gehege an einer Mauer': 'Bir duvarın kenarında çevrili alan', 'Mauer': 'Duvar',
         // book tr-2 mathe12-tr:
         // the cover of the start page (BGY 12)
         'Titelbild: Kurve mit Wendetangente und Ableitung, Binomialverteilung und ein Vektor im Raum':
@@ -39,6 +42,14 @@ window.BuchTR && BuchTR.add('analysis', {
         'Intervall': 'Aralık', 'konstant': 'sabit', 'steigt ↗': 'artar ↗', 'fällt ↘': 'azalır ↘',
         // tangente (lb2-5): Normale = normal doğrusu, Berührpunkt = değme noktası
         'Tangente und Normale an einen Graphen': 'Bir grafiğe teğet ve normal',
+        // steckbrief, optimieren (lb2-6): Steckbrief = koşullardan fonksiyon, Ansatz = başlangıç, Zielfunktion = amaç fonksiyonu,
+        // Nebenbedingung = kısıt ("Zaun an der Mauer" and "Probe" are in funktionen, tr-1); the surface of the tin is A (tr-1: yüzey alanı A), not O (rule below)
+        'Parabel durch 3 Punkte': '3 noktadan geçen parabol', 'Kubisch: Extrempunkt + 2 Punkte': 'Üçüncü derece: ekstremum noktası + 2 nokta',
+        'Kubisch: Wendepunkt mit Tangente + Punkt': 'Üçüncü derece: teğetiyle büküm noktası + nokta', 'Bedingungen': 'Koşullar',
+        'Steigung im Wendepunkt $m$': 'Büküm noktasındaki eğim $m$', 'Funktion aus Bedingungen': 'Koşullardan fonksiyon',
+        'Schachtel': 'Kutu', 'Dose': 'Konserve kutusu', 'Problem': 'Problem', 'Zielfunktion': 'Amaç fonksiyonu',
+        'Lösung mit der Ableitung': 'Türevle çözüm', 'x in cm': 'x (cm)', 'V in cm³': 'V (cm³)', 'r in cm': 'r (cm)',
+        'O in cm²': 'A (cm²)', 'x in m': 'x (m)', 'A in m²': 'A (m²)',
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -90,6 +101,23 @@ window.BuchTR && BuchTR.add('analysis', {
         // tangente
         ['$ · Berührpunkt $P', '$ · değme noktası $P'], ['Tangente: $', 'Teğet: $'],
         ['Normale (senkrecht zur Tangente, $m_n = -\\tfrac{1}{m_t}$): $', 'Normal (teğete dik, $m_n = -\\tfrac{1}{m_t}$): $'],
+        // steckbrief
+        ['Lösung: $f(x) = ', 'Çözüm: $f(x) = '], ['Ansatz: $f(x) = ', 'Başlangıç: $f(x) = '],
+        ['Achtung: Bei $E$ ist $f\'\'(x) = 0$, das ist ein Sattelpunkt, kein Extrempunkt.', 'Dikkat: $E$\'de $f\'\'(x) = 0$\'dır; bu bir eyer noktasıdır, ekstremum noktası değil.'],
+        ['< 0$, also ein Hochpunkt.', '< 0$, yani bir yerel maksimum noktası.'], ['> 0$, also ein Tiefpunkt.', '> 0$, yani bir yerel minimum noktası.'],
+        ['Mit diesen Bedingungen hat das Gleichungssystem keine eindeutige Lösung. Zwei Punkte mit gleichem $x$?',
+            'Bu koşullarla denklem sisteminin tek bir çözümü yok. Aynı $x$\'e sahip iki nokta mı var?'],
+        // optimieren
+        ['Aus einem Karton von 30 cm × 20 cm werden an den Ecken Quadrate mit der Seite $x$ ausgeschnitten und die Ränder hochgeklappt. Für welches $x$ wird das Volumen der offenen Schachtel am größten?',
+            '30 cm × 20 cm\'lik bir kartonun köşelerinden kenarı $x$ olan kareler kesiliyor ve kenarlar yukarı katlanıyor. Üstü açık kutunun hacmi hangi $x$ için en büyük olur?'],
+        ['Eine zylindrische Dose soll 1 Liter fassen ($V = \\pi r^2 h = 1000\\,\\text{cm}^3$). Für welchen Radius $r$ braucht man am wenigsten Blech?',
+            'Silindir biçimli bir konserve kutusu 1 litre almalı ($V = \\pi r^2 h = 1000\\,\\text{cm}^3$). Hangi $r$ yarıçapında en az teneke gerekir?'],
+        ['Mit 60 m Zaun soll an einer Mauer ein rechteckiges Gehege abgesteckt werden. Die Mauer bildet eine Seite. Wie groß wird die Fläche höchstens?',
+            '60 m çitle bir duvarın kenarında dikdörtgen bir alan çevrilecek. Duvar bir kenarı oluşturuyor. Alan en çok ne kadar olur?'],
+        ['$ ergibt $', '$ ise $'], ['$ mit $', '$, $'], ['(Maximum)', '(maksimum)'], ['(Minimum)', '(minimum)'],
+        [' Die zweite Lösung $x \\approx ', ' İkinci çözüm $x \\approx '], ['$ liegt außerhalb von $0 < x < 10$.', '$, $0 < x < 10$ aralığının dışındadır.'],
+        [' Dann ist $h = ', ' O zaman $h = '], ['\\,\\text{cm} = 2r$: Die beste Dose ist so hoch wie breit.', '\\,\\text{cm} = 2r$ olur: En iyi kutunun yüksekliği genişliğine eşittir.'],
+        [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' Duvara paralel kenar o zaman $60 - 2 \\cdot 15 = 30\\,\\text{m}$ uzunluğundadır.'],
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -103,5 +131,9 @@ window.BuchTR && BuchTR.add('analysis', {
         // kurve, schar, steckbrief: the letters drawn alone on the canvas, H/T/W (Hochpunkt, Tiefpunkt, Wendepunkt) → T/D/B (tepe, dip,
         // büküm), in one pass so that the new T is not turned into D; only a string that is nothing but the letter
         [/^([HTW])$/, (m, l) => ({ H: 'T', T: 'D', W: 'B' }[l])],
+        // optimieren: "Bei $x = 2 cm$: $V ≈ …$" → "$x = 2 cm$ için: $V ≈ …$"
+        [/>Bei (\$[^$]*\$): /g, '>$1 için: '],
+        // optimieren: the surface of the tin is A in Turkish schools (German O): "$O(r)", "$O'(r)", "$O \approx"
+        [/(^|\$)O('?\(r\)| \\approx)/g, '$1A$2'],
     ]
 });
