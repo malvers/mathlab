@@ -14,13 +14,31 @@ window.BuchTR && BuchTR.add('analysis', {
     word: {
         // tr0: the helpers of the module (outside every widget; check.mjs analysis/*)
         // book tr-2 mathe12-tr:
+        // the cover of the start page (BGY 12)
+        'Titelbild: Kurve mit Wendetangente und Ableitung, Binomialverteilung und ein Vektor im Raum':
+            'Kapak resmi: büküm noktasındaki teğetiyle bir eğri ve türevi, bir binom dağılımı ve uzayda bir vektör',
+        // grenzwert (lb2-1): Grenzwert = limit, waagerechte / senkrechte Asymptote = yatay / düşey asimptot, Loch = delik
+        'Annäherung, Schritt $k$': 'Yaklaşma, adım $k$', 'Graph mit Annäherung an einen Grenzwert': 'Bir limite yaklaşan grafik',
+        'Annäherung:': 'Yaklaşma:', 'Richtung': 'Yön',
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs analysis/*)
         // book tr-2 mathe12-tr:
+        // grenzwert
+        ['$x$ links', '$x$ (soldan)'], ['$x$ rechts', '$x$ (sağdan)'],
+        ['links gegen $-\\infty$, rechts gegen $+\\infty$: kein Grenzwert, senkrechte Asymptote $x = 1$',
+            'soldan $-\\infty$\'a, sağdan $+\\infty$\'a gider: limit yok, düşey asimptot $x = 1$'],
+        ['wächst über alle Grenzen: $f(x) \\to \\infty$, kein Grenzwert', 'sınırsız büyür: $f(x) \\to \\infty$, limit yok'],
+        ['An der Stelle $x = 1$ ist $f$ nicht definiert, der Graph hat dort ein Loch. Der Grenzwert existiert trotzdem: Kürzen gibt $',
+            '$x = 1$ noktasında $f$ tanımsızdır, grafiğin orada bir deliği vardır. Limit yine de vardır: Sadeleştirince $'],
+        ['Bei $x = 0$ ist $f$ nicht definiert. Die Werte kommen trotzdem beliebig nah an 1 heran.', '$x = 0$\'da $f$ tanımsızdır. Değerler yine de 1\'e istenildiği kadar yaklaşır.'],
+        ['Der Graph pendelt um die $x$-Achse, die Ausschläge werden immer kleiner.', 'Grafik $x$ ekseni etrafında salınır, salınımlar giderek küçülür.'],
+        ['Waagerechte Asymptote: $y = ', 'Yatay asimptot: $y = '],
     ],
     rule: [
         // tr0: notation of the module, for every book
         // book tr-2 mathe12-tr:
+        // grenzwert: "$f(x) = …$ für $x \to 1$" → "$x \to 1$ için $f(x) = …$"
+        [/(<p style="margin:0 0 8px">)(\$[^$]*\$) für (\$[^$]*\$)(<\/p>)/g, '$1$3 için $2$4'],
     ]
 });
