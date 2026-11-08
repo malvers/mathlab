@@ -580,7 +580,7 @@ const hoverTail = (function () {
 // überhaupt ausführen kann. Denn dadurch, dass jetzt der Mausklick weg ist"). Never while editing, drawing or remote
 // controlling, and never on a button, a link, a field, Solita's box, a lab or an open overview.
 (function () {
-  const NOT = '#hud, #nav, #ask, #ask-line, #ask-panel, #pres, #help, #overview, #ink-bar, a, button, input, textarea, '
+  const NOT = '#hud, #nav, #ask, #ask-line, #ask-panel, #pres, #help, #overview, #ink-bar, #countdown, a, button, input, textarea, '
     + 'select, label, .play-big, .labframe, .ani-ctl, [contenteditable], [data-pop], .pop';
   let down = null;
   addEventListener('pointerdown', e => {
@@ -1431,6 +1431,84 @@ const narr = (function () {
   // P belongs to Solita's mic since 23.09.2026 ("shift space und P sollen das Mic starten") - the talk starts
   // and pauses with its button in the HUD and the big one on the slide.
   show();
+  // A film countdown, then she starts by herself (Doc, 08.11.2026, the Making-of: "so wie im Film, runterzählen, so von
+  // 5, 4, 3 ... und dann automatisch starten. Vielleicht kommen manche Leute gar nicht drauf, den Play-Button zu
+  // drücken"). Only in a deck whose narration asks for it ("countdown": 5), only when the page opens on the title slide,
+  // never in the presenter view or a scripted browser (slide shots, the link preview). A browser lets a voice start by
+  // itself only after a click on the site - the Making-of card gives one; without it the leader ends in a big play
+  // button, and one click anywhere starts her. Click or Space during the count: at once; Esc or any other key: no start.
+  let cd = null;                                      // the running countdown: its key handler
+  addEventListener('keydown', function (e) { if (cd) cd(e); }, true);   // before Frag Solita's Space, like the one above
+  function full() {                                   // fullscreen as with the big button - only inside a click or key
+    if (PRESENTER || fsOn()) return;
+    const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+  function canPlay() {                                // may her voice start without a click? A silent blip asks
+    try { if (navigator.getAutoplayPolicy) return Promise.resolve(navigator.getAutoplayPolicy('mediaelement') === 'allowed'); } catch (e) { }
+    const n = 400, v = new DataView(new ArrayBuffer(44 + n));   // 50 ms of silence, 8 kHz 8 bit mono WAV
+    const s = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+    s(0, 'RIFF'); v.setUint32(4, 36 + n, true); s(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+    v.setUint16(22, 1, true); v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true);
+    v.setUint16(34, 8, true); s(36, 'data'); v.setUint32(40, n, true);
+    for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+    const url = URL.createObjectURL(new Blob([v.buffer], { type: 'audio/wav' })), a = new Audio(url);
+    const asked = a.play().then(() => true, () => false);
+    const late = new Promise(ok => setTimeout(() => ok(false), 1500));   // a browser that never answers: no
+    return Promise.race([asked, late]).then(ok => { a.pause(); URL.revokeObjectURL(url); return ok; });
+  }
+  function countdown(n) {
+    const box = document.createElement('div');
+    box.id = 'countdown';
+    box.setAttribute('role', 'dialog');
+    const dot = ' <span class="cd-dot">·</span> ';   // the round middle dot, not Orbitron's square
+    const touch = matchMedia('(pointer: coarse)').matches;   // a finger has no Esc
+    const hint = (touch ? 'Tippen: ' : 'Klick: ') + '%s' + (touch ? '' : dot + 'Esc: ohne Solita');
+    const len = data.minutes > 0 ? ' (' + data.minutes + (data.minutes === 1 ? ' Minute)' : ' Minuten)') : '';
+    box.setAttribute('aria-label', 'Countdown: Solita erklärt gleich' + len);
+    box.innerHTML = '<div class="cd-leader"><div class="cd-sweep"></div><i class="cd-x"></i><i class="cd-y"></i>'
+      + '<div class="cd-num">' + n + '</div><div class="cd-play"><svg viewBox="0 0 24 24" aria-hidden="true">' + PLAY + '</svg></div></div>'
+      + '<div class="cd-hint">' + hint.replace('%s', 'sofort los') + '</div>';   // name and length: the slide's own ring
+    document.body.appendChild(box);
+    const num = box.querySelector('.cd-num'), sweep = box.querySelector('.cd-sweep');
+    let t0 = 0, raf = 0;
+    // the count runs on animation frames: in a tab opened behind the others it waits until the tab is looked at
+    function frame(t) {
+      if (!t0) t0 = t;
+      const sec = (t - t0) / 1000;
+      // the last turn ends full, then she starts (Doc, 08.11.2026: "bei der 1 geht der Kuchen nicht ganz bis hoch") -
+      // the last frame before the end came a few degrees short, and the leader faded with that gap in it
+      if (sec >= n) { sweep.style.setProperty('--a', '360deg'); setTimeout(end, 250); return; }
+      const k = String(n - Math.floor(sec));
+      if (num.textContent !== k) num.textContent = k;
+      sweep.style.setProperty('--a', (sec % 1 * 360).toFixed(1) + 'deg');   // the hand goes round once a second
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+    function close() {
+      cd = null; cancelAnimationFrame(raf);
+      box.classList.add('cd-out');
+      setTimeout(() => box.remove(), 500);
+    }
+    // her clip first, then the fullscreen: a strict browser lets the fullscreen use up the click, and the clip came too late
+    function go() { close(); if (api.playing) return; toggle(); full(); }
+    box.addEventListener('click', function (e) { e.stopPropagation(); go(); });   // not on to the page's next slide
+    cd = function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); go(); return; }
+      close();                                        // Esc or an arrow: no start, the key does what it always does
+    };
+    function end() {
+      canPlay().then(function (ok) {
+        if (!cd) return;                              // closed meanwhile by a click or a key
+        if (ok) { close(); if (!api.playing && slides[si] === home) toggle(); return; }
+        box.classList.add('cd-wait');                 // the browser wants a click first: the big play button
+        box.querySelector('.cd-hint').innerHTML = hint.replace('%s', 'Solita startet');
+      });
+    }
+  }
+  if (data.countdown > 0 && !PRESENTER && !navigator.webdriver)
+    setTimeout(function () { if (slides[si] === home && !api.playing) countdown(data.countdown); }, 0);   // after fromHash()
   return api;
 })();
 

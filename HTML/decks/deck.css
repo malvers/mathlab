@@ -691,18 +691,20 @@ html.laser-armed #deck{touch-action:none}
 #help tr.sep td{height:13px;padding:0;background:linear-gradient(#C3CFE4,#C3CFE4) center/100% 1px no-repeat}
 /* Solita reads the deck (say() + deck_audio.mjs): on the title slide, in the orbit ring, her round picture, the words
    under it and under those a small play button (Doc, 15.09.2026: "kleiner, alles gruen, weiter nach rechts, 2. Folie",
-   02.11.2026: "ein Bild von Solita, wie wir sie kennen"). The picture is a second .play-big, so a click on it starts her too */
-.play-big{position:absolute;left:847px;top:310px;width:26px;height:26px;border-radius:50%;
+   02.11.2026: "ein Bild von Solita, wie wir sie kennen"). The picture is a second .play-big, so a click on it starts her too.
+   All of it sits 12px higher than before, so the length under the play button has air above the ring (Doc, 08.11.2026:
+   "Alles bitte ein bisschen höher, das sieht da noch zu geklatscht aus") */
+.play-big{position:absolute;left:847px;top:298px;width:26px;height:26px;border-radius:50%;
   border:0;background:var(--green);color:#fff;cursor:pointer;z-index:2;
   box-shadow:0 2px 8px rgba(0,0,0,.25);display:grid;place-items:center}
 .play-big svg{width:12px;height:12px}
 .play-big:hover{filter:brightness(1.08)}
-.play-big.play-face{left:816px;top:196px;width:88px;height:88px;border:1.5px solid var(--green);
+.play-big.play-face{left:816px;top:184px;width:88px;height:88px;border:1.5px solid var(--green);
   background:url(../resources/solita-avatar.png) center/cover}
-.play-big-label{position:absolute;left:760px;width:200px;top:292px;text-align:center;
+.play-big-label{position:absolute;left:760px;width:200px;top:280px;text-align:center;
   font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--green);
   text-transform:uppercase}
-/* the talk's length (narration "minutes"), below the play button that sits under "Solita erklärt" (310-336px) */
+/* the talk's length (narration "minutes"), below the play button that sits under "Solita erklärt" (298-324px) */
 .play-min{position:absolute;left:0;right:0;top:48px;font-size:12px;font-weight:700;letter-spacing:1px}
 /* the play button pulses like the one on "The Making of" card (js/buch-titel.css .b-kino-play; Doc, 03.11.2026: "so wabern
    wie auf der ersten Kachel. Dass klar wird, hier ist der Play-Button") - two rings in turn, still while she talks */
@@ -711,6 +713,47 @@ html.laser-armed #deck{touch-action:none}
 .play-big:not(.play-face)::after{animation-delay:1.1s}
 .play-big.playing::before,.play-big.playing::after{animation:none;opacity:0}
 @keyframes play-ring{from{transform:scale(1);opacity:.8}to{transform:scale(1.7);opacity:0}}
+/* the film countdown before Solita starts by herself (deck.js countdown, narration "countdown"; Doc, 08.11.2026: "so wie
+   im Film, runterzählen") - a film leader in the night of the title slide: grain, a scratch, the crosshair, two rings, the
+   hand sweeping round once a second (--a from deck.js) and the number. When the browser wants a click first, the number
+   gives way to a big pulsing play button (.cd-wait). The whole viewport, in vmin, so phone and beamer look the same.
+   See-through: the title slide stays visible behind the leader (Doc, 08.11.2026: "leicht durchsichtig, sodass man im
+   Hintergrund das noch sieht ... oder eben nur den Kreis") - a light veil, the leader's own disc denser so the number
+   reads; "Solita erklärt" and the minutes stay to be read in the slide's own ring behind */
+#countdown{--cd:min(58vmin,560px);position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3vmin;overflow:hidden;cursor:pointer;font-family:Orbitron,sans-serif;color:#E6ECF8;transition:opacity .5s;
+  background:radial-gradient(circle at 50% 50%,rgba(7,22,48,.22) 0,rgba(7,22,48,.22) 40%,rgba(2,10,22,.45) 100%)}
+#countdown.cd-out{opacity:0;pointer-events:none}
+#countdown::before{content:"";position:absolute;inset:-50%;pointer-events:none;opacity:.16;mix-blend-mode:screen;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:cd-grain .4s steps(4) infinite}
+#countdown::after{content:"";position:absolute;top:0;bottom:0;left:27%;width:1px;pointer-events:none;
+  background:rgba(230,236,248,.22);animation:cd-scratch 2.3s steps(1) infinite}
+@keyframes cd-grain{0%{transform:translate(0,0)}25%{transform:translate(-6%,4%)}50%{transform:translate(5%,-3%)}
+  75%{transform:translate(-3%,-6%)}}
+@keyframes cd-scratch{0%{left:27%;opacity:1}30%{left:71%;opacity:.6}55%{opacity:0}70%{left:43%;opacity:.8}}
+.cd-leader{position:relative;width:var(--cd);aspect-ratio:1;border-radius:50%;
+  border:max(2px,.3vmin) solid rgba(230,236,248,.8)}
+.cd-leader::before{content:"";position:absolute;inset:8%;border-radius:50%;border:max(2px,.3vmin) solid var(--orange)}
+.cd-sweep{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(rgba(245,194,66,.34) var(--a,0deg),rgba(7,22,48,.5) 0)}
+.cd-x,.cd-y{position:absolute;background:rgba(230,236,248,.55)}
+.cd-x{left:-24%;right:-24%;top:50%;height:max(1px,.2vmin)}
+.cd-y{top:-10%;bottom:-10%;left:50%;width:max(1px,.2vmin)}
+.cd-num{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--cd) * .52);font-weight:700;line-height:1;
+  color:#fff;text-shadow:0 0 3vmin rgba(245,194,66,.5)}
+.cd-play{position:absolute;left:50%;top:50%;width:calc(var(--cd) * .33);aspect-ratio:1;margin:calc(var(--cd) * -.165);
+  border-radius:50%;background:var(--green);color:#fff;display:none;place-items:center;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+.cd-play svg{width:46%;height:46%;margin-left:6%}
+.cd-play::before,.cd-play::after{content:"";position:absolute;inset:0;border-radius:50%;border:max(2px,.35vmin) solid var(--green);
+  box-shadow:0 0 1.2vmin var(--green);animation:play-ring 2.2s ease-out infinite;pointer-events:none}
+.cd-play::after{animation-delay:1.1s}
+.cd-wait .cd-num,.cd-wait .cd-sweep{display:none}
+.cd-wait .cd-play{display:grid}
+.cd-dot{font-family:'Times New Roman',Times,serif;font-weight:700;letter-spacing:0}
+.cd-hint{font-size:max(11px,1.5vmin);letter-spacing:.12em;color:rgba(230,236,248,.55);text-align:center;padding:0 16px}
+@media (max-aspect-ratio:3/4){#countdown{--cd:76vmin}}   /* a phone upright: the leader as wide as it can be */
+@media (prefers-reduced-motion:reduce){#countdown::before,#countdown::after,.cd-play::before,.cd-play::after{animation:none}}
 /* slide number typed for a jump (1 7 Enter) */
 #jump{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:42px;z-index:9;padding:4px 10px;border-radius:7px;
   background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.28);color:#0E244E;
@@ -1042,7 +1085,7 @@ html.laser-on .p-cur .p-fit{cursor:none}
 
 @media print{
   html,body{overflow:visible;background:#fff}
-  #hud,#nav,#bar,.play-big,.play-big-label{display:none}
+  #hud,#nav,#bar,.play-big,.play-big-label,#countdown{display:none}
   #stage{position:static;display:block}
   #deck{transform:none!important;width:auto;height:auto;position:static}
   .slide{display:block!important;position:relative;width:960px;height:540px;
