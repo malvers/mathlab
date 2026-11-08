@@ -40,6 +40,8 @@ window.BuchPT && BuchPT.add('analysis', {
         'Zeige auch:': 'Mostrar também:', 'nur f': 'só f', 'f′ und f″': 'f′ e f″', 'Ableitungen zeigen': 'Mostrar as derivadas',
         'Graph einer Funktion dritten Grades mit Extrem- und Wendepunkten': 'Gráfico de uma função de 3.º grau com extremos e pontos de inflexão',
         'Intervall': 'Intervalo', 'konstant': 'constante', 'steigt ↗': 'cresce ↗', 'fällt ↘': 'decresce ↘',
+        // tangente (lb2-5): Normale = reta normal, Berührpunkt = ponto de tangência
+        'Tangente und Normale an einen Graphen': 'Tangente e normal a um gráfico',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -88,6 +90,9 @@ window.BuchPT && BuchPT.add('analysis', {
         ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am kleinsten.', '$: aí $f\'\'(x) = 0$ e o declive é mínimo.'],
         ['$: Dort ist $f\'\'(x) = 0$ und die Steigung am größten.', '$: aí $f\'\'(x) = 0$ e o declive é máximo.'],
         ['Für $a = 0$ ist $f$ eine Parabel (oder Gerade) ohne Wendepunkt.', 'Para $a = 0$, $f$ é uma parábola (ou uma reta) sem ponto de inflexão.'],
+        // tangente
+        ['$ · Berührpunkt $P', '$ · ponto de tangência $P'], ['Tangente: $', 'Tangente: $'],
+        ['Normale (senkrecht zur Tangente, $m_n = -\\tfrac{1}{m_t}$): $', 'Normal (perpendicular à tangente, $m_n = -\\tfrac{1}{m_t}$): $'],
     ],
     rule: [
         // pt0: notation of the module, for every book
