@@ -1737,6 +1737,11 @@
             -webkit-line-clamp: 6;
             line-clamp: 6;
         }
+        /* the tour's title runs over two or three lines, so its text is shorter */
+        #tool-container .card.book-one-tour .card-desc {
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
+        }
         /* as far from the left as from the top, the cover in the middle from top to bottom, and room for "Mathematik BGY 12" in
            one line (Doc, 08.11.2026: "dass der Abstand von links zum Buch so ist wie von oben zum Buch", "nicht ganz y-symmetrisch";
            measured: 185 px needed, 182 px there with 20 px padding and an 18 px gap; six lines keep the text below the cover) */
@@ -2719,9 +2724,10 @@
            book without that edition shows its German cover grey with "kommt noch" and opens the English edition, else the German
            one (Doc, 08.11.2026: "wenn keins da ist, dann machen wir da irgendwie so kleine Platzhalter, mit dem Cover, aber
            irgendwie grau, schwarz-weiß ... die kommen noch"). Leaving the view gives the card its row of covers and link back. */
-        function bookOneCover(card, on) {
+        // tour: the book a card that is no book card shows (the live tour of BGY 11) - its cover only, the card keeps its link
+        function bookOneCover(card, on, tour) {
             const icon = card.querySelector('.card-icon');
-            const langs = BOOK_LANGS[(card.dataset.labId || '').replace(/^lehrbuch-/, '')];
+            const langs = BOOK_LANGS[tour || (card.dataset.labId || '').replace(/^lehrbuch-/, '')];
             if (!icon || !langs) return;
             card.classList.toggle('book-one-card', on);
             const h3 = card.querySelector('h3');
@@ -2749,11 +2755,11 @@
                     h3.appendChild(sub);
                 }
             }
-            const book = card.dataset.labId.replace(/^lehrbuch-/, '');
+            const book = tour || card.dataset.labId.replace(/^lehrbuch-/, '');
             const lang = (typeof CyberI18n !== 'undefined' && CyberI18n.current) || 'de';
             const has = langs.includes(lang);
             const edition = (l) => book + (l === 'de' ? '' : '-' + l);
-            card.setAttribute('href', 'buch/' + edition(has ? lang : langs.includes('en') ? 'en' : 'de') + '/index.html');
+            if (!tour) card.setAttribute('href', 'buch/' + edition(has ? lang : langs.includes('en') ? 'en' : 'de') + '/index.html');
             icon.innerHTML = '<span class="book-one' + (has ? '' : ' is-soon') + '">'
                 + '<img src="resources/og/buch-' + edition(has ? lang : 'de') + '-cover.jpg" alt="" loading="lazy" decoding="async">'
                 + (has ? '' : '<span class="book-soon">' + (BOOK_SOON[lang] || BOOK_SOON.en) + '</span>') + '</span>';
@@ -2766,6 +2772,11 @@
             // the card layout to try: ?karte=ecke puts the cover in the top right corner (see the CSS of .book-one-card)
             document.body.classList.toggle('bk-ecke', on && new URLSearchParams(location.search).get('karte') === 'ecke');
             if (!on) {
+                const tourCard = box.querySelector('.card.book-one-tour');
+                if (tourCard) {
+                    bookOneCover(tourCard, false, 'mathe11');
+                    tourCard.classList.remove('book-one-tour');
+                }
                 box.querySelectorAll('.card[data-icons]').forEach(card => bookOneCover(card, false));
                 if (box.dataset.grouped) {
                     LABS_DATA.forEach(lab => {
@@ -2784,6 +2795,10 @@
             const tour = box.querySelector('.card[data-lab-id="tour-mathe11-lehrbuch"]');
             if (tour) {
                 tour.style.display = 'flex';
+                // like the book cards: one cover of BGY 11 in the chosen language on the left, a shorter text (Doc, 08.11.2026:
+                // "Nehmen wir die Bücher da oben raus, machen wir die wie alle anderen ... dann machen wir den Text drunter kürzer")
+                bookOneCover(tour, true, 'mathe11');
+                tour.classList.add('book-one-tour');
                 frag.appendChild(tour);
             }
             // the Swahili tile (bookSw) is no longer shown: the Kenyan flag above switches the book cards to the Swahili editions
@@ -2791,7 +2806,7 @@
             const ref = box.querySelector('.card[data-lab-id="lehrbuch-mathe11"]');   // the Making of is as high as a book card
             if (bookKinoFit) bookKinoFit.disconnect();
             if (ref && window.ResizeObserver) {
-                bookKinoFit = new ResizeObserver(() => { kino.style.height = ref.offsetHeight + 'px'; });
+                bookKinoFit = new ResizeObserver(() => { kino.style.height = Math.max(ref.offsetHeight, 246) + 'px'; });   // the cards with one cover (08.11.2026) are lower than the banner needs: 246 px, its height beside the five-cover cards
                 bookKinoFit.observe(ref);
             }
             BOOK_SCHOOLS.forEach(school => {
