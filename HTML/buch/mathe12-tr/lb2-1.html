@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik 12 · Bölüm 2.1 · Limitler | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Sonsuzdaki davranış, asimptotlar, süreklilik. Bölüm 2.1, etkileşimli ders kitabı Matematik · Berufliches Gymnasium 12: açıklamalar, örnekler, üç düzeyde alıştırmalar, öz değerlendirme testleri ve denemek için laboratuvarlar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATİK · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Bölüm"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Bölümün içeriği">
+        <p class="b-toc-title">BÖLÜM 2.1 · ÖĞRENME ALANI 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Giriş" data-toc-k="G" data-toc-short="Giriş" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">BÖLÜM 2.1 · ÖĞRENME ALANI 2 · KASIM · ARALIK</p>
+            <h1>Limitler</h1>
+            <p class="b-hero-lead">Sıcak bir kahve soğur, ama hiçbir zaman oda sıcaklığının altına inmez. Bir eğri bir doğruya hiç ulaşmadan ona sokulur.
+                Bir fonksiyonun bir noktada deliği vardır, ama yine de oraya doğru nereye gitmek istediği tam olarak bilinir. <b>Limitler</b>, bir şeye
+                giderek daha çok yaklaşıldığında ne olduğunu anlatır. Bütün türev konusunun temeli onlardır.</p>
+            <div class="b-chips"><span class="b-chip">8 DERS SAATİ</span><span class="b-chip">2 KONU</span><span class="b-chip">TÜREVİN TEMELİ</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["(2*x+1)/(x-1)"]' data-labels='["f"]' data-lat="[5]" data-hl="2" data-x="-6,8" data-y="-6,9" data-h="240" data-aria="Yatay ve düşey asimptotu olan bir grafik"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">BU BÖLÜMDE ÖĞRENECEKLERİN</div>
+            <div class="b-text"><ul>
+                <li><b>sonsuzdaki davranışı</b> belirlemek ve <b>yatay asimptotları</b> vermek</li>
+                <li><b>bir noktadaki limitleri</b>, soldan ve sağdan limitleri de incelemek</li>
+                <li><b>kutup noktalarını</b> (düşey asimptotları) ve <b>delikleri</b> ayırt etmek</li>
+                <li><b>sürekliliğin</b> ne anlama geldiğini kavramak</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">ÖN KONTROL: BUNLARI BİLİYOR MUSUN?</div>
+            <div class="b-q" data-ans="0,001" data-tol="0.000001" data-ph="Sayı"><p class="b-q-text">$\tfrac{1}{1000}$ ondalık sayı olarak kaçtır?</p><div class="b-sol"><p>$0{,}001$</p></div></div>
+            <div class="b-q" data-ans="0,125" data-tol="0.0001" data-ph="Sayı"><p class="b-q-text">$2^{-3}$ değerini hesapla.</p><div class="b-sol"><p>$\tfrac{1}{2^3} = \tfrac18 = 0{,}125$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">$\tfrac{1}{x - 2}$ ifadesi hangi $x$ için tanımsızdır?</p><div class="b-sol"><p>$x = 2$ için payda 0 olurdu.</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="Sayı"><p class="b-q-text">$\tfrac{x^2 - 9}{x - 3}$ ifadesini sadeleştir ve sonra $x = 3$ yaz.</p><div class="b-sol"><p>$\tfrac{(x - 3)(x + 3)}{x - 3} = x + 3$, yani $x = 3$ için 6.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Keşifler" data-toc-k="K" data-toc-short="Keşifler">
+    <div class="b-band"><span class="b-band-tag">KEŞİFLER</span><span class="b-band-sub">BAŞLANGIÇ İÇİN · GRUPÇA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">KAHVE</div>
+            <div class="b-text"><p>Bir kahvenin $t$ dakika sonraki sıcaklığı $T(t) = 20 + 60 \cdot 0{,}9^t$ (°C cinsinden) ile veriliyor.</p>
+                <ul><li>$T(0)$, $T(10)$, $T(30)$, $T(60)$ değerlerini hesaplayın.</li><li>Kahve hangi sıcaklığa hiçbir zaman ulaşmaz? 20 neyi anlatıyor?</li></ul></div>
+            <span class="b-pair">→ Konu 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">1'E GİDEREK YAKLAŞMAK</div>
+            <div class="b-text"><p>$f(x) = \tfrac{x^2 - 1}{x - 1}$ fonksiyonunda 0,9; 0,99; 0,999 ve 1,1; 1,01; 1,001 değerlerini yerine yazın.</p>
+                <ul><li>Ne gözlemliyorsunuz? $x = 1$'de ne oluyor?</li><li>Grafiği çizin. 1 noktasında nasıl görünüyor?</li></ul></div>
+            <span class="b-pair">→ Konu 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">KARGO ÜCRETİ</div>
+            <div class="b-text"><p>Bir kargo şirketi 2 kg'a kadar 5 €, 5 kg'a kadar 7 € ve 10 kg'a kadar 10 € istiyor.</p>
+                <ul><li>Ücreti ağırlığa göre çizin.</li><li>Grafik hangi noktalarda “sıçrıyor”? Tam 2 kg'lık bir paket ne kadar tutar?</li></ul></div>
+            <span class="b-pair">→ Konu 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Sonsuzdaki davranış" data-toc-k="1" data-toc-short="1 Sonsuz">
+    <div class="b-band"><span class="b-band-tag">KONU 1</span><span class="b-band-sub">4 DERS SAATİ</span></div>
+    <h2><span class="b-no">1</span>Sonsuzdaki davranış</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Kahvede $T(60) = 20 + 60 \cdot 0{,}9^{60} \approx 20{,}11$'dir. Ne kadar uzun beklenirse $0{,}9^t$ o kadar küçülür ve $T(t)$, 20'ye istenildiği kadar yaklaşır.</p></div></div>
+            <div class="b-text"><p>Bu, $\lim\limits_{t \to \infty} T(t) = 20$ biçiminde yazılır (okunuşu: “$t$ sonsuza giderken $T(t)$'nin limiti 20'dir”). $y = 20$ doğrusuna <b>yatay asimptot</b> denir.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · SONSUZDA LİMİT</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to \infty} f(x) = g$ şu demektir: $x$ yeterince büyük olduğunda $f(x)$, $g$'ye istenildiği kadar yaklaşır. Bu durumda $y = g$ bir <b>yatay asimptottur</b>.</p>
+                    <p>Derecesi en az 1 olan <b>polinom fonksiyonlar</b>, $x \to \pm\infty$ için en yüksek dereceli terimleri gibi davranır; $+\infty$'a ya da $-\infty$'a gider.</p>
+                    <p><b>Rasyonel fonksiyonlar</b> $\tfrac{P(x)}{Q(x)}$: Payın derecesi paydanınkinden küçükse → limit 0. Dereceler eşitse → en yüksek dereceli terimlerin katsayılarının oranı.
+                        Payın derecesi büyükse → yatay asimptot yoktur.</p>
+                    <p>Ayrıca $x \to \infty$ için: $\tfrac1x \to 0$, $\mathrm{e}^{-x} \to 0$ ve $0 < q < 1$ için $q^x \to 0$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Püf noktası:</b> Payı ve paydayı, paydanın en yüksek kuvvetine böl. $\tfrac{1}{x}$ ya da $\tfrac{3}{x^2}$ gibi tüm terimler $x \to \infty$ için yok olur.</p>
+            <p class="b-note"><b>Asimptot</b> sözcüğü Yunancadan gelir ve “çakışmayan” demektir.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · ADIM ADIM LİMİTE</div>
+        <p class="b-help" style="margin:0 0 12px">Bir fonksiyon ve yaklaşmanın yönünü seç. Her $k$ adımında $x$ on kat daha dışarı gider ya da noktaya on kat daha yaklaşır.</p>
+        <div data-widget="grenzwert"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 1 · EŞİT DERECELER</div>
+            <div class="b-text"><p>$\lim\limits_{x \to \infty} \dfrac{3x^2 + 1}{x^2 + 2}$ limitini bul.</p></div>
+            <div class="b-sol"><p>$x^2$'ye bölünür: $\dfrac{3 + \frac{1}{x^2}}{1 + \frac{2}{x^2}} \to \dfrac{3 + 0}{1 + 0} = 3$. <span class="b-res">Yatay asimptot $y = 3$.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 2 · POLİNOM</div>
+            <div class="b-text"><p>$f(x) = -2x^3 + 5x^2 + 1$, $x \to \infty$ ve $x \to -\infty$ için nasıl davranır?</p></div>
+            <div class="b-sol"><p>Belirleyici olan $-2x^3$'tür: $x \to \infty$ için $f(x) \to -\infty$, $x \to -\infty$ için $f(x) \to +\infty$.</p></div>
+        </div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$x \to \infty$ için bul: a) $5 - \tfrac1x$ &nbsp; b) $3 \cdot 0{,}5^x$ &nbsp; c) $\dfrac{4x + 1}{2x - 3}$ &nbsp; d) $x^3 - 100x^2$</p></div>
+            <div class="b-sol"><p>a) 5 &nbsp; b) 0 &nbsp; c) 2 &nbsp; d) $+\infty$ (büyük $x$ için $x^3$ baskın gelir)</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$f(x) = \tfrac{x + 1}{x}$ için $f(10)$, $f(100)$ ve $f(1000)$ değerlerini hesapla. $f$ hangi değere yaklaşır?</p></div>
+            <div class="b-sol"><p>$1{,}1$; $1{,}01$; $1{,}001$. Limit 1, çünkü $\tfrac{x + 1}{x} = 1 + \tfrac1x$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>“Kahve” keşfi: $T(10)$'u hesapla. Kahve kaç dakika sonra 30 °C'nin altına iner?</p></div>
+            <div class="b-sol"><p>$T(10) = 20 + 60 \cdot 0{,}9^{10} \approx 40{,}9$ °C. $60 \cdot 0{,}9^t < 10 \Rightarrow 0{,}9^t < \tfrac16 \Rightarrow t > \tfrac{\ln(1/6)}{\ln 0{,}9} \approx 17{,}01$, yani 17 dakikadan biraz sonra.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Varsa yatay asimptotları ver: a) $\dfrac{6x^2}{2x^2 + 5}$ &nbsp; b) $\dfrac{x + 4}{x^2 + 1}$ &nbsp; c) $\dfrac{x^3}{x + 1}$</p></div>
+            <div class="b-sol"><p>a) $y = 3$ &nbsp; b) $y = 0$ &nbsp; c) yok, payın derecesi daha büyük</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Grafiğinin yatay asimptotu $y = -3$ ve düşey asimptotu $x = 2$ olan bir rasyonel fonksiyon ver.</p></div>
+            <div class="b-sol"><p>Örneğin $f(x) = \dfrac{-3x}{x - 2}$ ya da $f(x) = -3 + \dfrac{1}{x - 2}$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="5" data-ph="Limit"><p class="b-q-text">$\lim\limits_{x \to \infty} \dfrac{5x^2 - x}{x^2 + 4}$ limitini bul.</p><div class="b-sol"><p>Dereceler eşit: $\tfrac51 = 5$</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="Limit"><p class="b-q-text">$\lim\limits_{x \to \infty} \dfrac{7}{x + 1}$ limitini bul.</p><div class="b-sol"><p>Payda sınırsız büyür: 0</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="Limit"><p class="b-q-text">$\lim\limits_{x \to \infty} \left(4 + 2\mathrm{e}^{-x}\right)$ limitini bul.</p><div class="b-sol"><p>$\mathrm{e}^{-x} \to 0$, yani 4</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Bir noktada limit, süreklilik" data-toc-k="2" data-toc-short="2 Nokta">
+    <div class="b-band"><span class="b-band-tag">KONU 2</span><span class="b-band-sub">4 DERS SAATİ</span></div>
+    <h2><span class="b-no">2</span>Bir noktada limit ve süreklilik</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = \tfrac{x^2 - 1}{x - 1}$, $x = 1$'de tanımsızdır. Ama $f(0{,}999) = 1{,}999$ ve $f(1{,}001) = 2{,}001$ değerleri şunu gösterir: $f(x)$ iki taraftan da 2 sayısına yaklaşır.</p></div></div>
+            <div class="b-text"><p>$x \neq 1$ için $f(x) = \tfrac{(x - 1)(x + 1)}{x - 1} = x + 1$'dir. Grafik, $(1 \mid 2)$ noktasında bir <b>deliği</b> olan $y = x + 1$ doğrusudur.
+                $g(x) = \tfrac{1}{x - 1}$'de durum farklıdır: Burada $x \to 1$ için değerler sınırsız büyür, $x = 1$ doğrusu bir <b>düşey asimptottur</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · BİR NOKTADA LİMİT VE SÜREKLİLİK</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to a} f(x) = g$ şu demektir: $x$, $a$'ya yeterince yakın olduğunda $f(x)$, $g$'ye istenildiği kadar yaklaşır; hem <b>soldan hem sağdan</b>.</p>
+                    <p><b>Kutup noktası:</b> $x \to a$ için $|f(x)|$ sınırsız büyür; $x = a$ işaret değişimli ya da işaret değişimsiz bir düşey asimptottur.
+                        <b>Delik:</b> $f(a)$ tanımsızdır, ama limit vardır.</p>
+                    <p>$f(a)$ tanımlıysa ve $\lim\limits_{x \to a} f(x) = f(a)$ ise $f$ fonksiyonuna $a$ noktasında <b>süreklidir</b> denir. Görsel olarak: Grafik orada kalemi kaldırmadan çizilebilir.
+                        Polinom fonksiyonlar, $\mathrm{e}^x$ ve $\sin x$ her yerde süreklidir.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Soldan, sağdan:</b> Soldan ve sağdan farklı değerler çıkıyorsa o noktada limit yoktur, örneğin kargo ücretinde.</p>
+            <p class="b-note"><b>Yukarıdaki etkileşimli araçta</b> bir kutup noktası (ilk fonksiyonda $x \to 1$) ve iki delik bulursun.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ŞEKİL · İŞARET DEĞİŞİMLİ VE İŞARET DEĞİŞİMSİZ KUTUP NOKTALARI</div>
+        <p class="b-help" style="margin:0 0 12px">Altın: $f(x) = \tfrac{1}{x - 2}$, $x = 2$'de $-\infty$'dan $+\infty$'a geçer. Camgöbeği: $g(x) = \tfrac{1}{(x - 2)^2}$ iki taraftan da $+\infty$'a gider.</p>
+        <div data-widget="graph" data-fns='["1/(x-2)","1/((x-2)^2)"]' data-labels='["f","g"]' data-lat="[3.4,0.6]" data-x="-2,6" data-y="-5,6" data-h="280" data-aria="x eşittir 2'de iki kutup noktası"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 3 · DELİK Mİ, KUTUP MU?</div>
+            <div class="b-text"><p>$f(x) = \dfrac{x^2 - 4}{x - 2}$ ve $g(x) = \dfrac{x + 2}{x - 2}$ fonksiyonlarını $x = 2$ noktasında incele.</p></div>
+            <div class="b-sol"><p>$x \neq 2$ için $f(x) = x + 2$: delik, $\lim\limits_{x \to 2} f(x) = 4$.</p>
+                <p>$g$'de pay 4'e, payda 0'a gider: işaret değişimli kutup noktası, düşey asimptot $x = 2$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 4 · KARGO ÜCRETİ</div>
+            <div class="b-text"><p>Kargo şirketinin ücret fonksiyonu 2 kg noktasında sürekli midir?</p></div>
+            <div class="b-sol"><p>Soldan (2 kg'ın biraz altı): 5 €. Sağdan (2 kg'ın biraz üstü): 7 €. Tek taraflı limitler farklıdır: <span class="b-res">limit yok, dolayısıyla sürekli değil.</span> Grafik sıçrar.</p></div>
+        </div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Fonksiyonun tanımsız olduğu noktayı ve türünü bul: a) $\dfrac{3}{x + 4}$ &nbsp; b) $\dfrac{x^2 - 9}{x + 3}$ &nbsp; c) $\dfrac{1}{x^2}$</p></div>
+            <div class="b-sol"><p>a) $x = -4$: işaret değişimli kutup &nbsp; b) $x = -3$: delik, limit $-6$ &nbsp; c) $x = 0$: işaret değişimsiz kutup</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$\lim\limits_{x \to 2} (x^2 + 3x)$ ve $\lim\limits_{x \to 0} \dfrac{x^2 + 5x}{x}$ limitlerini bul.</p></div>
+            <div class="b-sol"><p>Sürekli, yani yerine yaz: $4 + 6 = 10$. Sadeleştir: $x + 5 \to 5$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$x \neq 0$ için $f(x) = \dfrac{|x|}{x}$. $f(0{,}1)$, $f(-0{,}1)$, $f(0{,}001)$, $f(-0{,}001)$ değerlerini hesapla. $f$'nin 0'da limiti var mı?</p></div>
+            <div class="b-sol"><p>$x > 0$ için $f(x) = 1$, $x < 0$ için $f(x) = -1$. Solda $-1$, sağda $1$: limit yok.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$f(x) = \begin{cases} x^2 & x \le 1 \text{ için} \\ 2x + c & x > 1 \text{ için} \end{cases}$ fonksiyonu hangi $c$ için 1 noktasında süreklidir?</p></div>
+            <div class="b-sol"><p>Soldan $1^2 = 1$, sağdan $2 + c$ gelir. $c = -1$ için eşittir.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="6" data-ph="Limit"><p class="b-q-text">$\lim\limits_{x \to 3} \dfrac{x^2 - 9}{x - 3}$ limitini bul.</p><div class="b-sol"><p>$x + 3 \to 6$</p></div></div>
+        <div class="b-q" data-ans="-5" data-ph="x ="><p class="b-q-text">$f(x) = \dfrac{1}{x + 5}$ fonksiyonunun kutup noktası nerededir?</p><div class="b-sol"><p>$x = -5$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">$f(x) = \dfrac{1}{x^2}$ fonksiyonunun 0 noktasında ne vardır?</p>
+            <div class="b-mc"><button>bir delik</button><button>işaret değişimli bir kutup noktası</button><button>işaret değişimsiz bir kutup noktası</button></div>
+            <div class="b-sol"><p>Her iki tarafta $x^2 > 0$, yani soldan ve sağdan $f(x) \to +\infty$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Tekrar Et · Derinleştir · İlişkilendir" data-toc-k="A" data-toc-short="Alıştırma">
+    <div class="b-band"><span class="b-band-tag">TEKRAR ET · DERİNLEŞTİR · İLİŞKİLENDİR</span></div>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$f(x) = \dfrac{2x - 1}{x + 1}$ fonksiyonunun grafiğinin tüm asimptotlarını ver.</p></div>
+            <div class="b-sol"><p>Yatay $y = 2$, düşey $x = -1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bir ilacın kandaki derişimi $c(t) = \dfrac{8t}{t^2 + 4}$'tür ($t$ saat cinsinden). $\lim\limits_{t \to \infty} c(t)$ limitini bul ve yorumla.</p></div>
+            <div class="b-sol"><p>Payın derecesi paydanınkinden küçük: limit 0. İlaç zamanla tamamen vücuttan atılır.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>11. sınıfla ilişkilendir:</b> 1.000 iyot-131 çekirdeğinden $t$ gün sonra $N(t) = 1000 \cdot 0{,}5^{t/8}$ çekirdek kalır. $t \to \infty$ için limiti bul. Hesaba göre ne zaman bir çekirdekten az kalır?</p></div>
+            <div class="b-sol"><p>Limit 0. $0{,}5^{t/8} < 0{,}001 \Rightarrow t > 8 \cdot \tfrac{\ln 0{,}001}{\ln 0{,}5} \approx 79{,}7$ gün. Ancak bu kadar küçük sayılarda model artık yalnızca bir ortalamadır.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$f(x) = \dfrac{x^2 + x}{x}$, 0'da tanımsızdır. $f$'nin her yerde sürekli olması için $f(0)$ nasıl tanımlanmalıdır?</p></div>
+            <div class="b-sol"><p>$x \neq 0$ için $f(x) = x + 1$, yani $f(0) := 1$. Buna <b>sürekli genişletme</b> denir.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Gezinti: Akhilleus ve kaplumbağa" data-toc-k="X" data-toc-short="Akhilleus">
+    <div class="b-band"><span class="b-band-tag">GEZİNTİ</span><span class="b-band-sub">SONSUZ ÇOK ADIM, SONLU BİR HEDEF</span></div>
+    <h2>Akhilleus ve kaplumbağa</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Yunan filozof Elealı Zenon, MÖ 5. yüzyılda şunu ileri sürdü: Hızlı Akhilleus, önde başlayan bir kaplumbağaya asla yetişemez.
+                Çünkü onun bulunduğu yere vardığında kaplumbağa biraz daha ilerlemiştir. Oraya vardığında yine ilerlemiştir ve bu sonsuz kez böyle sürer.</p>
+            <p>Limitlerle bilmece çözülür. Akhilleus iki kat hızlıysa ve kaplumbağa 1 metre öndeyse, Akhilleus sırasıyla
+                $1 + \tfrac12 + \tfrac14 + \tfrac18 + \ldots$ metre koşar. Bu sonsuz çok parça yolun <b>limiti</b> 2'dir: 2 metre sonra kaplumbağaya yetişmiştir.</p>
+            <p>Demek ki sonsuz çok adım birlikte sonlu bir yol ve sonlu bir süre verebilir. Her limitin içinde tam olarak bu düşünce vardır.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Kaynak:</b> Aristoteles'in aktarımıyla, Fizik, VI. kitap, 9. bölüm (239b).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Özet" data-toc-k="Ö" data-toc-short="Özet">
+    <div class="b-band"><span class="b-band-tag">ÖZET</span><span class="b-band-sub">EN ÖNEMLİLER BİR BAKIŞTA</span></div>
+    <div class="b-rueck"><div><h4>SONSUZDA</h4><p>$\lim\limits_{x \to \infty} f(x) = g$: yatay asimptot $y = g$.</p></div>
+        <div><p>$\tfrac{3x^2 + 1}{x^2 + 2} \to 3$ · $20 + 60 \cdot 0{,}9^t \to 20$</p></div></div>
+    <div class="b-rueck"><div><h4>RASYONEL FONKSİYON</h4><p>Payın derecesi &lt; paydanın derecesi: 0 · eşit: katsayıların oranı · büyük: yatay asimptot yok.</p></div>
+        <div><p>$\tfrac{6x^2}{2x^2 + 5} \to 3$</p></div></div>
+    <div class="b-rueck"><div><h4>BİR NOKTADA</h4><p>Soldan ve sağdan aynı değer. Kutup noktası: düşey asimptot. Delik: limit var.</p></div>
+        <div><p>$\tfrac{x^2 - 1}{x - 1}$: 1'de delik, limit 2</p></div></div>
+    <div class="b-rueck"><div><h4>SÜREKLİLİK</h4><p>$\lim\limits_{x \to a} f(x) = f(a)$: kalemi kaldırmadan çizilebilir.</p></div>
+        <div><p>Kargo ücreti: sıçramalar, sürekli değil</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">İKİ TUR · ANINDA GERİ BİLDİRİM</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">TUR 1</div>
+            <div class="b-q" data-ans="2" data-ph="Limit"><p class="b-q-text">$\lim\limits_{x \to \infty} \dfrac{6x + 1}{3x - 2}$ limitini bul.</p><div class="b-sol"><p>$\tfrac63 = 2$</p></div></div>
+            <div class="b-q" data-ans="0" data-ph="Limit"><p class="b-q-text">$\lim\limits_{x \to \infty} \dfrac{1}{x^3}$ limitini bul.</p><div class="b-sol"><p>0</p></div></div>
+            <div class="b-q" data-ans="8" data-ph="Limit"><p class="b-q-text">$\lim\limits_{x \to 4} \dfrac{x^2 - 16}{x - 4}$ limitini bul.</p><div class="b-sol"><p>$x + 4 \to 8$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">TUR 2</div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$f(x) = \dfrac{2x^3 + 1}{x^2 + 1}$, $x \to \infty$ için nasıl davranır?</p>
+                <div class="b-mc"><button>$f(x) \to 2$</button><button>$f(x) \to 0$</button><button>$f(x) \to \infty$</button></div>
+                <div class="b-sol"><p>Payın derecesi daha büyük, $f(x)$ yaklaşık $2x$ gibi davranır.</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="x ="><p class="b-q-text">$f(x) = \dfrac{x + 1}{x - 6}$ fonksiyonunun düşey asimptotu nerededir?</p><div class="b-sol"><p>$x = 6$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="c ="><p class="b-q-text">$x \le 2$ için $f(x) = x^2$ ve $x > 2$ için $f(x) = x + c$. $f$ hangi $c$ için süreklidir?</p><div class="b-sol"><p>$4 = 2 + c \Rightarrow c = 2$</p></div></div>
+        </div>
+    </div>
+    <h3>ÇEVRİMİÇİ DAHA FAZLA ALIŞTIRMA (ALMANCA)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-grenzwerte.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LİMİTLER</span><span class="b-lab-what">Sonsuzda ve bir noktada</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematik, Berufliches Gymnasium 12. sınıf · Saksonya Berufliches Gymnasium matematik öğretim programına göre öğrenme alanı 2.</p>
+    <p>Tüm metinler, alıştırmalar ve şekiller özgün içeriktir.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-tr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-tr/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-tr/analysis.js"></script>
+</body>
+</html>

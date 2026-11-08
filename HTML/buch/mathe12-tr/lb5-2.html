@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik 12 · Bölüm 5.2 · İç çarpım ve açılar | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Diklik, vektörler arasındaki açı, dörtgenlerde ispatlar. Bölüm 5.2, etkileşimli ders kitabı Matematik · Berufliches Gymnasium 12: açıklamalar, örnekler, üç düzeyde alıştırmalar, öz değerlendirme testleri ve denemek için laboratuvarlar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATİK · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Bölüm"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Bölümün içeriği">
+        <p class="b-toc-title">BÖLÜM 5.2 · ÖĞRENME ALANI 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Giriş" data-toc-k="G" data-toc-short="Giriş" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">BÖLÜM 5.2 · ÖĞRENME ALANI 5 · HAZİRAN · TEMMUZ</p>
+            <h1>İç çarpım ve açılar</h1>
+            <p class="b-hero-lead">Bir çatı iskeletinin iki kirişi birbirine dik mi? Uzayda iki çubuk hangi açıyla buluşuyor? Bu dörtgen gerçekten bir dikdörtgen mi?
+                Tek bir hesap aracı bunların hepsini cevaplar: <b>iç çarpım</b>. İki vektörden bir sayı üretir ve bu sayı açıyı ele verir.
+                Arama motorları bile metinleri karşılaştırmak için onu kullanır.</p>
+            <div class="b-chips"><span class="b-chip">8 DERS SAATİ</span><span class="b-chip">2 KONU</span><span class="b-chip">GERÇEK 3B</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="raum-hero" data-h="240"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">BU BÖLÜMDE ÖĞRENECEKLERİN</div>
+            <div class="b-text"><ul>
+                <li><b>iç çarpımı</b> (skaler çarpımı) hesaplamak ve geometrik olarak yorumlamak</li>
+                <li>iki vektörün <b>dikliğini</b> kanıtlamak</li>
+                <li>iki vektör arasındaki <b>açıyı</b> ve üçgenlerdeki açıları hesaplamak</li>
+                <li><b>paralelkenar, dikdörtgen, eşkenar dörtgen ve karelerin</b> özelliklerini vektörlerle kanıtlamak</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">ÖN KONTROL: BUNLARI BİLİYOR MUSUN?</div>
+            <div class="b-q" data-ans="0,5" data-tol="0.0001" data-ph="Sayı"><p class="b-q-text">$\cos 60°$ kaçtır?</p><div class="b-sol"><p>$\tfrac12$</p></div></div>
+            <div class="b-q" data-ans="90" data-ph="Derece"><p class="b-q-text">0° ile 180° arasında hangi açı için $\cos \varphi = 0$'dır?</p><div class="b-sol"><p>90°</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="Uzunluk"><p class="b-q-text">$(2, 2, 1)$ vektörü ne uzunluktadır?</p><div class="b-sol"><p>$\sqrt{4 + 4 + 1} = 3$</p></div></div>
+            <div class="b-q" data-ans="-4" data-ph="Sayı"><p class="b-q-text">$3 \cdot (-2) + 1 \cdot 2 + 0 \cdot 1$ işlemini yap.</p><div class="b-sol"><p>$-6 + 2 + 0 = -4$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Keşifler" data-toc-k="K" data-toc-short="Keşifler">
+    <div class="b-band"><span class="b-band-tag">KEŞİFLER</span><span class="b-band-sub">BAŞLANGIÇ İÇİN · GRUPÇA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">DÜZLEMDE DİKLİK</div>
+            <div class="b-text"><p>$(3, 1)$ ve $(-1, 3)$ ile $(2, 5)$ ve $(5, -2)$ vektörlerini çizin.</p>
+                <ul><li>Aralarındaki açıda ne dikkatinizi çekiyor?</li><li>Her çift için $a_1 b_1 + a_2 b_2$'yi hesaplayın. Ne çıkıyor?</li></ul></div>
+            <span class="b-pair">→ Konu 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">KIZAKLA İŞ</div>
+            <div class="b-text"><p>Bir kızak 100 m çekiliyor, ip 50 N'luk bir kuvvetle eğik olarak yukarı doğru çekiyor.</p>
+                <ul><li>İş için neden kuvvetin yalnızca hareket yönündeki kısmı sayılır?</li><li>Bu kısım ipin açısına nasıl bağlıdır?</li></ul></div>
+            <span class="b-pair">→ Konu 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">BU BİR DİKDÖRTGEN Mİ?</div>
+            <div class="b-text"><p>$A(2 \mid -2 \mid 0)$, $B(2 \mid 2 \mid 0)$, $C(-1 \mid 2 \mid 4)$, $D(-1 \mid -2 \mid 4)$ veriliyor.</p>
+                <ul><li>Karşılıklı kenarların paralel olup olmadığını çizim yapmadan nasıl sınayabilirsiniz?</li><li>Uzayda bir dik açı nasıl sınanır?</li></ul></div>
+            <span class="b-pair">→ Konu 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="İç çarpım ve diklik" data-toc-k="1" data-toc-short="1 İç çarpım">
+    <div class="b-band"><span class="b-band-tag">KONU 1</span><span class="b-band-sub">4 DERS SAATİ</span></div>
+    <h2><span class="b-no">1</span>İç çarpım ve dik vektörler</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$(3, 1)$ ve $(-1, 3)$ için $3 \cdot (-1) + 1 \cdot 3 = 0$ çıkar ve oklar birbirine diktir. $(2, 5)$ ve $(5, -2)$ için de öyle. Tesadüf mü?</p></div></div>
+            <div class="b-text"><p>Tesadüf değil. Pisagor teoremiyle şu gösterilebilir: İki vektör, ancak ve ancak bileşenlerinin çarpımlarının toplamı 0 ise birbirine diktir.
+                Bu toplama <b>iç çarpım</b> ya da skaler çarpım denir, çünkü sonucu bir vektör değil, bir sayıdır (bir skaler).</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · İÇ ÇARPIM</div>
+                <div class="b-text">
+                    <p>$$\vec{a} \cdot \vec{b} = a_1 b_1 + a_2 b_2 + a_3 b_3$$</p>
+                    <p>$\vec{a} \cdot \vec{a} = |\vec{a}|^2$'dir ve $\varphi$ vektörler arasındaki açı ise $\vec{a} \cdot \vec{b} = |\vec{a}| \cdot |\vec{b}| \cdot \cos \varphi$'dir.</p>
+                    <p><b>Dik:</b> İki vektör ($\vec{0}$'dan farklı), ancak ve ancak $\vec{a} \cdot \vec{b} = 0$ ise birbirine diktir. $\vec{a} \perp \vec{b}$ yazılır.</p>
+                    <p>İşaret: Dar açıda $\vec{a} \cdot \vec{b} > 0$, geniş açıda $< 0$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Geometrik olarak:</b> $\vec{a} \cdot \vec{b}$, $\vec{a}$'nın uzunluğu ile $\vec{b}$'nin $\vec{a}$ üzerine düşürdüğü gölgenin (dik izdüşümün) uzunluğunun çarpımıdır (etkileşimli araçta kesikli).</p>
+            <p class="b-note"><b>Fizik:</b> İş $W = \vec{F} \cdot \vec{s}$'dir: yol yönündeki kuvvet çarpı yol.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · İÇ ÇARPIM VE AÇI</div>
+        <p class="b-help" style="margin:0 0 12px">İki vektör gir ya da bir örnek seç. Altın renkli yay $\varphi$ açısını, kesikli çizgi $\vec{b}$'nin $\vec{a}$ üzerindeki gölgesini gösterir. Açının gerçekten dik olup olmadığını görmek için resmi döndür.</p>
+        <div data-widget="skalarprodukt"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 1 · DİK Mİ?</div>
+            <div class="b-text"><p>$\vec{a} = \begin{pmatrix} 1 \\ 2 \\ 2 \end{pmatrix}$ ve $\vec{b} = \begin{pmatrix} 2 \\ -2 \\ 1 \end{pmatrix}$ vektörlerinin birbirine dik olup olmadığını sına.</p></div>
+            <div class="b-sol"><p>$\vec{a} \cdot \vec{b} = 2 - 4 + 2 = 0$. <span class="b-res">Diktir.</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 2 · DİK BİR VEKTÖR BULMAK</div>
+            <div class="b-text"><p>$\begin{pmatrix} 1 \\ 2 \\ z \end{pmatrix}$ vektörü hangi $z$ için $\begin{pmatrix} 3 \\ -1 \\ 2 \end{pmatrix}$'ye diktir?</p></div>
+            <div class="b-sol"><p>$3 - 2 + 2z = 0 \Rightarrow z = -0{,}5$</p></div>
+        </div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>İç çarpımları hesapla: a) $(2, 1, 3) \cdot (1, 4, -2)$ &nbsp; b) $(1, 0, 0) \cdot (0, 5, 7)$ &nbsp; c) $(3, 4, 0) \cdot (3, 4, 0)$</p></div>
+            <div class="b-sol"><p>a) $2 + 4 - 6 = 0$, dik &nbsp; b) 0, $x$ ekseni $yz$ düzlemine diktir &nbsp; c) $25 = 5^2$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$(2, 1, -2)$, $(1, 2, 2)$, $(2, -2, 1)$ vektörlerinden hangileri ikişer ikişer birbirine diktir?</p></div>
+            <div class="b-sol"><p>Üç çiftin hepsi: $2 + 2 - 4 = 0$; $4 - 2 - 2 = 0$; $2 - 4 + 2 = 0$. Birlikte “eğik” bir eksen takımı oluştururlar.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$A(1 \mid 1 \mid 0)$, $B(3 \mid 2 \mid 1)$, $C(0 \mid 2 \mid 1)$ üçgeninin $A$'da dik açısı olduğunu göster.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = (2, 1, 1)$, $\vec{AC} = (-1, 1, 1)$, $\vec{AB} \cdot \vec{AC} = -2 + 1 + 1 = 0$. ✓</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Bir kızak 100 m çekiliyor, ip hareket yönüyle 30°'lik açı yaparak 50 N ile çekiyor. Yapılan iş ne kadardır? Düzlemde vektörlerle hesapla.</p></div>
+            <div class="b-sol"><p>$\vec{F} = 50 \cdot \begin{pmatrix} \cos 30° \\ \sin 30° \end{pmatrix}$, $\vec{s} = \begin{pmatrix} 100 \\ 0 \end{pmatrix}$, $W = 50 \cdot \cos 30° \cdot 100 \approx 4330$ J.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="5" data-ph="Sayı"><p class="b-q-text">$(3, 0, 1) \cdot (1, 3, 2)$ işlemini yap.</p><div class="b-sol"><p>$3 + 0 + 2 = 5$</p></div></div>
+        <div class="b-q" data-ans="-0,5" data-tol="0.0001" data-ph="z ="><p class="b-q-text">Hangi $z$ için $(1, 2, z) \perp (3, -1, 2)$'dir?</p><div class="b-sol"><p>$1 + 2z = 0$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">$\vec{a} \cdot \vec{b} = -4$. Bu durumda vektörler arasındaki açı …</p>
+            <div class="b-mc"><button>dar açıdır</button><button>dik açıdır</button><button>geniş açıdır</button></div>
+            <div class="b-sol"><p>Negatif iç çarpım: $\cos \varphi < 0$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Açılar ve dörtgenler" data-toc-k="2" data-toc-short="2 Açılar">
+    <div class="b-band"><span class="b-band-tag">KONU 2</span><span class="b-band-sub">4 DERS SAATİ</span></div>
+    <h2><span class="b-no">2</span>Açı hesaplamak ve dörtgenleri incelemek</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Vektörler biliniyorsa $\vec{a} \cdot \vec{b} = |\vec{a}| \cdot |\vec{b}| \cdot \cos \varphi$'den $\cos \varphi$ hesaplanabilir. $(3, 0, 1)$ ve $(1, 3, 2)$ için:
+                $\cos \varphi = \tfrac{5}{\sqrt{10} \cdot \sqrt{14}} \approx 0{,}423$, yani $\varphi \approx 65°$.</p></div></div>
+            <div class="b-text"><p>Böylece iç çarpımla uzaydaki bütün açılar, birleştiren vektörlerle de üçgen ve dörtgenlerdeki açılar hesaplanabilir.
+                5.1. bölümdeki işlem kurallarıyla birlikte bir dörtgenin hangi özel biçime sahip olduğu kanıtlanabilir.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · AÇILAR VE DÖRTGENLER</div>
+                <div class="b-text">
+                    <p>$$\cos \varphi = \frac{\vec{a} \cdot \vec{b}}{|\vec{a}| \cdot |\vec{b}|}, \qquad 0° \le \varphi \le 180°$$</p>
+                    <p><b>Paralelkenar:</b> $\vec{AB} = \vec{DC}$ &nbsp; · &nbsp; <b>Dikdörtgen:</b> ayrıca $\vec{AB} \cdot \vec{AD} = 0$</p>
+                    <p><b>Eşkenar dörtgen:</b> $|\vec{AB}| = |\vec{AD}|$ olan paralelkenar (o zaman $\vec{AC} \perp \vec{BD}$ de olur) &nbsp; · &nbsp; <b>Kare:</b> hem dikdörtgen hem eşkenar dörtgen</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Üçgende $A$'daki açı:</b> İki vektör de $A$'da başlamalıdır: $\vec{BA}$ değil, $\vec{AB}$ ve $\vec{AC}$.</p>
+            <p class="b-note"><b>Hesap makinesi:</b> $\varphi = \cos^{-1}(\ldots)$, derece cinsinden (DEG).</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · HANGİ DÖRTGEN?</div>
+        <p class="b-help" style="margin:0 0 12px">Bir örnek seç ya da kendi köşelerini gir. Sağdaki sınamalar dörtgenin türüne karar verir. Yandan görmek için resmi döndür.</p>
+        <div data-widget="viereck3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 3 · ÜÇGENDE AÇI</div>
+            <div class="b-text"><p>$A(1 \mid 0 \mid 0)$, $B(0 \mid 1 \mid 0)$, $C(0 \mid 0 \mid 1)$ üçgeninde $A$'daki açıyı bul.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = (-1, 1, 0)$, $\vec{AC} = (-1, 0, 1)$, $\cos \alpha = \tfrac{1}{\sqrt2 \cdot \sqrt2} = \tfrac12$, <span class="b-res">$\alpha = 60°$</span>. Bütün kenarlar $\sqrt2$ uzunluğunda: bir eşkenar üçgen.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">ÖRNEK 4 · KEŞİFTEKİ DİKDÖRTGEN</div>
+            <div class="b-text"><p>$A(2 \mid -2 \mid 0)$, $B(2 \mid 2 \mid 0)$, $C(-1 \mid 2 \mid 4)$, $D(-1 \mid -2 \mid 4)$'ü incele.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = (0, 4, 0) = \vec{DC}$: paralelkenar. $\vec{AD} = (-3, 0, 4)$, $\vec{AB} \cdot \vec{AD} = 0$: <span class="b-res">dikdörtgen</span>. $|\vec{AB}| = 4 \neq 5 = |\vec{AD}|$: kare değil.</p></div>
+        </div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>a) $(1, 0, 1)$ ile $(0, 1, 1)$ &nbsp; b) $(3, 1, 0)$ ile $(-2, 2, 1)$ arasındaki açıyı hesapla.</p></div>
+            <div class="b-sol"><p>a) $\cos \varphi = \tfrac{1}{2}$, $60°$ &nbsp; b) $\cos \varphi = \tfrac{-4}{\sqrt{10} \cdot 3} \approx -0{,}422$, $\varphi \approx 114{,}9°$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bir küpün cisim köşegeni bir ayrıtla hangi açıyı yapar? Taban yüzeyinin köşegeniyle hangi açıyı yapar?</p></div>
+            <div class="b-sol"><p>Ayrıt uzunluğu 1 ile: $\cos \varphi = \tfrac{(1,1,1) \cdot (1,0,0)}{\sqrt3 \cdot 1} = \tfrac{1}{\sqrt3}$, $\varphi \approx 54{,}7°$. $(1, 1, 0)$ ile: $\cos \varphi = \tfrac{2}{\sqrt3 \cdot \sqrt2}$, $\varphi \approx 35{,}3°$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>$A(2 \mid 0 \mid 0)$, $B(0 \mid 3 \mid 1)$, $C(-2 \mid 0 \mid 2)$, $D(0 \mid -3 \mid 1)$'in bir eşkenar dörtgen oluşturduğunu, ama kare olmadığını göster.</p></div>
+            <div class="b-sol"><p>$\vec{AB} = (-2, 3, 1) = \vec{DC}$; $\vec{AD} = (-2, -3, 1)$, $|\vec{AB}| = |\vec{AD}| = \sqrt{14}$: eşkenar dörtgen. $\vec{AB} \cdot \vec{AD} = 4 - 9 + 1 = -4 \neq 0$: kare değil.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>$A(2 \mid 0 \mid 0)$, $B(0 \mid 3 \mid 0)$, $C(0 \mid 0 \mid 4)$ üçgeninin üç açısını da hesapla ve açıların toplamını kontrol et.</p></div>
+            <div class="b-sol"><p>$A$'da: $\vec{AB} = (-2, 3, 0)$, $\vec{AC} = (-2, 0, 4)$, $\cos \alpha = \tfrac{4}{\sqrt{13} \cdot \sqrt{20}}$, $\alpha \approx 75{,}6°$.
+                Aynı biçimde $\beta \approx 60{,}1°$, $\gamma \approx 44{,}3°$. Toplam $180°$. ✓</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-ans="60" data-tol="0.1" data-ph="Derece"><p class="b-q-text">$(1, 0, 1)$ ile $(0, 1, 1)$ arasındaki açı kaç derecedir?</p><div class="b-sol"><p>$\cos \varphi = \tfrac12$</p></div></div>
+        <div class="b-q" data-ans="90" data-tol="0.1" data-ph="Derece"><p class="b-q-text">$(2, 1, -2)$ ile $(1, 2, 2)$ arasındaki açı kaç derecedir?</p><div class="b-sol"><p>İç çarpım $2 + 2 - 4 = 0$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">$\vec{AB} \cdot \vec{AD} = 0$ olan bir paralelkenar …</p>
+            <div class="b-mc"><button>bir eşkenar dörtgendir</button><button>bir dikdörtgendir</button><button>bir yamuktur</button></div>
+            <div class="b-sol"><p>Paralelkenarda bir dik açı yeterlidir.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Tekrar Et · Derinleştir · İlişkilendir" data-toc-k="A" data-toc-short="Alıştırma">
+    <div class="b-band"><span class="b-band-tag">TEKRAR ET · DERİNLEŞTİR · İLİŞKİLENDİR</span></div>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$\vec{a} = (2, -1, 3)$'e dik olan iki farklı vektör ver.</p></div>
+            <div class="b-sol"><p>Örneğin $(1, 2, 0)$ ve $(3, 0, -2)$. Kontrol: $2 - 2 + 0 = 0$, $6 + 0 - 6 = 0$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Bir çatı iskeletinin mahya noktaları $M_1(0 \mid 0 \mid 6)$, $M_2(0 \mid 10 \mid 6)$ ve saçak noktası $S(4 \mid 0 \mid 3)$. Mahya ile $\vec{M_1 S}$ merteği hangi açıyı yapar?</p></div>
+            <div class="b-sol"><p>$\vec{M_1M_2} = (0, 10, 0)$, $\vec{M_1S} = (4, 0, -3)$, iç çarpım 0: Mertek mahyaya diktir.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>5.1. bölümle ilişkilendir:</b> $A(1 \mid 0 \mid 2)$, $B(4 \mid 1 \mid 2)$, $C(5 \mid 3 \mid 4)$'ü $ABCD$ paralelkenarına tamamla ve $A$'daki açıyı bul.</p></div>
+            <div class="b-sol"><p>$D(2 \mid 2 \mid 4)$. $\vec{AB} = (3, 1, 0)$, $\vec{AD} = (1, 2, 2)$, $\cos \alpha = \tfrac{5}{\sqrt{10} \cdot 3} \approx 0{,}527$, $\alpha \approx 58{,}2°$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Thales teoremini vektörlerle kanıtla: $C$, çapı $AB$ ve merkezi $M$ olan çemberin üzerindeyse $\vec{CA} \perp \vec{CB}$'dir.</p></div>
+            <div class="b-hint"><p>$\vec{MA} = \vec{r}$ al, o zaman $\vec{MB} = -\vec{r}$ ve $|\vec{c}| = |\vec{r}|$ olmak üzere $\vec{MC} = \vec{c}$ olur.</p></div>
+            <div class="b-sol"><p>$\vec{CA} = \vec{r} - \vec{c}$, $\vec{CB} = -\vec{r} - \vec{c}$, $\vec{CA} \cdot \vec{CB} = -\vec{r} \cdot \vec{r} + \vec{c} \cdot \vec{c} = -|\vec{r}|^2 + |\vec{c}|^2 = 0$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Gezinti: Arama motorları metinleri nasıl karşılaştırır" data-toc-k="X" data-toc-short="Arama motoru">
+    <div class="b-band"><span class="b-band-tag">GEZİNTİ</span><span class="b-band-sub">İKİ METİN ARASINDAKİ AÇI</span></div>
+    <h2>Arama motorları metinleri nasıl karşılaştırır</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Bir bilgisayar iki metnin aynı konuyu anlatıp anlatmadığını nasıl anlar? 1970'lerden bir fikir: Her sözcüğün kaç kez geçtiği sayılır ve sayılar bir
+                <b>vektör</b> olarak yazılır. Yalnızca üç sözcükte (gol, top, kek) bir spor haberi örneğin $(3, 1, 0)$, ikinci bir spor haberi $(2, 0, 1)$, bir tarif $(0, 0, 2)$ olur.</p>
+            <p>Benzer metinler benzer yönleri gösterir. Ölçü olarak açının kosinüsü kullanılır: $\cos \varphi = \tfrac{\vec{a} \cdot \vec{b}}{|\vec{a}| \cdot |\vec{b}|}$.
+                İki spor haberi yaklaşık 0,85 verir, birinci spor haberi ile tarif ise 0: Birbirlerine diktirler, hiçbir ortak yanları yoktur.</p>
+            <p>Gerçek metinlerde on binlerce sözcük, yani on binlerce bileşenli vektörler vardır. İç çarpım orada da aynı biçimde işler. Bu “kosinüs benzerliği”
+                bugün hâlâ arama motorlarında, öneri sistemlerinde ve dil modellerinde kullanılır.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Kaynak:</b> G. Salton, A. Wong, C. S. Yang: A Vector Space Model for Automatic Indexing. Communications of the ACM 18 (11), 1975.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Özet" data-toc-k="Ö" data-toc-short="Özet">
+    <div class="b-band"><span class="b-band-tag">ÖZET</span><span class="b-band-sub">EN ÖNEMLİLER BİR BAKIŞTA</span></div>
+    <div class="b-rueck"><div><h4>İÇ ÇARPIM</h4><p>$\vec{a} \cdot \vec{b} = a_1 b_1 + a_2 b_2 + a_3 b_3 = |\vec{a}|\,|\vec{b}| \cos \varphi$</p></div>
+        <div><p>$(3, 0, 1) \cdot (1, 3, 2) = 5$</p></div></div>
+    <div class="b-rueck"><div><h4>DİKLİK</h4><p>$\vec{a} \perp \vec{b} \iff \vec{a} \cdot \vec{b} = 0$</p></div>
+        <div><p>$(1, 2, 2) \perp (2, -2, 1)$</p></div></div>
+    <div class="b-rueck"><div><h4>AÇI</h4><p>$\cos \varphi = \dfrac{\vec{a} \cdot \vec{b}}{|\vec{a}|\,|\vec{b}|}$</p></div>
+        <div><p>Eksenler üzerinde eşkenar üçgen: 60°</p></div></div>
+    <div class="b-rueck"><div><h4>DÖRTGENLER</h4><p>Paralelkenar $\vec{AB} = \vec{DC}$ · dikdörtgen $+$ dik açı · eşkenar dörtgen $+$ eşit kenarlar · kare ikisi birden.</p></div>
+        <div><p>$A(2 \mid -2 \mid 0)$ … $D(-1 \mid -2 \mid 4)$: dikdörtgen</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">İKİ TUR · ANINDA GERİ BİLDİRİM</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">TUR 1</div>
+            <div class="b-q" data-ans="0" data-ph="Sayı"><p class="b-q-text">$(2, 1, 3) \cdot (1, 4, -2)$ işlemini yap.</p><div class="b-sol"><p>$2 + 4 - 6 = 0$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">Hangi $t$ için $(t, 1, -1) \perp (1, 2, 4)$'tür?</p><div class="b-sol"><p>$t + 2 - 4 = 0$</p></div></div>
+            <div class="b-q" data-ans="25" data-ph="Sayı"><p class="b-q-text">$|\vec{a}| = 5$. $\vec{a} \cdot \vec{a}$ kaçtır?</p><div class="b-sol"><p>$|\vec{a}|^2 = 25$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">TUR 2</div>
+            <div class="b-q" data-ans="65" data-tol="0.5" data-ph="Derece"><p class="b-q-text">$(3, 0, 1)$ ile $(1, 3, 2)$ arasındaki açı, tam dereceye yuvarlanmış olarak nedir?</p><div class="b-sol"><p>$\cos \varphi \approx 0{,}423$, $\varphi \approx 65°$</p></div></div>
+            <div class="b-q" data-ans="54,74" data-tol="0.1" data-ph="Derece"><p class="b-q-text">Cisim köşegeni $(1, 1, 1)$ ile $x$ ekseni arasındaki açı nedir?</p><div class="b-sol"><p>$\cos \varphi = \tfrac{1}{\sqrt3}$, $\varphi \approx 54{,}74°$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Bir paralelkenarın komşu kenarları eşit uzunlukta ve bir dik açısı var. Bu paralelkenar …</p>
+                <div class="b-mc"><button>bir karedir</button><button>bir eşkenar dörtgendir, ama kare değildir</button><button>bir dikdörtgendir, ama kare değildir</button></div>
+                <div class="b-sol"><p>Hem eşkenar dörtgen hem dikdörtgen.</p></div></div>
+        </div>
+    </div>
+    <h3>ÇEVRİMİÇİ DAHA FAZLA ALIŞTIRMA (ALMANCA)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-skalarprodukt.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">İÇ ÇARPIM</span><span class="b-lab-what">Diklik ve açılar</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-vektoren-anwendungen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VEKTÖRLER: UYGULAMALAR</span><span class="b-lab-what">İspatlar ve uygulama problemleri</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematik, Berufliches Gymnasium 12. sınıf · Saksonya Berufliches Gymnasium matematik öğretim programına göre öğrenme alanı 5.</p>
+    <p>Tüm metinler, alıştırmalar ve şekiller özgün içeriktir.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-tr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-tr/vektoren.js"></script>
+</body>
+</html>

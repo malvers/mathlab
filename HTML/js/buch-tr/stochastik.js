@@ -45,6 +45,19 @@ window.BuchTR && BuchTR.add('stochastik', {
         'Strategie': 'Strateji', 'Spiele': 'Oyun', 'Autos': 'Otomobil', 'Gewinnquote': 'Kazanma oranı',
         'du: bleiben': 'sen: kal', 'du: wechseln': 'sen: değiştir', 'Rechner: bleiben': 'bilgisayar: kal', 'Rechner: wechseln': 'bilgisayar: değiştir',
         // book tr-2 mathe12-tr:
+        // unabhaengig (lb1-1): unabhängig = bağımsız, abhängig = bağımlı, unvereinbar = ayrık (tr0)
+        'Unabhängig machen': 'Bağımsız yap', 'Unvereinbar machen': 'Ayrık yap',
+        'Einheitsquadrat: Anteil von A in B und in nicht B': "Birim kare: A'nın B içindeki ve B' içindeki payı",
+        // histo-hero, zufallsgroesse (lb1-2): Zufallsgröße = rastgele değişken, Erwartungswert = beklenen değer, Varianz = varyans,
+        // Standardabweichung = standart sapma, Einsatz = oyun bedeli, Auszahlung = ödeme, Gewinn = kazanç; money stays "1,75 €"
+        'Histogramm einer Wahrscheinlichkeitsverteilung': 'Bir olasılık dağılımının histogramı', 'Histogramm einer Binomialverteilung': 'Bir binom dağılımının histogramı',
+        'Drei Münzen': 'Üç madeni para', 'Augensumme': 'Zarların toplamı', 'Glücksrad': 'Çarkıfelek', 'Zufallsgröße': 'Rastgele değişken', 'Einsatz': 'Oyun bedeli',
+        'Wahrscheinlichkeitsverteilung als Stabdiagramm': 'Çubuk grafik olarak olasılık dağılımı', 'Spielen:': 'Oyna:',
+        'SPIELE n': 'OYUN n', 'MITTELWERT': 'ORTALAMA', 'ERWARTUNGSWERT': 'BEKLENEN DEĞER', 'LETZTE': 'SONUNCULAR',
+        // bernoulli-baum, binomial (lb1-3): Treffer = başarı, Niete = başarısızlık; the tree letters T/N → B/B' (rule below)
+        'Stufen $n$:': 'Aşama $n$:', 'Anzahl der Stufen': 'Aşama sayısı', 'Trefferwahrscheinlichkeit $p$': 'Başarı olasılığı $p$',
+        'Genau $k$ Treffer:': 'Tam $k$ başarı:', 'Anzahl der Treffer': 'Başarı sayısı', 'Baumdiagramm einer Bernoulli-Kette': 'Bir Bernoulli dizisinin ağaç diyagramı',
+        'Anzahl der Versuche $n$': 'Deneme sayısı $n$', 'Was wird berechnet?': 'Ne hesaplanıyor?', 'Histogramm der Binomialverteilung': 'Binom dağılımının histogramı',
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -67,6 +80,24 @@ window.BuchTR && BuchTR.add('stochastik', {
         ['TÜR', 'KAPI'], ['Tür', 'Kapı'], ['Gewonnen – das Auto! ', 'Kazandın – otomobil! '], ['Leider eine Ziege. ', 'Maalesef bir keçi. '],
         ['Du hast gewechselt.', 'Kapını değiştirdin.'], ['Du bist geblieben.', 'Kapında kaldın.'],
         // book tr-2 mathe12-tr:
+        // unabhaengig
+        ['$ und $', '$ ve $'],
+        ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.',
+            '<b>Bağımsız:</b> $B$ gerçekleşse de gerçekleşmese de $A$\'nın payı aynı kalır. Karede sınır iki sütunda da aynı yüksekliktedir.'],
+        ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.',
+            '<b>Ayrık</b> ($A \\cap B = \\emptyset$) ve dolayısıyla <b>bağımlı</b>: $B$ gerçekleşirse $A$ artık gerçekleşemez.'],
+        // zufallsgroesse: the help "$X$ = …." and the results
+        ['Augensumme zweier Würfel', 'iki zarın toplamı'], ['Augenzahl', 'zarın üst yüzündeki sayı'], ['Anzahl Wappen', 'tura sayısı'],
+        ['Gewinn = Auszahlung − Einsatz', 'kazanç = ödeme − oyun bedeli'], ['Gewinn bei 1 € Einsatz', '1 € oyun bedeliyle kazanç'],
+        [' Auszahlungen 0 €, 1 €, 2 €, 10 € mit den Wahrscheinlichkeiten ', ' Ödemeler 0 €, 1 €, 2 €, 10 €; olasılıkları sırasıyla '],
+        [' Du setzt 1 € auf eine Zahl, dann werden drei Würfel geworfen. Für jeden Würfel mit deiner Zahl bekommst du 1 € Gewinn, sonst ist der Einsatz weg.',
+            ' Bir sayıya 1 € yatırıyorsun, sonra üç zar atılıyor. Senin sayını gösteren her zar için 1 € kazanırsın, hiçbiri göstermezse yatırdığın para gider.'],
+        ['Erwartungswert: ', 'Beklenen değer: '], ['Varianz: ', 'Varyans: '], [' · Standardabweichung: ', ' · Standart sapma: '],
+        [' · Das Spiel ist <b>fair</b>.', ' · Oyun <b>adildir</b>.'],
+        // bernoulli-baum, binomial
+        ['$ · jeder hat die Wahrscheinlichkeit $', '$ · her birinin olasılığı $'], ['Formel von Bernoulli: $', 'Bernoulli formülü: $'],
+        ['$X$ ist binomialverteilt mit $n = ', '$X$ binom dağılımlıdır: $n = '], ['$ und $p = ', '$ ve $p = '],
+        ['Erwartungswert $\\mu', 'Beklenen değer $\\mu'], [' · Standardabweichung $\\sigma', ' · Standart sapma $\\sigma'],
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -92,5 +123,22 @@ window.BuchTR && BuchTR.add('stochastik', {
             (m, d) => 'Sunucu otomobilin nerede olduğunu biliyor ve ' + d + '. kapıyı açıyor: bir keçi. Kapında mı kalırsın, değiştirir misin?'],
         [/Bei Tür (\d) bleiben/g, (m, d) => d + '. kapıda kal'], [/Zu Tür (\d) wechseln/g, (m, d) => d + '. kapıya geç'],
         // book tr-2 mathe12-tr:
+        // unabhaengig: "B verändert die Wahrscheinlichkeit von A nach oben" → "B, A'nın olasılığını artırır"
+        [/<b>Abhängig:<\/b> \$B\$ verändert die Wahrscheinlichkeit von \$A\$ nach (oben|unten)\./g,
+            (m, d) => '<b>Bağımlı:</b> $B$, $A$\'nın olasılığını ' + (d === 'oben' ? 'artırır' : 'azaltır') + '.'],
+        // unabhaengig: the column label B̄ in the square → B' (as the complement rule of tr-1 does in TeX)
+        [/B\u0304/g, "B'"],
+        // conditional probability the Turkish way (sozluk.md): P_B(A) → P(A | B), also P_{B'}(A) after the complement rule
+        // of tr-1; a plain bar with thin spaces, never \mid
+        [/P_\{([^{}]+)\}\(([^()]+)\)/g, 'P($2 \\,|\\, $1)'], [/P_([A-Z])\(([^()]+)\)/g, 'P($2 \\,|\\, $1)'],
+        // zufallsgroesse: "Auf lange Sicht verlierst du im Mittel 0,25 € pro Spiel." → "Uzun vadede oyun başına ortalama 0,25 € kaybedersin."
+        [/ · Auf lange Sicht <b>(verlierst|gewinnst)<\/b> du im Mittel (\$[^$]*\$|\S+) € pro Spiel\./g,
+            (m, w, x) => ' · Uzun vadede oyun başına ortalama ' + x + ' € <b>' + (w === 'verlierst' ? 'kaybedersin' : 'kazanırsın') + '</b>.'],
+        // bernoulli-baum: "Pfade mit genau 2 Treffern: …" → "Tam 2 başarı içeren dallar: …"
+        [/Pfade mit genau (\d+) Treffern: /g, 'Tam $1 başarı içeren dallar: '],
+        // bernoulli-baum: the letters of the tree T/N (Treffer/Niete) → B/B' (başarı/başarısızlık), only inside this tree
+        [/^(<svg class="st-tree"[^>]*aria-label="Baumdiagramm einer Bernoulli-Kette">)([\s\S]*)$/, (m, head, body) => head + body
+            .replace(/(font-weight:700">)([TN])(<\/text>)/g, (x, a, l, b) => a + (l === 'T' ? 'B' : "B'") + b)
+            .replace(/(<text x="10" y="20">)([TN]+)(<\/text>)/g, (x, a, k, b) => a + k.replace(/[TN]/g, l => (l === 'T' ? 'B' : "B'")) + b)],
     ]
 });
