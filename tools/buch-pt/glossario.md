@@ -98,7 +98,7 @@ Widgets anders schreiben, biegen die Regeln in `js/buch-pt/analysis.js`, `stocha
 
 | Deutsch | Português (PT) | Hinweis |
 |---|---|---|
-| bedingte Wahrscheinlichkeit $P_B(A)$ | probabilidade condicionada $P(A \mid B)$ | „probabilidade de A sabendo que B“, auf den Seiten mit senkrechtem Strich (nie \\mid); Regel im Widget `unabhaengig` |
+| bedingte Wahrscheinlichkeit $P_B(A)$ | probabilidade condicionada $P(A \mid B)$ | „probabilidade de A sabendo que B“, auf den Seiten mit senkrechtem Strich (nie \mid); Regel im Widget `unabhaengig` |
 | Multiplikationssatz | teorema da probabilidade composta | $P(A \cap B) = P(B) \cdot P(A \mid B)$ |
 | (stochastisch) unabhängig / abhängig | independentes / dependentes | unvereinbar = incompatíveis (wie pt-1) |
 | Bus / verspätet (lb1-1) | autocarro $A$ / chegou tarde $T$ | Buchstaben aus portugiesischen Wörtern; krank $K$ → doente $D$ |
