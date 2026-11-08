@@ -1,0 +1,25 @@
+apply plugin: 'com.android.application'
+
+android {
+    // the package is written here (twice) and once in build.sh (PKG); the app's name only in res/values/strings.xml
+    namespace 'de.docalvers.docstep'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'de.docalvers.docstep'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // the gait maths (Gait.java) is plain Java and runs its tests on the Mac: ./gradlew test
+    testImplementation 'junit:junit:4.13.2'
+}
