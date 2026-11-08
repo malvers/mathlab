@@ -2,6 +2,7 @@ package de.docalvers.docruf;
 
 import android.content.Context;
 import android.media.AudioAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -194,11 +195,33 @@ final class Ansage {
         if (tts.speak(text, TextToSpeech.QUEUE_ADD, null, id) != TextToSpeech.SUCCESS && done != null) done.run();
     }
 
+    /** True when an external output is connected (Bluetooth or wired speakers/headphones, USB audio): media goes there. */
+    private boolean external() {
+        for (AudioDeviceInfo d : am.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
+            switch (d.getType()) {
+                case AudioDeviceInfo.TYPE_BLUETOOTH_A2DP:
+                case AudioDeviceInfo.TYPE_BLE_HEADSET:
+                case AudioDeviceInfo.TYPE_BLE_SPEAKER:
+                case AudioDeviceInfo.TYPE_WIRED_HEADSET:
+                case AudioDeviceInfo.TYPE_WIRED_HEADPHONES:
+                case AudioDeviceInfo.TYPE_USB_HEADSET:
+                case AudioDeviceInfo.TYPE_USB_DEVICE:
+                case AudioDeviceInfo.TYPE_LINE_ANALOG:
+                case AudioDeviceInfo.TYPE_LINE_DIGITAL:
+                    return true;
+                default:
+            }
+        }
+        return false;
+    }
+
     /** Volume up, focus taken; the returned runnable undoes both and lets the CPU sleep again. */
     private Runnable louder(PowerManager.WakeLock wl) {
         int max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         int was = am.getStreamVolume(AudioManager.STREAM_MUSIC);
-        int want = Math.round(max * LOUD);
+        // speakers or headphones on the phone: the volume Doc set there stays - 70 % through his JBL boxes was far too loud
+        // (Doc, 08.11.2026: "nicht so laut rufen, ich habe drüben jetzt die JBLs dran")
+        int want = external() ? was : Math.round(max * LOUD);
         if (was < want) am.setStreamVolume(AudioManager.STREAM_MUSIC, want, 0);
         AudioFocusRequest focus = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
                 .setAudioAttributes(speech)
