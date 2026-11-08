@@ -1693,9 +1693,109 @@
             }
         }
 
-        /* Books view: only the book languages (Doc, 14.10.2026: "nur hier"; IT + FR added 26.10.2026: "noch ergänzen bitte") */
-        body.view-buecher .index-lang-switcher .lang-flag:not([data-lang="de"]):not([data-lang="es"]):not([data-lang="en"]):not([data-lang="it"]):not([data-lang="fr"]) {
-            display: none;
+        /* Books view: all nine languages of the hub - a book card shows the edition of the chosen flag, or its cover grey with
+           "kommt noch" (Doc, 08.11.2026: "dass die Sprachen oben tatsächlich umstellen, welches Exemplar zu sehen ist"); until then
+           only de/es/en/it/fr showed here. One cover instead of a row of five, so it may be larger (bookOneCover in the script) */
+        #tool-container .book-one {
+            position: relative;
+            display: block;
+        }
+        #tool-container .book-one img {
+            height: 104px;
+            width: auto;
+            display: block;
+            border-radius: 2px 6px 6px 2px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+        #tool-container .book-one.is-soon img {
+            filter: grayscale(1) brightness(0.85);
+            opacity: 0.5;
+        }
+        /* the card: the cover large on the left, title and text on the right (Doc, 08.11.2026: "dass die linke Seite das Cover ist
+           und rechts der Text, dann wird das Cover nämlich deutlich größer"); ?karte=ecke tries his other idea, the cover in the
+           top right corner with the text flowing round it ("rechts oben in die Ecke und lassen den Text unten drumherum fließen") */
+        #tool-container .card.book-one-card {
+            display: grid !important;   /* the filter shows a card with an inline display: flex */
+            grid-template-columns: auto 1fr;
+            grid-template-rows: auto 1fr;
+            column-gap: 18px;
+            align-items: start;
+        }
+        #tool-container .card.book-one-card .card-icon {
+            grid-row: 1 / span 2;
+            margin: 0;
+            min-height: 0;
+        }
+        #tool-container .card.book-one-card .book-one img {
+            height: 168px;
+        }
+        #tool-container .card.book-one-card h3,
+        #tool-container .card.book-one-card .card-desc {
+            grid-column: 2;
+        }
+        #tool-container .card.book-one-card .card-desc {
+            -webkit-line-clamp: 6;
+            line-clamp: 6;
+        }
+        /* as far from the left as from the top, the cover in the middle from top to bottom, and room for "Mathematik BGY 12" in
+           one line (Doc, 08.11.2026: "dass der Abstand von links zum Buch so ist wie von oben zum Buch", "nicht ganz y-symmetrisch";
+           measured: 185 px needed, 182 px there with 20 px padding and an 18 px gap; six lines keep the text below the cover) */
+        #tool-container .card.book-one-card {
+            padding: 16px;
+            column-gap: 16px;
+        }
+        #tool-container .card.book-one-card .card-icon {
+            align-self: center;
+        }
+        /* "LK" leaves the title and stands below it, small (Doc: "in die erste Zeile ... nur BGY 12 und dann darunter noch klein so
+           als Zwischenüberschrift Leistungskurs") */
+        #tool-container .card.book-one-card h3 .book-sub {
+            display: block;
+            margin-top: 3px;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            -webkit-text-fill-color: rgba(255, 255, 255, 0.55);
+        }
+        body.bk-ecke #tool-container .card.book-one-card {
+            display: block !important;
+        }
+        body.bk-ecke #tool-container .card.book-one-card .card-icon {
+            float: right;
+            margin: 0 0 8px 16px;
+        }
+        body.bk-ecke #tool-container .card.book-one-card .book-one img {
+            height: 132px;
+        }
+        body.bk-ecke #tool-container .card.book-one-card .card-desc {
+            display: block;   /* a -webkit-box would not flow round the float */
+            max-height: calc(1.45em * 10);
+            overflow: hidden;
+        }
+        /* "kommt noch" as a sash diagonally across the grey cover (Doc, 08.11.2026: "Ich würde das ja so schräg drüber schreiben"),
+           in the orange of the palette; the cover clips it */
+        #tool-container .book-one.is-soon {
+            overflow: hidden;
+            border-radius: 2px 6px 6px 2px;
+        }
+        #tool-container .book-one .book-soon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 170%;
+            transform: translate(-50%, -50%) rotate(-32deg);
+            padding: 5px 0;
+            background: rgba(245, 194, 66, 0.94);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            color: #111;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-align: center;
+            white-space: nowrap;
         }
 
         .index-lang-switcher::-webkit-scrollbar {
@@ -2584,11 +2684,89 @@
             return a;
         }
 
+        /* The editions of every book by language: folder HTML/buch/<book>[-<lang>]/, cover resources/og/buch-<book>[-<lang>]-cover.jpg
+           (German without a suffix). Add the language here when an edition goes live. */
+        const BOOK_LANGS = {
+            mathe11: ['de', 'en', 'es', 'fr', 'it', 'sw'],
+            mathe12: ['de', 'en', 'es', 'fr', 'it', 'sw'],
+            mathe13: ['de', 'en', 'es', 'fr', 'it', 'sw'],
+            mathe12lk: ['de', 'en', 'es', 'fr', 'it', 'sw'],
+            mathe13lk: ['de', 'en', 'es', 'fr', 'it', 'sw'],
+            mathefos11: ['de', 'en', 'es', 'fr', 'it'],
+            mathefos12: ['de', 'en', 'es', 'fr', 'it'],
+            mathe5: ['de', 'en', 'es', 'fr', 'it'],
+            mathe6: ['de', 'en', 'es', 'fr', 'it'],
+            mathe7: ['de', 'en', 'es', 'fr', 'it'],
+            mathe8: ['de', 'en', 'es', 'fr', 'it'],
+            mathe9: ['de', 'en', 'es', 'fr', 'it'],
+            mathe10: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy5: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy6: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy7: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy8: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy9: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy10: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy11: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy12: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy11lk: ['de', 'en', 'es', 'fr', 'it'],
+            mathegy12lk: ['de', 'en', 'es', 'fr', 'it'],
+            pruefung: ['de']
+        };
+        const BOOK_SOON = { de: 'kommt noch', en: 'coming soon', es: 'próximamente', fr: 'bientôt', it: 'in arrivo',
+            pt: 'em breve', nl: 'binnenkort', sw: 'inakuja', tr: 'yakında' };
+
+        /* In the books view a book card shows ONE cover, the edition in the language of the flag chosen above, and opens it; a
+           book without that edition shows its German cover grey with "kommt noch" and opens the English edition, else the German
+           one (Doc, 08.11.2026: "wenn keins da ist, dann machen wir da irgendwie so kleine Platzhalter, mit dem Cover, aber
+           irgendwie grau, schwarz-weiß ... die kommen noch"). Leaving the view gives the card its row of covers and link back. */
+        function bookOneCover(card, on) {
+            const icon = card.querySelector('.card-icon');
+            const langs = BOOK_LANGS[(card.dataset.labId || '').replace(/^lehrbuch-/, '')];
+            if (!icon || !langs) return;
+            card.classList.toggle('book-one-card', on);
+            const h3 = card.querySelector('h3');
+            if (!on) {
+                if (card.dataset.icons === undefined) return;
+                if (h3 && card.dataset.h3 !== undefined) h3.innerHTML = card.dataset.h3;
+                delete card.dataset.h3;
+                icon.innerHTML = card.dataset.icons;
+                card.setAttribute('href', card.dataset.href0);
+                delete card.dataset.icons;
+                delete card.dataset.href0;
+                return;
+            }
+            if (card.dataset.icons === undefined) {
+                card.dataset.icons = icon.innerHTML;
+                card.dataset.href0 = card.getAttribute('href');
+                // "Mathematik BGY 12 LK" -> "Mathematik BGY 12" with "Leistungskurs" small below it (see .book-sub)
+                const lk = h3 && h3.textContent.trim().match(/^(.*\S)\s+LK$/);
+                if (lk) {
+                    card.dataset.h3 = h3.innerHTML;
+                    h3.textContent = lk[1];
+                    const sub = document.createElement('span');
+                    sub.className = 'book-sub';
+                    sub.textContent = 'Leistungskurs';
+                    h3.appendChild(sub);
+                }
+            }
+            const book = card.dataset.labId.replace(/^lehrbuch-/, '');
+            const lang = (typeof CyberI18n !== 'undefined' && CyberI18n.current) || 'de';
+            const has = langs.includes(lang);
+            const edition = (l) => book + (l === 'de' ? '' : '-' + l);
+            card.setAttribute('href', 'buch/' + edition(has ? lang : langs.includes('en') ? 'en' : 'de') + '/index.html');
+            icon.innerHTML = '<span class="book-one' + (has ? '' : ' is-soon') + '">'
+                + '<img src="resources/og/buch-' + edition(has ? lang : 'de') + '-cover.jpg" alt="" loading="lazy" decoding="async">'
+                + (has ? '' : '<span class="book-soon">' + (BOOK_SOON[lang] || BOOK_SOON.en) + '</span>') + '</span>';
+        }
+
         function groupBooksBySchool(on) {
             const box = document.getElementById('tool-container');
             if (!box || typeof LABS_DATA === 'undefined') return;
             box.querySelectorAll('.book-school-head, .book-kino, .book-sw').forEach(h => h.remove());
+            // the card layout to try: ?karte=ecke puts the cover in the top right corner (see the CSS of .book-one-card)
+            document.body.classList.toggle('bk-ecke', on && new URLSearchParams(location.search).get('karte') === 'ecke');
             if (!on) {
+                box.querySelectorAll('.card[data-icons]').forEach(card => bookOneCover(card, false));
                 if (box.dataset.grouped) {
                     LABS_DATA.forEach(lab => {
                         const card = box.querySelector(`.card[data-lab-id="${lab.id}"]`);
@@ -2608,7 +2786,8 @@
                 tour.style.display = 'flex';
                 frag.appendChild(tour);
             }
-            frag.appendChild(bookSw());
+            // the Swahili tile (bookSw) is no longer shown: the Kenyan flag above switches the book cards to the Swahili editions
+            // like every other language (Doc, 08.11.2026: "Swahili machen wir das genauso. Da ist ja noch oben jetzt die Sonderkachel")
             const ref = box.querySelector('.card[data-lab-id="lehrbuch-mathe11"]');   // the Making of is as high as a book card
             if (bookKinoFit) bookKinoFit.disconnect();
             if (ref && window.ResizeObserver) {
@@ -2630,7 +2809,9 @@
                 frag.appendChild(head);
                 books.forEach(lab => {
                     const card = box.querySelector(`.card[data-lab-id="${lab.id}"]`);
-                    if (card) frag.appendChild(card);
+                    if (!card) return;
+                    bookOneCover(card, true);
+                    frag.appendChild(card);
                 });
             });
             box.prepend(frag);
