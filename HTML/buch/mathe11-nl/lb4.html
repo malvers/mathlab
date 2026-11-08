@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiskunde 11 · Hoofdstuk 4 · Stelsels lineaire vergelijkingen en matrices | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Methode van Gauss, oplossingsverzamelingen, rekenen met matrices. Hoofdstuk 4 van het interactieve leerboek Wiskunde · Berufliches Gymnasium 11: uitleg, voorbeelden, opgaven op drie niveaus, zelftoetsen en labs om uit te proberen.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">WISKUNDE · BERUFLICHES GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Hoofdstuk"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhoud van het hoofdstuk">
+        <p class="b-toc-title">HOOFDSTUK 4 · LEERGEBIED 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introductie" data-toc-k="I" data-toc-short="Introductie" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">HOOFDSTUK 4 · LEERGEBIED 4 · MAART · APRIL</p>
+            <h1>Stelsels lineaire vergelijkingen en matrices</h1>
+            <p class="b-hero-lead">Hoeveel kaartjes van elke soort heeft de bioscoop verkocht? Hoeveel moet een bedrijf produceren zodat alle grondstoffen op zijn? Meerdere onbekenden, meerdere voorwaarden: een <b>stelsel lineaire vergelijkingen</b>. Met <b>matrices</b> schrijf je het compact op en los je het stap voor stap op met de methode van Gauss, bij grote stelsels met het CAS.</p>
+            <div class="b-chips"><span class="b-chip">20 LESUREN</span><span class="b-chip">4 PARAGRAFEN</span><span class="b-chip">ECONOMIE EN TECHNIEK</span><span class="b-chip">INFORMATICA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["4-x","x","(6-x)/2"]' data-labels='["","",""]' data-x="-2,6" data-y="-2,6" data-pts="[[2,2]]" data-equal data-h="240" data-aria="Drie lijnen met één gemeenschappelijk punt"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DIT LEER JE IN DIT HOOFDSTUK</div>
+            <div class="b-text"><ul>
+                <li>stelsels in <b>matrixvorm</b> $A \cdot \vec{x} = \vec{b}$ schrijven en <b>bijzondere matrices</b> herkennen</li>
+                <li>stelsels met 3 vergelijkingen en 3 onbekenden <b>zonder hulpmiddelen</b> oplossen met de <b>methode van Gauss</b></li>
+                <li><b>oplossingsverzamelingen</b> bespreken: geen, één, oneindig veel oplossingen</li>
+                <li>grote stelsels met het <b>CAS</b> oplossen en met matrices <b>rekenen</b>: optellen, met een getal vermenigvuldigen, transponeren</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: KUN JE DIT AL?</div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">Er geldt $x + y = 5$ en $x - y = 1$. Hoe groot is $x$?</p><div class="b-sol"><p>Optellen: $2x = 6$, dus $x = 3$ en $y = 2$.</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="Getal"><p class="b-q-text">Bereken $2 \cdot 3 + (-1) \cdot 7$.</p><div class="b-sol"><p>$6 - 7 = -1$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Hoeveel gemeenschappelijke punten hebben twee verschillende evenwijdige lijnen?</p><div class="b-mc"><button>geen</button><button>precies één</button><button>oneindig veel</button></div><div class="b-sol"><p>Geen.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Verkenningen" data-toc-k="V" data-toc-short="Verkenningen">
+    <div class="b-band"><span class="b-band-tag">VERKENNINGEN</span><span class="b-band-sub">OM TE BEGINNEN · IN GROEPJES</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">DE BIOSCOOPAVOND</div>
+            <div class="b-text"><p>Normaal € 8, met korting € 6, kinderen € 4. Op een avond worden 200 kaartjes verkocht voor samen € 1280, twee keer zoveel kortingskaartjes als kinderkaartjes.</p>
+                <ul><li>Stel drie vergelijkingen op. Hoeveel kaartjes van elke soort waren het?</li><li>Welke strategie hebben jullie gebruikt? Werkt die altijd?</li></ul></div>
+            <span class="b-pair">→ Paragrafen 1 en 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">REKENEN MET TABELLEN</div>
+            <div class="b-text"><p>Twee filialen noteren elke maand hun verkoop van drie producten in een tabel.</p>
+                <ul><li>Hoe krijg je de totale verkoop voor januari en februari? En de verkoop na een stijging van 10%?</li><li>Wat gebeurt er als je rijen en kolommen van de tabel verwisselt?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 4</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">DRIE LIJNEN</div>
+            <div class="b-text"><p>Teken de lijnen $x + y = 4$, $x - y = 0$ en $x + 2y = 6$.</p>
+                <ul><li>Hebben alle drie een gemeenschappelijk punt? Verander een vergelijking zo dat er geen is.</li></ul></div>
+            <a class="b-lab" data-lab="gleichungssysteme" href="../../gleichungssysteme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">STELSELS VERGELIJKINGEN</span><span class="b-lab-what">Snijpunten en lineaire algebra</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Matrices" data-toc-k="1" data-toc-short="1 Matrices">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 1</span><span class="b-band-sub">5 LESUREN</span></div>
+    <h2><span class="b-no">1</span>Matrices en de matrixvorm van een stelsel</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Voor de bioscoopavond geldt met $x$ normale, $y$ kortings- en $z$ kinderkaartjes:</p>
+                <p>$$\begin{array}{rcrcrcl} x &+& y &+& z &=& 200 \\ 8x &+& 6y &+& 4z &=& 1280 \\ && y &-& 2z &=& 0 \end{array}$$</p>
+                <p>Eigenlijk gaat het alleen om de getallen. De letters staan altijd op dezelfde plaatsen.</p></div></div>
+            <div class="b-text"><p>Zet je alleen de getallen in een rechthoekig schema, dan krijg je een <b>matrix</b>. Het stelsel wordt dan $A \cdot \vec{x} = \vec{b}$:</p>
+                <p>$$\underbrace{\begin{pmatrix} 1 & 1 & 1 \\ 8 & 6 & 4 \\ 0 & 1 & -2 \end{pmatrix}}_{A} \cdot \underbrace{\begin{pmatrix} x \\ y \\ z \end{pmatrix}}_{\vec{x}} = \underbrace{\begin{pmatrix} 200 \\ 1280 \\ 0 \end{pmatrix}}_{\vec{b}} \qquad \text{kort:} \qquad \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)$$</p>
+                <p>De rechter vorm heet de <b>uitgebreide coëfficiëntenmatrix</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · MATRICES</div>
+                <div class="b-text">
+                    <p>Een <b>$m \times n$-matrix</b> heeft $m$ rijen en $n$ kolommen. Het element in rij $i$ en kolom $j$ heet $a_{ij}$.</p>
+                    <p><b>Bijzondere matrices:</b> <b>vierkant</b> ($m = n$) · <b>bovendriehoeksmatrix</b> (onder de diagonaal alleen nullen) · <b>diagonaalmatrix</b> (alleen op de diagonaal van nul verschillend) · <b>eenheidsmatrix</b> $I$ (diagonaal van enen) · <b>nulmatrix</b> (alleen nullen) · <b>kolommatrix</b> ($m \times 1$) · <b>rijmatrix</b> ($1 \times n$)</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Voorbeelden:</b> $I = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$ · bovendriehoeksmatrix $\begin{pmatrix} 2 & 1 & 4 \\ 0 & 3 & 1 \\ 0 & 0 & 5 \end{pmatrix}$</p>
+            <p class="b-note"><b>Informatica:</b> een afbeelding in grijstinten is een matrix: elk element is de helderheid van een pixel.</p>
+        </aside>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Geef de afmetingen en het element $a_{23}$: $A = \begin{pmatrix} 4 & -1 & 0 & 2 \\ 3 & 5 & 7 & -2 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>$2 \times 4$-matrix, $a_{23} = 7$ (2e rij, 3e kolom)</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Welke bijzondere matrices zijn het? a) $\begin{pmatrix} 3 & 0 \\ 0 & -1 \end{pmatrix}$ &nbsp; b) $\begin{pmatrix} 1 \\ 4 \\ 2 \end{pmatrix}$ &nbsp; c) $\begin{pmatrix} 1 & 5 \\ 0 & 2 \end{pmatrix}$ &nbsp; d) $\begin{pmatrix} 0 & 0 \end{pmatrix}$</p></div>
+            <div class="b-sol"><p>a) diagonaalmatrix (ook vierkant, ook driehoeksmatrix) &nbsp; b) kolommatrix &nbsp; c) bovendriehoeksmatrix &nbsp; d) nul- en rijmatrix</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Schrijf als uitgebreide coëfficiëntenmatrix: $\;2x - z = 4$, $\;x + 3y = 7$, $\;y + z = 1$</p></div>
+            <div class="b-hint"><p>Ontbrekende variabelen hebben coëfficiënt 0.</p></div>
+            <div class="b-sol"><p>$\left(\begin{array}{rrr|r} 2 & 0 & -1 & 4 \\ 1 & 3 & 0 & 7 \\ 0 & 1 & 1 & 1 \end{array}\right)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Een bedrijf maakt drie producten P1, P2, P3 uit drie grondstoffen. Per stuk is nodig (in kg): R1: 1, 2, 1 · R2: 2, 1, 3 · R3: 1, 1, 1. Op voorraad is 90 kg R1, 110 kg R2, 60 kg R3. Stel het stelsel in matrixvorm op, zodat alle voorraden opgebruikt worden.</p></div>
+            <div class="b-sol"><p>$\begin{pmatrix} 1 & 2 & 1 \\ 2 & 1 & 3 \\ 1 & 1 & 1 \end{pmatrix} \cdot \begin{pmatrix} x_1 \\ x_2 \\ x_3 \end{pmatrix} = \begin{pmatrix} 90 \\ 110 \\ 60 \end{pmatrix}$. Het oplossen gebeurt in paragraaf 2.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="6" data-ph="aantal"><p class="b-q-text">Hoeveel elementen heeft een $2 \times 3$-matrix?</p><div class="b-sol"><p>$2 \cdot 3 = 6$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Welke matrix is de eenheidsmatrix?</p><div class="b-mc"><button>$\begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}$</button><button>$\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$</button><button>$\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$</button></div><div class="b-sol"><p>Enen op de diagonaal, verder nullen.</p></div></div>
+        <div class="b-q" data-ans="-2" data-ph="Getal"><p class="b-q-text">In het bioscoopstelsel: wat is het element $a_{33}$ van de matrix $A$?</p><div class="b-sol"><p>3e rij, 3e kolom: $-2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="De methode van Gauss" data-toc-k="2" data-toc-short="2 Gauss">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 2</span><span class="b-band-sub">ZONDER HULPMIDDELEN · 5 LESUREN</span></div>
+    <h2><span class="b-no">2</span>De methode van Gauss</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Een bovendriehoeksmatrix is makkelijk: bij $\;x + y + z = 6$, $\;y + z = 5$, $\;z = 3$ lees je $z = 3$ af, vul je in in de tweede rij ($y = 2$) en daarna in de eerste ($x = 1$). Het idee van Gauss: herschrijf elk stelsel zo dat het deze <b>trapvorm</b> heeft.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · METHODE VAN GAUSS</div>
+                <div class="b-text">
+                    <p>De oplossingsverzameling verandert niet als je</p>
+                    <ul><li>twee rijen <b>verwisselt</b>,</li><li>een rij met een getal <b>ongelijk aan nul vermenigvuldigt</b>,</li><li>een <b>veelvoud van een rij bij een andere rij optelt</b>.</li></ul>
+                    <p><b>Gauss:</b> maak met deze bewerkingen eerst in kolom 1, dan in kolom 2 onder de diagonaal nullen (trapvorm, „vegen”), en vul dan van onder naar boven in.</p>
+                    <p><b>Gauss-Jordan:</b> ga door tot links de eenheidsmatrix staat. Dan staat rechts meteen de oplossing.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Notatie:</b> „$\text{II} - 8 \cdot \text{I}$” betekent: vervang rij II door rij II min 8 keer rij I.</p>
+            <p class="b-note"><b>Controle:</b> altijd invullen in alle <b>oorspronkelijke</b> vergelijkingen.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">VOORBEELD 1 · DE BIOSCOOPAVOND</div>
+        <div class="b-text"><p>Los het bioscoopstelsel op met de methode van Gauss.</p></div>
+        <div class="b-sol">
+            <p>$$\left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right) \xrightarrow{\;\text{II} - 8 \cdot \text{I}\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & -2 & -4 & -320 \\ 0 & 1 & -2 & 0 \end{array}\right) \xrightarrow{\;\text{II} : (-2)\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & 1 & 2 & 160 \\ 0 & 1 & -2 & 0 \end{array}\right)$$</p>
+            <p>$$\xrightarrow{\;\text{III} - \text{II}\;} \left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 0 & 1 & 2 & 160 \\ 0 & 0 & -4 & -160 \end{array}\right)$$</p>
+            <p>Terug naar boven: $z = 40$, $y = 160 - 80 = 80$, $x = 200 - 80 - 40 = 80$. <span class="b-res">80 normale, 80 kortings-, 40 kinderkaartjes.</span></p>
+            <p>Controle: $80 + 80 + 40 = 200$ · $640 + 480 + 160 = 1280$ · $80 = 2 \cdot 40$.</p>
+        </div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · GAUSSWERKPLAATS</div>
+        <p class="b-help" style="margin:0 0 12px">Kies een bewerking, een doelrij, een tweede rij en de factor $k$, en klik op „Uitvoeren”. Of laat met „Volgende stap” de volgende stap van Gauss zien. „Nieuw stelsel” gooit een stelsel met een geheeltallige oplossing.</p>
+        <div data-widget="gauss"></div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Los op: $\;x + y + z = 6$, $\;2x - y + z = 3$, $\;x + 2y - z = 2$</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $-3y - z = -9$ · $\text{III} - \text{I}$: $y - 2z = -4$ · dan $3 \cdot \text{III} + \text{II}$: $-7z = -21$.
+                <span class="b-res">$z = 3$, $y = 2$, $x = 1$</span></p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Los op: $\;2x + y - z = 1$, $\;x - y + 2z = 5$, $\;3x + 2y + z = 10$</p></div>
+            <div class="b-hint"><p>Verwissel eerst I en II, zodat er linksboven een 1 staat.</p></div>
+            <div class="b-sol"><p><span class="b-res">$x = 1$, $y = 2$, $z = 3$</span>. Controle: $2 + 2 - 3 = 1$ · $1 - 2 + 6 = 5$ · $3 + 4 + 3 = 10$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Los het grondstoffenstelsel uit paragraaf 1 op. Hoeveel stuks van P1, P2 en P3 worden er geproduceerd?</p></div>
+            <div class="b-hint"><p>$\text{I} - \text{III}$ geeft meteen $x_2$.</p></div>
+            <div class="b-sol"><p>$\text{I} - \text{III}$: $x_2 = 30$. Dan $x_1 + x_3 = 30$ en $2x_1 + 3x_3 = 80$, dus $x_3 = 20$, $x_1 = 10$.
+                <span class="b-res">10 stuks P1, 30 stuks P2, 20 stuks P3.</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Een parabool $f(x) = ax^2 + bx + c$ gaat door $(0, 1)$, $(1, 4)$ en $(2, 9)$. Stel een stelsel op en bepaal $a$, $b$, $c$.</p></div>
+            <div class="b-sol"><p>$c = 1$, $a + b + c = 4$, $4a + 2b + c = 9$ $\Rightarrow$ $a + b = 3$, $4a + 2b = 8$ $\Rightarrow$ $a = 1$, $b = 2$. <span class="b-res">$f(x) = x^2 + 2x + 1 = (x + 1)^2$</span></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">Bepaal $x$ uit de trapvorm $\;x + y + z = 6$, $\;y + z = 5$, $\;z = 3$.</p><div class="b-sol"><p>$y = 2$, $x = 6 - 2 - 3 = 1$</p></div></div>
+        <div class="b-q" data-ans="40" data-ph="aantal"><p class="b-q-text">Hoeveel kinderkaartjes zijn er op de bioscoopavond verkocht?</p><div class="b-sol"><p>$z = 40$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Welke bewerking is <b>niet</b> toegestaan?</p><div class="b-mc"><button>rijen verwisselen</button><button>een rij met $-3$ vermenigvuldigen</button><button>een rij met $0$ vermenigvuldigen</button></div><div class="b-sol"><p>Vermenigvuldigen met 0 maakt de vergelijking kapot.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Oplossingsverzamelingen" data-toc-k="3" data-toc-short="3 Oplossingen">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 3</span><span class="b-band-sub">5 LESUREN</span></div>
+    <h2><span class="b-no">3</span>Geen, één of oneindig veel oplossingen</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Niet elk stelsel komt uit. Aan het eind van de methode van Gauss kan er een rij ontstaan met links alleen nullen. Dan hangt het af van de rechterkant.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · OPLOSSINGSVERZAMELINGEN</div>
+                <div class="b-text">
+                    <p><b>Precies één oplossing:</b> bij evenveel vergelijkingen als onbekenden heeft de trapvorm in elke rij een spil (voorste element ongelijk aan nul).</p>
+                    <p><b>Geen oplossing:</b> er ontstaat een rij $(0 \;\; 0 \;\; 0,\ c)$ met $c \neq 0$, dus de tegenspraak $0 = c$.</p>
+                    <p><b>Oneindig veel oplossingen:</b> er ontstaat een nulrij $(0 \;\; 0 \;\; 0,\ 0)$ en geen tegenspraak. Eén variabele blijft vrij, je neemt haar als parameter $t$.</p>
+                    <p><b>Meetkundig</b> (twee onbekenden): twee lijnen snijden elkaar in één punt, zijn evenwijdig of vallen samen.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Vooruitblik:</b> bij drie onbekenden beschrijft elke vergelijking een vlak in de ruimte. Drie vlakken kunnen elkaar in één punt, in een lijn of helemaal niet gemeenschappelijk snijden. Meer daarover in de ruimtemeetkunde met vectoren.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · TWEE LIJNEN</div>
+        <div data-widget="geraden"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 2 · ONEINDIG VEEL</div>
+            <div class="b-text"><p>Los op: $\;x + y + z = 3$, $\;x - y + z = 1$, $\;2x + 2z = 4$.</p></div>
+            <div class="b-sol"><p>$\text{II} - \text{I}$: $-2y = -2$ · $\text{III} - 2\,\text{I}$: $-2y = -2$ · dan $\text{III} - \text{II}$: $0 = 0$, een nulrij.</p>
+                <p>$y = 1$, $z = t$ vrij, $x = 2 - t$: <span class="b-res">$V = \{(2 - t, 1, t) \mid t \in \mathbb{R}\}$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 3 · GEEN OPLOSSING</div>
+            <div class="b-text"><p>Los op: $\;x + 2y = 3$, $\;2x + 4y = 5$.</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $0 = -1$. Een tegenspraak: <span class="b-res">$V = \{\,\}$</span>. De twee lijnen zijn evenwijdig.</p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="9">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Hoeveel oplossingen heeft het stelsel met deze trapvorm? a) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 0 & 5 \end{array}\right)$ &nbsp; b) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 0 & 0 \end{array}\right)$ &nbsp; c) $\left(\begin{array}{rrr|r} 1 & 2 & 1 & 4 \\ 0 & 1 & 3 & 2 \\ 0 & 0 & 2 & 2 \end{array}\right)$</p></div>
+            <div class="b-sol"><p>a) geen ($0 = 5$) &nbsp; b) oneindig veel &nbsp; c) precies één: $z = 1$, $y = -1$, $x = 5$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Voor welke $a$ heeft $\;x + y = 1$, $\;2x + ay = 2$ oneindig veel oplossingen? Wat geldt voor alle andere $a$?</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $(a - 2)y = 0$. Voor $a = 2$ is dat $0 = 0$: oneindig veel oplossingen. Anders $y = 0$, $x = 1$: precies één oplossing.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Voor welke $b$ heeft $\;x + 2y = 3$, $\;2x + 4y = b$ geen oplossing?</p></div>
+            <div class="b-sol"><p>$\text{II} - 2\,\text{I}$: $0 = b - 6$. Voor $b \neq 6$ geen oplossing, voor $b = 6$ oneindig veel.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Een handelaar mengt twee koffiesoorten van € 8/kg en € 12/kg tot 10 kg van een melange voor € 100. Bij welke totaalprijs zou er geen zinvolle oplossing zijn? Licht toe.</p></div>
+            <div class="b-sol"><p>$x + y = 10$, $8x + 12y = P$ heeft altijd precies één oplossing $y = \tfrac{P - 80}{4}$. Zinvol is die echter alleen voor $0 \leq y \leq 10$, dus $80 \leq P \leq 120$. Bij $P = 100$: elk 5 kg. Voor $P$ buiten dit bereik zouden hoeveelheden negatief zijn. Wiskundig oplosbaar betekent niet altijd zinvol in de praktijk.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Aan het eind van de methode van Gauss staat de rij $(0 \;\; 0 \;\; 0,\ 7)$. Het stelsel heeft …</p><div class="b-mc"><button>geen oplossing</button><button>precies één oplossing</button><button>oneindig veel oplossingen</button></div><div class="b-sol"><p>$0 = 7$ is een tegenspraak.</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="a ="><p class="b-q-text">Voor welke $a$ heeft $\;x + y = 1$, $\;2x + ay = 2$ oneindig veel oplossingen?</p><div class="b-sol"><p>$a = 2$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le4" data-kind="le" data-toc="CAS en rekenen met matrices" data-toc-k="4" data-toc-short="4 CAS &amp; bewerkingen">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 4</span><span class="b-band-sub">MET HULPMIDDELEN · 5 LESUREN</span></div>
+    <h2><span class="b-no">4</span>Grote stelsels met het CAS, rekenen met matrices</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>In de praktijk hebben stelsels vaak tientallen of duizenden onbekenden, bijvoorbeeld bij de sterkteberekening van een brug of bij beeldbewerking. Daarvoor gebruik je digitale hulpmiddelen. In de les volstaat een CAS of GeoGebra.</p></div></div>
+            <div class="b-text"><p>In GeoGebra:<code class="b-codeline">Solve({w+x+y+z=10, w-x+y-z=-2, 2w+x-y+z=5, w+2x+3y-z=10}, {w,x,y,z})</code></p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · REKENEN MET MATRICES</div>
+                <div class="b-text">
+                    <p><b>Optellen en aftrekken:</b> alleen voor matrices met dezelfde afmetingen, element voor element: $(A + B)_{ij} = a_{ij} + b_{ij}$.</p>
+                    <p><b>Vermenigvuldigen met een getal:</b> elk element wordt met het getal $r$ vermenigvuldigd: $(r \cdot A)_{ij} = r \cdot a_{ij}$.</p>
+                    <p><b>Transponeren:</b> rijen worden kolommen: $(A^T)_{ij} = a_{ji}$. Van een $m \times n$-matrix maak je een $n \times m$-matrix.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Informatica:</b> spreadsheets, databases en beeldformaten slaan gegevens op als matrices. Een afbeelding 90° draaien betekent in de kern: transponeren en spiegelen.</p></aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · MATRIXREKENAAR</div>
+        <div data-widget="matrizen"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">VOORBEELD 4 · TWEE FILIALEN</div>
+        <div class="b-text"><p>Verkoop (rijen: filiaal 1 en 2, kolommen: producten X, Y, Z) in januari $A = \begin{pmatrix} 12 & 8 & 5 \\ 7 & 10 & 4 \end{pmatrix}$ en in februari $B = \begin{pmatrix} 10 & 9 & 6 \\ 8 & 12 & 3 \end{pmatrix}$. Bereken de totale verkoop en de streefcijfers voor maart, als er 10% meer verkocht moet worden dan in januari.</p></div>
+        <div class="b-sol"><p>$A + B = \begin{pmatrix} 22 & 17 & 11 \\ 15 & 22 & 7 \end{pmatrix}$ · $1{,}1 \cdot A = \begin{pmatrix} 13{,}2 & 8{,}8 & 5{,}5 \\ 7{,}7 & 11 & 4{,}4 \end{pmatrix}$</p>
+            <p>$A^T = \begin{pmatrix} 12 & 7 \\ 8 & 10 \\ 5 & 4 \end{pmatrix}$ laat dezelfde getallen zien, nu met de producten als rijen.</p></div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="13">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Los het stelsel uit het GeoGebra-commando hierboven op met een CAS.</p></div>
+            <div class="b-sol"><p>$w = 1$, $x = 2$, $y = 3$, $z = 4$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Bereken met $A$ en $B$ uit voorbeeld 4: $B - A$, $3B$ en $B^T$. Wat betekent $B - A$?</p></div>
+            <div class="b-sol"><p>$B - A = \begin{pmatrix} -2 & 1 & 1 \\ 1 & 2 & -1 \end{pmatrix}$: de verandering van januari naar februari. $3B = \begin{pmatrix} 30 & 27 & 18 \\ 24 & 36 & 9 \end{pmatrix}$, $B^T = \begin{pmatrix} 10 & 8 \\ 9 & 12 \\ 6 & 3 \end{pmatrix}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Waarom kun je een $2 \times 3$-matrix niet optellen bij een $3 \times 2$-matrix? Wat zou je eerst moeten doen?</p></div>
+            <div class="b-sol"><p>De elementen hebben geen partner op dezelfde plaats. Je zou een van beide kunnen transponeren, als dat inhoudelijk past.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Laat aan een voorbeeld zien: $(A + B)^T = A^T + B^T$ en $(r \cdot A)^T = r \cdot A^T$.</p></div>
+            <div class="b-sol"><p>Met voorbeeld 4: $(A + B)^T = \begin{pmatrix} 22 & 15 \\ 17 & 22 \\ 11 & 7 \end{pmatrix} = A^T + B^T$. Bij het transponeren gaat elk element naar dezelfde nieuwe plaats, de sommen gaan dus mee.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le4">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="3" data-ph="aantal"><p class="b-q-text">$A$ is een $2 \times 3$-matrix. Hoeveel rijen heeft $A^T$?</p><div class="b-sol"><p>3</p></div></div>
+        <div class="b-q" data-ans="22" data-ph="Getal"><p class="b-q-text">Welk getal staat in voorbeeld 4 in rij 2, kolom 2 van $A + B$?</p><div class="b-sol"><p>$10 + 12 = 22$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Herhalen · verdiepen · verbinden" data-toc-k="H" data-toc-short="Oefenen">
+    <div class="b-band"><span class="b-band-tag">HERHALEN · VERDIEPEN · VERBINDEN</span></div>
+    <div class="b-tasks" data-start="17">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Drie vrienden kopen drinken. Anouk: 2 cola, 1 sap, 1 water voor € 8. Bram: 1 cola, 2 sap voor € 6,50. Cem: 1 sap, 3 water voor € 5. Wat kost elk drankje?</p></div>
+            <div class="b-sol"><p>$2c + s + w = 8$, $c + 2s = 6{,}5$, $s + 3w = 5$ geeft <span class="b-res">cola € 2,50, sap € 2, water € 1</span>.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Verbinden met hoofdstuk 3.3:</b> bepaal de parabool door $(-1, 6)$, $(1, 2)$ en $(2, 3)$.</p></div>
+            <div class="b-sol"><p>$a - b + c = 6$, $a + b + c = 2$, $4a + 2b + c = 3$. Uit I en II: $b = -2$, $a + c = 4$; uit III: $4a + c = 7$, dus $a = 1$, $c = 3$. <span class="b-res">$f(x) = x^2 - 2x + 3$</span></p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Een stelsel met 3 vergelijkingen heeft de oplossingen $(1, 2, 3)$ en $(3, 2, 1)$. Leg uit dat het dan oneindig veel oplossingen heeft.</p></div>
+            <div class="b-sol"><p>Als het precies één oplossing had, was er geen tweede. Bij lineaire vergelijkingen is met twee oplossingen ook elk punt op de verbindingslijn een oplossing, bijvoorbeeld $(2, 2, 2)$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursie: PageRank" data-toc-k="X" data-toc-short="PageRank">
+    <div class="b-band"><span class="b-band-tag">EXCURSIE</span><span class="b-band-sub">INFORMATICA</span></div>
+    <h2>Hoe een zoekmachine pagina's sorteert</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Eind jaren negentig hadden Sergey Brin en Larry Page een idee: een webpagina is belangrijk als belangrijke pagina's ernaar linken. Een „willekeurige surfer” klikt zich door het web: met 85% kans volgt hij een link op de huidige pagina, met 15% springt hij naar een willekeurige pagina. Hoe vaak hij op den duur op een pagina terechtkomt, is haar <b>PageRank</b>.</p>
+            <p>Wiskundig is dat een matrix waarmee je een vector steeds opnieuw vermenigvuldigt. Na een paar stappen verandert de vector nauwelijks nog. In het voorbeeld hieronder ligt A bijna gelijk met C, hoewel maar één pagina naar A linkt: die ene link komt van C, de belangrijkste pagina.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Bron:</b> S. Brin, L. Page, „The Anatomy of a Large-Scale Hypertextual Web Search Engine”, Computer Networks 30 (1998).</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · VIER PAGINA'S</div>
+        <p class="b-help" style="margin:0 0 12px">Links: A → B, A → C, B → C, C → A, D → C. De grootte van de cirkel laat de huidige rang zien. Klik op „1 stap” tot er niets meer verandert.</p>
+        <div data-widget="pagerank"></div>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Samenvatting" data-toc-k="S" data-toc-short="Samenvatting">
+    <div class="b-band"><span class="b-band-tag">SAMENVATTING</span><span class="b-band-sub">HET BELANGRIJKSTE IN ÉÉN OOGOPSLAG</span></div>
+    <div class="b-rueck"><div><h4>MATRIXVORM</h4><p>$A \cdot \vec{x} = \vec{b}$ · uitgebreide coëfficiëntenmatrix $(A,\ \vec{b})$</p></div><div><p>Bioscoop: $\left(\begin{array}{rrr|r} 1 & 1 & 1 & 200 \\ 8 & 6 & 4 & 1280 \\ 0 & 1 & -2 & 0 \end{array}\right)$</p></div></div>
+    <div class="b-rueck"><div><h4>BIJZONDERE MATRICES</h4><p>vierkant, driehoeks-, diagonaal-, eenheids-, nul-, kolom-, rijmatrix</p></div><div><p>$I = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$</p></div></div>
+    <div class="b-rueck"><div><h4>GAUSS</h4><p>Rijen verwisselen, met een getal $\neq 0$ vermenigvuldigen, veelvouden optellen · trapvorm · van onder naar boven invullen</p></div><div><p>Bioscoop: $z = 40$, $y = 80$, $x = 80$</p></div></div>
+    <div class="b-rueck"><div><h4>OPLOSSINGSVERZAMELINGEN</h4><p>Tegenspraakrij: geen · nulrij: oneindig veel (parameter) · anders precies één</p></div><div><p>$V = \{(2 - t, 1, t)\}$</p></div></div>
+    <div class="b-rueck"><div><h4>BEWERKINGEN</h4><p>$A \pm B$ per element (zelfde afmetingen) · $r \cdot A$ · $A^T$: rijen ↔ kolommen</p></div><div><p>Filialen: januari + februari</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Toets" data-toc-k="T" data-toc-short="Toets">
+    <div class="b-band"><span class="b-band-tag">TOETS</span><span class="b-band-sub">TWEE RONDES · METEEN FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDE 1 · ZONDER HULPMIDDELEN</div>
+            <div class="b-q" data-ans="2" data-ph="z ="><p class="b-q-text">Los op: $\;x + y + z = 4$, $\;y - z = -1$, $\;3z = 6$. Hoe groot is $z$?</p><div class="b-sol"><p>$z = 2$ (dan $y = 1$, $x = 1$)</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="x ="><p class="b-q-text">Hoe groot is $x$ in hetzelfde stelsel?</p><div class="b-sol"><p>$y = 1$, $x = 4 - 1 - 2 = 1$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$\;x + y = 2$, $\;3x + 3y = 6$ heeft …</p><div class="b-mc"><button>geen oplossing</button><button>precies één oplossing</button><button>oneindig veel oplossingen</button></div><div class="b-sol"><p>De tweede vergelijking is drie keer de eerste.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDE 2 · MET HULPMIDDELEN</div>
+            <div class="b-q" data-ans="30" data-ph="stuks"><p class="b-q-text">Hoeveel stuks P2 produceert het grondstoffenbedrijf uit paragraaf 1?</p><div class="b-sol"><p>$x_2 = 30$</p></div></div>
+            <div class="b-q" data-ans="2,5" data-tol="0.001" data-ph="euro"><p class="b-q-text">Wat kost een cola in opgave 17?</p><div class="b-sol"><p>2,50 €</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="z ="><p class="b-q-text">Welke waarde heeft $z$ in het stelsel uit paragraaf 4 (CAS)?</p><div class="b-sol"><p>$z = 4$</p></div></div>
+        </div>
+    </div>
+    <h3>MEER OEFENEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-matrizen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">MATRICES</span><span class="b-lab-what">Begrip, bijzondere matrices</span></span></a>
+        <a class="b-lab" href="../../mathetest11-gauss.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GAUSS</span><span class="b-lab-what">3 × 3 zonder hulpmiddelen</span></span></a>
+        <a class="b-lab" href="../../mathetest11-loesungsmengen.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">OPLOSSINGSVERZAMELINGEN</span><span class="b-lab-what">geen, één, oneindig veel</span></span></a>
+        <a class="b-lab" href="../../mathetest11-cas-lgs.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">CAS EN BEWERKINGEN</span><span class="b-lab-what">grote stelsels, rekenen met matrices</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Wiskunde, Berufliches Gymnasium klas 11 · leergebied 4 volgens het Saksische leerplan Berufliches Gymnasium Wiskunde.</p>
+    <p>Alle teksten, opgaven en afbeeldingen zijn eigen materiaal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-nl.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-nl/funktionen.js"></script>
+<script src="../../js/buch-lgs.js"></script>
+<script src="../../js/buch-nl/lgs.js"></script>
+</body>
+</html>
