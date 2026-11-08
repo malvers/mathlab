@@ -32,6 +32,7 @@ final class UsbMic {
 
     private final AudioRecord rec;
     private final int channels;
+    private final AudioDeviceInfo device;        // the microphone Android really routed (for the settings, see Mic)
     private final Thread pump;
     private volatile boolean running = true;
     private ParcelFileDescriptor read, write;    // the current sentence's pipe; guarded by `this`
@@ -76,7 +77,7 @@ final class UsbMic {
                 AudioDeviceInfo routed = r.getRoutedDevice();
                 Log.d(RufService.TAG, "usb mic " + dev.getProductName() + " ch=" + (mask == AudioFormat.CHANNEL_IN_STEREO ? 2 : 1)
                         + " routed=" + (routed == null ? "?" : routed.getProductName() + "/" + routed.getType()));
-                return new UsbMic(r, mask == AudioFormat.CHANNEL_IN_STEREO ? 2 : 1);
+                return new UsbMic(r, mask == AudioFormat.CHANNEL_IN_STEREO ? 2 : 1, routed != null ? routed : dev);
             } catch (RuntimeException e) {
                 Log.d(RufService.TAG, "usb mic failed: " + e);
                 if (r != null) r.release();
@@ -85,11 +86,17 @@ final class UsbMic {
         return null;
     }
 
-    private UsbMic(AudioRecord rec, int channels) {
+    private UsbMic(AudioRecord rec, int channels, AudioDeviceInfo device) {
         this.rec = rec;
         this.channels = channels;
+        this.device = device;
         pump = new Thread(this::run, "docruf-usb-mic");
         pump.start();
+    }
+
+    /** Its short name, as DocNote writes it ("DJI Adapter"). */
+    String label() {
+        return Mic.label(device);
     }
 
     /** A fresh pipe for the next sentence; the old one is closed. The read end goes to the recognizer. */

@@ -81,6 +81,8 @@ public class MainActivity extends Activity {
 
     private Typeface orbitron;
     private TextView lineWord;
+    private TextView micWord, micHeard;   // settings: the microphone now, and the one that really heard him last
+    private java.util.Set<Integer> recordingBefore = new java.util.HashSet<>();   // see Mic.sessions
     private Button akku;
     private ImageView face;
     private TextView label;
@@ -230,6 +232,7 @@ public class MainActivity extends Activity {
         heard = "";
         mode = "listening";
         stopUsb();
+        recordingBefore = Mic.sessions(this);
         usb = UsbMic.open(this);
         show("Ich höre …", MUTED, false);
         breathe(true);
@@ -254,6 +257,19 @@ public class MainActivity extends Activity {
     private void stopUsb() {
         if (usb != null) usb.stop();
         usb = null;
+    }
+
+    /**
+     * While he answers: the microphone that really hears him - DocCall's own USB recording, or the one Android
+     * opened for the recognition - kept for the settings. Null when the recognition has no microphone open just now.
+     */
+    private String measureMic() {
+        if (!mode.equals("listening")) return null;
+        String m = usb != null ? usb.label() : Mic.recognizer(this, recordingBefore);
+        if (m == null) return null;
+        if (!m.equals(Mic.lastHeard(this))) Log.d(RufService.TAG, "mic heard " + m);
+        Mic.heard(this, m);
+        return m;
     }
 
     /** One sentence is done: keep it, listen on, and send only when he stays quiet for PAUSE_MS. */
@@ -293,6 +309,7 @@ public class MainActivity extends Activity {
 
         @Override
         public void onBeginningOfSpeech() {
+            measureMic();   // the microphone is surely open now
         }
 
         @Override
@@ -654,6 +671,12 @@ public class MainActivity extends Activity {
         lineWord = text("", 16, TEXT);
         col.addView(lineWord, gap(8));
 
+        // which microphone hears him (Doc, 08.11.2026): the one now, and below the one measured at his last answer
+        micWord = text("", 16, TEXT);
+        col.addView(micWord, gap(8));
+        micHeard = text("", 12, MUTED);
+        col.addView(micHeard, gap(2));
+
         Switch speak = new Switch(this);
         speak.setText("Ansagen");
         speak.setTypeface(orbitron);
@@ -845,6 +868,19 @@ public class MainActivity extends Activity {
         dot.setBackground(d);
         lineWord.setText("● " + word);
         lineWord.setTextColor(color);
+
+        String live = measureMic();
+        micWord.setText("Mikrofon: " + (live != null ? live : Mic.next(this)));
+        String last = Mic.lastHeard(this);
+        micHeard.setVisibility(last.isEmpty() ? View.GONE : View.VISIBLE);
+        if (!last.isEmpty()) {
+            // one short line: today only the time, otherwise the date as well
+            Date at = new Date(Mic.lastHeardAt(this));
+            SimpleDateFormat day = new SimpleDateFormat("dd.MM.", Locale.GERMANY);
+            boolean today = day.format(at).equals(day.format(new Date()));
+            micHeard.setText("Zuletzt gehört: " + last + " · "
+                    + new SimpleDateFormat(today ? "HH:mm" : "dd.MM. HH:mm", Locale.GERMANY).format(at));
+        }
 
         boolean free = getSystemService(PowerManager.class).isIgnoringBatteryOptimizations(getPackageName());
         akku.setVisibility(free ? View.GONE : View.VISIBLE);
