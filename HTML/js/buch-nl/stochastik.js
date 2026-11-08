@@ -44,6 +44,7 @@ window.BuchNL && BuchNL.add('stochastik', {
         'Neues Spiel': 'Nieuw spel', '1000 Spiele vom Rechner spielen lassen': 'De computer 1000 spellen laten spelen',
         'Strategie': 'Strategie', 'Spiele': 'Spellen', 'Autos': 'Auto\u2019s', 'Gewinnquote': 'Winstpercentage',
         'du: bleiben': 'jij: blijven', 'du: wechseln': 'jij: wisselen', 'Rechner: bleiben': 'computer: blijven', 'Rechner: wechseln': 'computer: wisselen',
+        // book nl-2 mathe12-nl:
     },
     phrase: [
         // nl0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -66,6 +67,7 @@ window.BuchNL && BuchNL.add('stochastik', {
         [' alles richtig', ' alles goed'], ['Ereignis: <b>', 'Gebeurtenis: <b>'], ['Zuletzt: ', 'Laatste: '],
         ['TÜR', 'DEUR'], ['Tür', 'Deur'], ['Gewonnen – das Auto! ', 'Gewonnen – de auto! '], ['Leider eine Ziege. ', 'Helaas een geit. '],
         ['Du hast gewechselt.', 'Je hebt gewisseld.'], ['Du bist geblieben.', 'Je bent gebleven.'],
+        // book nl-2 mathe12-nl:
     ],
     rule: [
         // nl0: notation of the module, for every book
@@ -82,5 +84,6 @@ window.BuchNL && BuchNL.add('stochastik', {
         [/Der Moderator weiß, wo das Auto steht, und öffnet Tür (\d): eine Ziege\. Bleibst du oder wechselst du\?/g,
             'De presentator weet waar de auto staat, en opent deur $1: een geit. Blijf je of wissel je?'],
         [/Bei Tür (\d) bleiben/g, 'Bij deur $1 blijven'], [/Zu Tür (\d) wechseln/g, 'Naar deur $1 wisselen'],
+        // book nl-2 mathe12-nl:
     ]
 });

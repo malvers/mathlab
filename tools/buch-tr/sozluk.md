@@ -180,3 +180,7 @@ Diophantos) stay. German places with real data stay (Dresden, Sachsen).
 | elective chapter letter W | S (seçmeli) |
 | widget months | Oca, Şub, Mar, Nis, May, Haz, Tem, Ağu, Eyl, Eki, Kas, Ara |
 | German school name in capitals | BERUFLICHES GYMNASIUM (German capitals, not the Turkish İ) |
+
+## mathe12-tr (BGY 12, block tr-2)
+
+Terms the book adds (Grenzwert, Ableitung, Extremum, Wendepunkt, Vektor im Raum, Skalarprodukt …) go here.

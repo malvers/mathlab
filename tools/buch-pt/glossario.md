@@ -90,3 +90,7 @@ Die Schülerin, der Schüler wird mit „tu“ angesprochen.
 | Kopf / Zahl | face nacional $N$ / face europeia $E$ | die zwei Seiten einer Euromünze, wie in Portugal üblich |
 | Bisektionsverfahren | método da bissecção | |
 | Monte-Carlo-Methode · Simulation | método de Monte Carlo · simulação | |
+
+## mathe12-pt (BGY 12, block pt-2)
+
+Terms the book adds (Grenzwert, Ableitung, Extremum, Wendepunkt, Vektor im Raum, Skalarprodukt …) go here.

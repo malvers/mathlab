@@ -87,3 +87,7 @@ Anouk, Bram, Cem. Geld bleibt Euro, deutsche Orte mit echten Daten bleiben (Tage
 
 „Berufliches Gymnasium“, „Abitur“ (einmal auf der Startseite erklärt), Labs und Wochenquiz (einmal gesagt), „Doc Alvers
 Mathe-Labor“, Solita.
+
+## mathe12-nl (BGY 12, block nl-2)
+
+Terms the book adds (Grenzwert, Ableitung, Extremum, Wendepunkt, Vektor im Raum, Skalarprodukt …) go here.

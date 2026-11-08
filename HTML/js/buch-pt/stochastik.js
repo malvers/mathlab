@@ -46,6 +46,7 @@ window.BuchPT && BuchPT.add('stochastik', {
         'Neues Spiel': 'Novo jogo', '1000 Spiele vom Rechner spielen lassen': 'Deixar o computador jogar 1000 jogos',
         'Strategie': 'Estratégia', 'Spiele': 'Jogos', 'Autos': 'Carros', 'Gewinnquote': 'Taxa de vitórias',
         'du: bleiben': 'tu: manter', 'du: wechseln': 'tu: trocar', 'Rechner: bleiben': 'computador: manter', 'Rechner: wechseln': 'computador: trocar',
+        // book pt-2 mathe12-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -68,6 +69,7 @@ window.BuchPT && BuchPT.add('stochastik', {
         [' alles richtig', ' tudo certo'], ['Ereignis: <b>', 'Acontecimento: <b>'], ['Zuletzt: ', 'Últimos: '],
         ['TÜR', 'PORTA'], ['Tür', 'Porta'], ['Gewonnen – das Auto! ', 'Ganhaste – o carro! '], ['Leider eine Ziege. ', 'Azar, uma cabra. '],
         ['Du hast gewechselt.', 'Trocaste de porta.'], ['Du bist geblieben.', 'Mantiveste a porta.'],
+        // book pt-2 mathe12-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -90,5 +92,6 @@ window.BuchPT && BuchPT.add('stochastik', {
         [/Der Moderator weiß, wo das Auto steht, und öffnet Tür (\d): eine Ziege\. Bleibst du oder wechselst du\?/g,
             'O apresentador sabe onde está o carro e abre a porta $1: uma cabra. Manténs a tua porta ou trocas?'],
         [/Bei Tür (\d) bleiben/g, 'Manter a porta $1'], [/Zu Tür (\d) wechseln/g, 'Trocar para a porta $1'],
+        // book pt-2 mathe12-pt:
     ]
 });

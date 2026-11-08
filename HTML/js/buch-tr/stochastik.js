@@ -44,6 +44,7 @@ window.BuchTR && BuchTR.add('stochastik', {
         'Neues Spiel': 'Yeni oyun', '1000 Spiele vom Rechner spielen lassen': 'Bilgisayara 1000 oyun oynat',
         'Strategie': 'Strateji', 'Spiele': 'Oyun', 'Autos': 'Otomobil', 'Gewinnquote': 'Kazanma oranı',
         'du: bleiben': 'sen: kal', 'du: wechseln': 'sen: değiştir', 'Rechner: bleiben': 'bilgisayar: kal', 'Rechner: wechseln': 'bilgisayar: değiştir',
+        // book tr-2 mathe12-tr:
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -65,6 +66,7 @@ window.BuchTR && BuchTR.add('stochastik', {
         [' alles richtig', ' hepsi doğru'], ['Ereignis: <b>', 'Olay: <b>'], ['Zuletzt: ', 'Son atışlar: '],
         ['TÜR', 'KAPI'], ['Tür', 'Kapı'], ['Gewonnen – das Auto! ', 'Kazandın – otomobil! '], ['Leider eine Ziege. ', 'Maalesef bir keçi. '],
         ['Du hast gewechselt.', 'Kapını değiştirdin.'], ['Du bist geblieben.', 'Kapında kaldın.'],
+        // book tr-2 mathe12-tr:
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -89,5 +91,6 @@ window.BuchTR && BuchTR.add('stochastik', {
         [/Der Moderator weiß, wo das Auto steht, und öffnet Tür (\d): eine Ziege\. Bleibst du oder wechselst du\?/g,
             (m, d) => 'Sunucu otomobilin nerede olduğunu biliyor ve ' + d + '. kapıyı açıyor: bir keçi. Kapında mı kalırsın, değiştirir misin?'],
         [/Bei Tür (\d) bleiben/g, (m, d) => d + '. kapıda kal'], [/Zu Tür (\d) wechseln/g, (m, d) => d + '. kapıya geç'],
+        // book tr-2 mathe12-tr:
     ]
 });

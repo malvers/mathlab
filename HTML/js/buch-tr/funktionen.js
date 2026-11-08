@@ -80,6 +80,7 @@ window.BuchTR && BuchTR.add('funktionen', {
         'Grundfunktion': 'Temel fonksiyon', 'Grundfunktion und veränderte Funktion': 'Temel fonksiyon ve dönüştürülmüş fonksiyon',
         'Das ist die Grundfunktion selbst.': 'Bu, temel fonksiyonun kendisi.',
         'Graph, zu dem der Term gesucht ist': 'İfadesi aranan grafik', 'Nächster Graph': 'Sonraki grafik',
+        // book tr-2 mathe12-tr:
     },
     phrase: [
         // tr0: the cover of the start page (BGY 11 mathe11) and the helpers of the module (outside every widget; check.mjs funktionen/*)
@@ -122,6 +123,7 @@ window.BuchTR && BuchTR.add('funktionen', {
         // parameter: the slider labels "$c \cdot f(x)$: strecken in $y$-Richtung"
         [': strecken in $y$-Richtung', ': $y$ yönünde uzatma'], [': verschieben in $y$-Richtung', ': $y$ yönünde öteleme'],
         [': stauchen in $x$-Richtung', ': $x$ yönünde daraltma'], [': verschieben in $x$-Richtung', ': $x$ yönünde öteleme'],
+        // book tr-2 mathe12-tr:
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -157,5 +159,6 @@ window.BuchTR && BuchTR.add('funktionen', {
             (m, c, d) => '$' + c + '$ birim ' + { links: 'sola', rechts: 'sağa', oben: 'yukarı', unten: 'aşağı' }[d] + ' ötelenmiş'],
         // graphquiz score: "3 richtig" → "3 doğru"
         [/^(\d+) richtig$/, '$1 doğru'],
+        // book tr-2 mathe12-tr:
     ]
 });

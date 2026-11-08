@@ -71,6 +71,7 @@ window.BuchNL && BuchNL.add('funktionen', {
         'Grundfunktion': 'Basisfunctie', 'Grundfunktion und veränderte Funktion': 'Basisfunctie en veranderde functie',
         'Das ist die Grundfunktion selbst.': 'Dat is de basisfunctie zelf.',
         'Graph, zu dem der Term gesucht ist': 'Grafiek waarbij de formule wordt gezocht', 'Nächster Graph': 'Volgende grafiek',
+        // book nl-2 mathe12-nl:
     },
     phrase: [
         // nl0: the cover of the start page (BGY 11 mathe11) and the helpers of the module (outside every widget; check.mjs funktionen/*)
@@ -124,6 +125,7 @@ window.BuchNL && BuchNL.add('funktionen', {
         // parameter: the slider labels "$c \cdot f(x)$: strecken in $y$-Richtung"
         [': strecken in $y$-Richtung', ': vermenigvuldigen in de $y$-richting'], [': verschieben in $y$-Richtung', ': verschuiven in de $y$-richting'],
         [': stauchen in $x$-Richtung', ': vermenigvuldigen in de $x$-richting'], [': verschieben in $x$-Richtung', ': verschuiven in de $x$-richting'],
+        // book nl-2 mathe12-nl:
     ],
     rule: [
         // nl0: notation of the module, for every book
@@ -159,5 +161,6 @@ window.BuchNL && BuchNL.add('funktionen', {
             (m, c, d) => '$' + c + '$ ' + { links: 'naar links', rechts: 'naar rechts', oben: 'omhoog', unten: 'omlaag' }[d] + ' verschoven'],
         // graphquiz score: "3 richtig" → "3 goed"
         [/^(\d+) richtig$/, (m, n) => n + ' goed'],
+        // book nl-2 mathe12-nl:
     ]
 });
