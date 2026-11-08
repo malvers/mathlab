@@ -48,6 +48,16 @@ window.BuchNL && BuchNL.add('stochastik', {
         // unabhaengig (lb1-1): "unvereinbar" = "disjunct" as in nl0, "abhängig" = "afhankelijk"
         'Unabhängig machen': 'Maak onafhankelijk', 'Unvereinbar machen': 'Maak disjunct',
         'Einheitsquadrat: Anteil von A in B und in nicht B': 'Eenheidsvierkant: aandeel van A in B en in niet B',
+        // histo-hero, zufallsgroesse (lb1-2): Zufallsgröße = toevalsvariabele, Erwartungswert = verwachtingswaarde, Varianz = variantie,
+        // Standardabweichung = standaardafwijking, Einsatz = inzet, Auszahlung = uitbetaling, Gewinn = winst; money "€ 1,75" (rule below)
+        'Histogramm einer Wahrscheinlichkeitsverteilung': 'Histogram van een kansverdeling', 'Histogramm einer Binomialverteilung': 'Histogram van een binomiale verdeling',
+        'Drei Münzen': 'Drie munten', 'Augensumme': 'Som van de ogen', 'Glücksrad': 'Rad van fortuin', 'Zufallsgröße': 'Toevalsvariabele', 'Einsatz': 'Inzet',
+        'Wahrscheinlichkeitsverteilung als Stabdiagramm': 'Kansverdeling als staafdiagram', 'Spielen:': 'Spelen:',
+        'SPIELE n': 'SPELLEN n', 'MITTELWERT': 'GEMIDDELDE', 'ERWARTUNGSWERT': 'VERWACHTINGSWAARDE', 'LETZTE': 'LAATSTE',
+        // bernoulli-baum, binomial (lb1-3): Treffer = succes, Niete = mislukking; the tree letters T/N → S/M (rule below)
+        'Stufen $n$:': 'Stappen $n$:', 'Anzahl der Stufen': 'Aantal stappen', 'Trefferwahrscheinlichkeit $p$': 'Succeskans $p$',
+        'Genau $k$ Treffer:': 'Precies $k$ successen:', 'Anzahl der Treffer': 'Aantal successen', 'Baumdiagramm einer Bernoulli-Kette': 'Kansboom van een Bernoulli-experiment',
+        'Anzahl der Versuche $n$': 'Aantal herhalingen $n$', 'Was wird berechnet?': 'Wat wordt er berekend?', 'Histogramm der Binomialverteilung': 'Histogram van de binomiale verdeling',
     },
     phrase: [
         // nl0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -77,6 +87,18 @@ window.BuchNL && BuchNL.add('stochastik', {
             '<b>Onafhankelijk:</b> of $B$ nu optreedt of niet, het aandeel van $A$ blijft gelijk. In het vierkant ligt de grens in beide kolommen even hoog.'],
         ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.',
             '<b>Disjunct</b> ($A \\cap B = \\emptyset$) en dus <b>afhankelijk</b>: als $B$ optreedt, kan $A$ niet meer optreden.'],
+        // zufallsgroesse: the help "$X$ = …." and the results (the euro rule has already turned "1 €" into "€ 1")
+        ['Augensumme zweier Würfel', 'som van de ogen van twee dobbelstenen'], ['Augenzahl', 'aantal ogen'], ['Anzahl Wappen', 'aantal keer kop'],
+        ['Gewinn = Auszahlung − Einsatz', 'winst = uitbetaling − inzet'], ['Gewinn bei € 1 Einsatz', 'winst bij € 1 inzet'],
+        [' Auszahlungen € 0, € 1, € 2, € 10 mit den Wahrscheinlichkeiten ', ' Uitbetalingen € 0, € 1, € 2, € 10 met de kansen '],
+        [' Du setzt € 1 auf eine Zahl, dann werden drei Würfel geworfen. Für jeden Würfel mit deiner Zahl bekommst du € 1 Gewinn, sonst ist der Einsatz weg.',
+            ' Je zet € 1 in op een getal, daarna worden drie dobbelstenen gegooid. Voor elke dobbelsteen met jouw getal krijg je € 1 winst, anders ben je je inzet kwijt.'],
+        ['Erwartungswert: ', 'Verwachtingswaarde: '], ['Varianz: ', 'Variantie: '], [' · Standardabweichung: ', ' · Standaardafwijking: '],
+        [' · Das Spiel ist <b>fair</b>.', ' · Het spel is <b>eerlijk</b>.'],
+        // bernoulli-baum, binomial
+        ['$ · jeder hat die Wahrscheinlichkeit $', '$ · elke route heeft de kans $'], ['Formel von Bernoulli: $', 'Formule van Bernoulli: $'],
+        ['$X$ ist binomialverteilt mit $n = ', '$X$ is binomiaal verdeeld met $n = '],
+        ['Erwartungswert $\\mu', 'Verwachtingswaarde $\\mu'], [' · Standardabweichung $\\sigma', ' · Standaardafwijking $\\sigma'],
     ],
     rule: [
         // nl0: notation of the module, for every book
@@ -99,5 +121,16 @@ window.BuchNL && BuchNL.add('stochastik', {
         [/\$P_B\(A\) = /g, '$P(A \\mid B) = '], [/\$P_\{\\overline\{B\}\}\(A\)/g, '$P(A \\mid \\overline{B})'],
         [/<b>Abhängig:<\/b> \$B\$ verändert die Wahrscheinlichkeit von \$A\$ nach (oben|unten)\./g,
             (m, d) => '<b>Afhankelijk:</b> $B$ maakt de kans op $A$ ' + (d === 'oben' ? 'groter' : 'kleiner') + '.'],
+        // zufallsgroesse: money the Dutch way, the sign in front with a no-break space: "1,75 €" → "€ 1,75", "-0,25 €" → "€ -0,25"
+        [/(^|[^\d.,])([-−]?\d+(?:,\d+)?) €/g, '$1€ $2'],
+        [/ · Auf lange Sicht <b>(verlierst|gewinnst)<\/b> du im Mittel (\$[^$]*\$) € pro Spiel\./g,
+            (m, w, x) => ' · Op de lange duur <b>' + (w === 'verlierst' ? 'verlies' : 'win') + '</b> je gemiddeld € ' + x + ' per spel.'],
+        // bernoulli-baum: "Pfade mit genau 2 Treffern: …" → "Routes met precies 2 successen: …"
+        [/Pfade mit genau (\d+) Treffern: /g, (m, k) => 'Routes met precies ' + k + (k === '1' ? ' succes: ' : ' successen: ')],
+        // bernoulli-baum: the letters of the tree T/N (Treffer/Niete) → S/M (succes/mislukking), only inside this tree, so the
+        // letters of the urn trees stay
+        [/^(<svg class="st-tree"[^>]*aria-label="Baumdiagramm einer Bernoulli-Kette">)([\s\S]*)$/, (m, head, body) => head + body
+            .replace(/(font-weight:700">)([TN])(<\/text>)/g, (x, a, l, b) => a + (l === 'T' ? 'S' : 'M') + b)
+            .replace(/(<text x="10" y="20">)([TN]+)(<\/text>)/g, (x, a, k, b) => a + k.replace(/[TN]/g, l => (l === 'T' ? 'S' : 'M')) + b)],
     ]
 });

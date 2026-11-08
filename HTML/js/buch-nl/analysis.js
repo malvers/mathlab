@@ -14,6 +14,9 @@ window.BuchNL && BuchNL.add('analysis', {
     word: {
         // nl0: the helpers of the module (outside every widget; check.mjs analysis/*)
         // book nl-2 mathe12-nl:
+        // the cover of the start page (BGY 12)
+        'Titelbild: Kurve mit Wendetangente und Ableitung, Binomialverteilung und ein Vektor im Raum':
+            'Omslag: kromme met buigraaklijn en afgeleide, binomiale verdeling en een vector in de ruimte',
     },
     phrase: [
         // nl0: the helpers of the module (outside every widget; check.mjs analysis/*)

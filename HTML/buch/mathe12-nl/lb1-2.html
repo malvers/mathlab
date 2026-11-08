@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiskunde 12 · Hoofdstuk 1.2 · Toevalsvariabelen | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Kansverdeling, verwachtingswaarde, variantie, eerlijke spelen. Hoofdstuk 1.2 van het interactieve leerboek Wiskunde · Berufliches Gymnasium 12: uitleg, voorbeelden, opgaven op drie niveaus, zelftoetsen en labs om uit te proberen.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">WISKUNDE · BERUFLICHES GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Hoofdstuk"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Inhoud van het hoofdstuk">
+        <p class="b-toc-title">HOOFDSTUK 1.2 · LEERGEBIED 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introductie" data-toc-k="I" data-toc-short="Introductie" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">HOOFDSTUK 1.2 · LEERGEBIED 1 · SEPTEMBER</p>
+            <h1>Toevalsvariabelen</h1>
+            <p class="b-hero-lead">Een rad van fortuin op het schoolfeest, een dobbelspel op de kermis, een verzekering voor je fiets: achter elk kansexperiment zitten
+                <b>getallen</b>, winst, verlies, aantallen. Hier leer je met die getallen te rekenen. De <b>verwachtingswaarde</b> vertelt je
+                wat er op de lange duur uitkomt, de <b>standaardafwijking</b> hoe sterk het schommelt.</p>
+            <div class="b-chips"><span class="b-chip">12 LESUREN</span><span class="b-chip">3 PARAGRAFEN</span><span class="b-chip">KANSSPELEN BEOORDELEN</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">DIT LEER JE IN DIT HOOFDSTUK</div>
+            <div class="b-text"><ul>
+                <li>een <b>toevalsvariabele</b> vastleggen en haar <b>kansverdeling</b> geven als tabel en als staafdiagram</li>
+                <li>„precies”, „hoogstens” en „minstens” vertalen in kansen</li>
+                <li><b>verwachtingswaarde</b>, <b>variantie</b> en <b>standaardafwijking</b> berekenen en interpreteren</li>
+                <li>beslissen of een spel <b>eerlijk</b> is</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: KUN JE DIT AL?</div>
+            <div class="b-q" data-ans="5" data-ph="getal"><p class="b-q-text">Bereken het gemiddelde van 2, 4, 6 en 8.</p><div class="b-sol"><p>$\tfrac{2 + 4 + 6 + 8}{4} = 5$</p></div></div>
+            <div class="b-q" data-ans="3/8" data-tol="0.0005" data-ph="breuk"><p class="b-q-text">Bereken $\tfrac14 + \tfrac18$.</p><div class="b-sol"><p>$\tfrac28 + \tfrac18 = \tfrac38$</p></div></div>
+            <div class="b-q" data-ans="1/4" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Je gooit twee munten op. Hoe groot is de kans op twee keer kop?</p><div class="b-sol"><p>$\tfrac12 \cdot \tfrac12 = \tfrac14$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="getal"><p class="b-q-text">Bereken $0{,}5 \cdot 4 + 0{,}5 \cdot (-2)$.</p><div class="b-sol"><p>$2 - 1 = 1$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Verkenningen" data-toc-k="V" data-toc-short="Verkenningen">
+    <div class="b-band"><span class="b-band-tag">VERKENNINGEN</span><span class="b-band-sub">OM TE BEGINNEN · IN GROEPJES</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">HET RAD VAN HET SCHOOLFEEST</div>
+            <div class="b-text"><p>Inzet € 2. De helft van het rad levert niets op, een kwart € 1, een achtste € 2, een achtste € 10.</p>
+                <ul><li>Zouden jullie spelen? Schat of de klassenkas er geld aan verdient.</li><li>Stel je voor dat 800 mensen spelen. Hoeveel wordt er uitbetaald?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">TWEE SPELEN, ÉÉN VERWACHTINGSWAARDE</div>
+            <div class="b-text"><p>Spel A: een munt, je wint of verliest € 1. Spel B: met een kans van 1% win je € 99, anders verlies je € 1.</p>
+                <ul><li>Wat win je in beide spelen gemiddeld?</li><li>Waarin verschillen ze dan toch?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 3</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">SOMMEN VAN OGEN TELLEN</div>
+            <div class="b-text"><p>Gooi 50 keer met twee dobbelstenen en noteer steeds de som van de ogen.</p>
+                <ul><li>Welke som komt het vaakst voor? Waarom?</li><li>Bereken het gemiddelde van jullie 50 sommen. Wat verwachten jullie?</li></ul></div>
+            <span class="b-pair">→ Paragraaf 1 en 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Toevalsvariabelen en verdelingen" data-toc-k="1" data-toc-short="1 Verdeling">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 1</span><span class="b-band-sub">4 LESUREN</span></div>
+    <h2><span class="b-no">1</span>Toevalsvariabele en kansverdeling</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Je gooit drie munten op. Er zijn 8 even waarschijnlijke uitkomsten, van KKK tot MMM. We willen alleen weten: <b>hoe vaak kop?</b></p></div></div>
+            <div class="b-text">
+                <p>Het getal $X$ = „aantal keer kop” hangt van het toeval af en kan de waarden 0, 1, 2, 3 aannemen. Als je de uitkomsten telt, krijg je:</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:440px">
+                    <tr><th>$x_i$</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                    <tr><th>$P(X = x_i)$</th><td>$\tfrac18$</td><td>$\tfrac38$</td><td>$\tfrac38$</td><td>$\tfrac18$</td></tr></table></div>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · TOEVALSVARIABELE</div>
+                <div class="b-text">
+                    <p>Een <b>toevalsvariabele</b> (stochast) $X$ koppelt aan elke uitkomst van een kansexperiment een reëel getal.</p>
+                    <p>De <b>kansverdeling</b> van $X$ geeft bij elke waarde $x_i$ de kans $P(X = x_i)$. Samen zijn ze 1.
+                        Je geeft haar weer als tabel, <b>staafdiagram</b> of histogram.</p>
+                    <p>„precies $k$”: $P(X = k)$ · „hoogstens $k$”: $P(X \le k)$ · „minstens $k$”: $P(X \ge k) = 1 - P(X \le k - 1)$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Discreet</b> heet een toevalsvariabele die alleen losse, aftelbare waarden aanneemt, bijvoorbeeld aantallen of geldbedragen.</p>
+            <p class="b-note"><b>Complementaire gebeurtenis:</b> „minstens één” reken je bijna altijd uit via $1 - P(\text{geen})$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGUUR · SOM VAN DE OGEN VAN TWEE DOBBELSTENEN</div>
+        <p class="b-help" style="margin:0 0 12px">De hoogte van de staven is $P(X = k)$, van $\tfrac{1}{36}$ bij 2 en 12 tot $\tfrac{6}{36}$ bij 7.</p>
+        <div data-widget="histo-hero" data-w="1,2,3,4,5,6,5,4,3,2,1" data-x0="2" data-lo="7" data-hi="7" data-step="1"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 1 · SOM VAN DE OGEN</div>
+            <div class="b-text"><p>$X$ is de som van de ogen van twee dobbelstenen. Bereken $P(X = 7)$, $P(X \le 4)$ en $P(X \ge 10)$.</p></div>
+            <div class="b-sol"><p>$P(X = 7) = \tfrac{6}{36} = \tfrac16$ · $P(X \le 4) = \tfrac{1 + 2 + 3}{36} = \tfrac16$ · $P(X \ge 10) = \tfrac{3 + 2 + 1}{36} = \tfrac16$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 2 · PAKKEN ZONDER TERUGLEGGEN</div>
+            <div class="b-text"><p>Uit een vaas met 3 rode en 2 blauwe knikkers pak je er twee zonder terugleggen. $X$ = aantal rode. Geef de kansverdeling.</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac25 \cdot \tfrac14 = \tfrac{1}{10}$, $P(X = 2) = \tfrac35 \cdot \tfrac24 = \tfrac{3}{10}$, $P(X = 1) = 1 - \tfrac{1}{10} - \tfrac{3}{10} = \tfrac{6}{10}$</p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Je gooit vier munten op, $X$ = aantal keer kop. Geef de kansverdeling.</p></div>
+            <div class="b-hint"><p>Er zijn 16 uitkomsten. Hoeveel daarvan hebben precies twee keer kop?</p></div>
+            <div class="b-sol"><p>$P(X = 0) = \tfrac{1}{16}$, $P(X = 1) = \tfrac{4}{16}$, $P(X = 2) = \tfrac{6}{16}$, $P(X = 3) = \tfrac{4}{16}$, $P(X = 4) = \tfrac{1}{16}$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Vul de ontbrekende kans aan en bereken $P(X \ge 2)$.</p>
+                <div class="b-table-wrap"><table class="b-table" style="min-width:0;max-width:360px"><tr><th>$x_i$</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+                    <tr><th>$P(X = x_i)$</th><td>0,1</td><td>0,3</td><td>?</td><td>0,2</td></tr></table></div></div>
+            <div class="b-sol"><p>$1 - 0{,}1 - 0{,}3 - 0{,}2 = 0{,}4$, $P(X \ge 2) = 0{,}4 + 0{,}2 = 0{,}6$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Je gooit twee keer met een dobbelsteen, $X$ is het grootste van de twee aantallen ogen. Bepaal de kansverdeling van $X$.</p></div>
+            <div class="b-sol"><p>$P(X = k) = \tfrac{2k - 1}{36}$: $\tfrac{1}{36}, \tfrac{3}{36}, \tfrac{5}{36}, \tfrac{7}{36}, \tfrac{9}{36}, \tfrac{11}{36}$ voor $k = 1, \ldots, 6$.
+                Uitleg: beide dobbelstenen hoogstens $k$ in $k^2$ gevallen, hoogstens $k - 1$ in $(k - 1)^2$ gevallen, het verschil is $2k - 1$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Een rad van fortuin heeft drie vakken met middelpuntshoeken van 180°, 120° en 60°. Ze betalen € 0, € 2 en € 5 uit. Geef de kansverdeling van de uitbetaling en teken een staafdiagram.</p></div>
+            <div class="b-sol"><p>$P(0) = \tfrac{180}{360} = \tfrac12$, $P(2) = \tfrac{120}{360} = \tfrac13$, $P(5) = \tfrac{60}{360} = \tfrac16$</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="3/8" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Drie munten, $X$ = aantal keer kop. Hoe groot is $P(X = 2)$?</p><div class="b-sol"><p>KKM, KMK, MKK: $\tfrac38$</p></div></div>
+        <div class="b-q" data-ans="0,3" data-tol="0.0001" data-ph="P ="><p class="b-q-text">De waarden van een verdeling hebben de kansen 0,25; 0,35; ?; 0,1. Welke kans ontbreekt?</p><div class="b-sol"><p>$1 - 0{,}7 = 0{,}3$</p></div></div>
+        <div class="b-q" data-ans="1/12" data-tol="0.0005" data-ph="P ="><p class="b-q-text">Twee dobbelstenen, $X$ = som van de ogen. Hoe groot is $P(X \ge 11)$?</p><div class="b-sol"><p>$\tfrac{2 + 1}{36} = \tfrac{1}{12}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Verwachtingswaarde" data-toc-k="2" data-toc-short="2 Verwachting">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 2</span><span class="b-band-sub">4 LESUREN</span></div>
+    <h2><span class="b-no">2</span>De verwachtingswaarde</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Bij het rad van het schoolfeest spelen 800 mensen. Ongeveer 400 krijgen niets, 200 elk € 1, 100 elk € 2 en 100 elk € 10.
+                Dat is $200 + 200 + 1000 = 1400$ euro, dus gemiddeld $\tfrac{1400}{800} = 1{,}75$ euro per spel.</p></div></div>
+            <div class="b-text"><p>Hetzelfde krijg je zonder die 800 mensen rechtstreeks uit de kansverdeling: $0 \cdot \tfrac12 + 1 \cdot \tfrac14 + 2 \cdot \tfrac18 + 10 \cdot \tfrac18 = 1{,}75$.
+                Bij een inzet van € 2 verlies je gemiddeld 25 cent per spel, de klassenkas verdient.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · VERWACHTINGSWAARDE</div>
+                <div class="b-text">
+                    <p>Neemt $X$ de waarden $x_1, \ldots, x_n$ aan, dan is de <b>verwachtingswaarde</b>
+                        $$E(X) = \mu = x_1 \cdot P(X = x_1) + x_2 \cdot P(X = x_2) + \ldots + x_n \cdot P(X = x_n).$$</p>
+                    <p>Dat is het <b>gemiddelde op de lange duur</b>: als je het experiment heel vaak uitvoert, ligt het gemiddelde van de uitkomsten dicht bij $E(X)$.</p>
+                    <p>Is $X$ de <b>winst</b> (uitbetaling min inzet), dan heet een spel <b>eerlijk</b> als $E(X) = 0$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Geen mogelijke waarde:</b> de verwachtingswaarde bij een dobbelsteen is 3,5. Dat aantal ogen gooi je nooit, het is een gemiddelde.</p>
+            <p class="b-note"><b>Zwaartepunt:</b> zie je de staven van het staafdiagram als gewichten op een wip, dan ligt het steunpunt bij $\mu$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERACTIEF · TOEVALSVARIABELEN EN HUN KENGETALLEN</div>
+        <p class="b-help" style="margin:0 0 12px">Kies een voorbeeld. Speel daarna 10, 100 of 1000 keer en vergelijk het gemiddelde van je spellen met de verwachtingswaarde.</p>
+        <div data-widget="zufallsgroesse"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 3 · DE DOBBELSTEEN</div>
+            <div class="b-text"><p>Bereken de verwachtingswaarde van het aantal ogen van een dobbelsteen.</p></div>
+            <div class="b-sol"><p>$E(X) = (1 + 2 + 3 + 4 + 5 + 6) \cdot \tfrac16 = \tfrac{21}{6} = 3{,}5$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 4 · CHUCK-A-LUCK</div>
+            <div class="b-text"><p>Je zet € 1 in op een getal, daarna worden drie dobbelstenen gegooid. Voor elke dobbelsteen met jouw getal krijg je € 1 winst, toont geen enkele het, dan ben je je inzet kwijt. Is het spel eerlijk?</p></div>
+            <div class="b-sol"><p>Geen overeenkomst: $\left(\tfrac56\right)^3 = \tfrac{125}{216}$, één: $3 \cdot \tfrac16 \cdot \left(\tfrac56\right)^2 = \tfrac{75}{216}$, twee: $\tfrac{15}{216}$, drie: $\tfrac{1}{216}$.</p>
+                <p>$E(X) = \dfrac{-125 + 75 + 2 \cdot 15 + 3 \cdot 1}{216} = -\dfrac{17}{216} \approx -0{,}079$. <span class="b-res">Oneerlijk: bijna 8 cent verlies per spel.</span></p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bereken $E(X)$ voor de verdeling $x_i$: 0, 1, 2, 3 met $P(X = x_i)$: 0,1; 0,3; 0,4; 0,2.</p></div>
+            <div class="b-sol"><p>$0 + 0{,}3 + 0{,}8 + 0{,}6 = 1{,}7$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bereken de verwachtingswaarde van het aantal keer kop bij drie munten. Wat betekent de uitkomst?</p></div>
+            <div class="b-sol"><p>$0 \cdot \tfrac18 + 1 \cdot \tfrac38 + 2 \cdot \tfrac38 + 3 \cdot \tfrac18 = \tfrac{12}{8} = 1{,}5$. Gemiddeld gooi je bij drie worpen 1,5 keer kop.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Het rad van het schoolfeest moet eerlijk worden. a) Hoe hoog zou de inzet moeten zijn? b) De inzet blijft € 2. Welk bedrag moet het vak van € 10 dan uitbetalen?</p></div>
+            <div class="b-sol"><p>a) € 1,75 &nbsp; b) $0{,}25 + 0{,}25 + \tfrac{a}{8} = 2 \Rightarrow a = 12$ euro</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Een tombola verkoopt 1000 loten van € 2. Er is één prijs van € 500, er zijn 10 prijzen van € 50 en 100 prijzen van € 5. Bereken de verwachtingswaarde van de winst voor één lot.</p></div>
+            <div class="b-sol"><p>Uitbetaling gemiddeld $\tfrac{500 + 500 + 500}{1000} = 1{,}5$ euro. Winst $1{,}5 - 2 = -0{,}5$ euro. De tombola haalt € 500 op.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Een fiets van € 800 wordt met een kans van 3% per jaar gestolen. Welke jaarpremie zou eerlijk zijn? Een verzekeraar vraagt € 39. Waarom verzekeren toch veel mensen hun fiets?</p></div>
+            <div class="b-sol"><p>Eerlijke premie $800 \cdot 0{,}03 = 24$ euro. Het verschil van € 15 dekt de kosten en de winst van de verzekeraar.
+                Je betaalt een klein, zeker bedrag om je in te dekken tegen een groot, onwaarschijnlijk verlies.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="0,2" data-tol="0.0001" data-ph="E(X) ="><p class="b-q-text">$X$ neemt $-1$ aan met kans 0,6 en $2$ met kans 0,4. Bereken $E(X)$.</p><div class="b-sol"><p>$-0{,}6 + 0{,}8 = 0{,}2$</p></div></div>
+        <div class="b-q" data-ans="3,5" data-tol="0.0001" data-ph="euro"><p class="b-q-text">Een dobbelspel betaalt het aantal ogen in euro uit. Welke inzet is eerlijk?</p><div class="b-sol"><p>$E(X) = 3{,}5$ euro</p></div></div>
+        <div class="b-q" data-ans="0,4" data-tol="0.0001" data-ph="P ="><p class="b-q-text">$X$ neemt alleen de waarden 0 en 5 aan en heeft $E(X) = 2$. Hoe groot is $P(X = 5)$?</p><div class="b-sol"><p>$5p = 2 \Rightarrow p = 0{,}4$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Variantie en standaardafwijking" data-toc-k="3" data-toc-short="3 Spreiding">
+    <div class="b-band"><span class="b-band-tag">PARAGRAAF 3</span><span class="b-band-sub">4 LESUREN</span></div>
+    <h2><span class="b-no">3</span>Variantie en standaardafwijking</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>In spel A win of verlies je met dezelfde kans € 1. In spel B win je met een kans van 1% € 99, anders verlies je € 1.
+                Beide hebben verwachtingswaarde 0. Toch voelt spel B heel anders.</p></div></div>
+            <div class="b-text"><p>Het verschil zit in de <b>spreiding</b>: bij spel A ligt elke uitkomst € 1 van de verwachtingswaarde af, bij spel B meestal € 1, maar soms € 99.
+                Je meet de spreiding met het gemiddelde van de <b>gekwadrateerde afwijkingen</b> van de verwachtingswaarde.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">ONTHOUD · VARIANTIE EN STANDAARDAFWIJKING</div>
+                <div class="b-text">
+                    <p><b>Variantie:</b> $V(X) = (x_1 - \mu)^2 \cdot P(X = x_1) + \ldots + (x_n - \mu)^2 \cdot P(X = x_n)$</p>
+                    <p><b>Standaardafwijking:</b> $\sigma = \sqrt{V(X)}$. Die heeft dezelfde eenheid als $X$ en geeft aan hoe ver de waarden <b>gewoonlijk</b> van de verwachtingswaarde afwijken.</p>
+                    <p>Spel A: $V = 1$, $\sigma = 1$ · Spel B: $V = 99^2 \cdot 0{,}01 + (-1)^2 \cdot 0{,}99 = 99$, $\sigma \approx 9{,}95$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Rekentip:</b> vaak sneller is $V(X) = E(X^2) - \mu^2$, dus „gemiddelde van de kwadraten min het kwadraat van het gemiddelde”.</p>
+            <p class="b-note"><b>Risico:</b> in de financiële wereld is de standaardafwijking een maat voor het risico van een belegging.</p>
+        </aside>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 5 · DE DOBBELSTEEN</div>
+            <div class="b-text"><p>Bereken de variantie en de standaardafwijking van het aantal ogen van een dobbelsteen.</p></div>
+            <div class="b-sol"><p>Met $\mu = 3{,}5$: $V(X) = \tfrac16 \left(2{,}5^2 + 1{,}5^2 + 0{,}5^2 + 0{,}5^2 + 1{,}5^2 + 2{,}5^2\right) = \tfrac{17{,}5}{6} \approx 2{,}917$, $\sigma \approx 1{,}708$</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">VOORBEELD 6 · TWEE VULMACHINES</div>
+            <div class="b-text"><p>Machine 1 vult 498 g, 500 g, 502 g met kansen 0,1; 0,8; 0,1. Machine 2 vult 495 g, 500 g, 505 g met kansen 0,2; 0,6; 0,2. Welke werkt nauwkeuriger?</p></div>
+            <div class="b-sol"><p>Allebei: $\mu = 500$ g. $\sigma_1 = \sqrt{4 \cdot 0{,}1 + 4 \cdot 0{,}1} = \sqrt{0{,}8} \approx 0{,}89$ g, $\sigma_2 = \sqrt{25 \cdot 0{,}2 \cdot 2} = \sqrt{10} \approx 3{,}16$ g.
+                <span class="b-res">Machine 1 spreidt minder.</span></p></div>
+        </div>
+    </div>
+
+    <h3>OPGAVEN</h3>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Bereken $V(X)$ en $\sigma$ voor het aantal keer kop bij drie munten ($\mu = 1{,}5$).</p></div>
+            <div class="b-sol"><p>$V = 2{,}25 \cdot \tfrac18 + 0{,}25 \cdot \tfrac38 + 0{,}25 \cdot \tfrac38 + 2{,}25 \cdot \tfrac18 = \tfrac68 = 0{,}75$, $\sigma \approx 0{,}866$</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>$X$ neemt 0, 2 en 4 aan met kansen 0,25; 0,5; 0,25. Bereken $\mu$, $V(X)$ en $\sigma$.</p></div>
+            <div class="b-sol"><p>$\mu = 2$, $V = 4 \cdot 0{,}25 + 0 + 4 \cdot 0{,}25 = 2$, $\sigma = \sqrt2 \approx 1{,}414$</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Vergelijk chuck-a-luck (voorbeeld 4) met spel A uit de instap: bereken de standaardafwijking van de winst bij chuck-a-luck. Controleer met het interactieve onderdeel.</p></div>
+            <div class="b-sol"><p>$E(X^2) = \tfrac{125 + 75 + 4 \cdot 15 + 9}{216} = \tfrac{269}{216} \approx 1{,}2454$, $V = 1{,}2454 - 0{,}0787^2 \approx 1{,}239$, $\sigma \approx 1{,}113$ euro</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Laat met het voorbeeld van de dobbelsteen zien dat $V(X) = E(X^2) - \mu^2$ hetzelfde oplevert als de definitie.</p></div>
+            <div class="b-sol"><p>$E(X^2) = \tfrac{1 + 4 + 9 + 16 + 25 + 36}{6} = \tfrac{91}{6} \approx 15{,}167$, min $3{,}5^2 = 12{,}25$ geeft $\tfrac{35}{12} \approx 2{,}917$. Net als in voorbeeld 5.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TEST JEZELF!</div>
+        <div class="b-q" data-ans="5" data-ph="σ ="><p class="b-q-text">$X$ neemt 0 en 10 aan, elk met kans 0,5. Hoe groot is $\sigma$?</p><div class="b-sol"><p>$\mu = 5$, $V = 25$, $\sigma = 5$</p></div></div>
+        <div class="b-q" data-ans="1,5" data-tol="0.0001" data-ph="σ ="><p class="b-q-text">$V(X) = 2{,}25$. Hoe groot is de standaardafwijking?</p><div class="b-sol"><p>$\sqrt{2{,}25} = 1{,}5$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Twee spelen hebben dezelfde verwachtingswaarde, spel A heeft $\sigma = 2$ euro, spel B heeft $\sigma = 8$ euro. Welk spel is riskanter?</p>
+            <div class="b-mc"><button>Spel A</button><button>Spel B</button><button>Allebei even riskant</button></div>
+            <div class="b-sol"><p>Bij spel B wijken de uitkomsten gewoonlijk veel sterker af van de verwachtingswaarde.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Herhalen · verdiepen · verbinden" data-toc-k="H" data-toc-short="Oefenen">
+    <div class="b-band"><span class="b-band-tag">HERHALEN · VERDIEPEN · VERBINDEN</span></div>
+    <div class="b-tasks" data-start="14">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Leg zonder lange berekening uit dat de som van de ogen van twee dobbelstenen verwachtingswaarde 7 heeft.</p></div>
+            <div class="b-sol"><p>De verdeling is symmetrisch rond 7. Of: elke dobbelsteen heeft verwachtingswaarde 3,5, en verwachtingswaarden tel je op.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Hoeveel euro verlies je bij chuck-a-luck op de lange duur in 216 spellen? Hoeveel in 1000?</p></div>
+            <div class="b-sol"><p>216 spellen: ongeveer € 17. 1000 spellen: $1000 \cdot \tfrac{17}{216} \approx 78{,}70$ euro.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Verbinden met hoofdstuk 1.1:</b> uit een vaas met 3 rode en 2 blauwe knikkers pak je er twee zonder terugleggen. Voor elke rode krijg je € 1. De inzet is € 1. Is het spel eerlijk?</p></div>
+            <div class="b-sol"><p>Met voorbeeld 2: $E(\text{uitbetaling}) = 0 \cdot 0{,}1 + 1 \cdot 0{,}6 + 2 \cdot 0{,}3 = 1{,}2$ euro. Winst gemiddeld $+0{,}20$ euro: gunstig voor de speler. Eerlijk zou een inzet van € 1,20 zijn.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Dobbelspel: bij een zes win je $a$ euro, anders verlies je € 1. Voor welke $a$ is het spel eerlijk? Hoe groot is dan $\sigma$?</p></div>
+            <div class="b-sol"><p>$\tfrac{a}{6} - \tfrac56 = 0 \Rightarrow a = 5$. $V = 25 \cdot \tfrac16 + 1 \cdot \tfrac56 = 5$, $\sigma = \sqrt5 \approx 2{,}24$ euro.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Excursie: de Sint-Petersburgparadox" data-toc-k="X" data-toc-short="Petersburg">
+    <div class="b-band"><span class="b-band-tag">EXCURSIE</span><span class="b-band-sub">EEN SPEL MET ONEINDIGE VERWACHTINGSWAARDE</span></div>
+    <h2>De Sint-Petersburgparadox</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Je gooit een munt op tot er voor het eerst munt valt. Gebeurt dat bij de $k$-de worp, dan krijg je $2^k$ euro.
+                Met kans $\tfrac12$ krijg je € 2, met kans $\tfrac14$ € 4, met kans $\tfrac18$ € 8, enzovoort.</p>
+            <p>De verwachtingswaarde is $2 \cdot \tfrac12 + 4 \cdot \tfrac14 + 8 \cdot \tfrac18 + \ldots = 1 + 1 + 1 + \ldots$, dus <b>oneindig</b>.
+                Toch zou bijna niemand meer dan € 20 inzetten. Waarom?</p>
+            <p>Nicolaus I Bernoulli stelde die vraag in 1713 in een brief aan Pierre Rémond de Montmort. Zijn neef Daniel Bernoulli antwoordde in 1738:
+                mensen beoordelen geld niet naar het bedrag, maar naar het <b>nut</b> ervan, en dat groeit langzamer dan het bedrag. Daar komt bij:
+                geen bank ter wereld zou de reusachtige prijzen van de zeldzame lange reeksen kunnen uitbetalen.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Bron:</b> Daniel Bernoulli: Specimen theoriae novae de mensura sortis. Commentarii Academiae Scientiarum Imperialis Petropolitanae 5 (1738).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Samenvatting" data-toc-k="S" data-toc-short="Samenvatting">
+    <div class="b-band"><span class="b-band-tag">SAMENVATTING</span><span class="b-band-sub">HET BELANGRIJKSTE IN ÉÉN OOGOPSLAG</span></div>
+    <div class="b-rueck"><div><h4>TOEVALSVARIABELE</h4><p>Koppelt aan elke uitkomst een getal. Verdeling: alle $P(X = x_i)$, samen 1.</p></div>
+        <div><p>Aantal keer kop bij drie munten: $\tfrac18, \tfrac38, \tfrac38, \tfrac18$</p></div></div>
+    <div class="b-rueck"><div><h4>VERWACHTINGSWAARDE</h4><p>$E(X) = \mu = \sum x_i \cdot P(X = x_i)$, het gemiddelde op de lange duur.</p></div>
+        <div><p>Dobbelsteen: 3,5 · rad van fortuin: € 1,75</p></div></div>
+    <div class="b-rueck"><div><h4>EERLIJK SPEL</h4><p>Verwachtingswaarde van de winst gelijk aan 0.</p></div>
+        <div><p>Chuck-a-luck: $-\tfrac{17}{216}$ euro, oneerlijk</p></div></div>
+    <div class="b-rueck"><div><h4>VARIANTIE EN STANDAARDAFWIJKING</h4><p>$V(X) = \sum (x_i - \mu)^2 \cdot P(X = x_i)$, $\sigma = \sqrt{V(X)}$</p></div>
+        <div><p>Dobbelsteen: $V \approx 2{,}917$, $\sigma \approx 1{,}708$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Toets" data-toc-k="T" data-toc-short="Toets">
+    <div class="b-band"><span class="b-band-tag">TOETS</span><span class="b-band-sub">TWEE RONDES · METEEN FEEDBACK</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDE 1</div>
+            <div class="b-q" data-ans="2,1" data-tol="0.0001" data-ph="E(X) ="><p class="b-q-text">$X$ neemt 1, 2, 3 aan met kansen 0,2; 0,5; 0,3. Bereken $E(X)$.</p><div class="b-sol"><p>$0{,}2 + 1 + 0{,}9 = 2{,}1$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Een spel heet eerlijk als …</p>
+                <div class="b-mc"><button>winnen waarschijnlijker is dan verliezen</button><button>de verwachtingswaarde van de winst 0 is</button><button>de standaardafwijking 0 is</button></div>
+                <div class="b-sol"><p>Op de lange duur wint niemand.</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="σ ="><p class="b-q-text">$X$ neemt 0 en 4 aan, elk met kans 0,5. Hoe groot is $\sigma$?</p><div class="b-sol"><p>$\mu = 2$, $V = 4$, $\sigma = 2$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDE 2</div>
+            <div class="b-q" data-ans="0,35" data-tol="0.0001" data-ph="P ="><p class="b-q-text">Een verdeling heeft de kansen 0,2; 0,15; ?; 0,3. Welke kans ontbreekt?</p><div class="b-sol"><p>$1 - 0{,}65 = 0{,}35$</p></div></div>
+            <div class="b-q" data-ans="-0,2" data-tol="0.0001" data-ph="euro"><p class="b-q-text">Inzet € 1. Met kans 0,1 wordt € 8 uitbetaald, anders niets. Wat is de verwachtingswaarde van de winst?</p><div class="b-sol"><p>$0{,}8 - 1 = -0{,}2$ euro</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="V ="><p class="b-q-text">$X$ neemt $-2$ en $2$ aan, elk met kans 0,5. Bereken $V(X)$.</p><div class="b-sol"><p>$\mu = 0$, $V = 4$</p></div></div>
+        </div>
+    </div>
+    <h3>MEER OEFENEN ONLINE</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetest11-stochastik-uebung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">OEFENEN KANSREKENING</span><span class="b-lab-what">Verdelingen en verwachtingswaarde (in het Duits)</span></span></a>
+        <a class="b-lab" href="../../mathetest11-simulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SIMULATIE</span><span class="b-lab-what">Gemiddelde op de lange duur (in het Duits)</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Wiskunde, Berufliches Gymnasium klas 12 · leergebied 1, volgens het leerplan wiskunde van het Berufliches Gymnasium in Saksen.</p>
+    <p>Alle teksten, opgaven en afbeeldingen zijn eigen materiaal.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-nl.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-nl/stochastik.js"></script>
+</body>
+</html>
