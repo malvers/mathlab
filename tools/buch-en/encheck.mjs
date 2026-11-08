@@ -4,7 +4,9 @@
 // usage: node tools/buch-en/encheck.mjs <book> [--poke] [file1.html …]   (no files: every page of the book)
 // A Spanish edition (<book>-es, package ES0) is checked the same way; there a decimal comma on a canvas is right.
 // The same for an Italian edition (<book>-it, package IT0), a French one (<book>-fr, package FR0) and a Swahili one
-// (<book>-sw, package SW0, decimal point as in English: a decimal comma on a canvas is wrong there too).
+// (<book>-sw, package SW0, decimal point as in English: a decimal comma on a canvas is wrong there too), and a Portuguese,
+// Dutch or Turkish one (<book>-pt, -nl, -tr, package arch3: decimal comma; ö and ü are Dutch and Turkish letters there).
+// The button "Türkçe baskı" on every BGY 11 start page is not German.
 // needs the local server (python3 serve.py, http://localhost:8765; PORT=… to change)
 import pw from '../../videopipeline/node_modules/playwright/index.js';
 import fs from 'fs';
@@ -15,21 +17,33 @@ const poke = args.includes('--poke');
 const given = args.filter(a => !a.startsWith('--'));
 const files = given.length ? given : fs.readdirSync(new URL('../../HTML/buch/' + book + '/', import.meta.url)).filter(f => f.endsWith('.html') && f !== 'druck.html').sort();
 const browser = await pw.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--mute-audio'] });
-const LANG = book.endsWith('-es') ? 'es' : book.endsWith('-it') ? 'it' : book.endsWith('-fr') ? 'fr' : book.endsWith('-sw') ? 'sw' : 'en';
+const LANG = book.endsWith('-es') ? 'es' : book.endsWith('-it') ? 'it' : book.endsWith('-fr') ? 'fr' : book.endsWith('-sw') ? 'sw' :
+  book.endsWith('-pt') ? 'pt' : book.endsWith('-nl') ? 'nl' : book.endsWith('-tr') ? 'tr' : 'en';
 // Spanish: the names of the other editions, names and titles quoted on purpose (Graßmann, mathe12-es 5.1), and Spanish words
 // with ü (pingüino, bilingüe), are not German
-const ALLOW_ES = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Edición alemana|English edition|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller|[a-záéíóúñ]*gü[eiéí][a-záéíóúñ]*|[A-ZÁÉÍÓÚÑ]*GÜ[EIÉÍ][A-ZÁÉÍÓÚÑ]*/g;
+const ALLOW_ES = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Edición alemana|English edition|Türkçe baskı|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller|[a-záéíóúñ]*gü[eiéí][a-záéíóúñ]*|[A-ZÁÉÍÓÚÑ]*GÜ[EIÉÍ][A-ZÁÉÍÓÚÑ]*/g;
 // Italian: the same names, the buttons of the other editions
-const ALLOW_IT = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Edizione tedesca|English edition|Edición española|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
+const ALLOW_IT = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Edizione tedesca|English edition|Edición española|Türkçe baskı|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
 // French: the same names, the buttons of the other editions, the second school name of the FOS books
-const ALLOW_FR = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Édition allemande|English edition|Edición española|Edizione italiana|Berufliches Gymnasium|Fachoberschule|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
+const ALLOW_FR = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Édition allemande|English edition|Edición española|Edizione italiana|Türkçe baskı|Berufliches Gymnasium|Fachoberschule|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
 // Swahili: the same names, the buttons of the other editions, the photographers and places with umlauts in the photo credits
-const ALLOW_SW = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Süßen|Mücke|Müngsten|Franz Xaver von Zach|Edition allemande|Toleo la Kijerumani|Deutsche Ausgabe|English edition|Edición española|Edizione italiana|Édition française|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
-const ALLOW = LANG === 'sw' ? ALLOW_SW : LANG === 'es' ? ALLOW_ES : LANG === 'it' ? ALLOW_IT : LANG === 'fr' ? ALLOW_FR : /Doc Alvers Mathe-Labor|Deutsche Ausgabe|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Würfel(?=\b)|Möbius|Schütz|Müller/g;
+const ALLOW_SW = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Süßen|Mücke|Müngsten|Franz Xaver von Zach|Edition allemande|Toleo la Kijerumani|Deutsche Ausgabe|English edition|Edición española|Edizione italiana|Édition française|Türkçe baskı|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
+// Portuguese, Dutch, Turkish (package arch3): the same names and photo credits, the buttons of the other editions
+const ALLOW_PT = /Doc Alvers Mathe-Labor|Graßmann|Die lineale Ausdehnungslehre(?:, ein neuer Zweig der Mathematik)?|Süßen|Mücke|Müngsten|Franz Xaver von Zach|English edition|Edición española|Edizione italiana|Édition française|Toleo la Kiswahili|Edição portuguesa|Nederlandse editie|Türkçe baskı|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Möbius|Schütz|Müller/g;
+const ALLOW = ['pt', 'nl', 'tr'].includes(LANG) ? ALLOW_PT : LANG === 'sw' ? ALLOW_SW : LANG === 'es' ? ALLOW_ES : LANG === 'it' ? ALLOW_IT : LANG === 'fr' ? ALLOW_FR : /Doc Alvers Mathe-Labor|Deutsche Ausgabe|Berufliches Gymnasium|Gauß|Mathe-Labor|Doc Alvers|Würfel(?=\b)|Türkçe baskı|Möbius|Schütz|Müller/g;
 const GERMAN_DE = /[äöüÄÖÜß]|\b(der|die|das|und|nicht|ist|mit|von|für|auf|eine?|einer|wird|sind|oder|zum|zur|bei|wie|auch|noch|nach|aus|Lösung|Aufgabe|Ergebnis|Zeile|Schritt|Funktion|Gerade|Seite|Zurück|Neue|keine|Anzahl|Summe|Wahrscheinlichkeit)\b/;
 // French: word boundaries that know accented letters (\b alone finds "mit" in "extrémités" and "der" in "procéder")
 // Swahili: "bei" is a Swahili word (bei ya tiketi, the price of the ticket)
-const GERMAN = LANG === 'sw' ? new RegExp(GERMAN_DE.source.replace('|bei|', '|')) : LANG === 'fr' ? new RegExp(GERMAN_DE.source.replace('\\b(', '(?<![\\p{L}\\p{N}_])(').replace(/\)\\b$/, ')(?![\\p{L}\\p{N}_])'), 'u') : GERMAN_DE;
+// Portuguese, Dutch, Turkish (package arch3): "das" is Portuguese, "die", "wie", "noch" are Dutch, ö and ü are Dutch (coördinaat)
+// and Turkish letters (bölüm); word boundaries that know accented letters, as for French ("biçim" is no German "im")
+const GERMAN_NEW = () => {
+  let src = GERMAN_DE.source;
+  if (LANG === 'pt') src = src.replace('|das|', '|');
+  if (LANG === 'nl') src = src.replace('|die|', '|').replace('|wie|', '|').replace('|noch|', '|');
+  if (LANG !== 'pt') src = src.replace('[äöüÄÖÜß]', '[äÄß]');
+  return new RegExp(src.replace('\\b(', '(?<![\\p{L}\\p{N}_])(').replace(/\)\\b$/, ')(?![\\p{L}\\p{N}_])'), 'u');
+};
+const GERMAN = ['pt', 'nl', 'tr'].includes(LANG) ? GERMAN_NEW() : LANG === 'sw' ? new RegExp(GERMAN_DE.source.replace('|bei|', '|')) : LANG === 'fr' ? new RegExp(GERMAN_DE.source.replace('\\b(', '(?<![\\p{L}\\p{N}_])(').replace(/\)\\b$/, ')(?![\\p{L}\\p{N}_])'), 'u') : GERMAN_DE;
 for (const f of files) {
   for (const w of [1280, 390]) {
     const ctx = await browser.newContext({ viewport: { width: w, height: 900 }, isMobile: w < 500, hasTouch: w < 500 });

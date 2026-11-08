@@ -127,5 +127,69 @@
                 'Furahia, na nakutakia mafanikio mema!',
             ],
         },
+
+        // Portuguese for Portugal (package arch3, 08.11.2026, block pt); the header button reads "Comunicar um erro" there
+        // (js/buch-pt.js); the pupil is "tu", the teachers "vocês"
+        pt: {
+            foto, name, zeile,
+            text: [
+                'Querida aluna, querido aluno,',
+                'Este livro nasceu de uma convicção simples: uma boa educação nunca pode falhar por falta de dinheiro. É por isso que tudo em ' +
+                'docalvers.de é gratuito, sem publicidade e sem registo. Ninguém recolhe os teus dados. Também os vídeos do meu canal de YouTube ' +
+                '(youtube.com/@docalvers) estão à tua disposição, gratuitamente.',
+                'Sou físico, fundei uma empresa de software e hoje ensino Matemática e Informática em Dresden, na Saxónia, na Alemanha. Construo o ' +
+                'Mathe-Labor por vontade própria. Invisto nele tempo e dinheiro porque estou convencido de que este investimento vale a pena: em ti e numa ' +
+                'educação melhor para todos. Ajudou-me uma equipa invulgar – agentes de inteligência artificial que programam, desenham, calculam e ' +
+                'traduzem segundo as minhas indicações. Foi assim que nasceram bem mais de 100 laboratórios interativos e mais de 20 manuais escolares ' +
+                'em várias línguas. E todos os dias há mais!',
+                'A Matemática não é só para ler, é para mexer. No livro online podes deslocar cada gráfico e repetir mil vezes cada experiência ' +
+                'aleatória; os códigos QR deste livro levam-te diretamente até lá. Experimenta, erra – é exatamente assim que mais se aprende.',
+                'E se encontrares um erro no livro, diz-me. Com o botão vermelho “Comunicar um erro” do livro online, cada mensagem chega diretamente a mim.',
+                'Às professoras e aos professores: usem tudo isto à vontade nas aulas – é exatamente para isso que existe.',
+                'Boa leitura e muito sucesso!',
+            ],
+        },
+
+        // Dutch (package arch3, 08.11.2026, block nl): still the English letter - TODO nl: translate this block only
+        // (name the header button as js/buch-nl.js writes it)
+        nl: {
+            foto, name, zeile,
+            text: [
+                'Dear student,',
+                'This book grew out of a simple conviction: a good education must never fail for lack of money. That is why everything on ' +
+                'docalvers.de is free, without ads and without signing up. Nobody collects your data. The videos on my YouTube channel ' +
+                '(youtube.com/@docalvers) are free for you as well.',
+                'I am a physicist, I founded a software company, and today I teach mathematics and computer science in Dresden, Saxony, Germany. I build the ' +
+                'Mathe-Labor of my own free will. I put time and money into it because I am convinced that the investment pays off: in you and in ' +
+                'better education for everyone. An unusual team has helped me – AI agents that program, draw, calculate and translate to my ' +
+                'specifications. This is how well over 100 interactive labs and more than 20 textbooks in several languages came about. And there are more every day!',
+                'Mathematics is not only for reading, it is for handling. In the online book you can drag every graph and run every random ' +
+                'experiment a thousand times; the QR codes in this book take you straight there. Try things out, make mistakes – that is exactly how you learn the most.',
+                'And if you find a mistake in the book, tell me. With the red “Fehler melden” button (report an error) in the online book, every report comes straight to me.',
+                'To teachers: please use all of it in your lessons – that is exactly what it is for.',
+                'Enjoy it, and every success!',
+            ],
+        },
+
+        // Turkish (package arch3, 08.11.2026, block tr): still the English letter - TODO tr: translate this block only
+        // (name the header button as js/buch-tr.js writes it)
+        tr: {
+            foto, name, zeile,
+            text: [
+                'Dear student,',
+                'This book grew out of a simple conviction: a good education must never fail for lack of money. That is why everything on ' +
+                'docalvers.de is free, without ads and without signing up. Nobody collects your data. The videos on my YouTube channel ' +
+                '(youtube.com/@docalvers) are free for you as well.',
+                'I am a physicist, I founded a software company, and today I teach mathematics and computer science in Dresden, Saxony, Germany. I build the ' +
+                'Mathe-Labor of my own free will. I put time and money into it because I am convinced that the investment pays off: in you and in ' +
+                'better education for everyone. An unusual team has helped me – AI agents that program, draw, calculate and translate to my ' +
+                'specifications. This is how well over 100 interactive labs and more than 20 textbooks in several languages came about. And there are more every day!',
+                'Mathematics is not only for reading, it is for handling. In the online book you can drag every graph and run every random ' +
+                'experiment a thousand times; the QR codes in this book take you straight there. Try things out, make mistakes – that is exactly how you learn the most.',
+                'And if you find a mistake in the book, tell me. With the red “Fehler melden” button (report an error) in the online book, every report comes straight to me.',
+                'To teachers: please use all of it in your lessons – that is exactly what it is for.',
+                'Enjoy it, and every success!',
+            ],
+        },
     };
 })();

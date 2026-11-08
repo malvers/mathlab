@@ -21,6 +21,10 @@
  * Swahili editions (buch/<book>-sw/, <html lang="sw">, package SW0, 03.11.2026, Kenya): t(de, en, es, it, fr, sw) picks the
  * sixth word (a missing Swahili falls back to German); numbers get a decimal point as in Kenyan schools (Buch.dot, true for
  * English and Swahili), the widget modules are translated by js/buch-sw.js. Buch.en stays true only for English.
+ * Portuguese (Portugal), Dutch and Turkish editions (buch/<book>-pt/, -nl/, -tr/, <html lang="pt" | "nl" | "tr">, package
+ * arch3, 08.11.2026): t(de, en, es, it, fr, sw, pt, nl, tr) picks the seventh, eighth or ninth word (a missing one falls
+ * back to German); all three keep the decimal comma (Buch.dot stays false), the widget modules are translated by
+ * js/buch-pt.js, js/buch-nl.js, js/buch-tr.js. Turkish capitals go through toLocaleUpperCase('tr-TR') (i → İ).
  */
 (function () {
     'use strict';
@@ -30,13 +34,18 @@
     // and Italian editions (Doc, 18.10.2026: "Bitte in Italienisch"): Buch.lang = 'de' | 'en' | 'es' | 'it'
     // and French editions (Doc, 22.10.2026: "mach die Übersetzung der Bücher in Französisch"): Buch.lang = … | 'fr'
     // and Swahili editions for Kenya (Doc, 03.11.2026: "übersetz mal bitte BGY11 in Suaheli (Kenia)"): Buch.lang = … | 'sw'
+    // and Portuguese (Portugal), Dutch and Turkish editions (package arch3, 08.11.2026): Buch.lang = … | 'pt' | 'nl' | 'tr'
     const LANG = /^en/i.test(document.documentElement.lang || '') ? 'en' : /^es/i.test(document.documentElement.lang || '') ? 'es' : /^it/i.test(document.documentElement.lang || '') ? 'it' :
-        /^fr/i.test(document.documentElement.lang || '') ? 'fr' : /^sw/i.test(document.documentElement.lang || '') ? 'sw' : 'de';
-    const EN = LANG === 'en', ES = LANG === 'es', IT = LANG === 'it', FR = LANG === 'fr', SW = LANG === 'sw';
+        /^fr/i.test(document.documentElement.lang || '') ? 'fr' : /^sw/i.test(document.documentElement.lang || '') ? 'sw' :
+        /^pt/i.test(document.documentElement.lang || '') ? 'pt' : /^nl/i.test(document.documentElement.lang || '') ? 'nl' : /^tr/i.test(document.documentElement.lang || '') ? 'tr' : 'de';
+    const EN = LANG === 'en', ES = LANG === 'es', IT = LANG === 'it', FR = LANG === 'fr', SW = LANG === 'sw', PT = LANG === 'pt', NL = LANG === 'nl', TR = LANG === 'tr';
     // the decimal point: English, and Swahili as Kenyan schools write it (0.5 · 10,000 · 30%)
     const DOT = EN || SW;
-    // a word without its Spanish (Italian, French, Swahili) falls back to German, never to English
-    const t = (de, en, es, it, fr, sw) => EN ? en : ES && es !== undefined ? es : IT && it !== undefined ? it : FR && fr !== undefined ? fr : SW && sw !== undefined ? sw : de;
+    // a word without its Spanish (Italian, French, Swahili, Portuguese, Dutch, Turkish) falls back to German, never to English
+    const t = (de, en, es, it, fr, sw, pt, nl, tr) => EN ? en : ES && es !== undefined ? es : IT && it !== undefined ? it : FR && fr !== undefined ? fr : SW && sw !== undefined ? sw :
+        PT && pt !== undefined ? pt : NL && nl !== undefined ? nl : TR && tr !== undefined ? tr : de;
+    // capitals: Turkish has a dotted capital İ for i and a dotless I for ı ("Bölüm" → "BÖLÜM", "içindekiler" → "İÇİNDEKİLER")
+    const upper = s => TR ? String(s).toLocaleUpperCase('tr-TR') : String(s).toUpperCase();
 
     // The debug window only on request: ?debug in the address (Doc, 09.10.2026: "im Moment brauchen wir es ja nicht").
     // Loaded from beside this file; its own autostart (DOMContentLoaded) may already be past, so start it here.
@@ -181,8 +190,9 @@
                 const lvl = document.createElement('span');
                 lvl.className = 'b-lvl'; lvl.dataset.lvl = task.dataset.lvl || '1';
                 lvl.title = (EN ? ['', 'Basic', 'Intermediate', 'Advanced'] : ES ? ['', 'Básico', 'Intermedio', 'Avanzado'] : IT ? ['', 'Base', 'Intermedio', 'Avanzato'] :
-                    FR ? ['', 'Base', 'Intermédiaire', 'Avancé'] : SW ? ['', 'Msingi', 'Kati', 'Juu'] : ['', 'Grundlage', 'Mittel', 'Anspruchsvoll'])[+lvl.dataset.lvl] || '';
-                lvl.setAttribute('aria-label', t('Niveau: ', 'Level: ', 'Nivel: ', 'Livello: ', 'Niveau : ', 'Kiwango: ') + lvl.title);
+                    FR ? ['', 'Base', 'Intermédiaire', 'Avancé'] : SW ? ['', 'Msingi', 'Kati', 'Juu'] :
+                    PT ? ['', 'Básico', 'Intermédio', 'Avançado'] : NL ? ['', 'Basis', 'Gemiddeld', 'Gevorderd'] : TR ? ['', 'Temel', 'Orta', 'İleri'] : ['', 'Grundlage', 'Mittel', 'Anspruchsvoll'])[+lvl.dataset.lvl] || '';
+                lvl.setAttribute('aria-label', t('Niveau: ', 'Level: ', 'Nivel: ', 'Livello: ', 'Niveau : ', 'Kiwango: ', 'Nível: ', 'Niveau: ', 'Seviye: ') + lvl.title);
                 head.appendChild(lvl);
                 task.insertBefore(head, q);
                 if (q) head.appendChild(q);
@@ -190,7 +200,7 @@
                 const acts = document.createElement('div');
                 acts.className = 'b-acts';
                 task.insertBefore(acts, hint || sol);
-                [[hint, t('Tipp', 'Hint', 'Pista', 'Suggerimento', 'Indice', 'Dokezo'), 'b-hintbtn'], [sol, t('Lösung', 'Solution', 'Solución', 'Soluzione', 'Solution', 'Suluhisho'), '']].forEach(([box, label, cls]) => {
+                [[hint, t('Tipp', 'Hint', 'Pista', 'Suggerimento', 'Indice', 'Dokezo', 'Dica', 'Tip', 'İpucu'), 'b-hintbtn'], [sol, t('Lösung', 'Solution', 'Solución', 'Soluzione', 'Solution', 'Suluhisho', 'Solução', 'Oplossing', 'Çözüm'), '']].forEach(([box, label, cls]) => {
                     if (!box) return;
                     box.classList.add('b-reveal');
                     const b = document.createElement('button');
@@ -225,7 +235,7 @@
             const isHint = box.classList.contains('b-hint');
             const b = document.createElement('button');
             b.type = 'button'; b.className = 'b-btn' + (isHint ? ' b-hintbtn' : '');
-            b.textContent = isHint ? t('Tipp', 'Hint', 'Pista', 'Suggerimento', 'Indice', 'Dokezo') : t('Lösung zeigen', 'Show solution', 'Ver solución', 'Mostra la soluzione', 'Voir la solution', 'Onyesha suluhisho');
+            b.textContent = isHint ? t('Tipp', 'Hint', 'Pista', 'Suggerimento', 'Indice', 'Dokezo', 'Dica', 'Tip', 'İpucu') : t('Lösung zeigen', 'Show solution', 'Ver solución', 'Mostra la soluzione', 'Voir la solution', 'Onyesha suluhisho', 'Ver solução', 'Oplossing tonen', 'Çözümü göster');
             b.addEventListener('click', () => b.classList.toggle('open', box.classList.toggle('open')));
             acts.appendChild(b);
         });
@@ -279,7 +289,7 @@
                 if (q.dataset.ans == null) return;
                 if (PRINT) {                                                       // paper: a line to write on
                     const line = document.createElement('div');
-                    line.className = 'b-answer'; line.textContent = (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato', 'Résultat', 'Jibu')) + ':';
+                    line.className = 'b-answer'; line.textContent = (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato', 'Résultat', 'Jibu', 'Resultado', 'Antwoord', 'Sonuç')) + ':';
                     q.insertBefore(line, sol || null);
                     return;
                 }
@@ -287,9 +297,9 @@
                 row.className = 'b-ask';
                 const inId = 'b-in-' + id + '-' + i;
                 row.innerHTML =
-                    '<label for="' + inId + '">' + (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato', 'Résultat', 'Jibu')) + '</label>' +
-                    '<input class="b-in" id="' + inId + '" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="' + (q.dataset.ph || t('z. B. 3/10', 'e.g. 3/10', 'p. ej. 3/10', 'per es. 3/10', 'p. ex. 3/10', 'k.m. 3/10')) + '">' +
-                    '<button type="button" class="b-btn">' + t('Prüfen', 'Check', 'Comprobar', 'Verifica', 'Vérifier', 'Kagua') + '</button>' +
+                    '<label for="' + inId + '">' + (q.dataset.label || t('Ergebnis', 'Answer', 'Resultado', 'Risultato', 'Résultat', 'Jibu', 'Resultado', 'Antwoord', 'Sonuç')) + '</label>' +
+                    '<input class="b-in" id="' + inId + '" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="' + (q.dataset.ph || t('z. B. 3/10', 'e.g. 3/10', 'p. ej. 3/10', 'per es. 3/10', 'p. ex. 3/10', 'k.m. 3/10', 'p. ex. 3/10', 'bijv. 3/10', 'örn. 3/10')) + '">' +
+                    '<button type="button" class="b-btn">' + t('Prüfen', 'Check', 'Comprobar', 'Verifica', 'Vérifier', 'Kagua', 'Verificar', 'Controleren', 'Kontrol et') + '</button>' +
                     '<span class="b-fb" aria-live="polite"></span>';
                 q.insertBefore(row, sol || null);
                 const input = row.querySelector('input'), btn = row.querySelector('button'), fb = row.querySelector('.b-fb');
@@ -298,16 +308,16 @@
                     const ok = matches(input.value, q.dataset.ans, q.dataset.tol != null ? parseFloat(q.dataset.tol) : null);
                     input.classList.toggle('ok', ok); input.classList.toggle('bad', !ok);
                     fb.className = 'b-fb ' + (ok ? 'ok' : 'bad');
-                    if (ok) { fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto', ' correct', ' sahihi'); solved(input.value); dbg('check ' + sk + ' ok'); return; }
+                    if (ok) { fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto', ' correct', ' sahihi', ' certo', ' goed', ' doğru'); solved(input.value); dbg('check ' + sk + ' ok'); return; }
                     tries++;
-                    fb.innerHTML = ICON.bad + (tries >= 2 && sol ? t(' noch nicht – schau dir die Lösung an', ' not yet – have a look at the solution', ' todavía no – mira la solución', ' non ancora – guarda la soluzione', ' pas encore – regarde la solution', ' bado – angalia suluhisho') : t(' noch nicht – versuch es noch einmal', ' not yet – try again', ' todavía no – inténtalo otra vez', ' non ancora – riprova', ' pas encore – réessaie', ' bado – jaribu tena'));
+                    fb.innerHTML = ICON.bad + (tries >= 2 && sol ? t(' noch nicht – schau dir die Lösung an', ' not yet – have a look at the solution', ' todavía no – mira la solución', ' non ancora – guarda la soluzione', ' pas encore – regarde la solution', ' bado – angalia suluhisho', ' ainda não – vê a solução', ' nog niet – bekijk de oplossing', ' henüz değil – çözüme bak') : t(' noch nicht – versuch es noch einmal', ' not yet – try again', ' todavía no – inténtalo otra vez', ' non ancora – riprova', ' pas encore – réessaie', ' bado – jaribu tena', ' ainda não – tenta outra vez', ' nog niet – probeer het nog eens', ' henüz değil – bir daha dene'));
                     if (tries >= 2) showSol();
                 }
                 btn.addEventListener('click', check);
                 input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
                 if (state[sk]) {
                     input.value = typeof state[sk] === 'string' ? state[sk] : '';
-                    input.classList.add('ok'); fb.className = 'b-fb ok'; fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto', ' correct', ' sahihi'); showSol();
+                    input.classList.add('ok'); fb.className = 'b-fb ok'; fb.innerHTML = ICON.ok + t(' richtig', ' correct', ' correcto', ' corretto', ' correct', ' sahihi', ' certo', ' goed', ' doğru'); showSol();
                 }
             });
             updateScore();
@@ -329,7 +339,7 @@
     // ---------- photos (js/buch-fotos.js): one list for every book and every language ----------
     // Doc, 24.10.2026: "Bilder aus der Lebensrealität … das wünsche ich mir wirklich sehr"; 25.10.: the translations
     // get them too, so the photos are placed by this code, not written into each chapter file.
-    const BOOK = ((location.pathname.match(/\/buch\/([^/]+)\//) || [])[1] || '').replace(/-(en|es|it|fr|sw)$/, '');
+    const BOOK = ((location.pathname.match(/\/buch\/([^/]+)\//) || [])[1] || '').replace(/-(en|es|it|fr|sw|pt|nl|tr)$/, '');
     // the photos live in Cloudflare R2 (bucket "media", folder buch/fotos/), not in git: free delivery, 10 GB
     // (Doc, 25.10.2026: "warum nicht R2?" - "ja! Toll!"); upload: node tools/media_publish.mjs <file> buch/fotos/<name>.jpg
     // The pictures of the print pages for the overview sit beside them (buch/seiten/, js/buch-druck.js).
@@ -346,10 +356,10 @@
     function fotoInfo(name) {
         const F = window.BUCH_FOTOS, f = F && F.fotos[name];
         if (!f) return null;
-        const lic = f.license === 'public domain' ? t('gemeinfrei', 'public domain', 'dominio público', 'pubblico dominio', 'domaine public', 'milki ya umma') : f.license;
+        const lic = f.license === 'public domain' ? t('gemeinfrei', 'public domain', 'dominio público', 'pubblico dominio', 'domaine public', 'milki ya umma', 'domínio público', 'publiek domein', 'kamu malı') : f.license;
         // "Bild", not "Foto": photos, paintings and engravings alike; an unknown artist is left out
         return { src: FOTO_DIR + name + '.jpg', alt: (f.alt && (f.alt[LANG] || f.alt.de)) || '',
-            credit: t('Bild: ', 'Image: ', 'Imagen: ', 'Immagine: ', 'Image : ', 'Picha: ') + (f.artist ? f.artist + ' · ' : '') + lic +
+            credit: t('Bild: ', 'Image: ', 'Imagen: ', 'Immagine: ', 'Image : ', 'Picha: ', 'Imagem: ', 'Afbeelding: ', 'Görsel: ') + (f.artist ? f.artist + ' · ' : '') + lic +
                 ' · <a href="' + f.page + '" target="_blank" rel="noopener">Wikimedia Commons</a>' };
     }
     function fotos(root, file, print) {
@@ -462,18 +472,18 @@
         if (top && top.tagName !== 'A') {
             const a = document.createElement('a');
             a.className = 'b-top-book'; a.href = 'index.html'; a.textContent = top.textContent;
-            a.title = t('Inhaltsverzeichnis des Buches', 'Contents of the book', 'Índice del libro', 'Indice del libro', 'Sommaire du manuel', 'Yaliyomo katika kitabu');
+            a.title = t('Inhaltsverzeichnis des Buches', 'Contents of the book', 'Índice del libro', 'Indice del libro', 'Sommaire du manuel', 'Yaliyomo katika kitabu', 'Índice do livro', 'Inhoudsopgave van het boek', 'Kitabın içindekiler');
             top.replaceWith(a);
         }
         if (i < 0) return;
         const prev = B.chapters[i - 1], next = B.chapters[i + 1];
         const nav = document.createElement('nav');
-        nav.className = 'b-chapnav'; nav.setAttribute('aria-label', t('Blättern', 'Turn the page', 'Pasar página', 'Sfoglia le pagine', 'Changer de chapitre', 'Kurasa'));
+        nav.className = 'b-chapnav'; nav.setAttribute('aria-label', t('Blättern', 'Turn the page', 'Pasar página', 'Sfoglia le pagine', 'Changer de chapitre', 'Kurasa', 'Mudar de capítulo', 'Bladeren', 'Bölümler arasında gezin'));
         const card = (c, dir) => c
-            ? '<a class="b-chapcard ' + dir + '" href="' + c.file + '"><span class="b-chapcard-k">' + (dir === 'prev' ? t('← ZURÜCK', '← BACK', '← ATRÁS', '← INDIETRO', '← PRÉCÉDENT', '← NYUMA') : t('WEITER →', 'NEXT →', 'SIGUIENTE →', 'AVANTI →', 'SUIVANT →', 'MBELE →')) +
-              t(' · KAPITEL ', ' · CHAPTER ', ' · CAPÍTULO ', ' · CAPITOLO ', ' · CHAPITRE ', ' · SURA ') + c.k + '</span><span class="b-chapcard-t">' + c.title + '</span></a>'
-            : '<a class="b-chapcard ' + dir + '" href="index.html"><span class="b-chapcard-k">' + (dir === 'prev' ? '← ' : '') + t('INHALT', 'CONTENTS', 'ÍNDICE', 'INDICE', 'SOMMAIRE', 'YALIYOMO') + (dir === 'next' ? ' →' : '') +
-              '</span><span class="b-chapcard-t">' + t('Alle Kapitel', 'All chapters', 'Todos los capítulos', 'Tutti i capitoli', 'Tous les chapitres', 'Sura zote') + '</span></a>';
+            ? '<a class="b-chapcard ' + dir + '" href="' + c.file + '"><span class="b-chapcard-k">' + (dir === 'prev' ? t('← ZURÜCK', '← BACK', '← ATRÁS', '← INDIETRO', '← PRÉCÉDENT', '← NYUMA', '← ANTERIOR', '← TERUG', '← GERİ') : t('WEITER →', 'NEXT →', 'SIGUIENTE →', 'AVANTI →', 'SUIVANT →', 'MBELE →', 'SEGUINTE →', 'VERDER →', 'İLERİ →')) +
+              t(' · KAPITEL ', ' · CHAPTER ', ' · CAPÍTULO ', ' · CAPITOLO ', ' · CHAPITRE ', ' · SURA ', ' · CAPÍTULO ', ' · HOOFDSTUK ', ' · BÖLÜM ') + c.k + '</span><span class="b-chapcard-t">' + c.title + '</span></a>'
+            : '<a class="b-chapcard ' + dir + '" href="index.html"><span class="b-chapcard-k">' + (dir === 'prev' ? '← ' : '') + t('INHALT', 'CONTENTS', 'ÍNDICE', 'INDICE', 'SOMMAIRE', 'YALIYOMO', 'ÍNDICE', 'INHOUD', 'İÇİNDEKİLER') + (dir === 'next' ? ' →' : '') +
+              '</span><span class="b-chapcard-t">' + t('Alle Kapitel', 'All chapters', 'Todos los capítulos', 'Tutti i capitoli', 'Tous les chapitres', 'Sura zote', 'Todos os capítulos', 'Alle hoofdstukken', 'Tüm bölümler') + '</span></a>';
         nav.innerHTML = card(prev, 'prev') + card(next, 'next');
         const foot = document.querySelector('.b-foot');
         if (foot) foot.parentNode.insertBefore(nav, foot); else document.querySelector('.b-main').appendChild(nav);
@@ -486,13 +496,13 @@
         const folder = location.pathname.replace(/^.*\/buch\//, '').replace(/[^/]*$/, '');
         let html = '', last = '';
         B.chapters.forEach(c => {
-            if (c.lb !== last) { html += '<p class="b-lbhead">' + c.lb.toUpperCase() + '</p>'; last = c.lb; }
+            if (c.lb !== last) { html += '<p class="b-lbhead">' + upper(c.lb) + '</p>'; last = c.lb; }
             let solved = 0;
             try { solved = Object.keys(JSON.parse(localStorage.getItem('buch:' + folder + c.file) || '{}')).length; } catch (_) { }
-            html += '<a class="b-chap" href="' + c.file + '"><span class="b-chap-k">' + c.k + '<small>' + t('KAPITEL', 'CHAPTER', 'CAPÍTULO', 'CAPITOLO', 'CHAPITRE', 'SURA') + '</small></span>' +
+            html += '<a class="b-chap" href="' + c.file + '"><span class="b-chap-k">' + c.k + '<small>' + t('KAPITEL', 'CHAPTER', 'CAPÍTULO', 'CAPITOLO', 'CHAPITRE', 'SURA', 'CAPÍTULO', 'HOOFDSTUK', 'BÖLÜM') + '</small></span>' +
                 '<span><span class="b-chap-t">' + c.title + '</span><span class="b-chap-s">' + c.sub + '</span></span>' +
-                '<span class="b-chap-m">' + c.when.toUpperCase() + (c.ustd ? '<br>' + c.ustd + t(' USTD.', ' LESSONS', ' SESIONES', ' ORE', ' HEURES', ' VIPINDI') : '') +
-                (solved ? '<br><span class="b-done">' + solved + t(' GELÖST', ' SOLVED', ' RESUELTOS', ' RISOLTI', ' RÉSOLUS', ' YAMETATULIWA') + '</span>' : '') + '</span></a>';
+                '<span class="b-chap-m">' + upper(c.when) + (c.ustd ? '<br>' + c.ustd + t(' USTD.', ' LESSONS', ' SESIONES', ' ORE', ' HEURES', ' VIPINDI', ' AULAS', ' LESUREN', ' DERS SAATİ') : '') +
+                (solved ? '<br><span class="b-done">' + solved + t(' GELÖST', ' SOLVED', ' RESUELTOS', ' RISOLTI', ' RÉSOLUS', ' YAMETATULIWA', ' RESOLVIDOS', ' OPGELOST', ' ÇÖZÜLDÜ') + '</span>' : '') + '</span></a>';
         });
         box.innerHTML = html;
     }
@@ -538,7 +548,7 @@
             ov = document.createElement('div');
             ov.className = 'b-ov';
             frame = document.createElement('iframe');
-            frame.title = t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée', 'Kurasa zote za toleo la kuchapishwa');
+            frame.title = t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée', 'Kurasa zote za toleo la kuchapishwa', 'Todas as páginas da edição impressa', 'Alle pagina’s van de gedrukte editie', 'Basılı baskının tüm sayfaları');
             frame.src = 'druck.html?uebersicht';
             frame.allow = 'fullscreen';                                  // the overview's full-screen button (js/buch-druck.js)
             ov.appendChild(frame);
@@ -562,11 +572,11 @@
         if (!top || !window.BUCH || window.BUCH.druck === false) return;
         ovBtn = document.createElement('button');
         ovBtn.type = 'button'; ovBtn.className = 'b-ovbtn';
-        ovBtn.title = t('Alle Seiten der Druckausgabe (O)', 'All pages of the print edition (O)', 'Todas las páginas de la edición impresa (O)', 'Tutte le pagine dell’edizione a stampa (O)', 'Toutes les pages de l’édition imprimée (O)', 'Kurasa zote za toleo la kuchapishwa (O)');
-        ovBtn.setAttribute('aria-label', t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée', 'Kurasa zote za toleo la kuchapishwa'));
+        ovBtn.title = t('Alle Seiten der Druckausgabe (O)', 'All pages of the print edition (O)', 'Todas las páginas de la edición impresa (O)', 'Tutte le pagine dell’edizione a stampa (O)', 'Toutes les pages de l’édition imprimée (O)', 'Kurasa zote za toleo la kuchapishwa (O)', 'Todas as páginas da edição impressa (O)', 'Alle pagina’s van de gedrukte editie (O)', 'Basılı baskının tüm sayfaları (O)');
+        ovBtn.setAttribute('aria-label', t('Alle Seiten der Druckausgabe', 'All pages of the print edition', 'Todas las páginas de la edición impresa', 'Tutte le pagine dell’edizione a stampa', 'Toutes les pages de l’édition imprimée', 'Kurasa zote za toleo la kuchapishwa', 'Todas as páginas da edição impressa', 'Alle pagina’s van de gedrukte editie', 'Basılı baskının tüm sayfaları'));
         ovBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
             '<rect x="2.5" y="2.5" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="1.2"/>' +
-            '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg><span class="b-ovbtn-l">' + t('Seiten', 'Pages', 'Páginas', 'Pagine', 'Pages', 'Kurasa') + '</span>';
+            '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg><span class="b-ovbtn-l">' + t('Seiten', 'Pages', 'Páginas', 'Pagine', 'Pages', 'Kurasa', 'Páginas', 'Pagina’s', 'Sayfalar') + '</span>';
         const book = top.querySelector('.b-top-book');
         if (book) book.after(ovBtn); else top.appendChild(ovBtn);
         ovBtn.addEventListener('click', () => { if (ov && !ov.hidden) zu(); else auf(); });
@@ -610,7 +620,7 @@
     }
     // the section goes in at once, so the chapter list has it above "Titelseite"; the letter follows when its file is there
     // the title stands in the chapter list before the letter has loaded, so it lives here, not in js/buch-gruss.js
-    const grussTitel = () => t('Grußwort', 'Foreword', 'Prólogo', 'Prefazione', 'Avant-propos', 'Dibaji');
+    const grussTitel = () => t('Grußwort', 'Foreword', 'Prólogo', 'Prefazione', 'Avant-propos', 'Dibaji', 'Prefácio', 'Voorwoord', 'Önsöz');
     function buildGruss() {
         const start = FILE === 'index.html' && ME && document.getElementById('start');
         if (!start) return;
@@ -623,7 +633,7 @@
         gruss().then(G => {
             const L = G && G[LANG];
             if (!L) { sec.hidden = true; return; }
-            sec.innerHTML = '<div class="b-band"><span class="b-band-tag">' + grussTitel().toUpperCase() + '</span></div>' + grussHtml(L, 'b-gruss');
+            sec.innerHTML = '<div class="b-band"><span class="b-band-tag">' + upper(grussTitel()) + '</span></div>' + grussHtml(L, 'b-gruss');
             // the letter pushed everything below it down: back to the section in the address, and the chapter list marks anew
             const h = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
             if (h && h !== sec) h.scrollIntoView({ block: 'start', behavior: 'instant' });
@@ -647,10 +657,10 @@
             a.className = 'b-ovbtn b-pdfbtn';
             a.href = base + m.pdf.datei + '?v=' + encodeURIComponent(m.v);
             a.target = '_blank'; a.rel = 'noopener';
-            a.title = t('PDF herunterladen', 'Download PDF', 'Descargar PDF', 'Scarica PDF', 'Télécharger le PDF', 'Pakua PDF') + ' · ' +
-                m.seiten.length + ' ' + t('Seiten', 'pages', 'páginas', 'pagine', 'pages', 'kurasa') + ' · ' + Math.max(1, Math.round(m.pdf.bytes / 1048576)) + ' MB · ' +
-                t('Stand', 'as of', 'versión del', 'aggiornato al', 'version du', 'toleo la') + ' ' + new Date(m.erstellt).toLocaleDateString(t('de-DE', 'en-GB', 'es-ES', 'it-IT', 'fr-FR', 'sw-KE'));
-            a.setAttribute('aria-label', t('PDF herunterladen', 'Download PDF', 'Descargar PDF', 'Scarica PDF', 'Télécharger le PDF', 'Pakua PDF'));
+            a.title = t('PDF herunterladen', 'Download PDF', 'Descargar PDF', 'Scarica PDF', 'Télécharger le PDF', 'Pakua PDF', 'Descarregar PDF', 'PDF downloaden', 'PDF indir') + ' · ' +
+                m.seiten.length + ' ' + t('Seiten', 'pages', 'páginas', 'pagine', 'pages', 'kurasa', 'páginas', 'pagina’s', 'sayfa') + ' · ' + Math.max(1, Math.round(m.pdf.bytes / 1048576)) + ' MB · ' +
+                t('Stand', 'as of', 'versión del', 'aggiornato al', 'version du', 'toleo la', 'versão de', 'stand van', 'son güncelleme') + ' ' + new Date(m.erstellt).toLocaleDateString(t('de-DE', 'en-GB', 'es-ES', 'it-IT', 'fr-FR', 'sw-KE', 'pt-PT', 'nl-NL', 'tr-TR'));
+            a.setAttribute('aria-label', t('PDF herunterladen', 'Download PDF', 'Descargar PDF', 'Scarica PDF', 'Télécharger le PDF', 'Pakua PDF', 'Descarregar PDF', 'PDF downloaden', 'PDF indir'));
             a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
                 '<path d="M12 3.5v11.5"/><path d="M7 10.5l5 5 5-5"/><path d="M4 16.5v3.5h16v-3.5"/></svg><span class="b-ovbtn-l">PDF</span>';
             // left of "Seiten", right of the book's name

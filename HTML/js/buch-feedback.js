@@ -226,9 +226,12 @@
                 ohr = window.SolitaListen({
                     // the language of the edition (Spanish editions: es-ES, package ES0; Italian editions: it-IT, package IT0;
                     // French editions: fr-FR, package FR0, "j'ai fini" with the straight apostrophe speech recognition usually writes;
-                    // Swahili editions: sw-KE, package SW0, "nimemaliza")
-                    lang: Buch.en ? 'en-GB' : Buch.lang === 'es' ? 'es-ES' : Buch.lang === 'it' ? 'it-IT' : Buch.lang === 'fr' ? 'fr-FR' : Buch.lang === 'sw' ? 'sw-KE' : 'de-DE', silenceMs: 3500,
-                    finishWord: Buch.en ? 'I am done' : Buch.lang === 'es' ? 'he terminado' : Buch.lang === 'it' ? 'ho finito' : Buch.lang === 'fr' ? 'j\'ai fini' : Buch.lang === 'sw' ? 'nimemaliza' : 'bin fertig',
+                    // Swahili editions: sw-KE, package SW0, "nimemaliza"; package arch3: Portuguese pt-PT "terminei",
+                    // Dutch nl-NL "ik ben klaar", Turkish tr-TR "bitirdim")
+                    lang: Buch.en ? 'en-GB' : Buch.lang === 'es' ? 'es-ES' : Buch.lang === 'it' ? 'it-IT' : Buch.lang === 'fr' ? 'fr-FR' : Buch.lang === 'sw' ? 'sw-KE' :
+                        Buch.lang === 'pt' ? 'pt-PT' : Buch.lang === 'nl' ? 'nl-NL' : Buch.lang === 'tr' ? 'tr-TR' : 'de-DE', silenceMs: 3500,
+                    finishWord: Buch.en ? 'I am done' : Buch.lang === 'es' ? 'he terminado' : Buch.lang === 'it' ? 'ho finito' : Buch.lang === 'fr' ? 'j\'ai fini' : Buch.lang === 'sw' ? 'nimemaliza' :
+                        Buch.lang === 'pt' ? 'terminei' : Buch.lang === 'nl' ? 'ik ben klaar' : Buch.lang === 'tr' ? 'bitirdim' : 'bin fertig',
                     onState: zustand,
                     // what is heard goes behind what stood in the field before, live, as with dictation
                     onPartial: t => { feld.value = (basis + ' ' + t).trim(); },

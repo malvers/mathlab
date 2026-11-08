@@ -113,6 +113,17 @@ const BOOK_WORDS = {
     sw: { tagline: (n) => `Kitabu shirikishi cha kiada / sura ${n}`, coverAlt: 'jalada la kitabu shirikishi cha kiada', chapter: 'Sura',
         chapterAlt: 'onyesho kutoka kitabu shirikishi cha kiada', locale: 'sw_KE',
         desc: (c, B) => `${c.sub}. Sura ya ${c.k} ya kitabu shirikishi cha kiada ${B.title}: maelezo, mifano, mazoezi ya viwango vitatu, majaribio ya kujipima na maabara ya kujaribu.` },
+    // the Portuguese (Portugal), Dutch and Turkish editions (package arch3, 08.11.2026); desc as tools/buch-en/wrap.py --lang pt / nl / tr
+    // writes it (TODO nl / TODO tr: the agents of these languages check their card words)
+    pt: { tagline: (n) => `Manual interativo / ${n} capítulos`, coverAlt: 'capa do manual interativo', chapter: 'Capítulo',
+        chapterAlt: 'pré-visualização do manual interativo', locale: 'pt_PT',
+        desc: (c, B) => `${c.sub}. Capítulo ${c.k} do manual interativo ${B.title}: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.` },
+    nl: { tagline: (n) => `Interactief leerboek / ${n} hoofdstukken`, coverAlt: 'omslag van het interactieve leerboek', chapter: 'Hoofdstuk',
+        chapterAlt: 'voorbeeld uit het interactieve leerboek', locale: 'nl_NL',
+        desc: (c, B) => `${c.sub}. Hoofdstuk ${c.k} van het interactieve leerboek ${B.title}: uitleg, voorbeelden, opgaven op drie niveaus, zelftoetsen en labs om uit te proberen.` },
+    tr: { tagline: (n) => `Etkileşimli ders kitabı / ${n} bölüm`, coverAlt: 'etkileşimli ders kitabının kapağı', chapter: 'Bölüm',
+        chapterAlt: 'etkileşimli ders kitabından önizleme', locale: 'tr_TR',
+        desc: (c, B) => `${c.sub}. Bölüm ${c.k}, etkileşimli ders kitabı ${B.title}: açıklamalar, örnekler, üç düzeyde alıştırmalar, öz değerlendirme testleri ve denemek için laboratuvarlar.` },
 };
 
 // The textbooks (HTML/buch/<book>/): a card for the cover page and one per chapter. The texts come from the
@@ -127,7 +138,8 @@ function readBooks() {
         new Function('window', fs.readFileSync(k, 'utf8'))(win);
         const B = win.BUCH;
         if (!B || !B.chapters) continue;
-        // the English, Spanish, Italian, French and Swahili editions (kapitel.js lang: 'en' / 'es' / 'it' / 'fr' / 'sw') get their card texts
+        // the English, Spanish, Italian, French, Swahili, Portuguese, Dutch and Turkish editions (kapitel.js lang: 'en' / 'es' / 'it' / 'fr' /
+        // 'sw' / 'pt' / 'nl' / 'tr') get their card texts
         // in their own language
         // (Doc, 12.10.2026: "Bitte stell sicher, dass alle Bücher auch eine Vorschau haben")
         const lang = B.lang || 'de';

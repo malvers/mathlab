@@ -20,6 +20,9 @@ js/buch-fr/<module>.js, header and title in French (a no-break space before the 
 --lang sw (package SW0, 03.11.2026): the same for a Swahili edition (Kenya) - HTML/buch/<book>-sw/, js/buch-sw.js and
 js/buch-sw/<module>.js, header and title in Swahili; numbers as in English (decimal point), so the skeleton compare
 reads a decimal comma and a decimal point in data-ans alike.
+--lang pt | nl | tr (package arch3, 08.11.2026): the same for a Portuguese (Portugal), Dutch or Turkish edition -
+HTML/buch/<book>-pt/ (-nl/, -tr/), js/buch-pt.js (buch-nl.js, buch-tr.js) and js/buch-<lang>/<module>.js, header and
+title in that language; numbers keep the decimal comma as in German. Turkish capitals with the dotted İ.
 """
 import sys, os, re, json, subprocess, html.parser, difflib
 
@@ -30,7 +33,7 @@ out_dir = sys.argv[sys.argv.index('--out') + 1] if '--out' in sys.argv else None
 if out_dir: args.remove(out_dir)
 LANG = sys.argv[sys.argv.index('--lang') + 1] if '--lang' in sys.argv else 'en'
 if '--lang' in sys.argv: args.remove(LANG)
-assert LANG in ('en', 'es', 'it', 'fr', 'sw'), 'unknown language ' + LANG
+assert LANG in ('en', 'es', 'it', 'fr', 'sw', 'pt', 'nl', 'tr'), 'unknown language ' + LANG
 book, name, src = args
 name = name[:-5] if name.endswith('.html') else name
 DE_DIR = os.path.join(HTML, 'buch', book)
@@ -57,7 +60,22 @@ WORDS = {
            'title': '%s · Sura %s · %s | Doc Alvers Mathe-Labor',
            'desc': '%s. Sura ya %s ya kitabu shirikishi cha kiada %s: maelezo, mifano, mazoezi ya viwango vitatu, majaribio ya kujipima na maabara ya kujaribu.',
            'langname': 'Swahili'},
+    # package arch3 (08.11.2026); desc as tools/og-preview/make-og.mjs writes it (TODO nl / TODO tr: checked by their agents)
+    'pt': {'Kapitel': 'Capítulo', 'Inhalt des Kapitels': 'Conteúdo do capítulo', 'CHAPTER': 'CAPÍTULO %s · ',
+           'title': '%s · Capítulo %s · %s | Doc Alvers Mathe-Labor',
+           'desc': '%s. Capítulo %s do manual interativo %s: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.',
+           'langname': 'Portuguese'},
+    'nl': {'Kapitel': 'Hoofdstuk', 'Inhalt des Kapitels': 'Inhoud van het hoofdstuk', 'CHAPTER': 'HOOFDSTUK %s · ',
+           'title': '%s · Hoofdstuk %s · %s | Doc Alvers Mathe-Labor',
+           'desc': '%s. Hoofdstuk %s van het interactieve leerboek %s: uitleg, voorbeelden, opgaven op drie niveaus, zelftoetsen en labs om uit te proberen.',
+           'langname': 'Dutch'},
+    'tr': {'Kapitel': 'Bölüm', 'Inhalt des Kapitels': 'Bölümün içeriği', 'CHAPTER': 'BÖLÜM %s · ',
+           'title': '%s · Bölüm %s · %s | Doc Alvers Mathe-Labor',
+           'desc': '%s. Bölüm %s, etkileşimli ders kitabı %s: açıklamalar, örnekler, üç düzeyde alıştırmalar, öz değerlendirme testleri ve denemek için laboratuvarlar.',
+           'langname': 'Turkish'},
 }[LANG]
+# capitals: Turkish writes i → İ and ı → I (Python's upper() knows no language)
+up = (lambda t: t.replace('i', 'İ').replace('ı', 'I').upper()) if LANG == 'tr' else (lambda t: t.upper())
 
 
 def kapitel(d):
@@ -77,11 +95,11 @@ if not body.lstrip().startswith('<body'):
     a = dbody.index('<main class="b-main">') + len('<main class="b-main">')
     b = dbody.index('</footer>') + len('</footer>')
     pre, post = dbody[:a], dbody[b:]
-    pre = re.sub(r'(<span class="b-top-book">)[^<]*(</span>)', lambda m: m.group(1) + B['title'].upper() + m.group(2), pre)
+    pre = re.sub(r'(<span class="b-top-book">)[^<]*(</span>)', lambda m: m.group(1) + up(B['title']) + m.group(2), pre)
     pre = pre.replace('aria-label="Kapitel"', 'aria-label="%s"' % WORDS['Kapitel']).replace('aria-label="Inhalt des Kapitels"', 'aria-label="%s"' % WORDS['Inhalt des Kapitels'])
     # "KAPITEL 3.2 · LERNBEREICH 3" → "CHAPTER 3.2 · LEARNING AREA 3", "WAHLBEREICH 3" → "ELECTIVE 3"
     pre = re.sub(r'(<p class="b-toc-title">)([^<]*)(</p>)',
-                 lambda m: m.group(1) + ((WORDS['CHAPTER'] % c['k']) if m.group(2).startswith('KAPITEL') else '') + c['lb'].upper() + m.group(3), pre)
+                 lambda m: m.group(1) + ((WORDS['CHAPTER'] % c['k']) if m.group(2).startswith('KAPITEL') else '') + up(c['lb']) + m.group(3), pre)
     left = re.findall(r'KAPITEL|LERNBEREICH|WAHLBEREICH|WAHLPFLICHT', pre)
     assert not left, 'German left in the header: ' + ', '.join(sorted(set(left)))
     body = pre + '\n\n' + body.strip('\n') + '\n' + post
@@ -100,7 +118,7 @@ made = []
 def dictionary(m):
     mod = m.group(1)
     src_js = os.path.join(HTML, 'js', 'buch-%s.js' % mod)
-    if mod in ('en', 'es', 'it', 'fr', 'sw', 'druck') or not os.path.exists(src_js) or not re.search(r"^[ \t]*W\('", open(src_js, encoding='utf-8').read(), re.M):
+    if mod in ('en', 'es', 'it', 'fr', 'sw', 'pt', 'nl', 'tr', 'druck') or not os.path.exists(src_js) or not re.search(r"^[ \t]*W\('", open(src_js, encoding='utf-8').read(), re.M):
         return m.group(0)
     f = os.path.join(HTML, 'js', 'buch-' + LANG, mod + '.js')
     if not os.path.exists(f) and LANG == 'sw':
@@ -116,9 +134,10 @@ def dictionary(m):
             " */\n"
             "window.BuchSW && BuchSW.add('%s', {\n    word: {\n    },\n    phrase: [\n    ],\n    rule: []\n});\n" % (mod, mod, mod, mod))
         made.append(f)
-    if not os.path.exists(f) and LANG in ('es', 'it', 'fr'):
-        # Spanish (ES0), Italian (IT0), French (FR0): the same stub, numbers keep their German form
-        L, E = {'es': ('Spanish', 'BuchES'), 'it': ('Italian', 'BuchIT'), 'fr': ('French', 'BuchFR')}[LANG]
+    if not os.path.exists(f) and LANG in ('es', 'it', 'fr', 'pt', 'nl', 'tr'):
+        # Spanish (ES0), Italian (IT0), French (FR0), Portuguese, Dutch, Turkish (arch3): the same stub, numbers keep their German form
+        L, E = {'es': ('Spanish', 'BuchES'), 'it': ('Italian', 'BuchIT'), 'fr': ('French', 'BuchFR'),
+                'pt': ('Portuguese', 'BuchPT'), 'nl': ('Dutch', 'BuchNL'), 'tr': ('Turkish', 'BuchTR')}[LANG]
         os.makedirs(os.path.dirname(f), exist_ok=True)
         open(f, 'w', encoding='utf-8').write(
             "/* js/buch-%s/%s.js — %s for the widgets of js/buch-%s.js.\n"
@@ -161,7 +180,7 @@ class P(html.parser.HTMLParser):
         if 'data-ans' in d: d['data-ans'] = d['data-ans'].replace(',', '.')
         s.seq.append((t, tuple(sorted(d.items()))))
 def skel(text):
-    p = P(); p.feed(text[text.index('<body'):]); return [x for x in p.seq if not (x[0] == 'script' and 'buch-' + LANG in dict(x[1]).get('src', ''))]
+    p = P(); p.feed(text[text.index('<body'):]); return [x for x in p.seq if not (x[0] == 'script' and re.search(r'/buch-' + LANG + r'(\.js|/)', dict(x[1]).get('src', '')))]
 a, b = skel(de), skel(out)
 diff = [l for l in difflib.unified_diff([repr(x) for x in a], [repr(x) for x in b], lineterm='', n=0) if l[:1] in '+-' and not l.startswith(('+++', '---'))]
 print(('%s: %d tags German, %d tags ' + WORDS['langname'] + ', %d differences → %s') % (name, len(a), len(b), len(diff), os.path.relpath(target, HTML) if not out_dir else target))

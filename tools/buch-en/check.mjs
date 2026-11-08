@@ -31,6 +31,11 @@
 //        node tools/buch-en/check.mjs --lang sw [book-sw …]   the same for the Swahili editions (package SW0, 03.11.2026:
 //                                                     HTML/buch/*-sw/, js/buch-sw.js, js/buch-sw/<module>.js,
 //                                                     tools/buch-sw/known.json; "bei" (price) is Swahili there)
+//        node tools/buch-en/check.mjs --lang pt|nl|tr [book-pt …]   the same for the Portuguese (Portugal), Dutch and Turkish
+//                                                     editions (package arch3, 08.11.2026: HTML/buch/*-pt/ …, js/buch-pt.js …,
+//                                                     tools/buch-pt/known.json …); there "das" (pt), "die", "wie", "des",
+//                                                     "noch" (nl) are no German words, ö and ü are Dutch (coördinaat) and
+//                                                     Turkish letters, and the word boundaries know accented letters
 import fs from 'fs';
 import vm from 'vm';
 import path from 'path';
@@ -40,8 +45,8 @@ const ROOT = process.env.BUCH_EN_ROOT ? path.resolve(process.env.BUCH_EN_ROOT) +
 const args = process.argv.slice(2);
 // the language of the editions: en (default) or es (package ES0, 12.10.2026)
 const LANG = args.includes('--lang') ? args.splice(args.indexOf('--lang'), 2)[1] : 'en';
-if (!['en', 'es', 'it', 'fr', 'sw'].includes(LANG)) { console.log('✗ unknown language ' + LANG); process.exit(1); }
-const NAME = { en: 'English', es: 'Spanish', it: 'Italian', fr: 'French', sw: 'Swahili' }[LANG];
+if (!['en', 'es', 'it', 'fr', 'sw', 'pt', 'nl', 'tr'].includes(LANG)) { console.log('✗ unknown language ' + LANG); process.exit(1); }
+const NAME = { en: 'English', es: 'Spanish', it: 'Italian', fr: 'French', sw: 'Swahili', pt: 'Portuguese', nl: 'Dutch', tr: 'Turkish' }[LANG];
 const KNOWN = new URL(LANG === 'en' ? 'known.json' : '../buch-' + LANG + '/known.json', import.meta.url).pathname;
 const accept = args.includes('--accept');
 const books = args.filter(a => !a.startsWith('--'));
@@ -66,7 +71,7 @@ function attrs(src) {
 }
 const MODULE = /<script src="\.\.\/\.\.\/js\/buch-([a-z0-9-]+)\.js"><\/script>/g;
 const DICT = new RegExp('<script src="\\.\\./\\.\\./js/buch-' + LANG + '/([a-z0-9-]+)\\.js"></script>', 'g');
-const NOT_WIDGETS = new Set(['en', 'es', 'it', 'fr', 'sw', 'druck']);
+const NOT_WIDGETS = new Set(['en', 'es', 'it', 'fr', 'sw', 'pt', 'nl', 'tr', 'druck']);
 
 // the widgets of every module: W('name', …) up to its closing bracket; everything outside them are the helpers
 const modules = {};
@@ -160,7 +165,8 @@ function engine(dicts) {
         const f = ROOT + 'js/buch-' + LANG + '/' + d + '.js';
         if (fs.existsSync(f)) vm.runInContext(read(f), ctx, { filename: 'buch-' + LANG + '/' + d + '.js' });
     }
-    return (engines[key] = LANG === 'en' ? ctx.BuchEN : LANG === 'it' ? ctx.BuchIT : LANG === 'fr' ? ctx.BuchFR : LANG === 'sw' ? ctx.BuchSW : ctx.BuchES);
+    return (engines[key] = LANG === 'en' ? ctx.BuchEN : LANG === 'it' ? ctx.BuchIT : LANG === 'fr' ? ctx.BuchFR : LANG === 'sw' ? ctx.BuchSW :
+        LANG === 'pt' ? ctx.BuchPT : LANG === 'nl' ? ctx.BuchNL : LANG === 'tr' ? ctx.BuchTR : ctx.BuchES);
 }
 
 // what counts as German: umlauts, frequent small words, typical words of the widgets - outside of tags and maths
@@ -170,6 +176,16 @@ let GERMAN = /[äöüÄÖÜß]|\b(der|die|das|den|dem|des|und|oder|nicht|ist|sin
 if (LANG === 'fr') GERMAN = new RegExp(GERMAN.source.replace('|des|', '|').replace('\\b(', '(?<![\\p{L}\\p{N}_])(').replace(/\)\\b$/, ')(?![\\p{L}\\p{N}_])'), 'u');
 // Swahili: "bei" is a Swahili word (bei ya tiketi, the price of the ticket)
 if (LANG === 'sw') GERMAN = new RegExp(GERMAN.source.replace('|bei|', '|'));
+// Portuguese, Dutch, Turkish (package arch3): "das" is Portuguese (das funções), "die", "wie", "des", "noch" are Dutch; ö and ü
+// are Dutch (coördinaat, reünie) and Turkish letters (bölüm, üç); the word boundaries know accented letters, as in French
+// ("biçim" must not show the German "im")
+if (['pt', 'nl', 'tr'].includes(LANG)) {
+    let src = GERMAN.source;
+    if (LANG === 'pt') src = src.replace('|das|', '|');
+    if (LANG === 'nl') src = src.replace('|die|', '|').replace('|des|', '|').replace('|wie|', '|').replace('|noch|', '|');
+    if (LANG !== 'pt') src = src.replace('[äöüÄÖÜß]', '[äÄß]');
+    GERMAN = new RegExp(src.replace('\\b(', '(?<![\\p{L}\\p{N}_])(').replace(/\)\\b$/, ')(?![\\p{L}\\p{N}_])'), 'u');
+}
 // the words a reader sees: tags out (their title, aria-label, placeholder, alt stay), TeX commands out, maths out -
 // but "$ und $" is not maths, a dollar pair counts as maths only without a word of three letters inside
 const visible = s => s.replace(/<[^>]*>/g, t => ' ' + [...t.matchAll(/\s(?:title|aria-label|placeholder|alt)="([^"]*)"/g)].map(m => m[1]).join(' ') + ' ')
@@ -180,12 +196,14 @@ const visible = s => s.replace(/<[^>]*>/g, t => ' ' + [...t.matchAll(/\s(?:title
 // word of the English dictionaries.
 // Spanish: the words of /usr/share/dict/spanish if there is one; else none, and only the Spanish dictionaries count
 // Italian the same with /usr/share/dict/italian, French with /usr/share/dict/french
-const WORDLIST = LANG === 'en' ? '/usr/share/dict/words' : LANG === 'it' ? '/usr/share/dict/italian' : LANG === 'fr' ? '/usr/share/dict/french' : LANG === 'sw' ? '/usr/share/dict/swahili' : '/usr/share/dict/spanish';
+const WORDLIST = LANG === 'en' ? '/usr/share/dict/words' : LANG === 'it' ? '/usr/share/dict/italian' : LANG === 'fr' ? '/usr/share/dict/french' : LANG === 'sw' ? '/usr/share/dict/swahili' :
+    LANG === 'pt' ? '/usr/share/dict/portuguese' : LANG === 'nl' ? '/usr/share/dict/dutch' : LANG === 'tr' ? '/usr/share/dict/turkish' : '/usr/share/dict/spanish';
 const ENGLISH = fs.existsSync(WORDLIST) ? new Set(read(WORDLIST).toLowerCase().split('\n')) : LANG === 'en' ? null : new Set();
 const SAFE = new Set('orbitron raleway rgba hsla svg viewbox katex px em rem nbsp xmidymid pagerank anscombe dresden gauss jordan monty hall use strict'.split(' '));
 function englishWords(B) {
     const set = new Set();
-    const add = v => String(v).toLowerCase().split(LANG === 'it' ? /[^a-zäöüßàèéìíòóùú]+/ : LANG === 'fr' ? /[^a-zäöüßàâæçéèêëîïôœùûÿ]+/ : /[^a-zäöüßáéíóúñ]+/).forEach(w => w && set.add(w));
+    const add = v => String(v).toLowerCase().split(LANG === 'it' ? /[^a-zäöüßàèéìíòóùú]+/ : LANG === 'fr' ? /[^a-zäöüßàâæçéèêëîïôœùûÿ]+/ :
+        LANG === 'pt' ? /[^a-zäöüßàáâãçéêíóôõú]+/ : LANG === 'nl' ? /[^a-zäöüßáàéèëêíïóòôúûü]+/ : LANG === 'tr' ? /[^a-zäöüßçğıîâûş]+/ : /[^a-zäöüßáéíóúñ]+/).forEach(w => w && set.add(w));
     for (const d of B.dicts) { Object.values(d.word).forEach(add); d.phrase.forEach(([, en]) => add(en)); }
     return set;
 }
@@ -198,7 +216,8 @@ function looksGerman(r, s) {
     if (!ENGLISH || CODE.test(v)) return false;
     // Spanish: accented letters belong to the word ("Parábola" is one word, not "Par" + "bola")
     const words = v.match(LANG === 'en' ? /[A-Za-zÄÖÜäöüß]{3,}/g : LANG === 'it' ? /[A-Za-zÄÖÜäöüßàèéìíòóùúÀÈÉÌÍÒÓÙÚ]{3,}/g :
-        LANG === 'fr' ? /[A-Za-zÄÖÜäöüßàâæçéèêëîïôœùûÿÀÂÆÇÉÈÊËÎÏÔŒÙÛŸ]{3,}/g : /[A-Za-zÄÖÜäöüßáéíóúñÁÉÍÓÚÑ]{3,}/g) || [];
+        LANG === 'fr' ? /[A-Za-zÄÖÜäöüßàâæçéèêëîïôœùûÿÀÂÆÇÉÈÊËÎÏÔŒÙÛŸ]{3,}/g : LANG === 'pt' ? /[A-Za-zÄÖÜäöüßàáâãçéêíóôõúÀÁÂÃÇÉÊÍÓÔÕÚ]{3,}/g :
+        LANG === 'nl' ? /[A-Za-zÄÖÜäöüßáàéèëêíïóòôúûÁÉËÍÏÓÚ]{3,}/g : LANG === 'tr' ? /[A-Za-zÄÖÜäöüßçğıİîâûşÇĞÎÂÛŞ]{3,}/g : /[A-Za-zÄÖÜäöüßáéíóúñÁÉÍÓÚÑ]{3,}/g) || [];
     // one lowercase word on its own is a key, a class or a value inside the widget ("wurf", "b-ctrls", "oben"), not text
     if (words.length < 2 && !/[A-ZÄÖÜ]/.test(v)) return false;
     // one identifier: "baum-hero", "AnB", "b_go"
