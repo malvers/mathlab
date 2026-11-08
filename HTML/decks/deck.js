@@ -1268,6 +1268,7 @@ const narr = (function () {
   const pad = n => String(n).padStart(2, '0');
   const parts = s => (data.slides[s] || []).length;
   let audio = null, aSlide = -1, part = 0;
+  let left = null;                                    // the clip a turn by hand cut off: {a, s, p}
   let wait = 0;                                       // pending pause after a clip or before the next slide
   const holds = data.hold || [];
   let held = -1;                                      // slide where Solita waits for a click
@@ -1313,10 +1314,16 @@ const narr = (function () {
       return;
     }
     // clip k speaks about group k - 1 of the file: the mark goes to its first click, sub-points are in view
-    if (part > 0) { step = Math.min(clickOf(slides[si], part - 1) + 1, groups(slides[si])); paint(); }
+    // - but a page already standing on a later sub-point of that group stays there: an arrow onto a sub-point while she
+    // talks must not be pulled back (Doc, 08.11.2026, mathe11-lehrbuch slide 4: "nicht über den ersten Punkt weg")
+    if (part > 0) {
+      const sl = slides[si], a = Math.min(clickOf(sl, part - 1) + 1, groups(sl)), z = Math.min(clickOf(sl, part), groups(sl));
+      if (!(step > a && step <= z)) step = a;
+      paint();
+    }
     // a line copied in the deck editor has an empty part (Doc, 17.09.2026: "erst mal nix"): it comes in, a pause, on
     if (!String(data.slides[si][part] || '').trim()) { wait = setTimeout(function () { part++; run(); }, 1200); return; }
-    aSlide = si;
+    aSlide = si; left = null;
     audio = new Audio('audio/' + data.deck + '/s' + pad(si) + '-' + pad(part) + '.mp3');
     demo(si, audio, part);
     const began = Date.now(), drawn = drawing(si);
@@ -1371,7 +1378,7 @@ const narr = (function () {
   }
   function resume(n) {                                // go on talking from the top of slide n
     clearTimeout(wait);
-    held = -1; api.playing = true; si = n; step = 0; part = 0; audio = null; show(); paint(); run();
+    held = -1; api.playing = true; si = n; step = 0; part = 0; audio = null; left = null; show(); paint(); run();
   }
   function toggle() {
     if (PRESENTER) { link.send({ t: 'play' }); return; }   // her voice comes from the beamer window
@@ -1383,7 +1390,17 @@ const narr = (function () {
     if (audio && aSlide === si && audio.paused && !audio.ended && audio.currentTime > 0) { audio.play(); return; }
     // start where the page stands - on a sub-point, with the clip of its group
     const here = [...slides[si].querySelectorAll('.step')].find(e => grp(e) === step - 1);
-    part = here ? +here.dataset.g + 1 : step; audio = null; run();
+    const p = here ? +here.dataset.g + 1 : step, l = left;
+    left = null;
+    // an arrow onto a sub-point of the group she is telling: the box moves on, her clip goes on where it was - it does
+    // not start again with every sub-point (Doc, 08.11.2026)
+    if (l && l.s === si && l.p === p && p > 0 && !l.a.ended && l.a.currentTime > 0) {
+      part = p; aSlide = si; audio = l.a;
+      const a = audio;
+      audio.play().catch(function () { if (audio !== a) return; api.playing = false; show(); });
+      return;
+    }
+    part = p; audio = null; run();
   }
   api.stop = function () {
     clearTimeout(wait);
@@ -1396,7 +1413,9 @@ const narr = (function () {
       return;
     }
     if (!api.playing) return;
-    api.playing = false; if (audio) audio.pause(); audio = null; show();
+    api.playing = false; if (audio) audio.pause();
+    left = audio && { a: audio, s: aSlide, p: part };   // toggle() may go on with it, if the page stays in its group
+    audio = null; show();
   };
   api.toggle = toggle;                                // 'p' pressed in the presenter window
   api.from = resume;                                  // Shift+arrow while she talks: on with that slide
