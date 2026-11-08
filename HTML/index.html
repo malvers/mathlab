@@ -1734,8 +1734,29 @@
             grid-column: 2;
         }
         #tool-container .card.book-one-card .card-desc {
-            -webkit-line-clamp: 7;
-            line-clamp: 7;
+            -webkit-line-clamp: 6;
+            line-clamp: 6;
+        }
+        /* as far from the left as from the top, the cover in the middle from top to bottom, and room for "Mathematik BGY 12" in
+           one line (Doc, 08.11.2026: "dass der Abstand von links zum Buch so ist wie von oben zum Buch", "nicht ganz y-symmetrisch";
+           measured: 185 px needed, 182 px there with 20 px padding and an 18 px gap; six lines keep the text below the cover) */
+        #tool-container .card.book-one-card {
+            padding: 16px;
+            column-gap: 16px;
+        }
+        #tool-container .card.book-one-card .card-icon {
+            align-self: center;
+        }
+        /* "LK" leaves the title and stands below it, small (Doc: "in die erste Zeile ... nur BGY 12 und dann darunter noch klein so
+           als Zwischenüberschrift Leistungskurs") */
+        #tool-container .card.book-one-card h3 .book-sub {
+            display: block;
+            margin-top: 3px;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            -webkit-text-fill-color: rgba(255, 255, 255, 0.55);
         }
         body.bk-ecke #tool-container .card.book-one-card {
             display: block !important;
@@ -2703,8 +2724,11 @@
             const langs = BOOK_LANGS[(card.dataset.labId || '').replace(/^lehrbuch-/, '')];
             if (!icon || !langs) return;
             card.classList.toggle('book-one-card', on);
+            const h3 = card.querySelector('h3');
             if (!on) {
                 if (card.dataset.icons === undefined) return;
+                if (h3 && card.dataset.h3 !== undefined) h3.innerHTML = card.dataset.h3;
+                delete card.dataset.h3;
                 icon.innerHTML = card.dataset.icons;
                 card.setAttribute('href', card.dataset.href0);
                 delete card.dataset.icons;
@@ -2714,6 +2738,16 @@
             if (card.dataset.icons === undefined) {
                 card.dataset.icons = icon.innerHTML;
                 card.dataset.href0 = card.getAttribute('href');
+                // "Mathematik BGY 12 LK" -> "Mathematik BGY 12" with "Leistungskurs" small below it (see .book-sub)
+                const lk = h3 && h3.textContent.trim().match(/^(.*\S)\s+LK$/);
+                if (lk) {
+                    card.dataset.h3 = h3.innerHTML;
+                    h3.textContent = lk[1];
+                    const sub = document.createElement('span');
+                    sub.className = 'book-sub';
+                    sub.textContent = 'Leistungskurs';
+                    h3.appendChild(sub);
+                }
             }
             const book = card.dataset.labId.replace(/^lehrbuch-/, '');
             const lang = (typeof CyberI18n !== 'undefined' && CyberI18n.current) || 'de';
