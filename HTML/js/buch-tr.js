@@ -98,11 +98,14 @@
         // the AI marks in Solita's field (js/solita-frage.js): "Es antwortet Claude Haiku und DeepSeek"
         [/^Es antwortet (.+)$/, (m, w) => 'Cevap veren: ' + w.replace(/ und /g, ' ve ')]
     ];
-    // after the pieces: the percent sign before the number, as Turkish writes it ("30 %" → "%30", "30\,\%" → "\%30",
-    // "−2,5 %" → "−%2,5"); the tags are parked while this runs, so "width:50%" in a style never changes
+    // after the pieces: the percent sign before the number, as Turkish writes it ("30 %" → "%30", "27,9\,\%" → "\%27,9",
+    // "−2,5 %" → "−%2,5"). Only with a space before the sign, as the widgets write it (Buch.pct: a narrow space): the
+    // colour scheme (js/farbschema.js) writes whole style sheets through textContent, and "width:50%" must stay as it is.
     const POST = [
-        [/(\d+(?:\{,\}\d+)?)\s*(?:\\,)?\s*\\%/g, '\\%$1'],
-        [/(\d+(?:,\d+)?)[  ]?%(?![\w{])/g, '%$1']
+        [/(\d+(?:(?:\{,\}|,)\d+)?)\s*(?:\\,|\\;|~)?\s*\\%/g, '\\%$1'],
+        [/(\d+(?:,\d+)?)[   ]%(?![\w{])/g, '%$1'],
+        // thousands with a narrow space (Buch.pct, toLocaleString('de-DE') with the dot replaced) → the Turkish dot: 1 111 → 1.111
+        [/(\d) (?=\d{3}(?!\d))/g, '$1.']
     ];
 
     // ---------- the module files ----------
@@ -174,8 +177,9 @@
     // remembered: a widget draws the same labels again and again
     const memo = { p: new Map(), h: new Map() };
     function tr(s, kind) {
-        // one difference to js/buch-en.js: a backslash counts too, so a bare interval "$[1;\,2]$" gets its comma
-        if (typeof s !== 'string' || !s || s.length > 20000 || !/[A-Za-zÄÖÜäöüß {\\]/.test(s)) return s;
+        // one difference to js/buch-en.js: a backslash counts too, so a bare interval "$[1;\,2]$" gets its comma; and (Turkish
+        // only) the percent sign and the narrow space, so a bare "2 %" of Buch.pct becomes "%2" and "1 111" becomes "1.111"
+        if (typeof s !== 'string' || !s || s.length > 20000 || !/[A-Za-zÄÖÜäöüß {\\%\u202f]/.test(s)) return s;
         if (dirty) compile();
         const m = memo[kind];
         let r = m.get(s);
