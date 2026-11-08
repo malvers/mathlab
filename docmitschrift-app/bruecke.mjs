@@ -160,6 +160,40 @@ async function pushPlan(cfg, list, force = false) {
 
 // ------------------------------------------------------------------ one round
 
+/** Which microphone really recorded each piece (the phone's status carries its last 60): kept for good in
+    daten/mikro.json, the transcript page writes it under each part's time (Doc, 08.11.2026). */
+const MICS = path.join(ROOT, 'daten', 'mikro.json');
+function keepMics(fromPhone) {
+  if (!fromPhone || typeof fromPhone !== 'object') return;
+  let all = {};
+  try { all = JSON.parse(fs.readFileSync(MICS, 'utf8')); } catch { /* first time */ }
+  let changed = false;
+  for (const [piece, mic] of Object.entries(fromPhone)) {
+    if (!PIECE.test(piece) || typeof mic !== 'string' || all[piece] === mic) continue;
+    all[piece] = mic;
+    changed = true;
+  }
+  if (!changed) return;
+  fs.writeFileSync(MICS + '.tmp', JSON.stringify(all, null, 1));
+  fs.renameSync(MICS + '.tmp', MICS);
+}
+
+/** DocNote records, but the microphone gives pure silence - the DJI receiver is plugged in while its transmitter
+    is off or not paired (Doc, 08.11.2026: "ja, bitte so bauen"). Solita calls Doc on the phone, once per recording
+    (its start time "seit"), and only while the phone's report is fresh. */
+const NO_SOUND_CALLED = path.join(ROOT, 'daten', 'kein-ton-gerufen.txt');
+function noSoundCall(st) {
+  if (!st.aufnahme || !String(st.problem || '').startsWith('kein Ton')) return;
+  if (Date.now() - Number(st.stand || 0) > 3 * 60000) return;
+  const seit = String(st.seit || '');
+  try { if (fs.readFileSync(NO_SOUND_CALLED, 'utf8').trim() === seit) return; } catch { /* never called yet */ }
+  fs.writeFileSync(NO_SOUND_CALLED, seit);
+  const said = 'Doc, hier ist Solita. DocNote nimmt gerade nur Stille auf. Ist der DJI-Sender eingeschaltet und verbunden?';
+  const r = spawnSync(process.execPath, [path.join(os.homedir(), '.claude', 'hooks', 'solita-ruf.mjs'), said, 'phone'],
+    { encoding: 'utf8', env: { ...process.env, SOLITA_FORCE: '1' }, timeout: 60000 });
+  log('kein Ton vom Mikro (' + st.problem + ') – Solita gerufen:', (r.stdout || r.stderr || '').trim().slice(-120));
+}
+
 async function takt() {
   const cfg = config();
   fs.mkdirSync(path.join(ROOT, 'eingang'), { recursive: true });
@@ -174,9 +208,12 @@ async function takt() {
   if (box) {
     try {
       const st = JSON.parse(open(cfg.key, 'status', box).toString());
+      keepMics(st.stuecke);
+      delete st.stuecke;
       st.empfangen = Date.now();
       fs.writeFileSync(LIVE + '.tmp', JSON.stringify(st));
       fs.renameSync(LIVE + '.tmp', LIVE);
+      noSoundCall(st);
     } catch (e) { log('Status unlesbar:', e.message); }
   }
 

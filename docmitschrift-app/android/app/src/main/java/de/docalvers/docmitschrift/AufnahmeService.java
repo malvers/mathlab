@@ -12,6 +12,7 @@ import android.content.pm.ServiceInfo;
 import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.media.AudioRouting;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
@@ -62,6 +63,7 @@ public class AufnahmeService extends Service {
     static final String ACTION_HAND = "de.docalvers.docmitschrift.HAND";    // Start on the screen: record now
     static final String ACTION_START = "de.docalvers.docmitschrift.START";  // the "Stunde beginnt" notification
     static final String ACTION_TICK = "de.docalvers.docmitschrift.TICK";
+    static final String ACTION_READY = "de.docalvers.docmitschrift.READY";  // the app was opened: be ready again
     static final String HAND_SUFFIX = "-hand";  // in the names of the pieces recorded by hand
 
     // read by the screen once a second
@@ -74,6 +76,13 @@ public class AufnahmeService extends Service {
     static volatile long since;                 // ms when this recording began
     static volatile String mic = "";            // the input of the current piece
     static volatile String problem = "";        // the last thing that went wrong, empty when all is well
+    static volatile boolean noSound = false;    // recording, but the microphone gives pure silence (see listen)
+    // Which microphone really recorded each piece, for the transcript page on the Mac (Doc, 08.11.2026: "unter
+    // die Zeit schreiben, welches Mic da wirklich dran war"). Goes along in the status, the last MIC_LOG pieces.
+    static final int MIC_LOG = 60;
+    static volatile String micLog = "{}";
+    private final java.util.LinkedHashSet<String> pieceMics = new java.util.LinkedHashSet<>();
+    private boolean pieceSilent, pieceSound;
     static volatile long pieceSince;            // ms when the running piece began, 0 between pieces
     private static volatile MediaRecorder live; // the running recorder, for the level on the screen
 
@@ -113,6 +122,12 @@ public class AufnahmeService extends Service {
     }
 
     /** Stopp on the screen: end the recording, stay ready for the next lesson. */
+    /** Ready for the lessons, recording nothing now (unless a lesson runs): the app does this when it is opened
+        and the service is gone, e.g. after an update (MainActivity.onResume). */
+    static void ready(Context c) {
+        c.startForegroundService(new Intent(c, AufnahmeService.class).setAction(ACTION_READY));
+    }
+
     public static void stop(Context c) {
         c.startService(new Intent(c, AufnahmeService.class).setAction(ACTION_STOP));
     }
@@ -129,6 +144,7 @@ public class AufnahmeService extends Service {
         super.onCreate();
         channels(this);
         audio = getSystemService(AudioManager.class);
+        micLog = prefs(this).getString("mikros", "{}");
     }
 
     @Override
@@ -344,12 +360,57 @@ public class AufnahmeService extends Service {
             o.put("mikro", mic);
             o.put("naechste", nextVon);
             o.put("naechsteName", nextName);
-            o.put("problem", problem.isEmpty() ? Bruecke.problem : problem);
+            o.put("problem", noSound ? "kein Ton: " + mic : problem.isEmpty() ? Bruecke.problem : problem);
             o.put("stand", System.currentTimeMillis());
+            o.put("stuecke", new org.json.JSONObject(micLog));
         } catch (org.json.JSONException ignored) {
         }
         return o;
     }
+
+    // ---- no sound (Doc, 08.11.2026: "wir können nicht davon ausgehen, dass wenn der Adapter steckt, auch das
+    // Mikrofon verwendet wird"). The DJI receiver is there as a USB microphone even with its transmitter off or
+    // not paired, and then gives pure silence. A real microphone never does: its own noise alone is far above
+    // SILENT_AMP. After SILENT_SECONDS of it the screen says "kein Ton" in red, a loud notification comes, and
+    // the Mac (bruecke.mjs) has Solita call once per recording.
+    // Marie measured the receiver with its transmitter off at -91 dB flat (08.11.2026), i.e. amplitude 0 or 1;
+    // kept well below any real microphone, also a quiet one in a still room, so a pause never rings
+    static final int SILENT_AMP = 3;            // loudest moment per second below this: about -81 dBFS
+    static final int SILENT_SECONDS = 15;
+    private int quietSeconds;
+    private static int heard;                   // loudest moment the screen's level() took away meanwhile (main thread)
+    private final Runnable listen = new Runnable() {
+        @Override
+        public void run() {
+            MediaRecorder r = recorder;
+            if (r == null) return;
+            int amp;
+            try {
+                amp = Math.max(r.getMaxAmplitude(), heard);   // getMaxAmplitude resets on every call: the pill
+            } catch (RuntimeException e) {                     // calls it too, so its peaks count here as well
+                amp = heard;
+            }
+            heard = 0;
+            quietSeconds = amp < SILENT_AMP ? quietSeconds + 1 : 0;
+            boolean silent = quietSeconds >= SILENT_SECONDS;
+            if (silent) pieceSilent = true;
+            if (amp >= SILENT_AMP) pieceSound = true;
+            if (silent != noSound) {
+                noSound = silent;
+                if (silent) {
+                    Log.w(TAG, "no sound from " + mic + " for " + quietSeconds + " s");
+                    alarm("Kein Ton – " + mic, "DocNote nimmt nur Stille auf. Ist der Sender an und verbunden?");
+                } else {
+                    Log.i(TAG, "sound again from " + mic);
+                    getSystemService(NotificationManager.class).cancel(NOTE_ALARM);
+                    problem = "";
+                }
+                refreshNote();
+                Bruecke.sendStatus(AufnahmeService.this, status());
+            }
+            handler.postDelayed(this, 1000);
+        }
+    };
 
     private void begin() {
         recording = true;
@@ -357,6 +418,8 @@ public class AufnahmeService extends Service {
         since = System.currentTimeMillis();
         problem = "";
         failures = 0;
+        quietSeconds = 0;
+        noSound = false;
         getSystemService(NotificationManager.class).cancel(NOTE_ALARM);
         wake = getSystemService(PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "docmitschrift:aufnahme");
         wake.acquire(16L * 60 * 60 * 1000);
@@ -372,6 +435,7 @@ public class AufnahmeService extends Service {
         if (recording) audio.unregisterAudioDeviceCallback(devices);
         if (wake != null && wake.isHeld()) wake.release();
         recording = false;
+        noSound = false;
         mic = "";
     }
 
@@ -441,8 +505,30 @@ public class AufnahmeService extends Service {
         recorder = r;
         live = r;
         pieceSince = pieceStart;
-        mic = label(input);
+        // What Android really records from, not what was asked for (Doc, 08.11.2026: "nimmt dann wirklich das
+        // Mikro auf, oder erkennt die App nur den Adapter?"). Android may refuse the USB receiver at 16 kHz mono
+        // (seen in DocCall) and quietly take the phone's own microphone - then the screen says so.
+        String asked = label(input);
+        mic = routedLabel(r.getRoutedDevice());
+        checkRoute(name, asked, mic);
+        pieceMics.clear();
+        pieceSilent = false;
+        pieceSound = false;
+        if (!MIC_UNKNOWN.equals(mic)) pieceMics.add(mic);
+        if (Build.VERSION.SDK_INT >= 28) {
+            r.addOnRoutingChangedListener((AudioRouting router) -> {
+                if (recorder != r) return;
+                String now = routedLabel(router.getRoutedDevice());
+                if (now.equals(mic)) return;
+                mic = now;
+                checkRoute(name, asked, now);
+                if (!MIC_UNKNOWN.equals(now)) pieceMics.add(now);
+                refreshNote();
+            }, handler);
+        }
         problem = "";
+        handler.removeCallbacks(listen);        // one listener across the pieces; the silence count carries on
+        handler.postDelayed(listen, 1000);
         return true;
     }
 
@@ -451,6 +537,7 @@ public class AufnahmeService extends Service {
         recorder = null;
         live = null;
         pieceSince = 0;
+        handler.removeCallbacks(listen);
         if (r == null) return;
         boolean ok = true;
         try {
@@ -465,9 +552,12 @@ public class AufnahmeService extends Service {
         if (f == null) return;
         if (ok && f.length() > 0) {
             String n = f.getName();
-            f.renameTo(new File(f.getParentFile(), n.substring(0, n.length() - ".part".length())));
+            String done = n.substring(0, n.length() - ".part".length());
+            f.renameTo(new File(f.getParentFile(), done));
             addRecorded(System.currentTimeMillis() - pieceStart);
-            Bruecke.sendPieces(this);                   // off to the Mac at once, encrypted (no-op without bridge)
+            logMic(done);
+            Bruecke.sendStatus(this, status());         // first which microphone it was (same queue, so it is there
+            Bruecke.sendPieces(this);                   // before the piece), then the piece, encrypted (no-op without bridge)
         } else {
             f.delete();
         }
@@ -486,6 +576,7 @@ public class AufnahmeService extends Service {
         if (r == null) return 0;
         try {
             int amp = r.getMaxAmplitude();
+            heard = Math.max(heard, amp);
             if (amp <= 0) return 0;
             double db = 20 * Math.log10(amp / 32767.0);
             return (float) Math.max(0, Math.min(1, (db + 50) / 50));
@@ -512,10 +603,10 @@ public class AufnahmeService extends Service {
 
     /**
      * The microphone the screen names at the bottom (Doc, 08.11.2026): while recording the one really in use
-     * (a Bluetooth one that would not open shows as "Telefon-Mikro"), otherwise the best one connected now.
+     * (a Bluetooth one that would not open shows as "Telefon Mic"), otherwise the best one connected now.
      */
     static String shownMic(Context c) {
-        if (recording && !mic.isEmpty()) return mic;
+        if (recording && !mic.isEmpty()) return noSound ? mic + MIC_SILENT : mic;
         AudioDeviceInfo best = null;
         int rank = -1;
         for (AudioDeviceInfo d : c.getSystemService(AudioManager.class).getDevices(AudioManager.GET_DEVICES_INPUTS)) {
@@ -525,9 +616,9 @@ public class AufnahmeService extends Service {
                 best = d;
             }
         }
-        if (best == null || rank < 2) return "Telefon-Mikro";
+        if (best == null || rank < 2) return MIC_PHONE;
         String name = deviceName(best);
-        return (rank == 3 ? "USB" : "Bluetooth") + (name.isEmpty() ? "" : " · " + name);
+        return rank == 3 ? usbText(name) : btText(name);
     }
 
     private static int rank(int type) {
@@ -585,13 +676,78 @@ public class AufnahmeService extends Service {
         bluetooth = false;
     }
 
-    private String label(AudioDeviceInfo d) {
-        if (d == null) return "Telefon-Mikro";
+    /** The device Android routes the recorder to; right after start it may not be known yet (the routing
+        listener tells a moment later). Shown in grey until then, never the asked-for one in its colour. */
+    static final String MIC_UNKNOWN = "Mikro wird geprüft";
+
+    // The names on the screen, short (Doc, 08.11.2026: "Telefon Mic", "DJI Mic BT", "DJI Adapter"). A microphone
+    // that is not Doc's DJI keeps its own name, so the screen never claims the DJI for a car or an earbud.
+    static final String MIC_PHONE = "Telefon Mic";
+
+    static String usbText(String name) {
+        String n = name.toLowerCase(Locale.ROOT);
+        return n.contains("wireless mic") || n.contains("dji") ? "DJI Adapter" : "USB" + (name.isEmpty() ? "" : " · " + name);
+    }
+
+    static String btText(String name) {
+        return name.toLowerCase(Locale.ROOT).contains("dji") ? "DJI Mic BT" : "BT" + (name.isEmpty() ? "" : " · " + name);
+    }
+
+    /** Its colour on the screen: 4 = no sound (red), 3 = USB / DJI receiver (green), 2 = Bluetooth (orange), 1 = phone (cyan), 0 = not known yet. */
+    static final String MIC_SILENT = " · kein Ton";
+
+    static int micKind(String text) {
+        if (text.endsWith(MIC_SILENT)) return 4;
+        if (text.equals("DJI Adapter") || text.startsWith("USB")) return 3;
+        if (text.equals("DJI Mic BT") || text.startsWith("BT")) return 2;
+        if (text.equals(MIC_PHONE)) return 1;
+        return 0;
+    }
+
+    private static String routedLabel(AudioDeviceInfo d) {
+        if (d == null) return MIC_UNKNOWN;
         String name = deviceName(d);
         int t = d.getType();
-        if (rank(t) == 3) return "USB" + (name.isEmpty() ? "" : " · " + name);
-        if (bluetooth) return "Bluetooth" + (name.isEmpty() ? "" : " · " + name);
-        return "Telefon-Mikro";
+        if (rank(t) == 3) return usbText(name);
+        if (isBluetooth(t)) return btText(name);
+        return MIC_PHONE;
+    }
+
+    /** The piece's microphone(s) into the log the status carries: "DJI Adapter", "Telefon Mic → DJI Adapter",
+        "DJI Adapter · kein Ton" (silent throughout) or "… · zeitweise kein Ton". Kept in the prefs as well, so a
+        restart of the service does not lose what the Mac has not seen yet. */
+    private void logMic(String piece) {
+        String said = pieceMics.isEmpty() ? MIC_UNKNOWN : String.join(" → ", pieceMics);
+        if (pieceSilent) said += pieceSound ? " · zeitweise kein Ton" : MIC_SILENT;
+        try {
+            org.json.JSONObject all = new org.json.JSONObject(prefs(this).getString("mikros", "{}"));
+            all.put(piece, said);
+            java.util.List<String> keys = new java.util.ArrayList<>();
+            for (java.util.Iterator<String> it = all.keys(); it.hasNext(); ) keys.add(it.next());
+            java.util.Collections.sort(keys);
+            for (int i = 0; i < keys.size() - MIC_LOG; i++) all.remove(keys.get(i));
+            micLog = all.toString();
+            prefs(this).edit().putString("mikros", micLog).apply();
+        } catch (org.json.JSONException e) {
+            Log.w(TAG, "mic log", e);
+        }
+        Log.i(TAG, "piece " + piece + ": " + said);
+    }
+
+    /** Asked for one microphone, Android records from another: into the log with the piece's name. */
+    private static void checkRoute(String piece, String asked, String routed) {
+        if (MIC_UNKNOWN.equals(routed)) return;
+        if (asked.equals(routed)) Log.i(TAG, "piece " + piece + ": records from " + routed);
+        else Log.w(TAG, "piece " + piece + ": asked for " + asked + ", Android records from " + routed);
+    }
+
+    private String label(AudioDeviceInfo d) {
+        if (d == null) return MIC_PHONE;
+        String name = deviceName(d);
+        int t = d.getType();
+        if (rank(t) == 3) return usbText(name);
+        if (bluetooth) return btText(name);
+        return MIC_PHONE;
     }
 
     /** The device's own name, without Android's "USB-Audio - " in front ("USB · Wireless Mic Rx"). */

@@ -453,6 +453,68 @@ def render(chunks):
     return [p.strip() for p in parts]
 
 
+# ---- which microphone recorded a part (Doc, 08.11.2026: "unter die Zeit schreiben, welches Mic da eigentlich
+# jetzt gerade wirklich dran war"). DocNote reports per piece what Android really routed (and silence),
+# bruecke.mjs keeps it in daten/mikro.json; a part's pieces come from its sentences' "quelle".
+_cache = {}
+
+
+def _cached(path, read):
+    try:
+        key = (path, path.stat().st_mtime)
+    except OSError:
+        return None
+    if key not in _cache:
+        _cache[key] = read(path)
+    return _cache[key]
+
+
+def mic_kind(mic):
+    """The colour, as in the app: no sound red, receiver/USB green, Bluetooth orange, the phone's own cyan."""
+    if "kein Ton" in mic:
+        return "stumm"
+    last = mic.split(" → ")[-1]                 # changed within a piece: the colour of where it ended
+    if last.startswith(("DJI Adapter", "USB")):
+        return "adapter"
+    if last.startswith(("DJI Mic BT", "BT")):
+        return "bt"
+    if last.startswith("Telefon Mic"):
+        return "telefon"
+    return "offen"
+
+
+def mics_html(day, zeit):
+    """'<p class="mikro">' with the microphones of the part from..to, each with its own time when there are
+    several. The pieces come from daten/mikro.json itself, by the start in their names, so a silent piece
+    (no sentence at all) shows too. Empty when nothing is known (before 08.11.2026, or over the cable)."""
+    m = re.match(r"(\d\d):(\d\d)–(\d\d):(\d\d)", zeit or "")
+    if not m:
+        return ""
+    a, b = int(m.group(1)) * 60 + int(m.group(2)), int(m.group(3)) * 60 + int(m.group(4))
+    mics = _cached(ROOT / "daten" / "mikro.json", lambda p: json.loads(p.read_text())) or {}
+    stamp = day.replace("-", "")
+    runs = []                                   # [mic, from, to] in minutes of the day, in time order
+    for piece in sorted(mics):
+        if not piece.startswith(stamp + "-"):
+            continue
+        von = int(piece[9:11]) * 60 + int(piece[11:13])
+        bis = von + 5                           # a piece is five minutes at most
+        if bis <= a or von > b:
+            continue
+        von, bis = max(von, a), min(bis, b)
+        if runs and runs[-1][0] == mics[piece] and von <= runs[-1][2] + 1:
+            runs[-1][2] = max(runs[-1][2], bis)
+        else:
+            runs.append([mics[piece], von, bis])
+    if not runs:
+        return ""
+    hm = lambda x: f"{x // 60:02d}:{x % 60:02d}"
+    many = len(runs) > 1
+    spans = [f'<span class="m-{mic_kind(mic)}">{html.escape(mic)}</span>'
+             + (f' <span class="m-zeit">{hm(v)}–{hm(t)}</span>' if many else "") for mic, v, t in runs]
+    return f'<p class="mikro">{" · ".join(spans)}</p>\n'
+
+
 def section_html(day, s, body, gone, date_label=""):
     """One section: a header that folds it (time, kind) and the trash button, then its content."""
     zeit, kind = head_parts(s["heading"])
@@ -468,6 +530,7 @@ def section_html(day, s, body, gone, date_label=""):
             f'</button></h2>'
             f'<button type="button" class="weg" title="In den Papierkorb" '
             f'aria-label="{html.escape(title)} in den Papierkorb">{icon("trash")}</button></div>\n'
+            + mics_html(day, zeit) +
             f'<div class="inhalt" id="{anchor}-i">\n{body}\n</div>\n</section>')
 
 

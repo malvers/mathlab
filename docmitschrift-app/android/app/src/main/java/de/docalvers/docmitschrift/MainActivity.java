@@ -2,6 +2,7 @@ package de.docalvers.docmitschrift;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -42,6 +43,7 @@ import java.util.List;
 public class MainActivity extends Activity {
     private static final int LAMBDA = 0xFFF5C242, UPSILON = 0xFFB02418, PHI = 0xFF799E31;
     private static final int TEXT = 0xFFEEEEEE, BG = 0xFF121212, MUTED = 0xFF8A93A6;
+    private static final int CYAN = 0xFF00F2FF;     // --neon-cyan of the site
 
     private Typeface orbitron;
     private Button toggle, akku;
@@ -118,11 +120,12 @@ public class MainActivity extends Activity {
                 Uri.parse("package:" + getPackageName()))));
         bottom.addView(akku, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        // which microphone, very small at the bottom (Doc, 08.11.2026), so a Bluetooth microphone that did not
-        // connect shows as "Telefon-Mikro" before a hike or a lesson, not afterwards in the transcript
+        // which microphone at the bottom (Doc, 08.11.2026), so a Bluetooth microphone that did not connect shows
+        // as "Telefon Mic" before a hike or a lesson, not afterwards in the transcript. Large and in one of three
+        // colours since the afternoon (Doc: "dass es mir in die Augen fällt") - see micColor()
         micLine = new TextView(this);
         micLine.setTypeface(orbitron);
-        micLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        micLine.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         micLine.setTextColor(MUTED);
         micLine.setGravity(Gravity.CENTER);
         micLine.setSingleLine(true);
@@ -196,7 +199,21 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        beReady();
         tick.post(refresh);
+    }
+
+    /** Opening DocNote makes it ready again (Doc, 08.11.2026: "Ja, ihr habt freie Hand. Hauptsache, es
+        funktioniert"). After an update Android has ended the service, and it starts a microphone service only
+        while the app is on screen - this is that moment. Not when Doc switched it off ("Aus" clears "bereit"),
+        not without a timetable or the microphone permission, and not behind the lock screen, where Android
+        would refuse and DocNote would ring "Aufnahme läuft nicht". Records only if a lesson runs right now. */
+    private void beReady() {
+        if (AufnahmeService.running) return;
+        if (!AufnahmeService.prefs(this).getBoolean("bereit", false) || !Plan.exists(this)) return;
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) return;
+        if (getSystemService(KeyguardManager.class).isKeyguardLocked()) return;
+        AufnahmeService.ready(this);
     }
 
     @Override
@@ -241,7 +258,22 @@ public class MainActivity extends Activity {
         boolean free = getSystemService(PowerManager.class).isIgnoringBatteryOptimizations(getPackageName());
         akku.setVisibility(free ? View.GONE : View.VISIBLE);
         String mic = AufnahmeService.shownMic(this);
-        if (!mic.contentEquals(micLine.getText())) micLine.setText(mic);
+        if (!mic.contentEquals(micLine.getText())) {
+            micLine.setText(mic);
+            micLine.setTextColor(micColor(mic));
+        }
+    }
+
+    /** Three microphones, three colours (Doc, 08.11.2026): the phone's own cyan, the DJI straight over Bluetooth
+        orange, the DJI receiver plugged into the phone (USB) green. */
+    private static int micColor(String mic) {
+        switch (AufnahmeService.micKind(mic)) {
+            case 4: return UPSILON;             // recording, but pure silence: transmitter off or not paired
+            case 3: return PHI;
+            case 2: return LAMBDA;
+            case 1: return CYAN;
+            default: return MUTED;              // "Mikro wird geprüft": Android has not said yet
+        }
     }
 
     private GradientDrawable shape(int kind, int color) {

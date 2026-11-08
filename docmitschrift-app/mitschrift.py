@@ -301,7 +301,12 @@ def solita_calls(day):
             continue
         mode, name = parts[2], parts[3]
         note = SOLITA_TRASH / re.sub(r"\.mp3$", ".txt", name)
-        text = note.read_text(errors="replace") if note.exists() else ""
+        try:
+            text = note.read_text(errors="replace") if note.exists() else ""
+        except OSError:
+            # Run by launchd (the bridge), macOS does not let the job read the Trash (08.11.2026: the day page
+            # was never written). Without her words, "hier ist Solita" still marks her sentences.
+            text = ""
         length = seconds_of(SOLITA_TRASH / name) or 15.0
         if mode == "vol=100":
             text, length = LOUD_INTRO + " " + text, length + 3.5
