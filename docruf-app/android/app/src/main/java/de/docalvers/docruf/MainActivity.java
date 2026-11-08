@@ -23,10 +23,12 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.text.Layout;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.TextUtils;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -64,6 +66,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
     private static final int LAMBDA = 0xFFF5C242, UPSILON = 0xFFB02418, PHI = 0xFF799E31;
     private static final int TEXT = 0xFFEEEEEE, MUTED = 0xFF8A93A6, CARD = 0xFF0E244E, BG = 0xFF0A1428;
+    private static final int CYAN = 0xFF00F2FF;     // --neon-cyan of the site, the phone's own microphone
     private static final long FADE_IN_MS = 450, FADE_OUT_MS = 2500, BACK_TO_IDLE_MS = 3000;
     private static final long HOLD_MS = 4000;   // her portrait and sentence stay a while after she is done (Doc, 07.11.2026)
     private static final int LIFT_DP = 80;      // how far the circle sits above the middle (optical centre)
@@ -672,10 +675,11 @@ public class MainActivity extends Activity {
         col.addView(lineWord, gap(8));
 
         // which microphone hears him (Doc, 08.11.2026): the one now, and below the one measured at his last answer
+        // a little room under the line, so the microphone reads as its own thing (Doc, 08.11.2026)
         micWord = text("", 16, TEXT);
-        col.addView(micWord, gap(8));
+        col.addView(micWord, gap(20));
         micHeard = text("", 12, MUTED);
-        col.addView(micHeard, gap(2));
+        col.addView(micHeard, gap(4));
 
         Switch speak = new Switch(this);
         speak.setText("Ansagen");
@@ -870,16 +874,22 @@ public class MainActivity extends Activity {
         lineWord.setTextColor(color);
 
         String live = measureMic();
-        micWord.setText("Mikrofon: " + (live != null ? live : Mic.next(this)));
+        String mic = live != null ? live : Mic.next(this);
+        micWord.setText("Mikrofon: " + mic);
+        micWord.setTextColor(micColor(mic));
         String last = Mic.lastHeard(this);
         micHeard.setVisibility(last.isEmpty() ? View.GONE : View.VISIBLE);
         if (!last.isEmpty()) {
-            // one short line: today only the time, otherwise the date as well
+            // one short line: today only the time, otherwise the date as well; the microphone in its colour
             Date at = new Date(Mic.lastHeardAt(this));
             SimpleDateFormat day = new SimpleDateFormat("dd.MM.", Locale.GERMANY);
             boolean today = day.format(at).equals(day.format(new Date()));
-            micHeard.setText("Zuletzt gehört: " + last + " · "
+            String head = "Zuletzt gehört: ";
+            SpannableString when = new SpannableString(head + last + " · "
                     + new SimpleDateFormat(today ? "HH:mm" : "dd.MM. HH:mm", Locale.GERMANY).format(at));
+            when.setSpan(new ForegroundColorSpan(micColor(last)), head.length(), head.length() + last.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            micHeard.setText(when);
         }
 
         boolean free = getSystemService(PowerManager.class).isIgnoringBatteryOptimizations(getPackageName());
@@ -911,6 +921,18 @@ public class MainActivity extends Activity {
             });
             list.addView(row, gap(8));
         }
+    }
+
+    /**
+     * The microphone's colour, as in DocNote (MainActivity.micColor - change both together): the phone's own
+     * cyan, the DJI straight over Bluetooth orange, the DJI receiver on USB green, no sound red.
+     */
+    private static int micColor(String mic) {
+        if (mic.endsWith(Mic.SILENT)) return UPSILON;
+        if (mic.equals("DJI Adapter") || mic.startsWith("USB")) return PHI;
+        if (mic.equals("DJI Mic BT") || mic.startsWith("BT")) return LAMBDA;
+        if (mic.equals(Mic.PHONE)) return CYAN;
+        return MUTED;
     }
 
     /**
