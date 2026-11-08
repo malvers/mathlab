@@ -183,4 +183,39 @@ Diophantos) stay. German places with real data stay (Dresden, Sachsen).
 
 ## mathe12-tr (BGY 12, block tr-2)
 
-Terms the book adds (Grenzwert, Ableitung, Extremum, Wendepunkt, Vektor im Raum, Skalarprodukt …) go here.
+Terms BGY 12 (`mathe12-tr`, block tr-2, 08.11.2026) added; the widgets use the same words.
+
+| German | Turkish |
+|---|---|
+| bedingte Wahrscheinlichkeit $P_B(A)$ | koşullu olasılık $P(A \,\|\, B)$ (plain bar), also in the widgets (rule in `js/buch-tr/stochastik.js`) |
+| Multiplikationssatz · stochastisch unabhängig · unvereinbar | çarpma kuralı · bağımsız · ayrık |
+| Bus / verspätet $B$/$V$ · Brille / liest $B$/$L$ · fehlerhaft $F$ · Informatik / Theater $I$/$T$ | otobüs / geç kaldı $O$/$G$ · gözlük / okur $Z$/$K$ · kusurlu $K$ · bilişim / tiyatro $B$/$T$ |
+| Zufallsgröße · Wahrscheinlichkeitsverteilung · Stabdiagramm | rastgele değişken · olasılık dağılımı · çubuk grafik |
+| Erwartungswert · Varianz · Standardabweichung | beklenen değer $E(X) = \mu$ · varyans $V(X)$ · standart sapma $\sigma$ |
+| Einsatz · Auszahlung · Gewinn · faires Spiel · Glücksrad | oyun bedeli · ödeme · kazanç · adil oyun · çarkıfelek |
+| Bernoulli-Experiment / -Kette · Treffer / Niete | Bernoulli deneyi / dizisi · başarı / başarısızlık (tree letters B / B') |
+| Binomialkoeffizient · Fakultät · binomialverteilt · kumuliert | binom katsayısı · faktöriyel · binom dağılımlı · birikimli |
+| Grenzwert · Verhalten im Unendlichen · waagerechte / senkrechte Asymptote | limit · sonsuzdaki davranış · yatay / düşey asimptot |
+| Polstelle (mit / ohne Vorzeichenwechsel) · Lücke · stetig · stetige Ergänzung | kutup noktası (işaret değişimli / değişimsiz) · delik · sürekli · sürekli genişletme |
+| ganzrationale / gebrochenrationale Funktion · Zähler- / Nennergrad | polinom / rasyonel fonksiyon · payın / paydanın derecesi |
+| mittlere / lokale Änderungsrate · Differenzenquotient · Momentangeschwindigkeit | ortalama / anlık değişim hızı · fark oranı · anlık hız |
+| Sekante · Tangente · Normale · Berührpunkt · Wendetangente | kesen · teğet · normal (doğrusu) · değme noktası · büküm teğeti |
+| Ableitung $f'$ (gelesen „f Strich“) · differenzierbar · Knick | türev $f'$ (“f üssü”) · türevlenebilir · kırık noktası |
+| Potenz- / Faktor- / Summen- / Produkt- / Kettenregel | kuvvet / sabitle çarpım / toplam / çarpım / zincir kuralı |
+| Stammfunktion | ilkel fonksiyon (integral tasks of the analysis module) |
+| streng monoton steigend / fallend · Monotoniesatz · Vorzeichentabelle | kesin artan / azalan · monotonluk teoremi · işaret tablosu |
+| notwendige / hinreichende Bedingung · lokal / global · Randwerte | gerek / yeter koşul · yerel / mutlak · uç değerler |
+| Hochpunkt $H$ · Tiefpunkt $T$ · Wendepunkt $W$ · Sattelpunkt $S$ | yerel maksimum noktası $T$ (tepe) · yerel minimum noktası $D$ (dip) · büküm noktası $B$ · eyer noktası (no letter); canvas letters by one rule H/T/W → T/D/B in `js/buch-tr/analysis.js` |
+| Linkskurve (linksgekrümmt) · Rechtskurve | yukarı bükey (sola kıvrılır) · aşağı bükey (sağa kıvrılır) |
+| achsensymmetrisch · punktsymmetrisch | $y$ eksenine göre simetrik (çift fonksiyon) · orijine göre simetrik (tek fonksiyon) |
+| Steckbriefaufgabe · Ansatz · Probe | koşullardan fonksiyon problemi · başlangıç · sağlama (as in tr-1) |
+| Extremwertproblem · Zielfunktion · Nebenbedingung · Randextremum | optimizasyon problemi · amaç fonksiyonu · kısıt · uçta ekstremum |
+| Oberfläche der Dose $O$ | $A$ (tr-1), also in the widget `optimieren` |
+| Ortsvektor · Verbindungsvektor („Spitze minus Fuß“) · Gegenvektor · Nullvektor | konum vektörü · birleştiren vektör (“bitiş eksi başlangıç”) · ters vektör · sıfır vektörü |
+| Betrag · Einheitsvektor · Linearkombination · kollinear | uzunluk (norm) · birim vektör · doğrusal bileşim · doğrusal (paralel) |
+| Mittelpunkt $M$ · Schwerpunkt $S$ | orta nokta $M$ · ağırlık merkezi $G$ |
+| Quader · Raumdiagonale · Kante | dikdörtgenler prizması · cisim köşegeni · ayrıt |
+| Skalarprodukt $\vec a \circ \vec b$ · orthogonal · spitz / stumpf | iç çarpım (skaler çarpım) $\vec a \cdot \vec b$ (rule ` \circ ` → ` \cdot ` in `js/buch-tr/vektoren.js`) · dik · dar / geniş |
+| Parallelogramm · Rechteck · Raute · Quadrat · Trapez · Viereck | paralelkenar · dikdörtgen · eşkenar dörtgen · kare · yamuk · dörtgen |
+| First · Traufe · Sparren | mahya $M_1$, $M_2$ · saçak $S$ · mertek |
+| Grundkurs / Leistungskurs | Grundkurs (temel düzey ders) / Leistungskurs (ileri düzey ders), explained once on the start page |
