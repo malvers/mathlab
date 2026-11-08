@@ -92,6 +92,7 @@ public class MainActivity extends Activity {
 
     // listening: idle | listening | sending; the call it answers and its notification (0 = from the app)
     private SpeechRecognizer ear;
+    private UsbMic usb;          // a USB microphone (DJI receiver) is heard by DocCall itself, see UsbMic
     private String mode = "idle";
     private String answerId = "";
     private int answerNote;
@@ -209,16 +210,31 @@ public class MainActivity extends Activity {
         said = "";
         heard = "";
         mode = "listening";
+        stopUsb();
+        usb = UsbMic.open(this);
         show("Ich höre …", MUTED, false);
         breathe(true);
         ear.startListening(ask());
     }
 
     private Intent ask() {
-        return new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
                 .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "de-DE")
                 .putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+        if (usb != null && Build.VERSION.SDK_INT >= 33) {
+            // the recognizer reads DocCall's own 16 kHz mono from the USB microphone instead of opening one
+            i.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, usb.next())
+                    .putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_CHANNEL_COUNT, 1)
+                    .putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_ENCODING, android.media.AudioFormat.ENCODING_PCM_16BIT)
+                    .putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_SAMPLING_RATE, UsbMic.RATE);
+        }
+        return i;
+    }
+
+    private void stopUsb() {
+        if (usb != null) usb.stop();
+        usb = null;
     }
 
     /** One sentence is done: keep it, listen on, and send only when he stays quiet for PAUSE_MS. */
@@ -236,6 +252,7 @@ public class MainActivity extends Activity {
     private void sendAll(String rest) {
         tick.removeCallbacks(quiet);
         tick.removeCallbacks(again);
+        stopUsb();
         String all = (said + " " + (rest == null ? "" : rest)).trim();
         if (all.isEmpty()) show("Nichts gehört", MUTED, true);
         else send(all);
@@ -287,6 +304,7 @@ public class MainActivity extends Activity {
                     tick.removeCallbacks(again);
                     tick.postDelayed(again, RESTART_MS * 3);
                 } else {
+                    stopUsb();
                     show(silent ? "Nichts gehört" : "Hat nicht geklappt", MUTED, true);
                 }
                 return;
@@ -677,6 +695,7 @@ public class MainActivity extends Activity {
         if (mode.equals("listening")) {
             // screen off or another app in front: stop listening, nothing half-heard goes out
             if (ear != null) ear.cancel();
+            stopUsb();
             tick.removeCallbacks(backToIdle);
             tick.removeCallbacks(quiet);
             tick.removeCallbacks(again);
@@ -700,6 +719,7 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         if (ear != null) ear.destroy();
         ear = null;
+        stopUsb();
         super.onDestroy();
     }
 
@@ -787,8 +807,14 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * The round button is the same size in DocCall and DocNote: exactly half way between DocCall's old circle
+     * (280 dp, at most 72 % of the width) and DocNote's old Start button (56 % of the width, at most 34 % of
+     * the height) (Doc, 08.11.2026). DocNote's MainActivity has the same line - change both together.
+     */
     private int circleSize() {
-        return Math.min(dp(280), Math.round(getResources().getDisplayMetrics().widthPixels * 0.72f));
+        android.util.DisplayMetrics m = getResources().getDisplayMetrics();
+        return Math.round((Math.min(dp(280), m.widthPixels * 0.72f) + Math.min(m.widthPixels * 0.56f, m.heightPixels * 0.34f)) / 2f);
     }
 
     private FrameLayout.LayoutParams center(int size) {
