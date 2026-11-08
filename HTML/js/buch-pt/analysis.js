@@ -23,6 +23,13 @@ window.BuchPT && BuchPT.add('analysis', {
         // grenzwert (lb2-1): Grenzwert = limite, waagerechte / senkrechte Asymptote = assíntota horizontal / vertical, Loch = buraco
         'Annäherung, Schritt $k$': 'Aproximação, passo $k$', 'Graph mit Annäherung an einen Grenzwert': 'Gráfico a aproximar-se de um limite',
         'Annäherung:': 'Aproximação:', 'Richtung': 'Sentido', '$x$ links': '$x$ à esquerda', '$x$ rechts': '$x$ à direita', 'sin(x)/x': 'sen(x)/x',
+        // sekante, ableitungsgraph (lb2-2): Sekante = secante, Tangente = tangente, Steigung = declive, f′ = "f linha"
+        'Abstand $h$ von $P$ zu $Q$': 'Distância $h$ de $P$ a $Q$', 'Tangente zeigen': 'Mostrar a tangente', 'Tangente ausblenden': 'Esconder a tangente',
+        'Sekante durch P und Q nähert sich der Tangente': 'A secante que passa por P e Q aproxima-se da tangente',
+        'Ganzen Graphen von f′ zeigen': 'Mostrar todo o gráfico de f′', 'Spur löschen': 'Apagar o rasto',
+        'Oben: f mit Tangente. Ziehe den Punkt P. Unten: Jede Tangentensteigung wird zu einem Punkt des Graphen von f′.':
+            'Em cima: f com a tangente. Arrasta o ponto P. Em baixo: cada declive da tangente torna-se um ponto do gráfico de f′.',
+        'Graph von f mit Tangente': 'Gráfico de f com a tangente', 'Graph der Ableitung f Strich': 'Gráfico da derivada f linha',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -58,6 +65,10 @@ window.BuchPT && BuchPT.add('analysis', {
         ['Bei $x = 0$ ist $f$ nicht definiert. Die Werte kommen trotzdem beliebig nah an 1 heran.', 'Em $x = 0$, $f$ não está definida. Mesmo assim, os valores aproximam-se de 1 tanto quanto se queira.'],
         ['Der Graph pendelt um die $x$-Achse, die Ausschläge werden immer kleiner.', 'O gráfico oscila em torno do eixo $Ox$ e as oscilações são cada vez menores.'],
         ['$ für $', '$ para $'], ['Waagerechte Asymptote: $y = ', 'Assíntota horizontal: $y = '],
+        // sekante, ableitungsgraph
+        ['$ mit $h = ', '$ com $h = '], ['Sekantensteigung (Differenzenquotient): $', 'Declive da secante (razão incremental): $'],
+        ['Tangentensteigung: $f', 'Declive da tangente: $f'], ['· Für $h \\to 0$ wird aus der Sekante die Tangente.', '· Para $h \\to 0$, a secante transforma-se na tangente.'],
+        ['· Mach $h$ kleiner.', '· Diminui $h$.'], ['$ · Steigung in $P', '$ · declive em $P'],
     ],
     rule: [
         // pt0: notation of the module, for every book
