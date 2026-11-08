@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik 11 · Bölüm 3.5 · Regresyon | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Ölçüm dizilerini dijital araçlarla değerlendirmek. Bölüm 3.5, etkileşimli ders kitabı Matematik · Berufliches Gymnasium 11: açıklamalar, örnekler, üç düzeyde alıştırmalar, öz değerlendirme testleri ve denemek için laboratuvarlar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMATİK · BERUFLİCHES GYMNASİUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Bölüm"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Bölümün içeriği">
+        <p class="b-toc-title">BÖLÜM 3.5 · ÖĞRENME ALANI 3</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Giriş" data-toc-k="G" data-toc-short="Giriş" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">BÖLÜM 3.5 · ÖĞRENME ALANI 3 · ARALIK</p>
+            <h1>Regresyon: ölçüm değerlerinden fonksiyonlar</h1>
+            <p class="b-hero-lead">Laboratuvarda, ekonomide, sporda: Değerler ölçülür ve onlara en iyi uyan fonksiyon aranır.
+                Buna <b>regresyon</b> denir. Hesap makinesi eğriyi saniyeler içinde bulur. Asıl iş sana kalır:
+                doğru modeli seçmek ve modelin ne söylediğini eleştirel gözle sınamak.</p>
+            <div class="b-chips"><span class="b-chip">5 DERS SAATİ</span><span class="b-chip">2 KONU</span><span class="b-chip">2 LAB</span><span class="b-chip">DİJİTAL ARAÇLARLA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["0.00989*x^2+0.0129*x-0.267"]' data-labels='["Regresyon"]' data-lat="[120]" data-x="0,160" data-y="0,260" data-pts="[[30,9.5],[50,24],[70,50],[90,80],[110,122],[130,168]]" data-xl="km/h" data-yl="m" data-h="240" data-aria="Fren mesafeleri ve ikinci dereceden regresyon eğrisi"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">BU BÖLÜMDE ÖĞRENECEKLERİN</div>
+            <div class="b-text"><ul>
+                <li>ölçüm dizileri için dijital araçlarla <b>doğrusal</b>, <b>ikinci dereceden</b> ya da <b>üstel</b> bir regresyon fonksiyonu belirlemek</li>
+                <li>uygun modeli <b>gerekçesiyle seçmek</b></li>
+                <li>tahminler yapmak ve sınırlarını görmek (<b>model eleştirisi</b>)</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">ÖN KONTROL: BUNLARI BİLİYOR MUSUN?</div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">$2, 6, 18, 54$ değerleri … büyüyor.</p><div class="b-mc"><button>doğrusal</button><button>üstel</button><button>ikinci dereceden</button></div><div class="b-sol"><p>Hep aynı çarpan: 3.</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="Sayı"><p class="b-q-text">$3$, $5$ ve $7$ sayılarının ortalaması kaçtır?</p><div class="b-sol"><p>$15 : 3 = 5$</p></div></div>
+            <div class="b-q" data-ans="-1,5" data-tol="0.001" data-ph="m ="><p class="b-q-text">Bir mum başta 20 cm, 2 saat sonra 17 cm uzunluğunda. Eğim (saat başına cm) kaçtır?</p><div class="b-sol"><p>$\tfrac{17 - 20}{2} = -1{,}5$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Keşifler" data-toc-k="K" data-toc-short="Keşifler">
+    <div class="b-band"><span class="b-band-tag">KEŞİFLER</span><span class="b-band-sub">BAŞLANGIÇ İÇİN · GRUPÇA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">CETVELLE DOĞRU</div>
+            <div class="b-text"><p>1. konudaki mum ölçümlerini bir koordinat sistemine işleyin ve cetvelle en iyi uyan doğruyu çizin.</p>
+                <ul><li>Doğrularınızı karşılaştırın. Kim “haklı”? “En iyi” tam olarak nasıl tanımlanabilir?</li></ul></div>
+            <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REGRESYON DOĞRUSU</span><span class="b-lab-what">En iyi uyan doğru</span></span></a></div>
+        <div class="b-box b-erk"><div class="b-box-title">SOĞUMAYI ÖLÇMEK</div>
+            <div class="b-text"><p>Bir fincan çayın sıcaklığını yarım saat boyunca 5 dakikada bir termometreyle ölçün. Oda sıcaklığını da not edin.</p>
+                <ul><li>Hangi model uyuyor: doğrusal, ikinci dereceden, üstel? Hangisi bir saat sonra da hâlâ makul olurdu?</li></ul></div>
+            <span class="b-pair">→ Konu 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Regresyon hesaplamak" data-toc-k="1" data-toc-short="1 Regresyon">
+    <div class="b-band"><span class="b-band-tag">KONU 1</span><span class="b-band-sub">DİJİTAL ARAÇLARLA · 3 DERS SAATİ</span></div>
+    <h2><span class="b-no">1</span>En iyi uyan fonksiyon</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Bir mumun boyu saatte bir ölçülüyor: 20 · 18,4 · 16,9 · 15,2 · 13,8 · 12,1 · 10,6 cm. Noktalar neredeyse, ama tam olarak değil, bir doğru üzerinde.
+                En iyi doğru hangisi?</p></div></div>
+            <div class="b-text"><p>Hesap makinesi, ölçüm noktalarıyla eğri arasındaki <b>uzaklıkların karelerinin</b> toplamını en küçük yapan fonksiyonu seçer
+                (en küçük kareler yöntemi). Mum için $f(t) \approx -1{,}568\,t + 19{,}99$ sonucunu verir. Mum yaklaşık $12{,}7$ saat sonra tükenir.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · REGRESYON</div>
+                <div class="b-text">
+                    <p><b>Regresyon fonksiyonu</b>, seçilen türdeki fonksiyonlar arasında ölçüm değerlerine en iyi uyan fonksiyondur.</p>
+                    <p><b>Doğrusal</b> $f(x) = mx + n$ · <b>ikinci dereceden</b> $f(x) = ax^2 + bx + c$ · <b>üstel</b> $f(x) = a \cdot q^x$</p>
+                    <p><b>Belirlilik katsayısı</b> $R^2$, 0 ile 1 arasındadır. 1'e ne kadar yakınsa fonksiyon ölçüm değerlerini o kadar iyi anlatır.</p>
+                    <p><b>İzlenecek yol:</b> ölçüm değerlerini gir · nokta bulutuna bak · fonksiyon türünü gerekçesiyle seç · regresyonu hesapla · sonucu yorumla ve sına.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>GeoGebra:</b> Noktaları liste olarak gir: <code>L = {(0,20), (1,18.4), …}</code>, sonra <code>FitLine(L)</code>, <code>FitPoly(L, 2)</code> ya da <code>FitExp(L)</code>.</p>
+            <p class="b-note"><b>Grafik hesap makinesi:</b> Değerleri listelere gir, istatistik menüsünde LinReg, QuadReg ya da ExpReg seç.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · REGRESYON LABORATUVARI</div>
+        <p class="b-help" style="margin:0 0 12px">Bir ölçüm dizisi ve bir model seç. Ölçüm noktaları sürüklenebilir, eğri hemen yeniden hesaplanır. Kesikli çizgi tahmin noktasını gösterir.</p>
+        <div data-widget="regression"></div>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">ÖRNEK 1 · FREN MESAFESİ</div>
+        <div class="b-text"><p>Ölçülen fren mesafeleri: 30 km/h: 9,5 m · 50: 24 m · 70: 50 m · 90: 80 m · 110: 122 m · 130: 168 m. Hangi model uyuyor? 150 km/h hızda fren mesafesi ne kadardır?</p></div>
+        <div class="b-sol">
+            <p>Doğrusal: $R^2 \approx 0{,}968$, ama noktaların bir eğri üzerinde olduğu açıkça görülüyor. İkinci dereceden: $f(v) \approx 0{,}00989\,v^2 + 0{,}013\,v - 0{,}27$, $R^2 \approx 0{,}9997$.
+                Bu fizik açısından da uygun: Kinetik enerji hızın karesiyle artar.</p>
+            <p>Tahmin: $f(150) \approx 224$ m. Sürücü kurslarındaki pratik formül $\left(\tfrac{v}{10}\right)^2 = 225$ m hemen hemen aynı sonucu verir.</p>
+        </div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Regresyon laboratuvarında mum için doğrusal regresyonu bul. Eğimi ve $y$ eksenini kestiği noktayı yorumla.</p></div>
+            <div class="b-sol"><p>$f(t) \approx -1{,}568t + 19{,}99$: başlangıç uzunluğu yaklaşık 20 cm, mum saatte yaklaşık 1,57 cm kısalır.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Hangi durumda hangi regresyon türü anlamlıdır? a) sabit faiz oranlı hesap bakiyesi &nbsp; b) sabit ücret ve birim fiyatla toplam maliyet &nbsp; c) atılan bir topun yüksekliğinin zamana göre değişimi</p></div>
+            <div class="b-sol"><p>a) üstel &nbsp; b) doğrusal &nbsp; c) ikinci dereceden</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Laboratuvarda mum verilerinden tek bir noktayı çok yukarı sürükle (bir “ölçüm hatası”). Doğru ve $R^2$ nasıl değişiyor?</p></div>
+            <div class="b-sol"><p>Doğru aykırı değere doğru eğilir, $R^2$ belirgin biçimde düşer. Uzaklıkların kareleri alındığı için aykırı değerlerin etkisi büyüktür. Bu yüzden ölçüm hatalarını her zaman kontrol et.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Mum ölçümlerini GeoGebra'ya ya da bir grafik hesap makinesine gir ve sonucu laboratuvarla karşılaştır. Denklemi kullanarak mumun ne zaman 5 cm olacağını hesapla.</p></div>
+            <div class="b-sol"><p>Aynı sonuç. $-1{,}568t + 19{,}99 = 5 \Rightarrow t \approx 9{,}6$ saat.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Hangi belirlilik katsayısı en iyi uyumu gösterir?</p><div class="b-mc"><button>$R^2 = 0{,}62$</button><button>$R^2 = 0{,}93$</button><button>$R^2 = 0{,}998$</button></div><div class="b-sol"><p>1'e ne kadar yakınsa o kadar iyi.</p></div></div>
+        <div class="b-q" data-ans="224" data-tol="2" data-ph="Metre"><p class="b-q-text">Örnek 1'deki ikinci dereceden modele göre 150 km/h hızda fren mesafesi kaç metredir (tam sayı)?</p><div class="b-sol"><p>$f(150) \approx 224$ m</p></div></div>
+        <div class="b-q" data-ans="12,7" data-tol="0.1" data-ph="Saat"><p class="b-q-text">$f(t) = -1{,}568t + 19{,}99$ modeline göre mum kaç saat sonra tükenir (virgülden sonra bir basamak)?</p><div class="b-sol"><p>$t = 19{,}99 : 1{,}568 \approx 12{,}7$ saat</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Modelleri eleştirel gözle sınamak" data-toc-k="2" data-toc-short="2 Model eleştirisi">
+    <div class="b-band"><span class="b-band-tag">KONU 2</span><span class="b-band-sub">2 DERS SAATİ</span></div>
+    <h2><span class="b-no">2</span>Modelleri eleştirel gözle sınamak</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Soğuyan çayda ikinci dereceden model ile üstel model eşit derecede iyi uyuyor: ikisinde de $R^2 \approx 0{,}9995$.
+                45 dakika sonra üstel model oda sıcaklığına göre 6,8 °C fark öngörüyor, ikinci dereceden model 17,6 °C. Hangisi haklı?</p></div></div>
+            <div class="b-text"><p>İkinci dereceden eğrinin yaklaşık 36. dakikada bir en alçak noktası var ve sonra yeniden yükseliyor: Çay kendiliğinden ısınacaktı. Bu, fizik açısından saçmadır.
+                Demek ki yüksek bir $R^2$ tek başına yetmez. Model <b>gerçek duruma</b> da uymalıdır.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">AKILDA TUT · MODEL ELEŞTİRİSİ</div>
+                <div class="b-text">
+                    <p><b>Ara değer kestirimi</b> (ölçüm değerleri arasında tahmin) çoğunlukla güvenilirdir. <b>Dış değer kestirimi</b> (ölçüm aralığının çok dışında) belirsizdir.</p>
+                    <p>Her modele sorulacak sorular: Fonksiyon türü duruma uyuyor mu? Çok büyük ya da çok küçük $x$ değerleri için ne oluyor? Aykırı değerler var mı? Yalnızca kısa bir süre mi ölçüldü?</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>İleri bakış:</b> Başka modeller de vardır: kuvvet fonksiyonları, doyma sınırı olan lojistik büyüme ya da periyodik veriler için sinüs regresyonu.</p></aside>
+    </div>
+
+    <div class="b-box b-bsp">
+        <div class="b-box-title">ÖRNEK 2 · DÜNYA NÜFUSU</div>
+        <div class="b-text"><p>Dünya nüfusu (milyar olarak): 1950: 2,50 · 1960: 3,02 · 1970: 3,70 · 1980: 4,44 · 1990: 5,32 · 2000: 6,15 · 2010: 6,99 · 2020: 7,84.
+            Modelleri regresyon laboratuvarında karşılaştır (“Dünya nüfusu” ölçüm dizisi). 2050 için ne öngörüyorlar?</p></div>
+        <div class="b-sol">
+            <p>Üstel: $R^2 \approx 0{,}986$, 2050 tahmini yaklaşık <b>13,7</b> milyar · Doğrusal: $R^2 \approx 0{,}995$, yaklaşık <b>10,1</b> milyar · İkinci dereceden: $R^2 \approx 0{,}999$, yaklaşık <b>11,0</b> milyar.</p>
+            <p>Şaşırtıcı: Yaklaşık 1970'ten beri nüfus üstelden çok doğrusal artıyor, büyüme hızı düşüyor. Birleşmiş Milletler 2050 için yaklaşık 9,7 milyar öngörüyor.
+                Hiçbir basit model doğum oranlarını, eğitimi ve refahı önceden göremez.</p>
+        </div>
+    </div>
+
+    <h3>ALIŞTIRMALAR</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Ara değer kestirimi ile dış değer kestirimi arasındaki farkı mum örneği üzerinde açıkla.</p></div>
+            <div class="b-sol"><p>2,5 saat sonraki uzunluk (ölçümlerin arasında): ara değer kestirimi, güvenilir. 20 saat sonraki uzunluk: dış değer kestirimi, model negatif bir uzunluk verir, yani saçma.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Laboratuvarda çay verileri için üç modeli de dene. Bir saat sonrası için tahminde hangisi en uygundur? Gerekçelendir.</p></div>
+            <div class="b-sol"><p>Üstel: Sıcaklık farkı giderek daha yavaş azalır ve 0'a yaklaşır. Doğrusal model 0'ın altına düşer, ikinci dereceden model yeniden yükselirdi.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Bir şirket, cirosunu son 4 yılda her yıl %30 artırmış ve üstel modeli 20 yıl ileriye taşıyor. Değerlendir.</p></div>
+            <div class="b-sol"><p>$1{,}3^{20} \approx 190$: Ciro neredeyse 190 katına çıkardı. Pazarlar sınırlıdır, rakipler ortaya çıkar. Dört yıllık veri 20 yıllık bir tahmini taşımaz.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">KENDİNİ DENE!</div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Ölçüm değerlerinin çok dışında yapılan tahmine … denir.</p><div class="b-mc"><button>dış değer kestirimi</button><button>ara değer kestirimi</button><button>regresyon</button></div><div class="b-sol"><p>Dış değer kestirimi; ve belirsizdir.</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">İki modelin $R^2$ değeri hemen hemen aynı. Neye göre karar verirsin?</p><div class="b-mc"><button>virgülden sonraki daha büyük sayıya göre</button><button>hangi modelin duruma uyduğuna göre</button><button>daha basit hesaplama yoluna göre</button></div><div class="b-sol"><p>Gerçek durum karar verir.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Gezinti: Anscombe dörtlüsü" data-toc-k="X" data-toc-short="Anscombe">
+    <div class="b-band"><span class="b-band-tag">GEZİNTİ</span><span class="b-band-sub">ÖNCE HEP BAK</span></div>
+    <h2>Dört veri kümesi, bir doğru</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>İstatistikçi Francis Anscombe 1973'te, hemen hemen aynı regresyon doğrusuna $y \approx 3 + 0{,}5x$ ve aynı $R^2 \approx 0{,}67$ değerine sahip dört veri kümesi tanıttı.
+                Onlara bakınca tamamen farklı oldukları görülür: biri bir nokta bulutu, biri bir eğri, biri aykırı değeri olan bir doğru, biri neredeyse tek bir $x$ değeri.</p>
+            <p>Ders: $R^2$ gibi sayılar verilere bakmanın yerini asla tutmaz.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Kaynak:</b> F. J. Anscombe, “Graphs in Statistical Analysis”, The American Statistician 27 (1973), s. 17–21.</p></aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">ETKİLEŞİMLİ · ANSCOMBE DÖRTLÜSÜ</div>
+        <div data-widget="anscombe"></div>
+    </div>
+    <div class="b-labs"><a class="b-lab" data-lab="kovarianz" href="../../kovarianz.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">KOVARYANS</span><span class="b-lab-what">Nokta bulutları nasıl ilişkilidir</span></span></a></div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Özet" data-toc-k="Ö" data-toc-short="Özet">
+    <div class="b-band"><span class="b-band-tag">ÖZET</span><span class="b-band-sub">EN ÖNEMLİLER BİR BAKIŞTA</span></div>
+    <div class="b-rueck"><div><h4>REGRESYON</h4><p>Seçilen türdeki fonksiyonlar arasında ölçüm değerlerine en iyi uyan fonksiyon (en küçük kareler).</p></div><div><p>Mum: $f(t) \approx -1{,}568t + 19{,}99$</p></div></div>
+    <div class="b-rueck"><div><h4>MODEL SEÇMEK</h4><p>Hep aynı artış: doğrusal · hep aynı çarpan: üstel · hareket, alan, enerji: çoğu zaman ikinci dereceden</p></div><div><p>Fren mesafesi ikinci dereceden, soğuma üstel</p></div></div>
+    <div class="b-rueck"><div><h4>BELİRLİLİK KATSAYISI</h4><p>$0 \leq R^2 \leq 1$; 1'e yakınsa uyum iyidir. Ama doğru modelin kanıtı değildir.</p></div><div><p>Anscombe: dört resim, tek bir $R^2$</p></div></div>
+    <div class="b-rueck"><div><h4>MODEL ELEŞTİRİSİ</h4><p>Ara değer kestirimi çoğunlukla güvenilir, dış değer kestirimi belirsiz. Her zaman sor: Model duruma uyuyor mu?</p></div><div><p>2050'de dünya nüfusu: modele göre 10 ile 14 milyar arası</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Test" data-toc-k="T" data-toc-short="Test">
+    <div class="b-band"><span class="b-band-tag">TEST</span><span class="b-band-sub">ANINDA GERİ BİLDİRİM</span></div>
+    <div class="b-box b-check" data-check="test1">
+        <div class="b-box-title">TEST · DİJİTAL ARAÇLARLA</div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Eşit aralıklarla ölçülen $100;\ 80;\ 64;\ 51{,}2$ değerlerine en iyi uyan model …</p><div class="b-mc"><button>doğrusal</button><button>üstel</button><button>ikinci dereceden</button></div><div class="b-sol"><p>Hep aynı çarpan: 0,8.</p></div></div>
+        <div class="b-q" data-ans="6,8" data-tol="0.1" data-ph="°C"><p class="b-q-text">Çay için üstel model $f(t) \approx 70{,}7 \cdot 0{,}9494^t$. Bu model 45 dakika sonra ne kadarlık bir sıcaklık farkı öngörür?</p><div class="b-sol"><p>$70{,}7 \cdot 0{,}9494^{45} \approx 6{,}8$ °C</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">$R^2 = 0{,}999$ olan bir model negatif bir mum uzunluğu öngörüyor. Sorun ne?</p><div class="b-mc"><button>hesap hatası</button><button>Mum bozuk.</button><button>geçerlilik aralığının ötesinde dış değer kestirimi</button></div><div class="b-sol"><p>Model yalnızca mum var olduğu sürece geçerlidir.</p></div></div>
+    </div>
+    <h3>ÇEVRİMİÇİ DAHA FAZLA ALIŞTIRMA (ALMANCA)</h3>
+    <div class="b-labs"><a class="b-lab" href="../../mathetest11-regression.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REGRESYON</span><span class="b-lab-what">Geri bildirimli 20 alıştırma</span></span></a></div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matematik, Berufliches Gymnasium 11. sınıf · Saksonya Berufliches Gymnasium matematik öğretim programına göre öğrenme alanı 3.</p>
+    <p>Dünya nüfusu: Birleşmiş Milletler verilerine göre yuvarlanmış değerler (World Population Prospects 2022). Mum, fren mesafesi ve çay örnek verilerdir. Tüm metinler, alıştırmalar ve şekiller özgün içeriktir.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-tr.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-tr/funktionen.js"></script>
+</body>
+</html>
