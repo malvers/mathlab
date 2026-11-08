@@ -8,6 +8,8 @@ window.BUCH = {
     title: 'Matematica · Berufliches Gymnasium 11',
     short: 'Matematica 11',
     lang: 'it',
+    // the dedication page at the front of the print edition (js/buch-druck.js; Doc, 08.11.2026)
+    widmung: 'Per Verena e Federica',
     description: 'Libro di testo interattivo di matematica per il Berufliches Gymnasium (liceo tedesco a indirizzo professionale), 11ª classe, Sassonia: equazioni, funzioni, sistemi di equazioni, probabilità e metodi numerici, con laboratori, simulazioni e autoverifiche con risposta immediata.',
     chapters: [
         { file: 'lb2.html', lb: 'Area di apprendimento 2', k: '2', title: 'Equazioni, formule, figure',

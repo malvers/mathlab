@@ -9,6 +9,8 @@ window.BUCH = {
     title: 'Mathématiques · Berufliches Gymnasium 11',
     short: 'Mathématiques 11',
     lang: 'fr',
+    // the dedication page at the front of the print edition (js/buch-druck.js; Doc, 08.11.2026)
+    widmung: 'Pour Ulf et Ulrike',
     description: 'Manuel interactif de mathématiques pour le Berufliches Gymnasium (lycée allemand à orientation professionnelle), 11e année, Saxe : équations, fonctions, systèmes d’équations, probabilités et méthodes numériques, avec des laboratoires, des simulations et des autoévaluations corrigées immédiatement.',
     chapters: [
         { file: 'lb2.html', lb: 'Domaine d’apprentissage 2', k: '2', title: 'Équations, formules, figures',
