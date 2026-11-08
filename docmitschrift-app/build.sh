@@ -5,7 +5,6 @@
 #   docmitschrift-app/build.sh mac        only mitschrift-mac
 set -e
 HERE="$(cd "$(dirname "$0")" && pwd)"
-PIXEL=43211JEKB10668
 ADB="$HOME/Library/Android/sdk/platform-tools/adb"
 WHAT="${1:-all}"
 
@@ -14,12 +13,13 @@ if [ "$WHAT" = all ] || [ "$WHAT" = android ]; then
     JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew -q assembleDebug
     APK="$HERE/android/app/build/outputs/apk/debug/app-debug.apk"
     echo "gebaut: $APK"
-    if "$ADB" devices | grep -q "^$PIXEL[[:space:]]*device"; then
+    # on the cable or over WLAN, whichever is there (tools/pixel-serial.sh)
+    if PIXEL=$(sh "$HERE/../tools/pixel-serial.sh"); then
         "$ADB" -s "$PIXEL" install -r "$APK"
         "$ADB" -s "$PIXEL" shell am start -n de.docalvers.docmitschrift/.MainActivity >/dev/null
-        echo "auf dem Pixel installiert und gestartet"
+        echo "auf dem Pixel installiert und gestartet ($PIXEL)"
     else
-        echo "Pixel nicht per USB da: installieren mit  $ADB -s $PIXEL install -r $APK"
+        echo "Pixel weder per USB noch per WLAN da: installieren mit  $ADB install -r $APK"
     fi
 fi
 
