@@ -47,6 +47,9 @@ window.BuchPT && BuchPT.add('stochastik', {
         'Strategie': 'Estratégia', 'Spiele': 'Jogos', 'Autos': 'Carros', 'Gewinnquote': 'Taxa de vitórias',
         'du: bleiben': 'tu: manter', 'du: wechseln': 'tu: trocar', 'Rechner: bleiben': 'computador: manter', 'Rechner: wechseln': 'computador: trocar',
         // book pt-2 mathe12-pt:
+        // unabhaengig (lb1-1): unabhängig = independentes, unvereinbar = incompatíveis (as pt0), abhängig = dependentes
+        'Unabhängig machen': 'Tornar independentes', 'Unvereinbar machen': 'Tornar incompatíveis',
+        'Einheitsquadrat: Anteil von A in B und in nicht B': 'Quadrado unitário: parte de A em B e em não B',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -70,6 +73,12 @@ window.BuchPT && BuchPT.add('stochastik', {
         ['TÜR', 'PORTA'], ['Tür', 'Porta'], ['Gewonnen – das Auto! ', 'Ganhaste – o carro! '], ['Leider eine Ziege. ', 'Azar, uma cabra. '],
         ['Du hast gewechselt.', 'Trocaste de porta.'], ['Du bist geblieben.', 'Mantiveste a porta.'],
         // book pt-2 mathe12-pt:
+        // unabhaengig
+        ['$ und $', '$ e $'],
+        ['<b>Unabhängig:</b> Ob $B$ eintritt oder nicht, der Anteil von $A$ bleibt gleich. Im Quadrat liegt die Grenze in beiden Spalten auf gleicher Höhe.',
+            '<b>Independentes:</b> quer $B$ aconteça quer não, a parte de $A$ mantém-se igual. No quadrado, a fronteira está à mesma altura nas duas colunas.'],
+        ['<b>Unvereinbar</b> ($A \\cap B = \\emptyset$) und damit <b>abhängig</b>: Wenn $B$ eintritt, kann $A$ nicht mehr eintreten.',
+            '<b>Incompatíveis</b> ($A \\cap B = \\emptyset$) e, portanto, <b>dependentes</b>: se $B$ acontecer, $A$ já não pode acontecer.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -93,5 +102,10 @@ window.BuchPT && BuchPT.add('stochastik', {
             'O apresentador sabe onde está o carro e abre a porta $1: uma cabra. Manténs a tua porta ou trocas?'],
         [/Bei Tür (\d) bleiben/g, 'Manter a porta $1'], [/Zu Tür (\d) wechseln/g, 'Trocar para a porta $1'],
         // book pt-2 mathe12-pt:
+        // unabhaengig: "B verändert die Wahrscheinlichkeit von A nach oben" → "B aumenta a probabilidade de A"
+        [/<b>Abhängig:<\/b> \$B\$ verändert die Wahrscheinlichkeit von \$A\$ nach (oben|unten)\./g,
+            (m, d) => '<b>Dependentes:</b> $B$ ' + (d === 'oben' ? 'aumenta' : 'diminui') + ' a probabilidade de $A$.'],
+        // unabhaengig: the German conditional probability P_B(A) is P(A|B) in Portuguese schools (with a bar, never \mid)
+        [/P_B\(A\)/g, 'P(A|B)'], [/P_\{\\overline\{B\}\}\(A\)/g, 'P(A|\\overline{B})'],
     ]
 });
