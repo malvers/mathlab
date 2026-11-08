@@ -112,7 +112,7 @@ const LABS_TERMS = {
     "stimmklon": ["alle Texte zeigen", "Aussteuerung automatisch", "Diff", "heller Grund", "Klon", "Mikrofon", "Original", "Original — Doc am RØDE", "Recording", "Spektrum", "Systemvorgabe"],
     "subtraktion": ["Minuend", "SCHRIFTLICHE SUBTRAKTION", "Subtrahend"],
     "tour-kreisteilung": ["Abspielen", "Die Formel", "Jedes Mal das Doppelte", "Kreisteilung", "Nummern", "Regelmäßig oder allgemein", "Und dann 31", "Was kommt dann?", "Was man sieht", "Zwei Punkte, eine Sehne"],
-    "tour-mathe11-lehrbuch": ["Aufgaben", "Die Druckausgabe", "Ein Kapitel", "Ein Lehrbuch für 49 Cent", "Elf Kapitel", "Exkursion", "Fünf Sprachen", "Für euch", "Labore", "Selbsttests", "Widgets"],
+    "tour-mathe11-lehrbuch": ["Aufgaben", "Die Druckausgabe", "Ein Kapitel", "Ein Lehrbuch, gebaut für 49 Cent", "Elf Kapitel", "Exkursion", "Fünf Sprachen", "Für euch", "Labore", "Selbsttests", "Widgets"],
     "tour-maya": ["Der Pfeil", "Die zwanzig Ziffern", "Die Zwanziger-Stelle", "Ein leeres Brett", "Eine Zahl eintippen", "Eine Ziffer legen", "Farben", "Hochkant", "Kalender oder rein zwanzig", "Maya-Zahlen", "Übertrag", "Wie viele Stellen", "Würfeln und legen"],
     "tour-mission-control": ["Abgabe", "Der rote Knopf", "Die ganze Klasse im Blick", "Die Klasse als Ganzes", "Die Klasse legt los", "Die Zettel", "Frage für Frage", "Kein Name auf dem Server", "Kurz mal weg", "Offline", "QR scannen"],
     "tour-trigonometrie": ["Das Bogenmaß", "Das rechtwinklige Dreieck", "Der Einheitskreis", "Der Tangens", "Die Ableitung", "Die Kosinuskurve", "Die Sinuskurve", "Gleichungen", "Tageslänge in Dresden", "Trigonometrie", "Vier Parameter", "Vom Dreieck zur Welle", "Zwei Dreiecke"],

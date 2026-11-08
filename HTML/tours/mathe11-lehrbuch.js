@@ -1,4 +1,4 @@
-/* Ein Lehrbuch für 49 Cent — the live tour through the book Mathematik, Berufliches Gymnasium 11 (HTML/buch/mathe11/).
+/* Ein Lehrbuch, gebaut für 49 Cent — the live tour through the book Mathematik, Berufliches Gymnasium 11 (HTML/buch/mathe11/).
  *
  * Doc, 03.11.2026: the deck decks/mathe11-lehrbuch.html tells how the book was made; the tour shows the book itself, the
  * way the Würfelspiel tour shows its lab ("So möchte ich das gerne haben"). Scene plan approved by Doc ("passt gut!"):
@@ -116,9 +116,10 @@
 
     CyberTour.define({
         id: 'mathe11-lehrbuch',
-        title: 'Ein Lehrbuch für 49 Cent',
+        title: 'Ein Lehrbuch, gebaut für 49 Cent',
         chapter: 'Teil',
-        card: { title: 'Ein Lehrbuch für 49 Cent', sub: 'Mathematik · Berufliches Gymnasium · Klasse 11 – live im Buch' },
+        /* the card title in two lines: in one it was wider than the link preview's picture (Doc, 08.11.2026: "gebaut") */
+        card: { title: 'Ein Lehrbuch,\ngebaut für 49 Cent', sub: 'Mathematik · Berufliches Gymnasium · Klasse 11 – live im Buch' },
         /* the address as Solita says it, written back for the subtitles (the longer one first) */
         spelled: {
             'Dock Alvers Punkt D E, Schrägstrich Buch, Schrägstrich Mathe elf': 'docalvers.de/buch/mathe11',
@@ -135,10 +136,10 @@
 
         scenes: [
             {
-                id: 's0', n: '00', title: 'Ein Lehrbuch für 49 Cent',
+                id: 's0', n: '00', title: 'Ein Lehrbuch, gebaut für 49 Cent',
                 async enter(t) { await open(t, BOOK + 'index.html', '#start'); },
                 async run(t) {
-                    begin(t, '00', 'Ein Lehrbuch für 49 Cent');
+                    begin(t, '00', 'Ein Lehrbuch, gebaut für 49 Cent');
                     await pointOn(t, L(t, 0) + 1.4, '.b-titel-art');            /* "Ein ganzes Lehrbuch Mathematik" */
                     await pointOn(t, L(t, 3) + 0.4, '.b-kino');                 /* "für neunundvierzig Cent" */
                     await pointOn(t, L(t, 5) + 0.6, '.b-kino');                 /* "erzählt die Präsentation hier oben" */

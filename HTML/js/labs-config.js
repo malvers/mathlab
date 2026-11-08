@@ -1490,7 +1490,7 @@ const LABS_DATA = [
     {
         "id": "tour-mathe11-lehrbuch",
         "href": "tours/mathe11-lehrbuch.html",
-        "title": "Tour: Ein Lehrbuch für 49 Cent",
+        "title": "Tour: Ein Lehrbuch, gebaut für 49 Cent",
         "description": "Live-Tour durch das Lehrbuch Mathematik für Klasse 11 am Beruflichen Gymnasium: Solita führt mit Stimme, Cursor und Untertiteln durch das echte Buch, vom Inhalt über ein Kapitel, die Parabel-Werkstatt, Tipp und Lösung, einen Selbsttest und Galileis Fallrinne bis zum Parabellabor, den fünf Sprachen und der Druckausgabe. Entstanden in knapp anderthalb Stunden, für 49 Cent. 11 Szenen, etwa 4½ Minuten, jederzeit anhalten und selbst ausprobieren.",
         "tagline": "Live-Tour / Lehrbuch / Mathe 11",
         "icon": LAB_ICONS["lehrbuch-mathe11"],

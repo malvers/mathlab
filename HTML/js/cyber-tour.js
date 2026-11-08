@@ -1171,6 +1171,7 @@
         const c = E.def.card || {};
         const cardEl = el('div', { id: 'tour-card' }, '<div class="blk"><h1></h1><p></p><div class="sig">Doc Alvers Mathe-Labor</div></div>');
         cardEl.querySelector('h1').textContent = c.title || E.def.title || '';
+        if (/\n/.test(c.title || '')) cardEl.classList.add('two');   // a title in two lines lifts the block (cyber-tour.css)
         cardEl.querySelector('p').textContent = c.sub || '';
         const media = el('div', { class: 'media' });
         if (c.img) { const img = el('img', { alt: '' }); img.src = c.img; media.appendChild(img); }
