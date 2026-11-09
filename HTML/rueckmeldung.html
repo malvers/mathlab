@@ -11,8 +11,8 @@
     central js/buzzer.js: the QR card, the count of open questions (a "verstanden" takes one back) and the phones'
     "zu schnell" / "zu langsam" since the last zero. No name, no device - only the code and the time.
     The written feedback too ("das will ich definitiv haben"): colleagues have no SVP login, so the code is claimed
-    for the day with a key of this device (Buzzer.texte with schluessel) - the texts behind a key in the panel, a
-    tap shows them, so they never stand on the beamer by themselves.
+    for the day with a key of this device (Buzzer.texte with schluessel). First behind a key, so they never stood
+    on the beamer by themselves; since 09.11.2026 right under the QR (Doc: "keinen Button Nachrichten ... gleich Text").
 -->
 
 <head>
@@ -56,17 +56,39 @@
         }
         [hidden] { display: none !important; }
 
-        /* the stage: the QR for the class beside the count; stacked when the screen is narrow */
+        /* the stage (Doc, 09.11.2026: "Nachrichten gleich unter den QR", "rechts 'ne Box drum und Feedback mittig"):
+           "FEEDBACK" centred over everything, the QR with the class's texts under it, the count in a box beside them;
+           stacked when the screen is narrow */
         #rm-buehne {
             position: absolute; inset: 0; overflow: auto;
-            display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-            gap: clamp(28px, 6vw, 96px); padding: 24px 16px;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: flex-start;        /* from the top ("alles höher", Doc 09.11.2026) */
+            gap: clamp(14px, 2.5vh, 28px); padding: clamp(20px, 4vh, 40px) 16px 24px;   /* clear of the brand top right */
             box-sizing: border-box; font-family: 'Orbitron', sans-serif; color: #eaf0f7;
         }
+        #rm-titel { text-align: center; }
+        #rm-titel > div { font-size: clamp(1.8rem, 5vw, 3.2rem) !important; }   /* bigger than on the card ("Feedback größer") */
+        /* the row sets the width, the texts under it take that width ("Text über beide Boxen") */
+        #rm-mitte { width: fit-content; max-width: 100%; display: flex; flex-direction: column; gap: clamp(14px, 2.5vh, 24px); }
+        #rm-reihe { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: clamp(28px, 6vw, 96px); }
+        #rm-links { display: flex; flex-direction: column; align-items: center; gap: 18px; }
         #rm-qr { display: flex; flex-direction: column; align-items: center; }
-        #rm-stand { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+        #rm-stand {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+            text-align: center; box-sizing: border-box; min-height: min(52vh, 70vw);   /* as tall as the QR */
+            padding: clamp(20px, 3vh, 36px) clamp(24px, 3vw, 48px);
+            border-radius: 14px; color: #0b1a33;
+            background: #e4edf9;               /* light like the QR card, a little bluish (Doc, 09.11.2026) */
+        }
+        @media (max-width: 700px), (orientation: portrait) { #rm-stand { min-height: 0; } }
+        /* on the light box: the quiet greys a shade darker, the orange count with a shadow instead of a glow */
+        #rm-stand { --rm-leise: #5f6b7e; }
+        #rm-stand #rm-zahl:not(.offen) { color: #8a95a8; }
+        #rm-stand #rm-zahl.offen { text-shadow: 0 4px 14px rgba(160, 110, 10, 0.35); }
+        #rm-stand .rm-pille { border-color: rgba(11, 26, 51, 0.22); }
         #rm-zahl {
-            font: 700 clamp(6rem, 26vh, 15rem)/1 'Orbitron', sans-serif;
+            /* not Orbitron (Doc, 09.11.2026: "rechts kein Orbi für die große") - its 0 reads like a crossed box */
+            font: 700 clamp(6rem, 26vh, 15rem)/1 Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums;
             color: var(--rm-leise); transition: color 0.4s ease, text-shadow 0.4s ease;
         }
         #rm-zahl.offen { color: var(--rm-orange); text-shadow: 0 0 40px rgba(245, 194, 66, 0.45); }
@@ -103,13 +125,13 @@
         .rm-code-fon { margin-top: 12px; font-size: 0.9rem; letter-spacing: 0.2em; color: var(--rm-leise); }
 
         /* the class's texts: a dialog, newest first - the words as text only (any phone wrote them) */
-        #rm-nachrichten .cyber-modal { max-width: 560px; max-height: 84vh; display: flex; flex-direction: column; padding: 28px 24px 20px; }
-        #rm-nachrichten h3 { font-size: 1rem; margin: 0 40px 16px; }
-        #rm-liste { overflow-y: auto; text-align: left; }
-        .rm-tx { display: flex; gap: 14px; padding: 10px 2px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        #rm-texte { width: 0; min-width: 100%; max-height: clamp(96px, 30vh, 380px); overflow-y: auto; text-align: left; }
+        .rm-tx { display: flex; gap: 14px; padding: 10px 8px; border-radius: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
         .rm-tx:last-child { border-bottom: none; }
-        .rm-tx-zeit { flex: none; padding-top: 3px; font: 400 0.75rem/1.4 'Orbitron', sans-serif; letter-spacing: 0.06em; color: var(--rm-leise); }
-        .rm-tx-text { font: 400 1rem/1.5 'Outfit', sans-serif; color: #eaf0f7; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .rm-tx.neu { animation: rm-neu 6s ease-out; }
+        @keyframes rm-neu { from { background: rgba(245, 194, 66, 0.28); } to { background: transparent; } }
+        .rm-tx-zeit { flex: none; padding-top: 4px; font: 400 0.8rem/1.4 'Orbitron', sans-serif; letter-spacing: 0.06em; color: var(--rm-leise); }
+        .rm-tx-text { font: 400 clamp(1rem, 1.5vw, 1.25rem)/1.45 'Outfit', sans-serif; color: #eaf0f7; white-space: pre-wrap; overflow-wrap: anywhere; }
         .rm-tx-name { font-weight: 600; color: var(--rm-orange); }
         .rm-leer { margin: 6px 0 10px; font: 400 0.95rem/1.5 'Outfit', sans-serif; color: var(--rm-leise); text-align: center; }
     </style>
@@ -136,7 +158,6 @@
                 <div id="rm-code">----</div>
             </div>
             <div class="cyber-control-group rm-knoepfe">
-                <button type="button" class="cyber-btn" data-aktion="texte">NACHRICHTEN</button>
                 <button type="button" class="cyber-btn" data-aktion="qr" id="rm-qr-knopf">QR-CODE AUSBLENDEN</button>
                 <button type="button" class="cyber-btn" data-aktion="null">AUF NULL</button>
                 <button type="button" class="cyber-btn" data-aktion="neu">NEUER CODE</button>
@@ -144,9 +165,9 @@
             <div class="cyber-control-group">
                 <p class="rm-hilfe">Die Klasse scannt den QR-Code mit dem Handy. Wer etwas <b>nicht versteht</b>, drückt –
                     die Zahl steigt. Wer es danach verstanden hat, drückt <b>noch einmal</b> – die Zahl geht wieder
-                    runter. Dazu „zu schnell“ und „zu langsam“ – auch die lassen sich am Handy zurücknehmen.</p>
-                <p class="rm-hilfe"><b>NACHRICHTEN</b> – was die Klasse anonym schreibt. Lesen kann das nur dieses
-                    Gerät, die Zahl am Knopf zeigt, was neu ist.</p>
+                    runter. Dazu „zu langsam“ und „zu schnell“ – auch die lassen sich am Handy zurücknehmen.</p>
+                <p class="rm-hilfe">Unter dem QR-Code steht, was die Klasse <b>anonym schreibt</b> – das Neueste
+                    oben, Neues leuchtet kurz auf. Lesen kann das nur dieses Gerät.</p>
                 <p class="rm-hilfe">Anonym: Gespeichert werden nur der Code und die Uhrzeit, kein Name, kein Gerät.</p>
                 <p class="rm-hilfe"><b>AUF NULL</b> – ein neues Thema. <b>NEUER CODE</b> – die nächste Klasse.</p>
             </div>
@@ -156,22 +177,31 @@
     <main id="main-content">
         <div id="canvas-container">
             <div id="rm-buehne">
-                <section id="rm-qr" aria-label="QR-Code für die Klasse"></section>
-                <section id="rm-stand" aria-live="polite">
-                    <div id="rm-zahl">0</div>
-                    <div id="rm-wort">NICHT VERSTANDEN</div>
-                    <div id="rm-bilanz"></div>
-                    <div id="rm-tempo">
-                        <span class="rm-pille" data-art="schnell">ZU SCHNELL <span>0</span></span>
-                        <span class="rm-pille" data-art="langsam">ZU LANGSAM <span>0</span></span>
+                <!-- the QR card's "FEEDBACK", moved here by zeigeQr() -->
+                <div id="rm-titel"></div>
+                <div id="rm-mitte">
+                    <div id="rm-reihe">
+                        <div id="rm-links">
+                            <section id="rm-qr" aria-label="QR-Code für die Klasse"></section>
+                        </div>
+                        <section id="rm-stand" aria-live="polite">
+                            <div id="rm-wort">NICHT VERSTANDEN</div>
+                            <div id="rm-zahl">0</div>
+                            <div id="rm-bilanz"></div>
+                            <div id="rm-tempo">
+                                <span class="rm-pille" data-art="langsam">ZU LANGSAM <span>0</span></span>
+                                <span class="rm-pille" data-art="schnell">ZU SCHNELL <span>0</span></span>
+                            </div>
+                            <!-- the panel's keys, on the phone only -->
+                            <div id="rm-fon-knoepfe" class="rm-fon">
+                                <button type="button" class="cyber-btn" data-aktion="null">AUF NULL</button>
+                                <button type="button" class="cyber-btn" data-aktion="neu">NEUER CODE</button>
+                            </div>
+                        </section>
                     </div>
-                    <!-- the panel's keys, on the phone only -->
-                    <div id="rm-fon-knoepfe" class="rm-fon">
-                        <button type="button" class="cyber-btn" data-aktion="texte">NACHRICHTEN</button>
-                        <button type="button" class="cyber-btn" data-aktion="null">AUF NULL</button>
-                        <button type="button" class="cyber-btn" data-aktion="neu">NEUER CODE</button>
-                    </div>
-                </section>
+                    <!-- the class's texts, as wide as the QR and the box together -->
+                    <section id="rm-texte" aria-label="Nachrichten der Klasse" aria-live="polite"></section>
+                </div>
             </div>
         </div>
     </main>
@@ -271,26 +301,25 @@
                 const code = document.createElement('div');                  // the panel's code, on the phone
                 code.className = 'rm-fon rm-code-fon';
                 code.textContent = 'CODE ' + Buzzer.code();
-                try { qrFeld.replaceChildren(await Buzzer.karteBereit(), code); }
+                try {
+                    const karte = await Buzzer.karteBereit();
+                    // the card's first child is its "FEEDBACK": over the whole stage, centred (Doc, 09.11.2026)
+                    $('rm-titel').replaceChildren(karte.firstElementChild);
+                    qrFeld.replaceChildren(karte, code);
+                }
                 catch (_) { qrFeld.textContent = Buzzer.link(); }
             }
-            // the texts: a key in the panel with the count of the unread, a dialog with all of today's
-            const KEY_GELESEN = 'rueckmeldung-gelesen', texteKnoepfe = document.querySelectorAll('[data-aktion="texte"]');
-            let texte = [];
+            // the texts (Doc, 09.11.2026: "keinen Button Nachrichten ... gleich Text"): all of today's right under the
+            // QR, newest first; a row come since the last look lights up orange for a moment
+            const KEY_GELESEN = 'rueckmeldung-gelesen';
+            let texte = [], gezeigteTexte = null;
             const gelesen = () => (g => g && g.code === Buzzer.code() && g.tag === heute() ? g.bis : 0)(lies(KEY_GELESEN, null));
-            const offen = () => { const o = $('rm-nachrichten'); return !!(o && o.classList.contains('open')); };
-            function alleGelesen() {
-                schreib(KEY_GELESEN, { code: Buzzer.code(), tag: heute(), bis: Math.max(gelesen(), ...texte.map(x => x.id)) });
-            }
             function texteZeigen() {
-                if (offen()) alleGelesen();
-                const neu = texte.filter(x => x.id > gelesen()).length;
-                texteKnoepfe.forEach(k => {
-                    Buzzer.markiere(k, neu);
-                    k.title = texte.length ? texte.length + ' Nachricht' + (texte.length === 1 ? '' : 'en') + ' heute' : 'heute noch keine Nachricht';
-                });
-                const liste = $('rm-liste');
-                if (!liste) return;
+                // every look of js/buzzer.js reports all rows again: draw only when they changed (keeps the scroll)
+                const stand = Buzzer.code() + ':' + texte.map(x => x.id).join(',');
+                if (stand === gezeigteTexte) return;
+                gezeigteTexte = stand;
+                const bis = gelesen(), liste = $('rm-texte');
                 liste.textContent = '';
                 if (!texte.length) {
                     const p = document.createElement('p');
@@ -301,7 +330,7 @@
                 }
                 texte.slice().sort((a, b) => b.id - a.id).forEach(x => {
                     const d = document.createElement('div'), zeit = document.createElement('span'), text = document.createElement('span');
-                    d.className = 'rm-tx';
+                    d.className = 'rm-tx' + (x.id > bis ? ' neu' : '');
                     zeit.className = 'rm-tx-zeit';
                     const t = new Date(x.t);
                     zeit.textContent = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
@@ -317,27 +346,8 @@
                     d.append(zeit, text);
                     liste.appendChild(d);
                 });
+                schreib(KEY_GELESEN, { code: Buzzer.code(), tag: heute(), bis: Math.max(bis, ...texte.map(x => x.id)) });
             }
-            function nachrichten(auf) {
-                let o = $('rm-nachrichten');
-                if (!auf) { if (o) o.classList.remove('open'); texteZeigen(); return; }
-                if (!o) {
-                    o = document.createElement('div');
-                    o.id = 'rm-nachrichten';
-                    o.className = 'cyber-overlay';
-                    o.innerHTML = '<div class="cyber-modal cyber-modal--neon" role="dialog" aria-label="Nachrichten der Klasse">' +
-                        '<button type="button" class="cyber-modal-x" title="Schließen" aria-label="Schließen">' +
-                        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6 L18 18 M18 6 L6 18" fill="none"' +
-                        ' stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
-                        '<h3>NACHRICHTEN</h3><div id="rm-liste"></div></div>';
-                    o.addEventListener('click', e => { if (e.target === o) nachrichten(false); });
-                    o.querySelector('.cyber-modal-x').addEventListener('click', () => nachrichten(false));
-                    document.body.appendChild(o);
-                }
-                o.classList.add('open');
-                texteZeigen();
-            }
-            addEventListener('keydown', e => { if (e.key === 'Escape' && offen()) nachrichten(false); });
 
             function qrSichtbar(an) {
                 qrFeld.hidden = !an;
@@ -347,8 +357,7 @@
 
             // the keys, in the panel and (on the phone) under the count
             const aktionen = {
-                texte: () => nachrichten(true),
-                qr: () => qrSichtbar(qrFeld.hidden),
+                qr:() => qrSichtbar(qrFeld.hidden),
                 null: () => {
                     Buzzer.gesehen();
                     abSetzen();

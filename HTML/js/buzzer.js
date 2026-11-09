@@ -377,7 +377,8 @@
         tempoLegen(el, m);
         m.title = 'Tempo-Feedback';
         m.textContent = '';
-        [['schnell', 'ZU SCHNELL', ROT, '#fff'], ['langsam', 'ZU LANGSAM', ORANGE, '#0b1a33']].forEach(([art, wort, grund, tinte]) => {
+        // slow first, then fast (Doc, 09.11.2026: "tausch mal über alle zu langsam / schnell")
+        [['langsam', 'ZU LANGSAM', ORANGE, '#0b1a33'], ['schnell', 'ZU SCHNELL', ROT, '#fff']].forEach(([art, wort, grund, tinte]) => {
             if (!s[art]) return;
             const p = document.createElement('span');
             p.textContent = wort + ' ' + s[art];

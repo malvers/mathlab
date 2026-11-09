@@ -406,7 +406,8 @@ function pillenZeichnen(neuTempo, neuText) {
         reihe.appendChild(p);
         if (n && neuTempo === art) puls(p);
     };
-    tempo('schnell', 'zu schnell', '1f3c3', 'gespiegelt');
+    // 🐌 💬 🏃 - slow first, then fast (Doc, 09.11.2026: "tausch mal über alle zu langsam / schnell")
+    tempo('langsam', 'zu langsam', '1f40c');
     if (!texte.length) {
         const p = pille('1f4ac', 'tx-pille leer');
         p.title = texteLetzt.angemeldet === false ? 'Feedback-Nachrichten – nur mit Anmeldung im Stoffverteilungsplan' : 'heute noch keine Feedback-Nachricht';
@@ -423,7 +424,7 @@ function pillenZeichnen(neuTempo, neuText) {
         reihe.appendChild(p);
         if (neuText) puls(p);
     }
-    tempo('langsam', 'zu langsam', '1f40c');
+    tempo('schnell', 'zu schnell', '1f3c3', 'gespiegelt');
     // the box under the row: newest first, the time and the words - as text only, never as markup (any phone wrote them)
     if (texteOffen && texte.length) {
         const box = document.createElement('div');

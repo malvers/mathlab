@@ -184,8 +184,9 @@
     <div id="tempo" hidden>
         <div id="tempo-frage">ERKLÄRUNGEN SIND …</div>
         <div id="tempo-knoepfe">
-        <button type="button" data-art="schnell"><img alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f3c3.png"><span>ZU SCHNELL</span></button>
+        <!-- slow first, then fast (Doc, 09.11.2026: "tausch mal über alle zu langsam / schnell") -->
         <button type="button" data-art="langsam"><img alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f40c.png"><span>ZU LANGSAM</span></button>
+        <button type="button" data-art="schnell"><img alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f3c3.png"><span>ZU SCHNELL</span></button>
         </div>
     </div>
     <div id="text-feld" hidden>
@@ -307,9 +308,11 @@
                 tempoMeins = v;
                 try { if (v) localStorage.setItem(KEY_TEMPO, JSON.stringify(v)); else localStorage.removeItem(KEY_TEMPO); } catch (_) {}
             }
-            function tempoZeigen() {
+            // art: show this one lit before the tap has arrived (null: none); left out: as tempoMeins stands
+            function tempoZeigen(art) {
+                const lit = art !== undefined ? art : tempoMeins && tempoMeins.art;
                 tempoKnoepfe.forEach(b => {
-                    const an = !!tempoMeins && tempoMeins.art === b.dataset.art;
+                    const an = !!lit && lit === b.dataset.art;
                     b.classList.toggle('an', an);
                     b.querySelector('span').textContent = an ? 'ZURÜCK\u00ADNEHMEN' : TEMPO_WORT[b.dataset.art];
                 });
@@ -338,32 +341,26 @@
                 await tempoFehler(res);
                 return false;
             }
-            // green with a word for a moment, then the keys as they stand
-            function tempoDanke(b, wort) {
-                sag('');
-                if (navigator.vibrate) navigator.vibrate(40);
-                b.classList.remove('an');
-                b.classList.add('danke');
-                b.classList.toggle('zurueck', wort !== 'DANKE!');
-                b.querySelector('span').textContent = wort;
-                setTimeout(() => { b.classList.remove('danke', 'zurueck'); tempoFertig(); }, 1500);
-            }
-            function tempoFertig() {
+            // no wait after a tap (Doc, 09.11.2026: "nimm das delay ganz raus ... wenn man zu langsam drückt, muss man
+            // warten, um zurückzunehmen"): no green moment and no locked keys any more - the tap shows at once (lit with
+            // ZURÜCKNEHMEN, or the word again), a short buzz says it arrived, a refusal puts the keys back as they stand.
+            // Only a tap while one is still on its way is let go (tempoLaeuft), so nothing is sent twice.
+            function tempoFertig(angekommen) {
                 tempoLaeuft = false;
-                tempoKnoepfe.forEach(k => { k.disabled = false; });
+                if (angekommen) { sag(''); if (navigator.vibrate) navigator.vibrate(40); }
                 tempoZeigen();
             }
             async function tempo(b) {
                 if (tempoLaeuft) return;
                 tempoLaeuft = true;
-                tempoKnoepfe.forEach(k => { k.disabled = true; });
                 const art = b.dataset.art;
                 // the lit key: take it back
                 if (tempoMeins && tempoMeins.art === art) {
-                    if (await tempoZurueck()) tempoDanke(b, 'ZURÜCK\u00ADGENOMMEN');
-                    else tempoFertig();
+                    tempoZeigen(null);
+                    tempoFertig(await tempoZurueck());
                     return;
                 }
+                tempoZeigen(art);
                 // the other one lit: that goes first, then this one counts
                 if (tempoMeins && !(await tempoZurueck())) { tempoFertig(); return; }
                 let res;
@@ -372,7 +369,7 @@
                 let id = null;
                 try { const z = await res.json(); id = z && z[0] && z[0].id; } catch (_) { /* arrived all the same */ }
                 if (id) tempoSetzen({ code, tag: heute(), art, id });     // without the id: counted, not to be taken back
-                tempoDanke(b, 'DANKE!');
+                tempoFertig(true);
             }
             tempoKnoepfe.forEach(b => b.addEventListener('click', () => tempo(b)));
 
