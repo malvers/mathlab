@@ -224,8 +224,13 @@
         .more { display: block; margin: 0 auto 12px; }
 
         /* ---------- Woche ---------- */
-        .wk { padding: 8px 12px 10px 0; }   /* the table a little to the left, some air on the right (Doc, 07.11.2026) */
-        .wk-head, .wk-allday, .wk-grid, .wk-lines { display: grid; grid-template-columns: 34px repeat(7, minmax(0, 1fr)); }
+        .wk { padding: 8px 0 10px 0; }   /* the table a little to the left, some air on the right (Doc, 07.11.2026) */
+        /* left the hour column, right one of the same width: it holds the forward arrow beside the day names and is
+           the air on the right (Doc, 09.11.2026: "mach mal die Pfeile auch links und rechts da unten") */
+        .wk-head, .wk-allday, .wk-grid, .wk-lines { display: grid; grid-template-columns: 34px repeat(7, minmax(0, 1fr)) 34px; }
+        button.icon.nav-step { justify-self: center; align-self: end; width: 30px; height: 32px; border-radius: 8px; }
+        button.icon.nav-step svg { width: 22px; height: 22px; }
+        .wk-head .nav-step { margin-bottom: 8px; }
         .wk-dayname {
             padding: 4px 0 8px; text-align: center; cursor: pointer; border: 0; background: transparent; color: var(--text);
             font: 700 12px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase;
@@ -246,7 +251,7 @@
            it stays put while the hours scroll beneath it - scrolled up it is the 0:00 line (Doc, 07.11.2026: "Die oben
            muss bleiben und die muss so aussehen wie die Tabelle") */
         .wk-sep { padding-left: 34px; }
-        .wk-sep i { display: block; height: 1px; background: var(--line); }
+        .wk-sep i { display: block; height: 1px; margin-right: 34px; background: var(--line); }
         /* all 24 hours in a box of their own under the day names, opened at 8:00, one hour a 13th of the box so 8 to 21
            fill it (Doc, 07.11.2026: "alle Stunden des Tages sehen, aber den Ausschnitt von 8 bis 21 Uhr rausgezoomt ist gut") */
         .wk-body { position: relative; overflow-y: auto; overscroll-behavior: contain; }
@@ -329,8 +334,11 @@
         .now-line::before { content: ''; position: absolute; left: -5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--lambda); }
 
         /* ---------- Monat ---------- */
-        .mo { padding: 8px 6px 6px; }
-        .mo-head, .mo-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+        /* the same side columns as the week, so the arrows stay in place when Doc switches (Doc, 09.11.2026: "bitte auch") */
+        .mo { padding: 8px 0 6px; }
+        .mo-head, .mo-grid { display: grid; grid-template-columns: 34px repeat(7, minmax(0, 1fr)) 34px; }
+        .mo-head .nav-step { margin-bottom: 4px; }
+        .mo-cell:nth-child(7n + 1) { grid-column-start: 2; }   /* each row starts after the left side column */
         .mo-head > span { padding: 4px 0 8px; text-align: center; font: 700 12px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--text); }
         .mo-cell {
             display: flex; flex-direction: column; align-items: stretch; gap: 3px; min-width: 0; min-height: 92px; padding: 4px 3px;
@@ -821,8 +829,8 @@
                 const timed = occs.filter(o => !o.ev.all_day), allday = occs.filter(o => o.ev.all_day);
                 const h0 = 0, H = 24;   // the whole day; fitWeek opens the box at 8:00
                 shownOcc = new Map();
-                let html = '<div class="wk-head"><div></div>' + days.map(d =>
-                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${dayName(d.getDay())}<b>${d.getDate()}</b></button>`).join('') + '</div>';
+                let html = '<div class="wk-head">' + STEP_BTN(-1) + days.map(d =>
+                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${dayName(d.getDay())}<b>${d.getDate()}</b></button>`).join('') + STEP_BTN(1) + '</div>';
                 if (allday.length) {
                     html += WK_SEP + '<div class="wk-allday"><div></div>' + days.map(d => {
                         const here = allday.filter(o => o.start < K.addDays(d, 1) && o.end > d);
@@ -877,6 +885,9 @@
                at 8:00 and then stays where Doc scrolled it, through the half-minute redraws and other weeks */
             const WK_FROM = 8, WK_TO = 21, WK_LABEL = 10;   // WK_LABEL: px kept above the top hour line for its label
             const WK_SEP = '<div class="wk-sep"><i></i></div>';
+            // back / forward beside the day names of the week and the month, the same as the header's
+            // (Material Icons "chevron_left" / "chevron_right")
+            const STEP_BTN = d => `<button type="button" class="icon nav-step" data-step="${d}" aria-label="${view === 'week' ? (d < 0 ? 'Vorige Woche' : 'Nächste Woche') : (d < 0 ? 'Voriger Monat' : 'Nächster Monat')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d < 0 ? 'M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z' : 'M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z'}"/></svg></button>`;
             let wkTop = WK_FROM;   // the hour whose line sits WK_LABEL below the top of the box
             function fitWeek() {
                 const box = $('wk').querySelector('.wk-body');
@@ -903,7 +914,7 @@
                 $('period').innerHTML = esc(K.MONTH_LONG[first.getMonth()]) + `<small>${first.getFullYear()}</small>`;
                 const occs = K.expand(items, start, K.addDays(start, 42));
                 shownOcc = new Map();
-                let html = '<div class="mo-head">' + [1, 2, 3, 4, 5, 6, 0].map(i => `<span>${dayName(i)}</span>`).join('') + '</div><div class="mo-grid">';
+                let html = '<div class="mo-head">' + STEP_BTN(-1) + [1, 2, 3, 4, 5, 6, 0].map(i => `<span>${dayName(i)}</span>`).join('') + STEP_BTN(1) + '</div><div class="mo-grid">';
                 for (const d of cells) {
                     const here = occs.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                     const school = lessonOccs(d, K.addDays(d, 1)).some(o => !isOff(o));   // one quiet mark for the lessons
@@ -1424,6 +1435,8 @@
 
                 // taps in the views: an appointment opens it, a "+" or an empty place in the week starts a new one there
                 $('main').addEventListener('click', e => {
+                    const stp = e.target.closest('[data-step]');
+                    if (stp) { step(Number(stp.dataset.step)); return; }
                     const add = e.target.closest('[data-add]');
                     if (add) { openEditor({ day: dateOf(add.dataset.add) }); return; }
                     const hit = e.target.closest('[data-key]');
