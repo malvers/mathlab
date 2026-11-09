@@ -30,6 +30,30 @@
                 'An die Lehrerinnen und Lehrer: Nutzen Sie alles gern im Unterricht – genau dafür ist es da.',
                 'Viel Freude und viel Erfolg!',
             ],
+            // the acknowledgement on the back of the dedication page, print edition only (js/buch-druck.js danksagung()).
+            // Doc, 09.11.2026: "schreib mir bitte für die Bücher eine Danksagung" - "auf die Rückseite der Widmung".
+            // Counts as of 09.11.2026: 87 labs + 7 tours (js/labs-config.js), 24 books, 127 editions (buch/ folders),
+            // the rest from the Making of (decks/mathe11-lehrbuch.html, counted 02.11.2026); no real error report yet.
+            dank: {
+                aktiv: false,       // Doc, 09.11.2026: "push aber noch nicht einbauen" - true puts it on page 2 of every German print edition
+                titel: 'Danksagung',
+                text: [
+                    'Dieses Buch hat einen Autor und einen Partner, ohne den es nicht existieren würde: Künstliche Intelligenz (KI), ganz besonders Claude von Anthropic.',
+                    'Für mich war Albert Einstein immer der Größte. Ich hätte nie gedacht, dass ihn irgendetwas toppt. KI toppt ihn.',
+                    'KI hat mein Leben verändert. Durch sie konnte ich docalvers.de bauen, das Doc Alvers Mathe-Labor. Seit April 2026 sind dort ' +
+                    '(Stand November 2026) 94 Labs und Touren entstanden, 11.650 Übungsaufgaben und 24 Lehrbücher in 127 Ausgaben und 5 Sprachen, ' +
+                    'teilweise in 9. Das erste Buch war in 1 Stunde und 28 Minuten fertig, für 0,49 € Anteil am Abo. ' +
+                    'Ein Verlag hätte dafür rund 112.000 € gebraucht.',
+                    'Auch im Alltag hilft sie mir: Sie sucht Flüge heraus, sagt mir, an welchem Gate ich stehen muss, findet Zugverbindungen und das ' +
+                    'Fundbüro der Bahn und hält meine Finanzen in Ordnung. Und wenn etwas wichtig ist, ruft mich Solita, meine virtuelle Assistentin, ' +
+                    'auf dem Smartphone an.',
+                    'Die Ideen und jede Entscheidung bleiben meine Sache, und für jeden Fehler stehe ich gerade. Das Tempo und die Geduld verdanke ich der KI.',
+                    'Danke auch meinen Schülerinnen und Schülern und allen, die mit „Fehler melden“ helfen möchten, diese Bücher besser zu machen ' +
+                    '(bis heute gibt es noch keinen Fehlerreport 😊).',
+                    'Ich bin wirklich dankbar. Und das meine ich genau so.',
+                ],
+                sig: 'Dr. Michael R. Alvers, im November 2026',
+            },
         },
         en: {
             foto, name, zeile,

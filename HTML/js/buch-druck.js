@@ -458,6 +458,17 @@
         return sec;
     }
 
+    // ---------- the acknowledgement: page 2, the back of the dedication (Doc, 09.11.2026: "auf die Rückseite der Widmung") ----------
+    // Print only. The text lives in js/buch-gruss.js beside the foreword (dank, in the edition's language); an edition
+    // without one (or with dank.aktiv false, Doc's switch: written, not built in yet) keeps the empty back, so the foreword
+    // still opens on a right-hand page.
+    async function danksagung() {
+        const G = await Buch.gruss(), D = G && G[Buch.lang] && G[Buch.lang].dank;
+        if (!D || !D.aktiv) return null;
+        return el('section', 'd-dank', '<h1>' + D.titel + '</h1><div class="b-text">' + D.text.map(p => '<p>' + p + '</p>').join('') + '</div>' +
+            '<p class="d-dank-sig">' + D.sig + '</p>');
+    }
+
     // ---------- the imprint: page 2, the back of the foreword, in every book and language ----------
     // Doc, 28.10.2026, before selling on KDP: "mach schon mal in alle Bücher ein Impressum". Self-published in Saxony,
     // so § 6 SächsPresseG wants the name and address of author/publisher and printer, plainly visible - in no set
@@ -781,7 +792,7 @@
         for (const pg of document.querySelectorAll('.pagedjs_page')) {
             const area = pg.querySelector('.pagedjs_area');
             // the index pages stay as they are: white space at the end of the index is its end, not room for notes
-            if (!area || pg.querySelector('.d-cover, .d-widmung, .d-toc, .d-loes-kap, .d-gequetscht, .d-register')) continue;
+            if (!area || pg.querySelector('.d-cover, .d-widmung, .d-dank, .d-toc, .d-loes-kap, .d-gequetscht, .d-register')) continue;
             const nodes = contentNodes(area);
             if (!nodes.length) continue;
             // 5 mm kept free above the page number
@@ -824,12 +835,12 @@
         if (front) { front.before(imp); front.appendChild(onlineBuch()); }
         // page 1 is the first sheet after the cover (js/buch-druck.css .d-p1): the dedication page, in every book (Doc, 07.11.2026:
         // "bitte in Zukunft bei jedem Buch eine Widmungsseite machen. Wenn mir nichts einfällt, dann lassen wir die eben weg, dann
-        // kann man sich da vorne Notizen machen") - the text from kapitel.js widmung, or the page stays empty. Its back is empty too,
-        // so the foreword still opens on a right-hand page.
+        // kann man sich da vorne Notizen machen") - the text from kapitel.js widmung, or the page stays empty. Its back holds the
+        // acknowledgement (danksagung(), 09.11.2026) or stays empty, so the foreword still opens on a right-hand page.
         const first = gruss || imp;
         const w = el('section', 'd-widmung d-p1', '<p>' + (B.widmung || '\u200b') + '</p>');
         first.before(w);
-        first.before(el('section', 'd-widmung d-widmung-leer', '<p>\u200b</p>'));
+        first.before((await danksagung()) || el('section', 'd-widmung d-widmung-leer', '<p>\u200b</p>'));
         const loesungen = tr('Lösungen', 'Solutions', 'Soluciones', 'Soluzioni', 'Solutions');
         const toc = el('section', 'd-toc');
         toc.appendChild(el('h1', 'd-toc-h', tr('Inhalt', 'Contents', 'Índice', 'Indice', 'Sommaire')));
