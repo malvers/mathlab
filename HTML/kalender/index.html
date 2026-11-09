@@ -305,6 +305,21 @@
         /* a short one (a 15-minute coaching) has room for one line only: time and title side by side */
         .wk-ev.short { padding-top: 0; padding-bottom: 0; white-space: nowrap; text-overflow: ellipsis; font-size: 10px; line-height: 1.2; }
         .wk-ev.short small { display: inline; margin-right: 4px; line-height: 1.2; }
+        /* larger cards text where the columns have room (Doc, 09.11.2026: "von bis pls und größer"); on the phone the
+           columns stay narrow, so "13:45–15:15" breaks after the dash there */
+        @media (min-width: 641px) {
+            .wk-ev { font-size: 13px; padding: 3px 5px; }
+            .wk-ev small { font-size: 11px; }
+            .wk-ev .src { font-size: 9px; }
+            .wk-ev.short { font-size: 12px; }
+        }
+        @media (min-width: 1000px) {
+            .wk-ev { font-size: 13px; line-height: 1.2; padding: 3px 7px; }
+            .wk-ev small { font-size: 13px; line-height: 1.2; }
+            .wk-ev .src { font-size: 10px; }
+            .wk-ev.short { font-size: 12px; }
+            .wk-ev.short small { margin-bottom: 0; font-size: 12px; }
+        }
         /* the cards stay opaque, so no hour line shows through (Doc, 07.11.2026: "die Cards bitte alle über die Linien");
            past and cancelled ones fade under a veil of the card colour instead of turning see-through */
         .wk-ev.past::after, .wk-ev.off::after {
@@ -845,8 +860,8 @@
                         shownOcc.set(x.o.key, x.o);
                         const top = `calc(var(--hour) * ${x.sm / 60})`, height = `calc(var(--hour) * ${(x.em - x.sm) / 60} - 2px)`;
                         const left = (x.lane / x.lanes * 100).toFixed(2), width = (100 / x.lanes).toFixed(2);
-                        col += `<div class="wk-ev c${colorOf(x.o.ev)}${x.o.end <= now ? ' past' : ''}${isOff(x.o) ? ' off' : ''}${x.em - x.sm <= 30 ? ' short' : ''}" data-key="${esc(x.o.key)}" style="top:${top};height:${height};left:calc(${left}% + 1px);width:calc(${width}% - 2px)" title="${esc(K.hhmm(x.o.start) + ' ' + x.o.ev.title)}">` +
-                            `<small>${K.hhmm(x.o.start)}${srcMark(x.o.ev)}</small>${esc(x.o.ev.title)}</div>`;
+                        col += `<div class="wk-ev c${colorOf(x.o.ev)}${x.o.end <= now ? ' past' : ''}${isOff(x.o) ? ' off' : ''}${x.em - x.sm <= 30 ? ' short' : ''}" data-key="${esc(x.o.key)}" style="top:${top};height:${height};left:calc(${left}% + 1px);width:calc(${width}% - 2px)" title="${esc(K.hhmm(x.o.start) + '–' + K.hhmm(x.o.end) + ' ' + x.o.ev.title)}">` +
+                            `<small>${K.hhmm(x.o.start)}–${K.hhmm(x.o.end)}${srcMark(x.o.ev)}</small>${esc(x.o.ev.title)}</div>`;
                     }
                     if (K.sameDay(d, now)) {
                         const nm = (now.getHours() - h0) * 60 + now.getMinutes();
