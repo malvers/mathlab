@@ -20,6 +20,7 @@ window.BuchTR && BuchTR.add('lgs', {
         'eine Lösung': 'tek çözüm', 'keine Lösung': 'çözüm yok', 'unendlich viele': 'sonsuz çok', 'Zwei Geraden': 'İki doğru',
         'mit $r =$': '$r =$', 'Neue Matrizen': 'Yeni matrisler', 'Wähle eine Rechnung.': 'Bir işlem seç.',
         '1 Schritt': '1 adım', '10 Schritte': '10 adım', 'Vier Webseiten und ihre Links': 'Dört web sayfası ve bağlantıları',
+        // book tr-3 mathe13-tr:
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs lgs/*)
@@ -41,6 +42,7 @@ window.BuchTR && BuchTR.add('lgs', {
         ['Jeder Eintrag wird mit $r$ multipliziert.', 'Her eleman $r$ ile çarpılır.'],
         ['Aus Zeilen werden Spalten: aus einer $2 \\times 3$- wird eine $3 \\times 2$-Matrix.', 'Satırlar sütun olur: $2 \\times 3$ türünde bir matris $3 \\times 2$ türünde bir matrise dönüşür.'],
         ['Summe: $', 'Toplam: $'],
+        // book tr-3 mathe13-tr:
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -51,5 +53,6 @@ window.BuchTR && BuchTR.add('lgs', {
         [/In Spalte (\d) gibt es keinen Pivot mehr: Das LGS hat keine oder unendlich viele Lösungen\./g,
             '$1. sütunda artık pivot yok: Sistemin ya hiç çözümü yok ya da sonsuz çok çözümü var.'],
         [/Schritt (\d+):/g, '$1. adım:'],
+        // book tr-3 mathe13-tr:
     ]
 });

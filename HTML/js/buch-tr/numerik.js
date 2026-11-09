@@ -20,6 +20,7 @@ window.BuchTR && BuchTR.add('numerik', {
         'Rechtecke links': 'Sol dikdörtgenler', 'Rechtecke Mitte': 'Orta nokta dikdörtgenleri', 'Trapeze': 'Yamuklar', 'Verfahren': 'Yöntem',
         'Anzahl der Streifen $n$': 'Şerit sayısı $n$', 'Flächeninhalt mit Streifen angenähert': 'Şeritlerle yaklaşık hesaplanan alan',
         'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Dikdörtgende rastgele noktalar, parabolün altındaki isabetler',
+        // book tr-3 mathe13-tr:
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs numerik/*)
@@ -30,6 +31,7 @@ window.BuchTR && BuchTR.add('numerik', {
         ['$ · genauer Wert $', '$ · kesin değer $'], ['$ · Fehler $', '$ · hata $'],
         ['Schätzwert: $A', 'Tahmin: $A'], [' · genau: $', ' · kesin: $'], ['Wirf Zufallspunkte in das Rechteck ', 'Dikdörtgene rastgele noktalar at: '],
         ['. Der Anteil der Treffer unter ', '. '], [' schätzt den Anteil der Fläche.', ' eğrisinin altındaki isabetlerin oranı, alanın oranını tahmin eder.'],
+        // book tr-3 mathe13-tr:
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -40,5 +42,6 @@ window.BuchTR && BuchTR.add('numerik', {
         [/\+(\d[\d\s\u00a0\u202f]*) Punkte(?=<|$)/g, (m, n) => '+' + n.replace(/[\s\u00a0\u202f]/g, '.') + ' nokta'],
         // mc-flaeche "Von $500$ Punkten liegen $160$ unter der Parabel. Rechteck: …" → "$500$ noktadan $160$ tanesi parabolün altında. Dikdörtgen: …"
         [/Von \$(\d+)\$ Punkten liegen \$(\d+)\$ unter der Parabel\. Rechteck: /g, (m, n, k) => '$' + n + '$ noktadan $' + k + '$ tanesi parabolün altında. Dikdörtgen: '],
+        // book tr-3 mathe13-tr:
     ]
 });

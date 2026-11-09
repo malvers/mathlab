@@ -146,3 +146,7 @@ Widgets anders schreiben, biegen die Regeln in `js/buch-pt/analysis.js`, `stocha
 | orthogonal · spitz / stumpf | perpendiculares · agudo / obtuso | |
 | Parallelogramm · Rechteck · Raute · Quadrat · Trapez | paralelogramo · retângulo · losango · quadrado · trapézio | Viereck $ABCD$ = quadrilátero $[ABCD]$ |
 | Satz des Thales (Halbkreis) | ângulo inscrito numa semicircunferência (teorema de Tales) | |
+
+## mathe13-pt (BGY 13, block pt-3)
+
+Terms the book adds (Integral, Stammfunktion, Hypothesentest, Gerade/Ebene im Raum …) go here.

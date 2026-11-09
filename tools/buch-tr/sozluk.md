@@ -219,3 +219,7 @@ Terms BGY 12 (`mathe12-tr`, block tr-2, 08.11.2026) added; the widgets use the s
 | Parallelogramm · Rechteck · Raute · Quadrat · Trapez · Viereck | paralelkenar · dikdörtgen · eşkenar dörtgen · kare · yamuk · dörtgen |
 | First · Traufe · Sparren | mahya $M_1$, $M_2$ · saçak $S$ · mertek |
 | Grundkurs / Leistungskurs | Grundkurs (temel düzey ders) / Leistungskurs (ileri düzey ders), explained once on the start page |
+
+## mathe13-tr (BGY 13, block tr-3)
+
+Terms the book adds (Integral, Stammfunktion, Hypothesentest, Gerade/Ebene im Raum …) go here.

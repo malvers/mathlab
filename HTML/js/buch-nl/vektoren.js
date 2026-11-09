@@ -27,6 +27,7 @@ window.BuchNL && BuchNL.add('vektoren', {
         // stumpf = scherp / stomp, Raute = ruit, Viereck = vierhoek
         'spitzer Winkel': 'scherpe hoek', 'orthogonal': 'loodrecht', 'stumpfer Winkel': 'stompe hoek', 'parallel': 'evenwijdig',
         'Parallelogramm': 'Parallellogram', 'Rechteck': 'Rechthoek', 'Raute': 'Ruit', 'Quadrat': 'Vierkant', 'Trapez': 'Trapezium',
+        // book nl-3 mathe13-nl:
     },
     phrase: [
         // nl0: the helpers of the module (outside every widget; check.mjs vektoren/*)
@@ -50,6 +51,7 @@ window.BuchNL && BuchNL.add('vektoren', {
         ['ein allgemeines Viereck', 'een willekeurige vierhoek'], ['$: gegenüberliegende Seiten parallel und gleich lang', '$: overstaande zijden evenwijdig en even lang'],
         ['$: rechter Winkel bei $A$', '$: rechte hoek bij $A$'], ['$: benachbarte Seiten gleich lang', '$: aanliggende zijden even lang'],
         ['$: Diagonalen senkrecht zueinander', '$: diagonalen loodrecht op elkaar'], ['$ABCD$ ist ', '$ABCD$ is '],
+        // book nl-3 mathe13-nl:
     ],
     rule: [
         // nl0: notation of the module, for every book
@@ -59,5 +61,6 @@ window.BuchNL && BuchNL.add('vektoren', {
         // the inner product is a · b in Dutch schools, German a ∘ b: every " \circ " between two terms; degrees "^\circ" have no
         // space before and stay
         [/ \\circ /g, ' \\cdot '],
+        // book nl-3 mathe13-nl:
     ]
 });

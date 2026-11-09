@@ -58,6 +58,7 @@ window.BuchNL && BuchNL.add('stochastik', {
         'Stufen $n$:': 'Stappen $n$:', 'Anzahl der Stufen': 'Aantal stappen', 'Trefferwahrscheinlichkeit $p$': 'Succeskans $p$',
         'Genau $k$ Treffer:': 'Precies $k$ successen:', 'Anzahl der Treffer': 'Aantal successen', 'Baumdiagramm einer Bernoulli-Kette': 'Kansboom van een Bernoulli-experiment',
         'Anzahl der Versuche $n$': 'Aantal herhalingen $n$', 'Was wird berechnet?': 'Wat wordt er berekend?', 'Histogramm der Binomialverteilung': 'Histogram van de binomiale verdeling',
+        // book nl-3 mathe13-nl:
     },
     phrase: [
         // nl0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -99,6 +100,7 @@ window.BuchNL && BuchNL.add('stochastik', {
         ['$ · jeder hat die Wahrscheinlichkeit $', '$ · elke route heeft de kans $'], ['Formel von Bernoulli: $', 'Formule van Bernoulli: $'],
         ['$X$ ist binomialverteilt mit $n = ', '$X$ is binomiaal verdeeld met $n = '],
         ['Erwartungswert $\\mu', 'Verwachtingswaarde $\\mu'], [' · Standardabweichung $\\sigma', ' · Standaardafwijking $\\sigma'],
+        // book nl-3 mathe13-nl:
     ],
     rule: [
         // nl0: notation of the module, for every book
@@ -132,5 +134,6 @@ window.BuchNL && BuchNL.add('stochastik', {
         [/^(<svg class="st-tree"[^>]*aria-label="Baumdiagramm einer Bernoulli-Kette">)([\s\S]*)$/, (m, head, body) => head + body
             .replace(/(font-weight:700">)([TN])(<\/text>)/g, (x, a, l, b) => a + (l === 'T' ? 'S' : 'M') + b)
             .replace(/(<text x="10" y="20">)([TN]+)(<\/text>)/g, (x, a, k, b) => a + k.replace(/[TN]/g, l => (l === 'T' ? 'S' : 'M')) + b)],
+        // book nl-3 mathe13-nl:
     ]
 });

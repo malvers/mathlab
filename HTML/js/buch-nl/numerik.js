@@ -20,6 +20,7 @@ window.BuchNL && BuchNL.add('numerik', {
         'Rechtecke links': 'Rechthoeken links', 'Rechtecke Mitte': 'Rechthoeken midden', 'Trapeze': 'Trapezia', 'Verfahren': 'Methode',
         'Anzahl der Streifen $n$': 'Aantal stroken $n$', 'Flächeninhalt mit Streifen angenähert': 'Oppervlakte benaderd met stroken',
         'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Willekeurige punten in de rechthoek, treffers onder de parabool',
+        // book nl-3 mathe13-nl:
     },
     phrase: [
         // nl0: the helpers of the module (outside every widget; check.mjs numerik/*)
@@ -30,6 +31,7 @@ window.BuchNL && BuchNL.add('numerik', {
         ['$ unter der Parabel. Rechteck: ', '$ onder de parabool. Rechthoek: '],
         ['Schätzwert: $A', 'Schatting: $A'], [' · genau: $', ' · precies: $'], ['Wirf Zufallspunkte in das Rechteck ', 'Gooi willekeurige punten in de rechthoek '],
         ['. Der Anteil der Treffer unter ', '. Het aandeel treffers onder '], [' schätzt den Anteil der Fläche.', ' schat het aandeel van de oppervlakte.'],
+        // book nl-3 mathe13-nl:
     ],
     rule: [
         // nl0: notation of the module, for every book
@@ -38,5 +40,6 @@ window.BuchNL && BuchNL.add('numerik', {
         [/\+([\d.\u00a0\u202f ]+) Punkte(?=<|$)/g, '+$1 punten'],
         // mc-flaeche "Von $500$ Punkten liegen $160$ unter …" → "Van de $500$ punten liggen er $160$ onder …"
         [/Von \$(\d+)\$ Punkten liegen \$/g, (m, n) => 'Van de $' + n + '$ punten liggen er $'],
+        // book nl-3 mathe13-nl:
     ]
 });

@@ -49,6 +49,7 @@ window.BuchNL && BuchNL.add('analysis', {
         'Steigung im Wendepunkt $m$': 'Helling in het buigpunt $m$', 'Funktion aus Bedingungen': 'Functie uit voorwaarden',
         'Schachtel': 'Doos', 'Dose': 'Blik', 'Problem': 'Probleem', 'Zielfunktion': 'Doelfunctie',
         'Lösung mit der Ableitung': 'Oplossing met de afgeleide',
+        // book nl-3 mathe13-nl:
     },
     phrase: [
         // nl0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -116,6 +117,7 @@ window.BuchNL && BuchNL.add('analysis', {
         [' Die zweite Lösung $x \\approx ', ' De tweede oplossing $x \\approx '], ['$ liegt außerhalb von $0 < x < 10$.', '$ ligt buiten $0 < x < 10$.'],
         [' Dann ist $h = ', ' Dan is $h = '], ['\\,\\text{cm} = 2r$: Die beste Dose ist so hoch wie breit.', '\\,\\text{cm} = 2r$: het beste blik is even hoog als breed.'],
         [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' De zijde evenwijdig aan de muur is dan $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.'],
+        // book nl-3 mathe13-nl:
     ],
     rule: [
         // nl0: notation of the module, for every book
@@ -125,5 +127,6 @@ window.BuchNL && BuchNL.add('analysis', {
         // kurve, steckbrief: the letters drawn alone on the canvas, T/W (Tiefpunkt, Wendepunkt) → L/B (laagste punt, buigpunt); H
         // (hoogste punt) and E (extreem) stay; only a string that is nothing but the letter (no widget sentence is)
         [/^T$/, 'L'], [/^W$/, 'B'],
+        // book nl-3 mathe13-nl:
     ]
 });

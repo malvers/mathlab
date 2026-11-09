@@ -58,6 +58,7 @@ window.BuchTR && BuchTR.add('stochastik', {
         'Stufen $n$:': 'Aşama $n$:', 'Anzahl der Stufen': 'Aşama sayısı', 'Trefferwahrscheinlichkeit $p$': 'Başarı olasılığı $p$',
         'Genau $k$ Treffer:': 'Tam $k$ başarı:', 'Anzahl der Treffer': 'Başarı sayısı', 'Baumdiagramm einer Bernoulli-Kette': 'Bir Bernoulli dizisinin ağaç diyagramı',
         'Anzahl der Versuche $n$': 'Deneme sayısı $n$', 'Was wird berechnet?': 'Ne hesaplanıyor?', 'Histogramm der Binomialverteilung': 'Binom dağılımının histogramı',
+        // book tr-3 mathe13-tr:
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -98,6 +99,7 @@ window.BuchTR && BuchTR.add('stochastik', {
         ['$ · jeder hat die Wahrscheinlichkeit $', '$ · her birinin olasılığı $'], ['Formel von Bernoulli: $', 'Bernoulli formülü: $'],
         ['$X$ ist binomialverteilt mit $n = ', '$X$ binom dağılımlıdır: $n = '], ['$ und $p = ', '$ ve $p = '],
         ['Erwartungswert $\\mu', 'Beklenen değer $\\mu'], [' · Standardabweichung $\\sigma', ' · Standart sapma $\\sigma'],
+        // book tr-3 mathe13-tr:
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -140,5 +142,6 @@ window.BuchTR && BuchTR.add('stochastik', {
         [/^(<svg class="st-tree"[^>]*aria-label="Baumdiagramm einer Bernoulli-Kette">)([\s\S]*)$/, (m, head, body) => head + body
             .replace(/(font-weight:700">)([TN])(<\/text>)/g, (x, a, l, b) => a + (l === 'T' ? 'B' : "B'") + b)
             .replace(/(<text x="10" y="20">)([TN]+)(<\/text>)/g, (x, a, k, b) => a + k.replace(/[TN]/g, l => (l === 'T' ? 'B' : "B'")) + b)],
+        // book tr-3 mathe13-tr:
     ]
 });

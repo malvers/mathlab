@@ -20,6 +20,7 @@ window.BuchPT && BuchPT.add('lgs', {
         'eine Lösung': 'uma solução', 'keine Lösung': 'nenhuma solução', 'unendlich viele': 'uma infinidade', 'Zwei Geraden': 'Duas retas',
         'mit $r =$': 'com $r =$', 'Neue Matrizen': 'Novas matrizes', 'Wähle eine Rechnung.': 'Escolhe um cálculo.',
         '1 Schritt': '1 passo', '10 Schritte': '10 passos', 'Vier Webseiten und ihre Links': 'Quatro páginas web e as suas ligações',
+        // book pt-3 mathe13-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs lgs/*)
@@ -42,6 +43,7 @@ window.BuchPT && BuchPT.add('lgs', {
         ['Jeder Eintrag wird mit $r$ multipliziert.', 'Cada elemento é multiplicado por $r$.'],
         ['Aus Zeilen werden Spalten: aus einer $2 \\times 3$- wird eine $3 \\times 2$-Matrix.', 'As linhas passam a colunas: uma matriz $2 \\times 3$ passa a ser uma matriz $3 \\times 2$.'],
         ['Summe: $', 'Soma: $'],
+        // book pt-3 mathe13-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -50,5 +52,6 @@ window.BuchPT && BuchPT.add('lgs', {
         [/In Spalte (\d) gibt es keinen Pivot mehr: Das LGS hat keine oder unendlich viele Lösungen\./g,
             'Na coluna $1 já não há pivô: o sistema não tem nenhuma solução ou tem uma infinidade de soluções.'],
         [/Schritt (\d+):/g, 'Passo $1:'],
+        // book pt-3 mathe13-pt:
     ]
 });

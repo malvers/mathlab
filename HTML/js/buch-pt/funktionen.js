@@ -74,6 +74,7 @@ window.BuchPT && BuchPT.add('funktionen', {
         'Das ist die Grundfunktion selbst.': 'É a própria função de referência.',
         'Graph, zu dem der Term gesucht ist': 'Gráfico cuja expressão se procura', 'Nächster Graph': 'Gráfico seguinte',
         // book pt-2 mathe12-pt:
+        // book pt-3 mathe13-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -130,6 +131,7 @@ window.BuchPT && BuchPT.add('funktionen', {
         [': strecken in $y$-Richtung', ': dilatar na vertical'], [': verschieben in $y$-Richtung', ': deslocar na vertical'],
         [': stauchen in $x$-Richtung', ': contrair na horizontal'], [': verschieben in $x$-Richtung', ': deslocar na horizontal'],
         // book pt-2 mathe12-pt:
+        // book pt-3 mathe13-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -159,5 +161,6 @@ window.BuchPT && BuchPT.add('funktionen', {
         // graphquiz score: "3 richtig" → "3 certas" (the shared "richtig" → "certo" would not agree with the number)
         [/^(\d+) richtig$/, (m, n) => n + (n === '1' ? ' certa' : ' certas')],
         // book pt-2 mathe12-pt:
+        // book pt-3 mathe13-pt:
     ]
 });

@@ -50,6 +50,7 @@ window.BuchTR && BuchTR.add('analysis', {
         'Schachtel': 'Kutu', 'Dose': 'Konserve kutusu', 'Problem': 'Problem', 'Zielfunktion': 'Amaç fonksiyonu',
         'Lösung mit der Ableitung': 'Türevle çözüm', 'x in cm': 'x (cm)', 'V in cm³': 'V (cm³)', 'r in cm': 'r (cm)',
         'O in cm²': 'A (cm²)', 'x in m': 'x (m)', 'A in m²': 'A (m²)',
+        // book tr-3 mathe13-tr:
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -118,6 +119,7 @@ window.BuchTR && BuchTR.add('analysis', {
         [' Die zweite Lösung $x \\approx ', ' İkinci çözüm $x \\approx '], ['$ liegt außerhalb von $0 < x < 10$.', '$, $0 < x < 10$ aralığının dışındadır.'],
         [' Dann ist $h = ', ' O zaman $h = '], ['\\,\\text{cm} = 2r$: Die beste Dose ist so hoch wie breit.', '\\,\\text{cm} = 2r$ olur: En iyi kutunun yüksekliği genişliğine eşittir.'],
         [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' Duvara paralel kenar o zaman $60 - 2 \\cdot 15 = 30\\,\\text{m}$ uzunluğundadır.'],
+        // book tr-3 mathe13-tr:
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -135,5 +137,6 @@ window.BuchTR && BuchTR.add('analysis', {
         [/>Bei (\$[^$]*\$): /g, '>$1 için: '],
         // optimieren: the surface of the tin is A in Turkish schools (German O): "$O(r)", "$O'(r)", "$O \approx"
         [/(^|\$)O('?\(r\)| \\approx)/g, '$1A$2'],
+        // book tr-3 mathe13-tr:
     ]
 });

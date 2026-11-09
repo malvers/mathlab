@@ -21,6 +21,7 @@ window.BuchPT && BuchPT.add('numerik', {
         'Anzahl der Streifen $n$': 'Número de faixas $n$', 'Flächeninhalt mit Streifen angenähert': 'Área aproximada por faixas',
         '+100 Punkte': '+100 pontos', '+1 000 Punkte': '+1 000 pontos', '+10 000 Punkte': '+10 000 pontos',   // narrow space as the widget writes it
         'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Pontos aleatórios no retângulo, acertos abaixo da parábola',
+        // book pt-3 mathe13-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs numerik/*)
@@ -32,11 +33,13 @@ window.BuchPT && BuchPT.add('numerik', {
         ['$ unter der Parabel. Rechteck: ', '$ estão abaixo da parábola. Retângulo: '],
         ['Schätzwert: $A', 'Estimativa: $A'], [' · genau: $', ' · exato: $'], ['Wirf Zufallspunkte in das Rechteck ', 'Lança pontos aleatórios no retângulo '],
         ['. Der Anteil der Treffer unter ', '. A proporção de acertos abaixo de '], [' schätzt den Anteil der Fläche.', ' estima a proporção da área.'],
+        // book pt-3 mathe13-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-1 mathe11-pt:
         // mc-flaeche "Von $500$ Punkten liegen $160$ unter …" → "Dos $500$ pontos, $160$ estão abaixo …"
         [/Von \$(\d+)\$ Punkten liegen \$/g, (m, n) => 'Dos $' + n + '$ pontos, $'],
+        // book pt-3 mathe13-pt:
     ]
 });

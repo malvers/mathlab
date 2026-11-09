@@ -27,6 +27,7 @@ window.BuchTR && BuchTR.add('vektoren', {
         // stumpf = dar / geniş, Raute = eşkenar dörtgen, Viereck = dörtgen
         'spitzer Winkel': 'dar açı', 'orthogonal': 'dik', 'stumpfer Winkel': 'geniş açı', 'parallel': 'paralel',
         'Parallelogramm': 'Paralelkenar', 'Rechteck': 'Dikdörtgen', 'Raute': 'Eşkenar dörtgen', 'Quadrat': 'Kare', 'Trapez': 'Yamuk',
+        // book tr-3 mathe13-tr:
     },
     phrase: [
         // tr0: the helpers of the module (outside every widget; check.mjs vektoren/*)
@@ -50,6 +51,7 @@ window.BuchTR && BuchTR.add('vektoren', {
         ['ein allgemeines Viereck', 'genel bir dörtgen'], ['$: gegenüberliegende Seiten parallel und gleich lang', '$: karşılıklı kenarlar paralel ve eşit uzunlukta'],
         ['$: rechter Winkel bei $A$', '$: $A$\'da dik açı'], ['$: benachbarte Seiten gleich lang', '$: komşu kenarlar eşit uzunlukta'],
         ['$: Diagonalen senkrecht zueinander', '$: köşegenler birbirine dik'], ['$ABCD$ ist ', '$ABCD$: '],
+        // book tr-3 mathe13-tr:
     ],
     rule: [
         // tr0: notation of the module, for every book
@@ -59,5 +61,6 @@ window.BuchTR && BuchTR.add('vektoren', {
         // the scalar product is a · b in Turkish schools (iç çarpım), German a ∘ b: every " \circ " between two terms; degrees "^\circ"
         // have no space before and stay
         [/ \\circ /g, ' \\cdot '],
+        // book tr-3 mathe13-tr:
     ]
 });

@@ -20,6 +20,7 @@ window.BuchNL && BuchNL.add('lgs', {
         'eine Lösung': 'één oplossing', 'keine Lösung': 'geen oplossing', 'unendlich viele': 'oneindig veel', 'Zwei Geraden': 'Twee lijnen',
         'mit $r =$': 'met $r =$', 'Neue Matrizen': 'Nieuwe matrices', 'Wähle eine Rechnung.': 'Kies een berekening.',
         '1 Schritt': '1 stap', '10 Schritte': '10 stappen', 'Vier Webseiten und ihre Links': 'Vier webpagina\u2019s en hun links',
+        // book nl-3 mathe13-nl:
     },
     phrase: [
         // nl0: the helpers of the module (outside every widget; check.mjs lgs/*)
@@ -41,6 +42,7 @@ window.BuchNL && BuchNL.add('lgs', {
         ['Jeder Eintrag wird mit $r$ multipliziert.', 'Elk element wordt met $r$ vermenigvuldigd.'],
         ['Aus Zeilen werden Spalten: aus einer $2 \\times 3$- wird eine $3 \\times 2$-Matrix.', 'Rijen worden kolommen: van een $2 \\times 3$-matrix wordt een $3 \\times 2$-matrix.'],
         ['Summe: $', 'Som: $'],
+        // book nl-3 mathe13-nl:
     ],
     rule: [
         // nl0: notation of the module, for every book
@@ -48,5 +50,6 @@ window.BuchNL && BuchNL.add('lgs', {
         [/In Spalte (\d) gibt es keinen Pivot mehr: Das LGS hat keine oder unendlich viele Lösungen\./g,
             'In kolom $1 is er geen spil meer: het stelsel heeft geen of oneindig veel oplossingen.'],
         [/Schritt (\d+):/g, 'Stap $1:'],
+        // book nl-3 mathe13-nl:
     ]
 });

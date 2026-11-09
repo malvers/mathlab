@@ -62,6 +62,7 @@ window.BuchPT && BuchPT.add('stochastik', {
         'Genau $k$ Treffer:': 'Exatamente $k$ sucessos:', 'Anzahl der Treffer': 'Número de sucessos',
         'Baumdiagramm einer Bernoulli-Kette': 'Diagrama em árvore de uma sequência de provas de Bernoulli',
         'Anzahl der Versuche $n$': 'Número de provas $n$', 'Was wird berechnet?': 'O que se calcula?', 'Histogramm der Binomialverteilung': 'Histograma da distribuição binomial',
+        // book pt-3 mathe13-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -103,6 +104,7 @@ window.BuchPT && BuchPT.add('stochastik', {
         ['$ · jeder hat die Wahrscheinlichkeit $', '$ · cada um tem a probabilidade $'], ['Formel von Bernoulli: $', 'Fórmula de Bernoulli: $'],
         ['$X$ ist binomialverteilt mit $n = ', '$X$ segue uma distribuição binomial com $n = '],
         ['Erwartungswert $\\mu', 'Valor médio $\\mu'], [' · Standardabweichung $\\sigma', ' · Desvio padrão $\\sigma'],
+        // book pt-3 mathe13-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -141,5 +143,6 @@ window.BuchPT && BuchPT.add('stochastik', {
         [/^(<svg class="st-tree"[^>]*aria-label="Baumdiagramm einer Bernoulli-Kette">)([\s\S]*)$/, (m, head, body) => head + body
             .replace(/(font-weight:700">)([TN])(<\/text>)/g, (x, a, l, b) => a + (l === 'T' ? 'S' : 'I') + b)
             .replace(/(<text x="10" y="20">)([TN]+)(<\/text>)/g, (x, a, k, b) => a + k.replace(/[TN]/g, l => (l === 'T' ? 'S' : 'I')) + b)],
+        // book pt-3 mathe13-pt:
     ]
 });

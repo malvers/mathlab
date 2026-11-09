@@ -129,3 +129,7 @@ Normale = helling `m` (wie die Widgets `m_t`, `m_n`), eine Gerade bleibt `y = ax
 | Mittelpunkt M · Schwerpunkt S · Raumdiagonale · Quader | midden `M` · zwaartepunt `Z` · lichaamsdiagonaal · balk |
 | Skalarprodukt · orthogonal · spitz / stumpf | inproduct · loodrecht · scherp / stomp |
 | Raute · Drachen · Trapez | ruit · vlieger · trapezium |
+
+## mathe13-nl (BGY 13, block nl-3)
+
+Terms the book adds (Integral, Stammfunktion, Hypothesentest, Gerade/Ebene im Raum …) go here.
