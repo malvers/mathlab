@@ -98,7 +98,7 @@
         #tempo-frage { font-size: clamp(0.8rem, 3.6vw, 0.95rem); letter-spacing: 0.12em; color: var(--leise); }   /* Doc: "einfach eine Überschrift Erklärung Punkt, Punkt, Punkt" */
         #tempo-knoepfe { display: flex; gap: 12px; }
         #tempo button {
-            flex: 1; min-height: 52px; padding: 0 8px; cursor: pointer; touch-action: manipulation;
+            flex: 1 1 0; min-width: 0; min-height: 52px; padding: 0 8px; cursor: pointer; touch-action: manipulation;
             display: flex; align-items: center; justify-content: center; gap: 8px;
             font-family: inherit; font-size: clamp(0.72rem, 3.4vw, 0.9rem); letter-spacing: 0.08em;
             color: var(--text); background: rgba(0, 210, 255, 0.08); border: 1px solid rgba(0, 210, 255, 0.4); border-radius: 12px;
@@ -108,7 +108,12 @@
         #tempo button:focus { outline: none; }
         #tempo button img { width: 1.9em; height: 1.9em; flex: none; pointer-events: none; -webkit-user-drag: none; }
         #tempo button[data-art="schnell"] img { transform: scaleX(-1); }   /* Doc, 01.10.: "den Runner bitte spiegeln" */
+        /* Doc, 09.11.: "dass man das so schnell zu langsam auch zurücknehmen kann" - after its thanks the key tapped
+           stays lit in the colour the teacher sees (red / orange) and says ZURÜCKNEHMEN; one more tap takes it back */
+        #tempo button.an[data-art="schnell"] { background: var(--rot); border-color: var(--rot); color: #fff; }
+        #tempo button.an[data-art="langsam"] { background: var(--orange); border-color: var(--orange); color: var(--grund); }
         #tempo button.danke { background: var(--gruen); border-color: var(--gruen); color: #fff; }
+        #tempo button.zurueck img { display: none; }   /* "ZURÜCKGENOMMEN" needs the room on a small phone */
         #tempo button:disabled:not(.danke) { opacity: 0.35; cursor: default; }
 
         /* Doc, 01.10.: "mach unten ein Feld. Für Feedback. Wo die mir also tatsächlich irgendwas schreiben können" -
@@ -281,31 +286,93 @@
                 else { zeige('frage'); sag(''); }
             }
 
-            // "zu schnell" / "zu langsam": a row of its own table (buzzer_tempo); the key says thanks, both rest 20 s
-            const TEMPO_RUHE = 20000;
+            // "zu schnell" / "zu langsam": a row of its own table (buzzer_tempo); the key says thanks and then stays
+            // lit - one more tap takes it back (Doc, 09.11.2026: "dass man das so schnell zu langsam auch zurücknehmen
+            // kann ... auf dem Phone"): a row with bezug = the tap, and the teacher's count goes down again. The other
+            // key while one is lit switches over (the lit one is taken back first). So a phone holds one tempo at most,
+            // and the 20 s rest after every tap is gone - it would only hold up the take-back.
+            const KEY_TEMPO = 'buzzer-tempo';
             const tempoKnoepfe = [...document.querySelectorAll('#tempo button')];
-            async function tempo(b) {
-                const art = b.dataset.art, schrift = b.querySelector('span'), wort = schrift.textContent;
-                tempoKnoepfe.forEach(k => { k.disabled = true; });
-                let res;
+            const TEMPO_WORT = {};
+            tempoKnoepfe.forEach(b => { TEMPO_WORT[b.dataset.art] = b.querySelector('span').textContent; });
+            // my lit key {code, tag, art, id}: kept in memory, and for a reload or a locked phone in localStorage
+            let tempoMeins = null, tempoLaeuft = false;
+            function tempoLies() {
                 try {
-                    res = await fetch(DB_URL + '/rest/v1/buzzer_tempo', {
-                        method: 'POST',
-                        headers: { apikey: DB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-                        body: JSON.stringify({ code, art })
-                    });
-                } catch (_) { res = null; }
-                if (!res || !res.ok) {
-                    tempoKnoepfe.forEach(k => { k.disabled = false; });
-                    sag(res && res.status === 400 ? 'Gerade drücken sehr viele – gleich nochmal.' : 'Nicht angekommen – bitte nochmal tippen.', true);
-                    return;
-                }
+                    const o = JSON.parse(localStorage.getItem(KEY_TEMPO) || 'null');
+                    return o && o.code === code && o.tag === heute() && o.id && TEMPO_WORT[o.art] ? o : null;
+                } catch (_) { return null; }
+            }
+            function tempoSetzen(v) {
+                tempoMeins = v;
+                try { if (v) localStorage.setItem(KEY_TEMPO, JSON.stringify(v)); else localStorage.removeItem(KEY_TEMPO); } catch (_) {}
+            }
+            function tempoZeigen() {
+                tempoKnoepfe.forEach(b => {
+                    const an = !!tempoMeins && tempoMeins.art === b.dataset.art;
+                    b.classList.toggle('an', an);
+                    b.querySelector('span').textContent = an ? 'ZURÜCK\u00ADNEHMEN' : TEMPO_WORT[b.dataset.art];
+                });
+            }
+            function tempoPost(daten, mitId) {
+                return fetch(DB_URL + '/rest/v1/buzzer_tempo' + (mitId ? '?select=id' : ''), {
+                    method: 'POST',
+                    headers: { apikey: DB_KEY, 'Content-Type': 'application/json', Prefer: mitId ? 'return=representation' : 'return=minimal' },
+                    body: JSON.stringify(daten)
+                });
+            }
+            // a refusal: the brake ("zu viele in einer Minute") asks to wait, anything else to tap again
+            async function tempoFehler(res) {
+                let m = '';
+                if (res) { try { m = (await res.json()).message || ''; } catch (_) {} }
+                sag(/zu viele/.test(m) ? 'Gerade drücken sehr viele – gleich nochmal.' : 'Nicht angekommen – bitte nochmal tippen.', true);
+            }
+            // take my lit tap back: true when it no longer counts - taken back now, already (409), or refused because
+            // there is nothing left to take back (401/403: the tap is too old, of another code)
+            async function tempoZurueck() {
+                const o = tempoMeins;
+                if (!o) return true;
+                let res;
+                try { res = await tempoPost({ code, art: o.art, bezug: o.id }); } catch (_) { res = null; }
+                if (res && (res.ok || res.status === 409 || res.status === 401 || res.status === 403)) { tempoSetzen(null); return true; }
+                await tempoFehler(res);
+                return false;
+            }
+            // green with a word for a moment, then the keys as they stand
+            function tempoDanke(b, wort) {
                 sag('');
                 if (navigator.vibrate) navigator.vibrate(40);
+                b.classList.remove('an');
                 b.classList.add('danke');
-                schrift.textContent = 'DANKE!';
-                setTimeout(() => { b.classList.remove('danke'); schrift.textContent = wort; }, 1500);
-                setTimeout(() => tempoKnoepfe.forEach(k => { k.disabled = false; }), TEMPO_RUHE);
+                b.classList.toggle('zurueck', wort !== 'DANKE!');
+                b.querySelector('span').textContent = wort;
+                setTimeout(() => { b.classList.remove('danke', 'zurueck'); tempoFertig(); }, 1500);
+            }
+            function tempoFertig() {
+                tempoLaeuft = false;
+                tempoKnoepfe.forEach(k => { k.disabled = false; });
+                tempoZeigen();
+            }
+            async function tempo(b) {
+                if (tempoLaeuft) return;
+                tempoLaeuft = true;
+                tempoKnoepfe.forEach(k => { k.disabled = true; });
+                const art = b.dataset.art;
+                // the lit key: take it back
+                if (tempoMeins && tempoMeins.art === art) {
+                    if (await tempoZurueck()) tempoDanke(b, 'ZURÜCK\u00ADGENOMMEN');
+                    else tempoFertig();
+                    return;
+                }
+                // the other one lit: that goes first, then this one counts
+                if (tempoMeins && !(await tempoZurueck())) { tempoFertig(); return; }
+                let res;
+                try { res = await tempoPost({ code, art }, true); } catch (_) { res = null; }
+                if (!res || !res.ok) { await tempoFehler(res); tempoFertig(); return; }
+                let id = null;
+                try { const z = await res.json(); id = z && z[0] && z[0].id; } catch (_) { /* arrived all the same */ }
+                if (id) tempoSetzen({ code, tag: heute(), art, id });     // without the id: counted, not to be taken back
+                tempoDanke(b, 'DANKE!');
             }
             tempoKnoepfe.forEach(b => b.addEventListener('click', () => tempo(b)));
 
@@ -368,6 +435,8 @@
                 knopf.hidden = false;
                 $('tempo').hidden = false;
                 if (offeneFrage()) zeige('offen');
+                tempoMeins = tempoLies();
+                tempoZeigen();
             }
 
             knopf.addEventListener('click', () => {

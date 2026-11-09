@@ -26,7 +26,9 @@
 //   Buzzer.blitz()           a short orange glow along the screen edge (never on a mirrored layer)
 //   Buzzer.tempo(onTempo, ab) the phones' "zu schnell" / "zu langsam" (Doc, 01.10.2026): onTempo({schnell, langsam,
 //                            neu}) with the counts since ab() (Vorrechnen: since the task came on the board; without
-//                            ab: the last two minutes), at every change and every 5 s; Buzzer.tempoJetzt() at once
+//                            ab: the last two minutes), at every change and every 5 s; Buzzer.tempoJetzt() at once.
+//                            A phone may take its tap back (Doc, 09.11.2026): a row with bezug = the tap, which then
+//                            no longer counts
 //   Buzzer.tempoMarke(el, s) shows such a count beside a button, left of it (the teacher's side only)
 //   Buzzer.texte(onTexte)    the phones' written feedback of today (table buzzer_text, Doc 01.10.2026): onTexte({texte,
 //                            angemeldet, neu}) every 5 s; readable only with the teacher's svpAuth session
@@ -112,8 +114,12 @@
     // a tab with the old code counts every row of buzzer as a question. Counted from the moment the page names (then
     // "pro Aufgabe ... neutralisiert, wenn wir eine neue Aufgabe machen": Vorrechnen gives the time its task came on
     // the board), else over the last two minutes; the look every 5 s refreshes it.
+    // Doc, 09.11.2026: "dass man das so schnell zu langsam auch zurücknehmen kann" - a take-back is a row of its own
+    // with bezug = the tap it takes back (supabase/migrations/20261109_buzzer_tempo_zurueck.sql); that tap is counted
+    // out, also when the take-back happens to arrive first
     const TEMPO_FENSTER = 120000;
     let tempoMelde = null, tempoAb = null, tempoZeilen = new Map();         // id -> {art, t}
+    let tempoZurueck = new Set();                                           // the ids taken back
     function tempoSeit() {
         const a = tempoAb ? tempoAb() : NaN;
         return a > 0 ? a : Date.now() - TEMPO_FENSTER;
@@ -127,7 +133,9 @@
         const zeiten = zeitenAus(zeilen), seit = tempoSeit();
         let neu = null;
         zeilen.forEach(r => {
-            if (!r || (r.art !== 'schnell' && r.art !== 'langsam') || tempoZeilen.has(r.id)) return;
+            if (!r || (r.art !== 'schnell' && r.art !== 'langsam')) return;
+            if (r.bezug) { tempoZurueck.add(r.bezug); tempoZeilen.delete(r.bezug); return; }   // taken back
+            if (tempoZeilen.has(r.id) || tempoZurueck.has(r.id)) return;
             const t = zeiten[r.id] || Date.now();
             if (t < seit) return;                                           // pressed before what counts now
             tempoZeilen.set(r.id, { art: r.art, t });
@@ -138,8 +146,9 @@
     async function tempoNachsehen() {
         try {
             const ab = new Date(tempoSeit()).toISOString();
+            // select=*: the column bezug is read where the table has it
             const res = await fetch(DB_URL + '/rest/v1/buzzer_tempo?code=eq.' + code() + '&created_at=gt.' + encodeURIComponent(ab) +
-                '&select=id,art,created_at&order=id', { headers: { apikey: DB_KEY }, cache: 'no-store' });
+                '&select=*&order=id', { headers: { apikey: DB_KEY }, cache: 'no-store' });
             if (res.ok) tempoDazu(await res.json());
         } catch (_) { /* offline for a moment - the next look catches up */ }
     }
@@ -233,6 +242,7 @@
         offen = new Set();
         bisher = 0;
         tempoZeilen = new Map();
+        tempoZurueck = new Set();
         texte = new Map();
         if (melde) melde(0, false);
         if (tempoMelde) tempoMelde(tempoStand());
