@@ -43,7 +43,17 @@
         a.back svg { width: 26px; height: 26px; fill: currentColor; }
         .sub { color: var(--muted); font: 13px Raleway, sans-serif; margin: 0 0 14px 50px; }
 
-        .years { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+        .bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .years { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+        /* colour mode: compare with the previous year or colour by frequency */
+        .modewrap { display: flex; align-items: center; gap: 8px; font: 12px Raleway, sans-serif; color: var(--muted); }
+        .mode { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+        .mode button {
+            font: 600 12px Orbitron, sans-serif; color: var(--muted); background: var(--bg);
+            border: 0; padding: 11px 12px; cursor: pointer;
+        }
+        .mode button + button { border-left: 1px solid var(--line); }
+        .mode button.on { color: var(--lambda); background: var(--card); }
         .years button {
             font: 600 13px Orbitron, sans-serif; color: var(--text); background: var(--card);
             border: 1px solid var(--line); border-radius: 10px; padding: 10px 11px; cursor: pointer;
@@ -65,6 +75,8 @@
 
         .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 12px Raleway, sans-serif; color: var(--muted); margin: 10px 2px 18px; }
         .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+        .legend .ramp { display: inline-flex; align-items: center; font-variant-numeric: lining-nums; }
+        .legend .ramp i { width: 180px; max-width: 45vw; border-radius: 6px; margin: 0 8px; }
 
         .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
@@ -113,7 +125,16 @@
         </div>
 
         <div id="app" hidden>
-            <div class="years" id="years"></div>
+            <div class="bar">
+                <div class="years" id="years"></div>
+                <div class="modewrap">
+                    <span id="modeLabel">Farbe</span>
+                    <div class="mode" id="mode" role="group" aria-labelledby="modeLabel">
+                        <button type="button" data-mode="trend">Vorjahr</button>
+                        <button type="button" data-mode="freq">Häufigkeit</button>
+                    </div>
+                </div>
+            </div>
 
             <div class="cloud" id="cloudBox">
                 <canvas id="cloud"></canvas>
@@ -159,12 +180,32 @@
                 down: 'rgb(110, 128, 160)',
                 plain: 'rgb(214, 226, 245)'
             };
+            // Frequency mode: continuous ramp from rare to frequent (project cyan → text white → λ → φ);
+            // white in between avoids mint tones, green only for the top quarter
+            const RAMP = [
+                [0, [0, 210, 255]],
+                [0.4, [214, 226, 245]],
+                [0.75, [245, 194, 66]],
+                [1, [121, 158, 49]]
+            ];
+            const rgb = c => `rgb(${c.map(Math.round).join(', ')})`;
+            const RAMP_CSS = `linear-gradient(90deg, ${RAMP.map(([p, c]) => `${rgb(c)} ${p * 100}%`).join(', ')})`;
+            function rampColor(t) {
+                const i = Math.max(1, RAMP.findIndex(([p]) => p >= t));
+                const [p0, c0] = RAMP[i - 1], [p1, c1] = RAMP[i];
+                const f = (t - p0) / (p1 - p0);
+                return rgb(c0.map((v, j) => v + (c1[j] - v) * f));
+            }
+            const MODE_KEY = 'grateful-wolke-farbe';
+            let mode = 'trend';
+            try { if (localStorage.getItem(MODE_KEY) === 'freq') mode = 'freq'; } catch (e) { }
             const WORD_RE = /[\p{L}]+/gu;
             const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
             const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-            let DATA = {}, YEARS = [], STATS = {}, current = null, selected = null, cls = new Map();
+            let DATA = {}, YEARS = [], STATS = {}, current = null, selected = null;
+            let words = [], colors = new Map();
             const canvas = $('cloud'), tip = $('tip');
 
             /* all entries - PostgREST hands out at most 1000 rows per request, so page through */
@@ -220,6 +261,60 @@
                 return out;
             }
 
+            // Words shown in the cloud, most frequent first
+            function cloudWords() {
+                const s = STATS[current];
+                const minCount = current === ALL ? 3 : 2;
+                const limit = current === ALL ? 170 : 120;
+                return [...s.counts].filter(([, c]) => c >= minCount)
+                    .sort((a, b) => b[1] - a[1]).slice(0, limit);
+            }
+
+            // Ramp position by rank (list is sorted most frequent first): the rarest count sits at 0,
+            // the most frequent at 1, words with the same count share one colour
+            function freqColors(list) {
+                const n = list.length, out = new Map();
+                let topBelow = null;
+                for (let i = 0; i < n;) {
+                    let j = i;
+                    while (j + 1 < n && list[j + 1][1] === list[i][1]) j++;
+                    const below = n - 1 - j;             // words with a smaller count
+                    if (topBelow === null) topBelow = below;
+                    const col = rampColor(topBelow ? below / topBelow : 1);
+                    for (let k = i; k <= j; k++) out.set(list[k][0], col);
+                    i = j + 1;
+                }
+                return out;
+            }
+
+            // Colour of every cloud word for the current year and mode
+            function paint() {
+                words = cloudWords();
+                if (mode === 'freq' && words.length) {
+                    colors = freqColors(words);
+                } else {
+                    colors = new Map([...classify(current)].map(([k, c]) => [k, COL[c]]));
+                }
+            }
+
+            function renderMode() {
+                for (const b of $('mode').children) {
+                    b.classList.toggle('on', b.dataset.mode === mode);
+                    b.setAttribute('aria-pressed', b.dataset.mode === mode);
+                }
+            }
+
+            function setMode(m) {
+                if (m === mode) return;
+                mode = m;
+                try { localStorage.setItem(MODE_KEY, m); } catch (e) { }
+                renderMode();
+                if (!current) return;
+                paint();
+                renderLegend();
+                drawCloud();
+            }
+
             function renderYears() {
                 const box = $('years');
                 box.innerHTML = '';
@@ -252,11 +347,6 @@
 
             function drawCloud() {
                 const s = STATS[current];
-                const minCount = current === ALL ? 3 : 2;
-                const limit = current === ALL ? 170 : 120;
-                const words = [...s.counts].filter(([, c]) => c >= minCount)
-                    .sort((a, b) => b[1] - a[1]).slice(0, limit);
-
                 const w = $('cloudBox').clientWidth;
                 const h = Math.round(Math.min(window.innerHeight * 0.62, Math.max(300, w * 0.6), 700));
                 const dpr = window.devicePixelRatio || 1;
@@ -279,7 +369,7 @@
                     gridSize: Math.round(6 * dpr),
                     fontFamily: 'Orbitron, sans-serif',
                     fontWeight: '600',
-                    color: word => COL[cls.get(byDisplay.get(word))] || COL.plain,
+                    color: word => colors.get(byDisplay.get(word)) || COL.plain,
                     backgroundColor: 'rgb(8, 20, 42)',
                     rotateRatio: 0,
                     shrinkToFit: true,
@@ -332,6 +422,12 @@
             }
 
             function renderLegend() {
+                if (mode === 'freq') {
+                    $('legend').innerHTML = words.length
+                        ? `<span class="ramp">${words[words.length - 1][1]}×<i style="background:${RAMP_CSS}"></i>${words[0][1]}× genannt</span>`
+                        : '';
+                    return;
+                }
                 const py = current === ALL ? null : prevYear(current);
                 $('legend').innerHTML = py
                     ? `<span><i style="background:${COL.new}"></i>neu ggü. ${py}</span>
@@ -365,7 +461,7 @@
                 $('sub').textContent = y === ALL
                     ? `${s.n} Einträge von ${YEARS[0]} bis ${YEARS[YEARS.length - 1]}`
                     : `${s.n} Einträge in ${y}`;
-                cls = classify(y);
+                paint();
                 renderYears();
                 renderLegend();
                 renderLists();
@@ -417,7 +513,10 @@
                 }
             }
 
-            $('loginBtn').onclick = () => auth.loginDialog(start, 'Anmelden für dein Dankbarkeits-Tagebuch');
+            for (const b of $('mode').children) b.onclick = () => setMode(b.dataset.mode);
+            renderMode();
+
+            $('loginBtn').onclick =() => auth.loginDialog(start, 'Anmelden für dein Dankbarkeits-Tagebuch');
             if (auth.hasSession()) start(); else $('gate').hidden = false;
         })();
     </script>
