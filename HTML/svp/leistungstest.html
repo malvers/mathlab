@@ -1613,13 +1613,18 @@
             /* the WebUntis entry for a list name, read both ways: most lists say "first last", FOG25-1's
                says "last first" (09.11.2026: no circle on any of its cards). Two different pupils for
                the two readings count as 'two' - no circle then, as for any ambiguous name. */
+            /* a last name of several words ("Tim von Falkenburg", WebUntis: "von Falkenburg") is read as the rest after the
+               first word too - and, for "last first" lists, as everything before the last word (Doc, 10.11.2026, FOW25-1:
+               "nicht da? Warum kein X") */
             function untisHit(name) {
                 const parts = String(name || '').trim().split(/\s+/);
                 if (!untis || parts.length < 2) return null;
-                const a = untis.map[personKey(parts[0], parts[parts.length - 1])];
-                const b = untis.map[personKey(parts[parts.length - 1], parts[0])];
-                if (a && b && a !== b) return 'two';
-                return a || b || null;
+                const n = parts.length;
+                const keys = [personKey(parts[0], parts[n - 1]), personKey(parts[n - 1], parts[0])];
+                if (n > 2) keys.push(personKey(parts[0], parts.slice(1).join(' ')), personKey(parts[n - 1], parts.slice(0, -1).join(' ')));
+                const hits = [...new Set(keys.map(function (k) { return untis.map[k]; }).filter(Boolean))];
+                if (hits.length > 1 || hits[0] === 'two') return 'two';
+                return hits[0] || null;
             }
             const UNTIS_SVG_ALARM = '<svg viewBox="0 0 48 42" aria-hidden="true"><path d="M24 3 L45 39 H3 Z" fill="rgb(245,194,66)" stroke="rgb(245,194,66)" stroke-width="4" stroke-linejoin="round"/>' +
                 '<path d="M24 15 V27" stroke="rgb(14,36,78)" stroke-width="4.5" stroke-linecap="round"/><circle cx="24" cy="33.5" r="2.6" fill="rgb(14,36,78)"/></svg>';
