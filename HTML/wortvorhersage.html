@@ -87,6 +87,7 @@
     <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/cyber-clock.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -227,12 +228,14 @@
             if (b) b.textContent = S.running ? T('btn_stop', 'Pause') : T('btn_play', 'Start');
             const f = document.getElementById('wv-fab-l');    // the widget's button does what Space does
             if (f) f.textContent = S.running ? '❚❚ ' + T('btn_stop', 'Pause')
-                : S.mode === 'run' && S.pos >= TEXT.length ? '⏭ ' + T('btn_next', 'Nächster Satz')
+                : S.mode === 'run' && S.pos >= TEXT.length ? (lastSentence() ? '✓ ' + T('btn_done', 'Fertig')
+                    : '⏭ ' + T('btn_next', 'Nächster Satz'))
                 : '▶ ' + T('btn_play', 'Start');
         }
 
         // the picture it opens with: the whole sentence, grey where the net has it, red where it has not
         function still() {
+            autoStop();
             S.mode = 'still'; S.running = false; S.stopAt = -1;
             rollLevel(); rollKnown();
             S.pos = border();
@@ -276,6 +279,7 @@
         // finding its combination - through to the end of the text (Doc, 22.09.2026: "hinter winziges aus
         // jiberish Stück entstehen ... der ganze Junk bis zum Ende - DAS hatte ich im Kopf").
         function startRun() {
+            autoStop();
             S.mode = 'run'; S.running = true; S.stopAt = -1;
             rollLevel();
             if (S.known.length !== TEXT.length) rollKnown();   // the picture's salad carries over into the run
@@ -316,6 +320,7 @@
                     grow();
                     playLabel(); showStats();
                     log('Durchlauf ' + S.epoch);
+                    if (S.level >= AUTO_FROM && !lastSentence()) autoNext();
                 } else if (S.stopAt >= 0 && S.pos >= S.stopAt) {
                     S.running = false; S.stopAt = -1;
                     playLabel();
@@ -324,18 +329,52 @@
         }
 
         // the learned share grows, quickly at first and ever more slowly - like real training
+        // 100 % means: every sentence of the corpus has been trained - not a number creeping towards 99 % while
+        // Space still brings more sentences (Doc, 10.11.2026: "Es soll bis 100 % durchlaufen, NICHT die Sätze
+        // überspringen. Wenn jetzt 100 % da steht, kann ich immer noch die Leertaste drücken und die Sätze kommen noch")
+        function levelAt(k) {
+            const n = TEXTS.length, f = (1 - Math.pow(0.7, Math.min(k, n))) / (1 - Math.pow(0.7, n));
+            return startLevel + (1 - startLevel) * f;
+        }
+        const lastSentence = () => S.nr >= TEXTS.length;
         function grow() {
             S.epoch++;
-            S.level = Math.min(0.99, S.level + (1 - S.level) * 0.3);
+            S.level = levelAt(S.epoch);
             const sl = document.getElementById('wv-level');
             const lb = document.getElementById('wv-level-l');
             if (sl) sl.value = Math.round(S.level * 100);
             if (lb) lb.textContent = Math.round(S.level * 100) + ' %';
         }
+        // From 85 % on the remaining sentences run by themselves, one after the other, up to the last one = 100 %
+        // (Doc, 10.11.2026: "Wenn man so bei 85-95% ist, lässt es einfach weiter durchlaufen. Bis zu 100%").
+        // A finished sentence stays a moment, then the next one's picture, then its run.
+        const AUTO_FROM = 0.85;
+        let autoT = 0;
+        function autoStop() { clearTimeout(autoT); autoT = 0; }
+        function autoNext() {
+            autoStop();
+            autoT = setTimeout(() => {
+                autoT = 0;
+                nextText();
+                autoT = setTimeout(() => { autoT = 0; startRun(); }, 700);
+            }, 900);
+        }
         // one training run by button: the share grows and the picture opens afresh
         function train() { grow(); still(); }
 
         // ------------------------------------------------------------------ drawing ---
+        // Numbers in fixed cells - the site's digits widget (js/cyber-clock.js, CyberClock.draw): Orbitron's digits
+        // differ in width, so the % pill, the bar and the run counter jumped while the numbers ran (Doc, 10.11.2026:
+        // "verwende für die Zahlen mal bitte das Zahlenwidget, dass die Orbitron nicht springen")
+        function num(t, x, y, opts) {
+            if (window.CyberClock && CyberClock.draw) return CyberClock.draw(ctx, t, x, y, opts);
+            ctx.save(); ctx.font = opts.font; ctx.fillStyle = opts.color; ctx.textAlign = opts.align || 'left';
+            ctx.fillText(t, x, y); const w = ctx.measureText(t).width; ctx.restore(); return w;
+        }
+        function numW(t, opts) {
+            if (window.CyberClock && CyberClock.width) return CyberClock.width(ctx, t, opts);
+            ctx.font = opts.font; return ctx.measureText(t).width;
+        }
         const SAND = '#F7F2E7';                       // the working area, a shade of paper (Doc, 22.09.2026)
         const PAPER = '#EFE7D4';                      // the box, a shade deeper than the ground around it
         const INK = '#3A4150';                        // dark grey, the ordinary word
@@ -479,18 +518,16 @@
             // produced, 100 at the end (Doc, 22.09.2026: "pack die % Pille über den unteren Text")
             const have = Math.min(TEXT.length, run ? S.pos + S.frac + knownAhead(S.pos + 1) : border() + knownAhead(border()));
             const pct = Math.round(100 * have / Math.max(1, TEXT.length)) + ' %';
-            ctx.font = '700 ' + (m.fs * 0.9) + 'px Orbitron, sans-serif';
-            const pw = ctx.measureText(pct).width + m.fs * 1.6, ph = m.fs * 1.5;
+            const pf = { font: '700 ' + (m.fs * 0.9) + 'px Orbitron, sans-serif', color: INK, align: 'center', minDigits: 3 };
+            const pw = numW('100 %', pf) + m.fs * 1.6, ph = m.fs * 1.5;
             const pcy = y + t.top * 0.5;               // the middle of the air above the text
             ctx.beginPath();
             ctx.roundRect(boxX + boxW / 2 - pw / 2, pcy - ph / 2, pw, ph, ph / 2);
             ctx.fillStyle = 'rgba(185,166,124,.55)';
             ctx.fill();
-            ctx.fillStyle = INK;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(pct, boxX + boxW / 2, pcy + m.fs * 0.04);
-            ctx.textBaseline = 'alphabetic';
+            ctx.font = pf.font;
+            const asc = ctx.measureText('0').actualBoundingBoxAscent;   // the digits' height: their middle on the pill's
+            num(pct, boxX + boxW / 2, pcy + asc / 2, pf);
             ctx.textAlign = 'left';
             if (run) grown(low.boxes, from, to, t);
             low.boxes.forEach(b => {
@@ -517,16 +554,13 @@
             const lab = T('t_level', 'Vom Korpus gelernt').toUpperCase();
             ctx.fillText(lab, boxX, by);
             const lw = ctx.measureText(lab).width;
-            ctx.textAlign = 'right';
+            const nf = '700 ' + (m.fs * 0.9) + 'px Orbitron, sans-serif';
             const epochTxt = T('t_epoch', 'Durchlauf') + ' ' + S.epoch;
-            ctx.fillStyle = 'rgba(58,65,80,.55)';
-            ctx.fillText(epochTxt, boxX + boxW, by);
-            const ew = ctx.measureText(epochTxt).width;
+            const ew = num(epochTxt, boxX + boxW, by, { font: nf, color: 'rgba(58,65,80,.55)', align: 'right', minDigits: 2 });
             const valTxt = Math.round(S.level * 100) + ' %';
-            ctx.fillStyle = INK;
             const vx = boxX + boxW - ew - m.fs * 2.2;
-            ctx.fillText(valTxt, vx, by);
-            const vw = ctx.measureText(valTxt).width;
+            const vw = num(valTxt, vx, by, { font: nf, color: INK, align: 'right', minDigits: 3 });
+            ctx.font = nf;
             ctx.textAlign = 'left';
             // the bar itself, between the label and the value
             const bx0 = boxX + lw + m.fs * 0.9, bx1 = vx - vw - m.fs * 0.9, bh = m.fs * 0.62;
@@ -589,7 +623,7 @@
         // Space - and the widget's button: start, pause and go on, and once the sentence is through the next one
         function spaceAction() {
             if (S.mode !== 'run') startRun();
-            else if (S.pos >= TEXT.length) nextText();
+            else if (S.pos >= TEXT.length) { if (!lastSentence()) nextText(); }
             else { S.running = !S.running; S.stopAt = -1; if (S.running) S.t0 = performance.now(); playLabel(); }
         }
         addEventListener('keydown', e => {
@@ -757,7 +791,7 @@
             if (sp !== null) startSpeed = sp;
             if (g !== null || l !== null || sp !== null) resetAll();
             const n = parseInt(q.get('satz') || '1', 10);
-            for (let k = 1; k < n && k < 60; k++) {
+            for (let k = 1; k < n && k < TEXTS.length; k++) {
                 TEXT.forEach(w => SEEN.add(norm(w)));
                 grow();
                 textIx = (textIx + 1) % TEXTS.length; TEXT = TEXTS[textIx].split(/\s+/); S.nr++;
