@@ -490,6 +490,24 @@ addEventListener('keydown', e => {
   p.hidden = true; popTell('');
   if (e.key === 'Escape') e.stopImmediatePropagation();   // Esc only closes the box
 }, true);
+// In fullscreen the browser keeps Esc for itself: a press meant for an open box left fullscreen and ended the show (Doc,
+// 09.11.2026, mid-talk: "wenn ich Escape drücke, wird die Präsentation beendet"). While something that Esc closes is
+// open - a box, the overview, Solita's answers or line - Esc is locked to the page (Keyboard Lock API, Chrome/Edge) and
+// only closes that; holding Esc still leaves fullscreen. Each of them adds a test to escWants and calls escSync().
+const escWants = [function () { return !!document.querySelector('.pop:not([hidden])'); }];
+let escHeld = false;
+function escSync() {
+  const kb = navigator.keyboard;
+  if (!kb || !kb.lock) return;
+  const fs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const want = fs && escWants.some(function (f) { try { return f(); } catch (e) { return false; } });
+  if (want === escHeld) return;
+  escHeld = want;
+  if (want) kb.lock(['Escape']).catch(function () { escHeld = false; }); else kb.unlock();
+}
+new MutationObserver(escSync).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['hidden'] });
+document.addEventListener('fullscreenchange', escSync);
+document.addEventListener('webkitfullscreenchange', escSync);
 // A picture with data-zoom stands big in the middle of the slide (Doc, 31.10.2026: "on hover ... soll der 10-Euro-Schein
 // riesengroß in der Mitte erscheinen") as long as the mouse is on it or on the big one; from the file itself, so that file
 // should be sharp.
@@ -917,10 +935,8 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
   // open. While the overview is open, Esc is locked to the page (Keyboard Lock API, Chrome/Edge) and only closes it;
   // holding Esc still leaves fullscreen (Doc, 28.09.2026: "im overview soll ESC nur den Mode schließen").
   const kb = navigator.keyboard;
-  function escLock(on) {
-    if (!kb || !kb.lock) return;
-    if (on) kb.lock(['Escape']).catch(function () { }); else kb.unlock();
-  }
+  function escLock() { escSync(); }                  // the shared lock (escWants) - the overview is one of its reasons
+  escWants.push(function () { return !ov.hidden; });
   function close() { ov.hidden = true; escLock(false); }
   function build() {
     slides.forEach(function (s, i) {
@@ -1868,7 +1884,40 @@ gestartet = true;
     // The panel above Solita shows only when it has something to show. Empty, or folded away by a page turn, it fades
     // out and only the question line in the footer remains (Doc, 23.09.2026). Opacity, not display: the box underneath
     // still slides open from zero when the next text arrives.
-    function bare() { panel.classList.toggle('bare', !out.children.length || out.classList.contains('sf-zu')); }
+    function bare() { panel.classList.toggle('bare', !out.children.length || out.classList.contains('sf-zu')); escHold(); }
+
+    // An answer that came by mistake must go without ending the show (Doc, 09.11.2026, mid-talk: "kleines X oben oder ein
+    // Escape in die Zeile von Solita - wenn ich Escape drücke, wird die Präsentation beendet"). While her answers stand
+    // there (or her line is open, or has the cursor in the presenter) Esc is hers: it closes them and the show goes on.
+    // In fullscreen the browser keeps Esc for itself, so for that time it is locked to the page (Keyboard Lock API, as the
+    // overview does); holding Esc still leaves fullscreen. The x in the answers' corner does the same with a click.
+    function answersUp() { return !panel.hidden && !panel.classList.contains('bare'); }
+    function wantsEsc() {
+      if (box.classList.contains('greet')) return false;
+      return answersUp() || (!PRESENTER && !panel.hidden) || box.contains(document.activeElement);
+    }
+    function escHold() { escSync(); }                // the shared lock in fullscreen (escWants, top of this file)
+    escWants.push(wantsEsc);
+    function dismiss() {                               // the x and Esc: her answers go, the show stays
+      sf.stop();
+      const a = document.activeElement;
+      if (a && a !== document.body && box.contains(a) && a.blur) a.blur();   // the keys go back to the slides
+      if (PRESENTER) {                                 // the answers stand on the beamer: that window closes them
+        out.classList.add('sf-zu'); bare();
+        if (window.DeckLink) window.DeckLink.send({ t: 'ask-close' });
+      } else close();
+      escHold();
+    }
+    function escKey() { if (!wantsEsc()) return false; dismiss(); return true; }
+    box.addEventListener('focusin', escHold);
+    box.addEventListener('focusout', function () { setTimeout(escHold, 0); });
+    // the ordinary window and the beamer; the presenter asks escKey() from its own Esc (DeckLink below)
+    if (!PRESENTER) addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (document.querySelector('.pop:not([hidden])')) return;     // a box on the slide closes first (its own handler)
+      if (window.DeckOverview && DeckOverview.isOpen()) return;
+      if (escKey()) { e.preventDefault(); e.stopImmediatePropagation(); }
+    }, true);
 
     // While the panel is open, the question line (mic, field) stands in the footer: behind "... Doc Alvers fragen!"
     // and in front of the page number, centred on that text line; the answers stay above Solita (Doc, 23.09.2026:
@@ -2011,14 +2060,14 @@ gestartet = true;
       sf.feld().focus();
       sf.aufwaermen();
     }
-    function close() { if (PRESENTER) return; panel.hidden = true; placeRow(); sf.stop(); }   // the row goes home, her picture stays in the footer; the presenter's line stays
+    function close() { if (PRESENTER) return; panel.hidden = true; placeRow(); sf.stop(); escHold(); syncSoon(); }   // the row goes home, her picture stays in the footer; the presenter's line stays
 
     // Her picture: a click or tap opens the line, and with the line open switches between Solita and Doc - the box does
     // it (Doc, 30.09.2026: "click auf Avatar switch Doc Solita (zentral bitte)"). Esc closes. The presenter's line is
     // always open.
     btn.addEventListener('click', function () { btn.classList.remove('invite'); });   // found her - no more inviting on this page
     sf.bild(btn, { offen: function () { return PRESENTER || !panel.hidden; }, oeffnen: open });
-    document.getElementById('ask-close').onclick = close;
+    document.getElementById('ask-close').onclick = function (e) { e.preventDefault(); dismiss(); };
     // Space and P start the mic from anywhere on the slide, not only inside her panel; a closed line slides open
     // first (Doc, 23.09.2026: "shift space und P sollen das Mic starten auf der ganzen Folie wenn eingeklappt,
     // animiert ausklappen"; 30.09.2026: Space alone). The key itself is the box's, for the labs too ("zentral bitte
@@ -2059,6 +2108,7 @@ gestartet = true;
       ask: function (q) { if (PRESENTER || !q) return; if (panel.hidden) open(); sf.feld().value = ''; sf.frage(q); },
       live: function (q) { if (PRESENTER) return; if (panel.hidden) open(); sf.live(q); },
       hush: function () { sf.stop(); }, shown: shown, sync: sync, place: placeRow,
+      dismiss: dismiss, escKey: escKey,
       words: function (tex) { return window.SolitaKaraoke ? window.SolitaKaraoke.texWords(tex) : String(tex); }
     };
     // the line is always there; the answers come from the beamer. Empty is decided before it shows, as in open() -
@@ -2150,6 +2200,7 @@ const link = (function () {
     else if (m.t === 'ask') { if (window.DeckAsk) DeckAsk.ask(m.q); }          // asked in the presenter: answered here
     else if (m.t === 'ask-live') { if (window.DeckAsk) DeckAsk.live(m.q); }    // dictated there, already on screen here
     else if (m.t === 'ask-hush') { if (window.DeckAsk) DeckAsk.hush(); }       // the presenter's mic is on: her voice off
+    else if (m.t === 'ask-close') { if (window.DeckAsk) DeckAsk.dismiss(); }   // x or Esc on her answers in the presenter
     else if (m.t === 'go') apply(m);
     else if (m.t === 'pop') popApply(m);                                       // a box opened in the presenter
     else if (m.t === 'tail') hoverTail.apply(m);                               // the presenter's mouse on a strip
@@ -2672,6 +2723,8 @@ const link = (function () {
     if (e.key !== 'Escape' || e.metaKey || e.ctrlKey || e.altKey) return;
     const j = document.getElementById('jump');
     if (j && !j.hidden) return;                      // Esc first drops a typed slide number
+    // her answers open (or her line has the cursor): Esc closes them, the show goes on (Doc, 09.11.2026)
+    if (window.DeckAsk && DeckAsk.escKey && DeckAsk.escKey()) { e.preventDefault(); e.stopImmediatePropagation(); return; }
     endShow();
   }, true);   // capture: before the slide-number handler clears its box; an open overview still gets Esc first
 
