@@ -20,6 +20,8 @@ window.BuchPT && BuchPT.add('gy11lk', {
         'Gerade und Wurzel': 'reta e raiz', 'Lücke füllen': 'preencher a lacuna', 'Funktionswert $b$ an der Stelle 1': 'Valor da função $b$ no ponto 1',
         'eˣ bei 0': 'eˣ em 0', 'sin x bei 0': 'sen x em 0', 'ln x bei 1': 'ln x em 1',
         'Kakao': 'Cacau', 'Zucker': 'Açúcar', 'Milch': 'Leite', 'Zartbitter': 'Negro', 'Vollmilch': 'De leite', 'Classic': 'Classic', 'Mix': 'Mix',
+        // the examples of randextrema (the sine is "sen")
+        'sin x + x/2': 'sen x + x/2',
         // book pt-4 mathe12lk-pt:
         // stetigkeit (lb2-1): stetig = contínua, Sprungstelle = descontinuidade de salto, hebbare Unstetigkeit = descontinuidade removível
         'Abschnittsweise definierte Funktion mit Übergangsstelle': 'Função definida por ramos com um ponto de junção',
@@ -29,6 +31,10 @@ window.BuchPT && BuchPT.add('gy11lk', {
         // produktregel (lb2-4): Produktregel = regra do produto, Zuwachs = acréscimo, Streifen = faixa, Ecke = canto
         'Zuwachs $h$ von $x$': 'Acréscimo $h$ de $x$',
         'Rechteck mit den Seiten u und v und seinem Zuwachs aus zwei Streifen und einer Ecke': 'Retângulo de lados u e v e o seu acréscimo, formado por duas faixas e um canto',
+        // randextrema (lb2-5): lokal / global = relativo / absoluto, Rand = fronteira (extremo do intervalo)
+        'Funktionsgraph mit einem Intervall, seinen lokalen und globalen Extrema': 'Gráfico da função com um intervalo e os seus extremos relativos e absolutos',
+        'linker Rand $a$': 'Extremo esquerdo $a$', 'rechter Rand $b$': 'Extremo direito $b$', 'lokales Maximum': 'máximo relativo',
+        'lokales Minimum': 'mínimo relativo', 'Rand': 'fronteira', 'Art': 'Tipo', 'Globales Maximum': 'Máximo absoluto', 'globales Minimum': 'mínimo absoluto',
         // book pt-5 mathe13lk-pt:
     },
     phrase: [
@@ -54,6 +60,13 @@ window.BuchPT && BuchPT.add('gy11lk', {
         ['Für $h \\to 0$ geht die Ecke $\\Delta u \\cdot \\tfrac{\\Delta v}{h}$ gegen $0 \\cdot v\'$, übrig bleibt $u\\,v\' + u\'\\,v = ',
             'Quando $h \\to 0$, o canto $\\Delta u \\cdot \\tfrac{\\Delta v}{h}$ tende para $0 \\cdot v\'$ e fica $u\\,v\' + u\'\\,v = '],
         ['$: die <b>Produktregel</b>.', '$: a <b>regra do produto</b>.'],
+        // randextrema
+        ['$ auf $[', '$ em $['],
+        [']$. Kandidaten: die Stellen mit $f\'(x) = 0$ und Vorzeichenwechsel im Inneren, dazu die beiden Ränder.',
+            ']$. Candidatos: os pontos interiores com $f\'(x) = 0$ e mudança de sinal, e ainda os dois extremos do intervalo.'],
+        [' auf dem Intervall. ', ' no intervalo. '],
+        ['Ein globales Extremum liegt am <b>Rand</b>: Dort ist $f\'$ nicht null.', 'Um extremo absoluto está na <b>fronteira</b>: aí $f\'$ não é zero.'],
+        ['Hier liegen beide globalen Extrema im Inneren.', 'Aqui os dois extremos absolutos estão no interior.'],
         // book pt-5 mathe13lk-pt:
     ],
     rule: [
@@ -61,6 +74,8 @@ window.BuchPT && BuchPT.add('gy11lk', {
         // book pt-4 mathe12lk-pt:
         // linapprox: "… höchstens um 0,0123 ab, das sind 0,0246 pro Einheit von $h$" (the separable verb "weicht … ab")
         [/ ab, das sind ([^ <]+) pro Einheit von \$h\$/g, ', ou seja, $1 por unidade de $h$'],
+        // randextrema: the interval "[0;\, 6]" has a space after \, (the interval rule of js/buch-pt.js wants none): [0, 6], [0{,}5; 6]
+        [/\[([-−]?\d+(?:\{,\}\d+)?);\\, ([-−]?\d+(?:\{,\}\d+)?)\](?=\$\. Kandidaten)/g, (m, x, y) => '[' + x + (/\{,\}/.test(x + y) ? '; ' : ', ') + y + ']'],
         // book pt-5 mathe13lk-pt:
     ]
 });
