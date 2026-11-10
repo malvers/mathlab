@@ -35,6 +35,12 @@ window.BuchPT && BuchPT.add('gy11lk', {
         'Funktionsgraph mit einem Intervall, seinen lokalen und globalen Extrema': 'Gráfico da função com um intervalo e os seus extremos relativos e absolutos',
         'linker Rand $a$': 'Extremo esquerdo $a$', 'rechter Rand $b$': 'Extremo direito $b$', 'lokales Maximum': 'máximo relativo',
         'lokales Minimum': 'mínimo relativo', 'Rand': 'fronteira', 'Art': 'Tipo', 'Globales Maximum': 'Máximo absoluto', 'globales Minimum': 'mínimo absoluto',
+        // rettung (lb2-8): Rettungsschwimmerin = nadadora-salvadora, Lot = perpendicular, Brechungsgesetz = lei da refração
+        'Tempo im Sand $v_1$ (m/s)': 'Velocidade na areia $v_1$ (m/s)', 'Tempo im Wasser $v_2$ (m/s)': 'Velocidade na água $v_2$ (m/s)',
+        'Strand und Wasser: der Weg der Rettungsschwimmerin von A über den Punkt P an der Wasserlinie zum Schwimmer B':
+            'Praia e água: o caminho da nadadora-salvadora de A, passando pelo ponto P na linha de água, até ao nadador B',
+        'Die Zeit T in Abhängigkeit vom Punkt x, an dem sie ins Wasser geht': 'O tempo T em função do ponto x em que ela entra na água',
+        'Sand': 'Areia', 'Wasser': 'Água',
         // book pt-5 mathe13lk-pt:
     },
     phrase: [
@@ -67,6 +73,13 @@ window.BuchPT && BuchPT.add('gy11lk', {
         [' auf dem Intervall. ', ' no intervalo. '],
         ['Ein globales Extremum liegt am <b>Rand</b>: Dort ist $f\'$ nicht null.', 'Um extremo absoluto está na <b>fronteira</b>: aí $f\'$ não é zero.'],
         ['Hier liegen beide globalen Extrema im Inneren.', 'Aqui os dois extremos absolutos estão no interior.'],
+        // rettung (the rules have already turned \sin into \operatorname{sen}: both forms below)
+        ['Bei $x = ', 'Em $x = '], ['$ m braucht sie ', '$ m, ela demora '], [' s, am schnellsten ist sie bei <b>$x \\approx ', ' s; é mais rápida em <b>$x \\approx '],
+        ['$ m</b> mit ', '$ m</b>, com '], [' s (grün).', ' s (a verde).'],
+        ['Winkel zum Lot: im Sand $\\alpha = ', 'Ângulos com a perpendicular: na areia, $\\alpha = '], ['$, im Wasser $\\beta = ', '$; na água, $\\beta = '],
+        ['$. Im Optimum ist $\\dfrac{\\operatorname{sen}\\alpha}{v_1} = \\dfrac{\\operatorname{sen}\\beta}{v_2}$: ', '$. No ótimo, $\\dfrac{\\operatorname{sen}\\alpha}{v_1} = \\dfrac{\\operatorname{sen}\\beta}{v_2}$: '],
+        ['$. Im Optimum ist $\\dfrac{\\sin\\alpha}{v_1} = \\dfrac{\\sin\\beta}{v_2}$: ', '$. No ótimo, $\\dfrac{\\operatorname{sen}\\alpha}{v_1} = \\dfrac{\\operatorname{sen}\\beta}{v_2}$: '],
+        ['$, das Brechungsgesetz.', '$: a lei da refração.'],
         // book pt-5 mathe13lk-pt:
     ],
     rule: [
