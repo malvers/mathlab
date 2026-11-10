@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática 12 LK · Capítulo 2.8 · Problemas de otimização | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Modelar, extremos na fronteira, análise de casos. Capítulo 2.8 do manual interativo Matemática · Berufliches Gymnasium 12 · Leistungskurs: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · BERUFLICHES GYMNASIUM 12 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO 2.8 · ÁREA DE APRENDIZAGEM 2</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 2.8 · ÁREA DE APRENDIZAGEM 2 · MAIO</p>
+            <h1>Problemas de otimização</h1>
+            <p class="b-hero-lead">Agora o cálculo diferencial torna-se uma ferramenta. De um cartão deve sair uma caixa com o maior volume possível, uma lata deve gastar o mínimo de chapa possível,
+                uma nadadora-salvadora deve chegar o mais depressa possível a quem se está a afogar. Aprendes a encontrar o <b>melhor</b> entre muitas possibilidades, a não esquecer as fronteiras
+                e a distinguir casos quando o problema depende de um parâmetro.</p>
+            <div class="b-chips"><span class="b-chip">12 AULAS</span><span class="b-chip">2 UNIDADES</span><span class="b-chip">APLICAR · MODELAR</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x*(30-2*x)*(20-2*x)"]' data-labels='["V"]' data-lat="[7.6]" data-pts="[[3.92,1056.3]]" data-x="-0.5,10.5" data-y="-100,1250" data-xl="x" data-yl="V" data-h="240" data-aria="Função volume da caixa, com o máximo"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a escrever, nos <b>problemas de otimização</b>, a função objetivo, a condição que relaciona as variáveis e o domínio</li>
+                <li>a ter em conta <b>extremos na fronteira</b> e a <b>avaliar criticamente</b> os modelos</li>
+                <li>a escrever funções objetivo com raízes e funções exponenciais e a otimizar <b>distâncias</b> e <b>caminhos mais rápidos</b></li>
+                <li>a resolver problemas com um <b>parâmetro</b>, <b>distinguindo casos</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Resolve o sistema $x + y = 5$, $x - y = -1$. Quanto é $x$?</p><div class="b-sol"><p>Somando: $2x = 4$, $x = 2$ (e $y = 3$)</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="Número"><p class="b-q-text">$f(x) = ax^2 + bx + c$ com $a = 1$, $b = 2$, $c = 2$. Quanto é $f(1)$?</p><div class="b-sol"><p>$1 + 2 + 2 = 5$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">Em que ponto tem $f(x) = -x^2 + 6x$ o seu máximo?</p><div class="b-sol"><p>$-2x + 6 = 0$</p></div></div>
+            <div class="b-q" data-ans="18" data-ph="cm²"><p class="b-q-text">Um retângulo tem 6 cm de comprimento e a largura é metade do comprimento. Qual é a sua área?</p><div class="b-sol"><p>$6 \cdot 3 = 18$ cm²</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">A CAIXA</div>
+            <div class="b-text"><p>Recortem, nos quatro cantos de uma folha A4, quadrados iguais e dobrem uma caixa aberta.</p>
+                <ul><li>Experimentem vários tamanhos de quadrado. Que caixa leva mais?</li><li>De que depende o volume? Escrevam uma fórmula.</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">A LATA DO SUPERMERCADO</div>
+            <div class="b-text"><p>Meçam o diâmetro e a altura de três latas de conserva e calculem o seu volume.</p>
+                <ul><li>Com o mesmo volume, outras medidas gastariam menos material?</li><li>Porque é que as latas reais, mesmo assim, são muitas vezes diferentes?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span>
+        </div>
+        <div class="b-box b-erk"><div class="b-box-title">O CAMINHO MAIS RÁPIDO</div>
+            <div class="b-text"><p>Uma nadadora-salvadora está a 30 m da água. Um nadador está a 20 m da margem e 50 m para o lado. Ela corre a 6 m/s e nada a 2 m/s.</p>
+                <ul><li>O caminho a direito é o mais rápido? Ou deve correr até ficar em frente ao nadador?</li><li>Estimem onde deve entrar na água e calculem dois caminhos.</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Função objetivo e condição" data-toc-k="1" data-toc-short="1 Otimizar">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">7 AULAS</span></div>
+    <h2><span class="b-no">1</span>Função objetivo, condição, domínio</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Num cartão de 30 cm × 20 cm recortam-se, nos cantos, quadrados de lado $x$. Para que valor de $x$ leva a caixa mais?</p></div></div>
+            <div class="b-text"><p>A caixa tem $30 - 2x$ de comprimento, $20 - 2x$ de largura e $x$ de altura. O seu volume é a <b>função objetivo</b> $V(x) = x(30 - 2x)(20 - 2x) = 4x^3 - 100x^2 + 600x$,
+                com o domínio $0 < x < 10$. $V'(x) = 12x^2 - 200x + 600 = 0$ dá $x \approx 3{,}92$ cm (a segunda solução, 12,74, fica fora do domínio). O volume é então de cerca de 1 056 cm³.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · RESOLVER PROBLEMAS DE OTIMIZAÇÃO</div>
+                <div class="b-text">
+                    <p><b>1. Função objetivo:</b> que grandeza deve ser máxima ou mínima? Escrever uma fórmula para ela, muitas vezes com duas variáveis.</p>
+                    <p><b>2. Condição:</b> o que está fixo (perímetro, volume, material)? Usá-la para substituir uma variável, de modo que a função objetivo dependa só de uma.</p>
+                    <p><b>3. Domínio:</b> fixá-lo a partir do contexto.</p>
+                    <p><b>4. Extremo:</b> determiná-lo com $f' = 0$ e a condição suficiente. Comparar com os <b>valores na fronteira</b>.</p>
+                    <p><b>5. Resposta</b> no contexto, com unidade, e avaliar o modelo de forma crítica.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Extremo na fronteira:</b> se o valor com $f' = 0$ ficar fora do domínio, o ótimo pode estar na fronteira.</p>
+            <p class="b-note"><b>Sem derivada:</b> quando uma função objetivo é demasiado complicada, os computadores procuram o ótimo com tentativas inteligentes, por exemplo com enxames de partículas.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · OTIMIZAR</div>
+        <p class="b-help" style="margin:0 0 12px">Escolhe um problema e procura o ótimo com o cursor. Depois compara com a solução obtida com a derivada.</p>
+        <div data-widget="optimieren"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · RETÂNGULO DEBAIXO DE UMA PARÁBOLA</div>
+            <div class="b-text"><p>Debaixo da parábola $f(x) = 9 - x^2$ há um retângulo com um lado sobre o eixo $Ox$ e dois vértices na parábola. Quando é que a sua área é máxima?</p></div>
+            <div class="b-sol"><p>Vértices em $\pm u$: largura $2u$, altura $9 - u^2$. $A(u) = 2u(9 - u^2) = 18u - 2u^3$, $0 < u < 3$.</p>
+                <p>$A'(u) = 18 - 6u^2 = 0 \Rightarrow u = \sqrt3 \approx 1{,}73$, $A''(u) = -12u < 0$. <span class="b-res">$A_{\max} = 12\sqrt3 \approx 20{,}8$</span> unidades de área.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · A LATA</div>
+            <div class="b-text"><p>Uma lata deve levar 1 litro. Que medidas gastam menos chapa?</p></div>
+            <div class="b-sol"><p>Condição $\pi r^2 h = 1000 \Rightarrow h = \tfrac{1000}{\pi r^2}$. Função objetivo (área total) $A(r) = 2\pi r^2 + 2\pi r h = 2\pi r^2 + \tfrac{2000}{r}$.</p>
+                <p>$A'(r) = 4\pi r - \tfrac{2000}{r^2} = 0 \Rightarrow r^3 = \tfrac{500}{\pi}$, $r \approx 5{,}42$ cm, $h \approx 10{,}84$ cm. <span class="b-res">A lata mais económica é tão alta como larga.</span></p></div>
+        </div>
+    </div>
+
+    <div class="b-labs">
+        <a class="b-lab" data-lab="particleswarm" href="../../particleswarm.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PARTICLE SWARM</span><span class="b-lab-what">Otimizar sem derivada</span></span></a>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Dois números têm soma 20. Quando é que o seu produto é máximo?</p></div>
+            <div class="b-sol"><p>$P(x) = x(20 - x)$, $P'(x) = 20 - 2x = 0$: $x = 10$, ambos os números 10, produto 100.</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Com 60 m de rede veda-se um retângulo junto a um muro (o muro é um dos lados). Determina a área máxima.</p></div>
+            <div class="b-sol"><p>$A(x) = x(60 - 2x)$, $A'(x) = 60 - 4x = 0$: $x = 15$ m, lado junto ao muro 30 m, $A = 450$ m².</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Como no exercício 2, mas o muro só tem 20 m de comprimento. O que muda?</p></div>
+            <div class="b-sol"><p>Agora tem de ser $60 - 2x \le 20$, ou seja, $x \ge 20$. Em $[20, 30[$, $A$ é decrescente; o ótimo está na <b>fronteira</b> $x = 20$: $A = 20 \cdot 20 = 400$ m².</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>O lucro de uma empresa é $G(x) = -x^3 + 6x^2 + 15x - 20$ (em milhares de euros, $x$ em centenas de unidades, $0 \le x \le 8$). Para que quantidade é máximo?</p></div>
+            <div class="b-sol"><p>$G'(x) = -3x^2 + 12x + 15 = 0 \Rightarrow x^2 - 4x - 5 = 0 \Rightarrow x = 5$. $G''(5) = -18 < 0$. $G(5) = 80$, ou seja, 80 000 € com 500 unidades. Fronteira: $G(0) = -20$, $G(8) = -28$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Uma janela é formada por um retângulo com um semicírculo por cima. O perímetro é 6 m. Para que raio deixa passar mais luz?</p></div>
+            <div class="b-hint"><p>Largura $2r$, altura do retângulo $h$. Perímetro $2r + 2h + \pi r = 6$. Área $A = 2rh + \tfrac{\pi}{2} r^2$.</p></div>
+            <div class="b-sol"><p>$h = 3 - r - \tfrac{\pi}{2} r$, $A(r) = 6r - 2r^2 - \tfrac{\pi}{2} r^2$, $A'(r) = 6 - (4 + \pi) r = 0$: $r = \tfrac{6}{4 + \pi} \approx 0{,}84$ m.
+                Então também $h \approx 0{,}84$ m: a altura do retângulo é igual ao raio.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="450" data-ph="m²"><p class="b-q-text">Área máxima da vedação junto ao muro (60 m de rede)?</p><div class="b-sol"><p>$15 \cdot 30 = 450$ m²</p></div></div>
+        <div class="b-q" data-ans="25" data-ph="Produto"><p class="b-q-text">Dois números positivos têm soma 10. Qual é, no máximo, o seu produto?</p><div class="b-sol"><p>$5 \cdot 5 = 25$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">A solução de $f'(x) = 0$ fica fora do domínio. Onde está o ótimo?</p>
+            <div class="b-mc"><button>não há nenhum</button><button>numa fronteira do domínio</button><button>mesmo assim, na solução de $f'(x) = 0$</button></div>
+            <div class="b-sol"><p>Nesse caso, é preciso comparar os valores na fronteira.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Distâncias, caminhos e parâmetros" data-toc-k="2" data-toc-short="2 Caminhos">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">5 AULAS</span></div>
+    <h2><span class="b-no">2</span>Distâncias, caminhos e parâmetros</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>O tempo da nadadora-salvadora depende do ponto $x$ em que entra na água. Se fizer o caminho a direito, demora 21,2 s;
+                se correr até ficar em frente ao nadador, 19,7 s. Entre os dois há um ponto ótimo. A função objetivo tem agora <b>raízes</b>, a sua derivada precisa da regra da cadeia do capítulo 2.4,
+                e a equação $T'(x) = 0$ resolve-se melhor com o CAS.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · RESOLVER PROBLEMAS DE OTIMIZAÇÃO</div>
+                <div class="b-text"><ol>
+                    <li>Identificar a <b>grandeza</b> que deve ser máxima ou mínima e escrevê-la como expressão, muitas vezes primeiro com várias variáveis.</li>
+                    <li>Com a <b>condição</b>, substituir todas as variáveis menos uma: obtém-se a <b>função objetivo</b>.</li>
+                    <li>Indicar o <b>domínio</b> com sentido no contexto.</li>
+                    <li>Determinar os extremos relativos com a derivada e compará-los com os <b>valores nos extremos do intervalo</b>: procura-se o extremo absoluto.</li>
+                    <li>Responder no <b>contexto</b> do problema.</li>
+                </ol></div>
+            </div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · PARÂMETROS NO PROBLEMA</div>
+                <div class="b-text">
+                    <p>Se o problema depende de uma grandeza $m$, por exemplo o comprimento de um muro, o ótimo pode estar, conforme $m$, no interior ou na <b>fronteira</b>. Nesse caso distinguem-se os casos
+                        e indica-se o resultado para cada um.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Truque:</b> em vez de uma distância $d = \sqrt{\ldots}$, minimiza-se $d^2$. A raiz é estritamente crescente, por isso ambas têm o mínimo no mesmo ponto, mas $d^2$ deriva-se mais facilmente.</p>
+            <p class="b-note"><b>Com o CAS:</b> se a equação $Z'(x) = 0$ for difícil, resolve-se numericamente ou lê-se o mínimo no gráfico. A justificação de que é o ótimo absoluto continua a ser tarefa tua.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · O CAMINHO MAIS RÁPIDO</div>
+        <p class="b-help" style="margin:0 0 12px">Arrasta o ponto $P$ na linha de água. À direita vês o tempo $T(x)$. Altera as velocidades e observa como o mínimo se desloca.</p>
+        <div data-widget="rettung"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · A MENOR DISTÂNCIA</div>
+            <div class="b-text"><p>Que ponto da parábola $y = x^2$ está mais próximo do ponto $P(3, 0)$? Qual é a distância?</p></div>
+            <div class="b-sol"><p>Um ponto da parábola é $Q(x, x^2)$. Função objetivo: $d^2(x) = (x - 3)^2 + x^4$, $D = \mathbb{R}$.</p>
+                <p>$\left(d^2\right)'(x) = 2(x - 3) + 4x^3 = 0 \iff 2x^3 + x - 3 = 0$. Por tentativa: $x = 1$. Divisão de polinómios: $(x - 1)(2x^2 + 2x + 3)$; o segundo fator não tem zeros.</p>
+                <p>$\left(d^2\right)'$ muda de $-$ para $+$ em 1: <span class="b-res">$Q(1, 1)$, distância $d = \sqrt{4 + 1} = \sqrt5 \approx 2{,}24$</span>. Quando $x \to \pm\infty$, $d^2$ cresce sem limite, logo o mínimo é absoluto.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · A NADADORA-SALVADORA</div>
+            <div class="b-text"><p>Ela está em $A(0, 30)$, o nadador está em $B(50, -20)$ e a linha de água é o eixo $Ox$. Ela corre a 6 m/s e nada a 2 m/s. Onde deve entrar na água?</p></div>
+            <div class="b-sol"><p>Percurso a correr: $\sqrt{30^2 + x^2}$; percurso a nadar: $\sqrt{20^2 + (50 - x)^2}$. Função objetivo $T(x) = \tfrac{\sqrt{900 + x^2}}{6} + \tfrac{\sqrt{400 + (50 - x)^2}}{2}$ em $D = [0, 50]$.</p>
+                <p>O CAS resolve $T'(x) = 0$: $x \approx 44{,}3$, $T \approx 19{,}3$ s. Valores nos extremos: $T(0) \approx 31{,}9$ s, $T(50) \approx 19{,}7$ s.</p>
+                <p><span class="b-res">Deve entrar na água cerca de 44 m para o lado</span> e poupa quase 2 s em relação ao caminho a direito.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Um jardim retangular deve ter 400 m². Para que medidas é precisa menos vedação?</p></div>
+            <div class="b-sol"><p>$xy = 400$, $U(x) = 2x + \tfrac{800}{x}$ para $x > 0$. $U'(x) = 2 - \tfrac{800}{x^2} = 0$ em $x = 20$: um quadrado de 20 m de lado, 80 m de vedação.
+                Quando $x \to 0$ e quando $x \to +\infty$, $U$ cresce sem limite; o mínimo é, portanto, absoluto.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Um retângulo no primeiro quadrante tem um vértice na origem e o vértice oposto no gráfico de $f(x) = \mathrm{e}^{-x}$. Quando é máxima a sua área?</p></div>
+            <div class="b-sol"><p>$A(u) = u\,\mathrm{e}^{-u}$ para $u > 0$. $A'(u) = (1 - u)\,\mathrm{e}^{-u} = 0$ em $u = 1$, com mudança de sinal de $+$ para $-$: $A = \tfrac1{\mathrm{e}} \approx 0{,}368$ (compara com o capítulo 2.5, exemplo 7).</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Com 60 m de vedação delimita-se um retângulo junto a um muro de comprimento $m$; o muro substitui um lado. Determina a maior área em função de $m$. Compara com os exercícios 2 e 3.</p></div>
+            <div class="b-hint"><p>Chama $y$ ao lado junto ao muro. Então $0 < y \le m$ e $2x + y = 60$.</p></div>
+            <div class="b-sol"><p>$A(y) = \tfrac{y(60 - y)}{2}$, $A'(y) = 30 - y = 0$ em $y = 30$.</p>
+                <p><b>Caso $m \ge 30$:</b> $y = 30$, $x = 15$, $A = 450$ m². <b>Caso $m < 30$:</b> $A$ é crescente em $]0, m]$ e o máximo está na fronteira $y = m$: $A = \tfrac{m(60 - m)}{2}$; para $m = 20$, 400 m².</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Num cone de raio 6 cm e altura 12 cm coloca-se um cilindro cuja base superior toca a superfície lateral. Qual é o maior volume possível do cilindro? Que fração do cone é isso?</p></div>
+            <div class="b-sol"><p>Semelhança de triângulos: $\tfrac{12 - h}{r} = \tfrac{12}{6}$, logo $h = 12 - 2r$. $V(r) = \pi r^2 (12 - 2r)$ em $[0, 6]$. $V'(r) = \pi(24r - 6r^2) = 0$ em $r = 4$, $h = 4$:
+                $V = 64\pi \approx 201$ cm³. Nos extremos, $V = 0$. O cone tem $144\pi$ cm³; o cilindro ocupa $\tfrac49$ dele.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Um retângulo está colocado simetricamente sobre o eixo $Ox$, debaixo do gráfico de $f_a(x) = a - x^2$ ($a > 0$). Determina a maior área em função de $a$ e verifica o resultado com o exemplo 1.</p></div>
+            <div class="b-sol"><p>$A(u) = 2u(a - u^2)$ em $]0, \sqrt{a}[$, $A'(u) = 2a - 6u^2 = 0 \iff u = \sqrt{\tfrac{a}{3}}$. Maior área: $A = 2\sqrt{\tfrac{a}{3}} \cdot \tfrac{2a}{3} = \tfrac{4a}{3}\sqrt{\tfrac{a}{3}}$.</p>
+                <p>Para $a = 9$: $u = \sqrt3$, $A = 12\sqrt3 \approx 20{,}8$, como no exemplo 1.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="2,236" data-tol="0.002" data-ph="d ="><p class="b-q-text">Qual é a menor distância da parábola $y = x^2$ ao ponto $P(3, 0)$ (três casas decimais)?</p><div class="b-sol"><p>Ponto mais próximo $(1, 1)$, $d = \sqrt5 \approx 2{,}236$</p></div></div>
+        <div class="b-q" data-ans="40" data-ph="m"><p class="b-q-text">Um retângulo tem área 100 m². Qual é, no mínimo, o seu perímetro?</p><div class="b-sol"><p>Quadrado de 10 m de lado: 40 m</p></div></div>
+        <div class="b-q" data-ans="400" data-ph="m²"><p class="b-q-text">60 m de vedação, muro de 20 m de comprimento (exercício 8). Qual é a maior área?</p><div class="b-sol"><p>Extremo na fronteira $y = 20$: $\tfrac{20 \cdot 40}{2} = 400$ m²</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Resolve a exploração «A caixa» para uma folha A4 (29,7 cm × 21 cm). Qual é o $x$ ótimo?</p></div>
+            <div class="b-sol"><p>$V(x) = x(29{,}7 - 2x)(21 - 2x)$, $V'(x) = 12x^2 - 202{,}8x + 623{,}7 = 0$. Solução em $0 < x < 10{,}5$: $x \approx 4{,}04$ cm, $V \approx 1128$ cm³.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relacionar com o capítulo 2.5:</b> justifica que na caixa há mesmo um máximo, sem usar a segunda derivada.</p></div>
+            <div class="b-sol"><p>Na fronteira, $x = 0$ e $x = 10$, $V = 0$; entre eles, $V > 0$. O único ponto interior com $V' = 0$ tem de ser o máximo.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Crítica do modelo da lata: as latas de conserva reais são muitas vezes mais altas do que sugere o cálculo $h = 2r$. Indica razões pelas quais o modelo só corresponde em parte à realidade.</p></div>
+            <div class="b-sol"><p>Por exemplo: a tampa e o fundo são mais grossos do que a parede lateral ou têm uma dobra, que gasta material. As latas têm de caber nas prateleiras, na mão e nas máquinas.
+                O preço da chapa é apenas uma parte dos custos. O rótulo e o empilhamento também contam.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Relacionar com a Física:</b> mostra em geral, para a nadadora-salvadora: de $T'(x) = 0$ resulta $\tfrac{\operatorname{sen}\alpha}{v_1} = \tfrac{\operatorname{sen}\beta}{v_2}$, onde $\alpha$ e $\beta$ são os ângulos dos percursos com a perpendicular à linha de água.</p></div>
+            <div class="b-sol"><p>Com $A(0, a)$, $B(b, -c)$: $T(x) = \tfrac{\sqrt{a^2 + x^2}}{v_1} + \tfrac{\sqrt{c^2 + (b - x)^2}}{v_2}$. Pela regra da cadeia: $T'(x) = \tfrac{x}{v_1\sqrt{a^2 + x^2}} - \tfrac{b - x}{v_2\sqrt{c^2 + (b - x)^2}}$.
+                As frações $\tfrac{x}{\sqrt{a^2 + x^2}}$ e $\tfrac{b - x}{\sqrt{c^2 + (b - x)^2}}$ são exatamente $\operatorname{sen}\alpha$ e $\operatorname{sen}\beta$. É a lei da refração da luz.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>De um tronco de secção circular (diâmetro 40 cm) corta-se uma viga de secção retangular. A sua resistência é proporcional a $b \cdot h^2$. Com que medidas aguenta mais?</p></div>
+            <div class="b-sol"><p>$b^2 + h^2 = 40^2$, logo $T(b) = b(1600 - b^2)$ em $]0, 40[$. $T'(b) = 1600 - 3b^2 = 0$: $b = \tfrac{40}{\sqrt3} \approx 23{,}1$ cm, $h = 40\sqrt{\tfrac23} \approx 32{,}7$ cm. A razão é $h : b = \sqrt2$.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: A luz segue o caminho mais rápido" data-toc-k="X" data-toc-short="Fermat">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">HISTÓRIA E FÍSICA</span></div>
+    <h2>A luz segue o caminho mais rápido</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Um pau dentro de água parece partido, porque a luz muda de direção à superfície da água. A lei deste fenómeno tinha sido encontrada por Willebrord Snellius e René Descartes:
+                a razão entre os senos dos dois ângulos com a perpendicular é constante. Mas porquê precisamente os senos?</p>
+            <p>Pierre de Fermat respondeu em 1662, em dois textos que juntou a uma carta ao médico Marin Cureau de la Chambre. A sua hipótese: a natureza não escolhe o caminho mais curto,
+                mas o <b>mais rápido</b>, e na água a luz é mais lenta do que no ar. Com o seu método para máximos e mínimos resolveu exatamente o problema da nadadora-salvadora
+                e obteve, para sua própria surpresa, a lei dos senos (exercício 14).</p>
+            <p>Os seguidores de Descartes não lhe perdoaram, porque Descartes tinha suposto que a luz era mais rápida na água. Fermat tinha razão: em 1850, Léon Foucault mediu que a luz é mais lenta na água.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> Pierre de Fermat: «Analysis ad refractiones» e «Synthesis ad refractiones», anexos a uma carta a Marin Cureau de la Chambre, 1662.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>PROBLEMA DE OTIMIZAÇÃO</h4><p>Função objetivo, condição, domínio, $f' = 0$, fronteira, resposta.</p></div>
+        <div><p>Caixa: $x \approx 3{,}92$ cm · lata: $h = 2r$</p></div></div>
+    <div class="b-rueck"><div><h4>EXTREMO NA FRONTEIRA</h4><p>Se $f' = 0$ fica fora do domínio, decide a fronteira.</p></div>
+        <div><p>Vedação junto a um muro de 20 m: 400 m²</p></div></div>
+    <div class="b-rueck"><div><h4>DISTÂNCIAS E CAMINHOS</h4><p>Minimizar $d^2$ em vez de $d$. Funções objetivo com raízes: regra da cadeia; $T'(x) = 0$ muitas vezes com o CAS.</p></div>
+        <div><p>Nadadora-salvadora: cerca de 44 m para o lado, 19,3 s</p></div></div>
+    <div class="b-rueck"><div><h4>PARÂMETROS</h4><p>Se o ótimo fica, conforme o parâmetro, no interior ou na fronteira: distinguir casos.</p></div>
+        <div><p>Muro $m \ge 30$: 450 m² · $m < 30$: $\tfrac{m(60 - m)}{2}$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="25" data-ph="Produto"><p class="b-q-text">Dois números positivos têm soma 10. Qual é, no máximo, o seu produto?</p><div class="b-sol"><p>$5 \cdot 5 = 25$</p></div></div>
+            <div class="b-q" data-ans="20" data-ph="m"><p class="b-q-text">Um jardim retangular deve ter 400 m². Qual é o comprimento do lado do retângulo com a vedação mais curta?</p><div class="b-sol"><p>Um quadrado: 20 m</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="x ="><p class="b-q-text">Para que valor de $x$ é $x(20 - x)$ máximo?</p><div class="b-sol"><p>$20 - 2x = 0$</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="1,732" data-tol="0.005" data-ph="u ="><p class="b-q-text">Retângulo debaixo de $f(x) = 9 - x^2$: para que valor de $u$ é $A(u) = 18u - 2u^3$ máxima?</p><div class="b-sol"><p>$u = \sqrt3 \approx 1{,}732$</p></div></div>
+            <div class="b-q" data-ans="80" data-ph="Milhares de €"><p class="b-q-text">$G(x) = -x^3 + 6x^2 + 15x - 20$. Lucro máximo, em milhares de euros?</p><div class="b-sol"><p>$G(5) = 80$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Na lata mais económica tem-se …</p>
+                <div class="b-mc"><button>$h = 2r$</button><button>$h = r$</button><button>$h = \pi r$</button></div>
+                <div class="b-sol"><p>Altura igual ao diâmetro.</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11lk-extremwertprobleme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXTREMWERTPROBLEME</span><span class="b-lab-what">Leistungskurs, com soluções</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-extremalaufgaben.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXTREMALAUFGABEN</span><span class="b-lab-what">Função objetivo e condição</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Berufliches Gymnasium, 12.º ano, Leistungskurs · Área de aprendizagem 2 segundo o programa de Matemática do Berufliches Gymnasium da Saxónia (2026).</p>
+    <p>Todos os textos, exercícios e figuras são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-pt/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-pt/analysis.js"></script>
+<script src="../../js/buch-gy11lk.js"></script>
+<script src="../../js/buch-pt/gy11lk.js"></script>
+</body>
+</html>

@@ -14,10 +14,21 @@ window.BuchPT && BuchPT.add('bgy12lk', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs bgy12lk/*)
         // book pt-4 mathe12lk-pt:
+        // titelbildbgy12lk: the cover of the start page (BGY 12 Leistungskurs)
+        'Titelbild: eine Verteilungsfunktion als Treppe über ihren Stäben, eine Kurve mit der Tangente, die sie im Berührpunkt ersetzt, und eine dreiseitige Pyramide mit ihrem Schwerpunkt':
+            'Imagem da capa: uma função de distribuição em escada por cima das suas barras, uma curva com a tangente que a substitui no ponto de tangência e uma pirâmide triangular com o seu baricentro',
+        // verteilungsfunktion (lb1-2): Verteilungsfunktion = função de distribuição, Wahrscheinlichkeitsfunktion = função de probabilidade,
+        // Treppe = escada; the die button "Würfel" is the rule (data-v="wuerfel") of stochastik
+        'Gesuchte Wahrscheinlichkeit': 'Probabilidade pedida', 'Wahrscheinlichkeitsfunktion als Stabdiagramm': 'Função de probabilidade em diagrama de barras',
+        'Verteilungsfunktion als Treppenfunktion': 'Função de distribuição em escada',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs bgy12lk/*)
         // book pt-4 mathe12lk-pt:
+        // verteilungsfunktion: "$X$ = Anzahl Wappen bei drei Münzwürfen. Oben die …, unten die …"
+        ['Anzahl Wappen bei drei Münzwürfen', 'número de faces nacionais em três lançamentos de uma moeda'], ['Augenzahl eines Würfels', 'número de pintas de um dado'],
+        ['Gewinn in € (Auszahlung minus 2 € Einsatz)', 'ganho em € (prémio menos 2 € de aposta)'],
+        ['. Oben die Wahrscheinlichkeitsfunktion', '. Em cima, a função de probabilidade'], [', unten die Verteilungsfunktion', '; em baixo, a função de distribuição'],
     ],
     rule: [
         // pt0: notation of the module, for every book
