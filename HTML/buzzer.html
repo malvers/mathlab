@@ -260,7 +260,7 @@
                     return;
                 }
                 knopf.disabled = false;
-                if (id) merke({ code, id, tag: heute() });
+                if (id) merke({ code, id, tag: heute(), t: Date.now() });
                 // arrived: green for a moment, then red - unless the id did not come back (then orange as before)
                 danke('VIELEN DANK FÜR DAS FEEDBACK', id ? 'offen' : 'frage');
             }
@@ -436,8 +436,17 @@
                 tempoZeigen();
             }
 
+            // Doc, 10.11.2026: "wenn sie da drücken ... kommt sofort das Gelbe wieder zurück" - pupils tap several times
+            // in a row; the first tap after the green moment hit the red key and took the question straight back
+            // (the table: half of all "verstanden" came 1.6-5 s after their question). So the red key takes no tap
+            // during its first seconds - it simply stays red.
+            const OFFEN_SPERRE = 10000;
             knopf.addEventListener('click', () => {
-                if (zustand === 'offen') verstanden();
+                if (zustand === 'offen') {
+                    const o = offeneFrage();
+                    if (o && o.t && Date.now() - o.t < OFFEN_SPERRE) return;
+                    verstanden();
+                }
                 else if (zustand === 'frage') buzz();           // the green moment takes no tap
             });
             // no QR, no code: type it from the board
