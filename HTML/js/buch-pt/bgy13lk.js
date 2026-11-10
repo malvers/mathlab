@@ -31,6 +31,10 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         'Verlauf der drei Klassen über die Schritte n': 'Evolução das três classes ao longo dos passos n', '1 Schritt': '1 passo', '10 Schritte': '10 passos',
         'Zurück auf Start': 'Voltar ao início',
         'Übergangsgraph mit drei Zuständen und den Übergangsanteilen an den Pfeilen': 'Grafo de transição com três estados e as proporções de transição nas setas',
+        // biquadratisch (lb7-1): biquadratische Gleichung = equação biquadrada, Substitution = substituição
+        'Koeffizient $p$': 'Coeficiente $p$', 'Koeffizient $q$': 'Coeficiente $q$', 'Keine Lösung': 'Nenhuma solução', 'Eine Lösung': 'Uma solução',
+        'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen': 'A parábola h(z) = z² + p·z + q com os seus zeros',
+        'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'O gráfico de f(x) = x⁴ + p·x² + q com os seus zeros',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs bgy13lk/*)
@@ -65,6 +69,10 @@ window.BuchPT && BuchPT.add('bgy13lk', {
             '$. Com $n$ a crescer, as colunas de $P^n$ ficam iguais: aproximam-se da <b>matriz limite</b>, cujas colunas são todas o <b>vetor fixo</b>.'],
         ['Fixvektor aus $P \\cdot \\vec{v} = \\vec{v}$ und $v_1 + v_2 + v_3 = 1$: $\\vec{v} \\approx ', 'Vetor fixo a partir de $P \\cdot \\vec{v} = \\vec{v}$ e $v_1 + v_2 + v_3 = 1$: $\\vec{v} \\approx '],
         ['$. Langfristig: ', '$. A longo prazo: '], [' der Kundschaft, egal wie es anfing.', ' da clientela, seja qual for o início.'],
+        // biquadratisch (the widget computes the reduced discriminant p²/4 − q)
+        [' = 0$ wird mit $z = x^2$ zu $z^2', ' = 0$ transforma-se, com $z = x^2$, em $z^2'], ['$, Diskriminante $\\tfrac{p^2}{4} - q = ', '$, discriminante reduzido $\\tfrac{p^2}{4} - q = '],
+        [' liefert $x = \\pm', ' dá $x = \\pm'], [' liefert $x = 0$', ' dá $x = 0$'], [' liefert nichts, denn $x^2$ ist nie negativ', ' não dá nada, porque $x^2$ nunca é negativo'],
+        ['keine Lösung $z$, die Diskriminante ist negativ', 'nenhuma solução $z$: o discriminante é negativo'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -80,5 +88,9 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         // uebergang: "um den Faktor 1,25 <b>gewachsen</b>." / "auf das 0,8-Fache <b>geschrumpft</b>, …"
         [/um den Faktor ([\d,]+) <b>gewachsen<\/b>\./g, '<b>cresceu</b> pelo fator $1.'],
         [/auf das ([\d,]+)-Fache <b>geschrumpft<\/b>, die Population stirbt langfristig aus\./g, '<b>diminuiu</b> para $1 vezes o valor anterior: a população extingue-se a longo prazo.'],
+        // biquadratisch: "<b>3 Lösungen</b>"
+        [/<b>(\d) Lösungen<\/b>/g, '<b>$1 soluções</b>'],
+        // biquadratisch: the solution set with whole numbers gets commas, with decimal commas it keeps the semicolons
+        [/(x \\in \\\{)([^$]*?)(\\\})/g, (m, a, b, c) => a + (/\{,\}/.test(b) ? b : b.replace(/;\\ /g, ', ')) + c],
     ]
 });
