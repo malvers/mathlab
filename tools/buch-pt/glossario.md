@@ -157,4 +157,58 @@ Terms the book adds go here.
 
 ## mathe13lk-pt (BGY 13 Leistungskurs, block pt-5)
 
-Terms the book adds go here.
+Die Begriffe, die BGY 13 LK (`mathe13lk-pt`, 10.11.2026) dazubringt. Was die Widgets anders schreiben, biegen die Regeln im Block
+pt-5 um (`bgy13lk.js`: E → I, ME → u.q.; `vektoren.js`: der Knopf „parallel“ von Geraden/Ebenen; `funktionen.js`: Matrizen bleiben Matrizen).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Leistungskurs / Grundkurs | Leistungskurs (curso de nível avançado) / Grundkurs | bleibt Deutsch, einmal auf der Startseite erklärt |
+| Wahlpflicht 1 / 2 | área opcional 1 / 2 | |
+| Stammfunktion · unbestimmtes Integral | primitiva · integral indefinido | Integrationskonstante = constante de integração |
+| Grundintegrale · Integrationsregeln · integrieren | primitivas imediatas · regras de primitivação · primitivar | Integrand = função integranda |
+| Nachweis (durch Ableiten) | verificação (derivando) | |
+| bestimmtes Integral · Integrationsgrenzen | integral definido · limites de integração (inferior / superior) | |
+| Ober- / Untersumme $O_n$, $U_n$ | soma superior / inferior $O_n$, $U_n$ | Buchstaben bleiben wie im Widget `summen` (offene Frage: $S_n$, $s_n$?) |
+| orientierter Flächeninhalt · rekonstruierter Bestand | área orientada · quantidade reconstruída | Änderungsrate = taxa de variação, Zuflussrate = caudal |
+| Hauptsatz der Differential- und Integralrechnung | teorema fundamental do cálculo | |
+| Integralfunktion $I_a$ | função integral $I_a$ | |
+| Rechteck- / Trapezmethode | método dos retângulos / dos trapézios | Mittelwert einer Funktion = valor médio |
+| Rotationskörper · Kreisscheibe | sólido de revolução · disco | Kegelstumpf = tronco de cone, Fass = barril |
+| links- / rechtsgekrümmt | concavidade voltada para cima / para baixo | Trapeze zu viel / zu wenig = por excesso / por defeito |
+| stetige Zufallsgröße · Dichtefunktion | variável aleatória contínua · função densidade | |
+| normalverteilt $N(\mu; \sigma^2)$ | segue uma distribuição normal $N(\mu, \sigma^2)$ | im Text der Hinweis auf $N(\mu, \sigma)$ der portugiesischen Schulen |
+| Gaußsche Glockenkurve · Standardnormalverteilung | curva de Gauss · distribuição normal padrão | |
+| Verteilungsfunktion $\Phi$ · Standardisieren | função de distribuição $\Phi$ · estandardização | σ-Regeln = regras σ |
+| Satz von de Moivre-Laplace · Stetigkeitskorrektur · Laplace-Bedingung | teorema de De Moivre-Laplace · correção de continuidade · condição de Laplace | |
+| Grundgesamtheit · Stichprobe · Stichprobenumfang | população · amostra · dimensão da amostra | repräsentativ = representativa, Verzerrung = enviesamento |
+| Schätz- / Testproblem | problema de estimação / de teste | |
+| Stichprobenmittel · Stichprobenvarianz | média amostral · variância amostral | Verschiebungssatz = fórmula de Steiner (de translação) |
+| Signifikanztest · Null- / Gegenhypothese | teste de significância · hipótese nula / alternativa | Testgröße = estatística de teste |
+| Signifikanzniveau · Ablehnungsbereich · kritischer Wert | nível de significância · região de rejeição · valor crítico | $K = \{10, \ldots, 50\}$ mit Kommas |
+| ein- / zweiseitig (links- / rechtsseitig) | unilateral (à esquerda / à direita) / bilateral | Entscheidungsregel = regra de decisão |
+| Fehler 1. / 2. Art · statistische Sicherheit | erro de tipo I / II · nível de confiança | |
+| Wappen / Zahl (Münze) | face nacional / face europeia | wie pt-1 |
+| Parametergleichung (Gerade) · Stützvektor · Richtungsvektor | equação vetorial · vetor posição de um ponto da reta · vetor diretor | Namen $g$, $h$, $E$ bleiben wie in den Widgets (offene Frage: $r$, $s$, $\alpha$?) |
+| Punktprobe | pertença de um ponto | |
+| Spurpunkte (Gerade) / Spurpunkte (Ebene) · Spurgerade | traços / pontos de interseção com os eixos · traço (do plano) | $xy$-Ebene = plano $xOy$ |
+| Parameterform (Ebene) · Spannvektoren | forma vetorial · vetores diretores | |
+| Normalenvektor · Vektorprodukt | vetor normal · produto vetorial $\vec u \times \vec v$ | |
+| Koordinatengleichung $n_1x + n_2y + n_3z = d$ | equação cartesiana | Hinweis auf $ax + by + cz + d = 0$ im Text |
+| Hessesche Normalform · Achsenabschnittsform | forma normal de Hesse · equação segmentária | |
+| identisch · echt parallel · schneidend · windschief | coincidentes · estritamente paralelas · concorrentes · não complanares | Ebenen: estritamente paralelos, coincidentes, concorrentes |
+| Schnittgerade · Schnittwinkel | reta de interseção · ângulo | Ebenenbüschel = feixe de planos |
+| Lotfußpunkt · Lotgerade · Spiegelpunkt | pé da perpendicular · reta perpendicular · simétrico | |
+| Grundfläche $G$ · Mantel $M$ · Oberfläche $O$ | área da base $A_b$ · área lateral $A_L$ · área total $A$ | auch im Widget `pyramide` |
+| Matrizenprodukt · verkettet · Typ $(2, 3)$ | produto de matrizes · compatíveis · tipo $2 \times 3$ | Falksches Schema = esquema de Falk |
+| Einheitsmatrix $E$ | matriz identidade $I$ | auch in den Widgets (Regeln in `bgy13lk.js`) |
+| inverse Matrix · invertierbar / singulär · Determinante | matriz inversa · invertível / singular · determinante | Gauß-Jordan-Verfahren = método de Gauss-Jordan |
+| Gozintograph · Bedarfsmatrix · Gesamtbedarfsmatrix | gozintograma · matriz de necessidades · matriz de necessidades totais | Indizes $R$, $Z$, $E$ bleiben, einmal erklärt |
+| Mengeneinheit ME | unidade de quantidade u.q. | auch in den Widgets |
+| Kosten $K$ · Erlös $E$ · Gewinn $G$ · Deckungsbeitrag | custo $K$ · receita $E$ · lucro $G$ · margem de contribuição | Buchstaben bleiben (Widget `gewinn`), einmal erklärt |
+| Grenzkosten · Stückkosten · Gewinnschwelle / -grenze | custo marginal · custo unitário · limiar de rentabilidade / limite do lucro | Cournotscher Punkt = ponto de Cournot |
+| Technologiematrix · Endnachfrage · Leontief-Inverse | matriz tecnológica · procura final · inversa de Leontief $(I - A)^{-1}$ | |
+| Übergangsmatrix · Übergangsgraph · stochastische Matrix | matriz de transição · grafo de transição · matriz estocástica | |
+| Grenzmatrix · Fixvektor | matriz limite $G$ · vetor fixo | |
+| biquadratische Gleichung · Substitution · Rücksubstitution | equação biquadrada · substituição · voltar à variável $x$ | |
+| Funktionenschar · Ortskurve · kritische Werte | família de funções · lugar geométrico · valores críticos | Fallunterscheidung = discussão de casos |
+| Drehmatrix · Drehwinkel | matriz de rotação · ângulo de rotação | |
