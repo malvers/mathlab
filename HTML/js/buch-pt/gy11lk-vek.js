@@ -13,11 +13,26 @@
 window.BuchPT && BuchPT.add('gy11lk-vek', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk-vek/*)
+        // eqRow: the aria labels of the four number fields "E₁, Koeffizient von x" (phrases below)
+        'Koeffizient von x': 'coeficiente de x', 'Koeffizient von y': 'coeficiente de y', 'Koeffizient von z': 'coeficiente de z', 'rechte Seite': 'segundo membro',
         // book pt-5 mathe13lk-pt:
+        // ebenenlage (wp1-2): Schnittgerade = reta de interseção, Spurgerade = traço; the preset "parallel" by the rule in vektoren.js
+        'Dach': 'Telhado', 'Spurgerade': 'Traço', 'Zwei Ebenen im Raum und ihre Schnittgerade': 'Dois planos no espaço e a sua reta de interseção',
+        'Mindestens ein Koeffizient von $x$, $y$, $z$ muss ungleich null sein, sonst ist es keine Ebene.': 'Pelo menos um coeficiente de $x$, $y$, $z$ tem de ser diferente de zero; caso contrário, não é um plano.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk-vek/*)
+        // eqRow
+        [', Koeffizient von ', ', coeficiente de '], [', rechte Seite', ', segundo membro'],
         // book pt-5 mathe13lk-pt:
+        // ebenenlage
+        ['Die linke Seite von $E_2$ ist das ', 'O primeiro membro de $E_2$ é '], ['-Fache der linken Seite von $E_1$. Rechts: $', ' vezes o primeiro membro de $E_1$. À direita: $'],
+        ['Beide Gleichungen sind gleichwertig: <b>identisch</b>.', 'As duas equações são equivalentes: planos <b>coincidentes</b>.'],
+        ['Das System hat keine Lösung: <b>parallel</b> und verschieden.', 'O sistema é impossível: planos <b>estritamente paralelos</b>.'],
+        ['Die linken Seiten sind keine Vielfachen: Die Ebenen <b>schneiden</b> sich in einer Geraden. Freie Variable $',
+            'Os primeiros membros não são múltiplos: os planos <b>intersetam-se</b> numa reta. Variável livre $'],
+        [' = t$, übrig bleibt für $', ' = t$; resta, para $'], ['$ und $', '$ e $'], ['Gelöst: $', 'Resolvido: $'], ['Schnittgerade: <b>$g', 'Reta de interseção: <b>$g'],
+        ['. Ganzzahliger Richtungsvektor: $', '. Vetor diretor de coordenadas inteiras: $'],
     ],
     rule: [
         // pt0: notation of the module, for every book

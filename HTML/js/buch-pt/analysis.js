@@ -59,6 +59,15 @@ window.BuchPT && BuchPT.add('analysis', {
         'Kosten, Erlös und Gewinn': 'Custos, receita e lucro',
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // integrieren (lb3-1): primitivar; the parser of the widget reads "sin", not "sen" (the help on the page shows -cos(x))
+        'eˣ, 1/x, sin, cos': 'eˣ, 1/x, sen, cos', 'Lineare Verkettung': 'Composição afim',
+        'z. B. x^3/3 - 2x oder -cos(2x)/2': 'p. ex. x^3/3 - 2x ou -cos(2x)/2',
+        // schar (lb7-1): Funktionenschar = família de funções, Ortskurve = lugar geométrico; Hoch-/Tiefpunkt without letters (phrases below)
+        'Funktionenschar': 'Família de funções', 'Ortskurve der Extrempunkte zeigen': 'Mostrar o lugar geométrico dos extremos',
+        'Funktionenschar mit Ortskurve': 'Família de funções com o lugar geométrico', 'Parameter $a$': 'Parâmetro $a$',
+        // gewinn (lb7-2): Kosten K, Erlös E, Gewinn G stay as letters (explained on the page); Stück = unidade
+        'Verkaufspreis $p$ (€ pro Stück)': 'Preço de venda $p$ (€ por unidade)', 'x in Stück': 'x em unidades', 'Kosten, Erlös und Gewinn': 'Custo, receita e lucro',
+        'Bei diesem Preis wird nie Gewinn gemacht.': 'A este preço nunca há lucro.', 'Kein positives Gewinnmaximum.': 'Não há lucro máximo positivo.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -142,6 +151,18 @@ window.BuchPT && BuchPT.add('analysis', {
         ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Lucro máximo: $G\'(x) = 0$ em $x \\approx '], ['Kein positives Gewinnmaximum.', 'Não há lucro máximo positivo.'],
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // integrieren ("· 3 von 5 gelöst" by the rule of pt-2)
+        ['Bestimme eine Stammfunktion: $f(x) = ', 'Determina uma primitiva: $f(x) = '],
+        ['Noch nicht. Leite deine Lösung zur Probe ab. Tipp: ', 'Ainda não. Deriva a tua solução para a verificares. Dica: '],
+        // schar
+        [' · Hochpunkt $(', ' · máximo relativo em $('], [' · Tiefpunkt $(', ' · mínimo relativo em $('],
+        ['Ortskurve aller Extrempunkte (violett): $', 'Lugar geométrico de todos os extremos (a violeta): $'],
+        ['Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
+            'Para $a \\le 0$ não há extremos: $f_a\'(x) = 3x^2 - a$ não tem então nenhum zero com mudança de sinal.'],
+        ['Jede Parabel der Schar geht durch den Ursprung, denn $f_a(0) = 0$ für alle $a$.', 'Todas as parábolas da família passam pela origem, porque $f_a(0) = 0$ para todo o $a$.'],
+        // gewinn
+        ['Gewinnschwelle bei $x \\approx ', 'Limiar de rentabilidade em $x \\approx '], ['$, Gewinngrenze bei $x \\approx ', '$, limite do lucro em $x \\approx '], ['$ Stück.', '$ unidades.'],
+        ['Gewinn ab $x \\approx ', 'Lucro a partir de $x \\approx '], ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Lucro máximo: $G\'(x) = 0$ em $x \\approx '], ['$ Stück, $G \\approx ', '$ unidades, $G \\approx '],
     ],
     rule: [
         // pt0: notation of the module, for every book

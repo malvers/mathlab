@@ -42,6 +42,12 @@ window.BuchPT && BuchPT.add('gy11lk', {
         'Die Zeit T in Abhängigkeit vom Punkt x, an dem sie ins Wasser geht': 'O tempo T em função do ponto x em que ela entra na água',
         'Sand': 'Areia', 'Wasser': 'Água',
         // book pt-5 mathe13lk-pt:
+        // verflechtung (wp2-2): the chocolate factory; its helpers (GZ, outside the widget) here, as the pt0 part of gy11lk belongs to
+        // book pt-4; ME (Mengeneinheiten) = u.q. (unidades de quantidade) by the phrase in bgy13lk.js
+        'Kakao': 'Cacau', 'Zucker': 'Açúcar', 'Milch': 'Leite', 'Zartbitter': 'Negro', 'Vollmilch': 'De leite', 'Classic': 'Classic', 'Mix': 'Mix',
+        'Tafeln „Classic“ $e_1$': 'Tabletes «Classic» $e_1$', 'Boxen „Mix“ $e_2$': 'Caixas «Mix» $e_2$',
+        'Gozinto-Graph: drei Rohstoffe, zwei Zwischenprodukte, zwei Endprodukte, an den Pfeilen die benötigten Mengen':
+            'Gozintograma: três matérias-primas, dois produtos intermédios, dois produtos finais; nas setas, as quantidades necessárias',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk/*)
@@ -81,6 +87,10 @@ window.BuchPT && BuchPT.add('gy11lk', {
         ['$. Im Optimum ist $\\dfrac{\\sin\\alpha}{v_1} = \\dfrac{\\sin\\beta}{v_2}$: ', '$. No ótimo, $\\dfrac{\\operatorname{sen}\\alpha}{v_1} = \\dfrac{\\operatorname{sen}\\beta}{v_2}$: '],
         ['$, das Brechungsgesetz.', '$: a lei da refração.'],
         // book pt-5 mathe13lk-pt:
+        // verflechtung
+        ['Zwischenprodukte: $\\vec{z} = B \\cdot \\vec{e} = ', 'Produtos intermédios: $\\vec{z} = B \\cdot \\vec{e} = '], ['Rohstoffe: $\\vec{r} = A \\cdot \\vec{z} = ', 'matérias-primas: $\\vec{r} = A \\cdot \\vec{z} = '],
+        ['In einem Schritt: $C = A \\cdot B = ', 'Num só passo: $C = A \\cdot B = '],
+        ['$ gibt den Rohstoffbedarf je Endprodukt an, und $C \\cdot \\vec{e} = ', '$ dá as necessidades de matérias-primas por produto final, e $C \\cdot \\vec{e} = '],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -90,5 +100,8 @@ window.BuchPT && BuchPT.add('gy11lk', {
         // randextrema: the interval "[0;\, 6]" has a space after \, (the interval rule of js/buch-pt.js wants none): [0, 6], [0{,}5; 6]
         [/\[([-−]?\d+(?:\{,\}\d+)?);\\, ([-−]?\d+(?:\{,\}\d+)?)\](?=\$\. Kandidaten)/g, (m, x, y) => '[' + x + (/\{,\}/.test(x + y) ? '; ' : ', ') + y + ']'],
         // book pt-5 mathe13lk-pt:
+        // verflechtung: "Für 10 Tafeln und 5 Boxen braucht man <b>… ME Kakao, … ME Zucker und … ME Milch</b>."
+        [/Für (\d+) Tafeln und (\d+) Boxen braucht man <b>(\d+) ME Kakao, (\d+) ME Zucker und (\d+) ME Milch<\/b>\./g,
+            'Para $1 tabletes e $2 caixas são precisas <b>$3 u.q. de cacau, $4 u.q. de açúcar e $5 u.q. de leite</b>.'],
     ]
 });

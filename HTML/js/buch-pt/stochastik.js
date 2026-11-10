@@ -76,6 +76,17 @@ window.BuchPT && BuchPT.add('stochastik', {
         'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Distribuição binomial sob a hipótese nula com a região de rejeição',
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // stichprobe (lb5-1): Grundgesamtheit = população, Stichprobe = amostra, Stichprobenumfang = dimensão da amostra, Anteil = proporção
+        'Anteil in der Grundgesamtheit $p$': 'Proporção na população $p$', 'Stichprobenumfang $n$': 'Dimensão da amostra $n$', 'Stichproben ziehen:': 'Recolher amostras:',
+        'Verteilung der relativen Häufigkeiten vieler Stichproben': 'Distribuição das frequências relativas de muitas amostras',
+        'Noch keine Stichprobe gezogen.': 'Ainda não foi recolhida nenhuma amostra.',
+        // signifikanztest (lb5-2): Nullhypothese = hipótese nula, Ablehnungsbereich = região de rejeição, Signifikanzniveau = nível de significância,
+        // Fehler 1. / 2. Art = erro de tipo I / II, links- / rechts- / zweiseitig = unilateral à esquerda / à direita, bilateral
+        'Nullhypothese $p_0$': 'Hipótese nula $p_0$', 'Test:': 'Teste:', 'Art des Tests': 'Tipo de teste', 'linksseitig': 'unilateral à esquerda',
+        'rechtsseitig': 'unilateral à direita', 'zweiseitig': 'bilateral', 'Signifikanzniveau $\\alpha$:': 'Nível de significância $\\alpha$:',
+        'Signifikanzniveau': 'Nível de significância', 'Beobachtete Trefferzahl $k$': 'Número de sucessos observado $k$',
+        'Fehler 2. Art zeigen: wahres $p$ =': 'Mostrar o erro de tipo II: $p$ verdadeiro =',
+        'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Distribuição binomial sob a hipótese nula, com a região de rejeição',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -133,6 +144,17 @@ window.BuchPT && BuchPT.add('stochastik', {
         ['$ fälschlich beibehalten (Fehler 2. Art).', '$ (erro de tipo II).'],
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // stichprobe
+        [' Stichprobe vom Umfang ', ' amostra de dimensão '], [' Stichproben vom Umfang ', ' amostras de dimensão '], [' · letzte: $h = ', ' · última: $h = '],
+        ['$ (gold)', '$ (a dourado)'], ['Mittelwert der $h$: $', 'Média dos $h$: $'], ['$ · Standardabweichung der $h$: $', '$ · desvio padrão dos $h$: $'],
+        ['Theorie: $\\sqrt{', 'Teoria: $\\sqrt{'], ['$. Viermal so großes $n$ halbiert die Streuung.', '$. Um $n$ quatro vezes maior reduz a dispersão a metade.'],
+        // signifikanztest
+        ['$ gegen $H_1\\colon ', '$ contra $H_1\\colon '], ['Ablehnungsbereich (rot): $', 'Região de rejeição (a vermelho): $'],
+        ['$ · tatsächliche Irrtumswahrscheinlichkeit $\\approx ', '$ · probabilidade de erro efetiva $\\approx '], ['Beobachtet $k = ', 'Observado $k = '],
+        ['<b>$H_0$ wird abgelehnt.</b> Das Ergebnis ist signifikant.', '<b>Rejeita-se $H_0$.</b> O resultado é significativo.'],
+        ['<b>$H_0$ wird nicht abgelehnt.</b> Das beweist aber nicht, dass $H_0$ stimmt.', '<b>Não se rejeita $H_0$.</b> Mas isso não demonstra que $H_0$ seja verdadeira.'],
+        ['Ist in Wahrheit $p = ', 'Se na realidade $p = '], ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (a violeta), $H_0$ é mantida, com $\\beta \\approx '],
+        ['$ fälschlich beibehalten (Fehler 2. Art).', '$, erradamente (erro de tipo II).'],
     ],
     rule: [
         // pt0: notation of the module, for every book
