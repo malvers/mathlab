@@ -183,6 +183,9 @@ nav.quick-nav a.nav-drop { cursor: pointer; }
    own look. */
 .nav-drop-panel .nd-sub { position: relative; display: flex; flex-direction: column; }
 .nav-drop-panel .nd-sub-head { position: relative; }
+/* a sub-menu inside a sub-menu sits in a panel only as wide as its longest pill - room for the ▸
+   on both sides, so the label stays centred and clear of it (MRA > Nachschreiben, 09.11.2026) */
+.nav-drop-panel .nd-sub-panel .nd-sub-head { padding-left: 20px; padding-right: 20px; }
 .nav-drop-panel .nd-caret {
     position: absolute;
     right: 7px;
@@ -215,11 +218,13 @@ nav.quick-nav a.nav-drop { cursor: pointer; }
     right: 100%;
     width: 17px;
 }
-.nav-drop-panel .nd-sub.nd-left .nd-sub-panel { left: auto; right: calc(100% + 15px); }
-.nav-drop-panel .nd-sub.nd-left .nd-sub-panel::before { right: auto; left: 100%; }
-.nav-drop-panel .nd-sub.open .nd-sub-panel { display: flex; }
+/* child combinators: a sub-menu may sit inside another (MRA > Nachschreiben, 09.11.2026) and opens
+   only its own panel, not the one nested in it */
+.nav-drop-panel .nd-sub.nd-left > .nd-sub-panel { left: auto; right: calc(100% + 15px); }
+.nav-drop-panel .nd-sub.nd-left > .nd-sub-panel::before { right: auto; left: 100%; }
+.nav-drop-panel .nd-sub.open > .nd-sub-panel { display: flex; }
 @media (hover: hover) {
-    .nav-drop-panel .nd-sub:hover .nd-sub-panel { display: flex; }
+    .nav-drop-panel .nd-sub:hover > .nd-sub-panel { display: flex; }
 }
 .nav-drop-panel .nd-sub-panel .badge { text-align: center; }
 /* Doc, 10.10.2026: the number of open reports on "Meldungen" and on MRA (svp-nav.js zaehleMeldungen) - Υ red with white,

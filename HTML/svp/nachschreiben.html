@@ -23,10 +23,12 @@
 </head>
 
 <body>
-    <!-- The school's make-up exam dates (a Word table in a colleague's OneDrive), read and checked
-         against the Saxon calendar by tools/nachschreiben.py, which keeps them in Supabase
-         (svp_untis, row _nachschreiben). Only Doc's account can read that row, so the page shows
-         nothing without his login - nothing of the table is in this file. -->
+    <!-- The schools' make-up exam dates (BGY: a Word table in a colleague's OneDrive; FO: a Word
+         list in the team TEAM FO), read and checked against the Saxon calendar by
+         tools/nachschreiben.py, which keeps them in Supabase (svp_untis, rows _nachschreiben and
+         _nachschreiben_fo). One page for both, ?s=fo picks the FO list (Doc, 09.11.2026: "für die
+         einzelnen Schulen getrennt", nav MRA > Nachschreiben > BGY / FO). Only Doc's account can read
+         those rows, so the page shows nothing without his login - nothing of the lists is in this file. -->
     <header class="page-head">
         <div class="head-row">
             <div class="title-group">
@@ -42,7 +44,7 @@
         <button class="action" id="ns-mine" type="button" hidden>Mein Termin</button>
         <div class="legend">
             <span><span class="dot" style="background: rgb(240, 160, 24)"></span>nächster Termin</span>
-            <span><span class="dot" style="background: rgb(176, 36, 24)"></span>meine Aufsicht</span>
+            <span id="ns-leg-mine"><span class="dot" style="background: rgb(176, 36, 24)"></span>meine Aufsicht</span>
             <span><span class="dot" style="background: var(--lambda)"></span>Hinweis</span>
         </div>
     </div>
@@ -59,7 +61,7 @@
                     <th>KW</th>
                     <th>Tag</th>
                     <th>Datum</th>
-                    <th>Aufsicht</th>
+                    <th id="ns-th-wer">Aufsicht</th>
                 </tr>
             </thead>
             <tbody>
@@ -79,7 +81,15 @@
     <script src="svp-nav.js"></script>
     <script>
         (function () {
-            const ROW = '_nachschreiben';
+            /* one page per school: the query picks the list (like punktetabelle.html?s=osgy) */
+            const SCHULEN = {
+                bgy: { row: '_nachschreiben', name: 'BGY' },
+                fo: { row: '_nachschreiben_fo', name: 'FO' }
+            };
+            const SCHULE = SCHULEN[new URLSearchParams(location.search).get('s')] || SCHULEN.bgy;
+            const ROW = SCHULE.row;
+            document.title = 'Nachschreibetermine ' + SCHULE.name;
+            document.querySelector('.page-head h1').firstChild.textContent = 'Nachschreibetermine ' + SCHULE.name + ' ';
             const TAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
             const table = document.getElementById('ns-table');
             const tbody = table.querySelector('tbody');
@@ -116,12 +126,16 @@
                 document.getElementById('ns-jahr').textContent = data.schuljahr || '';
                 const q = data.quelle || {};
                 document.getElementById('ns-sub').textContent =
-                    [data.raum && 'Raum ' + data.raum, data.zeit].filter(Boolean).join(' · ') +
-                    ' · aus Teams, Stand der Datei ' + stempel(q.geaendert);
+                    [data.raum && 'Raum ' + data.raum, data.zeit, 'aus Teams, Stand der Datei ' + stempel(q.geaendert)]
+                        .filter(Boolean).join(' · ');
 
                 /* a time column only when a date keeps a time of its own - all the same, it stands in the head */
                 const zeilen = data.zeilen || [];
                 const mitZeit = zeilen.some(z => z.zeit);
+                /* a list without supervisors (FO): the last column only carries the holiday notes */
+                const mitWer = zeilen.some(z => z.art !== 'ferien' && z.wer);
+                document.getElementById('ns-th-wer').textContent = mitWer ? 'Aufsicht' : 'Hinweis';
+                document.getElementById('ns-leg-mine').hidden = !mitWer;
                 if (mitZeit && !table.querySelector('col.c-zeit')) {
                     const last = table.querySelector('colgroup col:last-child');
                     last.before(el('col', 'c-zeit'));
@@ -160,7 +174,7 @@
                     if (z.wer) {
                         wer.appendChild(el('span', 'name', z.wer));
                         if (z.meins) wer.appendChild(el('span', 'ich', 'ich'));
-                    } else wer.appendChild(el('span', 'offen', 'noch offen'));
+                    } else if (mitWer) wer.appendChild(el('span', 'offen', 'noch offen'));
                     if (z.frei) wer.appendChild(el('span', 'frei-tag', z.frei));
                     if (hinweisAm[z.d]) { tr.classList.add('korr'); wer.title = hinweisAm[z.d].join('\n'); }
                     tr.appendChild(wer);

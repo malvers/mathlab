@@ -69,7 +69,10 @@
         ['fahrplan.html', 'Fahrplan', 'b-grey', 'Fahrplan der Woche'],
         /* Doc, 28.10.2026: the school's make-up exam dates from Teams as an SVP page, in MRA after
            Fahrplan - login only (LOGIN_ONLY), like Schuljahr */
-        ['nachschreiben.html', 'Nachschreiben', 'b-grey', 'Nachschreibetermine BGY - Termine und Aufsicht'],
+        /* Doc, 09.11.2026: "die Nachschreibetermine für die einzelnen Schulen getrennt" - one page, the
+           query picks the school, both in the sub-menu MRA > Nachschreiben (BGY / FO) */
+        ['nachschreiben.html', 'BGY', 'b-grey', 'Nachschreibetermine BGY - Termine und Aufsicht'],
+        ['nachschreiben.html?s=fo', 'FO', 'b-grey', 'Nachschreibetermine FO - Termine der Fachoberschule'],
         /* Doc, 29.10.2026: the school's plans of all Klassenarbeiten and Klausuren (Excel + Word per year group
            in Teams) as one SVP page with the rule of BGySO § 17 (4), in MRA after Nachschreiben - login only */
         ['klassenarbeiten.html', 'Klassenarbeiten', 'b-grey', 'Klassenarbeiten BGY - alle Jahrgänge, Regel § 17 BGySO'],
@@ -112,7 +115,7 @@
     /* Pages whose content only Doc's account may read (Supabase, RLS on his uid): logged out
        they leave the nav altogether - pill, menu entry, gear panel and link card - so the
        class never meets a page that only asks for a password. */
-    const LOGIN_ONLY = new Set(['schuljahr.html', 'nachschreiben.html', 'klassenarbeiten.html', 'telefonliste.html']);
+    const LOGIN_ONLY = new Set(['schuljahr.html', 'nachschreiben.html', 'nachschreiben.html?s=fo', 'klassenarbeiten.html', 'telefonliste.html']);
     if (!hasSession()) {
         for (let i = LINKS.length - 1; i >= 0; i--) if (LOGIN_ONLY.has(LINKS[i][0])) LINKS.splice(i, 1);
     }
@@ -158,7 +161,7 @@
     // Header wie alles sonst") - it opens in place, below this nav band.
     const NEW_TAB = new Set(['../aehm.html', 'notes.html', 'fahrplan.html', '../buch/meldungen.html', 'schuljahr.html', 'konzepte.html', 'operatoren.html',
         'punktetabelle.html', 'punktetabelle.html?s=osgy', 'bewertungen.html', 'notenvergabe-fos.html',
-        'notenvergabe-osgy.html', '../fokus.html', 'nachschreiben.html', 'klassenarbeiten.html', 'telefonliste.html']);
+        'notenvergabe-osgy.html', '../fokus.html', 'nachschreiben.html', 'nachschreiben.html?s=fo', 'klassenarbeiten.html', 'telefonliste.html']);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
     // everything else lives inside those. [pill label, [[caption|null, hrefs]],
@@ -198,7 +201,10 @@
                top, so the menu gets shorter - the demo class used to close the menu below a divider. */
             /* Doc, 10.10.2026: "mach MRA nur sichtbar, wenn ich eingeloggt bin" - login: the sub-menu alone goes
                (not LOGIN_ONLY: the pages and their cards stay as they were); "mach Meld. als ersten eintrag" */
-            [null, [{ sub: 'MRA', login: true, hrefs: ['../buch/meldungen.html', '../aehm.html', 'notes.html', 'fahrplan.html', 'nachschreiben.html', 'klassenarbeiten.html', 'telefonliste.html', '../vote.html?host', 'genii.html'] },
+            /* a sub-menu may hold another one: MRA > Nachschreiben > BGY / FO (Doc, 09.11.2026) */
+            [null, [{ sub: 'MRA', login: true, hrefs: ['../buch/meldungen.html', '../aehm.html', 'notes.html', 'fahrplan.html',
+                                                          { sub: 'Nachschreiben', hrefs: ['nachschreiben.html', 'nachschreiben.html?s=fo'] },
+                                                          'klassenarbeiten.html', 'telefonliste.html', '../vote.html?host', 'genii.html'] },
                     'schuljahr.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
                     { sub: 'Noten', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
                                                   'bewertungen.html', 'notenvergabe-fos.html',
@@ -209,9 +215,8 @@
 
     // every href that moved into a dropdown leaves the plain row
     const IN_DROP = new Set();
-    DROPS.forEach(([, rows]) => rows.forEach(([, hrefs]) => hrefs.forEach(function (h) {
-        if (typeof h === 'string') IN_DROP.add(h); else h.hrefs.forEach(x => IN_DROP.add(x));
-    })));
+    function inDrop(h) { if (typeof h === 'string') IN_DROP.add(h); else h.hrefs.forEach(inDrop); }
+    DROPS.forEach(([, rows]) => rows.forEach(([, hrefs]) => hrefs.forEach(inDrop)));
 
     // '/svp/' and '/svp/index.html' are the same page.
     function norm(path) { return path.replace(/index\.html$/, ''); }
@@ -338,7 +343,10 @@
        zeigen"): a pill with a ▸ whose entries show in a small panel beside
        it - on hover with a mouse, on click/tap everywhere. It opens to the
        right; where that would leave the window, to the left. */
-    function makeSub(label, items) {
+    /* items: what the panel shows - pills, or the box of a sub-menu inside it; all: every pill
+       in it, nested ones included (marks the head, hides the box when all are off in ⚙) */
+    function makeSub(label, items, all) {
+        all = all || items;
         const box = document.createElement('div');
         box.className = 'nd-sub';
         const head = document.createElement('a');
@@ -375,11 +383,26 @@
         });
         box.addEventListener('mouseenter', place);
         /* on one of its own pages the head pill is marked */
-        if (items.some(a => a.classList.contains('active'))) head.classList.add('active');
+        if (all.some(a => a.classList.contains('active'))) head.classList.add('active');
         box.appendChild(head);
         box.appendChild(fly);
-        subBoxes.push({ box: box, items: items });
+        subBoxes.push({ box: box, items: all });
         return box;
+    }
+    /* a sub-menu entry { sub, hrefs, login? } -> { box, pills } or null when nothing in it shows;
+       an href may itself be a sub-menu (MRA > Nachschreiben > BGY / FO, Doc 09.11.2026) */
+    function buildSub(entry) {
+        if (entry.login && !hasSession()) return null;
+        const parts = [], all = [];
+        entry.hrefs.forEach(function (h) {
+            if (typeof h === 'string') {
+                if (pills[h]) { parts.push(pills[h]); all.push(pills[h]); }
+                return;
+            }
+            const inner = buildSub(h);
+            if (inner) { parts.push(inner.box); all.push(...inner.pills); }
+        });
+        return all.length ? { box: makeSub(entry.sub, parts, all), pills: all } : null;
     }
     function closeSubs() {
         subBoxes.forEach(function (s) {
@@ -417,15 +440,13 @@
                     line.appendChild(a);
                     return;
                 }
-                if (entry.login && !hasSession()) return;
-                const subItems = entry.hrefs.map(h => pills[h]).filter(Boolean);
-                if (!subItems.length) return;
+                const built = buildSub(entry);
+                if (!built) return;
                 names.push(entry.sub);
-                if (subItems.some(a => a.classList.contains('active'))) active = true;
-                items.push(...subItems);
-                const sub = makeSub(entry.sub, subItems);
-                if (entry.sub === 'MRA') mraHead = sub.querySelector('.nd-sub-head');
-                line.appendChild(sub);
+                if (built.pills.some(a => a.classList.contains('active'))) active = true;
+                items.push(...built.pills);
+                if (entry.sub === 'MRA') mraHead = built.box.querySelector('.nd-sub-head');
+                line.appendChild(built.box);
             });
             if (!items.length) return;
             if (row[0]) {
