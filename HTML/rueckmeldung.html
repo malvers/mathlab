@@ -214,6 +214,19 @@
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/lade-skript.js"></script>
+    <!-- Mitlesen (Doc, 10.11.2026: "auf dem Telefon öffnen, dass ich sehe, was die Schülerinnen und Schüler mir Feedback
+         geben"): rueckmeldung.html?c=1234 follows the code another device shows on the board - the code is taken as today's
+         without claiming it (no key, so the board keeps its own and nothing switches to a fresh code); the count and
+         the tempo come as always, the written texts only with Doc's SVP login on this device (svp/svp-auth.js) -->
+    <script>
+        (function () {
+            const c = new URLSearchParams(location.search).get('c');
+            if (!/^\d{4}$/.test(c || '')) return;
+            window.RM_MITLESEN = c;
+            try { localStorage.setItem('buzzer-code', JSON.stringify({ code: c, tag: new Date().toDateString() })); } catch (_) { /* private: this visit */ }
+            document.write('<script src="svp/svp-auth.js"><\/script>');
+        })();
+    </script>
     <script src="js/buzzer.js"></script>
     <script>
         function toggleSidebar() {
@@ -365,6 +378,7 @@
                     vonVorn();
                 },
                 neu: () => {
+                    if (window.RM_MITLESEN) return;   // following the board's code: the board decides
                     vonVorn();
                     Buzzer.neuerCode();
                     abSetzen();
@@ -377,7 +391,8 @@
             addEventListener('buzzer-code', () => { vonVorn(); abSetzen(); zeigeQr(); });
 
             Buzzer.tempo(tempo, () => ab);
-            Buzzer.texte(t => { texte = t.texte || []; texteZeigen(); }, { schluessel: true });
+            // following another device's code (?c=): read the texts with the SVP login only, never claim the code
+            Buzzer.texte(t => { texte = t.texte || []; texteZeigen(); }, { schluessel: !window.RM_MITLESEN });
             Buzzer.start(meldung);
             qrSichtbar(lies(KEY_QR, true) !== false);
             zeigeQr();
