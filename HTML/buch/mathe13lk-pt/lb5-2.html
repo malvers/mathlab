@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática 13 LK · Capítulo 5.2 · Testes de significância | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Testes unilaterais e bilaterais, região de rejeição, erros de tipo I e de tipo II, nível de confiança. Capítulo 5.2 do manual interativo Matemática · Berufliches Gymnasium 13 · Leistungskurs: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO 5.2 · ÁREA DE APRENDIZAGEM 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 5.2 · ÁREA DE APRENDIZAGEM 5 · DEZEMBRO · JANEIRO</p>
+            <h1>Testes de significância</h1>
+            <p class="b-hero-lead">Uma moeda mostra a face nacional 33 vezes em 50 lançamentos. Está viciada ou foi acaso? Um medicamento cura num estudo 72 de 100 doentes, o antigo só 60 %.
+                Funciona mesmo melhor? Um <b>teste de significância</b> toma estas decisões segundo uma regra fixa e diz-te exatamente com que frequência nos enganamos ao fazê-lo.</p>
+            <div class="b-chips"><span class="b-chip">10 AULAS</span><span class="b-chip">2 UNIDADES</span><span class="b-chip">DECIDIR NA INCERTEZA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="50" data-p="0.5" data-lo="32" data-hi="50" data-step="10"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a formular a <b>hipótese nula</b> e a <b>hipótese alternativa</b> e a fixar a estatística de teste e o <b>nível de significância</b></li>
+                <li>a determinar a <b>região de rejeição</b> e o <b>valor crítico</b> e a estabelecer uma <b>regra de decisão</b></li>
+                <li>a realizar testes <b>unilaterais</b> e <b>bilaterais</b>, também com o CAS</li>
+                <li>a distinguir <b>erros de tipo I e de tipo II</b>, a calcular o erro de tipo II e a interpretar o <b>nível de confiança</b></li>
+                <li>a <b>planear</b> testes, também com a aproximação pela distribuição normal</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="25" data-ph="μ ="><p class="b-q-text">Valor médio do número de faces nacionais em 50 lançamentos de uma moeda equilibrada?</p><div class="b-sol"><p>25</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">$P(X \ge 32)$ é igual a …</p>
+                <div class="b-mc"><button>$1 - P(X \le 32)$</button><button>$P(X \le 31)$</button><button>$1 - P(X \le 31)$</button></div>
+                <div class="b-sol"><p>O acontecimento contrário de «pelo menos 32» é «no máximo 31».</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="Percentagem"><p class="b-q-text">Quanto é 0,05 em percentagem?</p><div class="b-sol"><p>5 %</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">A PARTIR DE QUANDO ESTÁ VICIADA?</div>
+            <div class="b-text"><p>Uma moeda é lançada 50 vezes. Querem decidir se ela favorece a face nacional.</p>
+                <ul><li>A partir de quantas faces nacionais diriam «viciada»? Ponham-se de acordo num número.</li><li>Com que frequência acusariam assim, injustamente, uma moeda equilibrada?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DUAS MANEIRAS DE ERRAR</div>
+            <div class="b-text"><p>Um teste à covid, um detetor de fumo, um tribunal: todos se podem enganar de duas maneiras diferentes.</p>
+                <ul><li>Descrevam os dois erros para cada exemplo. Qual é, em cada caso, o pior?</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">O DADO EQUILIBRADO</div>
+            <div class="b-text"><p>Um dado é lançado 120 vezes e o seis sai 28 vezes.</p>
+                <ul><li>Quantos seis esperam? 28 é suspeito?</li><li>8 também seria suspeito?</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Testes de significância unilaterais" data-toc-k="1" data-toc-short="1 Unilateral">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">5 AULAS</span></div>
+    <h2><span class="b-no">1</span>Testes de significância unilaterais</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Um padeiro diz: no máximo $10\,\%$ dos meus pães são demasiado pequenos. Uma cliente desconfia que são mais e pesa 50 pães.
+                Mesmo que o padeiro tenha razão, podem por acaso aparecer mais de 5 pequenos demais. A partir de quantos pode ela contradizê-lo sem se enganar com demasiada frequência?
+                A regra tem de ser fixada <b>antes</b> de pesar.</p></div></div>
+            <div class="b-text"><p>Testa-se a <b>hipótese nula</b> $H_0\colon p = 0{,}1$ contra a suspeita $H_1\colon p > 0{,}1$. A <b>estatística de teste</b> $X$ conta os pães demasiado pequenos.
+                Se $H_0$ for verdadeira, $X$ segue uma distribuição binomial com $n = 50$ e $p = 0{,}1$. Valores grandes de $X$ falam contra $H_0$: a <b>região de rejeição</b> fica à direita.
+                Escolhe-se de modo que, com $H_0$ verdadeira, seja atingida no máximo com a probabilidade $\alpha$, o <b>nível de significância</b>.</p>
+                <p>Um teste pode enganar-se de duas maneiras: rejeita-se $H_0$ embora seja verdadeira (<b>erro de tipo I</b>, no máximo $\alpha$), ou mantém-se $H_0$ embora seja falsa (<b>erro de tipo II</b>).</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · TESTE DE SIGNIFICÂNCIA UNILATERAL</div>
+                <div class="b-text">
+                    <p>1. Fixar $H_0\colon p = p_0$ e o sentido. 2. Estatística de teste $X$, sob $H_0$ com distribuição binomial de parâmetros $n$ e $p_0$. 3. Escolher o nível de significância $\alpha$.</p>
+                    <p>4. <b>Unilateral à direita:</b> $K = \{k, \ldots, n\}$ com o menor $k$ para o qual $P(X \ge k) \le \alpha$. <b>Unilateral à esquerda:</b> $K = \{0, \ldots, k\}$ com o maior $k$ para o qual $P(X \le k) \le \alpha$. $k$ chama-se <b>valor crítico</b>.</p>
+                    <p>5. <b>Regra de decisão:</b> se o resultado da amostra estiver em $K$, rejeita-se $H_0$; caso contrário, não.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Não rejeitada não quer dizer demonstrada:</b> se o resultado não está em $K$, os dados apenas não chegam para refutar $H_0$.</p>
+            <p class="b-note"><b>Na calculadora:</b> muitos aparelhos só conhecem $P(X \le k)$. Então $P(X \ge k) = 1 - P(X \le k - 1)$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · O TESTE DE SIGNIFICÂNCIA</div>
+        <p class="b-help" style="margin:0 0 12px">Escolhe $n$, $p_0$, o sentido e $\alpha$. A vermelho está a região de rejeição. Liga o erro de tipo II e altera o verdadeiro $p$: com que frequência o teste não se apercebe de que $H_0$ é falsa?</p>
+        <div data-widget="signifikanztest"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · À DIREITA: O PADEIRO</div>
+            <div class="b-text"><p>$n = 50$, $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$, $\alpha = 5\,\%$. Tem-se $P(X \ge 9) \approx 0{,}058$ e $P(X \ge 10) \approx 0{,}025$. A cliente encontra 9 pães demasiado pequenos.</p></div>
+            <div class="b-sol"><p>$k = 9$ é pequeno demais ($0{,}058 > 0{,}05$), $k = 10$ serve: <span class="b-res">$K = \{10, \ldots, 50\}$</span>.</p>
+                <p>9 não está em $K$: $H_0$ não é rejeitada. Os dados não chegam para contradizer o padeiro.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · À ESQUERDA: AS SEMENTES</div>
+            <div class="b-text"><p>Um comerciante promete que pelo menos $90\,\%$ das sementes germinam. Um jardineiro semeia 100 sementes. $H_0\colon p = 0{,}9$, $H_1\colon p < 0{,}9$, $\alpha = 5\,\%$, com $P(X \le 84) \approx 0{,}040$ e $P(X \le 85) \approx 0{,}073$.</p></div>
+            <div class="b-sol"><p>A região de rejeição fica à esquerda: o maior $k$ com $P(X \le k) \le 0{,}05$ é 84.</p>
+                <p><span class="b-res">$K = \{0, \ldots, 84\}$</span>: se germinarem no máximo 84 sementes, o jardineiro contradiz o comerciante.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Indica $H_0$, $H_1$ e o tipo de teste. a) Um novo medicamento deve funcionar melhor do que o antigo, com $70\,\%$ de taxa de cura. b) Um fornecedor garante no máximo $3\,\%$ de peças defeituosas, a compradora duvida. c) Um partido afirma ter pelo menos $30\,\%$ de apoio.</p></div>
+            <div class="b-sol"><p>a) $H_0\colon p = 0{,}7$, $H_1\colon p > 0{,}7$, unilateral à direita &nbsp; b) $H_0\colon p = 0{,}03$, $H_1\colon p > 0{,}03$, unilateral à direita &nbsp; c) $H_0\colon p = 0{,}3$, $H_1\colon p < 0{,}3$, unilateral à esquerda</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Uma moeda é lançada 30 vezes. Testa-se, à direita, se mostra demasiadas vezes a face europeia: $H_0\colon p = 0{,}5$, $\alpha = 5\,\%$. Tem-se $P(X \ge 19) \approx 0{,}100$ e $P(X \ge 20) \approx 0{,}049$. Determina $K$.</p></div>
+            <div class="b-sol"><p>$K = \{20, \ldots, 30\}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>No teste do padeiro ($K = \{10, \ldots, 50\}$), na realidade $20\,\%$ dos pães são demasiado pequenos. Com que probabilidade a cliente não dá por isso? Tem-se $P(X \le 9) \approx 0{,}444$ para $n = 50$, $p = 0{,}2$.</p></div>
+            <div class="b-sol"><p>Erro de tipo II: o resultado não está em $K$, logo $P(X \le 9) \approx 44\,\%$. Quase uma em cada duas verificações deixa escapar o mau padeiro.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>No teste das sementes germinam a) 86 sementes, b) 83 sementes. Formula, em cada caso, a decisão por palavras.</p></div>
+            <div class="b-sol"><p>a) $86 \notin K$: a afirmação do comerciante não é rejeitada. b) $83 \in K$: ao nível de $5\,\%$, o resultado fala significativamente contra uma taxa de germinação de $90\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Agora a cliente pesa 100 pães. Para $n = 100$, $p = 0{,}1$ tem-se $P(X \ge 15) \approx 0{,}073$ e $P(X \ge 16) \approx 0{,}040$; para $p = 0{,}2$ é $P(X \le 15) \approx 0{,}129$. Determina $K$ e o erro de tipo II para $p = 0{,}2$. O que traz a maior dimensão da amostra?</p></div>
+            <div class="b-sol"><p>$K = \{16, \ldots, 100\}$, erro de tipo II $\approx 13\,\%$ em vez de $44\,\%$. <span class="b-res">Mais dados tornam o teste mais apurado</span>, com o mesmo $\alpha$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="10" data-ph="k ="><p class="b-q-text">Valor crítico no teste do padeiro ($n = 50$, $\alpha = 5\,\%$)?</p><div class="b-sol"><p>$P(X \ge 10) \approx 0{,}025$</p></div></div>
+        <div class="b-q" data-ans="84" data-ph="k ="><p class="b-q-text">Maior número na região de rejeição do teste das sementes?</p><div class="b-sol"><p>$P(X \le 84) \approx 0{,}040$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Um erro de tipo I significa …</p><div class="b-mc"><button>mantém-se $H_0$, embora seja falsa.</button><button>rejeita-se $H_0$, embora seja verdadeira.</button><button>fez-se uma conta errada.</button></div><div class="b-sol"><p>A sua probabilidade é no máximo $\alpha$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Testes bilaterais" data-toc-k="2" data-toc-short="2 Bilateral">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">5 AULAS</span></div>
+    <h2><span class="b-no">2</span>Testes bilaterais e nível de confiança</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Uma moeda é equilibrada? São suspeitas <b>demasiadas</b> faces europeias, mas igualmente <b>poucas demais</b>. Por isso, a região de rejeição tem duas partes,
+                uma à esquerda e outra à direita. Para que o teste, no total, erre no máximo com $\alpha$, cada lado recebe no máximo $\tfrac{\alpha}{2}$.</p></div></div>
+            <div class="b-text"><p>Se $H_0$ for rejeitada, diz-se: o resultado é <b>significativo</b> ao nível $\alpha$. Isto só quer dizer: se $H_0$ fosse verdadeira, um resultado tão extremo seria raro.
+                <b>Não</b> quer dizer que $H_0$ seja falsa com probabilidade $1 - \alpha$, nem que a diferença seja grande ou importante.
+                A capacidade de um teste reconhecer uma hipótese falsa depende do verdadeiro $p$ e da dimensão da amostra.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · TESTE BILATERAL</div>
+                <div class="b-text">
+                    <p>$H_0\colon p = p_0$, $H_1\colon p \neq p_0$. Região de rejeição $K = \{0, \ldots, k_l\} \cup \{k_r, \ldots, n\}$ com</p>
+                    <p>o maior $k_l$ para o qual $P(X \le k_l) \le \tfrac{\alpha}{2}$, e o menor $k_r$ para o qual $P(X \ge k_r) \le \tfrac{\alpha}{2}$.</p>
+                    <p><b>Significativo</b> quer dizer: com $H_0$ verdadeira, o resultado teria caído em $K$ no máximo com a probabilidade $\alpha$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>O sentido conta:</b> quem sabe de antemão em que sentido procura testa unilateralmente e reconhece mais facilmente os desvios nesse sentido.</p>
+            <p class="b-note"><b>Com o CAS:</b> abrir a tabela da distribuição binomial acumulada e ler os limites $k_l$ e $k_r$; o widget abaixo calcula o mesmo.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · DISTRIBUIÇÃO BINOMIAL ACUMULADA</div>
+        <p class="b-help" style="margin:0 0 12px">Escolhe $n = 100$ e $p = 0{,}5$ e seleciona $P(X \le k)$. Procura o maior $k$ para o qual a probabilidade é no máximo 0,025.</p>
+        <div data-widget="binomial"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · A MOEDA É EQUILIBRADA?</div>
+            <div class="b-text"><p>$n = 100$, $H_0\colon p = 0{,}5$, $H_1\colon p \neq 0{,}5$, $\alpha = 5\,\%$. Tem-se $P(X \le 39) \approx 0{,}018$ e $P(X \le 40) \approx 0{,}028$.</p></div>
+            <div class="b-sol"><p>À esquerda: $k_l = 39$. Por simetria, à direita $k_r = 61$.</p>
+                <p><span class="b-res">$K = \{0, \ldots, 39\} \cup \{61, \ldots, 100\}$</span>. O erro de tipo I é até só $2 \cdot 0{,}0176 \approx 3{,}5\,\%$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · QUANDO A MOEDA ESTÁ VICIADA</div>
+            <div class="b-text"><p>Na realidade, a moeda mostra a face europeia com $p = 0{,}6$. Qual é a probabilidade de o teste não o detetar?</p></div>
+            <div class="b-sol"><p>Erro de tipo II: $P(40 \le X \le 60)$ para $p = 0{,}6$ $\approx 0{,}54$.</p>
+                <p><span class="b-res">Em mais de metade dos casos, a moeda não é descoberta.</span> Com $p = 0{,}7$ são só cerca de $2\,\%$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Justifica porque é que se testa bilateralmente se uma moeda é equilibrada, mas unilateralmente a eficácia de um novo medicamento.</p></div>
+            <div class="b-sol"><p>Na moeda, os desvios nos dois sentidos são suspeitos. No medicamento só interessa se é melhor.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$n = 50$, $H_0\colon p = 0{,}5$, bilateral, $\alpha = 5\,\%$. Tem-se $P(X \le 17) \approx 0{,}016$ e $P(X \le 18) \approx 0{,}033$. Determina $K$.</p></div>
+            <div class="b-sol"><p>$k_l = 17$, por simetria $k_r = 33$: $K = \{0, \ldots, 17\} \cup \{33, \ldots, 50\}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Um dado é lançado 120 vezes e testa-se bilateralmente a probabilidade de sair seis, $\alpha = 5\,\%$. Tem-se $P(X \le 11) \approx 0{,}014$, $P(X \le 12) \approx 0{,}028$, $P(X \ge 28) \approx 0{,}037$, $P(X \ge 29) \approx 0{,}022$. Determina $K$. Como se decide com 27 seis?</p></div>
+            <div class="b-sol"><p>$K = \{0, \ldots, 11\} \cup \{29, \ldots, 120\}$. $27 \notin K$: $H_0$ não é rejeitada.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Verdadeiro ou falso? a) O resultado é significativo, logo $H_0$ é falsa com $95\,\%$ de probabilidade. b) Se $H_0$ não for rejeitada, fica demonstrada. c) Um $\alpha$ menor aumenta o erro de tipo II.</p></div>
+            <div class="b-sol"><p>a) falso: $\alpha$ descreve o comportamento do teste com $H_0$ verdadeira, não é uma probabilidade de $H_0$. b) falso. c) verdadeiro, a região de rejeição fica menor.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Uma moeda tem, na realidade, $p = 0{,}55$. No teste bilateral com $\alpha = 5\,\%$, o erro de tipo II é cerca de 0,86 para $n = 100$ e cerca de 0,52 para $n = 400$. Interpreta os números. O que se conclui para o planeamento de um teste?</p></div>
+            <div class="b-sol"><p>Pequenos desvios passam quase sempre despercebidos em 100 lançamentos e, mesmo em 400, em metade dos casos. <span class="b-res">Quem quer detetar pequenas diferenças precisa de amostras muito grandes</span>; isso tem de ser planeado antes do teste.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="61" data-ph="k_r ="><p class="b-q-text">Moeda, $n = 100$, bilateral, $\alpha = 5\,\%$: a partir de que número se rejeita à direita?</p><div class="b-sol"><p>Simétrico de 39</p></div></div>
+        <div class="b-q" data-ans="0,025" data-ph="por lado"><p class="b-q-text">Que probabilidade pode ter, no máximo, cada lado de um teste bilateral com $\alpha = 5\,\%$?</p><div class="b-sol"><p>$\tfrac{\alpha}{2}$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Uma maior dimensão da amostra …</p><div class="b-mc"><button>diminui o erro de tipo II, com o mesmo $\alpha$.</button><button>aumenta o erro de tipo I.</button><button>não muda nada.</button></div><div class="b-sol"><p>Exercício 15</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Um teste a um dado com 60 lançamentos tem $K = \{16, \ldots, 60\}$. Quantos seis se esperam com um dado equilibrado? Como se decide com 14 e com 18 seis?</p></div>
+            <div class="b-sol"><p>Esperam-se 10. Com 14 não se rejeita, com 18 rejeita-se: o dado mostra o seis significativamente vezes demais.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar com o 12.º ano:</b> calcula com a fórmula de Bernoulli $P(X \ge 9)$ para $n = 10$ e $p = 0{,}5$. Com 9 sucessos em 10, consideravas a moeda viciada ($\alpha = 5\,\%$, unilateral à direita)?</p></div>
+            <div class="b-sol"><p>$P(X = 9) + P(X = 10) = \tfrac{10 + 1}{1024} \approx 0{,}011 \le 0{,}05$: sim, significativo ao nível de $5\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Explica porque é que a região de rejeição tem de ser fixada <b>antes</b> de recolher a amostra.</p></div>
+            <div class="b-sol"><p>Quem fixa o limite só depois do resultado pode colocá-lo de modo a obter o veredicto desejado. Então a afirmação sobre o erro de tipo I deixa de valer.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Um partido tinha até agora $40\,\%$. Depois de um escândalo, são inquiridas 200 pessoas. Planeia um teste com que o partido possa verificar, com $\alpha = 5\,\%$, se a sua proporção desceu. O CAS dá, para $n = 200$, $p = 0{,}4$: $P(X \le 68) \approx 0{,}048$ e $P(X \le 69) \approx 0{,}064$.</p></div>
+            <div class="b-sol"><p>Unilateral à esquerda, $H_0\colon p = 0{,}4$, $H_1\colon p < 0{,}4$, $K = \{0, \ldots, 68\}$. Se no máximo 68 dos 200 inquiridos quiserem votar no partido, a descida é significativa.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar com o capítulo 4:</b> uma moeda é lançada 1000 vezes e testada bilateralmente com $\alpha = 5\,\%$. Determina, com $\mu \pm 1{,}96\sigma$, a região em que $H_0\colon p = 0{,}5$ se mantém. Verifica-a com os valores do CAS $P(X \le 468) \approx 0{,}0231$ e $P(X \le 469) \approx 0{,}0268$.</p></div>
+            <div class="b-sol"><p>$\mu = 500$, $\sigma \approx 15{,}81$, $1{,}96\sigma \approx 31$: mantém-se de 469 a 531. Verificação: $P(X \le 468) \le 0{,}025$, mas $P(X \le 469) > 0{,}025$, logo $K = \{0, \ldots, 468\} \cup \{532, \ldots, 1000\}$ ✔ A aproximação acerta em cheio.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Uma padaria afirma que no máximo $10\,\%$ dos seus pães são leves demais. Uma inspetora pesa 400 pães ($\alpha = 5\,\%$, unilateral à direita). Determina o menor número $k$ de pães leves demais a partir do qual ela contradiz a padaria, primeiro com a aproximação $k \ge \mu + 1{,}645\,\sigma + 0{,}5$, depois com $P(X \ge 50) \approx 0{,}060$ e $P(X \ge 51) \approx 0{,}044$.</p></div>
+            <div class="b-sol"><p>$\mu = 40$, $\sigma = 6$: $k \ge 40 + 9{,}87 + 0{,}5 = 50{,}37$, logo $k = 51$. Exato: $P(X \ge 51) \le 0{,}05 &lt; P(X \ge 50)$, <span class="b-res">$K = \{51, \ldots, 400\}$</span>.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: a senhora que provava chá" data-toc-k="X" data-toc-short="Chá">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">O TESTE MAIS FAMOSO DA ESTATÍSTICA</span></div>
+    <h2>A senhora que provava chá</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>O estatístico inglês Ronald A. Fisher conta, no seu livro sobre o planeamento de experiências, a história de uma senhora que afirmava reconhecer pelo sabor
+                se na chávena tinha sido deitado primeiro o leite ou primeiro o chá.</p>
+            <p>Fisher planeou o teste assim: oito chávenas, quatro de cada tipo, por ordem aleatória. A senhora tem de identificar as quatro chávenas «leite primeiro». Se só adivinhar, há
+                $\binom84 = 70$ escolhas igualmente prováveis, e acertar nas quatro tem apenas probabilidade $\tfrac{1}{70} \approx 1{,}4\,\%$.
+                Se ela conseguir, rejeita-se a hipótese nula «ela só adivinha». Fisher fez disto o modelo de todos os testes de significância.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> Ronald A. Fisher: The Design of Experiments. Oliver and Boyd, Edimburgo 1935, capítulo 2.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>HIPÓTESES</h4><p>$H_0\colon p = p_0$; $H_1$ indica o sentido.</p></div>
+        <div><p>Padeiro: $H_0\colon p = 0{,}1$, $H_1\colon p > 0{,}1$</p></div></div>
+    <div class="b-rueck"><div><h4>UNILATERAL</h4><p>$K$ à direita ou à esquerda com $P(X \in K) \le \alpha$</p></div>
+        <div><p>$n = 50$: $K = \{10, \ldots, 50\}$</p></div></div>
+    <div class="b-rueck"><div><h4>BILATERAL</h4><p>em cada lado no máximo $\tfrac{\alpha}{2}$</p></div>
+        <div><p>Moeda, $n = 100$: $K = \{0, \ldots, 39\} \cup \{61, \ldots, 100\}$</p></div></div>
+    <div class="b-rueck"><div><h4>ERROS</h4><p>Tipo I: $H_0$ rejeitada injustamente, no máximo $\alpha$; tipo II: $H_0$ mantida injustamente</p></div>
+        <div><p>Moeda com $p = 0{,}6$: erro de tipo II $\approx 54\,\%$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SEM CALCULADORA</div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Quer-se testar se um dado mostra o seis <b>demasiadas vezes</b>. A região de rejeição fica …</p><div class="b-mc"><button>à esquerda</button><button>à direita</button><button>dos dois lados</button></div><div class="b-sol"><p>Muitos seis falam contra $H_0$: unilateral à direita.</p></div></div>
+            <div class="b-q" data-ans="20" data-ph="k ="><p class="b-q-text">$n = 30$, $H_0\colon p = 0{,}5$, unilateral à direita, $\alpha = 5\,\%$, $P(X \ge 20) \approx 0{,}049$, $P(X \ge 19) \approx 0{,}100$: valor crítico?</p><div class="b-sol"><p>Menor $k$ com $P(X \ge k) \le 0{,}05$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">«$H_0$ não é rejeitada» significa …</p><div class="b-mc"><button>$H_0$ está demonstrada.</button><button>$H_0$ é falsa.</button><button>os dados não chegam contra $H_0$.</button></div><div class="b-sol"><p>Não é uma demonstração</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · COM CALCULADORA</div>
+            <div class="b-q" data-ans="51" data-ph="k ="><p class="b-q-text">Padaria: $n = 400$, $H_0\colon p = 0{,}1$, unilateral à direita, $\alpha = 5\,\%$, $P(X \ge 50) \approx 0{,}060$, $P(X \ge 51) \approx 0{,}044$. Valor crítico?</p><div class="b-sol"><p>Menor $k$ com $P(X \ge k) \le 0{,}05$</p></div></div>
+            <div class="b-q" data-ans="0,54" data-tol="0.01" data-ph="β ≈"><p class="b-q-text">Teste da moeda, $n = 100$, $K = \{0, \ldots, 39\} \cup \{61, \ldots, 100\}$: erro de tipo II para $p = 0{,}6$?</p><div class="b-sol"><p>$P(40 \le X \le 60)$</p></div></div>
+            <div class="b-q" data-ans="1/70" data-tol="0.001" data-ph="P ="><p class="b-q-text">Teste do chá: probabilidade de classificar corretamente as oito chávenas por adivinhação?</p><div class="b-sol"><p>$\binom84 = 70$</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-signifikanztest.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EINSEITIGE TESTS</span><span class="b-lab-what">Hipóteses, região de rejeição, erros</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-zweiseitige-tests.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">ZWEISEITIGE TESTS</span><span class="b-lab-what">Nível de confiança</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTONBRETT</span><span class="b-lab-what">Distribuição binomial ao vivo</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Berufliches Gymnasium, 13.º ano, Leistungskurs · Área de aprendizagem 5 segundo o programa de Matemática do Berufliches Gymnasium da Saxónia.</p>
+    <p>Todos os textos, exercícios e figuras são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-pt/stochastik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-pt/gy12.js"></script>
+</body>
+</html>
