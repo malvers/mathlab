@@ -23,6 +23,9 @@ window.BuchPT && BuchPT.add('gy11lk', {
         // book pt-4 mathe12lk-pt:
         // stetigkeit (lb2-1): stetig = contínua, Sprungstelle = descontinuidade de salto, hebbare Unstetigkeit = descontinuidade removível
         'Abschnittsweise definierte Funktion mit Übergangsstelle': 'Função definida por ramos com um ponto de junção',
+        // linapprox (lb2-2): lineare Approximation = aproximação linear, Ausschnitt = janela
+        'Ausschnitt: halbe Breite $r$': 'Janela: meia largura $r$',
+        'Funktionsgraph und Tangente in einem Ausschnitt, der sich verkleinern lässt': 'Gráfico da função e tangente numa janela que se pode diminuir',
         // book pt-5 mathe13lk-pt:
     },
     phrase: [
@@ -35,11 +38,20 @@ window.BuchPT && BuchPT.add('gy11lk', {
         ['<b>Sprungstelle:</b> Die einseitigen Grenzwerte sind verschieden, der Graph springt um ', '<b>Descontinuidade de salto:</b> os limites laterais são diferentes e o gráfico salta '],
         ['. Stetig wird $f$ nur für $', '. $f$ só fica contínua para $'], ['<b>Hebbare Unstetigkeit:</b> Der Grenzwert ', '<b>Descontinuidade removível:</b> o limite '],
         [' existiert, aber der Funktionswert ist ', ' existe, mas o valor da função é '], ['. Mit $b = ', '. Com $b = '], ['$ wird die Lücke geschlossen.', '$, a lacuna fica preenchida.'],
+        // linapprox
+        ['$, Tangente in $x_0 = ', '$, tangente em $x_0 = '], ['$, also $f(x_0 + h)', '$, logo $f(x_0 + h)'],
+        ['Am Rand des Ausschnitts ($h = \\pm', 'Na borda da janela ($h = \\pm'], ['$) weicht die Tangente höchstens um ', '$), a tangente afasta-se da curva no máximo '],
+        [' pro Einheit von $h$. Verkleinere $r$: Der Fehler schrumpft schneller als $h$, die Kurve sieht im Kleinen aus wie ihre Tangente.',
+            ' por unidade de $h$. Diminui $r$: o erro encolhe mais depressa do que $h$ e, vista de muito perto, a curva parece a sua tangente.'],
+        ['. Verkleinere $r$: Der Fehler schrumpft schneller als $h$, die Kurve sieht im Kleinen aus wie ihre Tangente.',
+            '. Diminui $r$: o erro encolhe mais depressa do que $h$ e, vista de muito perto, a curva parece a sua tangente.'],
         // book pt-5 mathe13lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-4 mathe12lk-pt:
+        // linapprox: "… höchstens um 0,0123 ab, das sind 0,0246 pro Einheit von $h$" (the separable verb "weicht … ab")
+        [/ ab, das sind ([^ <]+) pro Einheit von \$h\$/g, ', ou seja, $1 por unidade de $h$'],
         // book pt-5 mathe13lk-pt:
     ]
 });
