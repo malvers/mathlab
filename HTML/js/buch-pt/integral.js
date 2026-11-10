@@ -75,7 +75,7 @@ window.BuchPT && BuchPT.add('integral', {
         [' · Das Integral ist kleiner, weil Flächen unter der Achse (rot) negativ zählen.', ' · O integral é menor, porque as áreas abaixo do eixo (a vermelho) contam como negativas.'],
         [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Atenção: $a > b$ troca o sinal.'],
         // zwischenflaeche
-        ['$ · Schnittstellen: ', '$ · pontos de interseção: '],
+        
     ],
     rule: [
         // pt0: notation of the module, for every book

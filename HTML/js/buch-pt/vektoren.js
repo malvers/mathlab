@@ -114,29 +114,24 @@ window.BuchPT && BuchPT.add('vektoren', {
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
         // gerade3d, ebene3d
-        ['Punktprobe für $Q(', 'Pertença de $Q('], ['Alle Zeilen liefern $t = ', 'Todas as linhas dão $t = '], ['$, also <b>$Q \\in g$</b>.', '$, logo <b>$Q \\in g$</b>.'],
+        ['Alle Zeilen liefern $t = ', 'Todas as linhas dão $t = '], ['$, also <b>$Q \\in g$</b>.', '$, logo <b>$Q \\in g$</b>.'],
         ['Die Zeilen liefern verschiedene Werte für $t$, also <b>$Q \\notin g$</b>.', 'As linhas dão valores diferentes de $t$, logo <b>$Q \\notin g$</b>.'],
-        ['Spurpunkte: keine', 'Traços: nenhum'], ['Spurpunkte: ', 'Traços: '],
         ['Normalenvektor $\\vec{n} = \\vec{u} \\times \\vec{v} = ', 'Vetor normal $\\vec{n} = \\vec{u} \\times \\vec{v} = '], ['$ · Koordinatenform: $', '$ · equação cartesiana: $'],
-        ['Spurpunkte mit den Achsen: ', 'Pontos de interseção com os eixos: '], ['Punktprobe: $', 'Pertença: $'], ['$: <b>$Q$ liegt in $E$</b>.', '$: <b>$Q$ pertence a $E$</b>.'],
+        ['$: <b>$Q$ liegt in $E$</b>.', '$: <b>$Q$ pertence a $E$</b>.'],
         ['$: <b>$Q$ liegt nicht in $E$</b>. Abstand $\\approx ', '$: <b>$Q$ não pertence a $E$</b>. Distância $\\approx '],
         [': Die Gerade ist parallel zur Ebene und liegt in ihr.', ': a reta é paralela ao plano e está contida nele.'],
         [': Die Gerade ist parallel zur Ebene und schneidet sie nicht.', ': a reta é estritamente paralela ao plano e não o interseta.'],
         ['Einsetzen von $g$ in $E$: $t = ', 'Substituindo $g$ em $E$: $t = '], ['$, Schnittpunkt $S(', '$, ponto de interseção $S('], ['$ · Schnittwinkel: $', '$ · ângulo: $'],
         // geradenlage: whole sentences, so the bold words are Portuguese before the labels between tags are looked up
         ['Die Richtungsvektoren sind parallel ($\\vec{v} = ', 'Os vetores diretores são colineares ($\\vec{v} = '],
-        ['Der Stützpunkt $Q$ liegt auf $g$: <b>identisch</b>.', 'O ponto $Q$ pertence a $g$: <b>coincidentes</b>.'],
-        ['Der Stützpunkt $Q$ liegt nicht auf $g$: <b>echt parallel</b>.', 'O ponto $Q$ não pertence a $g$: <b>estritamente paralelas</b>.'],
-        ['Nicht parallel. Gleichsetzen ergibt $t = ', 'Não são paralelas. Igualando obtém-se $t = '], ['$: <b>schneidend</b> im Punkt $S(', '$: <b>concorrentes</b> no ponto $S('],
-        ['Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ',
-            'Não são paralelas e o sistema é impossível: <b>não complanares</b>. Distância mínima (a tracejado vermelho) $\\approx '],
+        
+        ['$: <b>schneidend</b> im Punkt $S(', '$: <b>concorrentes</b> no ponto $S('],
         // pyramide
         ['Grundfläche $G = ', 'Área da base $A_b = '], ['$, Spitze $S(', '$, vértice $S('], [')$, Höhe $h = ', ')$, altura $h = '], ['$ (rot)', '$ (a vermelho)'],
         ['Volumen $V = \\tfrac13 \\cdot G \\cdot h \\approx ', 'Volume $V = \\tfrac13 \\cdot A_b \\cdot h \\approx '],
         ['Mantel (4 Dreiecke, je $', 'área lateral $A_L$ (4 triângulos, cada um $'], ['Mantel (4 Parallelogramme, je $', 'área lateral $A_L$ (4 paralelogramos, cada um $'],
         ['Oberfläche $O = G + M \\approx ', 'Área total $A = A_b + A_L \\approx '], ['Oberfläche $O = 2G + M \\approx ', 'Área total $A = 2A_b + A_L \\approx '],
-        ['$ · Verschiebst du die Spitze waagerecht, bleibt das Volumen gleich, der Mantel nicht.', '$ · Se deslocares o vértice na horizontal, o volume mantém-se, a área lateral não.'],
-        ['$, Verschiebung der Deckfläche $\\vec{w} = ', '$, deslocamento da face superior $\\vec{w} = '], ['$, Höhe $h = ', '$, altura $h = '],
+        ['$, Höhe $h = ', '$, altura $h = '],
         ['Volumen $V = G \\cdot h = ', 'Volume $V = A_b \\cdot h = '], ['$ (Prinzip von Cavalieri: auch schief) · ', '$ (princípio de Cavalieri: também oblíquo) · '],
         // lot3d
         ['$ · Lotgerade $l\\colon \\vec{x} = ', '$ · reta perpendicular $l\\colon \\vec{x} = '], ['$ in $E$ einsetzen: $', '$ substituída em $E$: $'], ['$, also $t = ', '$, logo $t = '],

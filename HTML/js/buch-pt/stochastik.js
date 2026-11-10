@@ -147,14 +147,12 @@ window.BuchPT && BuchPT.add('stochastik', {
         // stichprobe
         [' Stichprobe vom Umfang ', ' amostra de dimensão '], [' Stichproben vom Umfang ', ' amostras de dimensão '], [' · letzte: $h = ', ' · última: $h = '],
         ['$ (gold)', '$ (a dourado)'], ['Mittelwert der $h$: $', 'Média dos $h$: $'], ['$ · Standardabweichung der $h$: $', '$ · desvio padrão dos $h$: $'],
-        ['Theorie: $\\sqrt{', 'Teoria: $\\sqrt{'], ['$. Viermal so großes $n$ halbiert die Streuung.', '$. Um $n$ quatro vezes maior reduz a dispersão a metade.'],
+        ['Theorie: $\\sqrt{', 'Teoria: $\\sqrt{'], 
         // signifikanztest
         ['$ gegen $H_1\\colon ', '$ contra $H_1\\colon '], ['Ablehnungsbereich (rot): $', 'Região de rejeição (a vermelho): $'],
         ['$ · tatsächliche Irrtumswahrscheinlichkeit $\\approx ', '$ · probabilidade de erro efetiva $\\approx '], ['Beobachtet $k = ', 'Observado $k = '],
-        ['<b>$H_0$ wird abgelehnt.</b> Das Ergebnis ist signifikant.', '<b>Rejeita-se $H_0$.</b> O resultado é significativo.'],
-        ['<b>$H_0$ wird nicht abgelehnt.</b> Das beweist aber nicht, dass $H_0$ stimmt.', '<b>Não se rejeita $H_0$.</b> Mas isso não demonstra que $H_0$ seja verdadeira.'],
-        ['Ist in Wahrheit $p = ', 'Se na realidade $p = '], ['$ (violett), wird $H_0$ mit $\\beta \\approx ', '$ (a violeta), $H_0$ é mantida, com $\\beta \\approx '],
-        ['$ fälschlich beibehalten (Fehler 2. Art).', '$, erradamente (erro de tipo II).'],
+        
+        
     ],
     rule: [
         // pt0: notation of the module, for every book

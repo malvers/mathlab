@@ -161,7 +161,7 @@ window.BuchPT && BuchPT.add('analysis', {
             'Para $a \\le 0$ não há extremos: $f_a\'(x) = 3x^2 - a$ não tem então nenhum zero com mudança de sinal.'],
         ['Jede Parabel der Schar geht durch den Ursprung, denn $f_a(0) = 0$ für alle $a$.', 'Todas as parábolas da família passam pela origem, porque $f_a(0) = 0$ para todo o $a$.'],
         // gewinn
-        ['Gewinnschwelle bei $x \\approx ', 'Limiar de rentabilidade em $x \\approx '], ['$, Gewinngrenze bei $x \\approx ', '$, limite do lucro em $x \\approx '], ['$ Stück.', '$ unidades.'],
+        ['$, Gewinngrenze bei $x \\approx ', '$, limite do lucro em $x \\approx '], ['$ Stück.', '$ unidades.'],
         ['Gewinn ab $x \\approx ', 'Lucro a partir de $x \\approx '], ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Lucro máximo: $G\'(x) = 0$ em $x \\approx '], ['$ Stück, $G \\approx ', '$ unidades, $G \\approx '],
     ],
     rule: [
