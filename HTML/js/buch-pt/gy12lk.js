@@ -34,6 +34,11 @@ window.BuchPT && BuchPT.add('gy12lk', {
             'Histograma da distribuição binomial com a curva de Gauss de igual valor médio e igual desvio padrão',
         'Standardisiert: Jede Säule wird um $\\mu$ verschoben, in der Breite durch $\\sigma$ geteilt und in der Höhe mit $\\sigma$ multipliziert. Für großes $n$ legen sich alle Histogramme auf dieselbe Kurve $\\varphi$.':
             'Estandardizado: cada barra é deslocada de $\\mu$, a sua largura é dividida por $\\sigma$ e a sua altura multiplicada por $\\sigma$. Para $n$ grande, todos os histogramas ficam sobre a mesma curva $\\varphi$.',
+        // hesse2d (wp1-1): Hessesche Normalform = forma normal de Hesse, Normaleneinheitsvektor = vetor normal unitário, Lot = perpendicular
+        'Richtung des Normalenvektors': 'Direção do vetor normal',
+        'Gerade mit Normaleneinheitsvektor, ein Punkt P und sein Lot auf die Gerade': 'Reta com o vetor normal unitário, um ponto P e a perpendicular de P à reta',
+        'P liegt auf der Geraden.': 'P pertence à reta.', 'Positiv: P liegt auf der Seite, in die $\\vec n_0$ zeigt.': 'Positivo: P está do lado para onde aponta $\\vec n_0$.',
+        'Negativ: P liegt auf der anderen Seite.': 'Negativo: P está do outro lado.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12lk/*)
@@ -50,6 +55,11 @@ window.BuchPT && BuchPT.add('gy12lk', {
         ['. Das ist die gelbe Fläche.', '. É a área amarela.'], ['. Das ist der gelbe Anstieg der Verteilungsfunktion.', '. É a subida amarela da função de distribuição.'],
         ['$, Standardabweichung $\\sigma = \\sqrt{', '$, desvio padrão $\\sigma = \\sqrt{'], ['Laplace-Bedingung $\\sigma > 3$: ', 'Condição de Laplace $\\sigma > 3$: '],
         ['Größte Abweichung zwischen $P(X = k)$ und der Glockenkurve an der Stelle $k$: $', 'Maior desvio entre $P(X = k)$ e a curva de Gauss no ponto $k$: $'],
+        // hesse2d
+        ['Hessesche Normalform: $', 'Forma normal de Hesse: $'], ['mit $|\\vec n_0| = 1$.', 'com $\\|\\vec n_0\\| = 1$.'], ['Punkt einsetzen: $', 'Substituindo o ponto: $'],
+        ['Abstand $d(P, g) \\approx ', 'Distância $d(P, g) \\approx '],
+        ['$. P liegt auf der Geraden.', '$. P pertence à reta.'], ['$. Positiv: P liegt auf der Seite, in die $\\vec n_0$ zeigt.', '$. Positivo: P está do lado para onde aponta $\\vec n_0$.'],
+        ['$. Negativ: P liegt auf der anderen Seite.', '$. Negativo: P está do outro lado.'],
     ],
     rule: [
         // pt0: notation of the module, for every book

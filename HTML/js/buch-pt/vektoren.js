@@ -30,6 +30,12 @@ window.BuchPT && BuchPT.add('vektoren', {
         // book pt-3 mathe13-pt:
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // gerade3d, ebene3d (wp1-1): Parametergleichung = equação vetorial, Richtungsvektor = vetor diretor, Spurpunkte = traços (line) /
+        // pontos de interseção com os eixos (plane), Normalenvektor = vetor normal, Koordinatenform = equação cartesiana; the names g, E stay
+        // as the widgets draw them
+        'Parameter $t$': 'Parâmetro $t$', 'Der Richtungsvektor darf nicht der Nullvektor sein.': 'O vetor diretor não pode ser o vetor nulo.',
+        'Ebene und Normalenvektor': 'Plano e vetor normal', 'Liegt der Punkt in E?': 'O ponto pertence a E?', 'Gerade schneidet Ebene': 'Reta interseta plano',
+        '$\\vec{u}$ und $\\vec{v}$ sind parallel, sie spannen keine Ebene auf.': '$\\vec{u}$ e $\\vec{v}$ são colineares, não definem um plano.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs vektoren/*)
@@ -57,6 +63,16 @@ window.BuchPT && BuchPT.add('vektoren', {
         // book pt-3 mathe13-pt:
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // gerade3d, ebene3d
+        ['Punktprobe für $Q(', 'Pertença de $Q('], ['Alle Zeilen liefern $t = ', 'Todas as linhas dão $t = '], ['$, also <b>$Q \\in g$</b>.', '$, logo <b>$Q \\in g$</b>.'],
+        ['Die Zeilen liefern verschiedene Werte für $t$, also <b>$Q \\notin g$</b>.', 'As linhas dão valores diferentes de $t$, logo <b>$Q \\notin g$</b>.'],
+        ['Spurpunkte: keine', 'Traços: nenhum'], ['Spurpunkte: ', 'Traços: '],
+        ['Normalenvektor $\\vec{n} = \\vec{u} \\times \\vec{v} = ', 'Vetor normal $\\vec{n} = \\vec{u} \\times \\vec{v} = '], ['$ · Koordinatenform: $', '$ · equação cartesiana: $'],
+        ['Spurpunkte mit den Achsen: ', 'Pontos de interseção com os eixos: '], ['Punktprobe: $', 'Pertença: $'], ['$: <b>$Q$ liegt in $E$</b>.', '$: <b>$Q$ pertence a $E$</b>.'],
+        ['$: <b>$Q$ liegt nicht in $E$</b>. Abstand $\\approx ', '$: <b>$Q$ não pertence a $E$</b>. Distância $\\approx '],
+        [': Die Gerade ist parallel zur Ebene und liegt in ihr.', ': a reta é paralela ao plano e está contida nele.'],
+        [': Die Gerade ist parallel zur Ebene und schneidet sie nicht.', ': a reta é estritamente paralela ao plano e não o interseta.'],
+        ['Einsetzen von $g$ in $E$: $t = ', 'Substituindo $g$ em $E$: $t = '], ['$, Schnittpunkt $S(', '$, ponto de interseção $S('], ['$ · Schnittwinkel: $', '$ · ângulo: $'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -74,5 +90,7 @@ window.BuchPT && BuchPT.add('vektoren', {
         // book pt-3 mathe13-pt:
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // the sine is sen in Portuguese schools, also on the pages that load vektoren without funktionen (Schnittwinkel of ebene3d, geradenlage …)
+        [/\\sin(?![a-zA-Z])/g, '\\operatorname{sen}'],
     ]
 });
