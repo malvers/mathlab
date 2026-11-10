@@ -40,6 +40,14 @@ window.BuchPT && BuchPT.add('vektoren', {
         // complanares; "parallel" stays "colineares" as a word (vectors, pt-2): the preset button of lines and planes is a rule below
         'schneidend': 'concorrentes', 'identisch': 'coincidentes', 'windschief': 'não complanares',
         'Richtungsvektoren dürfen nicht der Nullvektor sein.': 'Os vetores diretores não podem ser o vetor nulo.',
+        // pyramide, lot3d (wp1-3): Grundfläche G = área da base A_b, Mantel M = área lateral A_L, Oberfläche O = área total A (as on the
+        // page), Lotfußpunkt = pé da perpendicular, Lotgerade = reta perpendicular, Spiegelpunkt = simétrico
+        'Pyramide': 'Pirâmide', 'Prisma (schief möglich)': 'Prisma (pode ser oblíquo)', 'Körper': 'Sólido', 'Grundkante $a$': 'Aresta da base $a$',
+        'Höhe $h$': 'Altura $h$', 'Verschiebung der Spitze in $x$': 'Deslocamento do vértice em $x$',
+        'Punkt über E': 'Ponto acima de E', 'Ursprung': 'Origem', 'Punkt unter E': 'Ponto abaixo de E', 'Punkt in E': 'Ponto em E',
+        'Spiegelpunkt P′ zeigen': 'Mostrar o simétrico P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Constante $d$ em $\\vec{n} \\cdot \\vec{x} = d$',
+        'Der Normalenvektor darf nicht der Nullvektor sein.': 'O vetor normal não pode ser o vetor nulo.',
+        '$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.': '$t = 0$: o ponto $P$ pertence ao plano; a sua distância é $0$.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs vektoren/*)
@@ -84,6 +92,18 @@ window.BuchPT && BuchPT.add('vektoren', {
         ['Nicht parallel. Gleichsetzen ergibt $t = ', 'Não são paralelas. Igualando obtém-se $t = '], ['$: <b>schneidend</b> im Punkt $S(', '$: <b>concorrentes</b> no ponto $S('],
         ['Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ',
             'Não são paralelas e o sistema é impossível: <b>não complanares</b>. Distância mínima (a tracejado vermelho) $\\approx '],
+        // pyramide
+        ['Grundfläche $G = ', 'Área da base $A_b = '], ['$, Spitze $S(', '$, vértice $S('], [')$, Höhe $h = ', ')$, altura $h = '], ['$ (rot)', '$ (a vermelho)'],
+        ['Volumen $V = \\tfrac13 \\cdot G \\cdot h \\approx ', 'Volume $V = \\tfrac13 \\cdot A_b \\cdot h \\approx '],
+        ['Mantel (4 Dreiecke, je $', 'área lateral $A_L$ (4 triângulos, cada um $'], ['Mantel (4 Parallelogramme, je $', 'área lateral $A_L$ (4 paralelogramos, cada um $'],
+        ['Oberfläche $O = G + M \\approx ', 'Área total $A = A_b + A_L \\approx '], ['Oberfläche $O = 2G + M \\approx ', 'Área total $A = 2A_b + A_L \\approx '],
+        ['$ · Verschiebst du die Spitze waagerecht, bleibt das Volumen gleich, der Mantel nicht.', '$ · Se deslocares o vértice na horizontal, o volume mantém-se, a área lateral não.'],
+        ['$, Verschiebung der Deckfläche $\\vec{w} = ', '$, deslocamento da face superior $\\vec{w} = '], ['$, Höhe $h = ', '$, altura $h = '],
+        ['Volumen $V = G \\cdot h = ', 'Volume $V = A_b \\cdot h = '], ['$ (Prinzip von Cavalieri: auch schief) · ', '$ (princípio de Cavalieri: também oblíquo) · '],
+        // lot3d
+        ['$ · Lotgerade $l\\colon \\vec{x} = ', '$ · reta perpendicular $l\\colon \\vec{x} = '], ['$ in $E$ einsetzen: $', '$ substituída em $E$: $'], ['$, also $t = ', '$, logo $t = '],
+        ['$ · Lotfußpunkt $F(', '$ · pé da perpendicular $F('], ['Abstand: $', 'Distância: $'], ['$ · ohne Lotfußpunkt: $\\dfrac{|', '$ · sem o pé da perpendicular: $\\dfrac{|'],
+        ['Spiegelpunkt: $t$ verdoppeln, $', 'Simétrico: duplicar $t$, $'], ['$, also $P\'(', '$, logo $P\'('],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -107,5 +127,7 @@ window.BuchPT && BuchPT.add('vektoren', {
         // the engine has already put the whole label aside as \u0003n\u0004, so the rule replaces that mark (ebenenlage: the button after "spur")
         [/(data-p="spur">[^<]*<\/button><button type="button" class="b-btn" data-p="par">)(?:\u0003\d+\u0004|parallel)/g, '$1paralelos'],
         [/(data-p="par">)(?:\u0003\d+\u0004|parallel)(?=<\/button>)/g, '$1paralelas'],
+        // lot3d: the vector of two points with a prime, \vec{OP'} → \overrightarrow{OP'} (the rule of pt-2 reads two capitals only)
+        [/\\vec\{([A-Z]{2}')\}/g, '\\overrightarrow{$1}'],
     ]
 });
