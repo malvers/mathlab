@@ -263,7 +263,9 @@ function stepMarks(root, st){
   const all = [...root.querySelectorAll('.step')];
   let top = -1;
   all.forEach(e => { const g = grp(e); if (g < st && g > top) top = g; });
-  const first = all.find(e => grp(e) === top);
+  // a part that only flashes in colour ("step flash") never carries the triangle and the box: they stay on the line of its
+  // click, also when the flash stands earlier on the slide - the step note right of the line above (Doc, 10.11.2026)
+  const first = all.find(e => grp(e) === top && !e.matches('.flash')) || all.find(e => grp(e) === top);
   // a part of a line that comes with a click of its own (<b class="step kommt">): the line keeps the triangle and the
   // box (Doc, 29.10.2026: "lass bitte die rund 4,1 Mio auf Click erscheinen")
   const cur = ganz ? null : first && first.matches('.kommt') && first.parentElement.closest('p.line.step') || first;

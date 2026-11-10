@@ -124,6 +124,46 @@ b{font-weight:600;color:var(--fg,var(--formel))}   /* bold inside a colour keeps
 .step.flash:not(.on){transform:none}
 .step.flash.on:not(.past),.step.flash.on:not(.past) *{animation:flash-red 5s ease-in}
 @keyframes flash-red{from{color:var(--red)}}
+/* "step flash halten": red as long as its click is the newest, fading back only when the next click comes (Doc, 10.11.2026:
+   "lass das erste rot ruhig bis das zweite kommt, dann fade") */
+.step.flash.halten.on:not(.past),.step.flash.halten.on:not(.past) *{animation:none;color:var(--red)}
+.step.flash.halten.on.past,.step.flash.halten.on.past *{animation:flash-red 5s ease-in}
+/* the order inside one click: a part that comes a moment after the click ("kommt sanft spaeter") and a line whose triangle
+   and box come last ("box-spaeter") - Doc, 10.11.2026: "Erst den Term links vom Gleichheitszeichen rot, dann die
+   Anweisung, dann die Box. Dann nächste Zeile." The delays only on the way in, going back is at once */
+.slide .sanft.spaeter.on{transition-delay:.9s}
+/* a flash that holds past its click: data-ab="k" - red from its own click until click group k comes, then it fades
+   (Doc, 10.11.2026: the term turns red first, stays red while the step note comes, both fade with the next line) */
+.step.flash.halten[data-ab].on.past:not(.ab-da),.step.flash.halten[data-ab].on.past:not(.ab-da) *{animation:none;color:var(--red)}
+.step.flash.halten[data-ab].on.ab-da,.step.flash.halten[data-ab].on.ab-da *{animation:flash-red 5s ease-in}
+/* a part that only flashes never shows a triangle of its own - its click may have no line (the term turns red first) */
+@media screen{html:not(.deck-edit) :not(.ov-thumb) > .slide .step.flash.now::after{display:none}}
+/* a slide whose formulas come one by one needs no triangle (section class "ohne-dreieck"): the bullet stays a bullet
+   (Doc, 10.11.2026: "da ja die Formeln erscheinen. Da müssen wir die Dreiecke nicht zeigen") */
+@media screen{html:not(.deck-edit) :not(.ov-thumb) > .slide.ohne-dreieck p.line.l0.step.now::before{position:static;width:7px;height:7px;
+  margin:0 13px 0 -20px;background:var(--ink);animation:none}}
+@media screen{
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.box-spaeter.now::before,
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.box-spaeter.now::after{animation:step-now .3s ease-out 1.8s both}
+}
+/* arcs that draw themselves on their click (an SVG path "step kommt zeichnen" with pathLength="1" in an <svg class="boegen">):
+   multiplying out "each with each", one arc per product (Doc, 10.11.2026: "so Bögen machen, dass eben x mal x ausgerechnet
+   wird und das alles animiert erscheinen lassen"). Editing, the overview and paper show them drawn */
+.boegen{position:absolute;overflow:visible;pointer-events:none;fill:none;stroke:var(--red);stroke-width:1.6;stroke-linecap:round}
+.zeichnen{stroke-dasharray:1;stroke-dashoffset:0}
+@media screen{
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .zeichnen.step:not(.on){stroke-dashoffset:1}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .zeichnen.step.on{transition:stroke-dashoffset .8s cubic-bezier(.3,.7,.2,1)}
+}
+/* a red frame that flashes a few times on its click and then stays while the click is the newest ("step blinken" round a
+   term): two things that are the same light up together (Doc, 10.11.2026: "um beide ... so eine rote Box ein paar Mal
+   aufflackern lassen, dass man sagt, okay, das ist wirklich genau das Gleiche"). No triangle of its own */
+.blinken{display:inline-block;border-radius:6px;outline:2px solid transparent;outline-offset:4px}
+@media screen{
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .step.blinken.on:not(.past){animation:rahmen-blinken .45s ease-in-out 5 alternate forwards}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .step.blinken.now::after{display:none}
+}
+@keyframes rahmen-blinken{from{outline-color:transparent}to{outline-color:var(--red)}}
 .dtable tr.frame td:first-child{border-left:2px solid var(--red)}.dtable tr.frame td:last-child{border-right:2px solid var(--red)}
 .pop-x{position:absolute;top:8px;right:12px;width:34px;height:34px;border:0;border-radius:8px;background:none;
   font:400 26px/1 system-ui,sans-serif;color:var(--stroke);cursor:pointer}
@@ -183,7 +223,9 @@ p.line.l2::before{background:#4A79C9;width:6px;height:6px;margin-right:14px;vert
   display:grid;grid-template-columns:396px 396px;gap:24px}
 .card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
   position:relative}
-.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+/* the coloured bar lies over the card's thin border, flush with its outer edge - inside it, a grey hairline ran above
+   and beside the bar (Doc, 10.11.2026: "die grüne Linie oben sieht nicht so schön aus") */
+.card::before{content:"";position:absolute;left:-.75px;top:-.75px;right:-.75px;height:3.75px}
 .card.left::before{background:var(--orange)}
 .card.right::before{background:var(--green)}
 p.col{position:relative;line-height:1.25}
