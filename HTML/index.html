@@ -1700,6 +1700,17 @@
             position: relative;
             display: block;
         }
+        /* Books view while scrolling (Doc, 10.11.2026: dark boxes over the cards when scrolling up, "früher war das nicht"):
+           nothing in a book card that the browser has to redraw on every frame of the background video. The cards' own
+           background is 94 % opaque (--portal-lab-tile-bg), so the blur behind them was invisible anyway; the icon's drop
+           shadow became a filter over a large cover with the one-cover cards of 08.11.2026. */
+        body.view-buecher #tool-container .card {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+        body.view-buecher #tool-container .card .card-icon {
+            filter: none;
+        }
         #tool-container .book-one img {
             height: 104px;
             width: auto;
@@ -2760,8 +2771,10 @@
             const has = langs.includes(lang);
             const edition = (l) => book + (l === 'de' ? '' : '-' + l);
             if (!tour) card.setAttribute('href', 'buch/' + edition(has ? lang : langs.includes('en') ? 'en' : 'de') + '/index.html');
+            // loaded at once, not lazily: a lazy cover was decoded only when scrolled to and left an empty box behind
+            // while scrolling up (Doc, 10.11.2026); 25 covers of ~80 KB
             icon.innerHTML = '<span class="book-one' + (has ? '' : ' is-soon') + '">'
-                + '<img src="resources/og/buch-' + edition(has ? lang : 'de') + '-cover.jpg" alt="" loading="lazy" decoding="async">'
+                + '<img src="resources/og/buch-' + edition(has ? lang : 'de') + '-cover.jpg" alt="">'
                 + (has ? '' : '<span class="book-soon">' + (BOOK_SOON[lang] || BOOK_SOON.en) + '</span>') + '</span>';
         }
 
