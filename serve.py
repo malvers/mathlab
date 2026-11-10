@@ -228,8 +228,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def mitschrift_api(self):
         """DocMitschrift for the plans' "Notizen" button (docmitschrift-app/mitschrift_seite.py, reloaded per call,
-        Doc 06.11.2026). The text is school data from ~/Documents/mitschrift: only for pages of this server."""
-        if not self.local_caller():
+        Doc 06.11.2026). The text is school data from ~/Documents/mitschrift: only for pages of this server - and,
+        to read only, for Doc's own devices through Tailscale Serve (Doc 09.11.2026: "ohne Push hier auch auf dem
+        Telefon"). The trash and the editing (POST) stay on the Mac."""
+        if not (self.local_caller() or (self.command == 'GET' and self.tailnet_owner())):
             return self.send_error(403, 'local pages only')
         here = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'docmitschrift-app')
         sent = b''
@@ -267,6 +269,35 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         origin = self.headers.get('Origin') or ''
         origin_host = origin.split('//', 1)[-1].rsplit(':', 1)[0] if origin else host
         return host in ok and origin_host in ok
+
+    TAILNET = {}
+
+    def tailnet_owner(self):
+        """True for a request that Tailscale Serve brings from the Mac's own owner (his phone, his tablet).
+
+        The server binds to 127.0.0.1, so only this machine reaches it; Tailscale Serve proxies the tailnet to it,
+        keeps the Host (<mac>.<tailnet>.ts.net) and adds Tailscale-User-Login for a request from a tailnet user.
+        A web page in the browser can set neither (Host is the address it calls, a custom header needs a CORS
+        preflight this server never grants). Name and login come from tailscaled itself, so the repo holds neither.
+        """
+        login = self.headers.get('Tailscale-User-Login') or ''
+        host = (self.headers.get('Host') or '').rsplit(':', 1)[0].lower()
+        if not login or not host.endswith('.ts.net'):
+            return False
+        me = self.TAILNET
+        if time.time() - me.get('at', 0) > 300:   # asked again every 5 minutes; a missing tailscaled just says no
+            me.clear()
+            me['at'] = time.time()
+            sock = os.path.expanduser('~/Library/Application Support/de.docalvers.tailscale/tailscaled.sock')
+            exe = next((x for x in ('/opt/homebrew/bin/tailscale', '/usr/local/bin/tailscale') if os.path.exists(x)), 'tailscale')
+            try:
+                out = subprocess.run([exe, '--socket=' + sock, 'status', '--json'], capture_output=True, timeout=5, check=True)
+                st = json.loads(out.stdout)
+                me['host'] = (st['Self']['DNSName'] or '').rstrip('.').lower()
+                me['login'] = st['User'][str(st['Self']['UserID'])]['LoginName']
+            except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+                pass
+        return bool(me.get('login')) and login == me['login'] and host == me.get('host')
 
     UNTIS_CACHE = {}
 

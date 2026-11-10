@@ -189,6 +189,11 @@ public class MainActivity extends Activity {
 
     /** A tap on the circle: listen; while listening, a tap means "done" and sends what was heard. */
     private void tap() {
+        if (Ansage.speaking > 0) {
+            // a tap on her while she speaks stops her - and that is all, no listening (Doc, 09.11.2026)
+            Ansage.get(this).stop();
+            return;
+        }
         if (mode.equals("listening")) {
             if (ear != null) ear.cancel();
             sendAll(heard);
@@ -239,7 +244,14 @@ public class MainActivity extends Activity {
         usb = UsbMic.open(this);
         show("Ich höre …", MUTED, false);
         breathe(true);
-        ear.startListening(ask());
+        // DocNote lets go of the DJI while Doc answers - else the recognizer hears silence (09.11.2026)
+        if (Ansage.yieldMic(this, 60000)) {
+            tick.postDelayed(() -> {
+                if (mode.equals("listening") && ear != null) ear.startListening(ask());
+            }, 800);
+        } else {
+            ear.startListening(ask());
+        }
     }
 
     private Intent ask() {
@@ -341,6 +353,7 @@ public class MainActivity extends Activity {
                     tick.postDelayed(again, RESTART_MS * 3);
                 } else {
                     stopUsb();
+                    Ansage.yieldMic(MainActivity.this, 0);
                     show(silent ? "Nichts gehört" : "Hat nicht geklappt", MUTED, true);
                 }
                 return;
@@ -386,6 +399,7 @@ public class MainActivity extends Activity {
     }
 
     private void send(String text) {
+        Ansage.yieldMic(this, 0);   // the answer is in: DocNote takes the DJI again
         mode = "sending";
         breathe(false);
         mine(text);

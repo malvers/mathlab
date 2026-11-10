@@ -64,6 +64,12 @@ public class AufnahmeService extends Service {
     static final String ACTION_START = "de.docalvers.docmitschrift.START";  // the "Stunde beginnt" notification
     static final String ACTION_TICK = "de.docalvers.docmitschrift.TICK";
     static final String ACTION_READY = "de.docalvers.docmitschrift.READY";  // the app was opened: be ready again
+    // DocCall asks for the DJI for a moment (extra "ms", 0 = done): while DocNote records through it over Bluetooth
+    // the phone is in call mode - Solita's voice is capped to the call volume and every other microphone hears
+    // only silence, so her call was "gaaanz leise und antworten geht nicht" (Doc, 09.11.2026). DocNote lets go
+    // for that time (a short gap in the recording) and takes the DJI again when DocCall is done or the time is up.
+    static final String ACTION_YIELD = "de.docalvers.docmitschrift.YIELD";
+    private static final long YIELD_MAX_MS = 120000;
     static final String HAND_SUFFIX = "-hand";  // in the names of the pieces recorded by hand
 
     // read by the screen once a second
@@ -89,6 +95,7 @@ public class AufnahmeService extends Service {
     private final Handler handler = new Handler(Looper.getMainLooper());
     // every five minutes: a new piece - unless the lesson is over, then the timetable decides
     private final Runnable rotate = () -> {
+        if (this.yielding) return;
         if (wanted() != null) nextPiece();
         else evaluate();
     };
@@ -100,6 +107,18 @@ public class AufnahmeService extends Service {
     private boolean bluetooth;
     private boolean stopping;
     private int failures;
+    private boolean yielding;                   // DocCall has the microphone for a moment (ACTION_YIELD)
+    private final Runnable resume = () -> {
+        yielding = false;
+        Log.i(TAG, "DocCall done: recording again");
+        if (recording) nextPiece();
+    };
+    private final android.content.BroadcastReceiver yieldReceiver = new android.content.BroadcastReceiver() {
+        @Override
+        public void onReceive(Context c, Intent i) {
+            yieldMic(i.getLongExtra("ms", 0));
+        }
+    };
 
     // Android reports every present device once right after registering, so only a real change of the
     // inputs starts a new piece (the first test on 05.11.2026 got a one-second piece from that report)
@@ -145,6 +164,27 @@ public class AufnahmeService extends Service {
         channels(this);
         audio = getSystemService(AudioManager.class);
         micLog = prefs(this).getString("mikros", "{}");
+        android.content.IntentFilter f = new android.content.IntentFilter(ACTION_YIELD);
+        if (Build.VERSION.SDK_INT >= 33) registerReceiver(yieldReceiver, f, Context.RECEIVER_EXPORTED);
+        else registerReceiver(yieldReceiver, f);
+    }
+
+    /** ACTION_YIELD: let go of the Bluetooth microphone for ms (0 = take it again now). Only a Bluetooth piece
+        holds the call mode; on the phone's own microphone or the USB receiver nothing needs to give way. */
+    private void yieldMic(long ms) {
+        if (!recording || (!bluetooth && !yielding)) return;
+        handler.removeCallbacks(resume);
+        if (ms <= 0) {
+            if (yielding) resume.run();
+            return;
+        }
+        if (!yielding) {
+            Log.i(TAG, "DocCall speaks: letting go of " + mic);
+            yielding = true;
+            handler.removeCallbacks(rotate);
+            closePiece();
+        }
+        handler.postDelayed(resume, Math.min(ms, YIELD_MAX_MS));
     }
 
     @Override
@@ -224,6 +264,11 @@ public class AufnahmeService extends Service {
 
     @Override
     public void onDestroy() {
+        try {
+            unregisterReceiver(yieldReceiver);
+        } catch (RuntimeException e) {
+            // never registered
+        }
         if (running && !stopping) {
             end();
             alarm("Aufnahme beendet", "Android hat DocMitschrift beendet. Öffne DocMitschrift und tippe auf Start.");
@@ -431,6 +476,7 @@ public class AufnahmeService extends Service {
 
     private void end() {
         handler.removeCallbacksAndMessages(null);
+        yielding = false;
         closePiece();
         if (recording) audio.unregisterAudioDeviceCallback(devices);
         if (wake != null && wake.isHeld()) wake.release();
@@ -448,7 +494,7 @@ public class AufnahmeService extends Service {
     private void nextPiece() {
         handler.removeCallbacks(rotate);
         closePiece();
-        if (!recording) return;
+        if (!recording || yielding) return;
         if (openPiece()) {
             failures = 0;
             handler.postDelayed(rotate, PIECE_MS);

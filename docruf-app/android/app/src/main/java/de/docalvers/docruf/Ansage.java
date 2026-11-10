@@ -30,6 +30,7 @@ final class Ansage {
     private static final float LOUD = 0.7f;
     private static final long STUCK_MS = 120000;  // the portrait goes even when a voice never reports back
     private static Ansage one;
+    private static final long ANSWER_WINDOW_MS = 20000;
 
     // How many calls are being spoken right now, and who wants to hear about it (the screen shows Solita's
     // portrait meanwhile). Both are touched on the main thread only.
@@ -52,6 +53,9 @@ final class Ansage {
     // which cuts her off (07.11.2026, "MediaPlayer finalized without being released" right after a choppy call)
     private final java.util.Set<MediaPlayer> playing = new java.util.HashSet<>();
     private boolean ttsReady;
+    // the calls being spoken now, each with its ending; a tap on her portrait ends them all (stop)
+    private final java.util.Set<Runnable> open = new java.util.HashSet<>();
+    private volatile int stops;   // bumped by stop(): a call still loading then stays silent
     private String pending;
     private Runnable pendingDone;
 
@@ -91,22 +95,66 @@ final class Ansage {
             changed();
             main.postDelayed(end, STUCK_MS);
         });
+        final int asked = stops;
         new Thread(() -> {
             PowerManager.WakeLock wl = app.getSystemService(PowerManager.class)
                     .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "docruf:ansage");
             wl.acquire(120000);
             File f = audio == null || audio.isEmpty() ? null : download(audio);
+            // DocNote lets go of the DJI while she speaks (see yieldMic); then a moment for Android to leave call mode
+            if (stops == asked && yieldMic(app, STUCK_MS)) {
+                try {
+                    Thread.sleep(800);
+                } catch (InterruptedException ignored) {
+                }
+            }
             main.post(() -> {
+                if (stops != asked) {   // tapped away while it was still loading: she stays silent
+                    if (wl.isHeld()) wl.release();
+                    yieldMic(app, 0);
+                    main.removeCallbacks(end);
+                    end.run();
+                    return;
+                }
                 Runnable restore = louder(wl);
+                Runnable[] self = new Runnable[1];
                 Runnable done = () -> {
+                    if (!open.remove(self[0])) return;   // ended already (stop)
                     restore.run();
+                    yieldMic(app, ANSWER_WINDOW_MS);   // time to tap "Antworten"; listening asks again
                     main.removeCallbacks(end);
                     end.run();
                 };
+                self[0] = done;
+                open.add(done);
                 if (f != null) play(f, text, done);
                 else read(text, done);
             });
         }, "docruf-ansage").start();
+    }
+
+    /**
+     * A tap on her portrait while she speaks (Doc, 09.11.2026: "bitte das Sprechen abbrechen und auch nicht mehr
+     * reagieren. Ich muss sie irgendwie abbrechen können"): she stops at once, a call still loading or queued
+     * stays silent, and nothing follows - no answer window, DocNote takes the DJI again. Main thread.
+     */
+    void stop() {
+        stops++;
+        for (MediaPlayer p : new java.util.ArrayList<>(playing)) {
+            try {
+                p.stop();
+            } catch (RuntimeException ignored) {
+                // not started yet
+            }
+            release(p);
+        }
+        if (tts != null) tts.stop();
+        pending = null;
+        pendingDone = null;
+        readAt = -1;
+        for (Runnable r : new java.util.ArrayList<>(open)) r.run();
+        yieldMic(app, 0);
+        Log.i(RufService.TAG, "stopped by a tap");
     }
 
     private static void changed() {
@@ -138,6 +186,10 @@ final class Ansage {
         try {
             mp.setAudioAttributes(speech);
             mp.setDataSource(f.getPath());
+            // only now: before setDataSource the player has no engine yet and refuses any device (09.11.2026)
+            AudioDeviceInfo out = phoneSpeaker();
+            boolean pinned = out != null && mp.setPreferredDevice(out);
+            Log.i(RufService.TAG, "voice to speaker: " + (out == null ? "no (route is fine)" : pinned ? "pinned" : "refused"));
             mp.setOnCompletionListener(p -> {
                 release(p);
                 done.run();
@@ -150,6 +202,10 @@ final class Ansage {
             mp.prepare();
             mp.start();
             voice = mp;
+            main.postDelayed(() -> {
+                AudioDeviceInfo r = playing.contains(mp) ? mp.getRoutedDevice() : null;
+                if (r != null) Log.i(RufService.TAG, "voice routed to type " + r.getType());
+            }, 800);
         } catch (Exception e) {
             release(mp);
             read(text, done);
@@ -193,6 +249,42 @@ final class Ansage {
             }
         });
         if (tts.speak(text, TextToSpeech.QUEUE_ADD, null, id) != TextToSpeech.SUCCESS && done != null) done.run();
+    }
+
+    /**
+     * Asks DocNote to let go of the DJI for ms (0 = done, take it again). While DocNote records through the DJI
+     * over Bluetooth the phone is in call mode: her voice is capped to the call volume and the recognizer for the
+     * answer hears only silence ("gaaanz leise und antworten geht ni" - Doc, 09.11.2026). True when a Bluetooth
+     * microphone holds the call route right now: then wait a moment before playing or listening.
+     */
+    static boolean yieldMic(Context c, long ms) {
+        c.sendBroadcast(new android.content.Intent("de.docalvers.docmitschrift.YIELD")
+                .setPackage("de.docalvers.docmitschrift").putExtra("ms", ms));
+        if (android.os.Build.VERSION.SDK_INT < 31) return false;
+        AudioDeviceInfo call = c.getSystemService(AudioManager.class).getCommunicationDevice();
+        return call != null && call.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO;
+    }
+
+    /**
+     * The phone's own speaker while a Bluetooth microphone without a speaker holds the call route, else null.
+     * DocNote records through the DJI Mic Mini 2 as a Bluetooth headset: Android then puts the phone in call mode
+     * and sends ALL media to that headset - which has no speaker, so she showed "spricht" and nobody heard her
+     * (Doc, 09.11.2026: "wieso spricht denn die in das Mikrofon? Da hat er gar keinen Lautsprecher").
+     * A real headset also plays music (A2DP or LE audio under the same address) and keeps her voice.
+     */
+    private AudioDeviceInfo phoneSpeaker() {
+        if (android.os.Build.VERSION.SDK_INT < 31) return null;
+        AudioDeviceInfo call = am.getCommunicationDevice();
+        Log.i(RufService.TAG, "call route: " + (call == null ? "none" : call.getType() + " " + call.getProductName()));
+        if (call == null || call.getType() != AudioDeviceInfo.TYPE_BLUETOOTH_SCO) return null;
+        AudioDeviceInfo speaker = null;
+        for (AudioDeviceInfo d : am.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
+            int t = d.getType();
+            if (t == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) speaker = d;
+            else if ((t == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP || t == AudioDeviceInfo.TYPE_BLE_HEADSET)
+                    && d.getAddress().equals(call.getAddress())) return null;
+        }
+        return speaker;
     }
 
     /** True when an external output is connected (Bluetooth or wired speakers/headphones, USB audio): media goes there. */
