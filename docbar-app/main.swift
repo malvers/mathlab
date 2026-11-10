@@ -306,6 +306,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let panel = PanelController()
     /// Where the panel was nudged to; a resize would otherwise recentre it under the icon.
     private var panelOriginX: CGFloat?
+    /// State the menu bar icon was last drawn for, so the 4 s timer only redraws on a change.
+    private var iconKey = ""
 
     /// Companion tools that belong to the toolbox: bring them up with the bar,
     /// so a single login item (DocBar) restores the whole set after a reboot.
@@ -412,6 +414,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return out
         }
 
+        // Every new image is a round trip to Control Center, which hosts the status items
+        // since macOS 26 — the log showed two every 4 s while nothing changed. Only redraw
+        // when the state or the bar's ink does.
+        let bar = button.effectiveAppearance.bestMatch(from: [.aqua, .vibrantLight, .darkAqua, .vibrantDark])
+        let key = "\(alerting)-\(here)-\(bar?.rawValue ?? "")"
+        guard key != iconKey else { return }
+        iconKey = key
+
         let layers: [NSImage?]
         if alerting && here {
             // Phi green on red is only 2.2:1, so this D is bolder than the white one. The disc
@@ -424,7 +434,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             layers = [symbol(Style.iconFilled, .semibold, [.white, Style.alertRed])]
         } else if here {
             // Colours rule out a template, so the ring takes its ink from the bar it sits in.
-            let bar = button.effectiveAppearance.bestMatch(from: [.aqua, .vibrantLight, .darkAqua, .vibrantDark])
             let ink: NSColor = bar == .darkAqua || bar == .vibrantDark ? .white : .black
             layers = [symbol(Style.icon, .light, [.clear, ink]),
                       symbol(Style.icon, .semibold, [Style.hereGreen, .clear])]
@@ -443,8 +452,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Explicit, so the popover never keeps a height from an earlier opening.
         popover.contentSize = NSSize(width: Style.width, height: panel.contentHeight)
         // Folding a section resizes the popover, and NSPopover then recentres it under
-        // the icon — which would make the panel jump sideways. Put it back.
-        if let x = panelOriginX, let w = popover.contentViewController?.view.window {
+        // the icon — which would make the panel jump sideways. Put it back, but only
+        // while it is open: on a fresh opening the x of the last one moved the panel away
+        // from the D that was clicked — onto the other display or off screen when that D
+        // sat in the other menu bar. The click looked dead, the second closed the unseen
+        // panel, only the third showed it (log 10.11.2026 18:08:30-32: open, close, open).
+        if popover.isShown, let x = panelOriginX, let w = popover.contentViewController?.view.window {
             DispatchQueue.main.async { w.setFrameOrigin(NSPoint(x: x, y: w.frame.origin.y)) }
         }
     }

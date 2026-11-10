@@ -1,9 +1,10 @@
 // DeskPhoto — lays photos on the real desktop: borderless windows at desktop-icon
 // level, so a picture sits above the wallpaper and below every ordinary window.
-// Each photo is drawn as a print (white margin, soft shadow, slight tilt) and can
-// be dragged, scaled and rotated with the mouse; position and size are remembered.
-// An image with transparent pixels is treated as a cut-out instead: no paper, no
-// shadow, the wallpaper shows through and only the picture itself is visible.
+// Each photo is drawn like a macOS widget (no margin, no shadow, rounded corners,
+// straight) and can be dragged, scaled and rotated with the mouse; position and
+// size are remembered. An image with transparent pixels is treated as a cut-out:
+// nothing is clipped, the wallpaper shows through its own outline. Every picture
+// is copied into ~/Library/Application Support/DeskPhoto/images when it is added.
 
 import Cocoa
 import ServiceManagement
@@ -15,7 +16,7 @@ struct PhotoRec: Codable {
     var path: String
     var centerX: Double      // screen coordinates, origin bottom-left of the primary display
     var centerY: Double
-    var width: Double        // width of the image itself, without the white margin
+    var width: Double        // width of the image itself
     var angle: Double        // radians, counter-clockwise
 }
 
@@ -46,10 +47,14 @@ final class Store {
 
 // MARK: - Geometry helpers
 
-/// White margin around the image, growing with the print but never dominating it.
-private func margin(for width: Double) -> Double { min(18, max(6, width * 0.028)) }
+/// Corner radius of a photo, in proportion to its width so it keeps its look when
+/// scaled. 0.056 is measured from the chat-bubble cut-out on Doc's desktop (37.5 px
+/// radius on 669 px), so a photo at the same width has the same corners as it and as
+/// the system widgets beside it (about 19 pt at the default 340 pt).
+private func cornerRadius(for width: Double) -> CGFloat { CGFloat(max(6, width * 0.056)) }
 
-/// Padding that keeps the drop shadow inside the window even when the print is tilted.
+/// Padding around the photo inside its window, so the corner grips and a tilted
+/// photo still fit.
 private let shadowPad: Double = 40
 
 /// True when the image has pixels that are not fully opaque. Probed on a small
@@ -76,8 +81,8 @@ private func hasTransparency(_ cg: CGImage) -> Bool {
 
 final class PhotoView: NSView {
     var paperSize: CGSize = .zero
-    var paperMargin: Double = 0
     var angle: Double = 0
+    private var rounded = false           // photo with widget corners; a cut-out keeps its own outline
 
     private let paper = CALayer()
     private let photo = CALayer()
@@ -108,20 +113,17 @@ final class PhotoView: NSView {
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
 
-        paper.backgroundColor = NSColor.white.cgColor
-        paper.cornerRadius = 2
+        // The paper layer only carries the photo and its grips, so both turn together;
+        // it draws nothing itself.
+        paper.backgroundColor = nil
         paper.masksToBounds = false
-        paper.shadowColor = NSColor.black.cgColor
-        paper.shadowOpacity = 0.45
-        paper.shadowRadius = 16
-        paper.shadowOffset = CGSize(width: 0, height: -8)   // layer coordinates: y points up
 
         photo.masksToBounds = true
         photo.contentsGravity = .resizeAspectFill
-        photo.cornerRadius = 1
+        photo.cornerCurve = .continuous     // the squircle of the system widgets
         paper.addSublayer(photo)
 
-        // Corner grips, sitting inside the paper layer so they turn along with the print.
+        // Corner grips, sitting inside the paper layer so they turn along with the photo.
         for _ in 0..<4 {
             let h = CALayer()
             h.backgroundColor = NSColor.white.cgColor
@@ -143,24 +145,23 @@ final class PhotoView: NSView {
 
     required init?(coder: NSCoder) { fatalError() }
 
-    /// A cut-out gets no paper and no shadow: the layer stays clear and nothing is
-    /// drawn around the picture, so it sits on the wallpaper as its bare outline.
+    /// A photo looks like the widgets beside it: no white margin, no shadow, rounded
+    /// corners (Doc, 10.11.2026: "nicht, dass das so einen weißen Rand kriegt ... mit so
+    /// runden Ecken"). A cut-out is not clipped, it sits on the wallpaper as its own outline.
     func setImage(_ image: CGImage, borderless: Bool) {
         photo.contents = image
-        paper.backgroundColor = borderless ? nil : NSColor.white.cgColor
-        photo.cornerRadius = borderless ? 0 : 1
-        paper.shadowOpacity = borderless ? 0 : 0.45
+        rounded = !borderless
     }
 
     /// Re-lays the print for the current window size; called after every scale or rotate.
     func relayout() {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        let m = CGFloat(paperMargin)
         paper.bounds = CGRect(origin: .zero, size: paperSize)
         paper.position = CGPoint(x: bounds.midX, y: bounds.midY)
         paper.transform = CATransform3DMakeRotation(CGFloat(angle), 0, 0, 1)
-        photo.frame = CGRect(x: m, y: m, width: paperSize.width - 2 * m, height: paperSize.height - 2 * m)
+        photo.frame = paper.bounds
+        photo.cornerRadius = rounded ? cornerRadius(for: Double(paperSize.width)) : 0
         for (i, h) in handles.enumerated() {
             let x: CGFloat = (i == 0 || i == 3) ? 0 : paperSize.width
             let y: CGFloat = (i < 2) ? 0 : paperSize.height
@@ -303,7 +304,7 @@ final class PhotoItem {
     let window: NSPanel
     private let view: PhotoView
     private let aspect: Double            // width / height of the image
-    let borderless: Bool                  // cut-out without paper, see hasTransparency
+    let borderless: Bool                  // cut-out, drawn unclipped, see hasTransparency
     weak var owner: AppDelegate?
 
     init?(rec: PhotoRec, owner: AppDelegate) {
@@ -321,7 +322,7 @@ final class PhotoItem {
                             backing: .buffered, defer: false)
         panel.isOpaque = false
         panel.backgroundColor = .clear
-        panel.hasShadow = false                 // the shadow is drawn in the layer so it tilts along
+        panel.hasShadow = false                 // flat like a widget, no window shadow
         panel.isMovableByWindowBackground = false
         panel.hidesOnDeactivate = false
         panel.becomesKeyOnlyIfNeeded = true
@@ -341,12 +342,10 @@ final class PhotoItem {
         panel.orderFront(nil)
     }
 
-    /// Rebuilds the window geometry from the record, keeping the print centred.
+    /// Rebuilds the window geometry from the record, keeping the photo centred.
     private func apply() {
         let w = rec.width
-        let h = w / aspect
-        let m = borderless ? 0 : margin(for: w)
-        let paper = CGSize(width: w + 2 * m, height: h + 2 * m)
+        let paper = CGSize(width: w, height: w / aspect)
 
         let ca = abs(cos(rec.angle)), sa = abs(sin(rec.angle))
         let boxW = Double(paper.width) * ca + Double(paper.height) * sa
@@ -359,7 +358,6 @@ final class PhotoItem {
 
         view.frame = NSRect(origin: .zero, size: CGSize(width: winW, height: winH))
         view.paperSize = paper
-        view.paperMargin = m
         view.angle = rec.angle
         view.relayout()
     }
@@ -491,26 +489,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
         for (i, url) in panel.urls.enumerated() {
             let n = items.count + i
-            let rec = PhotoRec(id: UUID().uuidString,
-                               path: url.path,
+            let id = UUID().uuidString
+            let rec = PhotoRec(id: id,
+                               path: ownCopy(of: url, id: id).path,
                                centerX: Double(screen.midX) + Double(n % 5) * 34,
                                centerY: Double(screen.midY) - Double(n % 5) * 28,
                                width: 340,
-                               angle: Double.random(in: -0.06 ... 0.06))
-            if let item = PhotoItem(rec: rec, owner: self) {
-                // A cut-out mimics a widget, so it starts straight; only paper prints tilt.
-                if item.borderless { item.setTransform(width: rec.width, angle: 0) }
-                items.append(item)
-            }
+                               angle: 0)     // straight, like the widgets beside it
+            if let item = PhotoItem(rec: rec, owner: self) { items.append(item) }
         }
         save()
         publishMenu()
     }
 
     @objc private func removeAll() {
+        let paths = items.map { $0.rec.path }
         items.forEach { $0.close() }
         items.removeAll()
         save()
+        paths.forEach(trashOwnCopy)
         publishMenu()
     }
 
@@ -543,7 +540,53 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         item.close()
         items.removeAll { $0 === item }
         save()
+        trashOwnCopy(item.rec.path)
         publishMenu()
+    }
+
+    // MARK: own copies
+
+    /// DeskPhoto's own folder of pictures; reading it needs no permission.
+    private var imagesFolder: URL {
+        let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("DeskPhoto/images", isDirectory: true)
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }
+
+    /// True when the file lies directly in DeskPhoto's own folder.
+    private func isOwnCopy(_ url: URL) -> Bool {
+        url.standardizedFileURL.deletingLastPathComponent().path == imagesFolder.standardizedFileURL.path
+    }
+
+    /// Copies a picture Doc picked into DeskPhoto's own folder and returns the copy.
+    /// Reading ~/Desktop or ~/Downloads needs a macOS permission, and every ad-hoc signed
+    /// rebuild voids it: on the next start the original could not be read, macOS asked
+    /// again, and a refused or missed prompt dropped the photo from photos.json
+    /// (10.11.2026). The copy needs no permission. Falls back to the original if the
+    /// copy fails, so adding a photo never breaks because of it.
+    private func ownCopy(of url: URL, id: String) -> URL {
+        if isOwnCopy(url) { return url }
+        let base = url.deletingPathExtension().lastPathComponent.lowercased()
+            .replacingOccurrences(of: " ", with: "-")
+        let ext = url.pathExtension.lowercased()
+        let name = "\(base)-\(id.prefix(8).lowercased())" + (ext.isEmpty ? "" : ".\(ext)")
+        let dest = imagesFolder.appendingPathComponent(name)
+        do {
+            try FileManager.default.copyItem(at: url, to: dest)
+            return dest
+        } catch {
+            return url
+        }
+    }
+
+    /// Moves DeskPhoto's own copy to the Trash once its photo has left the desktop —
+    /// the Trash, not deleted, so it can still be brought back. Files outside the own
+    /// folder (the originals) and copies another photo still shows are never touched.
+    private func trashOwnCopy(_ path: String) {
+        let url = URL(fileURLWithPath: path)
+        guard isOwnCopy(url), !items.contains(where: { $0.rec.path == path }) else { return }
+        try? FileManager.default.trashItem(at: url, resultingItemURL: nil)
     }
 
     // MARK: housekeeping
