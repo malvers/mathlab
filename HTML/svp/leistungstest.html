@@ -380,6 +380,10 @@
         .lt-tile .tl-att.in { background: rgb(76, 175, 80); }
         .lt-tile .tl-att.out { background: var(--ypsilon); }
         .lt-tile.untis-out .tl-name { opacity: 0.45; }
+        /* absent in WebUntis and not in the test: the code grey (Doc, 09.11.2026: "nicht da Code
+           grau"). A pupil who is writing is there: then only the red circle says WebUntis still has
+           them absent. */
+        .lt-tiles .lt-tile.untis-out.none .tl-code .cd-l, .lt-tiles .lt-tile.untis-out.none .tl-code .cd-n { color: var(--muted); }
         /* present in WebUntis, but never in the test: something to do (Doc, 05.11.2026: "so ein
            Dreieck mit dem Ausrufezeichen ... vielleicht sogar über alles weg") - the tile fades
            behind a warning triangle, only the name stays clear so you know who it is */
@@ -526,6 +530,15 @@
         .lt-tile.away .tl-bar i { background: var(--ypsilon); }
         .lt-tile.away .tl-pill { background: var(--ypsilon); color: #fff; border-radius: 999px; padding: 1px 9px;
             animation: lt-away 2.4s ease-in-out infinite; }
+        /* left the test ("weg"): the whole card clearly red, everything on it white (Doc, 09.11.2026:
+           "HG rot bei weg im Sinne von Test verlassen") - the pill turns white with red letters */
+        .lt-tiles .lt-tile.away { background: var(--ypsilon); color: #fff; }
+        .lt-tiles .lt-tile.away .tl-code .cd-l, .lt-tiles .lt-tile.away .tl-code .cd-n,
+        .lt-tiles .lt-tile.away .tl-main, .lt-tiles .lt-tile.away .tl-state, .lt-tiles .lt-tile.away .tl-leave,
+        .lt-tiles .lt-tile.away .tl-b { color: #fff; }
+        .lt-tiles .lt-tile.away .tl-bar { background: rgba(255, 255, 255, 0.3); }
+        .lt-tiles .lt-tile.away .tl-bar i { background: #fff; }
+        .lt-tiles .lt-tile.away .tl-pill { background: #fff; color: var(--ypsilon); }
         /* offline was grey on grey (Doc, 19.09.2026: "das Offline ist grau") - a pill like "weg", in a neutral slate:
            red means "gone on purpose", offline is a device that fell silent */
         .lt-tile.off { border: 2px dashed rgba(170, 190, 220, 0.75); padding: 9px 11px 9px; }
@@ -534,6 +547,9 @@
         .lt-tile.done { border: 2px solid var(--res, var(--phi)); padding: 9px 11px 9px; }
         .lt-tile.done .tl-main, .lt-tile.done .tl-state { color: var(--res, var(--phi)); }
         .lt-tile.done .tl-bar i { background: var(--res, var(--phi)); }
+        /* submitted = finished: the code's letters and digits all green, so "fertig" reads across the
+           room, apart from the score colour of frame and points (Doc, 09.11.2026) */
+        .lt-tile.done .tl-code .cd-l, .lt-tile.done .tl-code .cd-n { color: var(--phi); }
         .lt-tile.abort { border: 2px solid var(--ypsilon); padding: 9px 11px 9px; opacity: 0.75; }
         /* "abgebrochen" once, as the red pill below; the big line keeps the count reached (Doc, 19.09.2026: "zweimal
            abgebrochen in rot und dann noch mal klein abgebrochen drunter") */
@@ -1594,9 +1610,16 @@
             function personKey(first, last) {
                 return ((first || '').trim().split(/\s+/)[0] + ' ' + (last || '').trim().charAt(0)).toLowerCase();
             }
-            function entryKey(name) {
+            /* the WebUntis entry for a list name, read both ways: most lists say "first last", FOG25-1's
+               says "last first" (09.11.2026: no circle on any of its cards). Two different pupils for
+               the two readings count as 'two' - no circle then, as for any ambiguous name. */
+            function untisHit(name) {
                 const parts = String(name || '').trim().split(/\s+/);
-                return parts.length > 1 ? personKey(parts[0], parts[parts.length - 1]) : '';
+                if (!untis || parts.length < 2) return null;
+                const a = untis.map[personKey(parts[0], parts[parts.length - 1])];
+                const b = untis.map[personKey(parts[parts.length - 1], parts[0])];
+                if (a && b && a !== b) return 'two';
+                return a || b || null;
             }
             const UNTIS_SVG_ALARM = '<svg viewBox="0 0 48 42" aria-hidden="true"><path d="M24 3 L45 39 H3 Z" fill="rgb(245,194,66)" stroke="rgb(245,194,66)" stroke-width="4" stroke-linejoin="round"/>' +
                 '<path d="M24 15 V27" stroke="rgb(14,36,78)" stroke-width="4.5" stroke-linecap="round"/><circle cx="24" cy="33.5" r="2.6" fill="rgb(14,36,78)"/></svg>';
@@ -1620,7 +1643,7 @@
             function paintAttendance(t, code) {
                 let badge = t.querySelector('.tl-att');
                 const e = entries.find(function (x) { return x.code === code; });
-                const hit = untis && untisGroup === groupKey() && e && e.name ? untis.map[entryKey(e.name)] : null;
+                const hit = untis && untisGroup === groupKey() && e && e.name ? untisHit(e.name) : null;
                 const state = hit && hit !== 'two' ? (hit.absent ? 'out' : 'in') : '';
                 t.classList.toggle('untis-out', state === 'out');
                 const alarm = untisAlarm(code, state);
@@ -1701,7 +1724,7 @@
                 if (!untis || untisGroup !== groupKey() || !anyDone || !entries.some(function (e) { return e.name; })) return null;
                 const must = [], clear = [];
                 entries.forEach(function (e) {
-                    const hit = e.name ? untis.map[entryKey(e.name)] : null;
+                    const hit = e.name ? untisHit(e.name) : null;
                     if (!hit || hit === 'two') return;
                     const st = statusOf(control[e.code] || null).key;
                     if (st === 'done') return;
