@@ -13,17 +13,50 @@
 window.BuchPT && BuchPT.add('integral', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs integral/*)
+        // the cover of the start page (BGY 13): Ablehnungsbereich = região de rejeição, Normalenvektor = vetor normal
+        'Titelbild: Glockenkurve über dem Histogramm eines Tests mit Ablehnungsbereich, eine Ebene im Raum mit Normalenvektor und Gerade':
+            'Imagem da capa: curva em sino sobre o histograma de um teste com a região de rejeição, um plano no espaço com o vetor normal e uma reta',
         // book pt-3 mathe13-pt:
+        // stammfunktion (lb3-1): Stammfunktion = primitiva, Schar = família
+        'Konstante $C$': 'Constante $C$',
+        'Oben: Stammfunktionen F + C (die gewählte hell). Ziehe den Punkt. Unten: f. Die Steigung von F im Punkt ist genau der Funktionswert f(x₀).':
+            'Em cima: primitivas F + C (a escolhida a claro). Arrasta o ponto. Em baixo: f. O declive de F no ponto é exatamente o valor da função f(x₀).',
+        'Schar von Stammfunktionen': 'Família de primitivas', 'Die Funktion f': 'A função f',
+        // bestand (lb3-2): Bestand = quantidade, Zuflussrate = caudal (taxa de entrada), Änderungsrate = taxa de variação
+        'Wassertank': 'Depósito de água', 'Zuflussrate in l/min': 'Caudal em l/min', 'Wasser in l': 'Água em l',
+        'Bis $t = 6$ fließt Wasser zu, danach läuft es ab (negative Änderungsrate). Der Bestand ist bei $t = 6$ am größten.':
+            'Até $t = 6$ entra água; depois a água escoa-se (taxa de variação negativa). A quantidade é máxima em $t = 6$.',
+        'Autofahrt': 'Viagem de carro', 'v in m/s': 'v em m/s', 's in m': 's em m',
+        'Die Fläche unter dem Geschwindigkeitsgraphen ist der zurückgelegte Weg.': 'A área sob o gráfico da velocidade é a distância percorrida.',
+        'Änderungsrate mit Fläche': 'Taxa de variação com a área', 'Rekonstruierter Bestand': 'Quantidade reconstituída', 'Zeit $t$': 'Tempo $t$',
+        // integral, zwischenflaeche (lb3-2, lb3-3): bestimmtes Integral = integral definido, Grenzen = limites de integração, Schnittstelle = abcissa do ponto de interseção
+        'Bestimmtes Integral zwischen zwei Grenzen': 'Integral definido entre dois limites',
+        'Parabel und Gerade': 'Parábola e reta', 'Kubik und Parabel': 'Cúbica e parábola', 'Sinus und Kosinus': 'Seno e cosseno', 'Funktionen': 'Funções',
+        'Fläche zwischen zwei Graphen': 'Área entre dois gráficos', 'Zu wenige Schnittstellen im Bild.': 'Há poucos pontos de interseção na imagem.',
         // book pt-5 mathe13lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs integral/*)
         // book pt-3 mathe13-pt:
+        // stammfunktion
+        ['$ · Stammfunktionen $F(x) = ', '$ · primitivas $F(x) = '], [' + C$, denn $F\'(x) = f(x)$.', ' + C$, porque $F\'(x) = f(x)$.'],
+        ['Bei $x_0 = ', 'Em $x_0 = '], ['$: Steigung von $F$ $= f(', '$: declive de $F$ $= f('], ['$, egal welches $C$.', '$, seja qual for $C$.'],
+        // bestand
+        ['$ · Anfangsbestand $', '$ · quantidade inicial $'], ['Bestand nach $t = ', 'Quantidade ao fim de $t = '],
+        // integral
+        ['Teilstücke zwischen den Nullstellen: ', 'Partes entre os zeros: '],
+        ['Flächeninhalt zwischen Graph und $x$-Achse: $A \\approx ', 'Área entre o gráfico e o eixo $Ox$: $A \\approx '],
+        [' · Das Integral ist kleiner, weil Flächen unter der Achse (rot) negativ zählen.', ' · O integral é menor, porque as áreas abaixo do eixo (a vermelho) contam como negativas.'],
+        [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Atenção: $a > b$ troca o sinal.'],
+        // zwischenflaeche
+        ['$ · Schnittstellen: ', '$ · abcissas dos pontos de interseção: '],
         // book pt-5 mathe13lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-3 mathe13-pt:
+        // zwischenflaeche: the list of intersections ("0,785, 3,927") is separated by semicolons, as the numbers have a decimal comma
+        [/(Schnittstellen: [^<]*)/g, m => m.replace(/\$, \$/g, '$; $')],
         // book pt-5 mathe13lk-pt:
     ]
 });
