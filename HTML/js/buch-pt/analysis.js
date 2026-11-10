@@ -52,6 +52,11 @@ window.BuchPT && BuchPT.add('analysis', {
         'Lösung mit der Ableitung': 'Solução com a derivada', 'x in cm': 'x em cm', 'V in cm³': 'V em cm³', 'r in cm': 'r em cm',
         'O in cm²': 'A em cm²', 'x in m': 'x em m', 'A in m²': 'A em m²',
         // book pt-3 mathe13-pt:
+        // schar, gewinn (lb6): Funktionenschar = família de funções, Ortskurve = lugar geométrico, Erlös = receita, Gewinn = lucro,
+        // Gewinnschwelle = limiar de rendibilidade, Gewinngrenze = limite do lucro; the letters K, E, G stay (canvas labels, explained on the page)
+        'Funktionenschar': 'Família de funções', 'Funktionenschar mit Ortskurve': 'Família de funções com o lugar geométrico dos extremos',
+        'Parameter $a$': 'Parâmetro $a$', 'Verkaufspreis $p$ (€ pro Stück)': 'Preço de venda $p$ (€ por unidade)', 'x in Stück': 'x em unidades',
+        'Kosten, Erlös und Gewinn': 'Custos, receita e lucro',
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
     },
@@ -123,6 +128,18 @@ window.BuchPT && BuchPT.add('analysis', {
         [' Dann ist $h = ', ' Então $h = '], ['\\,\\text{cm} = 2r$: Die beste Dose ist so hoch wie breit.', '\\,\\text{cm} = 2r$: a melhor lata é tão alta como larga.'],
         [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' O lado paralelo ao muro mede então $60 - 2 \\cdot 15 = 30\\,\\text{m}$.'],
         // book pt-3 mathe13-pt:
+        // schar (the point rules have already written the extrema as (x, y))
+        [' Ortskurve der Extrempunkte zeigen', ' Mostrar o lugar geométrico dos extremos'],
+        ['Hochpunkt $(', 'máximo relativo em $('], ['Tiefpunkt $(', 'mínimo relativo em $('],
+        ['Ortskurve aller Extrempunkte (violett): $', 'Lugar geométrico de todos os extremos (a violeta): $'],
+        ['Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
+            'Para $a \\le 0$ não há extremos: $f_a\'(x) = 3x^2 - a$ não tem então nenhum zero com mudança de sinal.'],
+        ['Jede Parabel der Schar geht durch den Ursprung, denn $f_a(0) = 0$ für alle $a$.', 'Todas as parábolas da família passam pela origem, porque $f_a(0) = 0$ para todo o $a$.'],
+        // gewinn
+        ['Gewinnschwelle bei $x \\approx ', 'Limiar de rendibilidade em $x \\approx '], ['$, Gewinngrenze bei $x \\approx ', '$, limite do lucro em $x \\approx '],
+        ['$ Stück, $G \\approx ', '$ unidades, $G \\approx '], ['$ Stück.', '$ unidades.'], ['Gewinn ab $x \\approx ', 'Lucro a partir de $x \\approx '],
+        ['Bei diesem Preis wird nie Gewinn gemacht.', 'A este preço nunca há lucro.'],
+        ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Lucro máximo: $G\'(x) = 0$ em $x \\approx '], ['Kein positives Gewinnmaximum.', 'Não há lucro máximo positivo.'],
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
     ],
