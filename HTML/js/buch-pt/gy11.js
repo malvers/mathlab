@@ -19,6 +19,9 @@ window.BuchPT && BuchPT.add('gy11', {
         'Typen der Matrizen': 'Tipos das matrizes', 'Reihenfolge': 'Ordem', 'Neue Zahlen': 'Novos números', 'nicht definiert': 'não definido',
         '(2,2) · (2,2)': '(2 × 2) · (2 × 2)', '(2,3) · (3,1)': '(2 × 3) · (3 × 1)', '(2,3) · (3,2)': '(2 × 3) · (3 × 2)', '(3,3) · (3,1)': '(3 × 3) · (3 × 1)',
         'hier zufällig dasselbe': 'aqui, por acaso, o mesmo', 'andere Zahlen': 'outros números',
+        // drehmatrix (lb7-2): Drehmatrix = matriz de rotação
+        'Eine Figur wird mit einer Drehmatrix um den Ursprung gedreht': 'Uma figura é rodada em torno da origem com uma matriz de rotação',
+        'Drehwinkel $\\varphi$': 'Ângulo de rotação $\\varphi$',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11/*)
@@ -27,6 +30,8 @@ window.BuchPT && BuchPT.add('gy11', {
         // matrixprodukt
         ['$ ist nicht definiert.', '$ não está definido.'], ['$ ergibt hier zufällig dasselbe.', '$ dá aqui, por acaso, o mesmo.'], ['$ ergibt andere Zahlen.', '$ dá outros números.'],
         ['Andersherum: ', 'Pela ordem inversa: '], [' Das Kommutativgesetz gilt für Matrizen im Allgemeinen nicht.', ' Em geral, a propriedade comutativa não vale para matrizes.'],
+        // drehmatrix
+        ['$ · Gedreht wird um den Ursprung gegen den Uhrzeigersinn.', '$ · A rotação é feita em torno da origem, no sentido contrário ao dos ponteiros do relógio.'],
     ],
     rule: [
         // pt0: notation of the module, for every book

@@ -168,5 +168,9 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-3 mathe13-pt:
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // matrices (a pmatrix with &) become \left(\begin{matrix} … \end{matrix}\right) before the rule of vektoren.js (pt-2) writes every
+        // pmatrix as a row vector: it would turn the rotation matrix of drehmatrix (lb7-2) and the matrices of uebergang (abi) into broken TeX;
+        // the picture is the same. funktionen.js loads before vektoren.js on those pages.
+        [/\\begin\{pmatrix\}((?:(?!\\end\{pmatrix\})[^&])*&(?:(?!\\end\{pmatrix\})[\s\S])*?)\\end\{pmatrix\}/g, '\\left(\\begin{matrix}$1\\end{matrix}\\right)'],
     ]
 });

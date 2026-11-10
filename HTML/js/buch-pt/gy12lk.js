@@ -39,6 +39,8 @@ window.BuchPT && BuchPT.add('gy12lk', {
         'Gerade mit Normaleneinheitsvektor, ein Punkt P und sein Lot auf die Gerade': 'Reta com o vetor normal unitário, um ponto P e a perpendicular de P à reta',
         'P liegt auf der Geraden.': 'P pertence à reta.', 'Positiv: P liegt auf der Seite, in die $\\vec n_0$ zeigt.': 'Positivo: P está do lado para onde aponta $\\vec n_0$.',
         'Negativ: P liegt auf der anderen Seite.': 'Negativo: P está do outro lado.',
+        // abstand3d (lb7-2): Lotfußpunkt = pé da perpendicular; the presets of mode gg are words of vektoren.js
+        'Das 3D-Modul fehlt.': 'Falta o módulo 3D.', 'Beispiel 3': 'Exemplo 3', 'Ursprungsgerade': 'Reta pela origem', 'P auf g': 'P em g',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12lk/*)
@@ -60,6 +62,13 @@ window.BuchPT && BuchPT.add('gy12lk', {
         ['Abstand $d(P, g) \\approx ', 'Distância $d(P, g) \\approx '],
         ['$. P liegt auf der Geraden.', '$. P pertence à reta.'], ['$. Positiv: P liegt auf der Seite, in die $\\vec n_0$ zeigt.', '$. Positivo: P está do lado para onde aponta $\\vec n_0$.'],
         ['$. Negativ: P liegt auf der anderen Seite.', '$. Negativo: P está do outro lado.'],
+        // abstand3d
+        ['Lotfußpunkt: $', 'Pé da perpendicular: $'], ['$ gibt $t = ', '$ dá $t = '], ['Kontrolle mit dem Vektorprodukt: $', 'Verificação com o produto vetorial: $'],
+        ['. $P$ liegt auf $g$.', '. $P$ pertence a $g$.'],
+        ['$: Die Geraden sind parallel. Dann ist ihr Abstand der Abstand des Punktes $Q$ von $g$: $d ', '$: as retas são paralelas. Então a sua distância é a distância do ponto $Q$ a $g$: $d '],
+        [', sie sind identisch.', ': são coincidentes.'], ['$ steht auf beiden Geraden senkrecht, $', '$ é perpendicular às duas retas, $'],
+        ['. Abstand $0$: Die Geraden <b>schneiden</b> sich in $S(', '. Distância $0$: as retas <b>intersetam-se</b> em $S('],
+        ['. <b>Windschief</b>; das kürzeste Verbindungsstück (pink) verbindet $F(', '. <b>Não complanares</b>; o segmento mais curto (cor-de-rosa) une $F('], [')$ und $G(', ')$ e $G('],
     ],
     rule: [
         // pt0: notation of the module, for every book

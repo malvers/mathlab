@@ -60,6 +60,9 @@ window.BuchPT && BuchPT.add('analysis', {
         // schar (lb7-1): Funktionenschar = família de funções, Ortskurve = lugar geométrico; Hoch-/Tiefpunkt without letters (phrases below)
         'Funktionenschar': 'Família de funções', 'Ortskurve der Extrempunkte zeigen': 'Mostrar o lugar geométrico dos extremos',
         'Funktionenschar mit Ortskurve': 'Família de funções com o lugar geométrico', 'Parameter $a$': 'Parâmetro $a$',
+        // gewinn (lb7-2): Kosten K, Erlös E, Gewinn G stay as letters (explained on the page); Stück = unidade
+        'Verkaufspreis $p$ (€ pro Stück)': 'Preço de venda $p$ (€ por unidade)', 'x in Stück': 'x em unidades', 'Kosten, Erlös und Gewinn': 'Custo, receita e lucro',
+        'Bei diesem Preis wird nie Gewinn gemacht.': 'A este preço nunca há lucro.', 'Kein positives Gewinnmaximum.': 'Não há lucro máximo positivo.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -140,6 +143,9 @@ window.BuchPT && BuchPT.add('analysis', {
         ['Für $a \\le 0$ gibt es keine Extrempunkte: $f_a\'(x) = 3x^2 - a$ hat dann keine Nullstelle mit Vorzeichenwechsel.',
             'Para $a \\le 0$ não há extremos: $f_a\'(x) = 3x^2 - a$ não tem então nenhum zero com mudança de sinal.'],
         ['Jede Parabel der Schar geht durch den Ursprung, denn $f_a(0) = 0$ für alle $a$.', 'Todas as parábolas da família passam pela origem, porque $f_a(0) = 0$ para todo o $a$.'],
+        // gewinn
+        ['Gewinnschwelle bei $x \\approx ', 'Limiar de rentabilidade em $x \\approx '], ['$, Gewinngrenze bei $x \\approx ', '$, limite do lucro em $x \\approx '], ['$ Stück.', '$ unidades.'],
+        ['Gewinn ab $x \\approx ', 'Lucro a partir de $x \\approx '], ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Lucro máximo: $G\'(x) = 0$ em $x \\approx '], ['$ Stück, $G \\approx ', '$ unidades, $G \\approx '],
     ],
     rule: [
         // pt0: notation of the module, for every book
