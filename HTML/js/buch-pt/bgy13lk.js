@@ -15,6 +15,8 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         // pt0: the helpers of the module (outside every widget; check.mjs bgy13lk/*)
         // LEO (leontief): the three sectors; the short letters L, I, D of the table stay and are explained by a phrase of pt-5
         'Landwirtschaft': 'Agricultura', 'Industrie': 'Indústria', 'Dienstleistung': 'Serviços',
+        // UEB (uebergang): the stages of the beetle and the three providers
+        'Eier': 'Ovos', 'Larven': 'Larvas', 'Käfer': 'Escaravelhos', 'Anbieter A': 'Fornecedor A', 'Anbieter B': 'Fornecedor B', 'Anbieter C': 'Fornecedor C',
         // book pt-5 mathe13lk-pt:
         // the cover of the start page (titelbildbgy13lk)
         'Titelbild: Trapeze unter einer Kurve, eine Glockenkurve mit rotem Ablehnungsbereich, ein Kreislauf Ei, Larve, Käfer':
@@ -24,6 +26,11 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         'nicht invertierbar': 'não invertível', 'Beispielmatrix': 'Matriz de exemplo', 'Nächster Schritt': 'Próximo passo', 'Alle Schritte': 'Todos os passos', 'Von vorn': 'Do início',
         // leontief (wp2-2): Technologiematrix = matriz tecnológica, Endnachfrage = procura final, Leontief-Inverse = inversa de Leontief (I − A)⁻¹
         'Markt': 'Mercado',
+        // uebergang (wp2-3): Übergangsmatrix = matriz de transição, Grenzmatrix = matriz limite, Fixvektor = vetor fixo, E = I
+        'Käferpopulation': 'População de escaravelhos', 'Kundenwanderung': 'Mudança de clientes', 'Eier je Käfer $f$': 'Ovos por escaravelho $f$',
+        'Verlauf der drei Klassen über die Schritte n': 'Evolução das três classes ao longo dos passos n', '1 Schritt': '1 passo', '10 Schritte': '10 passos',
+        'Zurück auf Start': 'Voltar ao início',
+        'Übergangsgraph mit drei Zuständen und den Übergangsanteilen an den Pfeilen': 'Grafo de transição com três estados e as proporções de transição nas setas',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs bgy13lk/*)
@@ -50,6 +57,14 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         ['$\\vec{x} = (E - A)^{-1} \\cdot \\vec{y} \\approx ', '$\\vec{x} = (I - A)^{-1} \\cdot \\vec{y} \\approx '],
         ['$. Jede Zeile der Tabelle geht auf: Lieferungen an die drei Sektoren plus Endnachfrage ergeben die Produktion. ',
             '$. Cada linha da tabela bate certo: os fornecimentos aos três setores mais a procura final dão a produção. '],
+        // uebergang: the names inside the sentences ("(Eier 800, Larven 200, Käfer 50)", "Anbieter A 42,1 %")
+        ['(Eier ', '(ovos '], [', Larven ', ', larvas '], [', Käfer ', ', escaravelhos '], ['Anbieter ', 'fornecedor '],
+        ['$U^3 = a \\cdot b \\cdot f \\cdot E = ', '$U^3 = a \\cdot b \\cdot f \\cdot I = '], [' \\cdot E$: Nach jeweils drei Schritten ist jede Klasse ', ' \\cdot I$: ao fim de cada três passos, cada classe '],
+        ['<b>genau so groß wie vorher</b>, die Population schwankt zyklisch.', 'tem <b>exatamente o mesmo tamanho que antes</b>: a população oscila ciclicamente.'],
+        ['$. Mit wachsendem $n$ werden die Spalten von $P^n$ gleich: Sie nähern sich der <b>Grenzmatrix</b>, deren Spalten alle der <b>Fixvektor</b> sind.',
+            '$. Com $n$ a crescer, as colunas de $P^n$ ficam iguais: aproximam-se da <b>matriz limite</b>, cujas colunas são todas o <b>vetor fixo</b>.'],
+        ['Fixvektor aus $P \\cdot \\vec{v} = \\vec{v}$ und $v_1 + v_2 + v_3 = 1$: $\\vec{v} \\approx ', 'Vetor fixo a partir de $P \\cdot \\vec{v} = \\vec{v}$ e $v_1 + v_2 + v_3 = 1$: $\\vec{v} \\approx '],
+        ['$. Langfristig: ', '$. A longo prazo: '], [' der Kundschaft, egal wie es anfing.', ' da clientela, seja qual for o início.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -62,5 +77,8 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         [/Endnachfrage (Landwirtschaft|Industrie|Dienstleistung) \$y_(\d)\$/g,
             (m, n, i) => 'Procura final ' + { Landwirtschaft: 'agricultura', Industrie: 'indústria', Dienstleistung: 'serviços' }[n] + ' $y_' + i + '$'],
         [/Insgesamt werden ([\d .  ]+) ME erzeugt, damit ([\d .  ]+) ME den Markt erreichen\./g, 'No total produzem-se $1 u.q. para que $2 u.q. cheguem ao mercado.'],
+        // uebergang: "um den Faktor 1,25 <b>gewachsen</b>." / "auf das 0,8-Fache <b>geschrumpft</b>, …"
+        [/um den Faktor ([\d,]+) <b>gewachsen<\/b>\./g, '<b>cresceu</b> pelo fator $1.'],
+        [/auf das ([\d,]+)-Fache <b>geschrumpft<\/b>, die Population stirbt langfristig aus\./g, '<b>diminuiu</b> para $1 vezes o valor anterior: a população extingue-se a longo prazo.'],
     ]
 });
