@@ -28,6 +28,11 @@ window.BuchPT && BuchPT.add('vektoren', {
         'spitzer Winkel': 'ângulo agudo', 'orthogonal': 'perpendiculares', 'stumpfer Winkel': 'ângulo obtuso', 'parallel': 'colineares',
         'Parallelogramm': 'Paralelogramo', 'Rechteck': 'Retângulo', 'Raute': 'Losango', 'Quadrat': 'Quadrado', 'Trapez': 'Trapézio',
         // book pt-3 mathe13-pt:
+        // gerade3d, ebene3d, geradenlage (wp1-1, wp1-2): Gerade = reta, Ebene = plano, Richtungsvektor = vetor diretor, Normalenvektor = vetor normal,
+        // Spurpunkte = pontos de interseção com os planos coordenados / com os eixos; two lines: identisch = coincidentes, schneidend = concorrentes,
+        // windschief = não complanares, parallel = paralelas (rule below: the word "parallel" means colinear vectors in pt-2)
+        'Parameter $t$': 'Parâmetro $t$', 'Ebene und Normalenvektor': 'Plano e vetor normal', 'Liegt der Punkt in E?': 'O ponto pertence a E?',
+        'Gerade schneidet Ebene': 'Reta que interseta o plano', 'identisch': 'coincidentes', 'schneidend': 'concorrentes', 'windschief': 'não complanares',
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
     },
@@ -55,6 +60,26 @@ window.BuchPT && BuchPT.add('vektoren', {
         ['$: rechter Winkel bei $A$', '$: ângulo reto em $A$'], ['$: benachbarte Seiten gleich lang', '$: lados consecutivos iguais'],
         ['$: Diagonalen senkrecht zueinander', '$: diagonais perpendiculares'], ['$ABCD$ ist ', '$[ABCD]$ é '],
         // book pt-3 mathe13-pt:
+        // gerade3d (the rules have already written the coordinates in a row and the points with commas)
+        ['Der Richtungsvektor darf nicht der Nullvektor sein.', 'O vetor diretor não pode ser o vetor nulo.'],
+        ['Punktprobe für $Q(', 'Verificação de $Q('], ['Alle Zeilen liefern $t = ', 'Todas as linhas dão $t = '], ['$, also <b>$Q \\in g$</b>.', '$, logo <b>$Q \\in g$</b>.'],
+        ['Die Zeilen liefern verschiedene Werte für $t$, also <b>$Q \\notin g$</b>.', 'As linhas dão valores diferentes de $t$, logo <b>$Q \\notin g$</b>.'],
+        ['Spurpunkte: keine', 'Interseções com os planos coordenados: nenhuma'], ['Spurpunkte: ', 'Interseções com os planos coordenados: '],
+        // ebene3d (u ∘ v is already u · v by the rule of pt-2)
+        ['$\\vec{u}$ und $\\vec{v}$ sind parallel, sie spannen keine Ebene auf.', '$\\vec{u}$ e $\\vec{v}$ são colineares: não definem um plano.'],
+        ['Normalenvektor $\\vec{n}', 'Vetor normal $\\vec{n}'], ['$ · Koordinatenform: $', '$ · equação cartesiana: $'],
+        ['Spurpunkte mit den Achsen: ', 'Interseções com os eixos: '], ['Punktprobe: $', 'Verificação: $'],
+        ['$: <b>$Q$ liegt in $E$</b>.', '$: <b>$Q$ pertence a $E$</b>.'], ['$: <b>$Q$ liegt nicht in $E$</b>. Abstand $\\approx ', '$: <b>$Q$ não pertence a $E$</b>. Distância $\\approx '],
+        ['$: Die Gerade ist parallel zur Ebene ', '$: a reta é paralela ao plano '], ['und liegt in ihr.', 'e está contida nele.'], ['und schneidet sie nicht.', 'e não o interseta.'],
+        ['Einsetzen von $g$ in $E$: $t = ', 'Substituindo $g$ em $E$: $t = '], ['$, Schnittpunkt $S(', '$, ponto de interseção $S('], ['$ · Schnittwinkel: $', '$ · ângulo: $'],
+        // geradenlage
+        ['Richtungsvektoren dürfen nicht der Nullvektor sein.', 'Os vetores diretores não podem ser o vetor nulo.'],
+        ['Die Richtungsvektoren sind parallel ($\\vec{v} = ', 'Os vetores diretores são colineares ($\\vec{v} = '],
+        ['Der Stützpunkt $Q$ liegt auf $g$: <b>identisch</b>.', 'O ponto $Q$ de $h$ pertence a $g$: <b>coincidentes</b>.'],
+        ['Der Stützpunkt $Q$ liegt nicht auf $g$: <b>echt parallel</b>.', 'O ponto $Q$ de $h$ não pertence a $g$: <b>estritamente paralelas</b>.'],
+        ['Nicht parallel. Gleichsetzen ergibt $t = ', 'Não são paralelas. Igualando, obtém-se $t = '], ['$: <b>schneidend</b> im Punkt $S(', '$: <b>concorrentes</b> no ponto $S('],
+        ['Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ',
+            'Não são paralelas e o sistema não tem solução: <b>não complanares</b>. Menor distância (a tracejado vermelho) $\\approx '],
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
     ],
@@ -72,6 +97,10 @@ window.BuchPT && BuchPT.add('vektoren', {
             (m, inner) => '(' + inner.split(/\s*\\\\\s*/).join(/\{,\}|\d,\d/.test(inner) ? '; ' : ', ') + ')'],
         [/ \\circ /g, ' \\cdot '],
         // book pt-3 mathe13-pt:
+        // the sine is written sen in Portuguese schools, also on the pages that load no funktionen.js (ebene3d: sin φ)
+        [/\\sin(?![a-zA-Z])/g, '\\operatorname{sen}'],
+        // geradenlage: the preset "parallel" means two lines (paralelas); the word table has already parked the label "parallel" (colineares, pt-2)
+        [/(data-p="par">)\u0003\d+\u0004(?=<)/g, '$1paralelas'], [/(data-p="par">)parallel</g, '$1paralelas<'],
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
     ]
