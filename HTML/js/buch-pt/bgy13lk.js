@@ -13,6 +13,8 @@
 window.BuchPT && BuchPT.add('bgy13lk', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs bgy13lk/*)
+        // LEO (leontief): the three sectors; the short letters L, I, D of the table stay and are explained by a phrase of pt-5
+        'Landwirtschaft': 'Agricultura', 'Industrie': 'Indústria', 'Dienstleistung': 'Serviços',
         // book pt-5 mathe13lk-pt:
         // the cover of the start page (titelbildbgy13lk)
         'Titelbild: Trapeze unter einer Kurve, eine Glockenkurve mit rotem Ablehnungsbereich, ein Kreislauf Ei, Larve, Käfer':
@@ -20,6 +22,8 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         // matrixinverse (wp2-1): Einheitsmatrix E = matriz identidade I (Portuguese schools; the rules turn the E of this module's widgets into I),
         // invertierbar = invertível, Zeilenumformung = operação sobre as linhas, Pivotelement = pivô
         'nicht invertierbar': 'não invertível', 'Beispielmatrix': 'Matriz de exemplo', 'Nächster Schritt': 'Próximo passo', 'Alle Schritte': 'Todos os passos', 'Von vorn': 'Do início',
+        // leontief (wp2-2): Technologiematrix = matriz tecnológica, Endnachfrage = procura final, Leontief-Inverse = inversa de Leontief (I − A)⁻¹
+        'Markt': 'Mercado',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs bgy13lk/*)
@@ -36,6 +40,16 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         ['Die dritte Zeile von $A$ ist die Summe der ersten beiden. Dann hat $A \\cdot \\vec{x} = \\vec{b}$ entweder keine oder unendlich viele Lösungen, nie genau eine.',
             'A terceira linha de $A$ é a soma das duas primeiras. Então $A \\cdot \\vec{x} = \\vec{b}$ não tem solução ou tem uma infinidade de soluções, nunca exatamente uma.'],
         ['Weiter mit „Nächster Schritt“.', 'Continua com «Próximo passo».'],
+        // ME (Mengeneinheiten) = u.q. (unidades de quantidade), also for verflechtung (gy11lk) on the same page
+        [' ME', ' u.q.'],
+        // leontief
+        ['Zeile: liefernder Sektor, Spalte: empfangender Sektor. ', 'Linha: setor que fornece; coluna: setor que recebe. '],
+        ['L = Landwirtschaft, I = Industrie, D = Dienstleistung', 'L = agricultura (Landwirtschaft), I = indústria, D = serviços (Dienstleistung)'],
+        ['. Summe = Produktion, alle Angaben gerundet in ME.', '. Total = produção; todos os valores arredondados, em u.q.'],
+        ['Technologiematrix $A = ', 'Matriz tecnológica $A = '], ['$, Leontief-Inverse $(E - A)^{-1} \\approx ', '$, inversa de Leontief $(I - A)^{-1} \\approx '],
+        ['$\\vec{x} = (E - A)^{-1} \\cdot \\vec{y} \\approx ', '$\\vec{x} = (I - A)^{-1} \\cdot \\vec{y} \\approx '],
+        ['$. Jede Zeile der Tabelle geht auf: Lieferungen an die drei Sektoren plus Endnachfrage ergeben die Produktion. ',
+            '$. Cada linha da tabela bate certo: os fornecimentos aos três setores mais a procura final dão a produção. '],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -44,5 +58,9 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         [/Schritt (\d+) von (\d+): /g, 'Passo $1 de $2: '],
         [/Zeilen (I{1,3}) und (I{1,3}) tauschen, damit in Spalte (\d) oben keine Null steht\./g, 'Trocar as linhas $1 e $2, para que na coluna $3 não fique um zero em cima.'],
         [/Zeile (I{1,3}) durch \$/g, 'Dividir a linha $1 por $$'], [/In Spalte (\d) Nullen erzeugen: /g, 'Anular os outros elementos da coluna $1: '],
+        // leontief: the slider labels "Endnachfrage Landwirtschaft $y_1$" and the last sentence with two rounded totals
+        [/Endnachfrage (Landwirtschaft|Industrie|Dienstleistung) \$y_(\d)\$/g,
+            (m, n, i) => 'Procura final ' + { Landwirtschaft: 'agricultura', Industrie: 'indústria', Dienstleistung: 'serviços' }[n] + ' $y_' + i + '$'],
+        [/Insgesamt werden ([\d .  ]+) ME erzeugt, damit ([\d .  ]+) ME den Markt erreichen\./g, 'No total produzem-se $1 u.q. para que $2 u.q. cheguem ao mercado.'],
     ]
 });
