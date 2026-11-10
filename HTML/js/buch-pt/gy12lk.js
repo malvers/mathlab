@@ -19,6 +19,11 @@ window.BuchPT && BuchPT.add('gy12lk', {
         // integralfunktion (lb3-2): Integralfunktion = função integral, untere Grenze = limite inferior, Hauptsatz = teorema fundamental
         'Welche Funktion?': 'Que função?', 'untere Grenze $a$': 'limite inferior $a$', 'Graph von f mit der Fläche von a bis x': 'Gráfico de f com a área de a até x',
         'Graph der Integralfunktion mit Tangente': 'Gráfico da função integral com a tangente',
+        // rotation (lb3-4): Rotationskörper = sólido de revolução, Kreisscheibe = disco
+        'Welcher Körper?': 'Que sólido?', 'Kreisscheiben $n$': 'Discos $n$', 'aus': 'desligado', 'Ziehen zum Drehen': 'Arrasta para rodar',
+        'Rotationskörper im räumlichen Koordinatensystem, durch Ziehen drehbar': 'Sólido de revolução no referencial do espaço, roda-se arrastando',
+        'Schalte Kreisscheiben zu: Jede Scheibe hat das Volumen $\\pi \\, r^2 \\, \\Delta x$ mit $r = f(x)$.':
+            'Acrescenta discos: cada disco tem o volume $\\pi \\, r^2 \\, \\Delta x$ com $r = f(x)$.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12lk/*)
@@ -27,9 +32,16 @@ window.BuchPT && BuchPT.add('gy12lk', {
         [' (x links von a: das Integral zählt rückwärts)', ' (x à esquerda de a: o integral conta para trás)'], ['An der Stelle $x = ', 'No ponto $x = '],
         ['Die pinke Tangente an $I$ hat die Steigung $', 'A tangente cor-de-rosa a $I$ tem declive $'], ['$, und das ist genau $f(', '$, que é exatamente $f('],
         [')$. Das ist der Hauptsatz: $I_a\'(x) = f(x)$.', ')$. É o teorema fundamental: $I_a\'(x) = f(x)$.'],
+        // rotation
+        ['$, Abweichung $', '$, desvio $'],
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-5 mathe13lk-pt:
+        // rotation: "$f(x) = …$ auf $[-2;\ 2]$ dreht sich um die $x$-Achse: " (the interval with ";\ ", which the engine rule does not read)
+        [/\$ auf \$\[([^;\]$]*);\\ ([^\]$]*)\]\$ dreht sich um die \$x\$-Achse: /g,
+            (m, a, b) => '$ em $[' + a + (/\{,\}/.test(a + b) ? '; ' : ', ') + b + ']$ roda em torno do eixo $Ox$: '],
+        // rotation: "Summe der 12 Kreisscheiben (Radius in der Mitte jedes Streifens): "
+        [/Summe der (\d+) Kreisscheiben \(Radius in der Mitte jedes Streifens\): /g, 'Soma dos $1 discos (raio no ponto médio de cada faixa): '],
     ]
 });
