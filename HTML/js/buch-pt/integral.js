@@ -26,6 +26,9 @@ window.BuchPT && BuchPT.add('integral', {
         'Die Fläche unter dem Geschwindigkeitsgraphen ist der zurückgelegte Weg.': 'A área sob o gráfico da velocidade é a distância percorrida.',
         'Änderungsrate mit Fläche': 'Taxa de variação com a área', 'Rekonstruierter Bestand': 'Quantidade reconstruída', 'Zeit $t$': 'Tempo $t$',
         'Bestimmtes Integral zwischen zwei Grenzen': 'Integral definido entre dois limites',
+        // zwischenflaeche (lb3-3): Schnittstelle = abcissa do ponto de interseção, Differenzfunktion = função diferença
+        'Parabel und Gerade': 'Parábola e reta', 'Kubik und Parabel': 'Cúbica e parábola', 'Sinus und Kosinus': 'Seno e cosseno', 'Funktionen': 'Funções',
+        'Fläche zwischen zwei Graphen': 'Área entre dois gráficos', 'Zu wenige Schnittstellen im Bild.': 'Poucos pontos de interseção na figura.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs integral/*)
@@ -40,6 +43,8 @@ window.BuchPT && BuchPT.add('integral', {
         ['Flächeninhalt zwischen Graph und $x$-Achse: $A \\approx ', 'Área entre o gráfico e o eixo $Ox$: $A \\approx '],
         [' · Das Integral ist kleiner, weil Flächen unter der Achse (rot) negativ zählen.', ' · O integral é menor, porque as áreas abaixo do eixo (a vermelho) contam como negativas.'],
         [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Atenção: $a > b$ troca o sinal.'],
+        // zwischenflaeche
+        ['$ · Schnittstellen: ', '$ · pontos de interseção: '],
     ],
     rule: [
         // pt0: notation of the module, for every book
