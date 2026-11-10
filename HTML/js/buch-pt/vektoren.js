@@ -28,6 +28,8 @@ window.BuchPT && BuchPT.add('vektoren', {
         'spitzer Winkel': 'ângulo agudo', 'orthogonal': 'perpendiculares', 'stumpfer Winkel': 'ângulo obtuso', 'parallel': 'colineares',
         'Parallelogramm': 'Paralelogramo', 'Rechteck': 'Retângulo', 'Raute': 'Losango', 'Quadrat': 'Quadrado', 'Trapez': 'Trapézio',
         // book pt-3 mathe13-pt:
+        // book pt-4 mathe12lk-pt:
+        // book pt-5 mathe13lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs vektoren/*)
@@ -53,6 +55,8 @@ window.BuchPT && BuchPT.add('vektoren', {
         ['$: rechter Winkel bei $A$', '$: ângulo reto em $A$'], ['$: benachbarte Seiten gleich lang', '$: lados consecutivos iguais'],
         ['$: Diagonalen senkrecht zueinander', '$: diagonais perpendiculares'], ['$ABCD$ ist ', '$[ABCD]$ é '],
         // book pt-3 mathe13-pt:
+        // book pt-4 mathe12lk-pt:
+        // book pt-5 mathe13lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -68,5 +72,7 @@ window.BuchPT && BuchPT.add('vektoren', {
             (m, inner) => '(' + inner.split(/\s*\\\\\s*/).join(/\{,\}|\d,\d/.test(inner) ? '; ' : ', ') + ')'],
         [/ \\circ /g, ' \\cdot '],
         // book pt-3 mathe13-pt:
+        // book pt-4 mathe12lk-pt:
+        // book pt-5 mathe13lk-pt:
     ]
 });

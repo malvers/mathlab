@@ -75,6 +75,8 @@ window.BuchPT && BuchPT.add('funktionen', {
         'Graph, zu dem der Term gesucht ist': 'Gráfico cuja expressão se procura', 'Nächster Graph': 'Gráfico seguinte',
         // book pt-2 mathe12-pt:
         // book pt-3 mathe13-pt:
+        // book pt-4 mathe12lk-pt:
+        // book pt-5 mathe13lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -132,6 +134,8 @@ window.BuchPT && BuchPT.add('funktionen', {
         [': stauchen in $x$-Richtung', ': contrair na horizontal'], [': verschieben in $x$-Richtung', ': deslocar na horizontal'],
         // book pt-2 mathe12-pt:
         // book pt-3 mathe13-pt:
+        // book pt-4 mathe12lk-pt:
+        // book pt-5 mathe13lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -162,5 +166,7 @@ window.BuchPT && BuchPT.add('funktionen', {
         [/^(\d+) richtig$/, (m, n) => n + (n === '1' ? ' certa' : ' certas')],
         // book pt-2 mathe12-pt:
         // book pt-3 mathe13-pt:
+        // book pt-4 mathe12lk-pt:
+        // book pt-5 mathe13lk-pt:
     ]
 });

@@ -14,13 +14,16 @@ window.BuchPT && BuchPT.add('integral', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs integral/*)
         // book pt-3 mathe13-pt:
+        // book pt-5 mathe13lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs integral/*)
         // book pt-3 mathe13-pt:
+        // book pt-5 mathe13lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-3 mathe13-pt:
+        // book pt-5 mathe13lk-pt:
     ]
 });

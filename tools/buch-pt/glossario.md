@@ -150,3 +150,11 @@ Widgets anders schreiben, biegen die Regeln in `js/buch-pt/analysis.js`, `stocha
 ## mathe13-pt (BGY 13, block pt-3)
 
 Terms the book adds (Integral, Stammfunktion, Hypothesentest, Gerade/Ebene im Raum …) go here.
+
+## mathe12lk-pt (BGY 12 Leistungskurs, block pt-4)
+
+Terms the book adds go here.
+
+## mathe13lk-pt (BGY 13 Leistungskurs, block pt-5)
+
+Terms the book adds go here.

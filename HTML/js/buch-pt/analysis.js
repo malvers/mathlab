@@ -52,6 +52,8 @@ window.BuchPT && BuchPT.add('analysis', {
         'Lösung mit der Ableitung': 'Solução com a derivada', 'x in cm': 'x em cm', 'V in cm³': 'V em cm³', 'r in cm': 'r em cm',
         'O in cm²': 'A em cm²', 'x in m': 'x em m', 'A in m²': 'A em m²',
         // book pt-3 mathe13-pt:
+        // book pt-4 mathe12lk-pt:
+        // book pt-5 mathe13lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -121,6 +123,8 @@ window.BuchPT && BuchPT.add('analysis', {
         [' Dann ist $h = ', ' Então $h = '], ['\\,\\text{cm} = 2r$: Die beste Dose ist so hoch wie breit.', '\\,\\text{cm} = 2r$: a melhor lata é tão alta como larga.'],
         [' Die Seite parallel zur Mauer ist dann $60 - 2 \\cdot 15 = 30\\,\\text{m}$ lang.', ' O lado paralelo ao muro mede então $60 - 2 \\cdot 15 = 30\\,\\text{m}$.'],
         // book pt-3 mathe13-pt:
+        // book pt-4 mathe12lk-pt:
+        // book pt-5 mathe13lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -135,5 +139,7 @@ window.BuchPT && BuchPT.add('analysis', {
         // optimieren: the surface of the tin is A in Portuguese schools (German O): "$O(r)", "$O'(r)", "$O \approx"
         [/(^|\$)O('?\(r\)| \\approx)/g, '$1A$2'],
         // book pt-3 mathe13-pt:
+        // book pt-4 mathe12lk-pt:
+        // book pt-5 mathe13lk-pt:
     ]
 });
