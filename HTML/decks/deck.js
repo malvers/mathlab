@@ -2728,6 +2728,73 @@ const link = (function () {
     endShow();
   }, true);   // capture: before the slide-number handler clears its box; an open overview still gets Esc first
 
+  /* The buzzer in the presenter's bar (Doc, 10.11.2026: "das Feedback vom Buzzer gerne in der Präsentation im
+     Präsentationsview" - the phone beside him gets too few looks while he presents). Between the running time and
+     the clock: the open "nicht verstanden" (a click: seen, back to 0) and "zu langsam" / "zu schnell" of the last two
+     minutes, in the colours of the teacher's side (js/buzzer.js, which does the listening). The code is the phone's -
+     rueckmeldung.html keeps it in ITS storage - so the tables name it: the code a class is tapping (Buzzer.klassenCode),
+     asked until one turns up; counted from the moment the presenter opens. A click on the quiet label types another. */
+  function presBuzzer(el) {
+    if (!el) return;
+    const APPLE = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/';
+    const own = [].find.call(document.scripts, function (s) { return /\/deck\.js(\?|$)/.test(s.src); });
+    const base = own ? own.src : location.href;
+    function lade(src) {
+      return new Promise(function (ok, no) {
+        const s = document.createElement('script');
+        s.src = new URL(src, base).href; s.onload = ok; s.onerror = no;
+        document.head.appendChild(s);
+      });
+    }
+    const pill = function (art, cls, img, wort, title) {
+      return '<' + cls + ' class="pb ' + art + '" hidden title="' + title + '"' + (cls === 'button' ? ' type="button"' : '') + '>'
+        + '<img alt="" draggable="false" src="' + APPLE + img + '.png"><span>' + wort + '</span><b></b></' + cls + '>';
+    };
+    el.innerHTML = '<button type="button" class="pb-ruhe" title="Buzzer-Code der Klasse – Klick: anderen Code eingeben"></button>'
+      + pill('frage', 'button', '1f914', 'NICHT VERSTANDEN', 'Nicht verstanden, noch offen – Klick: gesehen')
+      + pill('langsam', 'span', '1f40c', 'ZU LANGSAM', 'Zu langsam (letzte 2 Minuten)')
+      + pill('schnell', 'span', '1f3c3', 'ZU SCHNELL', 'Zu schnell (letzte 2 Minuten)');
+    const ruhe = el.querySelector('.pb-ruhe');
+    const pills = { frage: el.querySelector('.frage'), langsam: el.querySelector('.langsam'), schnell: el.querySelector('.schnell') };
+    const stand = { frage: 0, langsam: 0, schnell: 0 };
+    let code = null;
+    function setze(art, n) {
+      const p = pills[art], vorher = stand[art];
+      n = n > 0 ? n : 0;
+      stand[art] = n;
+      p.hidden = !n;
+      p.querySelector('b').textContent = n > 99 ? '99+' : String(n);
+      if (n > vorher && p.animate) p.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(1)' }],
+        { duration: 600, iterations: 2, easing: 'ease-out' });
+      ruhe.hidden = stand.frage + stand.langsam + stand.schnell > 0;
+    }
+    function nimm(c, ab) {
+      code = Buzzer.nimmCode(c, ab);
+      if (!code) return;
+      ruhe.textContent = 'FEEDBACK ' + code;
+      el.hidden = false;
+      Buzzer.start(function (n) { setze('frage', n); });
+      Buzzer.tempo(function (s) { setze('langsam', s.langsam); setze('schnell', s.schnell); });
+    }
+    pills.frage.onclick = function () { Buzzer.gesehen(); };
+    ruhe.onclick = function () {
+      const c = (prompt('Buzzer-Code der Klasse (4 Ziffern):', code || '') || '').replace(/\D/g, '');
+      if (/^\d{4}$/.test(c) && c !== code) nimm(c, 0);
+    };
+    let tries = 0;
+    async function suche() {
+      if (code) return;
+      let z = null;
+      try { z = await Buzzer.klassenCode(); } catch (e) { /* offline for a moment */ }
+      if (code) return;                              // typed in meanwhile
+      if (z) nimm(z.code, z.maxId);
+      else if (++tries < 360) setTimeout(suche, 20000);   // nothing tapped today yet: ask again (two hours)
+    }
+    (window.ladeSkript ? Promise.resolve() : lade('../js/lade-skript.js'))
+      .then(function () { return window.Buzzer ? null : lade('../js/buzzer.js'); })
+      .then(suche, function () { /* no buzzer here (offline file copy): the bar stays as it was */ });
+  }
+
   function presenterView() {
     const svg = function (d) {
       return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
@@ -2742,6 +2809,7 @@ const link = (function () {
       + '<button type="button" class="p-pause"></button>'
       + '<button type="button" class="p-reset" title="Timer neu starten" aria-label="Timer neu starten">' + svg(RESET) + '</button>'
       + '<button type="button" class="p-ov" title="Übersicht aller Folien (o)" aria-label="Übersicht aller Folien"></button>'
+      + '<span class="p-buzz" hidden></span>'       // the class's buzzer feedback (presBuzzer)
       + '<span class="p-clock" title="Uhrzeit"></span>'
       + '<button type="button" class="p-end-btn" title="Präsentation beenden (Esc)" aria-label="Präsentation beenden">'
       + svg('<path d="M18 6 6 18M6 6l12 12"/>') + '</button></div>'
@@ -2983,6 +3051,7 @@ const link = (function () {
     // a clicked button must not keep the focus: the space bar would press it again on top of turning the page
     root.addEventListener('mousedown', function (e) { if (e.target.closest('button')) e.preventDefault(); });
     setInterval(tick, 500); tick(); showPause();
+    presBuzzer(q('.p-buzz'));
     // Fullscreen here too (Doc, 16.09.2026: "kannst Du das auch Fullscreen machen?"). Chrome allows it only
     // after a click or key IN this window - handing the right over from the beamer window is not shipped
     // (chromestatus: Fullscreen Capability Delegation, proposed) and gesture-free fullscreen needs an admin

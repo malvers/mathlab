@@ -852,6 +852,23 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 /* CyberClock.digits: fixed slots, the bar's size, weight and colour - widest Orbitron digit 0.834em (measured 17.09.2026) */
 #pres .p-timer,#pres .p-clock{--cc-size:1em;--cc-dw:.86em;--cc-sw:.4em;--cc-weight:400;--cc-digit:currentColor;gap:0}
 .p-clock{margin-left:auto}
+/* the class's buzzer feedback between running time and clock (Doc, 10.11.2026, deck.js presBuzzer): pills in the
+   colours of the teacher's side - "nicht verstanden" and "zu langsam" orange, "zu schnell" red - only while > 0;
+   all quiet: just the code, dim */
+.p-buzz{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.6em;letter-spacing:.06em}
+.p-buzz[hidden],.p-buzz [hidden]{display:none!important}
+#pres .p-buzz button{font:inherit;letter-spacing:inherit}
+#pres .p-buzz .pb,.p-buzz .pb{display:flex;align-items:center;gap:7px;padding:4px 14px 4px 8px;border-radius:999px;
+  white-space:nowrap;font-weight:700;opacity:1;cursor:default}
+.p-buzz .pb img{width:1.6em;height:1.6em;flex:none;pointer-events:none}
+.p-buzz .pb b{font-size:1.25em;color:inherit}
+.p-buzz .pb.schnell img{transform:scaleX(-1)}   /* the runner mirrored, as on the phone (Doc, 01.10.2026) */
+#pres .p-buzz .pb.frage,#pres .p-buzz .pb.langsam{background:rgb(245,194,66);color:#0b1a33}
+#pres .p-buzz .pb.schnell{background:rgb(176,36,24);color:#fff}
+#pres .p-buzz .pb.frage{cursor:pointer}
+#pres .p-buzz .pb.frage:hover{color:#0b1a33;filter:brightness(1.08)}
+#pres .p-buzz .pb-ruhe{opacity:.4;font-weight:400;letter-spacing:.12em}
+#pres .p-buzz .pb-ruhe:hover{opacity:.8}
 /* the end button right of the clock: Esc for a tablet without keyboard - red on hover, it closes the show */
 #pres .p-end-btn{margin-left:10px}
 #pres .p-end-btn:hover{color:rgb(176,36,24)}

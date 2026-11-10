@@ -35,6 +35,8 @@
 //   Buzzer.texte(onTexte, { schluessel: true })   the same without a session (rueckmeldung.html, Doc 07.10.2026):
 //                            the code is claimed for the day with a key of this device; if another has claimed it,
 //                            a fresh code follows and window hears 'buzzer-code'
+//   Buzzer.klassenCode()     {code, maxId}: the code a class is tapping now (Doc, 10.11.2026: the presenter view takes the
+//                            phone's code over), Buzzer.nimmCode(c, ab) listens to code c, counting questions after id ab
 //   Buzzer.aktiv(), Buzzer.code()
 (function () {
     'use strict';
@@ -392,7 +394,46 @@
         });
     }
 
+    // ---- a code another device shows (Doc, 10.11.2026: the buzzer in the deck's presenter view) ----------------------
+    // The phone's rueckmeldung.html keeps today's code in ITS storage - the laptop cannot read it. So the laptop asks
+    // the tables (buzzer and buzzer_tempo, both readable for the last day) which code a class is tapping: the one with
+    // the most taps in the last two hours - a test tap with 1234 must not win over a class - else today's newest.
+    // klassenCode() -> {code, maxId} | null; maxId: the newest question id of all (ids are one series, so
+    // "id > maxId" means: after this moment).
+    const KLASSE_FENSTER = 2 * 3600000;
+    async function klassenCode() {
+        const h0 = new Date(); h0.setHours(0, 0, 0, 0);
+        const ab = encodeURIComponent(h0.toISOString());
+        const hol = t => fetch(DB_URL + '/rest/v1/' + t + '?created_at=gt.' + ab + '&select=id,code,created_at&order=id.desc&limit=500',
+            { headers: { apikey: DB_KEY }, cache: 'no-store' }).then(r => (r.ok ? r.json() : []), () => []).catch(() => []);
+        const [b, t] = await Promise.all([hol('buzzer'), hol('buzzer_tempo')]);
+        const zeilen = [].concat(b || [], t || []).filter(r => r && /^\d{4}$/.test(r.code));
+        if (!zeilen.length) return null;
+        const zeit = r => zeitenAus([r])[r.id] || 0;
+        const jetzt = Date.now(), je = {};
+        zeilen.forEach(r => {
+            const ms = zeit(r), e = je[r.code] || (je[r.code] = { code: r.code, n: 0, t: 0 });
+            if (jetzt - ms < KLASSE_FENSTER) e.n++;
+            if (ms > e.t) e.t = ms;
+        });
+        const sieger = Object.values(je).sort((x, y) => y.n - x.n || y.t - x.t)[0];
+        return { code: sieger.code, maxId: b && b[0] ? b[0].id : 0 };
+    }
+    // nimmCode(c, ab): listen to code c from now on. ab: count only questions with a larger id (without it, the
+    // code this device already holds today keeps what was seen - a reload changes nothing).
+    function nimmCode(c, ab) {
+        c = String(c || '');
+        if (!/^\d{4}$/.test(c)) return null;
+        const k = lies(KEY_CODE, null), gleich = !!k && k.tag === heute() && k.code === c;
+        if (gleich && ab == null) return c;
+        schreib(KEY_CODE, { code: c, tag: heute() });
+        schreib(KEY_GESEHEN, ab || 0);
+        if (laeuft) verbinden();
+        return c;
+    }
+
     window.Buzzer = { start, weiter, gesehen, neuerCode, code, link, karte, karteBereit, markiere, blitz, tempoMarke,
+        klassenCode, nimmCode,
         // tempo(onTempo, ab): onTempo({schnell, langsam, neu}) - the counts since ab() (ms; without it: the last two
         // minutes), neu = the kind just come; tempoJetzt(): count again now (the page's ab() moved on)
         tempo: (cb, ab) => { tempoMelde = cb; tempoAb = ab || null; if (laeuft && cb) cb(tempoStand()); },
