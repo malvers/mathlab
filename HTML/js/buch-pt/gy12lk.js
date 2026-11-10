@@ -13,11 +13,20 @@
 window.BuchPT && BuchPT.add('gy12lk', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs gy12lk/*)
+        // the solids of rotation (BODIES of rotation) and the improper integrals (UFN of uneigentlich)
+        'Kegel': 'Cone', 'Kugel': 'Esfera', 'Paraboloid': 'Paraboloide', 'Fass': 'Barril', '1/√x bei 0': '1/√x em 0',
         // book pt-5 mathe13lk-pt:
+        // integralfunktion (lb3-2): Integralfunktion = função integral, untere Grenze = limite inferior, Hauptsatz = teorema fundamental
+        'Welche Funktion?': 'Que função?', 'untere Grenze $a$': 'limite inferior $a$', 'Graph von f mit der Fläche von a bis x': 'Gráfico de f com a área de a até x',
+        'Graph der Integralfunktion mit Tangente': 'Gráfico da função integral com a tangente',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12lk/*)
         // book pt-5 mathe13lk-pt:
+        // integralfunktion
+        [' (x links von a: das Integral zählt rückwärts)', ' (x à esquerda de a: o integral conta para trás)'], ['An der Stelle $x = ', 'No ponto $x = '],
+        ['Die pinke Tangente an $I$ hat die Steigung $', 'A tangente cor-de-rosa a $I$ tem declive $'], ['$, und das ist genau $f(', '$, que é exatamente $f('],
+        [')$. Das ist der Hauptsatz: $I_a\'(x) = f(x)$.', ')$. É o teorema fundamental: $I_a\'(x) = f(x)$.'],
     ],
     rule: [
         // pt0: notation of the module, for every book

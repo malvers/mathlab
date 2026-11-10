@@ -19,6 +19,13 @@ window.BuchPT && BuchPT.add('integral', {
         'Konstante $C$': 'Constante $C$', 'Schar von Stammfunktionen': 'Família de primitivas', 'Die Funktion f': 'A função f',
         'Oben: Stammfunktionen F + C (die gewählte hell). Ziehe den Punkt. Unten: f. Die Steigung von F im Punkt ist genau der Funktionswert f(x₀).':
             'Em cima: primitivas F + C (a escolhida a claro). Arrasta o ponto. Em baixo: f. O declive de F no ponto é exatamente o valor f(x₀) da função.',
+        // bestand, integral (lb3-2): Bestand = quantidade, Änderungsrate = taxa de variação, Zuflussrate = caudal, orientierte Fläche = área orientada
+        'Wassertank': 'Depósito de água', 'Zuflussrate in l/min': 'Caudal em l/min', 'Wasser in l': 'Água em l', 'Autofahrt': 'Viagem de carro',
+        'Bis $t = 6$ fließt Wasser zu, danach läuft es ab (negative Änderungsrate). Der Bestand ist bei $t = 6$ am größten.':
+            'Até $t = 6$ entra água; depois, sai (taxa de variação negativa). A quantidade é máxima em $t = 6$.',
+        'Die Fläche unter dem Geschwindigkeitsgraphen ist der zurückgelegte Weg.': 'A área sob o gráfico da velocidade é a distância percorrida.',
+        'Änderungsrate mit Fläche': 'Taxa de variação com a área', 'Rekonstruierter Bestand': 'Quantidade reconstruída', 'Zeit $t$': 'Tempo $t$',
+        'Bestimmtes Integral zwischen zwei Grenzen': 'Integral definido entre dois limites',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs integral/*)
@@ -27,6 +34,12 @@ window.BuchPT && BuchPT.add('integral', {
         // stammfunktion
         ['$ · Stammfunktionen $F(x) = ', '$ · primitivas $F(x) = '], [' + C$, denn $F\'(x) = f(x)$.', ' + C$, porque $F\'(x) = f(x)$.'],
         ['$: Steigung von $F$ $= f(', '$: declive de $F$ $= f('], ['$, egal welches $C$.', '$, seja qual for $C$.'],
+        // bestand, integral
+        ['$ · Anfangsbestand $', '$ · quantidade inicial $'], ['Bestand nach $t = ', 'Quantidade ao fim de $t = '],
+        ['Teilstücke zwischen den Nullstellen: ', 'Partes entre os zeros: '],
+        ['Flächeninhalt zwischen Graph und $x$-Achse: $A \\approx ', 'Área entre o gráfico e o eixo $Ox$: $A \\approx '],
+        [' · Das Integral ist kleiner, weil Flächen unter der Achse (rot) negativ zählen.', ' · O integral é menor, porque as áreas abaixo do eixo (a vermelho) contam como negativas.'],
+        [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Atenção: $a > b$ troca o sinal.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
