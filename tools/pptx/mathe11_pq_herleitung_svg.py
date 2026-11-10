@@ -85,5 +85,99 @@ def ergaenzung():
     return c.svg(), labels
 
 
+def ecke_zahlen():
+    """Slide 'Die fehlende Ecke', second version (Doc, 10.11.2026: "die fehlende Ecke so richtig verstehe ich es noch
+    nie"): x^2 + 6x built up in four pictures, one per click - the square and the strip 6x, the strip cut in half, one
+    half moved under the square (same area), and the corner 3 * 3 = 9 that closes the square (x + 3)^2.
+    Panel 1 is there from the start, panels 2-4 and the general line come with clicks 0-3 (deck.css .step.kommt)."""
+    c = S.Canvas(W, H)
+    X, U = 100, 30                       # side x and 3 units in pixels
+    TOP, LAB, GAP = 70, 22, 42           # upper edge, room for the left labels, gap with the arrow
+    p1 = 10 + LAB
+    p2 = p1 + X + 2 * U + GAP + LAB
+    p3 = p2 + X + 2 * U + GAP + LAB
+    p4 = p3 + X + U + GAP + LAB
+    assert p4 + X + U <= W - 8
+    labels = []
+
+    def lab(x, y, w, text, css=MID, g=None):
+        labels.append((x, y, w, text, css, {"g": g, "kommt": True} if g is not None else None))
+
+    def box(x, y, w, h, fill, opacity):
+        c.rect(x, y, w, h, fill=fill, opacity=opacity)
+        c.rect(x, y, w, h, stroke=S.INK, width=2)
+
+    def group(g):
+        c.raw('<g class="step kommt" data-g="%d">' % g)
+
+    def arrow(x_end, g):
+        group(g)
+        c.arrow(x_end - LAB - GAP + 8, TOP + X / 2, x_end - LAB - 8, TOP + X / 2, color=S.ORANGE, width=2.6)
+        c.raw('</g>')
+
+    cap = TOP + X + U + 30               # one line for all captions
+    # 1: the square and the whole strip 6x
+    box(p1, TOP, X, X, S.INK, 0.08)
+    box(p1 + X, TOP, 2 * U, X, S.GREEN, 0.28)
+    lab(p1 + X / 2, TOP + X / 2, 60, "$x^2$", BIG)
+    lab(p1 + X + U, TOP + X / 2, 50, "$6x$")
+    lab(p1 + X / 2, TOP - 18, 30, "$x$", SMALL)
+    lab(p1 + X + U, TOP - 18, 30, "$6$", SMALL)
+    lab(p1 - 12, TOP + X / 2, 24, "$x$", SMALL)
+    lab(p1 + X / 2 + U, cap, 160, "$x^2 + 6x$")
+    # 2: the strip cut in half
+    arrow(p2, 0)
+    group(0)
+    box(p2, TOP, X, X, S.INK, 0.08)
+    box(p2 + X, TOP, U, X, S.GREEN, 0.28)
+    box(p2 + X + U, TOP, U, X, S.GREEN, 0.28)
+    c.raw('</g>')
+    lab(p2 + X / 2, TOP + X / 2, 60, "$x^2$", BIG, 0)
+    lab(p2 + X + U / 2, TOP + X / 2, 30, "$3x$", SMALL, 0)
+    lab(p2 + X + 1.5 * U, TOP + X / 2, 30, "$3x$", SMALL, 0)
+    lab(p2 + X / 2, TOP - 18, 30, "$x$", SMALL, 0)
+    lab(p2 + X + U / 2, TOP - 18, 30, "$3$", SMALL, 0)
+    lab(p2 + X + 1.5 * U, TOP - 18, 30, "$3$", SMALL, 0)
+    lab(p2 - 12, TOP + X / 2, 24, "$x$", SMALL, 0)
+    lab(p2 + X / 2 + U, cap, 160, "$6x$ halbieren", MID, 0)
+    # 3: one half under the square - the area stays the same, the corner is empty
+    arrow(p3, 1)
+    group(1)
+    box(p3, TOP, X, X, S.INK, 0.08)
+    box(p3 + X, TOP, U, X, S.GREEN, 0.28)
+    box(p3, TOP + X, X, U, S.GREEN, 0.28)
+    c.rect(p3 + X, TOP + X, U, U, stroke=S.MUTED, width=1.6)
+    c.raw('</g>')
+    lab(p3 + X / 2, TOP + X / 2, 60, "$x^2$", BIG, 1)
+    lab(p3 + X + U / 2, TOP + X / 2, 30, "$3x$", SMALL, 1)
+    lab(p3 + X / 2, TOP + X + U / 2, 40, "$3x$", SMALL, 1)
+    lab(p3 + X + U / 2, TOP + X + U / 2, 30, "?", "font-size:18px;color:#6E7E9F", 1)
+    lab(p3 + X / 2, TOP - 18, 30, "$x$", SMALL, 1)
+    lab(p3 + X + U / 2, TOP - 18, 30, "$3$", SMALL, 1)
+    lab(p3 - 12, TOP + X / 2, 24, "$x$", SMALL, 1)
+    lab(p3 - 12, TOP + X + U / 2, 24, "$3$", SMALL, 1)
+    lab(p3 + (X + U) / 2, cap, 160, "Hälfte nach unten", MID, 1)
+    # 4: the corner 3 * 3 = 9 closes the square of side x + 3
+    arrow(p4, 2)
+    group(2)
+    box(p4, TOP, X, X, S.INK, 0.08)
+    box(p4 + X, TOP, U, X, S.GREEN, 0.28)
+    box(p4, TOP + X, X, U, S.GREEN, 0.28)
+    box(p4 + X, TOP + X, U, U, S.ORANGE, 0.85)
+    c.rect(p4, TOP, X + U, X + U, stroke=S.INK, width=3.2)
+    c.raw('</g>')
+    lab(p4 + X / 2, TOP + X / 2, 60, "$x^2$", BIG, 2)
+    lab(p4 + X + U / 2, TOP + X / 2, 30, "$3x$", SMALL, 2)
+    lab(p4 + X / 2, TOP + X + U / 2, 40, "$3x$", SMALL, 2)
+    lab(p4 + X + U / 2, TOP + X + U / 2, 30, "$9$", SMALL, 2)
+    lab(p4 + (X + U) / 2, TOP - 18, 80, "$x + 3$", SMALL, 2)
+    lab(p4 + (X + U) / 2, cap, 150, "Ecke: $3 \\cdot 3 = 9$", MID, 2)
+    # the sum of it, then the general case
+    lab(W / 2, cap + 56, W, "$x^2 + 6x + 9 = (x + 3)^2$ — und allgemein fehlt bei $x^2 + px$ die Ecke "
+        "$\\left(\\frac{p}{2}\\right)^2$", "font-size:17px;color:#0E244E", 3)
+    assert cap + 56 + 14 < H
+    return c.svg(), labels
+
+
 if __name__ == "__main__":
     print(ergaenzung()[0])
