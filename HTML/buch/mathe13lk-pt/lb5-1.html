@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática 13 LK · Capítulo 5.1 · População e amostra | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Estimar e testar, média amostral e variância amostral. Capítulo 5.1 do manual interativo Matemática · Berufliches Gymnasium 13 · Leistungskurs: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO 5.1 · ÁREA DE APRENDIZAGEM 5</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 5.1 · ÁREA DE APRENDIZAGEM 5 · DEZEMBRO</p>
+            <h1>População e amostra</h1>
+            <p class="b-hero-lead">Ninguém pergunta a todos os eleitores antes de fazer uma previsão. Ninguém abre todas as embalagens para verificar a quantidade. Toma-se uma <b>amostra</b>
+                e tiram-se conclusões sobre o todo. O quão bem isso funciona depende de como a amostra é recolhida e de quão grande ela é.
+                Aqui começa a <b>estatística inferencial</b>: estimar e testar com probabilidades.</p>
+            <div class="b-chips"><span class="b-chip">5 AULAS</span><span class="b-chip">2 UNIDADES</span><span class="b-chip">DA AMOSTRA AO TODO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="histo-hero" data-n="20" data-p="0.4" data-lo="6" data-hi="10"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a distinguir <b>população</b> e <b>amostra</b> e a verificar se uma amostra é representativa</li>
+                <li>a distinguir, em exemplos, <b>problemas de estimação</b> e <b>problemas de teste</b></li>
+                <li>a calcular a <b>média amostral</b> e a <b>variância amostral</b></li>
+                <li>a compreender quanto <b>variam</b> os resultados de uma amostra e como a dimensão muda isso</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="20" data-ph="μ ="><p class="b-q-text">$X$ segue uma distribuição binomial com $n = 50$ e $p = 0{,}4$. Quanto é $\mu$?</p><div class="b-sol"><p>$50 \cdot 0{,}4 = 20$</p></div></div>
+            <div class="b-q" data-ans="0,42" data-tol="0.0001" data-ph="Proporção"><p class="b-q-text">420 de 1 000 inquiridos concordam. Qual é a proporção, em número decimal?</p><div class="b-sol"><p>0,42</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="Média"><p class="b-q-text">Média de 2, 3, 5, 6?</p><div class="b-sol"><p>$\tfrac{16}{4} = 4$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk">
+            <div class="b-box-title">O INQUÉRITO NA ESCOLA</div>
+            <div class="b-text"><p>Querem saber quantos alunos e alunas da vossa escola vêm de bicicleta.</p>
+                <ul><li>Basta perguntar à vossa turma? Ou a todos os que de manhã estão junto ao parque de bicicletas?</li><li>Como recolheriam uma boa amostra?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">DEZ EMBALAGENS</div>
+            <div class="b-text"><p>Dez embalagens de 500 g pesam 498, 502, 500, 497, 503, 501, 499, 500, 504, 496 g.</p>
+                <ul><li>Qual é o peso médio? Quanto se dispersam os valores?</li><li>Confiariam na máquina de enchimento?</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span>
+        </div>
+        <div class="b-box b-erk">
+            <div class="b-box-title">ESTIMAR OU DECIDIR?</div>
+            <div class="b-text"><p>a) Que percentagem dos eleitores vota no partido X? b) O dado está viciado? c) O novo medicamento funciona melhor?</p>
+                <ul><li>Que pergunta pede um número e qual pede uma decisão sim ou não?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="População, amostra, estimar" data-toc-k="1" data-toc-short="1 Amostra">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">2 AULAS</span></div>
+    <h2><span class="b-no">1</span>População, amostra, estimar e testar</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Num inquérito a 1 000 eleitores escolhidos ao acaso, 420 dizem que votam no partido X. Que percentagem é na população inteira?</p></div></div>
+            <div class="b-text"><p>A melhor estimativa é a proporção amostral $h = 0{,}42$. Mas outra amostra teria dado um resultado um pouco diferente.
+                O quanto esses resultados variam pode calcular-se. Com $n = 1000$, o desvio típico é $\sqrt{\tfrac{0{,}42 \cdot 0{,}58}{1000}} \approx 0{,}016$, ou seja, cerca de 1,6 pontos percentuais.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · CONCEITOS BÁSICOS</div>
+                <div class="b-text">
+                    <p>A <b>população</b> é o conjunto de todos os objetos sobre os quais se quer saber algo. Uma <b>amostra</b> é uma seleção desse conjunto; a sua dimensão é $n$.</p>
+                    <p>Uma amostra é <b>representativa</b> se reproduz bem a população. O mais seguro é uma seleção <b>aleatória</b>, em que cada elemento tem a mesma probabilidade de ser escolhido.</p>
+                    <p><b>Problema de estimação:</b> determinar um valor desconhecido (por exemplo, uma proporção $p$) a partir da amostra. <b>Problema de teste:</b> verificar com a amostra uma hipótese sobre $p$ e decidir.</p>
+                    <p>As proporções amostrais dispersam-se em torno de $p$ com o desvio padrão $\sqrt{\tfrac{p(1-p)}{n}}$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Enviesamento:</b> quem só inquire voluntários, ou só a uma certa hora, não chega a determinados grupos. Uma grande dimensão não resolve isso.</p>
+            <p class="b-note"><b>Raiz de n:</b> o quádruplo dos inquiridos reduz a dispersão a metade, tal como na distribuição binomial do 12.º ano.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · MUITAS AMOSTRAS DE UMA POPULAÇÃO</div>
+        <p class="b-help" style="margin:0 0 12px">Escolhe $p$ e $n$ e recolhe muitas amostras. Cada uma dá uma proporção $h$. Observa a largura da distribuição dos $h$ e depois aumenta $n$.</p>
+        <div data-widget="stichprobe"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · REPRESENTATIVA?</div>
+            <div class="b-text"><p>Um jornal quer conhecer a opinião da cidade sobre a nova ciclovia e põe os leitores a votar online. 2 400 votos, 70 % contra. Isto é significativo?</p></div>
+            <div class="b-sol"><p>Não. Só respondem pessoas que leem o jornal e se sentem interpeladas, muitas vezes as especialmente irritadas. A amostra <b>não é aleatória</b>, apesar da sua dimensão.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · QUÃO GRANDE TEM DE SER n?</div>
+            <div class="b-text"><p>Qual é a variação típica de uma proporção amostral com $p = 0{,}5$ para $n = 100$ e $n = 400$?</p></div>
+            <div class="b-sol"><p>$\sqrt{\tfrac{0{,}25}{100}} = 0{,}05$ e $\sqrt{\tfrac{0{,}25}{400}} = 0{,}025$. <span class="b-res">Dimensão quadruplicada, dispersão a metade.</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Indica a população e a amostra: a) Numa fábrica medem-se, de hora a hora, 20 parafusos. b) Antes das eleições telefona-se a 1 200 eleitores.</p></div>
+            <div class="b-sol"><p>a) todos os parafusos da produção / os 20 medidos &nbsp; b) todos os eleitores / os 1 200 inquiridos</p></div>
+        </div>
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Problema de estimação ou de teste? a) O dado é equilibrado? b) Qual é a proporção de peças defeituosas? c) O novo fertilizante ajuda?</p></div>
+            <div class="b-sol"><p>a) teste &nbsp; b) estimação &nbsp; c) teste</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Num inquérito a 1 000 pessoas, 42 % indicam o partido X. Indica um intervalo onde, com grande segurança, está a verdadeira proporção (duas vezes o desvio padrão).</p></div>
+            <div class="b-sol"><p>$0{,}42 \pm 2 \cdot 0{,}016 = [0{,}389;\, 0{,}451]$, ou seja, cerca de 39 % a 45 %.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Quantas pessoas é preciso inquirir para que o desvio padrão da proporção, com $p = 0{,}5$, seja no máximo 1 ponto percentual?</p></div>
+            <div class="b-sol"><p>$\sqrt{\tfrac{0{,}25}{n}} \le 0{,}01 \Rightarrow n \ge 2500$.</p></div>
+        </div>
+    </div>
+
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="0,05" data-tol="0.0001" data-ph="σ ="><p class="b-q-text">Variação típica da proporção com $p = 0{,}5$ e $n = 100$?</p><div class="b-sol"><p>0,05</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Uma votação online com 10 000 participantes é …</p>
+            <div class="b-mc"><button>de certeza representativa, porque é grande</button><button>geralmente não representativa, porque os participantes se selecionam a si próprios</button><button>sempre mais exata do que uma amostra aleatória</button></div>
+            <div class="b-sol"><p>A autosseleção enviesa, seja qual for a dimensão.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Média e variância amostrais" data-toc-k="2" data-toc-short="2 Média">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">3 AULAS</span></div>
+    <h2><span class="b-no">2</span>Média amostral e variância amostral</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>As dez embalagens pesam, em média, exatamente 500 g. Mas uma máquina que enchesse alternadamente 480 g e 520 g teria a mesma média. Como se mede a dispersão?</p></div></div>
+            <div class="b-text"><p>Como nas variáveis aleatórias do 12.º ano: através dos quadrados dos desvios em relação à média. Nas amostras divide-se por $n - 1$ em vez de $n$,
+                porque a própria média foi estimada a partir dos dados.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · ESTATÍSTICAS DA AMOSTRA</div>
+                <div class="b-text">
+                    <p><b>Média amostral:</b> $\bar{x} = \dfrac{x_1 + x_2 + \ldots + x_n}{n}$</p>
+                    <p><b>Variância amostral:</b> $s^2 = \dfrac{1}{n - 1} \left((x_1 - \bar{x})^2 + \ldots + (x_n - \bar{x})^2\right)$ &nbsp; · &nbsp; <b>desvio padrão</b> $s = \sqrt{s^2}$</p>
+                    <p>$\bar{x}$ e $s$ estimam o valor médio $\mu$ e o desvio padrão $\sigma$ da população.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calculadora:</b> muitas calculadoras mostram os dois valores, $s_{n-1}$ (amostra) e $\sigma_n$ (dividindo por $n$). Para amostras usa-se $s_{n-1}$.</p>
+            <p class="b-note"><b>Folha de cálculo:</b> <code>MÉDIA(…)</code>, <code>VAR.S(…)</code> e <code>DESVPAD.S(…)</code> calculam com $n - 1$, <code>VAR.P</code> com $n$.</p>
+        </aside>
+    </div>
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · ESTIMAR A MÉDIA E A VARIÂNCIA</div>
+        <p class="b-help" style="margin:0 0 12px">Uma máquina enche garrafas. Recolhe amostras e compara $\bar x$ com o valor nominal. Com «+1000» vês que $s^2$ com $\tfrac{1}{n-1}$ acerta, em média, na verdadeira variância, mas com $\tfrac1n$ fica demasiado pequena.</p>
+        <div data-widget="schaetzen"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · DEZ EMBALAGENS</div>
+            <div class="b-text"><p>Calcula $\bar{x}$ e $s$ para 498, 502, 500, 497, 503, 501, 499, 500, 504, 496 g.</p></div>
+            <div class="b-sol"><p>$\bar{x} = 500$ g. Desvios $-2, 2, 0, -3, 3, 1, -1, 0, 4, -4$, soma dos quadrados 60.
+                $s^2 = \tfrac{60}{9} \approx 6{,}67$, <span class="b-res">$s \approx 2{,}58$ g</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · DUAS MÁQUINAS</div>
+            <div class="b-text"><p>A máquina B dá 480, 520, 490, 510, 500 g. Compara com o exemplo 3.</p></div>
+            <div class="b-sol"><p>$\bar{x} = 500$ g, soma dos quadrados $400 + 400 + 100 + 100 + 0 = 1000$, $s^2 = 250$, $s \approx 15{,}8$ g. A mesma média, mas B dispersa seis vezes mais.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="5">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Calcula $\bar{x}$ e $s$ para os valores medidos 12, 15, 11, 14, 13.</p></div>
+            <div class="b-sol"><p>$\bar{x} = 13$, soma dos quadrados $1 + 4 + 4 + 1 + 0 = 10$, $s^2 = 2{,}5$, $s \approx 1{,}58$.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Em 40 lançamentos de um dado, a média dos pontos foi 3,9. Isto é invulgar para um dado equilibrado? (Um lançamento tem $\sigma \approx 1{,}71$, a média de 40 lançamentos $\tfrac{1{,}71}{\sqrt{40}}$.)</p></div>
+            <div class="b-sol"><p>Desvio padrão da média $\approx 0{,}27$. 3,9 está 0,4 acima de 3,5, ou seja, cerca de 1,5 desvios padrão: chama a atenção, mas não é invulgar o suficiente para levantar suspeitas.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Porque é que em $s^2$ se divide por $n - 1$? Pensa numa amostra com um só valor.</p></div>
+            <div class="b-sol"><p>Com $n = 1$ tem-se $\bar{x} = x_1$ e todos os desvios são 0. Dividindo por $n$, obter-se-ia variância 0, como se não houvesse dispersão. Com $n - 1 = 0$, $s^2$ nem sequer está definida:
+                a partir de um único valor nada se pode dizer sobre a dispersão. Em geral, $n - 1$ compensa o facto de $\bar{x}$ estar mais perto dos dados do que o verdadeiro $\mu$.</p></div>
+        </div>
+    </div>
+
+    <h3>PARA O LEISTUNGSKURS · DEMONSTRAÇÕES</h3>
+    <div class="b-tasks" data-start="8">
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p>Mostra que os desvios em relação à média amostral se anulam sempre: $\sum\limits_{i=1}^{n} (x_i - \bar{x}) = 0$. Porque é que, por isso, não se pode medir a dispersão simplesmente como desvio médio?</p></div>
+            <div class="b-sol"><p>$\sum (x_i - \bar{x}) = \sum x_i - n\bar{x} = n\bar{x} - n\bar{x} = 0$. Desvios positivos e negativos compensam-se; por isso elevam-se ao quadrado (ou tomam-se os valores absolutos).</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p>Demonstra a <b>fórmula de Steiner</b> (de translação) $\sum\limits_{i=1}^{n} (x_i - \bar{x})^2 = \sum\limits_{i=1}^{n} x_i^2 - n\,\bar{x}^2$ e calcula com ela, uma segunda vez, $s^2$ para 12, 15, 11, 14, 13.</p></div>
+            <div class="b-hint"><p>Caso notável debaixo do símbolo de somatório; depois usa $\sum x_i = n\bar{x}$.</p></div>
+            <div class="b-sol"><p>$\sum (x_i^2 - 2\bar{x}x_i + \bar{x}^2) = \sum x_i^2 - 2\bar{x} \cdot n\bar{x} + n\bar{x}^2 = \sum x_i^2 - n\bar{x}^2$. $\square$</p>
+                <p>$\sum x_i^2 = 144 + 225 + 121 + 196 + 169 = 855$, $n\bar{x}^2 = 5 \cdot 169 = 845$: soma dos quadrados 10, <span class="b-res">$s^2 = \tfrac{10}{4} = 2{,}5$</span>, como acima.</p></div>
+        </div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="13" data-ph="x̄ ="><p class="b-q-text">Média de 12, 15, 11, 14, 13?</p><div class="b-sol"><p>13</p></div></div>
+        <div class="b-q" data-ans="2,5" data-tol="0.0001" data-ph="s² ="><p class="b-q-text">Variância amostral dos valores 12, 15, 11, 14, 13?</p><div class="b-sol"><p>$\tfrac{10}{4} = 2{,}5$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="10">
+        <div class="b-task" data-lvl="1">
+            <div class="b-task-q"><p>Uma escola quer saber quão satisfeitos estão os alunos com a cantina. Descreve uma boa e uma má maneira de recolher a amostra.</p></div>
+            <div class="b-sol"><p>Boa: escolher ao acaso a partir da lista de alunos, em todos os anos. Má: inquirir só quem está na cantina ao almoço; os insatisfeitos talvez comam noutro lado.</p></div>
+        </div>
+        <div class="b-task" data-lvl="2">
+            <div class="b-task-q"><p><b>Relacionar com o 12.º ano:</b> a proporção de canhotos é cerca de 10 %. Numa amostra de 50 pessoas, quantos esperas e quanto é $\sigma$? Qual é a probabilidade de 10 ou mais?</p></div>
+            <div class="b-sol"><p>$\mu = 5$, $\sigma = \sqrt{4{,}5} \approx 2{,}12$. $P(X \ge 10) \approx 0{,}025$: raro, mas possível.</p></div>
+        </div>
+        <div class="b-task" data-lvl="3">
+            <div class="b-task-q"><p><b>Problema aberto:</b> de 500 peças verificadas de uma produção diária de 20 000 unidades, 12 são defeituosas. Estima o número de peças defeituosas e indica a precisão dessa estimativa. Quantas peças seria preciso verificar para que a extrapolação variasse apenas cerca de 50 peças?</p></div>
+            <div class="b-hint"><p>A extrapolação é $N \cdot h$, a sua dispersão $N \cdot \sqrt{\tfrac{h(1-h)}{n}}$.</p></div>
+            <div class="b-sol"><p>$h = 0{,}024$: cerca de 480 peças, dispersão $20\,000 \cdot \sqrt{\tfrac{0{,}024 \cdot 0{,}976}{500}} \approx 137$ peças.</p>
+                <p>$20\,000 \cdot \sqrt{\tfrac{0{,}0234}{n}} \le 50$ dá $n \ge 0{,}0234 \cdot 400^2 \approx 3750$. <span class="b-res">Verificar cerca de 3 750 peças.</span> Com uma parte tão grande da produção diária, isso só compensa se os defeitos forem caros.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: a maior sondagem que alguma vez falhou" data-toc-k="X" data-toc-short="1936">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">A DIMENSÃO NÃO SUBSTITUI A SELEÇÃO ALEATÓRIA</span></div>
+    <h2>As eleições de 1936</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Antes das eleições presidenciais americanas de 1936, a revista Literary Digest enviou cerca de dez milhões de questionários, e mais de dois milhões foram devolvidos. A sua previsão:
+                o desafiante Alf Landon ganharia claramente ao presidente Franklin D. Roosevelt. Na realidade, Roosevelt ganhou com grande vantagem.</p>
+            <p>Os endereços vinham, entre outros, de listas telefónicas e de registos automóveis, na época sobretudo pessoas abastadas. E responderam principalmente os que estavam insatisfeitos com o governo.
+                O jovem especialista em sondagens George Gallup acertou com uma amostra muito mais pequena, mas escolhida com mais cuidado, e ficou famoso com isso.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> Peverill Squire: Why the 1936 Literary Digest Poll Failed. Public Opinion Quarterly 52 (1), 1988.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>POPULAÇÃO E AMOSTRA</h4><p>Escolhida ao acaso, para ser representativa.</p></div>
+        <div><p>Literary Digest 1936: grande, mas enviesada</p></div></div>
+    <div class="b-rueck"><div><h4>ESTIMAR E TESTAR</h4><p>Estimar: um número. Testar: uma decisão sobre uma hipótese.</p></div>
+        <div><p>Previsão eleitoral · dado equilibrado?</p></div></div>
+    <div class="b-rueck"><div><h4>DISPERSÃO DA PROPORÇÃO</h4><p>$\sqrt{\tfrac{p(1-p)}{n}}$; o quádruplo de $n$ reduz-a a metade.</p></div>
+        <div><p>$n = 1000$, $p = 0{,}42$: 1,6 pontos percentuais</p></div></div>
+    <div class="b-rueck"><div><h4>ESTATÍSTICAS</h4><p>$\bar{x}$ e $s^2 = \tfrac{1}{n-1} \sum (x_i - \bar{x})^2$</p></div>
+        <div><p>Embalagens: $\bar{x} = 500$ g, $s \approx 2{,}58$ g</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1</div>
+            <div class="b-q" data-ans="2500" data-ph="n ="><p class="b-q-text">Qual tem de ser, no mínimo, $n$ com $p = 0{,}5$ para que a dispersão da proporção seja no máximo 0,01?</p><div class="b-sol"><p>2500</p></div></div>
+            <div class="b-q" data-ans="500" data-ph="x̄ ="><p class="b-q-text">Média de 480, 520, 490, 510, 500?</p><div class="b-sol"><p>500</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2</div>
+            <div class="b-q" data-ans="250" data-ph="s² ="><p class="b-q-text">Variância amostral de 480, 520, 490, 510, 500?</p><div class="b-sol"><p>$\tfrac{1000}{4} = 250$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">«O novo método de estudo é melhor?» é …</p>
+                <div class="b-mc"><button>um problema de teste</button><button>um problema de estimação</button><button>nem sequer um problema estatístico</button></div>
+                <div class="b-sol"><p>Verifica-se uma hipótese.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Berufliches Gymnasium, 13.º ano, Leistungskurs · Área de aprendizagem 5 segundo o programa de Matemática do Berufliches Gymnasium da Saxónia.</p>
+    <p>Todos os textos, exercícios e figuras são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-pt/stochastik.js"></script>
+<script src="../../js/buch-gy12.js"></script>
+<script src="../../js/buch-pt/gy12.js"></script>
+</body>
+</html>

@@ -65,6 +65,10 @@ window.BuchPT && BuchPT.add('stochastik', {
         // book pt-3 mathe13-pt:
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // stichprobe (lb5-1): Grundgesamtheit = população, Stichprobe = amostra, Stichprobenumfang = dimensão da amostra, Anteil = proporção
+        'Anteil in der Grundgesamtheit $p$': 'Proporção na população $p$', 'Stichprobenumfang $n$': 'Dimensão da amostra $n$', 'Stichproben ziehen:': 'Recolher amostras:',
+        'Verteilung der relativen Häufigkeiten vieler Stichproben': 'Distribuição das frequências relativas de muitas amostras',
+        'Noch keine Stichprobe gezogen.': 'Ainda não foi recolhida nenhuma amostra.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -109,6 +113,10 @@ window.BuchPT && BuchPT.add('stochastik', {
         // book pt-3 mathe13-pt:
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // stichprobe
+        [' Stichprobe vom Umfang ', ' amostra de dimensão '], [' Stichproben vom Umfang ', ' amostras de dimensão '], [' · letzte: $h = ', ' · última: $h = '],
+        ['$ (gold)', '$ (a dourado)'], ['Mittelwert der $h$: $', 'Média dos $h$: $'], ['$ · Standardabweichung der $h$: $', '$ · desvio padrão dos $h$: $'],
+        ['Theorie: $\\sqrt{', 'Teoria: $\\sqrt{'], ['$. Viermal so großes $n$ halbiert die Streuung.', '$. Um $n$ quatro vezes maior reduz a dispersão a metade.'],
     ],
     rule: [
         // pt0: notation of the module, for every book

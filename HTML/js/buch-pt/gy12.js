@@ -20,6 +20,10 @@ window.BuchPT && BuchPT.add('gy12', {
         'Rechtecke Mitte': 'Retângulos ao centro', 'Trapeze': 'Trapézios', 'Verfahren': 'Método', 'Anzahl der Streifen $n$': 'Número de faixas $n$',
         'Streifen unter einem Funktionsgraphen': 'Faixas sob o gráfico de uma função', 'Näherung': 'Aproximação', 'Fehler': 'Erro',
         'Hier ist das Verfahren schon exakt.': 'Aqui o método já é exato.',
+        // schaetzen (lb5-1): Stichprobenmittel = média amostral, Stichprobenvarianz = variância amostral, Sollwert = valor nominal
+        'Stichprobenumfang $n$': 'Dimensão da amostra $n$', 'Neue Stichprobe': 'Nova amostra', '+1000 Stichproben': '+1000 amostras', 'Anzahl': 'Número',
+        'Füllmengen der Stichprobe als Punktdiagramm mit ihrem Mittelwert und dem Sollwert': 'Volumes da amostra num diagrama de pontos, com a sua média e o valor nominal',
+        'Sollwert': 'Valor nominal',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12/*)
@@ -32,6 +36,13 @@ window.BuchPT && BuchPT.add('gy12', {
         ['Rechtecke links mit $n = ', 'Retângulos à esquerda com $n = '], ['Rechtecke rechts mit $n = ', 'Retângulos à direita com $n = '],
         ['Rechtecke Mitte mit $n = ', 'Retângulos ao centro com $n = '], ['Trapeze mit $n = ', 'Trapézios com $n = '],
         ['$ · genauer Wert $', '$ · valor exato $'], [' (ohne Stammfunktion, nur numerisch)', ' (sem primitiva, só numericamente)'],
+        // schaetzen
+        [' Werte)', ' valores)'], ['Stichprobe: ', 'Amostra: '], ['Im Mittel über ', 'Em média, em '], [' Stichproben: $\\bar{x} \\approx ', ' amostras: $\\bar{x} \\approx '],
+        ['$ (wahr: ', '$ (verdadeiro: '], ['$s^2$ mit $\\tfrac{1}{n-1}$: $', '$s^2$ com $\\tfrac{1}{n-1}$: $'], ['$, mit $\\tfrac1n$: $', '$, com $\\tfrac1n$: $'],
+        ['Die Division durch $n$ liegt im Mittel um den Faktor $\\tfrac{n-1}{n} = ', 'A divisão por $n$ dá, em média, um valor demasiado baixo, pelo fator $\\tfrac{n-1}{n} = '],
+        ['$ zu tief.', '$.'], ['Die Anlage füllt im Mittel $\\mu = ', 'A máquina enche, em média, $\\mu = '],
+        ['$ ml mit der Standardabweichung $\\sigma = ', '$ ml, com o desvio padrão $\\sigma = '],
+        ['$ ml ab. Das weiß die Prüferin aber nicht: Sie schätzt beides aus der Stichprobe.', '$ ml. Mas a inspetora não sabe isso: estima os dois valores a partir da amostra.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
