@@ -153,7 +153,41 @@ Terms the book adds (Integral, Stammfunktion, Hypothesentest, Gerade/Ebene im Ra
 
 ## mathe12lk-pt (BGY 12 Leistungskurs, block pt-4)
 
-Terms the book adds go here.
+Die Begriffe, die BGY 12 Leistungskurs (`mathe12lk-pt`, 10.11.2026) zu `mathe12-pt` dazubringt. Was mit `mathe12` gleich ist,
+hat dessen Übersetzung übernommen (Zeile für Zeile, wo der deutsche Text gleich ist).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Satz von der totalen Wahrscheinlichkeit · Satz von Bayes | teorema da probabilidade total · teorema de Bayes | $P(A_k \mid B) = \frac{P(A_k) \cdot P(B \mid A_k)}{P(B)}$, auf den Seiten mit senkrechtem Strich |
+| Zerlegung der Ergebnismenge | partição do espaço amostral | |
+| Zulieferer $Z_i$ · defekt $D$ | fornecedor $F_i$ · defeituoso $D$ | Buchstaben aus portugiesischen Wörtern |
+| Schülerin $S$ / Chor $C$ | rapariga $R$ / coro $C$ | lb1-1, Aufgabe zur Unabhängigkeit |
+| Verteilungsfunktion $F(x) = P(X \le x)$ · Treppenfunktion | função de distribuição · função em escada | Widget `verteilungsfunktion` |
+| Wahrscheinlichkeitsfunktion | função de probabilidade | |
+| höchstens · mehr als · zwischen | no máximo · mais de · entre | |
+| Summensymbol · binomischer Lehrsatz | símbolo de somatório · binómio de Newton | |
+| gesuchtes $n$ oder $p$ | procura-se $n$ ou $p$ | |
+| Galtonbrett · Nagelreihe · Fach | tabuleiro de Galton · fila de pregos · compartimento | Widget `galton` |
+| Stetigkeit · Unstetigkeitsstelle | continuidade · ponto de descontinuidade | |
+| Sprungstelle · hebbare Unstetigkeit | descontinuidade de salto · descontinuidade removível | |
+| abschnittsweise definierte Funktion · Nahtstelle | função definida por ramos · ponto de junção | |
+| Zwischenwertsatz | teorema de Bolzano | |
+| lineare Approximation · differenzierbar · Differenzierbarkeit | aproximação linear · derivável · derivabilidade | „derivável implica contínua“ |
+| Ausschnitt (Zoom) | janela | Widget `linapprox` |
+| Produktregel · Kettenregel | regra do produto · regra da cadeia | |
+| Verkettung · innere / äußere Funktion | função composta (composição) · função interior / exterior | „derivada exterior vezes derivada interior“ |
+| lineare Verkettung | composição linear | |
+| Ausklammern · Satz vom Nullprodukt | pôr em evidência · lei do anulamento do produto | |
+| Quotientenregel | regra do quociente | |
+| trigonometrischer Pythagoras | fórmula fundamental da trigonometria | $\operatorname{sen}^2 x + \cos^2 x = 1$ |
+| globales / lokales Extremum | extremo absoluto / relativo | Rand = fronteira, Randwerte = valores nos extremos do intervalo |
+| Fallunterscheidung | análise de casos | |
+| Regression · Bestimmtheitsmaß $r^2$ · Extrapolation | regressão · coeficiente de determinação $r^2$ · extrapolação | |
+| Methode der kleinsten Quadrate | método dos mínimos quadrados | |
+| Rettungsschwimmerin · Lot · Brechungsgesetz | nadadora-salvadora · perpendicular · lei da refração | Widget `rettung` |
+| Schwerpunkt der dreiseitigen Pyramide $S$ | baricentro $G$ da pirâmide triangular $[ABCD]$ | Schwerpunkt der Grundfläche $G'$ |
+| Seitenhalbierende | mediana | |
+| Hilfsmittel / CAS | calculadora / calculadora (CAS) | „sem calculadora“ wie in pt-1 |
 
 ## mathe13lk-pt (BGY 13 Leistungskurs, block pt-5)
 
