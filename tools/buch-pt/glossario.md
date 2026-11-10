@@ -149,7 +149,49 @@ Widgets anders schreiben, biegen die Regeln in `js/buch-pt/analysis.js`, `stocha
 
 ## mathe13-pt (BGY 13, block pt-3)
 
-Terms the book adds (Integral, Stammfunktion, Hypothesentest, Gerade/Ebene im Raum …) go here.
+Die Begriffe, die BGY 13 (`mathe13-pt`, 10.11.2026) dazubringt. Was die Widgets anders schreiben, biegen die Regeln in
+`js/buch-pt/integral.js`, `vektoren.js` und `analysis.js` um (Block pt-3).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Stammfunktion · unbestimmtes Integral | primitiva · integral indefinido | integrieren = primitivar (Integrationsregeln = regras de primitivação) |
+| Anfangsbedingung · Nachweis durch Ableiten | condição inicial · verificação por derivação | |
+| bestimmtes Integral · Grenzen | integral definido · limites de integração | $\Big[F(x)\Big]_a^b$ bleibt |
+| rekonstruierter Bestand · Änderungsrate · Zuflussrate | quantidade reconstituída · taxa de variação · caudal | Wassertank = depósito de água |
+| Hauptsatz der Differenzial- und Integralrechnung | teorema fundamental do cálculo | |
+| Intervalladditivität · Linearität | aditividade em relação ao intervalo · linearidade | |
+| Flächeninhalt · Differenzfunktion · Schnittstelle | área · função diferença · abcissa do ponto de interseção | Liste mit Dezimalkomma durch Semikolon getrennt (Regel) |
+| Rechteck- / Trapezmethode · Streifen | método dos retângulos / dos trapézios · faixas | zu viel / zu wenig = por excesso / por defeito |
+| Mittelwert einer Funktion | valor médio | linksgekrümmt = concavidade voltada para cima |
+| Grenzkosten · Fixkosten | custo marginal · custos fixos | |
+| beurteilende Statistik | estatística inferencial | |
+| Grundgesamtheit · Stichprobe · Stichprobenumfang | população · amostra · dimensão da amostra | repräsentativ = representativa, Verzerrung = enviesamento |
+| Schätz- / Testproblem | problema de estimação / de teste | |
+| Stichprobenmittel · Stichprobenvarianz | média amostral $\bar{x}$ · variância amostral $s^2$ | Prozentpunkte = pontos percentuais |
+| Signifikanztest | teste de hipóteses (teste de significância) | |
+| Nullhypothese · Gegenhypothese | hipótese nula $H_0$ · hipótese alternativa $H_1$ | Testgröße = estatística de teste |
+| Signifikanzniveau · Irrtumswahrscheinlichkeit | nível de significância $\alpha$ · probabilidade de erro | |
+| Ablehnungsbereich $\overline{A}$ · kritischer Wert | região de rejeição $\overline{A}$ · valor crítico | $A$ = região de aceitação, der Buchstabe passt auch im Portugiesischen |
+| links- / rechtsseitig / zweiseitig | unilateral à esquerda / à direita / bilateral | |
+| Fehler 1. / 2. Art | erro de tipo I / de tipo II | $\beta$ bleibt |
+| Wappen (Münze) | face nacional | wie pt-1 |
+| Parametergleichung einer Geraden | equação vetorial da reta $g\colon \vec{x} = \vec{p} + t\,\vec{u}$ | einmal erwähnt: $(x, y, z) = \ldots$; Widgets schreiben $\vec{x}$ |
+| Stützpunkt · Richtungsvektor · Spannvektoren | ponto da reta · vetor diretor · vetores diretores do plano | |
+| Punktprobe | pertença de um ponto (verificação) | |
+| Spurpunkte (Gerade / Ebene) | pontos de interseção com os planos coordenados / com os eixos | $xy$-Ebene = plano $xOy$ |
+| Vektorprodukt · Normalenvektor | produto vetorial $\vec{u} \times \vec{v}$ · vetor normal | Formel in einer Zeile wie alle Koordinaten |
+| Koordinatengleichung · Achsenabschnittsform | equação cartesiana · equação segmentária | |
+| Lagebeziehungen | posições relativas | |
+| identisch · parallel · schneidend · windschief | coincidentes · paralelas · concorrentes · não complanares | Preset „parallel“ in geradenlage = paralelas (Regel), sonst colineares |
+| Schnittwinkel | ângulo (de duas retas, de reta e plano, de dois planos) | $\operatorname{sen}$ auch in vektoren (Regel) |
+| Grundfläche $G$ · Mantel $M$ · Oberfläche $O$ | área da base $A_b$ · área lateral $A_L$ · área total $A$ | Widget pyramide mit denselben Buchstaben; Spitze = vértice |
+| Pyramidenstumpf · Elle | tronco de pirâmide · côvado | |
+| Funktionenschar · Ortskurve | família de funções · lugar geométrico | Scheitel $S_a$ = vértice $V_a$ |
+| Abstand Punkt–Gerade · Lotfußpunkt | distância de um ponto a uma reta · pé da perpendicular | |
+| Lösbarkeit · Stufenform | possibilidade · forma em escada | possível e determinado / indeterminado, impossível |
+| Kosten · Erlös · Gewinn | custos $K$ · receita $E$ · lucro $G$ | Buchstaben bleiben (Leinwand), Seite nennt C, R, L |
+| Gewinnschwelle · Gewinngrenze · Gewinnmaximum | limiar de rendibilidade · limite do lucro · lucro máximo | Stückkosten = custo médio, Betriebsoptimum = ótimo de exploração |
+| Operatoren berechne / begründe / zeige / deute | calcula / justifica / mostra / interpreta | |
 
 ## mathe12lk-pt (BGY 12 Leistungskurs, block pt-4)
 
