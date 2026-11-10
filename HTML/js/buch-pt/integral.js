@@ -15,11 +15,18 @@ window.BuchPT && BuchPT.add('integral', {
         // pt0: the helpers of the module (outside every widget; check.mjs integral/*)
         // book pt-3 mathe13-pt:
         // book pt-5 mathe13lk-pt:
+        // stammfunktion (lb3-1): Stammfunktion = primitiva, Integrationskonstante = constante de integração
+        'Konstante $C$': 'Constante $C$', 'Schar von Stammfunktionen': 'Família de primitivas', 'Die Funktion f': 'A função f',
+        'Oben: Stammfunktionen F + C (die gewählte hell). Ziehe den Punkt. Unten: f. Die Steigung von F im Punkt ist genau der Funktionswert f(x₀).':
+            'Em cima: primitivas F + C (a escolhida a claro). Arrasta o ponto. Em baixo: f. O declive de F no ponto é exatamente o valor f(x₀) da função.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs integral/*)
         // book pt-3 mathe13-pt:
         // book pt-5 mathe13lk-pt:
+        // stammfunktion
+        ['$ · Stammfunktionen $F(x) = ', '$ · primitivas $F(x) = '], [' + C$, denn $F\'(x) = f(x)$.', ' + C$, porque $F\'(x) = f(x)$.'],
+        ['$: Steigung von $F$ $= f(', '$: declive de $F$ $= f('], ['$, egal welches $C$.', '$, seja qual for $C$.'],
     ],
     rule: [
         // pt0: notation of the module, for every book

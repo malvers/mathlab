@@ -14,6 +14,9 @@ window.BuchPT && BuchPT.add('bgy13lk', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs bgy13lk/*)
         // book pt-5 mathe13lk-pt:
+        // the cover of the start page (titelbildbgy13lk)
+        'Titelbild: Trapeze unter einer Kurve, eine Glockenkurve mit rotem Ablehnungsbereich, ein Kreislauf Ei, Larve, Käfer':
+            'Imagem da capa: trapézios sob uma curva, uma curva de Gauss com a região de rejeição a vermelho, um ciclo ovo, larva, escaravelho',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs bgy13lk/*)
