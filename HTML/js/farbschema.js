@@ -28,7 +28,11 @@
     let mode = 'dark';
     try { const s = localStorage.getItem(KEY); if (NEXT[s]) mode = s; } catch (_) { }
     try { const q = new URLSearchParams(location.search).get('farbschema'); if (NEXT[q]) mode = q; } catch (_) { }
-    const forced = html.getAttribute('data-fs-force');                          // e.g. the print edition: always light, never stored
+    // a lab embedded in a deck (?widget) keeps its own colours whatever scheme is stored - the deck's frame was drawn for
+    // them (Doc, 10.11.2026: the digits net in ai-wasserzeichen came up in "Hell", "die ganze Optik ist verändert")
+    let widget = false;
+    try { widget = new URLSearchParams(location.search).has('widget'); } catch (_) { }
+    const forced = html.getAttribute('data-fs-force') || (widget ? 'dark' : null);   // e.g. the print edition: always light, never stored
     if (NEXT[forced]) mode = forced;
 
     function dbg(msg) { try { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('[farbschema] ' + msg); } catch (_) { } }
