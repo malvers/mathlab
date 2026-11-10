@@ -26,6 +26,9 @@ window.BuchPT && BuchPT.add('gy11lk', {
         // linapprox (lb2-2): lineare Approximation = aproximação linear, Ausschnitt = janela
         'Ausschnitt: halbe Breite $r$': 'Janela: meia largura $r$',
         'Funktionsgraph und Tangente in einem Ausschnitt, der sich verkleinern lässt': 'Gráfico da função e tangente numa janela que se pode diminuir',
+        // produktregel (lb2-4): Produktregel = regra do produto, Zuwachs = acréscimo, Streifen = faixa, Ecke = canto
+        'Zuwachs $h$ von $x$': 'Acréscimo $h$ de $x$',
+        'Rechteck mit den Seiten u und v und seinem Zuwachs aus zwei Streifen und einer Ecke': 'Retângulo de lados u e v e o seu acréscimo, formado por duas faixas e um canto',
         // book pt-5 mathe13lk-pt:
     },
     phrase: [
@@ -45,6 +48,12 @@ window.BuchPT && BuchPT.add('gy11lk', {
             ' por unidade de $h$. Diminui $r$: o erro encolhe mais depressa do que $h$ e, vista de muito perto, a curva parece a sua tangente.'],
         ['. Verkleinere $r$: Der Fehler schrumpft schneller als $h$, die Kurve sieht im Kleinen aus wie ihre Tangente.',
             '. Diminui $r$: o erro encolhe mais depressa do que $h$ e, vista de muito perto, a curva parece a sua tangente.'],
+        // produktregel
+        ['$ bei $x = 1{,}5$. Wächst $x$ um $h$, wächst die Fläche $u \\cdot v$ um zwei Streifen und eine Ecke:',
+            '$ em $x = 1{,}5$. Se $x$ cresce $h$, a área $u \\cdot v$ cresce duas faixas e um canto:'],
+        ['Für $h \\to 0$ geht die Ecke $\\Delta u \\cdot \\tfrac{\\Delta v}{h}$ gegen $0 \\cdot v\'$, übrig bleibt $u\\,v\' + u\'\\,v = ',
+            'Quando $h \\to 0$, o canto $\\Delta u \\cdot \\tfrac{\\Delta v}{h}$ tende para $0 \\cdot v\'$ e fica $u\\,v\' + u\'\\,v = '],
+        ['$: die <b>Produktregel</b>.', '$: a <b>regra do produto</b>.'],
         // book pt-5 mathe13lk-pt:
     ],
     rule: [
