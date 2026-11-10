@@ -55,8 +55,8 @@ window.BuchPT && BuchPT.add('integral', {
     rule: [
         // pt0: notation of the module, for every book
         // book pt-3 mathe13-pt:
-        // zwischenflaeche: the list of intersections ("0,785, 3,927") is separated by semicolons, as the numbers have a decimal comma
-        [/(Schnittstellen: [^<]*)/g, m => m.replace(/\$, \$/g, '$; $')],
+        // zwischenflaeche: a list of intersections with a decimal comma ("0,785, 3,927") is separated by semicolons, as in A(1,5; 2)
+        [/(Schnittstellen: [^<]*)/g, m => (/\{,\}/.test(m) ? m.replace(/\$, \$/g, '$; $') : m)],
         // book pt-5 mathe13lk-pt:
     ]
 });
