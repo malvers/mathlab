@@ -518,6 +518,7 @@ CyberI18n.translations.fr = {
                 standard_form: "FORME DÉVELOPPÉE",
                 roots: "RACINES (ZÉROS)",
                 roots_none: "PAS DE RACINES RÉELLES",
+                discriminant: "DISCRIMINANT",
                 vertex_point: "SOMMET S",
                 parameter_a: "PARAMÈTRE A",
                 stretch_a: "Étirement a",

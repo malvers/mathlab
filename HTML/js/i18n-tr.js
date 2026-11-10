@@ -518,6 +518,7 @@ CyberI18n.translations.tr = {
                 standard_form: "STANDART FORM",
                 roots: "KÖKLER (SIFIR)",
                 roots_none: "GERÇEK KÖK YOK",
+                discriminant: "DİSKRİMİNANT",
                 vertex_point: "KÖŞE S",
                 parameter_a: "PARAMETRE A",
                 stretch_a: "",

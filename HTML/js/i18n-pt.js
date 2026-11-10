@@ -518,6 +518,7 @@ CyberI18n.translations.pt = {
                 standard_form: "STANDARD FORM",
                 roots: "ROOTS (ZEROS)",
                 roots_none: "NO REAL ROOTS",
+                discriminant: "DISCRIMINANTE",
                 vertex_point: "VERTEX S",
                 parameter_a: "PARAMETER A",
                 stretch_a: "Stretching a",

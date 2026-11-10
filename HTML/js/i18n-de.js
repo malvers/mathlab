@@ -569,6 +569,7 @@ CyberI18n.translations.de = {
                 standard_form: "NORMALFORM",
                 roots: "NULLSTELLEN",
                 roots_none: "KEINE REELLEN NULLSTELLEN",
+                discriminant: "DISKRIMINANTE",
                 vertex_point: "SCHEITELPUNKT S",
                 parameter_a: "PARAMETER A",
                 stretch_a: "Streckung a",

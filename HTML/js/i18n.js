@@ -42,13 +42,17 @@ const CyberI18n = {
         };
         try {
             const urlParams = new URLSearchParams(window.location.search);
+            // a lab embedded in a deck (?widget) speaks the deck's language - ?lang= or German - whatever language is
+            // stored, and stores nothing (Doc, 10.11.2026: the parabola lab in mathe11-pq-herleitung came up as
+            // "Laboratorio de Parábolas"); the same rule as the colours in farbschema.js
+            const widget = urlParams.has('widget');
             let pick = norm(urlParams.get('lang'));
-            if (!supported.includes(pick)) {
+            if (!supported.includes(pick) && !widget) {
                 pick = norm(localStorage.getItem('cyber-lab-lang'));
             }
             if (!supported.includes(pick)) pick = 'de';
             this.current = pick;
-            try {
+            if (!widget) try {
                 localStorage.setItem('cyber-lab-lang', pick);
             } catch (e) {}
             this.applyHtmlLangAttribute();

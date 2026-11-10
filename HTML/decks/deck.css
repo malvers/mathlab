@@ -86,6 +86,12 @@ b{font-weight:600;color:var(--fg,var(--formel))}   /* bold inside a colour keeps
 .pic .fl svg.ring-svg,svg.ring-svg{display:inline-block;position:static;width:1.45em;height:1.45em;margin:0 .1em;vertical-align:-.36em}   /* a 0 or 1 in its circle within a line of text, the same drawing as in the figure (Doc, 31.10.2026) */
 .boxed-soft{padding:2px .45em;border:1.2px solid var(--muted);border-radius:8px;background:rgba(255,255,255,.55)}   /* a quiet frame around the core of a line, e.g. the formula (Doc, 31.10.2026) */
 .boxed-soft.tiny{display:inline-block;box-sizing:border-box;height:16px;line-height:14px;padding:0 .55em;letter-spacing:.4px;border-width:1px;border-radius:5px}   /* the same frame for a small sum of exact height, so a line can start at its edge */
+/* a slide's goal, set apart from the text: a small tag "Ziel" in its own column, the sentence beside it, so every line
+   starts at the same left edge; the tag sits on the first line's baseline (Doc, 10.11.2026: "das Ziel auch absetzen,
+   nicht Ziel-Doppelpunkt, sondern irgendwie so anders schön") */
+.ziel,.pic .fl.ziel{display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:baseline;text-align:left}   /* .pic .fl centres a figure's words */
+.ziel-tag{font-family:Orbitron,system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;
+  text-transform:uppercase;line-height:1;color:var(--ink);background:var(--orange);padding:5px 8px 4px 10.5px;border-radius:5px}
 /* a box that opens on a click on [data-pop] (deck.js) - for the question someone may ask (Doc, 31.10.2026) */
 [data-pop]{cursor:pointer}
 .pop{position:absolute;left:50%;top:calc(50% + var(--pop-dy,0px));transform:translate(-50%,-50%) scale(var(--pop-scale,1));width:var(--pop-w,min-content);max-width:848px;max-height:452px;z-index:27;background:#fff;color:var(--body);
@@ -131,7 +137,7 @@ b{font-weight:600;color:var(--fg,var(--formel))}   /* bold inside a colour keeps
 /* the order inside one click: a part that comes a moment after the click ("kommt sanft spaeter") and a line whose triangle
    and box come last ("box-spaeter") - Doc, 10.11.2026: "Erst den Term links vom Gleichheitszeichen rot, dann die
    Anweisung, dann die Box. Dann nächste Zeile." The delays only on the way in, going back is at once */
-.slide .sanft.spaeter.on{transition-delay:.9s}
+.slide .sanft.spaeter.on{transition-delay:var(--spaeter,.9s)}   /* style="--spaeter:1.9s": after a flight has landed (.fliegen) */
 /* a flash that holds past its click: data-ab="k" - red from its own click until click group k comes, then it fades
    (Doc, 10.11.2026: the term turns red first, stays red while the step note comes, both fade with the next line) */
 .step.flash.halten[data-ab].on.past:not(.ab-da),.step.flash.halten[data-ab].on.past:not(.ab-da) *{animation:none;color:var(--red)}
@@ -531,6 +537,21 @@ html.lab-voll #nav,html.lab-voll #hud,html.lab-voll #ask{opacity:0;pointer-event
   html:not(.deck-edit) :not(.ov-thumb) > .slide .wachsen{transform-box:fill-box;transform-origin:0 50%;
     transition:transform .7s cubic-bezier(.3,.7,.2,1)}
   html:not(.deck-edit) :not(.ov-thumb) > .slide .wachsen.step:not(.on){transform:scaleX(0)}
+}
+/* a piece that flies to its place ("fliegen", an SVG <g> or a figure's .fl word, drawn where it lands): it stands where
+   --von puts it (style="--von:translate(95px,-65px) rotate(-90deg)", turned about its own middle) and flies home on its
+   click ("step kommt fliegen" data-g="k") or - already there before - from click k on ("step kommt fliegen" data-g="j"
+   data-ab="k"). It waits half a second, passes --ueber halfway (a place on the way, so it goes round what stands
+   between; without one it is home at half time) and lands after 1.9 s - what comes after the landing takes "sanft
+   spaeter" with --spaeter:1.9s (Doc, 10.11.2026, the missing corner: "im zweiten Schritt auf Klick der eine
+   Dreierbalken nach unten fliegen"). Going back it is at its start at once; editing, the overview and paper show it home */
+@keyframes fliegen{from{transform:var(--von)}50%{transform:var(--ueber,none)}to{transform:none}}
+@media screen{
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .fliegen{transform-box:fill-box;transform-origin:50% 50%}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .fliegen.step:not([data-ab]):not(.on),
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .fliegen[data-ab]:not(.ab-da){transform:var(--von)}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .fliegen.step:not([data-ab]).on,
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .fliegen[data-ab].ab-da{animation:fliegen 1.4s ease-in-out .5s both}
 }
 /* a box in the middle of a veiled slide, a click of its own ("vorhang step kommt sanft"), and from click data-ab on
    small at the top right beside the heading, the veil gone (Doc, 30.10.2026: "lass in der Mitte eine Box erscheinen

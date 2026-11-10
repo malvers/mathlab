@@ -508,6 +508,7 @@ Object.assign(CyberI18n.translations.nl.fractal, {
             standard_form: "STANDAARDVOORM",
             roots: "NULLEN",
             roots_none: "GEEN REËLE NULLEN",
+            discriminant: "DISCRIMINANT",
             vertex_point: "TOPPUNT S",
             parameter_a: "PARAMETER A",
             stretch_a: "Uitrekking a",

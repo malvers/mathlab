@@ -517,6 +517,7 @@ CyberI18n.translations.sw = {
                 standard_form: "FOMU YA SANIFU",
                 roots: "MIZIZI (ZEROS)",
                 roots_none: "HAKUNA MIZIZI HALISI",
+                discriminant: "DISCRIMINANT",
                 vertex_point: "VERTEX S",
                 parameter_a: "PARAMETER A",
                 stretch_a: "Kunyoosha a",

@@ -249,6 +249,10 @@
                             <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">${CyberI18n.get('parabola.roots')}</span>
                             <div id="eq-roots" class="math-glow" style="color: var(--neon-green);"></div>
                         </div>
+                        <div id="eq-disc-container" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: none;">
+                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: 'Orbitron'; text-transform: uppercase; margin-bottom: 5px; display: block;">${CyberI18n.get('parabola.discriminant')}</span>
+                            <div id="eq-disc" class="math-glow"></div>
+                        </div>
                     `, 'var(--neon-blue)', { collapsible: false });
 
                     // Card 2: STEUERUNG
@@ -664,6 +668,23 @@
                     katex.render(`x_0 = ${roots[0].toFixed(2)}`, rootsTarget, { throwOnError: false });
                 } else {
                     katex.render(`\\text{${CyberI18n.get('parabola.roots_none')}}`, rootsTarget, { throwOnError: false });
+                }
+            }
+
+            // --- DISKRIMINANTE: only for the parabola (n = 2). In the normal form x^2 + px + q = 0 (divided by a)
+            // D = (p/2)^2 - q = -e/a; its sign tells two, one or no zero - the same test as realRoots() (Doc, 10.11.2026:
+            // "im Labor irgendwo die Diskriminante tatsächlich hinschreiben")
+            const discBox = document.getElementById('eq-disc-container');
+            const discTarget = document.getElementById('eq-disc');
+            if (discBox && discTarget) {
+                const parabola = nIsInteger() && Math.round(paraN) === 2;
+                discBox.style.display = parabola ? 'block' : 'none';
+                if (parabola) {
+                    const D = -paraE / paraA;
+                    const zero = Math.abs(D) < 0.0001;
+                    const col = zero ? '#faff00' : (D > 0 ? '#adff2f' : '#ff5a4d');
+                    const val = zero ? '0' : `${D.toFixed(2)} ${D > 0 ? '> 0' : '< 0'}`;
+                    katex.render(`D = \\left(\\tfrac{p}{2}\\right)^2 - q = \\textcolor{${col}}{${val}}`, discTarget, { throwOnError: false });
                 }
             }
         }

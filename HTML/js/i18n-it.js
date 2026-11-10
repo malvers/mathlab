@@ -518,6 +518,7 @@ CyberI18n.translations.it = {
                 standard_form: "FORMA STANDARD",
                 roots: "RADICI (ZERI)",
                 roots_none: "NESSUNA RADICE REALE",
+                discriminant: "DISCRIMINANTE",
                 vertex_point: "VERTICE S",
                 parameter_a: "PARAMETRO A",
                 stretch_a: "Dilatazione a",
