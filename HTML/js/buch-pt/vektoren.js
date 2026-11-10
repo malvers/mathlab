@@ -33,6 +33,9 @@ window.BuchPT && BuchPT.add('vektoren', {
         // windschief = não complanares, parallel = paralelas (rule below: the word "parallel" means colinear vectors in pt-2)
         'Parameter $t$': 'Parâmetro $t$', 'Ebene und Normalenvektor': 'Plano e vetor normal', 'Liegt der Punkt in E?': 'O ponto pertence a E?',
         'Gerade schneidet Ebene': 'Reta que interseta o plano', 'identisch': 'coincidentes', 'schneidend': 'concorrentes', 'windschief': 'não complanares',
+        // pyramide (wp1-3): Grundfläche G = área da base A_b, Mantel M = área lateral A_L, Oberfläche O = área total A (as mathe12-pt), Spitze = vértice
+        'Pyramide': 'Pirâmide', 'Prisma (schief möglich)': 'Prisma (pode ser oblíquo)', 'Körper': 'Sólido', 'Grundkante $a$': 'Aresta da base $a$',
+        'Höhe $h$': 'Altura $h$', 'Verschiebung der Spitze in $x$': 'Deslocamento do vértice em $x$',
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
     },
@@ -80,6 +83,16 @@ window.BuchPT && BuchPT.add('vektoren', {
         ['Nicht parallel. Gleichsetzen ergibt $t = ', 'Não são paralelas. Igualando, obtém-se $t = '], ['$: <b>schneidend</b> im Punkt $S(', '$: <b>concorrentes</b> no ponto $S('],
         ['Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ',
             'Não são paralelas e o sistema não tem solução: <b>não complanares</b>. Menor distância (a tracejado vermelho) $\\approx '],
+        // pyramide: the letters of Portuguese schools (A_b, A_L, A) and the norm ‖a × b‖ (the rules have already written \overrightarrow{AB})
+        ['Grundfläche $G = |\\overrightarrow{AB} \\times \\overrightarrow{AD}| = ', 'Área da base $A_b = \\|\\overrightarrow{AB} \\times \\overrightarrow{AD}\\| = '],
+        ['Grundfläche $G = ', 'Área da base $A_b = '], ['$, Spitze $S(', '$, vértice $S('], ['$, Höhe $h = ', '$, altura $h = '], ['$ (rot)', '$ (a vermelho)'],
+        ['Volumen $V = \\tfrac13 \\cdot G \\cdot h \\approx ', 'Volume $V = \\tfrac13 \\cdot A_b \\cdot h \\approx '], ['Volumen $V = G \\cdot h = ', 'Volume $V = A_b \\cdot h = '],
+        ['$ · Mantel (4 Dreiecke, je $\\tfrac12 |\\vec{a} \\times \\vec{b}|$) $\\approx ', '$ · área lateral $A_L$ (4 triângulos, cada um $\\tfrac12 \\|\\vec{a} \\times \\vec{b}\\|$) $\\approx '],
+        [' · Mantel (4 Parallelogramme, je $|\\vec{a} \\times \\vec{w}|$) $\\approx ', ' · área lateral $A_L$ (4 paralelogramos, cada um $\\|\\vec{a} \\times \\vec{w}\\|$) $\\approx '],
+        ['$ (Prinzip von Cavalieri: auch schief)', '$ (princípio de Cavalieri: também se for oblíquo)'],
+        ['Oberfläche $O = G + M \\approx ', 'Área total $A = A_b + A_L \\approx '], ['Oberfläche $O = 2G + M \\approx ', 'Área total $A = 2A_b + A_L \\approx '],
+        ['$ · Verschiebst du die Spitze waagerecht, bleibt das Volumen gleich, der Mantel nicht.', '$ · Se deslocares o vértice na horizontal, o volume mantém-se, mas a área lateral não.'],
+        ['$, Verschiebung der Deckfläche $\\vec{w} = ', '$, translação da base superior $\\vec{w} = '],
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
     ],
