@@ -36,6 +36,10 @@ window.BuchPT && BuchPT.add('vektoren', {
         'Parameter $t$': 'Parâmetro $t$', 'Der Richtungsvektor darf nicht der Nullvektor sein.': 'O vetor diretor não pode ser o vetor nulo.',
         'Ebene und Normalenvektor': 'Plano e vetor normal', 'Liegt der Punkt in E?': 'O ponto pertence a E?', 'Gerade schneidet Ebene': 'Reta interseta plano',
         '$\\vec{u}$ und $\\vec{v}$ sind parallel, sie spannen keine Ebene auf.': '$\\vec{u}$ e $\\vec{v}$ são colineares, não definem um plano.',
+        // geradenlage (wp1-2): identisch = coincidentes, echt parallel = estritamente paralelas, schneidend = concorrentes, windschief = não
+        // complanares; "parallel" stays "colineares" as a word (vectors, pt-2): the preset button of lines and planes is a rule below
+        'schneidend': 'concorrentes', 'identisch': 'coincidentes', 'windschief': 'não complanares',
+        'Richtungsvektoren dürfen nicht der Nullvektor sein.': 'Os vetores diretores não podem ser o vetor nulo.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs vektoren/*)
@@ -73,6 +77,13 @@ window.BuchPT && BuchPT.add('vektoren', {
         [': Die Gerade ist parallel zur Ebene und liegt in ihr.', ': a reta é paralela ao plano e está contida nele.'],
         [': Die Gerade ist parallel zur Ebene und schneidet sie nicht.', ': a reta é estritamente paralela ao plano e não o interseta.'],
         ['Einsetzen von $g$ in $E$: $t = ', 'Substituindo $g$ em $E$: $t = '], ['$, Schnittpunkt $S(', '$, ponto de interseção $S('], ['$ · Schnittwinkel: $', '$ · ângulo: $'],
+        // geradenlage: whole sentences, so the bold words are Portuguese before the labels between tags are looked up
+        ['Die Richtungsvektoren sind parallel ($\\vec{v} = ', 'Os vetores diretores são colineares ($\\vec{v} = '],
+        ['Der Stützpunkt $Q$ liegt auf $g$: <b>identisch</b>.', 'O ponto $Q$ pertence a $g$: <b>coincidentes</b>.'],
+        ['Der Stützpunkt $Q$ liegt nicht auf $g$: <b>echt parallel</b>.', 'O ponto $Q$ não pertence a $g$: <b>estritamente paralelas</b>.'],
+        ['Nicht parallel. Gleichsetzen ergibt $t = ', 'Não são paralelas. Igualando obtém-se $t = '], ['$: <b>schneidend</b> im Punkt $S(', '$: <b>concorrentes</b> no ponto $S('],
+        ['Nicht parallel und das Gleichungssystem hat keine Lösung: <b>windschief</b>. Kürzester Abstand (rot gestrichelt) $\\approx ',
+            'Não são paralelas e o sistema é impossível: <b>não complanares</b>. Distância mínima (a tracejado vermelho) $\\approx '],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -92,5 +103,9 @@ window.BuchPT && BuchPT.add('vektoren', {
         // book pt-5 mathe13lk-pt:
         // the sine is sen in Portuguese schools, also on the pages that load vektoren without funktionen (Schnittwinkel of ebene3d, geradenlage …)
         [/\\sin(?![a-zA-Z])/g, '\\operatorname{sen}'],
+        // presetRow (geradenlage, ebenenlage): the button "parallel" means lines (paralelas) or planes (paralelos), not vectors (colineares);
+        // the engine has already put the whole label aside as \u0003n\u0004, so the rule replaces that mark (ebenenlage: the button after "spur")
+        [/(data-p="spur">[^<]*<\/button><button type="button" class="b-btn" data-p="par">)(?:\u0003\d+\u0004|parallel)/g, '$1paralelos'],
+        [/(data-p="par">)(?:\u0003\d+\u0004|parallel)(?=<\/button>)/g, '$1paralelas'],
     ]
 });
