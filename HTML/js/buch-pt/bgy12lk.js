@@ -14,6 +14,9 @@ window.BuchPT && BuchPT.add('bgy12lk', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs bgy12lk/*)
         // book pt-4 mathe12lk-pt:
+        // titelbildbgy12lk: the cover of the start page (BGY 12 Leistungskurs)
+        'Titelbild: eine Verteilungsfunktion als Treppe über ihren Stäben, eine Kurve mit der Tangente, die sie im Berührpunkt ersetzt, und eine dreiseitige Pyramide mit ihrem Schwerpunkt':
+            'Imagem da capa: uma função de distribuição em escada por cima das suas barras, uma curva com a tangente que a substitui no ponto de tangência e uma pirâmide triangular com o seu baricentro',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs bgy12lk/*)
