@@ -24,6 +24,16 @@ window.BuchPT && BuchPT.add('gy12lk', {
         'Rotationskörper im räumlichen Koordinatensystem, durch Ziehen drehbar': 'Sólido de revolução no referencial do espaço, roda-se arrastando',
         'Schalte Kreisscheiben zu: Jede Scheibe hat das Volumen $\\pi \\, r^2 \\, \\Delta x$ mit $r = f(x)$.':
             'Acrescenta discos: cada disco tem o volume $\\pi \\, r^2 \\, \\Delta x$ com $r = f(x)$.',
+        // normalverteilung, moivre (lb4): Dichte = densidade, Verteilungsfunktion = função de distribuição, Standardisieren = estandardização,
+        // Glockenkurve = curva de Gauss, Laplace-Bedingung = condição de Laplace; N(μ, σ²) with a comma (no decimal inside)
+        'Standardabweichung $\\sigma$': 'Desvio padrão $\\sigma$', '$\\sigma$-Regeln': 'Regras $\\sigma$', 'Dichte': 'Densidade',
+        'Verteilungsfunktion': 'Função de distribuição', 'Ansicht': 'Vista',
+        'Dichtefunktion der Normalverteilung mit markierter Fläche': 'Função densidade da distribuição normal com a área assinalada',
+        'Histogramm': 'Histograma', 'standardisiert': 'estandardizado', 'erfüllt': 'verificada', 'nicht erfüllt': 'não verificada',
+        'Histogramm der Binomialverteilung mit der Glockenkurve gleichen Erwartungswerts und gleicher Standardabweichung':
+            'Histograma da distribuição binomial com a curva de Gauss de igual valor médio e igual desvio padrão',
+        'Standardisiert: Jede Säule wird um $\\mu$ verschoben, in der Breite durch $\\sigma$ geteilt und in der Höhe mit $\\sigma$ multipliziert. Für großes $n$ legen sich alle Histogramme auf dieselbe Kurve $\\varphi$.':
+            'Estandardizado: cada barra é deslocada de $\\mu$, a sua largura é dividida por $\\sigma$ e a sua altura multiplicada por $\\sigma$. Para $n$ grande, todos os histogramas ficam sobre a mesma curva $\\varphi$.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12lk/*)
@@ -34,6 +44,12 @@ window.BuchPT && BuchPT.add('gy12lk', {
         [')$. Das ist der Hauptsatz: $I_a\'(x) = f(x)$.', ')$. É o teorema fundamental: $I_a\'(x) = f(x)$.'],
         // rotation
         ['$, Abweichung $', '$, desvio $'],
+        // normalverteilung, moivre ("Erwartungswert $\mu" is in stochastik, pt-2)
+        ['$X \\sim N(\\mu;\\ \\sigma^2)$ mit $\\mu = ', '$X \\sim N(\\mu, \\sigma^2)$ com $\\mu = '], ['$ und $\\sigma = ', '$ e $\\sigma = '],
+        ['Standardisieren: $Z = \\dfrac{X - \\mu}{\\sigma}$ ist standardnormalverteilt.', 'Estandardização: $Z = \\dfrac{X - \\mu}{\\sigma}$ segue a distribuição normal padrão.'],
+        ['. Das ist die gelbe Fläche.', '. É a área amarela.'], ['. Das ist der gelbe Anstieg der Verteilungsfunktion.', '. É a subida amarela da função de distribuição.'],
+        ['$, Standardabweichung $\\sigma = \\sqrt{', '$, desvio padrão $\\sigma = \\sqrt{'], ['Laplace-Bedingung $\\sigma > 3$: ', 'Condição de Laplace $\\sigma > 3$: '],
+        ['Größte Abweichung zwischen $P(X = k)$ und der Glockenkurve an der Stelle $k$: $', 'Maior desvio entre $P(X = k)$ e a curva de Gauss no ponto $k$: $'],
     ],
     rule: [
         // pt0: notation of the module, for every book

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática 13 LK · Capítulo 4 · Variáveis aleatórias com distribuição normal | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Curva de Gauss, função densidade e função de distribuição, valor médio, desvio padrão, regras σ. Capítulo 4 do manual interativo Matemática · Berufliches Gymnasium 13 · Leistungskurs: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · BERUFLICHES GYMNASIUM 13 · LEISTUNGSKURS</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO 4 · ÁREA DE APRENDIZAGEM 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 4 · ÁREA DE APRENDIZAGEM 4 · NOVEMBRO</p>
+            <h1>Variáveis aleatórias com distribuição normal</h1>
+            <p class="b-hero-lead">Volumes de enchimento de garrafas, alturas de pessoas, erros de medição, o número de faces nacionais em mil lançamentos de uma moeda: aparece sempre a mesma forma,
+                a <b>curva de Gauss</b>. Aprendes a calcular probabilidades como <b>áreas sob uma função densidade</b>, a trabalhar com a função de distribuição $\Phi$ e com as
+                <b>regras $\sigma$</b> e a compreender porque é que qualquer distribuição binomial com $n$ grande se encosta a esta curva.</p>
+            <div class="b-chips"><span class="b-chip">12 AULAS</span><span class="b-chip">3 UNIDADES</span><span class="b-chip">3 WIDGETS</span><span class="b-chip">1 LABORATÓRIO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["exp(-x*x/2)/sqrt(2*PI)", "exp(-(x-1)*(x-1)/8)/(2*sqrt(2*PI))"]' data-labels='["φ", "σ = 2"]' data-lat="[0.6, 3.4]" data-x="-4,5" data-y="-0.05,0.48" data-h="240" data-yl="φ" data-aria="Duas curvas de Gauss: a distribuição normal padrão e outra mais larga e mais achatada, com valor médio 1 e desvio padrão 2"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a descrever <b>variáveis aleatórias contínuas</b> com uma função densidade: probabilidade é área</li>
+                <li>a conhecer a <b>curva de Gauss</b> $\varphi_{\mu;\sigma}$ e a explicar a influência de $\mu$ e $\sigma$, também com derivadas</li>
+                <li>a calcular probabilidades e limites com a <b>função de distribuição</b> e por <b>estandardização</b>, e a usar as regras $\sigma$</li>
+                <li>a aproximar distribuições binomiais pela distribuição normal com o teorema de <b>De Moivre-Laplace</b> e a avaliar a qualidade da aproximação</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="30" data-ph="μ ="><p class="b-q-text">Valor médio de $X \sim B(100;\ 0{,}3)$?</p><div class="b-sol"><p>$\mu = n \cdot p$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="σ ="><p class="b-q-text">Desvio padrão de $X \sim B(100;\ 0{,}5)$?</p><div class="b-sol"><p>$\sqrt{100 \cdot 0{,}5 \cdot 0{,}5}$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="Valor"><p class="b-q-text">Calcula $\int_0^1 2x\,\mathrm{d}x$.</p><div class="b-sol"><p>$\left[x^2\right]_0^1$</p></div></div>
+            <div class="b-q" data-ans="0,2" data-ph="Valor"><p class="b-q-text">$P(X \le 3) = 0{,}8$. Quanto é $P(X > 3)$?</p><div class="b-sol"><p>Acontecimento contrário</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">EXATAMENTE 180 CENTÍMETROS</div>
+            <div class="b-text"><p>Qual é a probabilidade de uma pessoa escolhida ao acaso medir <b>exatamente</b> 180 cm, ou seja, $180{,}000\ldots$ cm?</p>
+                <ul><li>Comparem com «entre 179,5 e 180,5 cm» e «entre 179,95 e 180,05 cm».</li><li>O que resta quando o intervalo fica cada vez mais estreito?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">A MÁQUINA DE ENCHIMENTO</div>
+            <div class="b-text"><p>Uma máquina enche garrafas com, em média, 500 ml; os volumes dispersam-se com $\sigma = 4$ ml. Na garrafa está escrito 495 ml.</p>
+                <ul><li>Estimem: que percentagem de garrafas contém menos?</li><li>Quanto seria preciso aumentar o valor médio para que fossem só $1\,\%$?</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">O TABULEIRO DE GALTON</div>
+            <div class="b-text"><p>Bolas caem através de filas de pregos e, em cada prego, saltam ao acaso para a esquerda ou para a direita.</p>
+                <ul><li>Que distribuição têm as casas onde as bolas caem?</li><li>O que acontece à forma quando há cada vez mais filas?</li></ul></div>
+            <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTONBRETT</span><span class="b-lab-what">Bolas, pregos e o sino</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Densidade e curva de Gauss" data-toc-k="1" data-toc-short="1 Densidade">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">1</span>Variáveis aleatórias contínuas e a curva de Gauss</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Uma altura pode tomar qualquer valor de um intervalo, não só centímetros inteiros. Uma tal <b>variável aleatória contínua</b> tem, para cada valor isolado,
+                probabilidade 0. Só os intervalos fazem sentido. Um histograma com classes cada vez mais finas, cujas áreas das barras são as probabilidades, aproxima-se de uma curva:
+                a <b>função densidade</b>.</p></div></div>
+            <div class="b-text"><p>Numa densidade, a probabilidade é a <b>área</b>, não o valor da função. Por isso, a área total sob o gráfico tem de ser 1. A densidade mais importante é a
+                curva de Gauss. O seu máximo está no valor médio $\mu$, e os seus pontos de inflexão ficam exatamente um desvio padrão à esquerda e à direita dele. Um $\sigma$ grande
+                torna o sino largo e achatado, porque a área continua a ser 1.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · DENSIDADE E DISTRIBUIÇÃO NORMAL</div>
+                <div class="b-text">
+                    <p>Uma <b>função densidade</b> $f$ tem $f(x) \ge 0$ e $\displaystyle\int_{-\infty}^{+\infty} f(x)\,\mathrm{d}x = 1$. Para a variável aleatória $X$ tem-se $P(a \le X \le b) = \displaystyle\int_a^b f(x)\,\mathrm{d}x$.</p>
+                    <p>Diz-se que $X$ <b>segue uma distribuição normal</b> de parâmetros $\mu$ e $\sigma > 0$, abreviadamente $X \sim N(\mu, \sigma^2)$, se a sua densidade for
+                        $\varphi_{\mu;\sigma}(x) = \dfrac{1}{\sigma\sqrt{2\pi}}\,\mathrm{e}^{-\frac{(x - \mu)^2}{2\sigma^2}}$. (Em Portugal escreve-se muitas vezes $N(\mu, \sigma)$, com o desvio padrão.)</p>
+                    <p>Então $E(X) = \mu$, $V(X) = \sigma^2$. O gráfico é simétrico em relação a $x = \mu$, tem aí o máximo e tem pontos de inflexão em $\mu \pm \sigma$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>$\le$ ou $&lt;$?</b> Para variáveis aleatórias contínuas é indiferente, porque $P(X = a) = 0$. Na distribuição binomial faz uma grande diferença.</p>
+            <p class="b-note"><b>Distribuição normal padrão:</b> $\mu = 0$, $\sigma = 1$. A sua densidade chama-se simplesmente $\varphi$, a sua função de distribuição $\Phi$.</p>
+            <p class="b-note"><b>No CAS:</b> <i>normPdf(x, μ, σ)</i> para a densidade, <i>normCdf(a, b, μ, σ)</i> para $P(a \le X \le b)$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · A CURVA DE GAUSS</div>
+        <p class="b-help" style="margin:0 0 12px">Altera $\mu$ e $\sigma$ e observa a posição, a altura e a largura. A área amarela é a probabilidade. Muda para «Regras $\sigma$» para ver os três intervalos.</p>
+        <div data-widget="normalverteilung" data-mu="0" data-sigma="1" data-xr="-4,4" data-a="-1" data-b="1"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · PONTOS DE INFLEXÃO DEMONSTRADOS</div>
+            <div class="b-text"><p>Mostra que $\varphi(x) = \tfrac{1}{\sqrt{2\pi}}\,\mathrm{e}^{-x^2/2}$ tem pontos de inflexão em $x = \pm 1$.</p></div>
+            <div class="b-sol"><p>Regra da cadeia: $\varphi'(x) = -x\,\varphi(x)$. Regra do produto: $\varphi''(x) = -\varphi(x) - x\,\varphi'(x) = (x^2 - 1)\,\varphi(x)$.</p>
+                <p>Como $\varphi(x) > 0$, tem-se $\varphi''(x) = 0$ exatamente para $x = \pm 1$, e $x^2 - 1$ muda aí de sinal: <span class="b-res">pontos de inflexão em $\pm 1 = \mu \pm \sigma$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · PROBABILIDADE COMO ÁREA</div>
+            <div class="b-text"><p>$X \sim N(0, 1)$. Calcula $P(-1 \le X \le 1)$ e $P(X > 2)$.</p></div>
+            <div class="b-sol"><p>$P(-1 \le X \le 1) = \int_{-1}^{1} \varphi(x)\,\mathrm{d}x \approx 0{,}6827$ (CAS). Não existe uma primitiva em forma fechada; por isso calcula-se com $\Phi$ ou com o CAS.</p>
+                <p>$P(X > 2) = 1 - \Phi(2) \approx 1 - 0{,}9772 = $ <span class="b-res">0,0228</span>, ou seja, pouco mais de $2\,\%$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Para $X \sim N(170, 8^2)$ (altura em cm), indica a posição do máximo e dos pontos de inflexão da densidade. Qual é a altura do máximo?</p></div>
+            <div class="b-sol"><p>Máximo em $x = 170$, pontos de inflexão em 162 e 178. Altura $\varphi_{170;8}(170) = \tfrac{1}{8\sqrt{2\pi}} \approx 0{,}0499$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Duas curvas de Gauss têm o mesmo valor médio. Uma é duas vezes mais larga. O que se pode dizer dos seus máximos? Justifica com a área.</p></div>
+            <div class="b-sol"><p>O dobro de $\sigma$ reduz a metade o fator $\tfrac{1}{\sigma\sqrt{2\pi}}$: o máximo fica com metade da altura. As duas áreas são 1.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Verifica se $f(x) = \tfrac{3}{4}(1 - x^2)$ para $-1 \le x \le 1$ (e 0 fora daí) é uma densidade e calcula $P(X \ge 0{,}5)$.</p></div>
+            <div class="b-sol"><p>$f \ge 0$ e $\int_{-1}^{1} \tfrac34(1 - x^2)\,\mathrm{d}x = \tfrac34 \cdot \tfrac43 = 1$: sim. $P(X \ge 0{,}5) = \tfrac34\left[x - \tfrac13 x^3\right]_{0{,}5}^{1} = \tfrac34\left(\tfrac23 - \tfrac{11}{24}\right) = \tfrac{5}{32} \approx 0{,}156$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Mostra em geral: os pontos de inflexão de $\varphi_{\mu;\sigma}$ estão em $\mu \pm \sigma$.</p></div>
+            <div class="b-hint"><p>Escreve $\varphi_{\mu;\sigma}(x) = c \cdot \mathrm{e}^{-u^2/2}$ com $u = \tfrac{x - \mu}{\sigma}$.</p></div>
+            <div class="b-sol"><p>$\varphi' = -\tfrac{x - \mu}{\sigma^2}\varphi$, $\varphi'' = \left(\tfrac{(x - \mu)^2}{\sigma^4} - \tfrac{1}{\sigma^2}\right)\varphi = 0 \iff (x - \mu)^2 = \sigma^2 \iff x = \mu \pm \sigma$, com mudança de sinal.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>O tempo de espera $T$ (em min) num semáforo tem a densidade $f(t) = \tfrac12$ para $0 \le t \le 2$. Calcula $E(T) = \int t\,f(t)\,\mathrm{d}t$ e $V(T) = \int (t - \mu)^2 f(t)\,\mathrm{d}t$.</p></div>
+            <div class="b-sol"><p>$E(T) = \int_0^2 \tfrac t2\,\mathrm{d}t = 1$. $V(T) = \int_0^2 \tfrac12 (t - 1)^2\,\mathrm{d}t = \tfrac12 \cdot \tfrac23 = \tfrac13$, logo $\sigma \approx 0{,}58$ min. É assim que $E$ e $V$ passam das somas para os integrais.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="0,6827" data-tol="0.001" data-ph="P"><p class="b-q-text">$P(-1 \le Z \le 1)$ para $Z \sim N(0, 1)$? Quatro casas decimais.</p><div class="b-sol"><p>$\Phi(1) - \Phi(-1)$</p></div></div>
+        <div class="b-q" data-ans="178" data-ph="x ="><p class="b-q-text">$X \sim N(170, 8^2)$: ponto de inflexão da direita da densidade?</p><div class="b-sol"><p>$\mu + \sigma$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Para $X$ contínua, $P(X = 3)$ é …</p><div class="b-mc"><button>igual a $f(3)$.</button><button>igual a 0.</button><button>indefinida.</button></div><div class="b-sol"><p>Um ponto não tem área.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Função de distribuição e regras σ" data-toc-k="2" data-toc-short="2 Φ e σ">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">2</span>Função de distribuição, estandardização e regras $\sigma$</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A máquina de enchimento: $X \sim N(500, 4^2)$. Quantas garrafas têm menos de 492 ml? 492 está exatamente dois desvios padrão abaixo de $\mu$.
+                Para a distribuição normal padrão sabe-se que $P(Z \le -2) \approx 0{,}0228$. São, portanto, pouco mais de $2\,\%$, sem cálculo novo nenhum, apenas convertendo em <b>desvios padrão</b>.</p></div></div>
+            <div class="b-text"><p>É esta a ideia da <b>estandardização</b>: qualquer distribuição normal é uma distribuição normal padrão deslocada e dilatada. Com $z = \tfrac{x - \mu}{\sigma}$ conta-se
+                a quantos desvios padrão está $x$ do valor médio. Então basta uma única função, $\Phi$, para todas as distribuições normais. Ao contrário, podem determinar-se
+                limites, valores médios e desvios padrão quando é dada uma probabilidade.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · FUNÇÃO DE DISTRIBUIÇÃO E ESTANDARDIZAÇÃO</div>
+                <div class="b-text">
+                    <p>$F(x) = P(X \le x) = \displaystyle\int_{-\infty}^{x} \varphi_{\mu;\sigma}(t)\,\mathrm{d}t = \Phi\!\left(\dfrac{x - \mu}{\sigma}\right)$</p>
+                    <p>$P(a \le X \le b) = \Phi\!\left(\tfrac{b - \mu}{\sigma}\right) - \Phi\!\left(\tfrac{a - \mu}{\sigma}\right)$ · $P(X \ge a) = 1 - \Phi\!\left(\tfrac{a - \mu}{\sigma}\right)$ · $\Phi(-z) = 1 - \Phi(z)$</p>
+                    <p><b>Regras $\sigma$:</b> em $[\mu - \sigma, \mu + \sigma]$ estão $68{,}3\,\%$, em $\mu \pm 2\sigma$ $95{,}4\,\%$, em $\mu \pm 3\sigma$ $99{,}7\,\%$.
+                        Ao contrário: $90\,\%$ em $\mu \pm 1{,}64\sigma$, $95\,\%$ em $\mu \pm 1{,}96\sigma$, $99\,\%$ em $\mu \pm 2{,}58\sigma$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Calcular ao contrário:</b> se é dada uma probabilidade, procura-se o $z$ correspondente com <i>invNorm</i> no CAS: $\Phi(z) = 0{,}95$ dá $z \approx 1{,}645$.</p>
+            <p class="b-note"><b>Esboço:</b> desenhar o sino, marcar $\mu$, sombrear a área pedida. Vê-se logo se se trata de $\Phi$, de $1 - \Phi$ ou de uma diferença.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · A MÁQUINA DE ENCHIMENTO</div>
+        <p class="b-help" style="margin:0 0 12px">Calcula com $\Phi$ em vez da área: muda para «Função de distribuição». A probabilidade pedida é aí a diferença de alturas do gráfico.</p>
+        <div data-widget="normalverteilung" data-mu="500" data-sigma="4" data-xr="480,520" data-unit="ml" data-a="495" data-b="505"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · ENTRE DOIS LIMITES</div>
+            <div class="b-text"><p>$X \sim N(500, 4^2)$. Que proporção de garrafas contém entre 495 e 505 ml?</p></div>
+            <div class="b-sol"><p>$z_1 = \tfrac{495 - 500}{4} = -1{,}25$, $z_2 = 1{,}25$. $P = \Phi(1{,}25) - \Phi(-1{,}25) = 2\,\Phi(1{,}25) - 1 \approx 2 \cdot 0{,}8944 - 1$: <span class="b-res">$\approx 0{,}789$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · LIMITAR A DISPERSÃO</div>
+            <div class="b-text"><p>No máximo $1\,\%$ das garrafas pode ter menos de 490 ml ($\mu = 500$). Qual é o maior valor possível de $\sigma$?</p></div>
+            <div class="b-sol"><p>$\Phi\!\left(\tfrac{490 - 500}{\sigma}\right) \le 0{,}01$. $\Phi(z) = 0{,}01$ para $z \approx -2{,}326$. Logo $-\tfrac{10}{\sigma} \le -2{,}326$:
+                <span class="b-res">$\sigma \le \tfrac{10}{2{,}326} \approx 4{,}30$ ml</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A altura dos rapazes jovens segue uma distribuição $N(180, 7^2)$ (em cm). Calcula a proporção acima de 190 cm e a proporção entre 170 e 185 cm.</p></div>
+            <div class="b-sol"><p>$1 - \Phi\!\left(\tfrac{10}{7}\right) \approx 1 - 0{,}9234 = 0{,}077$. $\Phi\!\left(\tfrac57\right) - \Phi\!\left(-\tfrac{10}{7}\right) \approx 0{,}7625 - 0{,}0766 = 0{,}686$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Indica, com as regras $\sigma$ e sem cálculos: em que intervalo em torno de 500 ml estão cerca de $95\,\%$ dos volumes ($\sigma = 4$)?</p></div>
+            <div class="b-sol"><p>$500 \pm 1{,}96 \cdot 4$, ou seja, cerca de $[492{,}2;\ 507{,}8]$ ml.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Que volume é ultrapassado por $95\,\%$ das garrafas ($\mu = 500$, $\sigma = 4$)?</p></div>
+            <div class="b-sol"><p>Procura-se $x$ com $P(X \le x) = 0{,}05$: $z \approx -1{,}645$, $x = 500 - 1{,}645 \cdot 4 \approx 493{,}4$ ml.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Para que valor médio se deve regular a máquina ($\sigma = 4$) de modo que só $1\,\%$ das garrafas fique abaixo de 495 ml?</p></div>
+            <div class="b-sol"><p>$\tfrac{495 - \mu}{4} = -2{,}326$, logo $\mu = 495 + 9{,}31 \approx 504{,}3$ ml.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Num exame, as pontuações seguem aproximadamente uma distribuição normal. $15\,\%$ dos examinandos têm mais de 80 pontos, $10\,\%$ menos de 40. Determina $\mu$ e $\sigma$.</p></div>
+            <div class="b-hint"><p>Duas condições dão duas equações: $\tfrac{80 - \mu}{\sigma} = z_1$ e $\tfrac{40 - \mu}{\sigma} = z_2$.</p></div>
+            <div class="b-sol"><p>$\Phi(z_1) = 0{,}85$: $z_1 \approx 1{,}036$. $\Phi(z_2) = 0{,}10$: $z_2 \approx -1{,}282$. $80 - \mu = 1{,}036\sigma$, $40 - \mu = -1{,}282\sigma$. Subtraindo: $40 = 2{,}318\sigma$,
+                logo <span class="b-res">$\sigma \approx 17{,}3$, $\mu \approx 62{,}1$</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="0,0228" data-tol="0.0005" data-ph="P"><p class="b-q-text">$X \sim N(500, 4^2)$: $P(X &lt; 492)$? Quatro casas decimais.</p><div class="b-sol"><p>$\Phi(-2)$</p></div></div>
+        <div class="b-q" data-ans="0,789" data-tol="0.002" data-ph="P"><p class="b-q-text">$X \sim N(500, 4^2)$: $P(495 \le X \le 505)$? Três casas decimais.</p><div class="b-sol"><p>$2\,\Phi(1{,}25) - 1$</p></div></div>
+        <div class="b-q" data-ans="4,3" data-tol="0.02" data-ph="σ ≤"><p class="b-q-text">Qual é o maior valor de $\sigma$ se no máximo $1\,\%$ deve ficar abaixo de 490 ml ($\mu = 500$)? Uma casa decimal.</p><div class="b-sol"><p>$10 / 2{,}326$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="De Moivre-Laplace" data-toc-k="3" data-toc-short="3 Moivre">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 3</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">3</span>Da distribuição binomial à distribuição normal</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>1000 lançamentos de uma moeda: qual é a probabilidade de sair a face nacional entre 480 e 520 vezes? De forma exata, são 41 parcelas com coeficientes binomiais enormes.
+                Mas o histograma de $B(1000;\ 0{,}5)$ parece um sino com $\mu = 500$ e $\sigma = \sqrt{250} \approx 15{,}8$. Calculando a área sob esse sino
+                de 479,5 a 520,5, obtém-se 0,8052. O valor exato é 0,8052.</p></div></div>
+            <div class="b-text"><p>Porquê 479,5 e não 480? Cada barra do histograma assenta num intervalo de largura 1 em torno do seu valor $k$. As barras de 480 a 520 vão, portanto,
+                de 479,5 a 520,5. Esta <b>correção de continuidade</b> melhora bastante a aproximação. A sua qualidade depende de $\sigma$: se $\sigma$ é pequeno ou se
+                $p$ está perto de 0 ou de 1, o histograma é assimétrico e o sino simétrico ajusta-se mal.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · TEOREMA DE DE MOIVRE-LAPLACE</div>
+                <div class="b-text">
+                    <p>Se $X \sim B(n, p)$ com $\mu = np$ e $\sigma = \sqrt{np(1 - p)}$, então, para $n$ grande, tem-se aproximadamente</p>
+                    <p>$P(X \le k) \approx \Phi\!\left(\dfrac{k + 0{,}5 - \mu}{\sigma}\right)$ e $P(X = k) \approx \dfrac{1}{\sigma}\,\varphi\!\left(\dfrac{k - \mu}{\sigma}\right)$.</p>
+                    <p>Regra prática (<b>condição de Laplace</b>): a aproximação é utilizável quando $\sigma > 3$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Hoje:</b> o CAS também calcula $B(1000;\ 0{,}5)$ de forma exata. A aproximação continua importante porque mostra <b>porque é que</b> tantas grandezas seguem uma distribuição normal: são somas de muitas pequenas influências aleatórias.</p>
+            <p class="b-note"><b>Tabuleiro de Galton:</b> cada bola faz uma sequência de provas de Bernoulli. Com muitas filas, a distribuição pelas casas torna-se um sino.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · O SINO SOBRE O HISTOGRAMA</div>
+        <p class="b-help" style="margin:0 0 12px">Aumenta $n$ e observa como as barras se aproximam da curva. Escolhe $p = 0{,}05$: com $n$ pequeno, o histograma é assimétrico. Na vista estandardizada, todos os histogramas ficam sobre a mesma curva.</p>
+        <div data-widget="moivre" data-n="20" data-p="0.3"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 5 · PROBABILIDADE DE UM SÓ VALOR</div>
+            <div class="b-text"><p>$X \sim B(100;\ 0{,}5)$. Aproxima $P(X = 50)$ e compara com o valor exato.</p></div>
+            <div class="b-sol"><p>$\mu = 50$, $\sigma = 5$: $P(X = 50) \approx \tfrac15\,\varphi(0) = \tfrac{1}{5\sqrt{2\pi}} \approx 0{,}0798$. Exato: $\binom{100}{50} \cdot 0{,}5^{100} \approx 0{,}0796$.
+                <span class="b-res">Desvio inferior a $0{,}3\,\%$ do valor</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 6 · ONDE A APROXIMAÇÃO FRAQUEJA</div>
+            <div class="b-text"><p>Uma companhia aérea vende 300 bilhetes para 285 lugares. Cada passageiro aparece com $p = 0{,}92$. Qual é a probabilidade de os lugares chegarem?</p></div>
+            <div class="b-sol"><p>$\mu = 276$, $\sigma \approx 4{,}70 > 3$. Aproximação: $\Phi\!\left(\tfrac{285{,}5 - 276}{4{,}70}\right) = \Phi(2{,}02) \approx 0{,}978$. Exato com o CAS: 0,984.</p>
+                <p><span class="b-res">Utilizável, mas menos exata</span>: $p$ está perto de 1 e o histograma é assimétrico.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Verifica a condição de Laplace para $B(50;\ 0{,}1)$, $B(200;\ 0{,}1)$ e $B(100;\ 0{,}5)$.</p></div>
+            <div class="b-sol"><p>$\sigma = \sqrt{4{,}5} \approx 2{,}12$ (não), $\sqrt{18} \approx 4{,}24$ (sim), 5 (sim).</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>$X \sim B(200;\ 0{,}3)$. Aproxima $P(X \le 50)$ com e sem correção de continuidade. O valor exato é $P(X \le 50) \approx 0{,}0695$.</p></div>
+            <div class="b-sol"><p>$\mu = 60$, $\sigma = \sqrt{42} \approx 6{,}48$. Com correção: $\Phi\!\left(\tfrac{50{,}5 - 60}{6{,}48}\right) = \Phi(-1{,}47) \approx 0{,}071$. Sem: $\Phi(-1{,}54) \approx 0{,}062$. A correção acerta melhor.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Um dado é lançado 600 vezes. Em que intervalo simétrico em relação ao valor médio está o número de seis com cerca de $95\,\%$ de probabilidade?</p></div>
+            <div class="b-sol"><p>$\mu = 100$, $\sigma = \sqrt{600 \cdot \tfrac16 \cdot \tfrac56} \approx 9{,}13$. $100 \pm 1{,}96 \cdot 9{,}13$: cerca de $[82, 118]$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Quantas vezes, no mínimo, é preciso lançar uma moeda para que a frequência relativa da face nacional se afaste de 0,5 no máximo 0,01, com $95\,\%$ de probabilidade?</p></div>
+            <div class="b-hint"><p>Para a frequência relativa $H = \tfrac Xn$ tem-se $\sigma_H = \sqrt{\tfrac{p(1 - p)}{n}}$.</p></div>
+            <div class="b-sol"><p>$1{,}96 \cdot \sqrt{\tfrac{0{,}25}{n}} \le 0{,}01 \iff \sqrt n \ge 98 \iff n \ge 9604$. Para um ponto percentual de precisão são precisos quase dez mil lançamentos: a lei dos grandes números é lenta.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="0,0798" data-tol="0.0005" data-ph="P ≈"><p class="b-q-text">Aproximação de $P(X = 50)$ para $X \sim B(100;\ 0{,}5)$? Quatro casas decimais.</p><div class="b-sol"><p>$\tfrac{1}{5\sqrt{2\pi}}$</p></div></div>
+        <div class="b-q" data-ans="9604" data-ph="n ≥"><p class="b-q-text">Número mínimo de lançamentos para $|H - 0{,}5| \le 0{,}01$ com $95\,\%$?</p><div class="b-sol"><p>$(1{,}96 \cdot 0{,}5 / 0{,}01)^2$</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Para que distribuição se verifica a condição de Laplace?</p><div class="b-mc"><button>$B(50;\ 0{,}1)$</button><button>$B(30;\ 0{,}5)$</button><button>$B(200;\ 0{,}1)$</button></div><div class="b-sol"><p>$\sigma = \sqrt{18} > 3$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="15">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>As maçãs de uma variedade pesam, em média, 180 g, com $\sigma = 15$ g (distribuição normal). As maçãs com menos de 160 g vão para sumo. Que proporção é essa?</p></div>
+            <div class="b-sol"><p>$\Phi\!\left(\tfrac{160 - 180}{15}\right) = \Phi(-1{,}33) \approx 0{,}091$, pouco mais de $9\,\%$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar com o capítulo 3.4:</b> calcula $\int_{-3}^{3} \varphi(x)\,\mathrm{d}x$ com o método dos trapézios e $n = 6$ faixas e compara com 0,9973.</p></div>
+            <div class="b-sol"><p>Valores em $-3, \ldots, 3$: $0{,}0044;\ 0{,}0540;\ 0{,}2420;\ 0{,}3989;\ 0{,}2420;\ 0{,}0540;\ 0{,}0044$. Trapézios: $1 \cdot \left(\tfrac{0{,}0044 + 0{,}0044}{2} + 0{,}0540 + 0{,}2420 + 0{,}3989 + 0{,}2420 + 0{,}0540\right) \approx 0{,}995$. Já com seis faixas fica muito perto.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Uma máquina corta barras com $\sigma = 0{,}8$ mm. Tolerância: $200 \pm 1{,}5$ mm. Que percentagem de peças defeituosas há com $\mu = 200$ mm, e quanto se a máquina estiver desregulada para 200,5 mm?</p></div>
+            <div class="b-sol"><p>$\mu = 200$: $1 - (\Phi(1{,}875) - \Phi(-1{,}875)) \approx 1 - 0{,}939 = 0{,}061$. $\mu = 200{,}5$: $1 - (\Phi(1{,}25) - \Phi(-2{,}5)) \approx 1 - (0{,}894 - 0{,}006) = 0{,}112$. O desvio quase duplica as peças defeituosas.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Com a folha de cálculo:</b> aí a função de distribuição chama-se <code>DIST.NORMAL(x; μ; σ; VERDADEIRO)</code> e a sua inversa <code>INV.NORMAL(p; μ; σ)</code>. As máquinas de enchimento enchem, em média, 500 g com $\sigma = 4$ g. Faz uma tabela que mostre, para $\mu$ de 500 a 510 g em passos de 1 g, a proporção de embalagens abaixo de 495 g. A partir de que $\mu$ fica abaixo de 1 %?</p></div>
+            <div class="b-hint"><p>Em cada linha <code>=DIST.NORMAL(495; A2; 4; VERDADEIRO)</code>, se $\mu$ estiver na coluna A.</p></div>
+            <div class="b-sol"><p>$P(X &lt; 495) = \Phi\!\left(\tfrac{495 - \mu}{4}\right) &lt; 0{,}01$ exige $\tfrac{495 - \mu}{4} &lt; -2{,}326$, logo $\mu &gt; 504{,}3$ g. Na tabela: com 504 g ainda 1,2 %, <span class="b-res">a partir de 505 g abaixo de 1 %</span> (0,62 %).</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Um teste de escolha múltipla tem 100 perguntas com 4 respostas cada. Quem só adivinha: qual é a probabilidade de acertar pelo menos 35? Aproxima com De Moivre-Laplace e justifica se a aproximação é admissível.</p></div>
+            <div class="b-sol"><p>$\mu = 25$, $\sigma = \sqrt{18{,}75} \approx 4{,}33 > 3$: admissível. $P(X \ge 35) = 1 - P(X \le 34) \approx 1 - \Phi\!\left(\tfrac{34{,}5 - 25}{4{,}33}\right) = 1 - \Phi(2{,}19) \approx 0{,}014$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: o sino na carteira" data-toc-k="X" data-toc-short="Sino">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">HISTÓRIA</span></div>
+    <h2>O sino na carteira</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>A 12 de novembro de 1733, o matemático Abraham de Moivre (1667–1754), um huguenote refugiado em Londres, distribuiu a amigos um caderno de sete páginas em latim:
+                <i>Approximatio ad Summam Terminorum Binomii (a + b)<sup>n</sup> in Seriem expansi</i>. Nele aproxima os termos do binómio, para $n$ grande, por uma curva a que hoje
+                chamamos curva de Gauss, e reconhece o desvio padrão como a unidade natural da dispersão. Só se conservam dois exemplares do caderno. Uma versão inglesa sua foi incluída
+                em 1738 na segunda edição do seu livro <i>The Doctrine of Chances</i>.</p>
+            <p>Mesmo assim, a curva recebeu o nome de outro: Carl Friedrich Gauss usou-a em 1809, na sua <i>Theoria motus corporum coelestium</i>, como lei dos erros de observação,
+                quando calculava órbitas de planetas a partir de medições imprecisas. Pierre-Simon Laplace demonstrou em 1812, na sua <i>Théorie analytique des probabilités</i>, uma forma geral do
+                teorema do limite: somas de muitas pequenas influências aleatórias seguem aproximadamente uma distribuição normal.</p>
+            <p>De 1991 até ao fim de 2001, cada nota de dez marcos na Alemanha mostrava Gauss, casas de Göttingen atrás dele e, ao lado, a curva de Gauss com a sua fórmula. O Bundesbank pô-la
+                em circulação pela primeira vez a 16 de abril de 1991. Provavelmente nunca uma fórmula do cálculo de probabilidades esteve tantas vezes em tantos bolsos.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fontes:</b> MacTutor History of Mathematics (St Andrews), «Abraham de Moivre»; W. E. Deming, Nature 132 (1933), p. 713; Deutsche Bundesbank, notas em marcos da série BBK III.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>DENSIDADE</h4><p>$f \ge 0$, área total 1, probabilidade $=$ área</p></div>
+        <div><p>$P(a \le X \le b) = \int_a^b f(x)\,\mathrm{d}x$, $P(X = a) = 0$</p></div></div>
+    <div class="b-rueck"><div><h4>DISTRIBUIÇÃO NORMAL</h4><p>$\varphi_{\mu;\sigma}(x) = \tfrac{1}{\sigma\sqrt{2\pi}}\,\mathrm{e}^{-\frac{(x - \mu)^2}{2\sigma^2}}$</p></div>
+        <div><p>Máximo em $\mu$, pontos de inflexão em $\mu \pm \sigma$</p></div></div>
+    <div class="b-rueck"><div><h4>ESTANDARDIZAR</h4><p>$P(X \le x) = \Phi\!\left(\tfrac{x - \mu}{\sigma}\right)$</p></div>
+        <div><p>$N(500, 4^2)$: $P(X &lt; 492) = \Phi(-2) \approx 0{,}023$</p></div></div>
+    <div class="b-rueck"><div><h4>REGRAS σ</h4><p>$68{,}3\,\%$ · $95{,}4\,\%$ · $99{,}7\,\%$</p></div>
+        <div><p>$95\,\%$ estão em $\mu \pm 1{,}96\sigma$</p></div></div>
+    <div class="b-rueck"><div><h4>DE MOIVRE-LAPLACE</h4><p>$P(X \le k) \approx \Phi\!\left(\tfrac{k + 0{,}5 - \mu}{\sigma}\right)$ para $\sigma > 3$</p></div>
+        <div><p>1000 lançamentos, face nacional entre 480 e 520 vezes: $\approx 0{,}805$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SEM CALCULADORA</div>
+            <div class="b-q" data-ans="162" data-ph="x ="><p class="b-q-text">$X \sim N(170, 8^2)$: ponto de inflexão da esquerda da densidade?</p><div class="b-sol"><p>$\mu - \sigma$</p></div></div>
+            <div class="b-q" data-ans="0,954" data-tol="0.002" data-ph="P ≈"><p class="b-q-text">Probabilidade de $\mu - 2\sigma \le X \le \mu + 2\sigma$? Três casas decimais.</p><div class="b-sol"><p>Regra $\sigma$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Se $\sigma$ duplicar, o máximo do sino fica …</p><div class="b-mc"><button>com metade da altura.</button><button>com o dobro da altura.</button><button>com a mesma altura.</button></div><div class="b-sol"><p>A área continua a ser 1.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · COM CALCULADORA</div>
+            <div class="b-q" data-ans="0,077" data-tol="0.002" data-ph="P ≈"><p class="b-q-text">$X \sim N(180, 7^2)$: $P(X &gt; 190)$? Três casas decimais.</p><div class="b-sol"><p>$1 - \Phi(10/7)$</p></div></div>
+            <div class="b-q" data-ans="504,3" data-tol="0.1" data-ph="μ ="><p class="b-q-text">$\sigma = 4$: que $\mu$ dá exatamente $1\,\%$ abaixo de 495 ml? Uma casa decimal.</p><div class="b-sol"><p>$495 + 2{,}326 \cdot 4$</p></div></div>
+            <div class="b-q" data-ans="0,014" data-tol="0.002" data-ph="P ≈"><p class="b-q-text">Adivinhar em 100 perguntas com $p = 0{,}25$: aproximação de $P(X \ge 35)$? Três casas decimais.</p><div class="b-sol"><p>$1 - \Phi(9{,}5 / 4{,}33)$</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12lk-normalverteilung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">NORMALVERTEILUNG</span><span class="b-lab-what">Densidade, Φ, regras σ</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12lk-moivre-laplace.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DE MOIVRE-LAPLACE</span><span class="b-lab-what">Distribuição binomial e distribuição normal</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTONBRETT</span><span class="b-lab-what">Provas de Bernoulli que se tornam um sino</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Berufliches Gymnasium, 13.º ano, Leistungskurs · Área de aprendizagem 4 segundo o programa de Matemática do Berufliches Gymnasium da Saxónia.</p>
+    <p>Todos os textos, exercícios e figuras são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-pt/funktionen.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-pt/stochastik.js"></script>
+<script src="../../js/buch-gy12lk.js"></script>
+<script src="../../js/buch-pt/gy12lk.js"></script>
+</body>
+</html>
