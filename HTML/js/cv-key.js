@@ -67,6 +67,11 @@
   const load = () => idb("readonly", (st) => st.get("data")).catch(() => null);
   const save = (key) => idb("readwrite", (st) => st.put(key, "data")).catch(() => {});
   const drop = () => idb("readwrite", (st) => st.delete("data")).catch(() => {});
+  /* further keys of the family under their own name - "real-salary": the-real-salary.html has a
+     key of its own since 10.11.2026, from its secret link or unwrapped with the CV key */
+  const loadAs = (name) => idb("readonly", (st) => st.get(name)).catch(() => null);
+  const saveAs = (name, key) => idb("readwrite", (st) => st.put(key, name)).catch(() => {});
+  const dropAs = (name) => idb("readwrite", (st) => st.delete(name)).catch(() => {});
 
   /* the remembered key, or null when there is none or it no longer fits */
   async function remembered() {
@@ -85,5 +90,5 @@
     return Promise.race([store, new Promise((r) => setTimeout(r, 1500))]);
   }
 
-  window.CvKey = { fromPassword, fits, open, remembered, save, drop, rememberInChrome };
+  window.CvKey = { fromPassword, fits, open, remembered, save, drop, loadAs, saveAs, dropAs, rememberInChrome };
 })();

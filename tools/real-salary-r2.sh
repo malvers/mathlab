@@ -2,7 +2,7 @@
 # The Real Salary: puts the sealed files of the-real-salary.html (HTML/resources/real-salary/*.bin, made by
 # tools/real-salary.py + scripts/cv-docs.mjs) into the R2 bucket "media" under real-salary/ - only what is new or
 # changed (R2's ETag is the MD5 of the file), so a run after a few new slides takes seconds. The files are sealed
-# with the key of the CV documents; nothing plain leaves the Mac.
+# with the page's own key (since 10.11.2026, see scripts/cv-docs.mjs); nothing plain leaves the Mac.
 #
 #     bash tools/real-salary-r2.sh
 #

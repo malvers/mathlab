@@ -413,10 +413,14 @@
 <script>
 /* ============================================================
    The Real Salary (Doc, 28.10.2026): the pictures of Doc's deck "The real salary" as a page,
-   linked from the documents of cv.html. Everything but this shell is sealed with the key of
-   the CV documents (js/cv-key.js): content.bin holds the moments (one per slide: pictures,
-   captions, text), <id>-thumb.bin / <id>.bin the pictures. Built by tools/real-salary.py,
-   sealed by scripts/cv-docs.mjs - the plain files never leave ~/PRIVAT MRA.
+   linked from the documents of cv.html. Everything but this shell is sealed (js/cv-key.js):
+   content.bin holds the moments (one per slide: pictures, captions, text), <id>-thumb.bin /
+   <id>.bin the pictures. Built by tools/real-salary.py, sealed by scripts/cv-docs.mjs - the
+   plain files never leave ~/PRIVAT MRA.
+   Since 10.11.2026 with a key of its own (Doc: "nur wem ich den Link direkt schicke"): the
+   secret link carries it after the # (#k=..., a fragment never reaches a server) and opens
+   this page only, never the CV documents; after the CV password it is unwrapped from
+   resources/cv-docs/real-salary-key.bin. Either way the device remembers it.
    Locally the sealed files come from resources/real-salary, live from R2 (25 MB, not git).
    ============================================================ */
 const LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
@@ -549,6 +553,26 @@ function metaFor(m) {
   return box;
 }
 const sc = (s) => L === "de" ? s : s.replace(",", ".");
+
+/* ---------- the page's own key ---------- */
+const RS = "real-salary";                                   /* its name in CvKey's store */
+const RS_WRAPPED = "resources/cv-docs/real-salary-key.bin";  /* the key, sealed with the CV key */
+
+/* the key from the secret link (#k=...[&m=7]); it leaves the address bar at once */
+function keyFromLink() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  const k = h.get("k");
+  if (!k) return null;
+  history.replaceState(null, "", location.pathname + location.search + (h.get("m") ? "#m" + h.get("m") : ""));
+  const raw = Uint8Array.from(atob(k.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+  return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+}
+
+/* the key unwrapped with the key of the CV documents */
+async function keyFromCv(cvKey) {
+  const raw = await CvKey.open(cvKey, RS_WRAPPED, { cache: "no-cache" });
+  return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+}
 
 /* ---------- decrypted pictures, a few at a time ---------- */
 let key = null;
@@ -856,6 +880,8 @@ async function unlocked() {
     await start();
     $("lockBtn").hidden = false;
   } catch (e) {
+    CvKey.dropAs(RS);                        /* a remembered or linked key that no longer fits */
+    key = null;
     status(T.fail + " (" + e.message + ")");
     showLock();
   } finally {
@@ -880,9 +906,11 @@ $("lock").addEventListener("submit", async (e) => {
   $("go").disabled = true;
   status(T.busy, true);
   try {
-    key = await CvKey.fromPassword(pw);
-    await CvKey.save(key);
+    const cv = await CvKey.fromPassword(pw);
+    await CvKey.save(cv);
     await CvKey.rememberInChrome(pw);
+    key = await keyFromCv(cv);
+    await CvKey.saveAs(RS, key);
     $("pw").value = "";
     status("");
     await unlocked();
@@ -897,6 +925,7 @@ $("lock").addEventListener("submit", async (e) => {
 
 $("lockBtn").addEventListener("click", () => {
   key = null;
+  CvKey.dropAs(RS);
   CvKey.drop();
   urls.forEach((p) => p.then((u) => URL.revokeObjectURL(u)).catch(() => {}));
   urls = new Map();
@@ -915,8 +944,17 @@ window.addEventListener("resize", () => {
   resizeT = setTimeout(() => { if (cards.length) layout(); }, 150);
 });
 
+/* secret link, then the remembered page key, then a device that knows the CV key, else the password */
 (async function () {
-  try { key = await CvKey.remembered(); } catch (e) { key = null; }
+  try {
+    const linked = keyFromLink();
+    if (linked) { key = await linked; await CvKey.saveAs(RS, key); }
+    else key = await CvKey.loadAs(RS);
+    if (!key) {
+      const cv = await CvKey.remembered();
+      if (cv) { key = await keyFromCv(cv); await CvKey.saveAs(RS, key); }
+    }
+  } catch (e) { key = null; }
   if (key) unlocked(); else showLock();
 })();
 </script>
