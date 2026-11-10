@@ -486,20 +486,47 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
         guard panel.runModal() == .OK else { return }
 
-        let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
-        for (i, url) in panel.urls.enumerated() {
-            let n = items.count + i
+        for url in panel.urls {
             let id = UUID().uuidString
-            let rec = PhotoRec(id: id,
-                               path: ownCopy(of: url, id: id).path,
-                               centerX: Double(screen.midX) + Double(n % 5) * 34,
-                               centerY: Double(screen.midY) - Double(n % 5) * 28,
-                               width: 340,
+            let path = ownCopy(of: url, id: id).path
+            let width = 340.0
+            let size = NSImage(contentsOfFile: path)?.size ?? NSSize(width: 4, height: 3)
+            let height = size.width > 0 ? width * Double(size.height / size.width) : width * 0.75
+            let spot = newSpot(width: width, height: height)
+            let rec = PhotoRec(id: id, path: path,
+                               centerX: Double(spot.x), centerY: Double(spot.y),
+                               width: width,
                                angle: 0)     // straight, like the widgets beside it
             if let item = PhotoItem(rec: rec, owner: self) { items.append(item) }
         }
         save()
         publishMenu()
+    }
+
+    /// Where a new photo goes: right beside the photo added last, top edges aligned, so
+    /// it lands where Doc keeps his photos and can see them. The middle of the screen is
+    /// nearly always covered by windows, and a desktop photo lies below every window
+    /// (10.11.2026: a screenshot landed in the middle of the LG, behind his windows —
+    /// "kommt aber nicht aufs Desktop"). No room on the right: below it; no room there
+    /// either: slightly offset on top of it. Without any photo yet: the middle of the
+    /// screen under the mouse. Several pictures from one dialog line up one after another.
+    private func newSpot(width w: Double, height h: Double) -> NSPoint {
+        let gap = 24.0
+        if let last = items.last {
+            // The window is the photo plus shadowPad on every side.
+            let f = last.window.frame.insetBy(dx: shadowPad, dy: shadowPad)
+            let vis = (NSScreen.screens.first { $0.frame.contains(NSPoint(x: f.midX, y: f.midY)) }
+                       ?? NSScreen.main)?.visibleFrame ?? f
+            let right = NSPoint(x: Double(f.maxX) + gap + w / 2, y: Double(f.maxY) - h / 2)
+            if right.x + w / 2 <= Double(vis.maxX) && right.y - h / 2 >= Double(vis.minY) { return right }
+            let below = NSPoint(x: Double(f.minX) + w / 2, y: Double(f.minY) - gap - h / 2)
+            if below.y - h / 2 >= Double(vis.minY) && below.x + w / 2 <= Double(vis.maxX) { return below }
+            return NSPoint(x: f.midX + 34, y: f.midY - 28)
+        }
+        let mouse = NSEvent.mouseLocation
+        let vis = (NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) }
+                   ?? NSScreen.main)?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+        return NSPoint(x: vis.midX, y: vis.midY)
     }
 
     @objc private func removeAll() {
