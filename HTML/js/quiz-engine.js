@@ -1316,6 +1316,26 @@
     updateSubmitState();
   }
 
+  /* The screen stays on while the test runs (Doc, 11.11.2026: "Wenn das Mobiltelefon den Bildschirm wegschaltet, also
+     in Sleep-Modus geht, dann ist auch aus dem Test rausgeflogen. Das geht auch nicht."): a phone that dims and locks
+     itself hides the page just like a switch to another app, and the page cannot tell the two apart. The Screen Wake
+     Lock API (Safari from iOS 16.4, Chrome on Android) keeps the screen awake; the browser drops the lock whenever the
+     page is hidden, so it is asked for again each time the page comes back. Without the API nothing changes. */
+  let wakeLock = null;
+  function keepAwake() {
+    if (!guardArmed || wakeLock || document.hidden || !('wakeLock' in navigator)) return;
+    navigator.wakeLock.request('screen').then(function (l) {
+      wakeLock = l;
+      l.addEventListener('release', function () { if (wakeLock === l) wakeLock = null; });
+      if (!guardArmed) letSleep();
+    }).catch(function () { /* not allowed just now (battery saver, page hidden): the next return asks again */ });
+  }
+  function letSleep() {
+    const l = wakeLock;
+    wakeLock = null;
+    if (l) l.release().catch(function () {});
+  }
+
   function guardGo() {
     if (guardAborted || guardAway) return;
     if (REQUIRE_CODE && !(CODE_RE.test(code) && codeCleared()) && !guardArmed) return;
@@ -1330,6 +1350,7 @@
       guardPing();
       pingTimer = setInterval(guardPing, 15000);
     }
+    keepAwake();
     hideGuard();
   }
 
@@ -1362,19 +1383,53 @@
     clearInterval(pingTimer);
     clearTimeout(pingSoon);
     awayPoll(false);
+    letSleep();
     hideGuard();
     exitFullscreen();
+  }
+
+  /* A short look away is no leave (Doc, 11.11.2026, KA FOS25-2 on iPhones: "auch wenn man die Uhrzeit runterzieht,
+     gilt das offensichtlich als testverlassen" - pulling down the status bar, or a swipe up from the bottom edge
+     meant as scrolling, hides the page for a moment). Only an absence of GUARD_GRACE or longer locks the test; a real
+     switch to another app or tab still does. Phones put the timers of a hidden page to sleep, so the length is taken
+     from the clock when the page comes back; the timer catches the desktop, where the page keeps running while another
+     window has the focus. QUIZ.guardGrace (ms) changes it for one test, 0 = the old instant lock. */
+  const GUARD_GRACE = typeof CFG.guardGrace === 'number' ? Math.max(0, CFG.guardGrace) : 3000;
+  let awaySince = 0, awayKind = '', graceTimer = null;
+  function awayStart(kind) {
+    if (awaySince) return;
+    awaySince = Date.now();
+    awayKind = kind;
+    clearTimeout(graceTimer);
+    /* still away when it fires (desktop), or fired late because it slept (phone): either way the absence was long */
+    graceTimer = setTimeout(function () {
+      if (awaySince && (document.hidden || !document.hasFocus() || Date.now() - awaySince >= GUARD_GRACE)) awayEnd(true);
+    }, GUARD_GRACE);
+  }
+  function awayEnd(long) {
+    if (!awaySince) return;
+    const kind = awayKind;
+    long = long || Date.now() - awaySince >= GUARD_GRACE;
+    awaySince = 0;
+    awayKind = '';
+    clearTimeout(graceTimer);
+    if (long) guardLeave(kind);
   }
 
   function guardWatch() {
     if (!GUARD_ON) return;
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) guardLeave('tab');
+      if (document.hidden) awayStart('tab');
+      else {
+        keepAwake();                                  /* the browser let go of the wake lock while hidden */
+        if (document.hasFocus()) awayEnd(false);
+      }
     });
     /* a real switch keeps the focus away; a flicker is back within a moment */
     window.addEventListener('blur', function () {
-      setTimeout(function () { if (!document.hasFocus()) guardLeave('focus'); }, 250);
+      setTimeout(function () { if (!document.hasFocus()) awayStart('focus'); }, 250);
     });
+    window.addEventListener('focus', function () { if (!document.hidden) awayEnd(false); });
     ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
       document.addEventListener(ev, function () { if (!fsElement() && !GUARD_TOUCH) guardLeave('fullscreen'); });
     });

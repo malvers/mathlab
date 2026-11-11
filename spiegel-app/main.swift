@@ -483,8 +483,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                      DocBarItem("login", "Start at login", state: startsAtLogin)]
         if problem != nil { items.append(DocBarItem("settings", "Screen Recording settings")) }
         items.append(DocBarItem("quit", "Quit DocMirror"))
-        let status = !enabled ? "off" : problem ?? (shown.isEmpty ? "no second screen" : "shows \(shown)")
+        let none = mirrored() ? "gespiegelt – ⌘F1 für Erweitern" : "no second screen"
+        let status = !enabled ? "off" : problem ?? (shown.isEmpty ? none : "shows \(shown)")
         bar?.publish(status: status, items: items, primary: "toggle", alert: problem != nil, toggle: enabled)
+    }
+
+    /// Two displays online, but macOS mirrors them: there is no second screen to show, and the menu says how to get one
+    /// (Doc, 11.11.2026, in class: "mirror is on but not visible" - "no second screen" did not say what to do).
+    private func mirrored() -> Bool {
+        var ids = [CGDirectDisplayID](repeating: 0, count: 8)
+        var n: UInt32 = 0
+        guard CGGetOnlineDisplayList(UInt32(ids.count), &ids, &n) == .success, n > 1 else { return false }
+        return ids.prefix(Int(n)).contains { CGDisplayIsInMirrorSet($0) != 0 }
     }
 
     private func clicked(_ item: String) {

@@ -30,6 +30,8 @@
 //                            A phone may take its tap back (Doc, 09.11.2026): a row with bezug = the tap, which then
 //                            no longer counts
 //   Buzzer.tempoMarke(el, s) shows such a count beside a button, left of it (the teacher's side only)
+//   Buzzer.jubel(onJubel)    the phones' "EUPHORIE" (Doc, 11.11.2026): onJubel({id, t}) once for every cheer that comes
+//                            after this moment (rows of buzzer_tempo with art 'jubel'; the tempo count ignores them)
 //   Buzzer.texte(onTexte)    the phones' written feedback of today (table buzzer_text, Doc 01.10.2026): onTexte({texte,
 //                            angemeldet, neu}) every 5 s; readable only with the teacher's svpAuth session
 //   Buzzer.texte(onTexte, { schluessel: true })   the same without a session (rueckmeldung.html, Doc 07.10.2026):
@@ -154,6 +156,34 @@
             if (res.ok) tempoDazu(await res.json());
         } catch (_) { /* offline for a moment - the next look catches up */ }
     }
+    // ---- the cheer (Doc, 11.11.2026: the phone's "EUPHORIE" button - "wenn ich gerade am Präsentieren bin, ein kleines
+    // Feuerwerk"): a tap is a row of buzzer_tempo with art 'jubel' (supabase/migrations/20261111_buzzer_jubel.sql). Only
+    // the cheers from the moment a page listens count, none from before: the first look only notes the newest id there
+    // is, later looks and realtime report what comes after it - each row once. The tempo count never sees them.
+    let jubelMelde = null, jubelBasis = null, jubelIds = new Set();        // basis: newest id before listening, null = not asked yet
+    function jubelDazu(zeilen) {
+        zeilen.forEach(r => {
+            if (!r || r.art !== 'jubel' || r.bezug || jubelIds.has(r.id)) return;
+            jubelIds.add(r.id);
+            if (jubelBasis !== null && r.id > jubelBasis) jubelBasis = r.id;
+            if (jubelMelde) jubelMelde({ id: r.id, t: zeitenAus([r])[r.id] || Date.now() });
+        });
+    }
+    async function jubelNachsehen() {
+        if (!jubelMelde) return;
+        const c = code(), erst = jubelBasis === null;
+        try {
+            const res = await fetch(DB_URL + '/rest/v1/buzzer_tempo?code=eq.' + c + '&art=eq.jubel' +
+                (erst ? '&select=id&order=id.desc&limit=1' : '&id=gt.' + jubelBasis + '&select=*&order=id'),
+                { headers: { apikey: DB_KEY }, cache: 'no-store' });
+            if (!res.ok || c !== code()) return;
+            const zeilen = await res.json();
+            if (!erst) { jubelDazu(zeilen); return; }
+            if (jubelBasis !== null) return;                               // another look answered first
+            // what came by realtime meanwhile stays counted; the rest of before is history
+            jubelBasis = Math.max(zeilen[0] ? zeilen[0].id : 0, ...jubelIds);
+        } catch (_) { /* offline for a moment - the next look catches up */ }
+    }
     // ---- written feedback (Doc, 01.10.2026: "ein Feld. Für Feedback. Wo die mir also tatsächlich irgendwas schreiben
     // können ... bei mir im Mission Control"): rows of buzzer_text, today's of this code. Only a signed-in teacher may
     // read them (svpAuth - the page brings it along), so without a session there is nothing to show.
@@ -246,13 +276,16 @@
         tempoZeilen = new Map();
         tempoZurueck = new Set();
         texte = new Map();
+        jubelBasis = null;                                                  // a new code: its cheers from now on
+        jubelIds = new Set();
         if (melde) melde(0, false);
         if (tempoMelde) tempoMelde(tempoStand());
         clearInterval(timer);
-        timer = setInterval(() => { nachsehen(); tempoNachsehen(); texteNachsehen(); }, 5000);
+        timer = setInterval(() => { nachsehen(); tempoNachsehen(); texteNachsehen(); jubelNachsehen(); }, 5000);
         nachsehen();
         tempoNachsehen();
         texteNachsehen();
+        jubelNachsehen();
         try {
             if (!window.supabase) await ladeSkript(DIR + 'vendor/supabase.min.js');
             if (!sb) sb = window.supabase.createClient(DB_URL, DB_KEY, { auth: { persistSession: false } });
@@ -262,7 +295,7 @@
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'buzzer', filter: 'code=eq.' + c },
                     p => { if (p.new && p.new.code === code()) zaehlen([p.new.id], zeitenAus([p.new]), bezuegeAus([p.new])); })
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'buzzer_tempo', filter: 'code=eq.' + c },
-                    p => { if (p.new && p.new.code === code()) tempoDazu([p.new]); })
+                    p => { if (p.new && p.new.code === code()) { tempoDazu([p.new]); jubelDazu([p.new]); } })
                 .subscribe();
         } catch (_) { /* no realtime (school Wi-Fi): the look every 5 s carries it alone */ }
     }
@@ -438,6 +471,9 @@
         // minutes), neu = the kind just come; tempoJetzt(): count again now (the page's ab() moved on)
         tempo: (cb, ab) => { tempoMelde = cb; tempoAb = ab || null; if (laeuft && cb) cb(tempoStand()); },
         tempoJetzt: () => { if (tempoMelde) tempoMelde(tempoStand()); },
+        // jubel(onJubel): onJubel({id, t}) once for every cheer of this code that comes after this moment (Doc,
+        // 11.11.2026: the presenter's mini firework)
+        jubel: cb => { jubelMelde = cb; if (laeuft && cb && jubelBasis === null) jubelNachsehen(); },
         // texte(onTexte, {schluessel}): onTexte({texte: [{id, text, name, t}], angemeldet, neu}) - today's written feedback
         // of this code; schluessel: true reads them without a session, with the code claimed by this device
         texte: (cb, opts) => { texteMelde = cb; texteMitSchluessel = !!(opts && opts.schluessel); if (laeuft && cb) texteNachsehen(); },

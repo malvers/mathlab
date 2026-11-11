@@ -2275,6 +2275,7 @@ const link = (function () {
     else if (m.t === 'go') apply(m);
     else if (m.t === 'pop') popApply(m);                                       // a box opened in the presenter
     else if (m.t === 'tail') hoverTail.apply(m);                               // the presenter's mouse on a strip
+    else if (m.t === 'jubel') feuerwerk(0.86, 0.16);                           // the class cheered: the mini firework
     else if (m.t === 'zoom') hoverZoom.apply(m);                               // a picture under the presenter's mouse
     else if (m.t === 'ev') mirror.replay(m);
     else if (m.t === 'lab-fresh') mirror.fresh(m.si);                         // the presenter's labs of that slide are new
@@ -2799,6 +2800,52 @@ const link = (function () {
     endShow();
   }, true);   // capture: before the slide-number handler clears its box; an open overview still gets Esc first
 
+  /* A mini firework when the class cheers (Doc, 11.11.2026: "wenn das gedrückt wird ... bei mir in der Präsentation,
+     also wenn ich gerade am Präsentieren bin, ein kleines Feuerwerk ... so ein Mini-Feuerwerk"). The phone's
+     "EUPHORIE" is a row of buzzer_tempo (Buzzer.jubel, js/buzzer.js); the presenter view hears it (presBuzzer), bursts
+     over the top right of its current slide and tells the beamer window, which bursts in its own top right corner.
+     Three small round bursts in Doc's colours, about 1.5 s; cheers within 2 s of a firework join it. canvas-confetti
+     (MIT, one fixed version) draws it on a canvas of its own over everything, pointer-events none - it is loaded on
+     the first cheer only, and offline there is simply no firework. Never while editing; without a presenter view
+     nothing happens, since only the presenter listens. */
+  const FEUER_JS = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js';
+  const FEUER_FARBEN = ['#F5C242', '#D4960F', '#B02418', '#799E31', '#00D2FF'];   // no white: the slides are light
+  let feuerLib = null, feuerBis = 0;
+  function feuerLaden() {
+    if (!feuerLib) feuerLib = window.confetti ? Promise.resolve(window.confetti) : new Promise(function (ok, no) {
+      const s = document.createElement('script');
+      s.src = FEUER_JS; s.async = true;
+      s.onload = function () { if (window.confetti) ok(window.confetti); else no(); };
+      s.onerror = function () { feuerLib = null; no(); };          // the next cheer tries again
+      document.head.appendChild(s);
+    });
+    return feuerLib;
+  }
+  // x, y: where the bursts go, 0..1 of the window (the corner of the slide)
+  function feuerwerk(x, y) {
+    if (EDITING()) return;
+    const jetzt = Date.now();
+    if (jetzt < feuerBis) return;                                   // one firework for a handful of cheers
+    feuerBis = jetzt + 2000;
+    feuerLaden().then(function (confetti) {
+      [[0, 0, 0], [380, -0.07, 0.05], [760, 0.04, -0.02]].forEach(function (b) {
+        setTimeout(function () {
+          confetti({ particleCount: 32, spread: 360, startVelocity: 17, ticks: 75, gravity: 0.7, decay: 0.92,
+            scalar: 0.95, shapes: ['circle'], colors: FEUER_FARBEN, zIndex: 70000,
+            origin: { x: Math.min(0.97, Math.max(0.03, x + b[1])), y: Math.min(0.9, Math.max(0.05, y + b[2])) } });
+        }, b[0]);
+      });
+    }, function () { /* offline: no firework */ });
+  }
+  // the presenter: over the top right of its current slide, and the beamer gets told
+  function feuerHier() {
+    const f = document.querySelector('#pres .p-frame');
+    const r = f && f.getBoundingClientRect();
+    if (r && r.width) feuerwerk((r.right - r.width * 0.16) / innerWidth, (r.top + r.height * 0.2) / innerHeight);
+    else feuerwerk(0.84, 0.2);
+    send({ t: 'jubel' });
+  }
+
   /* The buzzer in the presenter's bar (Doc, 10.11.2026: "das Feedback vom Buzzer gerne in der Präsentation im
      Präsentationsview" - the phone beside him gets too few looks while he presents). Between the running time and
      the clock: the open "nicht verstanden" (a click: seen, back to 0) and "zu langsam" / "zu schnell" of the last two
@@ -2846,6 +2893,7 @@ const link = (function () {
       el.hidden = false;
       Buzzer.start(function (n) { setze('frage', n); });
       Buzzer.tempo(function (s) { setze('langsam', s.langsam); setze('schnell', s.schnell); });
+      if (Buzzer.jubel) Buzzer.jubel(feuerHier);    // the phones' EUPHORIE: a mini firework (buzzer.js from 11.11.2026)
     }
     pills.frage.onclick = function () { Buzzer.gesehen(); };
     ruhe.onclick = function () {
