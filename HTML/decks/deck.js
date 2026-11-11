@@ -2372,7 +2372,7 @@ const link = (function () {
     else if (m.t === 'go') apply(m);
     else if (m.t === 'pop') popApply(m);                                       // a box opened in the presenter
     else if (m.t === 'tail') hoverTail.apply(m);                               // the presenter's mouse on a strip
-    else if (m.t === 'jubel') feuerwerk(0.86, 0.16);                           // the class cheered: the mini firework
+    else if (m.t === 'jubel') feuerwerk(0.12, 0.12, 0.88, 0.5);                // the class cheered: the firework
     else if (m.t === 'zoom') hoverZoom.apply(m);                               // a picture under the presenter's mouse
     else if (m.t === 'ev') mirror.replay(m);
     else if (m.t === 'lab-fresh') mirror.fresh(m.si);                         // the presenter's labs of that slide are new
@@ -2918,28 +2918,39 @@ const link = (function () {
     });
     return feuerLib;
   }
-  // x, y: where the bursts go, 0..1 of the window (the corner of the slide)
-  function feuerwerk(x, y) {
+  /* x0, y0, x1, y1: the area the bursts go into, 0..1 of the window (the upper part of the slide).
+     Doc, 11.11.2026 at the board: "der Effekt müsste noch ein bisschen doller sein. Man sieht es ganz wenig nur ...
+     nicht so richtig, dass es Feuerwerk ist" - so six big bursts spread over the upper half of the slide, about 2.5 s,
+     each one colour with gold stars inside, like rockets bursting in the sky (was three small mixed ones in a corner).
+     The burst size follows the width of the area, so beamer and presenter frame look alike. */
+  function feuerwerk(x0, y0, x1, y1) {
     if (EDITING()) return;
     const jetzt = Date.now();
     if (jetzt < feuerBis) return;                                   // one firework for a handful of cheers
-    feuerBis = jetzt + 2000;
+    feuerBis = jetzt + 3000;
     feuerLaden().then(function (confetti) {
-      [[0, 0, 0], [380, -0.07, 0.05], [760, 0.04, -0.02]].forEach(function (b) {
+      const w = x1 - x0, h = y1 - y0;
+      const v = Math.min(42, Math.max(14, w * innerWidth * 0.017));   // start speed: radius about 0.2 of the area
+      const s = Math.min(1.8, Math.max(0.9, w * innerWidth / 1100));  // particle size
+      for (let i = 0; i < 6; i++) {
+        const farbe = FEUER_FARBEN[i % FEUER_FARBEN.length];
+        const o = { x: x0 + w * ((i * 0.618 + 0.12) % 1), y: y0 + h * Math.random() };   // golden ratio: spread out
         setTimeout(function () {
-          confetti({ particleCount: 32, spread: 360, startVelocity: 17, ticks: 75, gravity: 0.7, decay: 0.92,
-            scalar: 0.95, shapes: ['circle'], colors: FEUER_FARBEN, zIndex: 70000,
-            origin: { x: Math.min(0.97, Math.max(0.03, x + b[1])), y: Math.min(0.9, Math.max(0.05, y + b[2])) } });
-        }, b[0]);
-      });
+          confetti({ particleCount: 90, spread: 360, startVelocity: v, ticks: 120, gravity: 0.75, decay: 0.92,
+            scalar: s, shapes: ['circle'], colors: [farbe], zIndex: 70000, origin: o });
+          confetti({ particleCount: 24, spread: 360, startVelocity: v * 0.7, ticks: 140, gravity: 0.6, decay: 0.92,
+            scalar: s * 0.9, shapes: ['star'], colors: ['#F5C242', '#D4960F'], zIndex: 70000, origin: o });
+        }, i * 380 + Math.random() * 120);
+      }
     }, function () { /* offline: no firework */ });
   }
-  // the presenter: over the top right of its current slide, and the beamer gets told
+  // the presenter: over the upper half of its current slide, and the beamer gets told
   function feuerHier() {
     const f = document.querySelector('#pres .p-frame');
     const r = f && f.getBoundingClientRect();
-    if (r && r.width) feuerwerk((r.right - r.width * 0.16) / innerWidth, (r.top + r.height * 0.2) / innerHeight);
-    else feuerwerk(0.84, 0.2);
+    if (r && r.width) feuerwerk((r.left + r.width * 0.12) / innerWidth, (r.top + r.height * 0.12) / innerHeight,
+                                (r.right - r.width * 0.12) / innerWidth, (r.top + r.height * 0.5) / innerHeight);
+    else feuerwerk(0.15, 0.12, 0.85, 0.5);
     send({ t: 'jubel' });
   }
 
