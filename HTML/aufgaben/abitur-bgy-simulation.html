@@ -222,6 +222,10 @@ figure.fig figcaption{margin-top:4px;color:var(--muted);font-size:13.5px}
 </main>
 
 <script>
+// What may not start a line after a formula: a punctuation mark, a unit after a space (not
+// when it is only the start of a longer word - "m" in "mal", "min" in "mindestens"), a word
+// joined by a hyphen; punctuation behind the unit or the word comes along.
+const TAIL = /^(?:[.,;:!?)\]]|-[A-Za-zÄÖÜäöüß]+[.,;:!?)]?|[ \u00a0](?:m|cm|mm|dm|km|m²|m³|cm²|cm³|dm³|km²|ha|kg|g|mg|t|l|ml|hl|Liter|€|Euro|ct|Cent|%|‰|°C?|s|min|h|Std\.|km\/h|m\/s|GB|Gigabyte|MB|kB|kWh|W|kW|V|A|Hz|Grad|Meter|Kilometer|Zentimeter|Gramm|Kilogramm|Sekunden|Minuten|Stunden|Tage|Wochen|Jahre|Prozent)(?![A-Za-zÄÖÜäöüß0-9²³\/])[.,;:!?)]?)/;
 // Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
 addEventListener('load', () => {
   if (!window.katex) return;
@@ -238,11 +242,15 @@ addEventListener('load', () => {
       try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
       catch (err) { span.textContent = part; }
       // A formula is an inline-block, so a comma or full stop right after it can wrap
-      // onto the next line all by itself. Keep the two together (Doc, 09.09.2026).
+      // onto the next line all by itself. Keep the two together (Doc, 09.09.2026) - and the
+      // same for a unit after a number ("12 m", "2,5 Stunden", "30 €.") and for a word joined
+      // by a hyphen ("x-Achse", "60-mal"): on a 390 px phone they stood alone at the start of
+      // the next line (Doc, 11.11.2026). The space stays a space, only no break inside.
       const next = parts[i + 1];
-      const tail = next && /^[.,;:!?)\]]/.test(next) ? next[0] : '';
+      const hit = next && next.match(TAIL);
+      const tail = hit ? hit[0] : '';
       if (tail) {
-        parts[i + 1] = next.slice(1);
+        parts[i + 1] = next.slice(tail.length);
         const keep = document.createElement('span');
         keep.className = 'nowrap';
         keep.appendChild(span);
