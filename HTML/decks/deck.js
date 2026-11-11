@@ -488,6 +488,7 @@ addEventListener('keydown', e => {
   const p = document.querySelector('.pop:not([hidden])');
   if (!p || !(e.key === 'Escape' || /^(Arrow|Page|Home|End)/.test(e.key))) return;
   p.hidden = true; popTell('');
+  e.deckPopClosed = p;                               // later listeners know this key closed a box (deck-vote.js)
   if (e.key === 'Escape') e.stopImmediatePropagation();   // Esc only closes the box
 }, true);
 // In fullscreen the browser keeps Esc for itself: a press meant for an open box left fullscreen and ended the show (Doc,

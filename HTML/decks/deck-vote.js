@@ -17,7 +17,11 @@
 //                      mean (Doc: "in einer Box ..., die sich über alles drüber weglegt und groß ist") - the deck's own
 //                      .pop, so x, a click beside it, Esc and turning the page close it, and the presenter's click opens
 //                      it on the beamer too. The mean only on a click, as on vote.html: the first votes do not steer
-//                      the rest.
+//                      the rest. The clicker opens it as well (Doc, 11.11.2026, via Marie: "JA - per Pfeiltaste/
+//                      Klicker"): once a round runs, the next forward press (→, ↓, PageDown) opens the box instead of
+//                      turning the page; with the box open, forward closes it (and turns on, should a slide follow),
+//                      back only closes it. Before the start forward simply turns on - a key never starts a round.
+//                      Not Space: that is the mic's key (deck.js).
 //   "Neue Runde"       a new round under the same code: phones that scanned already are switched over (vote.html).
 // Plain REST and a look every 2 s while the slide is up - no supabase-js, and school Wi-Fi that drops websockets does
 // not matter. The round is kept per deck in localStorage: the beamer and the presenter window share it (storage
@@ -246,6 +250,31 @@
     const box = b.closest('.vote-box');
     if (b.classList.contains('vote-go')) start(box, false);
     else if (b.classList.contains('vote-new')) start(box, true);
+  }, true);
+
+  // the clicker on the survey slide: forward opens the result box once a round runs (see the top). In the presenter
+  // window the box of its live copy opens and popTell opens the beamer's; deck.js closes a box on any arrow first and
+  // marks the key (e.deckPopClosed), so that press is not taken for an "open".
+  const FORWARD = { ArrowRight: 1, ArrowDown: 1, PageDown: 1 }, BACK = { ArrowLeft: 1, ArrowUp: 1, PageUp: 1 };
+  addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || !(FORWARD[e.key] || BACK[e.key])) return;
+    if (!state.poll || !onScreen() || document.documentElement.classList.contains('deck-edit')) return;
+    const ov = document.getElementById('overview');
+    if (ov && !ov.hidden) return;                    // the overview's own business
+    const t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    if (e.deckPopClosed) {
+      if (e.deckPopClosed.classList.contains('vote-pop') && BACK[e.key]) { e.preventDefault(); e.stopImmediatePropagation(); }
+      return;                                        // forward: closed, and deck.js turns on if a slide follows
+    }
+    if (!FORWARD[e.key] || document.querySelector('.pop:not([hidden])')) return;
+    const p = (typeof PRESENTER !== 'undefined' && PRESENTER && document.querySelector('#pres .p-cur .p-frame .vote-pop'))
+      || slides[si].querySelector('.vote-pop');
+    if (!p) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();                    // not on to the next slide
+    p.hidden = false;
+    if (typeof popTell === 'function') popTell('vote-pop');
   }, true);
 
   // the other window (beamer / presenter) started a round
