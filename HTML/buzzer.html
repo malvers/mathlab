@@ -73,6 +73,9 @@
             /* was min(78vw, 58vh, 380px); smaller since the EUPHORIE key sits above it (Doc, 11.11.2026: "alles ein
                Stück nach unten schiebst, gegebenenfalls kleiner machst") */
             --knopf: min(66vw, 32vh, 380px);
+            /* more air under the green key (Doc, 11.11.2026: "der orange Button drunter soll ein Stück nach unten") -
+               less on a short screen, see the media rules at the end */
+            margin-top: 22px;
             width: var(--knopf); aspect-ratio: 1; border-radius: 50%;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
             padding: 0 calc(var(--knopf) * 0.14); cursor: pointer; touch-action: manipulation;
@@ -235,15 +238,16 @@
 
         /* a short screen (small phone, a browser's bars, a laptop): the yellow key and the text box give way, so all
            of it still fits without scrolling (since the EUPHORIE key, 11.11.2026) - last, so it wins over the rules above */
-        @media (max-height: 760px) {
-            #knopf { --knopf: min(66vw, 27vh, 380px); }
+        /* (800, was 760: a 1024 x 768 laptop scrolled by 17 px, and the yellow key moved down since) */
+        @media (max-height: 800px) {
+            #knopf { --knopf: min(66vw, 27vh, 380px); margin-top: 16px; }
             #tempo { margin-top: 8px; }
             #text { min-height: 64px; }
         }
         /* a small phone with the browser's bars (375 x 667, 390 x 664): a little tighter still */
         @media (max-height: 700px) {
             body { gap: 12px; }
-            #knopf { --knopf: min(66vw, 25vh, 380px); }
+            #knopf { --knopf: min(66vw, 24vh, 380px); margin-top: 8px; }
             #text { min-height: 56px; }
         }
     </style>
@@ -260,7 +264,7 @@
 
     <button type="button" id="jubel" hidden>
         <img id="jubel-bild" alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f929.png">
-        <span id="jubel-wort">EUPHORIE</span>
+        <span id="jubel-wort">GUT ERKLÄRT</span>
     </button>
     <button type="button" id="knopf" hidden>
         <span id="knopf-text">HAB ICH NICHT VERSTANDEN</span>
@@ -471,12 +475,14 @@
             const KEY_JUBEL = 'buzzer-jubel', JUBEL_RUHE = 10000, JUBEL_DANKE = 1800;
             new Image().src = APPLE + '1f386.png';                       // 🎆 for the thanks, fetched once
             let jubelUhren = [];
+            // the green key's word (Doc, 11.11.2026, 17:20: "der Button für Euphorie soll bitte heißen: gut erklärt")
+            const JUBEL_WORT = 'GUT ERKLÄRT';
             function jubelStand(wort, bild) { jubelWort.textContent = wort; jubelBild.src = APPLE + bild + '.png'; }
             function jubelFrei() {
                 jubelUhren.forEach(clearTimeout); jubelUhren = [];
                 jubelKnopf.classList.remove('ruht', 'danke');
                 jubelKnopf.disabled = false;
-                jubelStand('EUPHORIE', '1f929');
+                jubelStand(JUBEL_WORT, '1f929');
             }
             // rest until bis (ms): grey, the bar runs down from where it stands; danke: the thanks first
             function jubelRuhe(bis, danke) {
@@ -492,8 +498,8 @@
                 if (danke) {
                     jubelKnopf.classList.add('danke');
                     jubelStand('DANKE!', '1f386');
-                    jubelUhren.push(setTimeout(() => { jubelKnopf.classList.remove('danke'); jubelStand('EUPHORIE', '1f929'); }, Math.min(JUBEL_DANKE, rest)));
-                } else jubelStand('EUPHORIE', '1f929');
+                    jubelUhren.push(setTimeout(() => { jubelKnopf.classList.remove('danke'); jubelStand(JUBEL_WORT, '1f929'); }, Math.min(JUBEL_DANKE, rest)));
+                } else jubelStand(JUBEL_WORT, '1f929');
                 jubelUhren.push(setTimeout(jubelFrei, rest));
             }
             function jubelLies() {
