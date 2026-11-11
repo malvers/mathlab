@@ -1456,6 +1456,12 @@ const narr = (function () {
   const PAUSE = '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/>';
   const pad = n => String(n).padStart(2, '0');
   const parts = s => (data.slides[s] || []).length;
+  // her pace (Doc, 11.11.2026: "dass Solita da insgesamt sehr schnell spricht"): her clips play a little slower, the pitch
+  // kept, in every deck at once; "demo" counts the place in her clip, so her clicks move along. ?tempo=0.9 tries another
+  // pace on this page (0.5 .. 1.5), a deck may set its own with narration "tempo"
+  const TEMPO_ALLE = 0.92;                             // Doc picked sample 33 by ear (11.11.2026)
+  const tempoUrl = parseFloat(new URLSearchParams(location.search).get('tempo'));
+  const TEMPO = tempoUrl >= 0.5 && tempoUrl <= 1.5 ? tempoUrl : data.tempo > 0 ? data.tempo : TEMPO_ALLE;
   let audio = null, aSlide = -1, part = 0;
   let left = null;                                    // the clip a turn by hand cut off: {a, s, p}
   let wait = 0;                                       // pending pause after a clip or before the next slide
@@ -1473,7 +1479,8 @@ const narr = (function () {
   if (data.minutes > 0) {
     const min = document.createElement('span');
     min.className = 'play-min';
-    min.textContent = data.minutes + (data.minutes === 1 ? ' Minute' : ' Minuten');
+    const mins = Math.round(data.minutes / TEMPO);      // measured at her own pace
+    min.textContent = mins + (mins === 1 ? ' Minute' : ' Minuten');
     label.appendChild(min);
   }
   const face = document.createElement('button');      // no <img>: the deck editor counts a slide's pictures against its file
@@ -1518,6 +1525,7 @@ const narr = (function () {
     if (!String(data.slides[si][part] || '').trim()) { wait = setTimeout(function () { part++; run(); }, 1200); return; }
     aSlide = si; left = null;
     audio = new Audio('audio/' + data.deck + '/s' + pad(si) + '-' + pad(part) + '.mp3');
+    audio.preservesPitch = true; audio.defaultPlaybackRate = audio.playbackRate = TEMPO;
     demo(si, audio, part);
     const began = Date.now(), drawn = drawing(si);
     audio.onended = function () { part++; wait = setTimeout(run, Math.max(part < parts(si) ? 900 : 0, drawn - (Date.now() - began))); };
@@ -1695,7 +1703,7 @@ const narr = (function () {
     const dot = ' <span class="cd-dot">·</span> ';   // the round middle dot, not Orbitron's square
     const touch = matchMedia('(pointer: coarse)').matches;   // a finger has no Esc
     const hint = (touch ? 'Tippen: ' : 'Klick: ') + '%s' + (touch ? '' : dot + 'Esc: ohne Solita');
-    const len = data.minutes > 0 ? ' (' + data.minutes + (data.minutes === 1 ? ' Minute)' : ' Minuten)') : '';
+    const mz = Math.round(data.minutes / TEMPO), len = data.minutes > 0 ? ' (' + mz + (mz === 1 ? ' Minute)' : ' Minuten)') : '';
     box.setAttribute('aria-label', 'Countdown: Solita erklärt gleich' + len);
     box.innerHTML = '<div class="cd-leader"><div class="cd-sweep"></div><i class="cd-x"></i><i class="cd-y"></i>'
       + '<div class="cd-num">' + n + '</div><div class="cd-play"><svg viewBox="0 0 24 24" aria-hidden="true">' + PLAY + '</svg></div></div>'

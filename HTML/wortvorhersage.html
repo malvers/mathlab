@@ -49,7 +49,16 @@
         /* top right on the sheet: the switch between the two views, and in the widget the Start button beside it
            (Doc, 11.11.2026: "Wie schalte ich denn den Modus um? ... einen Switch machen oben rechts?") - the same
            quiet navy outline as the widget's button, the same height */
-        #wv-top { position: fixed; top: 14px; right: 22px; z-index: 30; display: flex; gap: 8px; align-items: stretch; }
+        /* never on top of each other: the parts keep their size (flex: none) and, where the room is short, the bar wraps
+           to a second row instead of squeezing them together */
+        #wv-top { position: fixed; top: 14px; right: 22px; z-index: 30; display: flex; gap: 8px; align-items: stretch;
+            flex-wrap: wrap; justify-content: flex-end; max-width: calc(100vw - 28px); }
+        #wv-top > * { flex: none; }
+        /* the widget button's labels, all in one cell (fabLabels) */
+        .wv-fab-lbls { display: grid; }
+        .wv-fab-lbls > span { grid-area: 1 / 1; display: flex; align-items: baseline; justify-content: center; gap: 8px;
+            visibility: hidden; white-space: nowrap; }
+        .wv-fab-lbls > span.on { visibility: visible; }
         body.wv-widget #wv-top #wv-fab { position: static; }
         #wv-mode { display: flex; border: 1px solid rgba(14, 36, 78, .3); border-radius: 8px; overflow: hidden;
             background: rgba(14, 36, 78, .06); }
@@ -66,6 +75,8 @@
         body.wv-widget #wv-fab { padding: 5px 10px; letter-spacing: .5px; justify-content: center; box-sizing: border-box; }
         /* a narrow page has no room beside the heading: there the switch in the card on the left does it alone */
         @media (max-width: 700px) { body:not(.wv-widget) #wv-top { display: none; } }
+        /* a narrow widget: the Space hint gives way first */
+        @media (max-width: 600px) { body.wv-widget .wv-fab-key { display: none; } }
         /* the working area reads like paper - the cards on the left keep the dark house style */
         #canvas-container { background: #F7F2E7; }
         /* no wordmark over the sheet in THIS lab (Doc, 22.09.2026: "Branding rechts oben raus (hier)") */
@@ -407,32 +418,28 @@
             }
         }
         // The widget's button keeps ONE width whatever it says (Doc, 11.11.2026: "Der Play-Knopf und Pausen-Knopf ändert
-        // seine Breite ... dann springt das alles") - the widest of its labels, measured once the font is there. "oder
-        // Leertaste" only where Space does what the button says: not beside "Nächster Satz" and "Fertig", which keeps
-        // the widest label short enough for the switch and the heading beside it.
+        // seine Breite ... dann springt das alles"): all its labels stand in the same grid cell, only one visible - the
+        // cell is as wide as the widest of them in whatever font has arrived. (Measured in px before, the width came out
+        // too small when Orbitron loaded after the measuring, and the label ran over the switch - Doc's screenshot of
+        // the deck, 11.11.2026.) "oder Leertaste" only where Space does what the button says: not beside "Nächster
+        // Satz" and "Fertig", which keeps the widest label short enough for the switch and the heading beside it.
         const FAB = {
             play: () => ['▶ ' + T('btn_play', 'Start'), true],
             stop: () => ['❚❚ ' + T('btn_stop', 'Pause'), true],
             next: () => ['⏭ ' + T('btn_next', 'Nächster Satz'), false],
             done: () => ['✓ ' + T('btn_done', 'Fertig'), false]
         };
-        function fabLabel(st) {
-            const f = document.getElementById('wv-fab-l'), k = document.querySelector('#wv-fab .wv-fab-key');
-            if (!f) return;
-            const [text, key] = FAB[st]();
-            f.textContent = text;
-            if (k) k.style.display = key ? '' : 'none';
+        function fabLabels() {
+            const key = '<span class="wv-fab-key">' + T('key_space', 'oder Leertaste') + '</span>';
+            return Object.keys(FAB).map(st => {
+                const [text, k] = FAB[st]();
+                return '<span data-st="' + st + '"><span>' + text + '</span>' + (k ? key : '') + '</span>';
+            }).join('');
         }
-        function fabWidth() {
-            const fab = document.getElementById('wv-fab'), f = document.getElementById('wv-fab-l');
-            if (!fab || !f) return;
-            const keep = f.textContent, k = document.querySelector('#wv-fab .wv-fab-key'), kd = k ? k.style.display : '';
-            fab.style.width = '';
-            let w = 0;
-            Object.keys(FAB).forEach(st => { fabLabel(st); w = Math.max(w, fab.getBoundingClientRect().width); });
-            f.textContent = keep;
-            if (k) k.style.display = kd;
-            fab.style.width = Math.ceil(w) + 'px';
+        function fabLabel(st) {
+            const f = document.getElementById('wv-fab-l');
+            if (!f) return;
+            f.querySelectorAll('[data-st]').forEach(e => e.classList.toggle('on', e.dataset.st === st));
         }
 
         // the picture it opens with: the whole sentence, grey where the net has it, red where it has not
@@ -1056,11 +1063,9 @@
                 document.body.classList.add('wv-widget');
                 const fab = document.createElement('button');
                 fab.id = 'wv-fab'; fab.type = 'button';
-                fab.innerHTML = '<span id="wv-fab-l"></span><span class="wv-fab-key">' + T('key_space', 'oder Leertaste') + '</span>';
+                fab.innerHTML = '<span id="wv-fab-l" class="wv-fab-lbls">' + fabLabels() + '</span>';
                 fab.addEventListener('click', () => { spaceAction(); fab.blur(); });   // blur: Space goes on working
                 (document.getElementById('wv-top') || document.body).appendChild(fab);
-                fabWidth();
-                document.fonts.ready.then(fabWidth);     // Orbitron may come later: measure again with it
                 playLabel();
             }
             // ?vorgabe=60&korpus=0&tempo=280 - the deck sets the sliders, the stored ones stay untouched
