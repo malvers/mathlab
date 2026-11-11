@@ -589,6 +589,13 @@ class HtmlDeck:
         if getattr(self, "verweise", True) and os.path.isdir(os.path.join(OUT_DIR, "..", "buch", prefix)) \
                 and os.path.isfile(os.path.join(OUT_DIR, "..", "svp", "mathe", prefix + ".html")):
             slides.append('<section class="slide" data-aus="vorspann/verweise.html#1"></section>')
+        # the survey "Wie fandet ihr's?" as the very last slide, a stub deck.js fills from HTML/decks/vorspann/umfrage.html
+        # (Doc, 11.11.2026: "die Umfragefolie soll ans Ende"). Without data-frage deck-vote.js asks "Wie fandet ihr
+        # „<title>“?". After everything else, so recorded Solita clips (named by slide index) stay where they are. Not twice:
+        # a deck script that put a stub of its own in (say with its own data-frage) keeps that one; deck.umfrage = False
+        # switches it off.
+        if getattr(self, "umfrage", True) and not any('data-aus="vorspann/umfrage.html' in s for s in slides):
+            slides.append('<section class="slide" data-aus="vorspann/umfrage.html#1"></section>')
         out = page(_html.escape(self.doc_title, quote=False), _html.escape(self.subtitle, quote=False),
                    "\n".join(slides), narr, summ)
         voice = getattr(self, "voice", None)
