@@ -145,6 +145,16 @@ svg.pfeil path{fill:currentColor}
    and box come last ("box-spaeter") - Doc, 10.11.2026: "Erst den Term links vom Gleichheitszeichen rot, dann die
    Anweisung, dann die Box. Dann nächste Zeile." The delays only on the way in, going back is at once */
 .slide .sanft.spaeter.on{transition-delay:var(--spaeter,.9s)}   /* style="--spaeter:1.9s": after a flight has landed (.fliegen) */
+/* a part that comes in by itself when its slide comes up, one after the other, without a click (Doc, 12.11.2026, the
+   perceptron of ai-wasserzeichen: "so machen, dass es animiert erscheint, dass das eine Neuron, dann das andere
+   Ausgangsneuron, Trainingsdaten und Verbindung" - that slide then went to clicks, which Solita makes herself, demo
+   "step:N" in deck.js; the class stays for timed entrances): class "auftritt", style="--auftritt:1.7s" its moment. Every time the
+   slide comes up again, never in the editor, the overview or the strip; works on svg parts too. Only the way in
+   ("backwards"): once there, the part is as the file has it - a drawn animation (SMIL) keeps its own opacity */
+@media screen and (prefers-reduced-motion:no-preference){
+  html:not(.deck-edit) :not(.ov-thumb):not(.p-thumb) > .slide.on .auftritt{animation:auftritt .7s ease var(--auftritt,0s) backwards}
+}
+@keyframes auftritt{from{opacity:0}}
 /* a flash that holds past its click: data-ab="k" - red from its own click until click group k comes, then it fades
    (Doc, 10.11.2026: the term turns red first, stays red while the step note comes, both fade with the next line) */
 .step.flash.halten[data-ab].on.past:not(.ab-da),.step.flash.halten[data-ab].on.past:not(.ab-da) *{animation:none;color:var(--red)}
@@ -204,6 +214,11 @@ p.line[data-lead=z8]{--lead:2.1}p.line[data-lead=z9]{--lead:2.6}
   color:var(--ink);letter-spacing:-.2px;line-height:1.05}
 .rules{position:absolute;left:72px;top:106px;width:64px;height:3px}   /* 10 px higher for more room (Doc, 31.10.2026) */
 .slide.h3-zwei .rules{top:116px}   /* a title of two lines needs the old place, deck.js sets the class */
+/* a quiet line under the title, on the height of its two strokes, right of them (Doc, 12.11.2026, the perceptron: "nenn
+   die Folie bitte Das Perzeptron und klein drunter So lernt ..."): <p class="h3-unter"> right after .rules */
+.h3-unter{position:absolute;left:150px;top:99px;width:738px;font:600 14px/17px var(--deck-schrift);color:var(--muted);
+  letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slide.h3-zwei .h3-unter{top:109px}
 .rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
 .rules::before{left:0;width:44px;background:var(--orange)}
 .rules::after{left:50px;width:14px;background:var(--green)}
@@ -335,10 +350,12 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .pic .ani-ctl svg{display:block;width:8px;height:8px;margin:0;fill:currentColor}   /* not the figure's own .pic svg sizing */
 .ov-thumb .ani-ctl{display:none}
 .ani-ctl.am-ort button{flex:1;justify-content:center}   /* placed by the figure (rect.ani-ort): the two share its width */
-/* Start breathes softly while the animation waits at its beginning (deck.js label(); Doc, 04.11.2026: "leicht wabernd") */
+/* Start glows softly while the animation waits at its beginning (deck.js label(); Doc, 04.11.2026: "leicht wabernd") -
+   the button itself, its face lighting up warm, no ring around it (Doc, 12.11.2026: "lass den Start-Knopf selbst
+   glimmen, nicht den Rand außen") */
 .ani-ctl button.lockt{animation:ani-lockt 2.6s ease-in-out infinite}
-@keyframes ani-lockt{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(25,52,130,0);color:var(--muted)}
-  50%{transform:scale(1.035);box-shadow:0 0 0 4px rgba(25,52,130,.10);color:var(--ink)}}
+@keyframes ani-lockt{0%,100%{background:rgba(255,255,255,.35);box-shadow:inset 0 0 0 0 rgba(245,194,66,0);color:var(--muted)}
+  50%{background:rgba(245,194,66,.42);box-shadow:inset 0 0 9px rgba(245,194,66,.85);color:var(--ink)}}
 @media (prefers-reduced-motion:reduce){.ani-ctl button.lockt{animation:none}}
 .p-frame > .slide.live .ani-ctl{pointer-events:auto}   /* the presenter's current slide: its buttons take the pointer */
 .fig-source{position:absolute;left:72px;top:484px;width:816px;text-align:center;font-size:10px;line-height:1.3;

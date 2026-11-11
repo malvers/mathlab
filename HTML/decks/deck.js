@@ -1374,8 +1374,12 @@ const narr = (function () {
       if (si >= slides.length - 1) { api.playing = false; audio = null; show(); return; }
       // say(hold=True): e.g. before a solution - the next slide comes only on a click
       if (holds.indexOf(si) >= 0) { api.playing = false; audio = null; held = si; show(); return; }
-      // Doc 16.09.2026 "zu schnell, ein wenig mehr Pausen": the finished slide stands a moment longer
-      wait = setTimeout(function () { if (!api.playing) return; si++; step = 0; part = 0; paint(); run(); }, 1600);
+      // Doc 16.09.2026 "zu schnell, ein wenig mehr Pausen": the finished slide stands a moment longer - and a drawn
+      // animation she started runs to its end first (12.11.2026: the perceptron learns on after her last word)
+      const running = aniOf(slides[si]).reduce(function (ms, v) {
+        return v.aniEnd < Infinity && !v.animationsPaused() ? Math.max(ms, (v.aniEnd - v.getCurrentTime()) * 1000) : ms;
+      }, 0);
+      wait = setTimeout(function () { if (!api.playing) return; si++; step = 0; part = 0; paint(); run(); }, Math.max(1600, running + 1200));
       return;
     }
     // clip k speaks about group k - 1 of the file: the mark goes to its first click, sub-points are in view
@@ -1401,7 +1405,10 @@ const narr = (function () {
   }
   // she shows what she explains (Doc, 01.11.2026: "sie soll das Ding auch vorführen", "alle Tools"): narration "demo"
   // {slide: [[ms, what], ...]}, ms = the place in her first clip, so a pause holds the demo too (Doc, 02.11.2026: "die scheint
-  // den Button nicht zu drücken"), what = a selector on the slide, or "lab:..." inside its iframe, "lab:space" for its key.
+  // den Button nicht zu drücken"), what = a selector on the slide, or "lab:..." inside its iframe, "lab:space" for its key,
+// "step:N" her own click: the slide stands on at least N click groups (Doc, 12.11.2026, the perceptron: "einen, wo es
+// automatisch läuft, wenn Solita das ganze Ding vorführt, und einen per Klick, wenn ich es vorführe") - "at least", so a
+// click Doc made by hand ahead of her is never taken back. paint() tells the other window of a show, as a real click.
   // A later clip of the slide has its own list under "slide.part" ("13.8": clip 8 of slide 13), its ms counted in that clip -
   // a widget that comes with a later click (Doc, 02.11.2026: the DocPoint slide of mathe11-lehrbuch)
   function demo(n, clip, k) {
@@ -1409,6 +1416,11 @@ const narr = (function () {
     clip.ontimeupdate = function () {
       while (todo.length && clip.currentTime * 1000 >= todo[0][0]) {
         const f = slides[n].querySelector('iframe'), what = todo.shift()[1];
+        if (/^step:\d+$/.test(what)) {
+          const to = Math.min(+what.slice(5), groups(slides[n]));
+          if (n === si && step < to) { step = to; paint(); }
+          continue;
+        }
         if (what === 'lab:space') { if (f) f.contentWindow.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true })); continue; }
         // she shows a page, not only a button (Doc, 02.11.2026, the book on mathe11-lehrbuch: "mal runterscrollen,
         // Inhaltsverzeichnis, dann eins aufmachen und die interaktiven Widgets zeigen"): "lab:reset" brings the frame back to
@@ -1441,6 +1453,9 @@ const narr = (function () {
     });
     return ms;
   }
+  function ownClicks(n, k) {                          // the clip k of slide n makes the slide's clicks (demo "step:N")
+    return ((data.demo || {})[k ? n + '.' + k : n] || []).some(function (d) { return /^step:/.test(d[1]); });
+  }
   function resume(n) {                                // go on talking from the top of slide n
     clearTimeout(wait);
     held = -1; api.playing = true; si = n; step = 0; part = 0; audio = null; left = null; show(); paint(); run();
@@ -1457,6 +1472,14 @@ const narr = (function () {
     const here = [...slides[si].querySelectorAll('.step')].find(e => grp(e) === step - 1);
     const p = here ? +here.dataset.g + 1 : step, l = left;
     left = null;
+    // a slide whose clicks she makes herself (demo "step:N"): Doc's click by hand stays, and she goes on in her clip -
+    // counted by groups she would start a later clip, and with one clip for the slide that means its end
+    if (l && l.s === si && !l.a.ended && l.a.currentTime > 0 && ownClicks(si, l.p)) {
+      part = l.p; aSlide = si; audio = l.a;
+      const a = audio;
+      audio.play().catch(function () { if (audio !== a) return; api.playing = false; show(); });
+      return;
+    }
     // an arrow onto a sub-point of the group she is telling: the box moves on, her clip goes on where it was - it does
     // not start again with every sub-point (Doc, 08.11.2026)
     if (l && l.s === si && l.p === p && p > 0 && !l.a.ended && l.a.currentTime > 0) {
@@ -1639,6 +1662,7 @@ function aniCtl(svg, i) {
   const end = parts.some(a => a.getAttribute('repeatCount') === 'indefinite' || a.getAttribute('repeatDur'))
     ? Infinity : Math.max(...parts.map(a => parseFloat(a.getAttribute('dur')) || 0));
   const ended = () => svg.getCurrentTime() >= end - 0.02;
+  svg.aniEnd = end;                                  // narr waits for a running one before the next slide
   const label = () => {
     play.innerHTML = !svg.animationsPaused() && !ended() ? ANI_ICON.pause + 'Pause'
       : ANI_ICON.play + (svg.getCurrentTime() > 0.05 && !ended() ? 'Weiter' : 'Start');
