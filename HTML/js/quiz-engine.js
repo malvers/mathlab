@@ -1101,7 +1101,25 @@
      carries the run state ('running' | 'away' | 'aborted'), so an abort or a
      release by the teacher arrives here within one beat - and so does taking
      an abort back. */
+  /* The beat also says how many answers are right so far (Doc, 11.11.2026: "auch während des Tests schon die Note
+     einblenden, die zu erwarten ist"), counted by the very rule of the score on submitting; only the teacher's
+     session can read it back (quiz_live). A server without the five-argument quiz_ping yet
+     (supabase/migrations/20261111_quiz_live_correct.sql) answers 404 - then this page beats the old way, so the
+     heartbeat never stops over it. */
+  let pingCorrect = true;
+  function rightSoFar() {
+    let n = 0;
+    QUESTIONS.forEach(function (item, qi) { if (answers[qi] === item.solution) n++; });
+    return n;
+  }
   function guardPing() {
+    const beat = {
+      p_quiz: QUIZ_ID,
+      p_code: code,
+      p_answered: answers.filter(function (a) { return a >= 0; }).length,
+      p_total: QUESTIONS.length
+    };
+    if (pingCorrect) beat.p_correct = rightSoFar();
     fetch(DB_URL + '/rest/v1/rpc/quiz_ping', {
       method: 'POST',
       headers: {
@@ -1109,13 +1127,14 @@
         Authorization: 'Bearer ' + DB_KEY,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        p_quiz: QUIZ_ID,
-        p_code: code,
-        p_answered: answers.filter(function (a) { return a >= 0; }).length,
-        p_total: QUESTIONS.length
-      })
+      body: JSON.stringify(beat)
     }).then(function (res) {
+      /* 404: no such function (PGRST202), 300: not unique (PGRST203) - beat again without p_correct */
+      if (!res.ok && pingCorrect && (res.status === 404 || res.status === 300)) {
+        pingCorrect = false;
+        guardPing();
+        return null;
+      }
       return res.ok ? res.json() : null;
     }).then(function (state) {
       if (!guardArmed) return;

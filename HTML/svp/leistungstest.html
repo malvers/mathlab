@@ -332,6 +332,10 @@
         /* in the same cell (Doc, 18.09.2026: one column): how often and how long the pupil left the test */
         .lt-tab td.status .st-leave { color: var(--lt-red); margin-left: 10px; }
         .lt-tab td.status .st-leave .cyber-digits { margin-right: 6px; }
+        /* the count of leaves as a red badge, white on Doc's red - the same as on the tile (Doc, 11.11.2026: "1x größer
+           bitte, roter HG, weiße Schrift") */
+        .lt-tab td.status .st-leave .cyber-digits { --cc-digit: #fff; background: rgb(176, 36, 24); color: #fff;
+            border-radius: 999px; padding: 2px 8px; }
         .lt-tab td.status.away .st-leave { color: inherit; }
         /* the teacher's red button in a pupil's detail (second click confirms, like "Alles löschen") */
         .lt-abort { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
@@ -509,13 +513,18 @@
             --cc-weight: 400; gap: 1px; }
         .lt-tile .tl-main { display: flex; align-items: center; gap: 8px; }
         .lt-tile .tl-grade { white-space: nowrap; font-size: var(--row-fs, 0.75rem); letter-spacing: 0.02em; }
+        /* the grade to expect while it runs (liveHint): small, in the running cyan, the tooltip explains it */
+        .lt-tile .tl-hint { white-space: nowrap; font-size: 0.84em; letter-spacing: 0; cursor: help; }
         /* the smaller points line sits 2 px lower than the 16 px one did; the tile keeps 148 px.
            The code's band reaches down to it (6 px of this gap went to the band) */
         .lt-tile .tl-main, .lt-tile .tl-state { margin-top: 1px; }
         .lt-tile .tl-state { grid-area: state; display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 2px 8px; min-height: 1.4em;
             font-family: Orbitron, system-ui, sans-serif; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted); white-space: nowrap; }
         /* "1×" beside the points; the tooltip says "1× verlassen" */
-        .lt-tile .tl-leave { margin-left: auto; color: var(--lt-red); white-space: nowrap; font-size: 0.72em; letter-spacing: 0.04em; }
+        /* a red badge, white figures, readable from afar (Doc, 11.11.2026: "1x größer bitte, roter HG, weiße Schrift");
+           the negative margins keep the points line - and so the tile - as high as on every other tile */
+        .lt-tile .tl-leave { margin: -6px 0 -6px auto; padding: 2px 7px; border-radius: 999px; background: rgb(176, 36, 24);
+            color: #fff; white-space: nowrap; font-size: 1.3em; font-weight: 700; line-height: 1.2; letter-spacing: 0.04em; }
         /* points line and bar sit low (Doc, 05.11.2026: line 6 px, bar 2 px further down) - taken from the
            bar's gap and the bottom padding, so the tile keeps its height */
         .lt-tile .tl-bar { grid-area: bar; height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 0; }
@@ -536,6 +545,8 @@
         .lt-tiles .lt-tile.away .tl-code .cd-l, .lt-tiles .lt-tile.away .tl-code .cd-n,
         .lt-tiles .lt-tile.away .tl-main, .lt-tiles .lt-tile.away .tl-state, .lt-tiles .lt-tile.away .tl-leave,
         .lt-tiles .lt-tile.away .tl-b { color: #fff; }
+        /* on the red "weg" tile the badge turns round: white ground, red figures */
+        .lt-tiles .lt-tile.away .tl-leave { background: #fff; color: rgb(176, 36, 24); }
         .lt-tiles .lt-tile.away .tl-bar { background: rgba(255, 255, 255, 0.3); }
         .lt-tiles .lt-tile.away .tl-bar i { background: #fff; }
         .lt-tiles .lt-tile.away .tl-pill { background: #fff; color: var(--ypsilon); }
@@ -824,10 +835,11 @@
                 <ol start="8">
                     <li><b>weg:</b> Das Kind hat den Test verlassen und ist gesperrt. Nur du gibst frei: Kachel anklicken, „Freigeben“. Die Kachel zählt mit (1×).</li>
                     <li><b>offline:</b> Kein Signal mehr vom Gerät. WLAN und Handy prüfen.</li>
+                    <li><b>jetzt 4 · Hochr. 2:</b> die Note, die zu erwarten ist. „jetzt“: die bisher richtigen, alles Offene zählt als falsch. „Hochr.“: die Trefferquote der beantworteten auf den ganzen Test hochgerechnet. Nur ein Hinweis, nur mit deinem Login, Maus drauf zeigt die Rechnung.</li>
                     <li>Test für ein Kind beenden: Kachel anklicken, „Test abbrechen“, zweiter Klick bestätigt. Das lässt sich zurücknehmen.</li>
                 </ol>
                 <h3>Am Ende</h3>
-                <ol start="11">
+                <ol start="12">
                     <li>Punkte und Noten stehen nach jeder Abgabe von selbst in der Kachel. „Ergebnisse abrufen“ lädt nur alles neu.</li>
                     <li><b>Klassenarbeit mit Teil B (Papier):</b> Die Note steht erst da, wenn Teil B eingetragen ist. „Liste“ wählen, die Punkte in die Spalte „Teil B“ tippen (Enter springt weiter), dann „Liste als CSV sichern“.</li>
                     <li><b>Geht es schief:</b> Ruhe bewahren, abbrechen. Die Gruppe schreibt den Test dann später noch einmal.</li>
@@ -1310,20 +1322,56 @@
                 });
                 return row ? row[1] : meta.gradeUnit === 'NP' ? '00' : '6';
             }
+            /* the grade of A + B points out of max - a Klassenarbeit with Teil B (also the live hint, liveHint) */
+            function gradeAB(meta, pts, max) {
+                if (byUnits(meta)) return unitsGrade(meta, pts, max);
+                const p = pctHalfUp(pts, max);
+                const st = (meta.gradeScale || []).find(function (x) { return p >= x[0]; });
+                return st ? st[1] : '';
+            }
             function gradeOf(meta, res, code) {
                 if (meta.partB) {
                     /* a Klassenarbeit with Teil B: graded only once B is in */
                     const s = sumAB(meta, res, code);
                     if (!s) return '';
-                    if (byUnits(meta)) return unitsGrade(meta, s.pts, s.max);
-                    const p = pctHalfUp(s.pts, s.max);
-                    const st = (meta.gradeScale || []).find(function (x) { return p >= x[0]; });
-                    return st ? st[1] : '';
+                    return gradeAB(meta, s.pts, s.max);
                 }
                 if (byUnits(meta)) return unitsGrade(meta, res.score, res.total);
                 const pct = Math.round(res.score / res.total * 100);
                 const step = (meta.gradeScale || []).find(function (st) { return pct >= st[0]; });
                 return step ? step[1] : '';
+            }
+            /* The grade to expect while the test still runs (Doc, 11.11.2026: "auch während des Tests schon die Note
+               einblenden, die zu erwarten ist") - a hint on the tile, written nowhere. The page's heartbeat says how
+               many answers are right so far (quiz_live, Doc's session only; supabase/migrations/
+               20261111_quiz_live_correct.sql).
+                 jetzt:        the right ones so far, everything still open counts as wrong (Teil B too, until it is in)
+                 Hochrechnung: the hit rate of the answered ones carried over the whole test, rounded to whole points
+               Both go through the functions of the final grade (gradeOf, gradeAB) with this test's own scale from
+               the test page (meta.gradeScale / gradeUnit) - never a second scale. null before the first answer. */
+            function liveHint(meta, row, correct, code) {
+                if (!meta || !row || !(row.total > 0) || !(row.answered > 0) || typeof correct !== 'number') return null;
+                const c = Math.max(0, Math.min(correct, row.answered)), rate = c / row.answered;
+                if (!meta.partB) {
+                    const proj = Math.round(rate * row.total);
+                    return { now: gradeOf(meta, { score: c, total: row.total }), proj: gradeOf(meta, { score: proj, total: row.total }),
+                             c: c, answered: row.answered, total: row.total, projPts: proj, max: row.total, b: null };
+                }
+                const b = code ? partBGet(poolOf(meta, testUrl()), code) : null;     /* Teil B, if already typed in */
+                const max = row.total + meta.partB;
+                const proj = b === null ? Math.round(rate * max) : Math.round(rate * row.total) + b;
+                return { now: gradeAB(meta, c + (b || 0), max), proj: gradeAB(meta, proj, max),
+                         c: c, answered: row.answered, total: row.total, projPts: proj, max: max, b: b };
+            }
+            function liveHintTip(meta, h) {
+                const g = function (x) { return meta.gradeUnit === 'NP' ? x + ' NP (Note ' + npNote(x) + ')' : 'Note ' + x; };
+                const pct = Math.round(h.c / h.answered * 100);
+                return 'Zu erwartende Note \u2013 nur ein Hinweis, wird nirgends eingetragen\n' +
+                    'jetzt: ' + h.c + ' von ' + h.total + ' richtig' + (meta.partB ? (h.b === null ? ', Teil B noch offen (0)' : ', Teil B ' + fmtB(h.b)) : '') +
+                    ', alles Offene z\u00e4hlt als falsch \u2192 ' + g(h.now) + '\n' +
+                    'Hochrechnung: ' + h.c + ' von ' + h.answered + ' beantworteten richtig (' + pct + ' %) \u2192 \u2248 ' +
+                    h.projPts + ' von ' + h.max + ' \u2192 ' + g(h.proj) + '\n' +
+                    'Skala dieses Tests, dieselbe Rechnung wie f\u00fcr die Endnote';
             }
             /* "13 NP" or "Note 2", and whether it counts as good (1-2) or low (5-6) */
             function gradeText(meta, g) {
@@ -1576,6 +1624,7 @@
             const OFFLINE_SECS = 45;   /* three missed heartbeats */
             const AWAY_DEAD_SECS = 90; /* hidden tabs beat about once a minute (browser throttling) */
             let control = {};          /* code -> row of quiz_control */
+            let live = {}, liveMeta = null, liveRetry = 0;   /* code -> right answers so far (quiz_live), the test's meta */
             let controlTimer = null;
             /* --- Anwesenheit aus WebUntis (Doc, 05.11.2026: "wenn die im Untis nicht da sind, mach
                bei uns einen Kreis mit X, wenn sie da sind, einen Kreis mit dem Check") ----------
@@ -2450,6 +2499,7 @@
                             }
                         });
                         if (fresh) fillResults(false);
+                        fillLive(pool, codes, meta);
                         paintSummary(codes, true);
                         paintUntisCount();
                         paintNach();
@@ -2461,6 +2511,23 @@
                     codes.forEach(function (c) { paintControl(c, undefined); });
                     paintSummary(codes, false);
                 });
+            }
+            /* the right answers so far (liveHint) - only with Doc's session (quiz_live checks it); before the SQL
+               of 11.11.2026 the server does not know the function: then a new try once a minute */
+            function fillLive(pool, codes, meta) {
+                if (!window.svpAuth || !svpAuth.hasSession() || Date.now() < liveRetry) return;
+                const url = testUrl();
+                svpAuth.api('rpc/quiz_live', { method: 'POST', body: JSON.stringify({ p_quiz: pool, p_codes: codes }) })
+                    .then(function (r) {
+                        if (!r.ok) { liveRetry = Date.now() + 60000; return null; }
+                        return r.json();
+                    }).then(function (rows) {
+                        if (!rows || testUrl() !== url) return;
+                        live = {};
+                        liveMeta = meta;
+                        rows.forEach(function (x) { live[x.code] = x.correct; });
+                        codes.forEach(function (c) { paintTile(c); });
+                    }).catch(function () { /* the next beat */ });
             }
             function mmss(secs) {
                 return Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0');
@@ -2680,7 +2747,16 @@
                     main.textContent = '\u2014';
                 }
                 const graded = res && res.grade && st.key !== 'abort';
-                if (st.key !== 'none' && !graded) {
+                const hint = !res && st.key === 'run' ? liveHint(liveMeta, row, live[code], code) : null;
+                if (hint) {
+                    /* "jetzt 4 · Hochr. 2" (Notenpunkte: "jetzt 03 · Hochr. 08", the unit in the tooltip - the tile has
+                       no room for it beside the leave badge) - the cyan frame and the count still say it runs */
+                    const h = document.createElement('span');
+                    h.className = 'tl-hint';
+                    h.textContent = 'jetzt ' + hint.now + ' \u00b7 Hochr. ' + hint.proj;
+                    h.title = liveHintTip(liveMeta, hint);
+                    state.appendChild(h);
+                } else if (st.key !== 'none' && !graded) {
                     const lab = document.createElement('span');
                     lab.className = 'tl-pill';
                     lab.textContent = st.label;
