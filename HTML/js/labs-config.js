@@ -744,6 +744,17 @@ const LABS_DATA = [
         "color": "purple"
     },
     {
+        "id": "token-lab",
+        "href": "token-lab.html",
+        "title": "Tokenizer",
+        "description": "Ein Sprachmodell liest keine Wörter, sondern Tokens. Hier zerlegt der echte Wortschatz von GPT-4o (o200k, rund 200.000 Einträge) jeden Text live in farbige Stücke mit ihrer Nummer: Deutsch, Englisch, Chinesisch, Code, Emoji. „So entsteht ein Token“ zeigt Schritt für Schritt, wie Byte-Pair-Encoding aus einzelnen Bytes ganze Wörter verschmilzt, mit den echten Nummern, und warum „sonnig“ als sonn|ig stehen bleibt. Unten läuft ein Band mit zufälligen Einträgen des Wortschatzes durch.",
+        "tagline": "Informatik / KI / Tokens & Byte-Pair-Encoding",
+        "icon": LAB_ICONS["token-lab"],
+        "category": "informatik neu hot grade9 grade10 grade11 grade12",
+        "keywords": "token tokens tokenizer tokenisierung wortschatz vokabular byte pair encoding bpe gpt chatgpt sprachmodell llm ki kuenstliche intelligenz o200k tiktoken woerter silben emoji bytes",
+        "color": "gold"
+    },
+    {
         "id": "subtraktion",
         "href": "subtraktion.html",
         "title": "Schriftliche Subtraktion",

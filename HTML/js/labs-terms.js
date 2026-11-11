@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 125 labs, 2196 terms, 2026-11-03
+ * 126 labs, 2203 terms, 2026-11-11
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -22,7 +22,7 @@ const LABS_TERMS = {
     "brahmagupta": ["ABWEICHUNG VON 90°", "ALLE VIER LOTE", "BEWEIS", "BEWEIS (SCHRITT FÜR SCHRITT)", "Bogen", "BRETSCHNEIDER", "DIE ANDERE SEITE", "DIE KETTE", "DIFFERENZ", "ECKEN AUF DEM KREIS", "FLÄCHE (GAUSS)", "FORMEL (FLÄCHE)", "FORMEL VON BRAHMAGUPTA", "GEGENSEITE", "GLEICHE ERGÄNZUNG", "GLEICHSCHENKLIG", "INNENWINKELSATZ", "K (BRAHMAGUPTA)", "KONSTRUKTION", "LÖSUNG ZEIGEN", "M ↔ MITTE", "MESSWERTE", "PERIPHERIEWINKEL", "SATZ (LOT & MITTE)", "SATZ VON BRAHMAGUPTA", "SCHEITELWINKEL", "SCHRITT 1 • PERIPHERIEWINKEL", "SCHRITT 2 • INNENWINKELSATZ", "SCHRITT 3 • GLEICHE ERGÄNZUNG", "SCHRITT 4 • SCHEITELWINKEL", "SCHRITT 5 • DIE KETTE", "SCHRITT 6 • GLEICHSCHENKLIG", "SCHRITT 7 • DIE ANDERE SEITE", "SEITE", "Summe", "Umfang", "VORAUSSETZUNG", "VORAUSSETZUNG & BEHAUPTUNG"],
     "burningship": ["Burning Ship", "Detail", "Fraktal-Explorer", "Iterationen", "NAVIGATION", "Zoom", "Zurücksetzen"],
     "butterfly": ["ANIMATION ENGINE", "Animation zurücksetzen", "Basis-Farbton", "Cos Amp", "Cos Freq", "Exp Amp", "GLOW", "Glow Effekt AN/AUS", "KURVEN-PARAMETER", "MESSWERTE", "SCHMETTERLINGS-LABOR", "Sin Amp", "Sin Div"],
-    "buzzer": ["CODE VON DER TAFEL", "DEIN ANONYMES FEEDBACK", "HAB ICH NICHT VERSTANDEN", "SENDEN", "ZU LANGSAM", "ZU SCHNELL"],
+    "buzzer": ["CODE VON DER TAFEL", "DEIN ANONYMES FEEDBACK", "GUT ERKLÄRT", "HAB ICH NICHT VERSTANDEN", "QR-CODE SCANNEN", "SENDEN", "ZU LANGSAM", "ZU SCHNELL"],
     "cmaes": ["EVOLUTIONSDATEN", "FITNESS", "FLÄCHE", "FLÄCHENOPTIMIERUNG", "GENERATION", "MAX 5000", "OPTIMIERUNG KREIS", "OPTIMIERUNG LINSE", "OPTIMIERUNG: KREIS", "STEP 1", "STEP 10", "UMFANG"],
     "collatz": ["Collatz", "Härtester Start", "Weg ablaufen"],
     "conuslab": ["FORMELN", "ZÜNDEN"],
@@ -31,7 +31,7 @@ const LABS_TERMS = {
     "costablanca": ["Highlights Costa Blanca", "Pool"],
     "differentiallabor": ["Cosinus-Welle", "DIFFERENTIALRECHNUNG", "Exponentialfunktion", "FUNKTIONALITÄT", "Kubische Funktion", "Logarithmus", "Normalparabel", "Punkt Reset (x₀)", "Punkt-Position (x₀)", "Sinus-Welle", "VISUALISIERUNG"],
     "dividieren": ["Dividend", "Divisor", "SCHRIFTLICHE DIVISION"],
-    "docpad": ["AES-GCM", "DOCPAD", "ÖFFNEN", "Passwort"],
+    "docpad": ["AES-GCM", "DocPad", "ÖFFNEN", "Passwort"],
     "dreiecksbillard": ["armenian", "brahmic", "Breite von A", "cjk", "cyrillic", "Dreieck", "Fenster", "Fenster zeigen", "georgian", "Gleich breit", "Gleichseitig (60°, 60°, 60°)", "hangul", "Laser", "latin", "Reflexionen pro Sekunde", "Spur", "Treffer bis Stopp", "Winkel α", "Winkel β"],
     "einsundeins": ["ABSPIELEN", "add", "Befehl", "Bit-Spannung (Ebene 5)", "Hex", "KI-Prolog (Ebene 0)", "mov", "Was er tut"],
     "equationocr": ["Bestimmtes Integral", "Binomialkoeffizient", "Bruch", "Cauchy-Integral", "CLEAR", "Dirac", "Druck", "Einstein", "Einstein-Feldgleichungen", "ERKENNEN", "Eulersche Identität", "FORMELN", "Gauss-Integral", "GOOGLE GEMINI API", "KOMPLEX", "KOSTENKONTROLLE", "Maxwell (Ampère)", "Maxwell (Gauß)", "Navier–Stokes", "Newton Gravitation", "Outline (off → KaTeX HTML)", "Potenzregel", "Pythagoras", "Quadratische Formel", "RELOAD", "Riemann ζ", "Scale", "Schrödinger", "Stift", "Taylor e^x", "Thinking (default on)", "VERSTANDEN", "ZEICHNEN"],
@@ -97,7 +97,7 @@ const LABS_TERMS = {
     "neuroaddierer": ["Backpropagation", "Evolution (CMA-ES)", "LERNEN"],
     "numberrecognition": ["ANZAHL TRAININGSDATEN", "DEBUG", "START TRAINING"],
     "opti-lens": ["Bedienfeld ausblenden", "CALLS", "CONTROL FLAGS", "DIMENSION", "EVOLUTION DATA", "FITNESS", "FOCUS OSCILLATE", "GENERATION", "Optimierung einer Linse · CMA-ES", "OPTIMIZE BACK", "OPTIMIZE FRONT", "PENALTY", "REFRACTION", "REFRACTION (n)", "RESET VIEWRV", "SHOW POINTS", "SIGMA", "SYMMETRY MODE", "SYSTEM CONFIG"],
-    "parabellabor": ["FUNKTIONSGLEICHUNG", "Gebrochener Exponent", "GERADE", "HYPERBEL", "KEINE REELLEN NULLSTELLEN", "NORMALFORM", "NULLSTELLEN", "PARABEL", "Parabel-Labor", "PARAMETER A", "Potenz n", "POTENZKURVE", "SCHEITELPUNKT", "SCHEITELPUNKT S", "SCHEITELPUNKTFORM", "Streckung a", "Verschiebung d (x)", "Verschiebung e (y)", "WURZELKURVE"],
+    "parabellabor": ["DISKRIMINANTE", "FUNKTIONSGLEICHUNG", "Gebrochener Exponent", "GERADE", "HYPERBEL", "KEINE REELLEN NULLSTELLEN", "NORMALFORM", "NULLSTELLEN", "PARABEL", "Parabel-Labor", "PARAMETER A", "Potenz n", "POTENZKURVE", "SCHEITELPUNKT", "SCHEITELPUNKT S", "SCHEITELPUNKTFORM", "Streckung a", "Verschiebung d (x)", "Verschiebung e (y)", "WURZELKURVE"],
     "particleswarm": ["Eine Runde", "Himmelblau (vier Minima)", "Landschaft", "Neu streuen", "Parabel (ein Tal)", "Particle Swarm", "Rastrigin (viele Täler)"],
     "pinkerfinder": ["Erster Start: Sicherheitsabfrage von macOS", "macOS: App zum ersten Mal öffnen", "PinkerFinder"],
     "potenzlabor": ["EXPONENT (N)", "Potenz- & Wurzelfunktionen", "X-POSITION"],
@@ -105,12 +105,13 @@ const LABS_TERMS = {
     "pythagorasbeweis": ["AUẞERHALB DES RAHMENS", "BEWEIS RESET", "FLÄCHE CM²", "KOLLISION ERKANNT", "MISSIONS-STATUS", "Pythagoras-Beweis", "Summe Dreiecke", "SUMME Σ", "TRIANGULIERUNG AN", "TRIANGULIERUNG AUS", "TRIANGULIERUNG DEAKTIVIERT", "Zielfläche [ABCD]"],
     "reaction-diffusion": ["Eis", "Feuer", "Graustufen", "Grün", "LEEREN", "SÄEN", "Violett"],
     "rechenrallye": ["armenian", "brahmic", "cjk", "cyrillic", "Dein Spitzname", "georgian", "hangul", "latin", "Math Rally", "Rechen-Rallye", "Your nickname"],
-    "rueckmeldung": ["AUF NULL", "Code für die Klasse", "NACHRICHTEN", "NEUER CODE", "QR-CODE AUSBLENDEN", "Rückmeldung"],
+    "rueckmeldung": ["AUF NULL", "Code für die Klasse", "NEUER CODE", "QR-CODE AUSBLENDEN", "Rückmeldung"],
     "shell": ["DAS BILD IST EIN PROTOKOLL", "DAS SUBSTRAT IST DIE ERKLÄRUNG", "EINE ZELLE STECKT AN", "FORMELN", "SUBSTRAT-SCHATTEN", "VIELE ZÜNDUNGEN - ZELTE", "WEITER &rarr", "WENIGE ZÜNDUNGEN - LINIEN", "ZWEI WELLEN LÖSCHEN SICH AUS"],
     "solita-avatar": ["Ansicht: Kopf", "Frage an Solita", "Sprechen", "Stimmung: neutral"],
     "steigung": ["DREIECK BREITE (ΔX)", "DREIECK POSITION (X)", "FUNKTION", "GERADEN-STEIGUNG M", "LINEARE FUNKTIONEN", "NULLSTELLE X₀", "STEIGUNG M", "Y-ABSCHNITT N"],
     "stimmklon": ["alle Texte zeigen", "Aussteuerung automatisch", "Diff", "heller Grund", "Klon", "Mikrofon", "Original", "Original — Doc am RØDE", "Recording", "Spektrum", "Systemvorgabe"],
     "subtraktion": ["Minuend", "SCHRIFTLICHE SUBTRAKTION", "Subtrahend"],
+    "token-lab": ["Alle Schritte", "Eigenes Wort", "So entsteht ein Token", "Text", "Tokenizer"],
     "tour-kreisteilung": ["Abspielen", "Die Formel", "Jedes Mal das Doppelte", "Kreisteilung", "Nummern", "Regelmäßig oder allgemein", "Und dann 31", "Was kommt dann?", "Was man sieht", "Zwei Punkte, eine Sehne"],
     "tour-mathe11-lehrbuch": ["Aufgaben", "Die Druckausgabe", "Ein Kapitel", "Ein Lehrbuch, gebaut für 49 Cent", "Elf Kapitel", "Exkursion", "Fünf Sprachen", "Für euch", "Labore", "Selbsttests", "Widgets"],
     "tour-maya": ["Der Pfeil", "Die zwanzig Ziffern", "Die Zwanziger-Stelle", "Ein leeres Brett", "Eine Zahl eintippen", "Eine Ziffer legen", "Farben", "Hochkant", "Kalender oder rein zwanzig", "Maya-Zahlen", "Übertrag", "Wie viele Stellen", "Würfeln und legen"],

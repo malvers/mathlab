@@ -1626,6 +1626,14 @@ const LAB_ICONS = {
             <circle cx="50" cy="78" r="6" fill="rgba(0, 210, 255, 0.25)" stroke="#00D2FF" stroke-width="1.8" />
             <circle cx="82" cy="50" r="7.5" fill="rgba(245, 194, 66, 0.35)" stroke="#F5C242" stroke-width="2" />
         </svg>`,
+    "token-lab": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- three token boxes in a row (gold, green, cyan), under them the number sign and a line of digits -->
+            <rect x="8" y="30" width="30" height="26" rx="6" fill="none" stroke="#F5C242" stroke-width="5" />
+            <rect x="42" y="30" width="20" height="26" rx="6" fill="none" stroke="#799E31" stroke-width="5" />
+            <rect x="66" y="30" width="26" height="26" rx="6" fill="none" stroke="#00D2FF" stroke-width="5" />
+            <path d="M18 68 L16 82 M26 68 L24 82 M13 72 L29 72 M12 78 L28 78" stroke="#D73728" stroke-width="3.5" stroke-linecap="round" fill="none" />
+            <rect x="36" y="73" width="52" height="5" rx="2.5" fill="#F5C242" opacity=".55" />
+        </svg>`,
     "numberrecognition": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- a 5x7 pixel digit "3" as the net sees it; the tall gold bar is the class it picks -->
             <g fill="rgba(255, 255, 255, 0.08)">
