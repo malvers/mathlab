@@ -15,6 +15,21 @@
  * HTML itself changes.
  *
  * Run:  node tools/build-plan-suchindex.mjs
+ *
+ * A second file from the same reading: HTML/svp/plan-verweise.json, for the
+ * slide "Üben & Nachlesen" at the end of a deck (decks/deck-verweise.js; Doc,
+ * 11.11.2026: "in den Mathe-Decks überall ... den Verweis auf die Aufgaben ...,
+ * die wir im Stoffverteilungsplan haben ... Und natürlich auch zu den Seiten im
+ * Mathebuch jeweils"). Only plans that have decks of their name (decks/
+ * mathe11-*.html for svp/mathe/mathe11.html) and a book of their name
+ * (buch/mathe11/). Per week the static part the cloud does not hold - the
+ * week's exercise set (quiz), the red button (redBtn), Bereich and hours
+ * (type, u) - and per plan the book's Lerneinheiten with their hours, read
+ * from buch/<name>/kapitel.js and the chapter pages. The deck maps a week onto
+ * the book itself (its hours inside the Lernbereich against the hours of the
+ * Lerneinheiten), from the cloud's type/u if Doc changed them; the material,
+ * the deck links and the book's printed page numbers (R2 seiten.json) it reads
+ * live. Rebuild when a plan HTML or a chapter's Lerneinheiten change.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -88,6 +103,60 @@ function woche(row, i, badge) {
     return w;
 }
 
+/* --- plan-verweise.json (see the head): the book of a plan, its Lerneinheiten --- */
+const HTML = path.join(SVP, '..');
+const OUT_VERWEISE = path.join(SVP, 'plan-verweise.json');
+const BEREICH = lb => { const m = /Lernbereich\s+(\d+)/.exec(lb || ''); return m ? 'lb' + m[1] : /Wahlbereich/.test(lb || '') ? 'wb' : ''; };
+const ohneTags = s => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+function buchVon(name) {
+    const dir = path.join(HTML, 'buch', name), kap = path.join(dir, 'kapitel.js');
+    if (!fs.existsSync(kap)) return null;
+    const ctx = { window: {} };
+    try { vm.runInNewContext(fs.readFileSync(kap, 'utf8'), ctx); } catch (e) { console.error('buch/' + name + ': kapitel.js nicht lesbar - ' + e.message); return null; }
+    const B = ctx.window.BUCH;
+    if (!B || !Array.isArray(B.chapters)) return null;
+    const kapitel = B.chapters.map(function (c) {
+        const datei = path.join(dir, c.file);
+        const le = [];
+        if (fs.existsSync(datei)) {
+            const src = fs.readFileSync(datei, 'utf8');
+            /* <section class="b-sec" id="le2" data-kind="le" ...> <span class="b-band-sub">OHNE HILFSMITTEL · 5 USTD.</span>
+               <h2><span class="b-no">2</span>Quadratische Gleichungen lösen</h2> */
+            const re = /<section[^>]*\bid="(le\d+)"[^>]*data-kind="le"[^>]*>([\s\S]*?)<\/h2>/g;
+            let m;
+            while ((m = re.exec(src))) {
+                const kopf = m[2], sub = /<span class="b-band-sub">([^<]*)<\/span>/.exec(kopf), u = sub && /(\d+)\s*USTD\./i.exec(sub[1]);
+                const no = /<span class="b-no">([^<]*)<\/span>/.exec(kopf);
+                const h2 = /<h2[^>]*>([\s\S]*)$/.exec(kopf);
+                le.push({ s: m[1], n: no ? no[1].trim() : m[1].slice(2), u: u ? +u[1] : 0,
+                    t: h2 ? ohneTags(h2[1].replace(/<span class="b-no">[^<]*<\/span>/, '')) : '' });
+            }
+        }
+        return { f: c.file, k: String(c.k || ''), t: c.title || '', lb: BEREICH(c.lb), lbt: c.lb || '', le: le };
+    });
+    return { name: name, titel: B.short || B.title || name, kapitel: kapitel };
+}
+/* only what the deck slide needs of a week: where it stands, what the plan HTML alone knows */
+function verweisWoche(row, i) {
+    if (!row || row.ferien) return null;
+    const w = { i: i };
+    if (row.nr) w.nr = row.nr;
+    if (row.kw) w.kw = row.kw;
+    if (row.type) w.typ = row.type;
+    if (row.u) w.u = String(row.u);
+    if (row.topic) w.thema = row.topic;
+    if (row.material) w.material = row.material;
+    const q = row.quiz;
+    if (q) w.quiz = typeof q === 'string' ? { href: q } : { href: q.href, label: q.label || '' };
+    /* the red button only with a real list behind it (src, or items without the "Geplant ..." placeholder note) */
+    const rb = row.redBtn;
+    if (rb && (rb.src || (Array.isArray(rb.items) && rb.items.length && !rb.info)))
+        w.rot = { label: rb.label || '', title: rb.title || '' };
+    if (row.buch) w.buch = row.buch;   /* a hand-set Lerneinheit ('lb3-3.html#le2' or a list) wins over the hours */
+    return w;
+}
+const verweise = [];
+
 const plaene = [];
 let wochen = 0;
 for (const s of seiten) {
@@ -117,6 +186,17 @@ for (const s of seiten) {
     plaene.push(Object.assign({ href: s.href, kurz: s.kurz, lang: s.lang, marken: labels },
         termin ? { termin: true } : {}, { wochen: list }));
     console.log(s.kurz.padEnd(8) + s.href.padEnd(32) + list.length + ' Wochen');
+    /* the deck slide's data: a plan with decks and a book of its own name */
+    const name = path.basename(s.href, '.html');
+    const decks = fs.existsSync(path.join(HTML, 'decks'))
+        ? fs.readdirSync(path.join(HTML, 'decks')).filter(f => f.startsWith(name + '-') && f.endsWith('.html')) : [];
+    const buch = decks.length ? buchVon(name) : null;
+    if (buch) {
+        verweise.push({ href: s.href, buch: buch,
+            wochen: rows.map(function (r, i) { return verweisWoche(r, i); }).filter(Boolean) });
+        console.log('         -> plan-verweise: ' + decks.length + ' Decks, Buch ' + name + ' ('
+            + buch.kapitel.reduce((n, k) => n + k.le.length, 0) + ' Lerneinheiten)');
+    }
 }
 
 /* Eine Woche pro Zeile: so bleibt der git-Diff lesbar, wenn Doc eine Zeile im
@@ -136,3 +216,13 @@ fs.writeFileSync(OUT, '{\n "gebaut": ' + JSON.stringify(new Date().toISOString()
 console.log('\n' + plaene.length + ' Plaene, ' + wochen + ' Wochen -> '
     + path.relative(path.join(HERE, '..'), OUT) + ' ('
     + Math.round(fs.statSync(OUT).size / 1024) + ' KB)');
+
+/* the same one-line-per-week layout, so a changed week is one line in the diff */
+fs.writeFileSync(OUT_VERWEISE, '{\n "gebaut": ' + JSON.stringify(new Date().toISOString().slice(0, 10))
+    + ',\n "plaene": [\n' + verweise.map(p => '  {\n'
+        + '   "href": ' + JSON.stringify(p.href) + ',\n'
+        + '   "buch": ' + JSON.stringify(p.buch) + ',\n'
+        + '   "wochen": [\n' + p.wochen.map(w => '    ' + JSON.stringify(w)).join(',\n') + '\n   ]\n  }').join(',\n')
+    + '\n ]\n}\n');
+console.log(verweise.length + ' Plaene mit Decks und Buch -> ' + path.relative(path.join(HERE, '..'), OUT_VERWEISE)
+    + ' (' + Math.round(fs.statSync(OUT_VERWEISE).size / 1024) + ' KB)');

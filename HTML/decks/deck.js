@@ -632,6 +632,87 @@ const hoverTail = (function () {
     if (talking) setTimeout(function () { if (!narr.playing) narr.toggle(); }, 0);
   }
 })();
+// A mouse click on a part that comes with a click - a bullet line, a column, a label, a table row, any .step - makes it
+// the current step: the slide is built up to its click group and the box sits there, so single bullets can be skipped.
+// A click on an earlier one takes the box back exactly as the left arrow would: the lines stay in view (they always
+// are), a part that only shows with a later click goes again. The arrows go on from there; beamer and presenter follow
+// through paint() like an arrow press, so Solita's "step:N", the drum roll (one step forward only) and drawn animations
+// see an ordinary step (Doc, 11.11.2026: "wenn ich mit der Maus ein Bullet klicke, sollte er direkt die Box kriegen.
+// Manchmal will ich einzelne Bullets überspringen, wenn ich das nur mit den Pfeiltasten kann, geht das nie.").
+// Only a real mouse - a finger's tap still steps on (above). Never while editing or drawing, never in the overview or a
+// preview, never on a link, button, field, ? mark, zoom picture, Solita's box or a lab, and not the click that only
+// closes an open box or the help. While Solita talks it skips as the arrows do: she goes on at the new point.
+(function () {
+  const NOT = '#hud, #nav, #ask, #ask-line, #ask-panel, #help, #overview, #ink-bar, #countdown, a, button, input, '
+    + 'textarea, select, label, .play-big, .labframe, .ani-ctl, [contenteditable], [data-pop], .pop, .pop-mark, '
+    + '[data-zoom], .zoom-big, .ov-thumb, .p-thumb, .vorhang';
+  let mouse = false, busy = false;                    // pressed with the mouse; a box or the help was open at the press
+  addEventListener('pointerdown', e => {
+    mouse = e.pointerType === 'mouse';
+    const help = document.getElementById('help');
+    busy = !!document.querySelector('.pop:not([hidden])') || !!(help && !help.hidden);
+  }, true);
+  const shown = el => getComputedStyle(el).visibility !== 'hidden';   // a part not there yet ("step kommt") is no target
+  // The part under the mouse. A figure's svg often lies over the bullet lines (the 816x330 picture box of svgfig) and in
+  // the presenter's copy the slide takes no pointer at all - so text parts (lines, columns, labels, rows and the parts
+  // inside them) are found by their boxes, the smallest one wins (a part inside its line). A figure part only counts
+  // where it is really hit. A text that lets the clicks through on the beamer (pointer-events none) is no target
+  // either - in the presenter that is read off the deck's own slide, its copy takes no pointer anywhere
+  const TEXT = 'p.step, li.step, tr.step, p .step, li .step, td .step';
+  // A box laid over the slide (the curtain: big in the middle it takes the whole slide) is never a target, and while it
+  // stands open it covers the lines under it - a click there does nothing (Marie for Doc, 11.11.2026). Shrunk to its
+  // corner it lets the clicks through to the lines (pointer-events none). In the presenter's copy that is read off the
+  // deck's own slide
+  const OVERLAY = '.vorhang';
+  const through = (sl, sel, el, i) => {               // the element lets clicks through on the beamer
+    const own = sl === slides[si] ? el : slides[si].querySelectorAll(sel)[i];
+    return !!own && getComputedStyle(own).pointerEvents === 'none';
+  };
+  function under(sl, t, x, y) {
+    const hit = t.closest('.step');
+    if (hit && sl.contains(hit) && shown(hit)) return hit;
+    const covered = [...sl.querySelectorAll(OVERLAY)].some((o, i) => {
+      const b = o.getBoundingClientRect();
+      return shown(o) && b.width && x >= b.left && x <= b.right && y >= b.top && y <= b.bottom && !through(sl, OVERLAY, o, i);
+    });
+    if (covered) return null;
+    const list = [...sl.querySelectorAll(TEXT)];
+    let own = sl === slides[si] ? list : [...slides[si].querySelectorAll(TEXT)];
+    if (own.length !== list.length) own = null;
+    let best = null, area = Infinity;
+    list.forEach((el, i) => {
+      if (el instanceof SVGElement || el.closest(OVERLAY)) return;
+      const b = el.getBoundingClientRect(), a = b.width * b.height;
+      if (!a || x < b.left || x > b.right || y < b.top || y > b.bottom || a >= area || !shown(el)) return;
+      if (own && getComputedStyle(own[i]).pointerEvents === 'none') return;
+      best = el; area = a;
+    });
+    return best;
+  }
+  addEventListener('click', e => {
+    if (!e.isTrusted || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || !e.target.closest) return;
+    if (!(e.pointerType ? e.pointerType === 'mouse' : mouse) || busy) return;
+    const r = document.documentElement.classList;
+    if (r.contains('deck-edit') || r.contains('ink-pen') || r.contains('ink-remote')) return;
+    if (e.target.closest(NOT)) return;
+    const marked = getSelection();                     // a drag that marked words is not a click on the line
+    if (marked && !marked.isCollapsed && String(marked).trim()) return;
+    // only the slide on screen: the deck's own, or the presenter's live copy (not its previews, not the strip)
+    const sl = PRESENTER ? e.target.closest('.p-cur') && document.querySelector('.p-cur .slide.live')
+                         : e.target.closest('.slide') === slides[si] && slides[si];
+    const el = sl && under(sl, e.target, e.clientX, e.clientY);
+    if (!el) return;
+    const g = grp(el);
+    if (isNaN(g)) return;
+    const to = Math.max(1, Math.min(g + 1, groups(slides[si])));
+    if (to === step && !ganz) return;                 // already the current one
+    if (trommel.laeuft()) return;                     // the drum still rolls: the click waits for the crash, as next()
+    const talking = narr.playing;
+    narr.stop();
+    ganz = false; step = to; paint();
+    if (talking) setTimeout(function () { if (!narr.playing) narr.toggle(); }, 0);
+  });
+})();
 // Chrome's own menu (save image, copy image, inspect ...) never comes up in a deck: a right click or a long press
 // on the board opened it over the slide (Doc, 28.09.2026: "das dumme Menu von Chrome ... unbedingt überschreiben
 // (nix)"). The deck's own menus (Solita's box, the overview's slide menu) still open; text fields keep theirs, to paste.
@@ -683,6 +764,17 @@ addEventListener('contextmenu', e => {
   const own = [].find.call(document.scripts, function (s) { return /\/deck\.js(\?|$)/.test(s.src); });
   const s = document.createElement('script');
   s.src = new URL('deck-vote.js', own ? own.src : location.href).href;
+  document.head.appendChild(s);
+})();
+/* "Üben & Nachlesen" at the end of a deck (Doc, 11.11.2026: "den Verweis auf die Aufgaben ..., die wir im
+   Stoffverteilungsplan haben ... Und natürlich auch zu den Seiten im Mathebuch"): a slide with
+   <div class="verweise-box"></div> (vorspann/verweise.html) gets the week's exercises and the book's pages from
+   deck-verweise.js - loaded only in a deck that has one. */
+(function () {
+  if (!document.querySelector('.slide .verweise-box')) return;
+  const own = [].find.call(document.scripts, function (s) { return /\/deck\.js(\?|$)/.test(s.src); });
+  const s = document.createElement('script');
+  s.src = new URL('deck-verweise.js', own ? own.src : location.href).href;
   document.head.appendChild(s);
 })();
 // the lab bar sits right on top of its lab: each slide places its lab frame itself, so read that frame's top.

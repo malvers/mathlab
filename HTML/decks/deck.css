@@ -80,12 +80,13 @@ b{font-weight:600;color:var(--fg,var(--formel))}   /* bold inside a colour keeps
 .c1{--fg:var(--orange)}.c2{--fg:var(--red)}.c3{--fg:var(--green)}
 .c4{--fg:var(--blue)}.c5{--fg:var(--teal)}.c6{--fg:var(--violet)}
 .c7{--fg:var(--magenta)}.c8{--fg:var(--brown)}.c9{--fg:var(--slate)}
-.boxed{padding:0 .3em;border:1.5px solid var(--stroke);border-radius:6px;background:rgba(255,255,255,.85)}   /* a box around a word that is hard to see in its colour, e.g. orange (Doc, 31.10.2026) */
+.boxed{padding:0 .3em;border:1px solid var(--stroke);border-radius:6px;background:#E6EEF8}   /* a box around a word that is hard to see in its colour, e.g. orange (Doc, 31.10.2026); thinner edge and a light blue ground (Doc, 11.11.2026: "Key rand dünner + HG leicht blau") */
 .boxed.c1{--fg:#D4960F}   /* the orange a bit darker inside the box (Doc, 31.10.2026) */
-.boxed-soft .c1,.c1.boxed-soft,h3 .c1{--fg:#D4960F}   /* the same darker orange in a quiet frame and in a title, on a light ground (Doc, 31.10.2026) */
+.boxed-soft .c1,.c1.boxed-soft,h3 .c1,.pic .fl.calc .c1{--fg:#D4960F}   /* the same darker orange in a quiet frame and in a title, on a light ground (Doc, 31.10.2026); also in a figure's short sum, the key's 7 like the key itself (Doc, 11.11.2026: "hier auch") */
 .pic .fl svg.ring-svg,svg.ring-svg{display:inline-block;position:static;width:1.45em;height:1.45em;margin:0 .1em;vertical-align:-.36em}   /* a 0 or 1 in its circle within a line of text, the same drawing as in the figure (Doc, 31.10.2026) */
 .boxed-soft{padding:2px .45em;border:1.2px solid var(--muted);border-radius:8px;background:rgba(255,255,255,.55)}   /* a quiet frame around the core of a line, e.g. the formula (Doc, 31.10.2026) */
 .boxed-soft.tiny{display:inline-block;box-sizing:border-box;height:16px;line-height:14px;padding:0 .55em;letter-spacing:.4px;border-width:1px;border-radius:5px}   /* the same frame for a small sum of exact height, so a line can start at its edge */
+.boxed-soft.big{padding:6px .75em;border-radius:10px}   /* the same frame with more room around a formula that carries the slide (Doc, 11.11.2026: "box bitte größer") */
 /* a slide's goal, set apart from the text: a small tag "Ziel" in its own column, the sentence beside it, so every line
    starts at the same left edge; the tag sits on the first line's baseline (Doc, 10.11.2026: "das Ziel auch absetzen,
    nicht Ziel-Doppelpunkt, sondern irgendwie so anders schön") */
@@ -122,8 +123,8 @@ svg.pfeil path{fill:currentColor}
 .pic .fl.pop-mark{display:flex;color:transparent}
 .pop-list{margin:10px 0 0 1.2em;padding:0;font-size:15px;line-height:1.45}
 .pop-list li{margin-top:6px}
-.pop-mark{display:inline-flex;vertical-align:.1em;width:18px;height:18px;align-items:center;justify-content:center;font:700 10.5px/1 Arial,Helvetica,sans-serif;color:transparent;cursor:pointer;-webkit-print-color-adjust:exact;print-color-adjust:exact;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Ccircle cx='9' cy='9' r='8.55' fill='%23fff' fill-opacity='.75' stroke='%237F90BC' stroke-width='.9'/%3E%3Cpath d='M7.15 7.3a1.85 1.85 0 1 1 3.37 1.06c-.8.55-1.52.95-1.52 1.9' fill='none' stroke='%237F90BC' stroke-width='1.2' stroke-linecap='round'/%3E%3Ccircle cx='9' cy='12.4' r='.75' fill='%237F90BC'/%3E%3C/svg%3E") center/100% 100% no-repeat}   /* the ? in a circle that says: a click opens more - one drawing, its ? measured onto the circle's centre; the letter stays in the HTML, invisible, and only gives the line its baseline (Doc, 01.11.2026) */
+.pop-mark{display:inline-flex;vertical-align:.05em;width:18px;height:18px;align-items:center;justify-content:center;font:700 1em/1 Arial,Helvetica,sans-serif;color:transparent;cursor:pointer;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Ccircle cx='9' cy='9' r='8.55' fill='%23fff' fill-opacity='.75' stroke='%237F90BC' stroke-width='.9'/%3E%3Cpath d='M7.15 7.3a1.85 1.85 0 1 1 3.37 1.06c-.8.55-1.52.95-1.52 1.9' fill='none' stroke='%237F90BC' stroke-width='1.2' stroke-linecap='round'/%3E%3Ccircle cx='9' cy='12.4' r='.75' fill='%237F90BC'/%3E%3C/svg%3E") center/100% 100% no-repeat}   /* the ? in a circle that says: a click opens more - one drawing, its ? measured onto the circle's centre; the letter stays in the HTML, invisible, and only gives the line its baseline (Doc, 01.11.2026) ; the circle sits centred on the digits of its line - its own (invisible) font takes the line's size, so the lift .05em grows with the line (Doc, 11.11.2026: "sitzt der y sym?" - it sat 1 px low beside the 9) */
 .pop h4{margin:0 0 12px;font:700 19px Orbitron,system-ui,sans-serif;color:var(--stroke)}
 .pop p{margin:12px 0 0;font-size:15px;line-height:1.45}
 .pop .dtable{position:static}
@@ -225,6 +226,7 @@ p.line[data-lead=z8]{--lead:2.1}p.line[data-lead=z9]{--lead:2.6}
 .body{position:absolute;left:72px;top:146px;width:816px;height:330px}
 
 p.line{position:relative;line-height:1.25}
+p.line,p.col{text-wrap:pretty}   /* no single word alone on a bullet's last line - the browser takes a word or two along (Doc, 11.11.2026: "so ein einzelnes Wort auf einer neuen Zeile ist nicht so schön ... sieht irgendwie verloren aus") */
 p.line.l0{font-size:20px;color:var(--formel);margin-top:var(--gap,12px);padding-left:20px}   /* the text as blue as the formulas, trial (Doc, 06.10.2026: "probier mal die Schrift (nicht Header) so blau wie x") - was var(--body) */
 /* --gap on a body spreads its bullets apart (Doc, 30.10.2026: "zieh die Bullets ein bisschen auseinander") */
 p.line.apart{margin-top:44px}   /* a bullet set apart from the ones above it (Doc, 06.10.2026: "ein dritter Bullet, der aber abgesetzt ist") */
@@ -242,6 +244,7 @@ p.line:first-child{margin-top:0}
 p.line::before{content:"";display:inline-block;width:7px;height:7px;margin:0 13px 0 -20px;
   vertical-align:calc(.325em + (max(var(--lead, 1), 1) - 1) * .375em - 3.5px)}
 p.line.l0::before{background:var(--ink)}   /* dark blue like the headings, not red (Doc, 27.09.2026: "probier mal ... dunkelblau") */
+p.line.ziel::before{position:absolute;background:none}   /* a bullet line that opens with a tag like the slide's goal (.ziel-tag "Idee") instead of its square; the triangle of the current step still shows (Doc, 11.11.2026: "Setz mal Idee so gelb ab wie wir das neulich gemacht hatten") */
 p.line.leise{color:var(--muted);--formel:var(--muted);font-size:.86em}p.line.leise::before{background:var(--muted)}   /* a bullet in passing, marker included (Doc, 31.10.2026) */
 p.line.l1::before{background:var(--green);width:6px;height:6px;margin-right:14px;vertical-align:calc(.325em + (max(var(--lead, 1), 1) - 1) * .375em - 3px)}
 p.line.l2::before{background:#4A79C9;width:6px;height:6px;margin-right:14px;vertical-align:calc(.325em + (max(var(--lead, 1), 1) - 1) * .375em - 3px)}
@@ -384,6 +387,7 @@ a.fig-source:hover{color:var(--red);text-decoration:underline}
 .pic .fl{position:absolute;margin:0;text-align:center;font-size:12.5px;line-height:1.28;color:var(--muted)}   /* a figure's words, laid over the SVG - the editor's text; unitless line height, so a label scaled up keeps its own */
 .pic .fl.calc{display:grid;grid-template-columns:1.2em 1.1em .6em 1.1em 1.2em;font-family:Arial,Helvetica,sans-serif}   /* a short sum in a figure: number, sign, number, =, result in columns, so the signs stand under each other (Doc, 31.10.2026) */
 .pic .fl.calc>:nth-child(odd){text-align:right}.pic .fl.calc>:nth-child(even){text-align:center}
+.pic .fl.calc>.boxed{justify-self:center;text-align:center;line-height:1.15;padding:0 .14em;border-radius:4px;transform:translateX(-.1em)}   /* a boxed number in such a sum (the key's 7) keeps its middle on its column and may reach a little into the neighbours (Doc, 11.11.2026: "box drum") */
 .pic.left{justify-content:flex-start}
 /* a small drawn figure in the free room right of the heading, above a hero formula (Doc, 03.10.2026: "oben wo die freie
    Fläche ist, ein Integral hin") - its .fl words as in any .pic */
@@ -668,6 +672,11 @@ html.lab-voll #nav,html.lab-voll #hud,html.lab-voll #ask{opacity:0;pointer-event
   p.line.step{width:fit-content}
   html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.now::after{left:-14px;right:-14px;top:-5px;bottom:-5px;width:auto;height:auto;
     border:1.5px solid var(--red);background:none}   /* dark red, trial (Doc, 06.10.2026: "probier mal rot (dunkel)") - was var(--orange) */
+  /* a key point: while its box is up (the current step) the usual dark red box is filled with a light green ground
+     (Doc, 11.11.2026: "erst grün, Hintergrund und keine grüne Box, sondern eine rote Box. Erst wenn die Box
+     sichtbar ist ... hinterlegen") */
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.key-point{isolation:isolate}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.key-point.now::after{background:rgba(121,158,49,.16);z-index:-1}
   html:not(.deck-edit) :not(.ov-thumb) > .slide p.col.l1.step.now::before{left:-2px;top:calc(50% - 7px);width:11px;height:14px;
     background:var(--tri) no-repeat;animation:step-now .25s ease-out}
   html:not(.deck-edit) :not(.ov-thumb) > .slide p.col.l1.step.now::after{display:none}
@@ -1287,3 +1296,66 @@ html.laser-on .p-cur .p-fit{cursor:none}
 .vote-x{margin-top:7px;text-align:center;font:700 15px Orbitron,sans-serif;color:var(--ink)}
 .vote-x em{display:block;font-style:normal;font-size:24px;line-height:1.3}
 .p-frame > .slide.live .vote-btns{pointer-events:auto}   /* the presenter's current slide: its buttons take the pointer */
+
+/* ---- "Üben & Nachlesen" (vorspann/verweise.html, filled by deck-verweise.js; Doc, 11.11.2026: "in den Mathe-Decks
+   überall ... den Verweis auf die Aufgaben ..., die wir im Stoffverteilungsplan haben ... Und natürlich auch zu den
+   Seiten im Mathebuch jeweils"): two white fields like the survey's - left the week's exercises from the SVP in
+   phi-green with the QR of the first set, right the textbook in lambda-orange: cover, chapter, Lerneinheit with its
+   printed page, the chapter's practice/test/solutions pages. Nothing in it is editable text (deck_edit.py SELECTOR). */
+.verweise-box{position:absolute;left:72px;top:138px;width:816px;height:352px;display:grid;grid-template-columns:1.2fr 1fr;
+  gap:22px}
+.vw-karte{min-width:0;min-height:0;display:flex;flex-direction:column;padding:16px 18px 14px;border-radius:16px;background:#fff;
+  box-shadow:0 6px 28px rgba(14,36,78,.18);overflow:hidden}
+.vw-kopf{display:flex;align-items:baseline;gap:9px;padding-bottom:7px;border-bottom:2px solid var(--green);
+  font:700 12px Orbitron,sans-serif;letter-spacing:3px;text-transform:uppercase;color:var(--ink)}
+.vw-kopf span{font:400 10px 'Deck Punkt',Raleway,sans-serif;letter-spacing:1.5px;color:var(--muted)}
+.vw-buch .vw-kopf{border-color:var(--orange)}
+.vw-body{flex:1;min-height:0;display:flex;gap:14px;margin-top:9px}
+.vw-links{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.vw-links > *{flex:none}
+.vw-woche{margin:1px 0 1px;font-size:11px;letter-spacing:.3px;color:var(--muted);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.vw-woche ~ .vw-woche{margin-top:6px}
+.vw-a{display:flex;align-items:center;gap:10px;padding:5px 9px 5px 6px;border-radius:11px;text-decoration:none;
+  color:var(--ink);background:rgba(121,158,49,.09);transition:background .15s}
+.vw-a:hover{background:rgba(121,158,49,.2)}
+.vw-n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--green);
+  font:700 12px Orbitron,sans-serif;color:#fff}
+.vw-n:empty::before{content:"\203A";font-size:17px;line-height:1}
+.vw-text{background:rgba(245,194,66,.14)}.vw-text:hover{background:rgba(245,194,66,.3)}
+.vw-text .vw-n{background:var(--orange);color:var(--ink)}
+.vw-rot{background:rgba(176,36,24,.07)}.vw-rot:hover{background:rgba(176,36,24,.16)}
+.vw-rot .vw-n{background:var(--red)}
+.vw-rot .vw-name{white-space:normal}   /* "Klassenarbeit 1: Das kann drankommen" in full, on two lines if need be */
+.vw-txt{min-width:0;display:flex;flex-direction:column}
+.vw-name{font-size:14px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vw-desc{margin-top:1px;font-size:10.5px;line-height:1.25;color:var(--muted);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.vw-mehr{margin-top:auto;padding-top:4px;font-size:11px;letter-spacing:.3px;color:var(--muted);text-decoration:none}
+.vw-mehr:hover{color:var(--red)}
+.vw-qr-box{flex:none;width:108px;display:flex;flex-direction:column;align-items:center}
+.vw-qr{width:108px;height:108px;box-sizing:border-box;padding:6px;border-radius:10px;background:#fff;
+  border:1px solid rgba(14,36,78,.14)}
+.vw-qr svg{display:block;width:100%;height:100%}
+.vw-qr-sub{margin-top:6px;font-size:9.5px;line-height:1.3;letter-spacing:.4px;text-align:center;color:var(--muted)}
+.vw-buch-body{flex:1;min-height:0;display:flex;gap:14px;margin-top:12px}
+.vw-cover{flex:none;align-self:flex-start;width:82px;aspect-ratio:690/977;object-fit:cover;border-radius:4px;
+  box-shadow:0 3px 12px rgba(14,36,78,.28)}
+.vw-buch-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.vw-kapitel{display:flex;flex-direction:column;align-items:flex-start;text-decoration:none;color:var(--ink)}
+.vw-kk{padding:4px 8px 3px;border-radius:5px;background:var(--orange);font:700 10px Orbitron,sans-serif;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--ink)}
+.vw-kt{margin-top:5px;font-size:15px;font-weight:600;line-height:1.25}
+.vw-le{display:flex;flex-direction:column;gap:2px;padding:6px 10px 7px;border-radius:11px;text-decoration:none;
+  color:var(--body);background:rgba(245,194,66,.13);transition:background .15s}
+.vw-le:hover{background:rgba(245,194,66,.3)}
+.vw-ln{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:9.5px;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--muted)}
+.vw-s{font:700 13px Orbitron,sans-serif;letter-spacing:.5px;text-transform:none;color:var(--ink)}
+.vw-lt{min-width:0;font-size:13.5px;font-weight:600;line-height:1.3;color:var(--ink)}
+.vw-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.vw-chips a,.vw-chips span{padding:3px 9px;border-radius:999px;border:1px solid rgba(14,36,78,.2);font-size:10.5px;
+  color:var(--body);text-decoration:none}
+.vw-chips a:hover{border-color:var(--red);color:var(--red)}
+.vw-leer{font-size:11px;line-height:1.4;color:var(--muted)}
+.vw-fehler{grid-column:1/-1;align-self:center;text-align:center;font-size:13px;color:var(--muted)}

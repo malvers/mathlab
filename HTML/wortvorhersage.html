@@ -46,6 +46,26 @@
             letter-spacing: .8px; }
         body.wv-widget #wv-fab:hover { background: rgba(14, 36, 78, .13); border-color: rgba(14, 36, 78, .5); }
         #wv-fab .wv-fab-key { font-family: Raleway, sans-serif; font-size: 10px; letter-spacing: .3px; opacity: .65; }
+        /* top right on the sheet: the switch between the two views, and in the widget the Start button beside it
+           (Doc, 11.11.2026: "Wie schalte ich denn den Modus um? ... einen Switch machen oben rechts?") - the same
+           quiet navy outline as the widget's button, the same height */
+        #wv-top { position: fixed; top: 14px; right: 22px; z-index: 30; display: flex; gap: 8px; align-items: stretch; }
+        body.wv-widget #wv-top #wv-fab { position: static; }
+        #wv-mode { display: flex; border: 1px solid rgba(14, 36, 78, .3); border-radius: 8px; overflow: hidden;
+            background: rgba(14, 36, 78, .06); }
+        #wv-mode button { border: 0; margin: 0; padding: 5px 11px; background: transparent; color: #0E244E; cursor: pointer;
+            font-family: Orbitron, sans-serif; font-size: 12px; letter-spacing: .8px; line-height: 1.3; }
+        #wv-mode button + button { border-left: 1px solid rgba(14, 36, 78, .3); }
+        #wv-mode button:hover { background: rgba(14, 36, 78, .10); }
+        #wv-mode button.on { background: #0E244E; color: #F7F2E7; }
+        #wv-mode button:focus-visible { outline: 2px solid rgba(14, 36, 78, .6); outline-offset: -2px; }
+        /* in the deck's frame (960 wide) switch and Start share the space right of the centred heading - a little
+           tighter there, so the heading keeps clear */
+        body.wv-widget #wv-top { right: 14px; gap: 6px; }
+        body.wv-widget #wv-mode button { padding: 5px 9px; font-size: 11px; letter-spacing: .5px; }
+        body.wv-widget #wv-fab { padding: 5px 10px; letter-spacing: .5px; justify-content: center; box-sizing: border-box; }
+        /* a narrow page has no room beside the heading: there the switch in the card on the left does it alone */
+        @media (max-width: 700px) { body:not(.wv-widget) #wv-top { display: none; } }
         /* the working area reads like paper - the cards on the left keep the dark house style */
         #canvas-container { background: #F7F2E7; }
         /* no wordmark over the sheet in THIS lab (Doc, 22.09.2026: "Branding rechts oben raus (hier)") */
@@ -194,14 +214,31 @@
             cur: '',              // the settling word as it looks this instant
             flick: 0,             // when the loose letters were last rolled
             frac: 0,              // how far the settling word has locked, 0..1
+            view: 'wort',         // 'wort' = word by word from the left (the default), 'patch' = in patches all over
+            tk: [], tkB: [], tkOn: [], tkAt: [], tkOrder: [],   // patches: tokens, their salad, right yet?, since when, order
+            pp: 0, ppStop: -1,    // patches: how far this run is, 0..1; "Ein Schritt" stops a little later
+            lastT: 0, reroll: 0, tkN: 0,
             t0: 0                 // when the current word started settling
         };
 
-        // gibberish, the way an untrained net babbles: letters with no word behind them
+        // gibberish, the way an untrained net babbles: characters with no word behind them - letters, but well mixed
+        // with capitals, umlauts, digits, punctuation and signs (Doc, 11.11.2026: "das muss Buchstabensalat sein ...
+        // mehr Sonderzeichen"). The target word's own commas and full stops are not copied - an untrained net knows
+        // nothing about them. One character per character of the word: the line keeps still.
         const LETTERS = 'abcdefghijklmnopqrstuvwxyz';
+        const CAPS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ';
+        const UML = 'äöüßäöü';
+        const DIGITS = '0123456789';
+        const SIGNS = ',.;:!?–…„“()§%&/+*#@=';
+        const pickc = a => a[(Math.random() * a.length) | 0];
+        function rnd() {
+            const r = Math.random();
+            return r < 0.52 ? pickc(LETTERS) : r < 0.62 ? pickc(CAPS) : r < 0.69 ? pickc(UML)
+                : r < 0.81 ? pickc(DIGITS) : pickc(SIGNS);
+        }
         function babble(n) {
             let s = '';
-            for (let i = 0; i < n; i++) s += LETTERS[(Math.random() * LETTERS.length) | 0];
+            for (let i = 0; i < n; i++) s += rnd();
             return s;
         }
 
@@ -209,6 +246,8 @@
         // does not (Doc, 22.09.2026: "den ersten Teil bis winziges grün der Rest rot"). That is how it reads
         // in class - the border walks to the right while the net trains.
         const border = () => Math.round(TEXT.length * S.given);
+        // Patches keep the handed-over part too (Doc, 11.11.2026: "das ist mein Stück, was du fortsetzen sollst, ist da
+        // weg in dem Modus") - the pieces come right only behind the border
 
         const SEEN = new Set();
         const norm = w => w.toLowerCase().replace(/[^a-zäöüß]/g, '');
@@ -220,17 +259,180 @@
             const green = border();
             S.known = TEXT.map((w, i) => i >= green && SEEN.has(norm(w)) && Math.random() < S.level);
             S.noise = TEXT.map((w, i) => (i < green || S.known[i]) ? w : babble(w.length));   // same length: the line keeps still
+            rollTokens();
         }
+
+        // ---------------------------------------------------------------- "Patches" ---
+        // Doc, 11.11.2026: "einen Modus ..., wo das nicht Wort für Wort erscheint, sondern eben wie es in Wirklichkeit
+        // ist. Dass sich das ganze Ding aus Patches zusammensetzt" - "Wenn irgendwo ein Stück grün wird, zack, grün
+        // machen. Da grün, da grün, da grün ... bis fertig." In training a net predicts EVERY position at once
+        // (teacher forcing), so with each pass pieces come right all over the part behind the border (the handed-over
+        // beginning stands black above and fixed below, as word by word): first the punctuation and the
+        // frequent little words, then the grammar (endings), last the rare content words. Pieces, not words: a long
+        // word comes right in tokens ("Gewi|chte"). Each piece is green the moment it is right - nothing walks from
+        // left to right. The salad keeps each piece's length, so the text never shifts.
+        const FUNC = new Set(['der', 'die', 'das', 'und', 'ist', 'ein', 'eine', 'einen', 'in', 'zu', 'nicht', 'es',
+            'sich', 'mit', 'von', 'den', 'dem', 'des', 'auf', 'für', 'im', 'an', 'als', 'auch', 'wie', 'wird', 'sind',
+            'so', 'aus', 'nur', 'was', 'bis', 'am', 'vom', 'zum', 'oder', 'aber', 'dann', 'sie', 'er', 'wir', 'man']);
+        const COUNT = new Map();                      // how often each word occurs in the corpus
+        TEXTS.join(' ').split(/\s+/).forEach(w => {
+            const k = w.replace(/[^A-Za-zÄÖÜäöüß]/g, '').toLowerCase();
+            if (k) COUNT.set(k, (COUNT.get(k) || 0) + 1);
+        });
+        const MAXC = Math.max(1, ...COUNT.values());
+        const VOWEL = /[aeiouäöüyAEIOUÄÖÜY]/;
+        // a long word in pieces, the way a tokenizer cuts it: after a vowel before a consonant, pieces of 3 and more
+        function piecesOf(core) {
+            if (core.length <= 5 || FUNC.has(core.toLowerCase())) return [core];
+            const out = [];
+            let last = 0;
+            for (let k = 3; k < core.length - 1; k++) {
+                if (k - last >= 3 && VOWEL.test(core[k - 1]) && !VOWEL.test(core[k])) { out.push(core.slice(last, k)); last = k; }
+            }
+            out.push(core.slice(last));
+            return out;
+        }
+        // the tokens of one word, each with its character offset in the word
+        function tokensOf(word, i) {
+            const m = word.match(/^([^A-Za-zÄÖÜäöüß0-9]*)(.*?)([^A-Za-zÄÖÜäöüß0-9]*)$/);
+            const out = [];
+            let at = 0;
+            const push = (t, kind) => { if (t) { out.push({ t: t, i: i, kind: kind, at: at }); at += t.length; } };
+            [...m[1]].forEach(c => push(c, 'sign'));
+            if (m[2]) piecesOf(m[2]).forEach((p, k) => push(p, k ? 'tail' : 'head'));
+            [...m[3]].forEach(c => push(c, 'sign'));
+            return out;
+        }
+        // how late a piece comes right, 0 early .. 1 late
+        function difficulty(tok) {
+            if (tok.kind === 'sign') return 0.05;                              // punctuation first
+            const w = TEXT[tok.i].replace(/[^A-Za-zÄÖÜäöüß]/g, '').toLowerCase();
+            if (FUNC.has(w)) return 0.18;                                      // the frequent little words
+            if (tok.kind === 'tail' && tok.t.length <= 3) return 0.42;         // endings: grammar
+            const f = Math.log(1 + (COUNT.get(w) || 0)) / Math.log(1 + MAXC);  // 1 frequent .. 0 rare
+            return 0.55 + 0.35 * (1 - f);                                      // content words, the rare ones last
+        }
+        function rollTokens() {
+            const bord = border();
+            S.tk = [];
+            TEXT.forEach((w, i) => S.tk.push(...tokensOf(w, i)));
+            const open = [];
+            S.tk.forEach((t, j) => { if (t.i >= bord && !S.known[t.i]) open.push(j); });
+            S.tkB = S.tk.map(t => babble(t.t.length));
+            S.tkOrder = open.map(j => [j, difficulty(S.tk[j]) + (Math.random() - 0.5) * 0.35])
+                .sort((a, b) => a[1] - b[1]).map(a => a[0]);
+            tokensReset();
+        }
+        function tokensReset() {
+            const bord = border();
+            S.tkOn = S.tk.map(t => t.i < bord || !!S.known[t.i]);
+            S.tkAt = S.tk.map(() => 0);
+            S.pp = 0; S.ppStop = -1; S.tkN = 0;
+        }
+        const wordDone = i => S.tk.every((t, j) => t.i !== i || S.tkOn[j]);
+        // the share of the part to be guessed that is right: the pieces behind the border (what it had before counts)
+        function openShare() {
+            const bord = border();
+            let n = 0, on = 0;
+            S.tk.forEach((t, j) => { if (t.i >= bord) { n++; if (S.tkOn[j]) on++; } });
+            return { n: n, on: on, pct: n ? Math.round(100 * on / n) : 100 };
+        }
+        const easeOut = u => 1 - Math.pow(1 - u, 1.7);      // quick at first, ever slower - like training
+        // one frame of the run: the share grows in time (as long as word by word would take), the pieces of that
+        // share come right in their order; the salad of the rest keeps rattling, a few pieces at a time
+        function patchStep(now) {
+            const nWords = Math.max(1, TEXT.length - border() - knownAhead(border()));
+            const dt = Math.min(100, now - S.lastT);
+            S.lastT = now;
+            S.pp = Math.min(1, S.pp + dt / (nWords * S.speed));
+            if (S.ppStop >= 0 && S.pp >= S.ppStop) { S.pp = S.ppStop; S.ppStop = -1; S.running = false; playLabel(); }
+            const n = Math.round(easeOut(S.pp) * S.tkOrder.length);
+            for (let k = 0; k < n; k++) {
+                const j = S.tkOrder[k];
+                if (!S.tkOn[j]) { S.tkOn[j] = true; S.tkAt[j] = now; }
+            }
+            if (n !== S.tkN) { S.tkN = n; showStats(); }
+            if (now - S.reroll > 90) {
+                S.reroll = now;
+                for (let k = n; k < S.tkOrder.length; k++) {
+                    if (Math.random() < 0.18) { const j = S.tkOrder[k]; S.tkB[j] = babble(S.tk[j].t.length); }
+                }
+            }
+            S.frac = S.pp;
+            if (S.pp >= 1 || n >= S.tkOrder.length) { S.pp = 1; S.pos = TEXT.length; finish(); }   // the last piece: done
+        }
+        // the view, from either switch (the card on the left, the one top right) or &modus=patch at the start: a
+        // sentence in the middle of its run starts again in the new view, one at rest just shows the new picture
+        function setView(v) {
+            const again = S.mode === 'run' && S.pos < TEXT.length;
+            S.view = v === 'patch' ? 'patch' : 'wort';
+            ['wort', 'patch'].forEach(k => {
+                const b = document.getElementById('wv-view-' + k);
+                if (b) { b.classList.toggle('active', S.view === k); b.setAttribute('aria-pressed', S.view === k); }
+                const t = document.querySelector('#wv-mode [data-v="' + k + '"]');
+                if (t) { t.classList.toggle('on', S.view === k); t.setAttribute('aria-pressed', S.view === k); }
+            });
+            const st = document.getElementById('wv-step');
+            if (st) st.textContent = S.view === 'patch' ? T('btn_step_patch', 'Ein Schritt') : T('btn_step', 'Ein Wort');
+            still();
+            if (again) startRun();
+        }
+        // the switch top right, on both pages
+        (function topSwitch() {
+            const top = document.createElement('div');
+            top.id = 'wv-top';
+            const sw = document.createElement('div');
+            sw.id = 'wv-mode';
+            sw.setAttribute('role', 'group');
+            sw.setAttribute('aria-label', T('l_view', 'Ablauf'));
+            [['wort', T('btn_view_wort', 'Wort für Wort')], ['patch', T('btn_view_patch', 'Patches')]].forEach(([k, label]) => {
+                const b = document.createElement('button');
+                b.type = 'button'; b.dataset.v = k; b.textContent = label;
+                b.classList.toggle('on', S.view === k); b.setAttribute('aria-pressed', S.view === k);
+                b.addEventListener('click', () => { if (S.view !== k) setView(k); b.blur(); });   // blur: Space goes on working
+                sw.appendChild(b);
+            });
+            top.appendChild(sw);
+            document.body.appendChild(top);
+        })();
         const knownAhead = from => S.known.reduce((n, k, i) => n + (k && i >= from ? 1 : 0), 0);
 
         function playLabel() {
             const b = document.getElementById('wv-play');
             if (b) b.textContent = S.running ? T('btn_stop', 'Pause') : T('btn_play', 'Start');
             const f = document.getElementById('wv-fab-l');    // the widget's button does what Space does
-            if (f) f.textContent = S.running ? '❚❚ ' + T('btn_stop', 'Pause')
-                : S.mode === 'run' && S.pos >= TEXT.length ? (lastSentence() ? '✓ ' + T('btn_done', 'Fertig')
-                    : '⏭ ' + T('btn_next', 'Nächster Satz'))
-                : '▶ ' + T('btn_play', 'Start');
+            if (f) {
+                const st = S.running ? 'stop' : S.mode === 'run' && S.pos >= TEXT.length ? (lastSentence() ? 'done' : 'next') : 'play';
+                fabLabel(st);
+            }
+        }
+        // The widget's button keeps ONE width whatever it says (Doc, 11.11.2026: "Der Play-Knopf und Pausen-Knopf ändert
+        // seine Breite ... dann springt das alles") - the widest of its labels, measured once the font is there. "oder
+        // Leertaste" only where Space does what the button says: not beside "Nächster Satz" and "Fertig", which keeps
+        // the widest label short enough for the switch and the heading beside it.
+        const FAB = {
+            play: () => ['▶ ' + T('btn_play', 'Start'), true],
+            stop: () => ['❚❚ ' + T('btn_stop', 'Pause'), true],
+            next: () => ['⏭ ' + T('btn_next', 'Nächster Satz'), false],
+            done: () => ['✓ ' + T('btn_done', 'Fertig'), false]
+        };
+        function fabLabel(st) {
+            const f = document.getElementById('wv-fab-l'), k = document.querySelector('#wv-fab .wv-fab-key');
+            if (!f) return;
+            const [text, key] = FAB[st]();
+            f.textContent = text;
+            if (k) k.style.display = key ? '' : 'none';
+        }
+        function fabWidth() {
+            const fab = document.getElementById('wv-fab'), f = document.getElementById('wv-fab-l');
+            if (!fab || !f) return;
+            const keep = f.textContent, k = document.querySelector('#wv-fab .wv-fab-key'), kd = k ? k.style.display : '';
+            fab.style.width = '';
+            let w = 0;
+            Object.keys(FAB).forEach(st => { fabLabel(st); w = Math.max(w, fab.getBoundingClientRect().width); });
+            f.textContent = keep;
+            if (k) k.style.display = kd;
+            fab.style.width = Math.ceil(w) + 'px';
         }
 
         // the picture it opens with: the whole sentence, grey where the net has it, red where it has not
@@ -284,6 +486,7 @@
             rollLevel();
             if (S.known.length !== TEXT.length) rollKnown();   // the picture's salad carries over into the run
             S.pos = border();
+            if (S.view === 'patch') { tokensReset(); S.lastT = S.reroll = performance.now(); }
             S.cur = S.noise[S.pos] || '';
             S.t0 = performance.now(); S.flick = 0; S.frac = 0;
             playLabel();
@@ -301,10 +504,7 @@
             if (now - S.flick > 70 || S.cur.length !== word.length) {   // roll the loose letters ~14 times a second
                 S.flick = now;
                 let out = word.slice(0, locked);
-                for (let k = locked; k < word.length; k++) {
-                    const c = word[k];
-                    out += /[a-zA-Z]/.test(c) ? LETTERS[(Math.random() * LETTERS.length) | 0] : c;
-                }
+                for (let k = locked; k < word.length; k++) out += rnd();   // its punctuation rolls too, until it locks
                 S.cur = out;
             } else {
                 S.cur = word.slice(0, locked) + S.cur.slice(locked);
@@ -315,17 +515,22 @@
                 S.t0 = now; S.frac = 0;
                 showStats();
                 if (S.pos >= TEXT.length) {               // the end: the sentence is through, the net has grown
-                    S.running = false;
-                    TEXT.forEach(w => SEEN.add(norm(w)));
-                    grow();
-                    playLabel(); showStats();
-                    log('Durchlauf ' + S.epoch);
-                    if (S.level >= AUTO_FROM && !lastSentence()) autoNext();
+                    finish();
                 } else if (S.stopAt >= 0 && S.pos >= S.stopAt) {
                     S.running = false; S.stopAt = -1;
                     playLabel();
                 }
             }
+        }
+
+        // the end of a sentence, in both views: it is through, the net has grown
+        function finish() {
+            S.running = false;
+            TEXT.forEach(w => SEEN.add(norm(w)));
+            grow();
+            playLabel(); showStats();
+            log('Durchlauf ' + S.epoch);
+            if (S.level >= AUTO_FROM && !lastSentence()) autoNext();
         }
 
         // the learned share grows, quickly at first and ever more slowly - like real training
@@ -337,6 +542,21 @@
             return startLevel + (1 - startLevel) * f;
         }
         const lastSentence = () => S.nr >= TEXTS.length;
+        // The corpus share as it shows (Doc, 11.11.2026, "ja, lass Alan das so bauen"): during a run it grows with every
+        // word or piece the net gets, from where it stood to where this sentence takes it (levelAt) - far more slowly
+        // than this sentence's pill, and the end of the sentence brings no jump, it is there already. After the last
+        // sentence it stands at exactly 100 %, as levelAt says.
+        function sentenceDone() {
+            if (S.mode !== 'run') return 0;
+            if (S.view === 'patch') return S.tkOrder.length ? S.tkN / S.tkOrder.length : 1;
+            const b = border(), n = TEXT.length - b;
+            return n > 0 ? Math.max(0, Math.min(1, (S.pos - b) / n)) : 1;
+        }
+        function shownLevel() {
+            if (S.mode !== 'run' || S.pos >= TEXT.length) return S.level;   // at rest, and once grown: the level itself
+            const to = Math.max(S.level, levelAt(S.epoch + 1));
+            return S.level + (to - S.level) * sentenceDone();
+        }
         function grow() {
             S.epoch++;
             S.level = levelAt(S.epoch);
@@ -467,6 +687,27 @@
             ctx.textAlign = 'left';
         }
 
+        // patches in the lower box: each word at its place in the real text, piece by piece - a right piece green at
+        // once ("zack, grün"), with a short glow behind it so the eye finds it, the rest salad of the same length
+        function drawPatches(boxes, t, font) {
+            const now = performance.now();
+            ctx.font = font;
+            boxes.forEach(b => {
+                S.tk.forEach((tok, j) => {
+                    if (tok.i !== b.i) return;
+                    const x = b.x + ctx.measureText(b.t.slice(0, tok.at)).width;
+                    const w = ctx.measureText(tok.t).width;
+                    const on = S.tkOn[j], age = S.tkAt[j] ? now - S.tkAt[j] : 1e9;
+                    if (on && age < 900) {                   // the glow: there at once, gone in under a second
+                        ctx.fillStyle = 'rgba(121,158,49,' + (0.35 * (1 - age / 900)).toFixed(3) + ')';
+                        ctx.fillRect(x - 2, b.y - t.fs, w + 4, t.fs * 1.38);
+                    }
+                    ctx.fillStyle = on ? (tok.i < border() ? INK : GREEN) : WRONG;
+                    ctx.fillText(on ? tok.t : S.tkB[j], x, b.y, w);
+                });
+            });
+        }
+
         function draw() {
             const m = metrics();
             const cr = canvas.getBoundingClientRect();
@@ -498,10 +739,13 @@
             const top = layout(TEXT, t, x0, y + baseline, maxW);
             S.box = { x: boxX, y: y, w: boxW, h: boxH, fs: t.fs, lh: t.lh, pad: t.inner };
             panel(boxX, y, boxW, boxH, m);
-            if (run) grown(top.boxes, from, to, t);
+            const patch = S.view === 'patch';
+            if (run && !patch) grown(top.boxes, from, to, t);
             top.boxes.forEach(b => {
                 ctx.font = font;
-                ctx.fillStyle = S.ok[b.i] ? RIGHT : WRONG;   // the sentence keeps its colours throughout
+                // the sentence keeps its colours throughout, in both views: the progress shows below (Doc, 11.11.2026:
+                // "Jetzt macht der oben aus den roten Buchstaben schwarze. Das sieht man unten schon. Das soll oben so bleiben")
+                ctx.fillStyle = S.ok[b.i] ? RIGHT : WRONG;
                 ctx.fillText(b.t, b.x, b.y);
             });
 
@@ -517,19 +761,28 @@
             // in the lower box, above its text: how much of this sentence the net has - learned plus
             // produced, 100 at the end (Doc, 22.09.2026: "pack die % Pille über den unteren Text")
             const have = Math.min(TEXT.length, run ? S.pos + S.frac + knownAhead(S.pos + 1) : border() + knownAhead(border()));
-            const pct = Math.round(100 * have / Math.max(1, TEXT.length)) + ' %';
-            const pf = { font: '700 ' + (m.fs * 0.9) + 'px Orbitron, sans-serif', color: INK, align: 'center', minDigits: 3 };
-            const pw = numW('100 %', pf) + m.fs * 1.6, ph = m.fs * 1.5;
+            const pct = (patch ? openShare().pct : Math.round(100 * have / Math.max(1, TEXT.length))) + ' %';
+            // with its name in front, "Dieser Satz" - the bar under the box is the whole corpus (Doc, 11.11.2026)
+            const pf = { font: '700 ' + (m.fs * 0.9) + 'px Orbitron, sans-serif', color: INK, align: 'right', minDigits: 3 };
+            const pl = T('t_sentence', 'Dieser Satz').toUpperCase(), plf = '700 ' + (m.fs * 0.62) + 'px Orbitron, sans-serif';
+            ctx.font = plf;
+            const plw = ctx.measureText(pl).width;
+            const pnw = numW('100 %', pf), ppad = m.fs * 0.8;
+            const pw = ppad + plw + m.fs * 0.6 + pnw + ppad, ph = m.fs * 1.5;
             const pcy = y + t.top * 0.5;               // the middle of the air above the text
+            const px0 = boxX + boxW / 2 - pw / 2;
             ctx.beginPath();
-            ctx.roundRect(boxX + boxW / 2 - pw / 2, pcy - ph / 2, pw, ph, ph / 2);
+            ctx.roundRect(px0, pcy - ph / 2, pw, ph, ph / 2);
             ctx.fillStyle = 'rgba(185,166,124,.55)';
             ctx.fill();
             ctx.font = pf.font;
             const asc = ctx.measureText('0').actualBoundingBoxAscent;   // the digits' height: their middle on the pill's
-            num(pct, boxX + boxW / 2, pcy + asc / 2, pf);
+            num(pct, px0 + pw - ppad, pcy + asc / 2, pf);
+            ctx.font = plf; ctx.fillStyle = 'rgba(58,65,80,.62)'; ctx.textAlign = 'left';
+            ctx.fillText(pl, px0 + ppad, pcy + asc / 2);
             ctx.textAlign = 'left';
-            if (run) grown(low.boxes, from, to, t);
+            if (patch) { drawPatches(low.boxes, t, font); low.boxes.length = 0; }
+            else if (run) grown(low.boxes, from, to, t);
             low.boxes.forEach(b => {
                 ctx.font = font;
                 let txt = b.t, col = INK;
@@ -551,13 +804,14 @@
             ctx.font = '700 ' + (m.fs * 0.9) + 'px Orbitron, sans-serif';
             ctx.fillStyle = 'rgba(58,65,80,.62)';
             ctx.textAlign = 'left';
-            const lab = T('t_level', 'Vom Korpus gelernt').toUpperCase();
+            const lab = T('t_corpus', 'Ganzer Korpus').toUpperCase();   // the whole corpus - the pill above is this sentence
             ctx.fillText(lab, boxX, by);
             const lw = ctx.measureText(lab).width;
             const nf = '700 ' + (m.fs * 0.9) + 'px Orbitron, sans-serif';
             const epochTxt = T('t_epoch', 'Durchlauf') + ' ' + S.epoch;
             const ew = num(epochTxt, boxX + boxW, by, { font: nf, color: 'rgba(58,65,80,.55)', align: 'right', minDigits: 2 });
-            const valTxt = Math.round(S.level * 100) + ' %';
+            const lvl = shownLevel();
+            const valTxt = Math.round(lvl * 100) + ' %';
             const vx = boxX + boxW - ew - m.fs * 2.2;
             const vw = num(valTxt, vx, by, { font: nf, color: INK, align: 'right', minDigits: 3 });
             ctx.font = nf;
@@ -567,7 +821,7 @@
             if (bx1 > bx0 + m.fs) {
                 ctx.beginPath(); ctx.roundRect(bx0, by - bh * 0.95, bx1 - bx0, bh, bh / 2);
                 ctx.fillStyle = 'rgba(58,65,80,.10)'; ctx.fill();
-                ctx.beginPath(); ctx.roundRect(bx0, by - bh * 0.95, (bx1 - bx0) * S.level, bh, bh / 2);
+                ctx.beginPath(); ctx.roundRect(bx0, by - bh * 0.95, (bx1 - bx0) * lvl, bh, bh / 2);
                 ctx.fillStyle = GREEN; ctx.fill();
             }
         }
@@ -624,7 +878,7 @@
         function spaceAction() {
             if (S.mode !== 'run') startRun();
             else if (S.pos >= TEXT.length) { if (!lastSentence()) nextText(); }
-            else { S.running = !S.running; S.stopAt = -1; if (S.running) S.t0 = performance.now(); playLabel(); }
+            else { S.running = !S.running; S.stopAt = -1; S.ppStop = -1; if (S.running) S.t0 = S.lastT = performance.now(); playLabel(); }
         }
         addEventListener('keydown', e => {
             if (e.key !== ' ' || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -644,7 +898,14 @@
 
         // ------------------------------------------------------------------- the loop ---
         function frame() {
-            if (S.running && S.mode === 'run') settle(performance.now());
+            if (S.running && S.mode === 'run') (S.view === 'patch' ? patchStep : settle)(performance.now());
+            const lv = Math.round(shownLevel() * 100);  // the slider on the left follows the bar
+            if (S.mode === 'run' && lv !== S.lvShown) {
+                S.lvShown = lv;
+                const sl = document.getElementById('wv-level'), lb = document.getElementById('wv-level-l');
+                if (sl) sl.value = lv;
+                if (lb) lb.textContent = lv + ' %';
+            }
             resizeCanvasToContainer();            // the layout may settle long after load
             draw();
             requestAnimationFrame(frame);
@@ -652,6 +913,14 @@
 
         function showStats() {
             const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+            if (S.view === 'patch') {                     // pieces behind the border: how many are right, wherever
+                const o = openShare();
+                set('wv-epoch', S.epoch);
+                set('wv-hit', o.n ? o.pct + ' %' : '–');
+                set('wv-red', (o.n - o.on) + ' / ' + o.n);
+                set('wv-pos', '–');
+                return;
+            }
             const have = Math.min(TEXT.length, (S.mode === 'run' ? Math.min(S.pos, TEXT.length) + knownAhead(S.pos) : border() + knownAhead(border())));   // words the net has
             set('wv-epoch', S.epoch);
             set('wv-hit', TEXT.length ? Math.round(100 * have / TEXT.length) + ' %' : '–');
@@ -678,11 +947,15 @@
                         <button class="cyber-btn" id="wv-play">${T('btn_play', 'Start')}</button>
                         <button class="cyber-btn" id="wv-step">${T('btn_step', 'Ein Wort')}</button>
                     </div>
+                    <div class="wv-btns" role="group" aria-label="${T('l_view', 'Ablauf')}">
+                        <button class="cyber-btn active" id="wv-view-wort" aria-pressed="true">${T('btn_view_wort', 'Wort für Wort')}</button>
+                        <button class="cyber-btn" id="wv-view-patch" aria-pressed="false">${T('btn_view_patch', 'Patches')}</button>
+                    </div>
                     <div class="wv-btns">
                         <button class="cyber-btn" id="wv-train">${T('btn_train', 'Ein Durchlauf')}</button>
                         <button class="cyber-btn" id="wv-reset">${T('btn_reset', 'Von vorn')}</button>
                     </div>
-                    <div class="lab-note">${T('hint', 'Leertaste startet: der Rest hinter der Vorgabe steht als Buchstabensalat da und rastet Wort für Wort ein. Ist der Satz durch, holt die Leertaste den nächsten — mit Lücken dort, wo das Netz noch nichts hat. Noch eine Leertaste, und er läuft, jedes Mal schneller. In den oberen Kasten klicken, um einen eigenen Satz zu schreiben; Enter übernimmt, Esc verwirft.')}</div>
+                    <div class="lab-note">${T('hint', 'Leertaste startet: der Rest hinter der Vorgabe steht als Buchstabensalat da und rastet Wort für Wort ein. „Patches“ zeigt, wie Training wirklich läuft: Das Netz sagt alle Stellen zugleich vorher, und überall im Text werden Stücke richtig und grün, zuerst Satzzeichen und häufige Wörter, zuletzt seltene. Ist der Satz durch, holt die Leertaste den nächsten — mit Lücken dort, wo das Netz noch nichts hat. Noch eine Leertaste, und er läuft, jedes Mal schneller. In den oberen Kasten klicken, um einen eigenen Satz zu schreiben; Enter übernimmt, Esc verwirft.')}</div>
                 </div>`);
 
             CyberUI.createCard('ui-container', T('card_size', 'Lernen'), `
@@ -716,15 +989,20 @@
             const on = (id, ev, fn) => { const e = document.getElementById(id); if (e) e.addEventListener(ev, fn); };
             on('wv-play', 'click', () => {
                 if (S.mode !== 'run' || S.pos >= TEXT.length) { startRun(); return; }   // from the picture, or once more after the end
-                S.running = !S.running; S.stopAt = -1;
-                if (S.running) S.t0 = performance.now();
+                S.running = !S.running; S.stopAt = -1; S.ppStop = -1;
+                if (S.running) S.t0 = S.lastT = performance.now();
                 playLabel();
             });
             on('wv-step', 'click', () => {                 // one word settles, then it waits
                 if (S.mode !== 'run' || S.pos >= TEXT.length) startRun();
-                S.stopAt = S.pos + 1; S.running = true; S.t0 = performance.now();
+                if (S.view === 'patch') {                  // with patches: a step as long as one word would take
+                    S.ppStop = Math.min(1, S.pp + 1 / Math.max(1, TEXT.length - border() - knownAhead(border())));
+                    S.running = true; S.lastT = performance.now();
+                } else { S.stopAt = S.pos + 1; S.running = true; S.t0 = performance.now(); }
                 playLabel();
             });
+            on('wv-view-wort', 'click', () => setView('wort'));
+            on('wv-view-patch', 'click', () => setView('patch'));
             on('wv-train', 'click', train);
             on('wv-reset', 'click', resetAll);
             on('wv-given', 'input', e => {
@@ -780,7 +1058,9 @@
                 fab.id = 'wv-fab'; fab.type = 'button';
                 fab.innerHTML = '<span id="wv-fab-l"></span><span class="wv-fab-key">' + T('key_space', 'oder Leertaste') + '</span>';
                 fab.addEventListener('click', () => { spaceAction(); fab.blur(); });   // blur: Space goes on working
-                document.body.appendChild(fab);
+                (document.getElementById('wv-top') || document.body).appendChild(fab);
+                fabWidth();
+                document.fonts.ready.then(fabWidth);     // Orbitron may come later: measure again with it
                 playLabel();
             }
             // ?vorgabe=60&korpus=0&tempo=280 - the deck sets the sliders, the stored ones stay untouched
@@ -790,6 +1070,7 @@
             if (l !== null) startLevel = l;
             if (sp !== null) startSpeed = sp;
             if (g !== null || l !== null || sp !== null) resetAll();
+            if (q.get('modus') === 'patch') setView('patch');   // &modus=patch for the deck; word by word stays the default
             const n = parseInt(q.get('satz') || '1', 10);
             for (let k = 1; k < n && k < TEXTS.length; k++) {
                 TEXT.forEach(w => SEEN.add(norm(w)));

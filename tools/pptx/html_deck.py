@@ -579,8 +579,18 @@ class HtmlDeck:
                            ensure_ascii=False).replace("</", "<\\/") if self.narration else "")
         summ = json.dumps({str(k): v for k, v in sorted(self.summaries.items())},
                           ensure_ascii=False).replace("</", "<\\/")
+        # the last slide "Üben & Nachlesen", as a stub deck.js fills from HTML/decks/vorspann/verweise.html (Doc,
+        # 11.11.2026: "in den Mathe-Decks überall ... den Verweis auf die Aufgaben ..., die wir im Stoffverteilungsplan
+        # haben ... Und natürlich auch zu den Seiten im Mathebuch jeweils"): in every deck of a plan with a book of its
+        # name (mathe11-*.html <-> svp/mathe/mathe11.html + buch/mathe11/). At the end, so recorded Solita clips
+        # (named by slide index) stay where they are. A deck script can switch it off: deck.verweise = False.
+        prefix = self.name.split("-")[0]
+        slides = list(self.slides)
+        if getattr(self, "verweise", True) and os.path.isdir(os.path.join(OUT_DIR, "..", "buch", prefix)) \
+                and os.path.isfile(os.path.join(OUT_DIR, "..", "svp", "mathe", prefix + ".html")):
+            slides.append('<section class="slide" data-aus="vorspann/verweise.html#1"></section>')
         out = page(_html.escape(self.doc_title, quote=False), _html.escape(self.subtitle, quote=False),
-                   "\n".join(self.slides), narr, summ)
+                   "\n".join(slides), narr, summ)
         voice = getattr(self, "voice", None)
         if voice:
             assert out.count("<body>") == 1, "PAGE has no plain <body> - set_voice() needs updating"
