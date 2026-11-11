@@ -42,6 +42,8 @@
                 hot_stuff: "Mengine mengi",
                 neu: "Mpya",
                 buecher: "Vitabu",
+                /** title of the books view (Doc, 11.11.2026: "Lehrbücher", "textbooks", digit 9, "(fast)" - not every book in all 9 yet) */
+                buecher_title: "Vitabu {n} vya kiada katika (karibu) lugha 9",
                 buecher_tip: "Vitabu: vitabu vyetu vya kiada shirikishi kwa Kijerumani, Kiingereza na Kihispania",
                 school_gy: "Gymnasium",
                 school_gylk: "Gymnasium · Leistungskurs",

@@ -42,6 +42,8 @@
                 hot_stuff: "À la mode",
                 neu: "Nouveau",
                 buecher: "Livres",
+                /** title of the books view (Doc, 11.11.2026: "Lehrbücher", "textbooks", digit 9, "(fast)" - not every book in all 9 yet) */
+                buecher_title: "{n} manuels en (presque) 9 langues",
                 buecher_tip: "Livres : nos manuels interactifs en allemand, anglais et espagnol",
                 school_gy: "Gymnasium",
                 school_gylk: "Gymnasium · Leistungskurs",

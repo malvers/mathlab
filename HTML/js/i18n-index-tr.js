@@ -42,6 +42,8 @@
                 hot_stuff: "Sıcak şeyler",
                 neu: "Yeni",
                 buecher: "Kitaplar",
+                /** title of the books view (Doc, 11.11.2026: "Lehrbücher", "textbooks", digit 9, "(fast)" - not every book in all 9 yet) */
+                buecher_title: "(Neredeyse) 9 dilde {n} ders kitabı",
                 buecher_tip: "Kitaplar: Almanca, İngilizce ve İspanyolca etkileşimli ders kitaplarımız",
                 school_gy: "Gymnasium",
                 school_gylk: "Gymnasium · Leistungskurs",

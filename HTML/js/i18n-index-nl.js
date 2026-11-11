@@ -42,6 +42,8 @@
                 hot_stuff: "Hot stuff",
                 neu: "Nieuw",
                 buecher: "Boeken",
+                /** title of the books view (Doc, 11.11.2026: "Lehrbücher", "textbooks", digit 9, "(fast)" - not every book in all 9 yet) */
+                buecher_title: "{n} leerboeken in (bijna) 9 talen",
                 buecher_tip: "Boeken: onze interactieve leerboeken in het Duits, Engels en Spaans",
                 school_gy: "Gymnasium",
                 school_gylk: "Gymnasium · Leistungskurs",

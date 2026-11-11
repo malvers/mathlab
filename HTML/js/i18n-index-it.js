@@ -42,6 +42,8 @@
                 hot_stuff: "In evidenza",
                 neu: "Novità",
                 buecher: "Libri",
+                /** title of the books view (Doc, 11.11.2026: "Lehrbücher", "textbooks", digit 9, "(fast)" - not every book in all 9 yet) */
+                buecher_title: "{n} libri di testo in (quasi) 9 lingue",
                 buecher_tip: "Libri: i nostri libri di testo interattivi in tedesco, inglese e spagnolo",
                 school_gy: "Gymnasium",
                 school_gylk: "Gymnasium · Leistungskurs",

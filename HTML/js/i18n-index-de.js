@@ -43,6 +43,8 @@
                 hot_stuff: "Hot stuff",
                 neu: "Neu",
                 buecher: "Bücher",
+                /** title of the books view (Doc, 11.11.2026: "Lehrbücher", "textbooks", digit 9, "(fast)" - not every book in all 9 yet) */
+                buecher_title: "{n} Lehrbücher in (fast) 9 Sprachen",
                 buecher_tip: "Bücher: unsere interaktiven Lehrbücher auf Deutsch, Englisch und Spanisch",
                 school_gy: "Gymnasium",
                 school_gylk: "Gymnasium · Leistungskurs",

@@ -42,6 +42,8 @@
                 hot_stuff: "Destaques",
                 neu: "Novo",
                 buecher: "Livros",
+                /** title of the books view (Doc, 11.11.2026: "Lehrbücher", "textbooks", digit 9, "(fast)" - not every book in all 9 yet) */
+                buecher_title: "{n} livros didáticos em (quase) 9 idiomas",
                 buecher_tip: "Livros: nossos livros didáticos interativos em alemão, inglês e espanhol",
                 school_gy: "Gymnasium",
                 school_gylk: "Gymnasium · Leistungskurs",

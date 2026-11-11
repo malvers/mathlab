@@ -2895,8 +2895,8 @@
                 'sonst': 'Sonst noch …',
                 'neu': 'Die neuen Werkzeuge',
                 'touren': CyberI18n.getOr('index.ui.touren', 'Touren'),
-                /* "20 BÜCHER · …" - number of book cards; Vitabu for the Swahili BGY 11 (Doc, 03.11.2026: "Bücher auf Swahili mit dazu") */
-                'buecher': countLabsInCategory('buecher') + ' Bücher\u00a0· Books\u00a0· Libros\u00a0· Libri\u00a0· Livres\u00a0· Vitabu',
+                /* "24 LEHRBÜCHER IN (FAST) 9 SPRACHEN" in the active language, n = number of book cards (Doc, 11.11.2026) */
+                'buecher': CyberI18n.getOr('index.ui.buecher_title', '{n} Lehrbücher in (fast) 9 Sprachen').replace('{n}', countLabsInCategory('buecher')),
                 'fraktale': CyberI18n.get('index.ui.fraktale'),
                 'uni': CyberI18n.get('index.ui.university'),
                 'university': CyberI18n.get('index.ui.university')
@@ -2905,7 +2905,8 @@
             const titleEl = document.getElementById('view-title');
             if (titleEl) {
                 const rawTitle = titles[filter] || titles[categoryToken] || 'LABOR-ANSICHT';
-                titleEl.innerText = rawTitle.toUpperCase();
+                // locale-aware: Turkish i -> İ (DİLDE, not DILDE)
+                titleEl.innerText = rawTitle.toLocaleUpperCase(CyberI18n.current || 'de');
             }
 
             const tools = document.querySelectorAll('#tool-container .card');
