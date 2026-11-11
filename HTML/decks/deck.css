@@ -357,6 +357,15 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .ani-ctl button:hover{color:var(--ink);border-color:rgba(14,36,78,.35)}
 .pic .ani-ctl svg{display:block;width:8px;height:8px;margin:0;fill:currentColor}   /* not the figure's own .pic svg sizing */
 .ov-thumb .ani-ctl{display:none}
+/* a figure that builds up in clicks: its buttons come with its last click, softly (deck.js aniCtl data-mit + stepMarks
+   .mit-da; Doc, 11.11.2026, the perceptron: "erst erscheinen lassen, wenn es dann wirklich losgehen soll") - in the
+   editor they always stand */
+html:not(.deck-edit) .ani-ctl[data-mit]:not(.mit-da){visibility:hidden;opacity:0}
+html:not(.deck-edit) .ani-ctl[data-mit].mit-da{transition:opacity .6s ease}
+/* a patch behind a number in a figure that lights up when its click comes - "this is the number" (an svg rect "step
+   kommt sanft leuchten" with fill-opacity 0, so it shows only while it lights; Doc, 11.11.2026, the perceptron's 3,70:
+   "aufleuchten, leuchten, leuchten", "die müssen unbedingt synchron leuchten", "lieber ... mit Flächen"). deck.js
+   stepMarks plays it (Web Animations, one start time for all patches of the click); in the editor it stays hidden. */
 .ani-ctl.am-ort button{flex:1;justify-content:center}   /* placed by the figure (rect.ani-ort): the two share its width */
 /* Start glows softly while the animation waits at its beginning (deck.js label(); Doc, 04.11.2026: "leicht wabernd") -
    the button itself, its face lighting up warm, no ring around it (Doc, 12.11.2026: "lass den Start-Knopf selbst

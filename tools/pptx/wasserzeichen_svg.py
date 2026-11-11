@@ -644,7 +644,7 @@ def netz_lernt():
                 css(16.5, S.INK, "text-align:right")),
                (W / 2, 347, W, "Das Netz übt sechs Summen: 5 + 2, 3 + 4, 1 + 6, 6 + 1, 2 + 2, 4 + 3. Am Ende sind beide "
                                "Gewichte 1 — es kann addieren.", css(12.5, S.MUTED))]
-    svg = c.svg("Animation: ein Perzeptron mit den Eingaben 5 und 2 lernt addieren; der Fehler läuft rot zurück, die "
+    svg = c.svg("Animation: ein Perceptron mit den Eingaben 5 und 2 lernt addieren; der Fehler läuft rot zurück, die "
                 "Verbindungen werden dicker und dünner, die Ausgabe nähert sich von %s bis 7,00, beide Gewichte "
                 "enden bei 1" % de(5 * snaps[0][0] + 2 * snaps[0][1]))
     # the whole figure centred in the picture box (Doc, 04.11.2026: "die ganze Grafik-Bounding-Box x-zentriert"):

@@ -282,6 +282,33 @@ function stepMarks(root, st){
   // a part that changes from click group k on: data-ab="k" (deck.css .ab-da) - the box in the middle (.vorhang) shrinks
   // to the top right (Doc, 30.10.2026: "auf den nächsten Klick die Box ... verkleinern und nach rechts oben schieben")
   root.querySelectorAll('[data-ab]').forEach(e => e.classList.toggle('ab-da', clickOf(root, +e.dataset.ab) < st));
+  // the buttons of a drawn animation come with the last click of their figure (aniCtl data-mit, Doc 11.11.2026)
+  root.querySelectorAll('.ani-ctl[data-mit]').forEach(e => e.classList.toggle('mit-da', clickOf(root, +e.dataset.mit) < st));
+  leuchten(root);
+}
+// Patches that light up behind a number when their click comes (deck.css .leuchten; Doc, 11.11.2026, the perceptron's
+// 3,70 in the neuron and in the formula: "die müssen unbedingt synchron leuchten", "lieber ... mit Flächen"): only on the
+// newest click, three flashes, then a slow fade to nothing. All patches that start together get one start time, so
+// they flash in the same frame. A patch whose click is taken back (or goes past) stops and is hidden again.
+const LEUCHTEN = [
+  { fillOpacity: 0, offset: 0 }, { fillOpacity: .55, offset: .1 }, { fillOpacity: .15, offset: .22 },
+  { fillOpacity: .55, offset: .34 }, { fillOpacity: .15, offset: .46 }, { fillOpacity: .55, offset: .58 },
+  { fillOpacity: 0, offset: 1 }];
+function leuchten(root) {
+  if (document.documentElement.classList.contains('deck-edit')) return;
+  const neu = [];
+  root.querySelectorAll('.leuchten.step').forEach(e => {
+    const an = e.classList.contains('on') && !e.classList.contains('past');
+    if (!an && e.leuchtet) { e.leuchtet.cancel(); e.leuchtet = null; }
+    if (an && !e.leuchtet) neu.push(e);
+  });
+  if (!neu.length || !document.timeline || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const t0 = document.timeline.currentTime + 350;      // a moment after the click, once the step has faded in
+  neu.forEach(e => {
+    const a = e.animate(LEUCHTEN, { duration: 3200, easing: 'ease-in-out', fill: 'none' });
+    a.startTime = t0;                                   // the same clock for all of them
+    e.leuchtet = a;
+  });
 }
 let gestartet = false;   // the start has read the #7 of a link (fromHash) - only from then on may paint() drop it
 let shownSi = -1;        // the slide paint() last showed - a slide coming up restarts its drawn animations
@@ -1752,6 +1779,16 @@ function aniCtl(svg, i) {
     bar.style.top = ort.getAttribute('y') + 'px';
     bar.style.width = ort.getAttribute('width') + 'px';
   }
+  // a figure that builds up in clicks shows its buttons with its last click, not before (Doc, 11.11.2026, the
+  // perceptron: "die Simulationsknöpfe ... erst erscheinen lassen, wenn es dann wirklich losgehen soll"): data-mit = the
+  // figure's last click group (file numbers), stepMarks sets .mit-da once it is on (deck.css); a figure without click
+  // groups shows them at once. The presenter's copy is marked already when its buttons come: take its state.
+  const pic = svg.closest('.pic') || svg.parentNode;
+  const gs = [...pic.querySelectorAll('.step[data-g]')].map(e => +e.dataset.g).filter(g => !isNaN(g));
+  if (gs.length) {
+    bar.dataset.mit = Math.max(...gs);
+    bar.classList.toggle('mit-da', !!pic.querySelector('.step.on[data-g="' + bar.dataset.mit + '"]'));
+  }
   const [play, stop] = bar.children;
   // an animation that runs once (none of its parts repeats "indefinite") stands at its end, frozen, and offers Start
   // again instead of Pause (Doc, 04.11.2026, the perceptron: "soll enden, wenn der Fehler 0 ist")
@@ -1938,7 +1975,8 @@ gestartet = true;
         } catch (e) { }                               // a lab from elsewhere: nothing to read
       });
       const spoken = NARR && NARR.slides && NARR.slides[String(i)];
-      if (spoken && spoken.length) lines.push('Solita erklärt dazu: ' + spoken.join(' ').replace(/\[[\d.]+s\]/g, ''));   // [0.7s]: her pause, deck_audio.mjs
+      // [0.7s]: her pause, [the]: a word she says English (deck_audio.mjs) - marks for the voice, not words
+      if (spoken && spoken.length) lines.push('Solita erklärt dazu: ' + spoken.join(' ').replace(/\[(?:[\d.]+s|the)\]/g, ''));
     });
     if (ahead.length) {
       lines.push('', 'Wichtig: Die Lösung zu Folie ' + (last + 1) + ' hat die Klasse noch nicht gesehen. '
