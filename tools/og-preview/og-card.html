@@ -156,6 +156,9 @@
         .card.full .brand img { width: 44px; height: 44px; border-radius: 10px; }
         .card.full .brand span { font-size: 15px; color: #cfdcf2; }
 
+        /* ---- bare: a page that is no lab (The Real Salary), its hero alone, no wordmark ---- */
+        .card.full.bare .panel { display: none; }
+
         /* Thin accent edge along the bottom of the whole card. */
         .card::after {
             content: '';
@@ -188,9 +191,10 @@
     </div>
 
     <script>
-        // Called by make-og.mjs with { title, tagline, shot, logo, full } (images as data URIs).
+        // Called by make-og.mjs with { title, tagline, shot, logo, full, bare } (images as data URIs).
         window.ogFill = function (data) {
             document.querySelector('.card').classList.toggle('full', !!data.full);
+            document.querySelector('.card').classList.toggle('bare', !!data.bare);
             document.getElementById('og-title').textContent = data.title || '';
             document.getElementById('og-tagline').textContent = data.tagline || '';
             if (data.shot) document.getElementById('og-shot').src = data.shot;

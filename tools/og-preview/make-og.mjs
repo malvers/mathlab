@@ -88,6 +88,18 @@ const EXTRA = [{
     tagline: '241 Fehler gefunden und korrigiert',
     description: 'Wie KI-Agentinnen alle Lehrbücher, Wochen-Quizze und Arbeitsblätter des Doc Alvers Mathe-Labors ein zweites Mal nachgerechnet und 241 Fehler gefunden haben - mit zehn echten Fehlern zum Selbersuchen.',
     alt: 'Die zweite Prüfung \u2014 Vorschaubild',
+}, {
+    // The Real Salary is no lab: the card is the page's own hero edge to edge (title, name, the open subtitle), no lab
+    // wordmark, and the head keeps the page's own title. The sealed moments never reach the card, the shot is taken
+    // locked (Doc, 11.11.2026: WhatsApp showed only the favicon, "schön, wenn das irgendwie vollflächig ausgefüllt wäre")
+    id: 'the-real-salary',
+    href: 'the-real-salary.html',
+    hero: true,
+    title: 'The Real Salary',
+    pageTitle: 'The Real Salary \u2013 Dr. Michael R. Alvers',
+    siteName: 'Dr. Michael R. Alvers',
+    description: 'Was Schülerinnen und Schüler, Eltern und Kollegen zurückgeben.',
+    alt: 'The Real Salary \u2014 Dr. Michael R. Alvers',
 }];
 
 // The words of the book cards per language; the chapter description is the one tools/buch-en/wrap.py writes into the page.
@@ -270,8 +282,37 @@ async function shootDeck(browser, lab, port) {
     }
 }
 
+// A page's own hero as the whole card (lab.hero): the lock, the spinner and the top bar hidden, the hero alone in the
+// middle, the title on one line, its shine stopped with the gold in the middle - only open text, nothing unsealed.
+const HERO_CSS = `
+  .topbar, #lock, #checking, #prints { display: none !important; }
+  body { min-height: 630px; height: 630px; padding: 0 84px; display: flex; align-items: center; }
+  .wrap { width: 100%; }
+  .hero { display: block; padding: 0 0 18px; }
+  .kicker { font-size: 1.3rem; }
+  h1 { animation: none !important; background-position: 50% 0 !important; font-size: 6.15rem; white-space: nowrap;
+    margin: 10px 0 22px; }
+  .sub { font-size: 2rem; max-width: 1000px; }`;
+
+async function shootHero(browser, lab, port) {
+    const dest = path.join(SHOTS, lab.id + '.png');
+    const ctx = await browser.newContext({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1.5, locale: 'de-DE' });
+    const page = await ctx.newPage();
+    try {
+        await page.goto(`http://127.0.0.1:${port}/${lab.href}?lang=de`, { waitUntil: 'load', timeout: 30000 });
+        await page.addStyleTag({ content: HERO_CSS });
+        await page.evaluate(() => document.fonts.ready);
+        await page.waitForTimeout(1500);
+        await page.screenshot({ path: dest });
+        return dest;
+    } finally {
+        await ctx.close();
+    }
+}
+
 async function shootLab(browser, lab, port) {
     if (lab.deck) return shootDeck(browser, lab, port);
+    if (lab.hero) return shootHero(browser, lab, port);
     const dest = path.join(SHOTS, lab.id + '.png');
     const ctx = await browser.newContext({ viewport: SHOT_VIEWPORT, deviceScaleFactor: 1.5 });
     const page = await ctx.newPage();
@@ -321,7 +362,8 @@ async function renderCard(browser, lab, shotFile) {
             title: forCard(lab.title),
             tagline: forCard(taglineOf(lab)),
             shot: shotFile ? dataUri(shotFile, 'image/png') : null,
-            full: !!lab.deck,                     // the title slide carries its own title: no text panel
+            full: !!(lab.deck || lab.hero),       // the title slide carries its own title: no text panel
+            bare: !!lab.hero,                     // a page that is no lab: not even the wordmark
             // favicon-live.png: in the repo favicon.png is the red local icon (27.10.2026)
             logo: dataUri(path.join(HTML, 'resources', 'favicon-live.png'), 'image/png'),
         });
@@ -356,13 +398,13 @@ const END = '<!-- OG:END -->';
 function metaBlock(lab) {
     const url = `${SITE}/${lab.href}`;
     const img = onR2(lab) ? `${MEDIA}/og/${lab.id}.jpg` : `${SITE}/resources/og/${lab.id}.jpg`;
-    const title = lab.id === 'index' ? 'Doc Alvers Mathe-Labore' : `${lab.title} \u2014 Doc Alvers Mathe-Labore`;
+    const title = lab.pageTitle || (lab.id === 'index' ? 'Doc Alvers Mathe-Labore' : `${lab.title} \u2014 Doc Alvers Mathe-Labore`);
     const desc = shorten(lab.description || taglineOf(lab), 200);
     const L = [
         BEGIN,
         `<meta name="description" content="${esc(desc)}">`,
         `<meta property="og:type" content="website">`,
-        `<meta property="og:site_name" content="Doc Alvers Mathe-Labore">`,
+        `<meta property="og:site_name" content="${esc(lab.siteName || 'Doc Alvers Mathe-Labore')}">`,
         `<meta property="og:locale" content="${(BOOK_WORDS[lab.lang] || BOOK_WORDS.de).locale}">`,
         `<meta property="og:title" content="${esc(title)}">`,
         `<meta property="og:description" content="${esc(desc)}">`,
