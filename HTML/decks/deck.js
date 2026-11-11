@@ -674,6 +674,16 @@ addEventListener('contextmenu', e => {
       addEventListener('storage', function (e) { if (e.key === 'buzzer-code') draw(); });
     }, function () { /* no buzzer here (offline file copy): the box stays empty and hidden */ });
 })();
+/* The survey at the end of a deck (Doc, 11.11.2026: "am Ende jeder Präsentation ... eine Umfrage"): a slide with
+   <div class="vote-box"></div> (vorspann/umfrage.html) gets its QR, counter and result from deck-vote.js - loaded only
+   in a deck that has one. */
+(function () {
+  if (!document.querySelector('.slide .vote-box')) return;
+  const own = [].find.call(document.scripts, function (s) { return /\/deck\.js(\?|$)/.test(s.src); });
+  const s = document.createElement('script');
+  s.src = new URL('deck-vote.js', own ? own.src : location.href).href;
+  document.head.appendChild(s);
+})();
 // the lab bar sits right on top of its lab: each slide places its lab frame itself, so read that frame's top.
 // A note that runs under the bar (a long one, mathe11-nichtlinear) pushes it up above the note instead.
 // A bar Doc placed himself in the deck editor (deck-label.js: it has a left of its own) stays where he put it; the

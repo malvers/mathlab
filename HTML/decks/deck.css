@@ -1205,3 +1205,68 @@ html.laser-on .p-cur .p-fit{cursor:none}
     page-break-after:always;break-after:page}
   .step{opacity:1!important;filter:none!important}
 }
+
+/* --- the survey at the end of a deck (Doc, 11.11.2026: "am Ende jeder Präsentation ... eine Umfrage", the QR on the
+   slide and "was ich dann sehe" beside it). vorspann/umfrage.html holds <div class="vote-box">, deck-vote.js fills it:
+   left the QR on a white field (as .buzzer-qr) with a quiet line under it, right a field just like it with the counter
+   and the buttons. Its
+   class says the state: idle (not started: only "Umfrage starten"), live (counting). The result - the bars 1..10 in
+   vote.html's red-orange-green and the mean - is a big .pop over the slide (.vote-pop, "Ergebnis"). */
+/* the QR as the buzzer slide's (vorspann/buzzer.html), 323.4 px (Doc: "so wie auf Folie 3, so ein Stück eingesetzt"),
+   at its height too (a tick higher was "zu weit oben", Doc 11.11.2026); the right field is its twin (Doc: "um die
+   rechte Seite auch noch eine Box ... So groß wie der QR-Code ... Genauso"), the pair mirrored about the slide's
+   middle: 135.3 + 323.4 + 42.6 + 323.4 = 824.7 */
+.vote-box{position:absolute;left:135.3px;top:135.1px;width:689.4px;height:352px;display:flex;gap:42.6px}
+.vote-left{flex:none;width:323.4px}
+.vote-qr{width:323.4px;height:323.4px;box-sizing:border-box;padding:16px;border-radius:16px;background:#fff;
+  box-shadow:0 6px 28px rgba(14,36,78,.18);display:grid;place-items:center}
+.vote-qr svg{display:block;width:100%;height:100%}
+.vote-qr span{font:700 40px Orbitron,sans-serif;letter-spacing:6px;color:var(--ink)}
+.vote-box.idle .vote-qr,.vote-box.idle .vote-right{background:rgba(255,255,255,.4);border:2px dashed rgba(14,36,78,.25);
+  box-shadow:none}
+.vote-box.idle .vote-qr span{font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+/* small and quiet under the QR (Doc: "noch kleiner und zurückhaltender") - the QR is the way in, this the spare one */
+.vote-link{margin-top:9px;text-align:center;font:400 10.5px 'Deck Punkt',Orbitron,sans-serif;letter-spacing:1.5px;
+  color:var(--muted);opacity:.8}
+.vote-right{position:relative;flex:none;width:323.4px;height:323.4px;box-sizing:border-box;padding:22px 16px;
+  border-radius:16px;background:#fff;box-shadow:0 6px 28px rgba(14,36,78,.18);display:flex;flex-direction:column}
+.vote-count{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.vote-n{font:700 128px/1 Orbitron,sans-serif;color:var(--ink)}
+.vote-n-sub{margin-top:10px;font:600 13px Orbitron,sans-serif;letter-spacing:4px;text-transform:uppercase;color:var(--muted)}
+.vote-n:empty{display:none}
+.vote-n:empty + .vote-n-sub{margin-top:0;letter-spacing:2.5px}
+.vote-btns{display:flex;gap:10px;justify-content:center;margin-top:10px}
+.vote-btns button{font:700 12px Orbitron,sans-serif;letter-spacing:1px;padding:11px 20px;border-radius:999px;cursor:pointer;
+  border:1.5px solid var(--ink);background:var(--ink);color:#fff}
+.vote-btns button.ghost{background:transparent;color:var(--ink);border-color:rgba(14,36,78,.3)}
+.vote-box.live .vote-btns button{width:134px;padding-left:0;padding-right:0}   /* "Ergebnis" and "Neue Runde" alike wide (Doc) */
+.vote-btns button:disabled{opacity:.55;cursor:default}
+.vote-btns .vote-go{font-size:17px;padding:18px 34px;background:var(--orange);border-color:var(--orange);color:var(--ink);
+  box-shadow:0 6px 22px rgba(245,194,66,.45);animation:vote-go 2.6s ease-in-out infinite}
+@keyframes vote-go{50%{box-shadow:0 6px 30px rgba(245,194,66,.85);transform:scale(1.03)}}
+@media (prefers-reduced-motion:reduce){.vote-btns .vote-go{animation:none}}
+.vote-msg{position:absolute;left:0;right:0;top:100%;margin-top:9px;text-align:center;font-size:12px;color:var(--red)}
+.vote-box.idle .vote-count,.vote-box.idle .vote-show,.vote-box.idle .vote-new,.vote-box.live .vote-go{display:none}
+.vote-box.idle .vote-right{justify-content:center}   /* the button in the field's middle */
+.vote-box.idle .vote-btns{margin-top:0}
+/* the result: as big as a .pop gets (848 x 452), over everything */
+.pop.vote-pop{width:848px;height:452px;padding:22px 30px 18px;display:flex;flex-direction:column;overflow:hidden}
+.pop.vote-pop[hidden]{display:none}
+/* the whole box symmetric about its middle (Doc, 11.11.2026: "das ganze Ding ist y-symmetrisch") - the question kept
+   clear of the x on both sides; without votes no number, no dash: "Noch keine Votes" stands on the number's line, and
+   the mean comes in front of it later (Doc: "was heißt denn dieser schwarze Strich da eigentlich?") */
+.vote-pop h4{margin:0 44px;text-align:center;font-size:20px;line-height:1.25}
+.vote-mean{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px;min-height:54px}
+.vote-mean b:empty{display:none}
+.vote-mean b{font:700 54px/1 Orbitron,sans-serif;color:var(--ink)}
+.vote-mean span{font:600 12px 'Deck Punkt',Orbitron,sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.vote-result{flex:1;min-height:0;display:flex;flex-direction:column}
+.vote-bars{flex:1;min-height:0;display:grid;grid-template-columns:repeat(10,1fr);gap:14px;margin-top:10px}
+.vote-col{display:flex;flex-direction:column;min-height:0}
+.vote-track{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;
+  border-bottom:2px solid rgba(14,36,78,.25)}
+.vote-cnt{text-align:center;font:700 17px Orbitron,sans-serif;color:var(--ink);margin-bottom:5px}
+.vote-bar{display:block;border-radius:7px 7px 0 0;transition:height .4s ease}
+.vote-x{margin-top:7px;text-align:center;font:700 15px Orbitron,sans-serif;color:var(--ink)}
+.vote-x em{display:block;font-style:normal;font-size:24px;line-height:1.3}
+.p-frame > .slide.live .vote-btns{pointer-events:auto}   /* the presenter's current slide: its buttons take the pointer */
