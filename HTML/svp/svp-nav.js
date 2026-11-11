@@ -40,11 +40,14 @@
         ['mathe/mathegy12.html', 'MA GY 12', 'b-grey', 'Mathematik Jahrgangsstufe 12, Grundkurs (Gymnasium)'],
         ['mathe/mathegy11lk.html', 'MA GY 11 LK', 'b-grey', 'Mathematik Jahrgangsstufe 11, Leistungskurs (Gymnasium)'],
         ['mathe/mathegy12lk.html', 'MA GY 12 LK', 'b-grey', 'Mathematik Jahrgangsstufe 12, Leistungskurs (Gymnasium)'],
-        ['mathe/blf.html', 'BLF MA', 'b-grey', 'Training BLF Mathematik (Gymnasium)'],
+        /* Trainings (BLF, Abitur, Vergleichsarbeit) carry b-train, not b-grey: in every menu they stand out in the colour of
+           the featured cards on svp/index.html (Doc, 11.11.2026: "entrys andere Farbe") - svp-nav.css / svp-badges.css */
+        ['mathe/blf.html', 'BLF MA', 'b-train', 'Training BLF Mathematik (Gymnasium)'],
         ['mathe/mathe11.html', 'MA 11', 'b-grey', 'Mathematik Klasse 11 (BGY)'],
         ['mathe/mathe12.html', 'MA 12', 'b-grey', 'Mathematik Klasse 12 (BGY)'],
         ['mathe/mathe13.html', 'MA 13', 'b-grey', 'Mathematik Klasse 13 (BGY)'],
-        ['mathe/abitur.html', 'Abi MA', 'b-grey', 'Training Abitur Mathematik (BGY)'],
+        ['mathe/abitur.html', 'Abi MA', 'b-train', 'Training Abitur Mathematik (BGY)'],
+        ['mathe/vergleichsarbeit.html', 'VA MA 11', 'b-train', 'Training Vergleichsarbeit Mathematik Klasse 11 (BGY)'],
         ['physik/phygy10.html', 'PH 10', 'b-grey', 'Physik Klasse 10 (Gymnasium)'],
         /* wr/wr11.html (W/R 11) is parked, not linked - see the note in svp/index.html (27.09.2026) */
         ['informatik/informatik9.html', 'INF 9', 'b-grey', 'Informatik Klasse 9'],
@@ -180,7 +183,7 @@
            (MA 11, FO 12 ...) tragen sie weiter. */
         ['Berufliches Gymnasium', [
             ['Mathematik', ['mathe/mathe11.html', 'mathe/mathe12.html', 'mathe/mathe13.html',
-                            'mathe/abitur.html']],
+                            'mathe/vergleichsarbeit.html', 'mathe/abitur.html']],
             ['Informatik', ['informatik/inf11.html', 'informatik/inf12.html', 'informatik/inf13.html']],
             ['Informatiksysteme', ['informatik/informatik11.html', 'informatik/informatik12.html',
                                    'informatik/informatik13.html']]

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vergleichsarbeit-Training: Trigonometrie und Körper — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Vergleichsarbeit-Training Mathematik BGY Klasse 11: ein rechtwinkliges Dreieck und ein Prisma an der Talsperre Kriebstein, Sinus- und Kosinussatz an der Bastei, ein Turmdach in Görlitz als Pyramide und als Kegel, mit Lösungen und Abbildungen.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+/* bar colour by AFB: I green, II orange, III red */
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--green)}
+.task.afb2::before{background:var(--orange)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+/* formula plus the punctuation that follows it - see the KaTeX pass in the script */
+.nowrap{white-space:nowrap}
+/* ...but only the seam between formula and comma: inside the formula KaTeX may still
+   break after = and + - inherited nowrap pushed long formulas past a 390 px phone
+   (measured 26.09.2026: Teil A 559 px wide) */
+.nowrap .katex{white-space:normal}
+
+/* figures: drawn as inline SVG by tools/aufgaben/svgfig.py, never as a bitmap -
+   sharp on screen and in print, and the coordinates come from the same numbers
+   that verify() checks (Doc, 08.09.2026). */
+figure.fig{margin:14px 0 4px;text-align:center;break-inside:avoid;page-break-inside:avoid}
+figure.fig svg{max-width:100%;height:auto;display:inline-block;vertical-align:top}
+figure.fig figcaption{margin-top:4px;color:var(--muted);font-size:13.5px}
+.sol figure.fig{margin:10px 0 6px}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* per-task solution: button under the task, the solution opens right there
+   (Doc, 07.09.2026). The copy is built by JS from the solutions section, so
+   the sheet keeps exactly one source for every solution text. */
+.solbtn{font-family:Orbitron,system-ui,sans-serif;font-size:11px;letter-spacing:1px;
+  color:var(--green);background:transparent;cursor:pointer;margin-top:14px;
+  border:.75px solid rgba(121,158,49,.5);border-radius:4px;padding:7px 12px}
+.solbtn:hover{border-color:var(--green);background:rgba(121,158,49,.08)}
+.solinline{margin:14px 0 0;background:rgba(121,158,49,.07)}
+.solinline h3{display:none}
+.solinline[hidden]{display:none}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  /* the inline copies stay out of print - the solutions keep their own page */
+  .solbtn,.solinline{display:none!important}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Vergleichsarbeit-Training: Trigonometrie und Körper</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · Vergleichsarbeit Mathematik · Teil B · mit MMS und Formelsammlung · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/vergleichsarbeit.html">Zur Übersicht</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Die Slipanlage an der Talsperre Kriebstein</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>An der Talsperre Kriebstein wird eine Slipanlage gebaut, über die Boote ins Wasser gelassen werden. Die Rampe ist ein gerades dreiseitiges Prisma aus Beton mit einem rechtwinkligen Dreieck als Grundfläche: Sie steigt auf $14{,}0$ m waagerechter Länge um $1{,}8$ m an und ist $4{,}5$ m breit (siehe Abbildung, nicht maßstäblich).</p>
+    <figure class="fig">
+      <svg viewBox="0 0 480 250" width="480" height="250" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schraegbild der Rampe als dreiseitiges Prisma: 14,0 m lang, 1,8 m hoch, 4,5 m breit; die schraege Fahrflaeche s ist gruen"><path d="M 32.62 200.62 L 382.62 88.12 L 422 37.5 L 72 150 Z" fill="#799E31" opacity="0.22"/><path d="M 32.62 200.62 L 382.62 200.62 L 382.62 88.12 Z" fill="#6E7E9F" opacity="0.2"/><path d="M 382.62 200.62 L 422 150 L 422 37.5 L 382.62 88.12 Z" fill="#6E7E9F" opacity="0.1"/><line x1="32.62" y1="200.62" x2="382.62" y2="200.62" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="382.62" y1="200.62" x2="382.62" y2="88.12" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="32.62" y1="200.62" x2="382.62" y2="88.12" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="32.62" y1="200.62" x2="72" y2="150" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="72" y1="150" x2="422" y2="37.5" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="382.62" y1="88.12" x2="422" y2="37.5" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="382.62" y1="200.62" x2="422" y2="150" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="422" y1="150" x2="422" y2="37.5" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="72" y1="150" x2="422" y2="150" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="5 4"/><circle cx="32.62" cy="200.62" r="2.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="25.62" y="215.62" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">A</text><circle cx="382.62" cy="200.62" r="2.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="382.62" y="217.62" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="382.62" cy="88.12" r="2.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="375.62" y="81.12" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">C</text><circle cx="72" cy="150" r="2.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="65" y="143" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">D</text><circle cx="422" cy="150" r="2.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="430" y="155" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">E</text><circle cx="422" cy="37.5" r="2.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="429" y="30.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">F</text><text x="207.62" y="220.62" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">14,0 m</text><text x="374.62" y="116.88" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1,8 m</text><text x="412.31" y="189.31" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4,5 m</text><text x="223.13" y="129.75" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#B02418" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">s</text><path d="M 90.62 200.62 A 58 58 0 0 0 87.84 182.88" fill="none" stroke="#B02418" stroke-width="1.4"/><text x="104.25" y="193.4" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#B02418" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">α</text></svg>
+      <figcaption>Die Rampe als Prisma (nicht maßstäblich, die Höhe ist überhöht gezeichnet).</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Berechnen Sie die Länge $s$ der schrägen Fahrfläche und den Neigungswinkel $\alpha$ der Rampe.</li>
+      <li>Ein Ratgeber empfiehlt für Slipanlagen eine Steigung von höchstens $15\ \%$. Prüfen Sie, ob die Rampe diese Empfehlung einhält.</li>
+      <li>Berechnen Sie das Betonvolumen der Rampe. Ein Fahrmischer bringt höchstens $8\ \mathrm{m}^3$ Beton je Fahrt. Ermitteln Sie die Anzahl der nötigen Fahrten.</li>
+      <li>Die Fahrfläche erhält eine rutschfeste Beschichtung, ein Eimer reicht für $10\ \mathrm{m}^2$. Ermitteln Sie, wie viele Eimer gekauft werden müssen.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Peilung zur Bastei</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Von zwei Punkten $P$ und $Q$ am Elbufer gegenüber der Bastei wird die Aussichtsplattform $B$ angepeilt. $P$ und $Q$ liegen $140$ m auseinander auf einer waagerechten Geraden durch den Punkt $F$, der auf Höhe des Elbufers senkrecht unter $B$ liegt. Von $P$ aus erscheint $B$ unter dem Höhenwinkel $31°$, von $Q$ aus unter $47°$ (Abbildung 1). Auf einer Wanderkarte (Abbildung 2) misst man von der Bastei aus $3{,}2$ km bis zum Lilienstein $L$ und $4{,}9$ km bis zur Festung Königstein $K$; die beiden Richtungen schließen einen Winkel von $28°$ ein.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 470 270" width="470" height="270" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Seitenansicht: von P und Q am Elbufer wird die Plattform B unter 31 Grad und 47 Grad angepeilt; P und Q sind 140 m voneinander entfernt, F liegt senkrecht unter B"><path d="M 394 236 L 398 176 L 391 124 L 397 77.12 L 390 47.12 L 400 35.12 L 424 32.12 L 432 63.12 L 448 105.12 L 454 192 L 466 236 Z" fill="#6E7E9F" stroke="none" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" opacity="0.25"/><rect x="234.67" y="232" width="153.33" height="8" rx="0" fill="#9CC3E6" opacity="0.7"/><line x1="10" y1="236" x2="462" y2="236" stroke="#0E244E" stroke-width="1.4" stroke-linecap="round"/><line x1="65.67" y1="236" x2="400" y2="35.12" stroke="#B02418" stroke-width="1.5" stroke-linecap="round"/><line x1="212.67" y1="236" x2="400" y2="35.12" stroke="#B02418" stroke-width="1.5" stroke-linecap="round"/><line x1="400" y1="35.12" x2="400" y2="236" stroke="#0E244E" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="5 4"/><rect x="391" y="227" width="9" height="9" rx="0" fill="none" stroke="#0E244E" stroke-width="1"/><path d="M 111.67 236 A 46 46 0 0 0 105.1 212.31" fill="none" stroke="#799E31" stroke-width="1.4"/><text x="129.95" y="222.18" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#799E31" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">31°</text><path d="M 246.67 236 A 34 34 0 0 0 235.86 211.13" fill="none" stroke="#799E31" stroke-width="1.4"/><text x="261" y="218.99" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#799E31" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">47°</text><circle cx="65.67" cy="236" r="3.2" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="65.67" y="256" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">P</text><circle cx="212.67" cy="236" r="3.2" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="212.67" y="256" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Q</text><circle cx="400" cy="236" r="3.2" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="410" y="256" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">F</text><circle cx="400" cy="35.12" r="3.2" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="390" y="29.12" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><text x="139.17" y="256" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="middle">140 m</text><text x="408" y="135.56" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">h</text><text x="320.34" y="224" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Elbe</text></svg>
+      <figcaption>Abbildung 1: die Peilung vom Elbufer aus (Seitenansicht).</figcaption>
+    </figure>
+    <figure class="fig">
+      <svg viewBox="0 0 300 290" width="300" height="290" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kartenskizze: von der Bastei B sind es 3,2 km zum Lilienstein L und 4,9 km zur Festung Koenigstein K, die Richtungen schliessen 28 Grad ein"><defs><marker id="f5-ar-6E7E9F" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#6E7E9F"/></marker></defs><path d="M 150 34 L 185.61 176.83 L 95.47 252.7 Z" fill="#F5C242" stroke="none" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" opacity="0.22"/><line x1="150" y1="34" x2="185.61" y2="176.83" stroke="#0E244E" stroke-width="1.6" stroke-linecap="round"/><line x1="150" y1="34" x2="95.47" y2="252.7" stroke="#0E244E" stroke-width="1.6" stroke-linecap="round"/><line x1="185.61" y1="176.83" x2="95.47" y2="252.7" stroke="#B02418" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="6 4"/><path d="M 139.36 76.69 A 44 44 0 0 0 160.64 76.69" fill="none" stroke="#799E31" stroke-width="1.4"/><text x="150" y="101.8" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#799E31" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">28°</text><path d="M 180.77 157.42 A 20 20 0 0 0 170.31 189.71" fill="none" stroke="#B02418" stroke-width="1.4"/><text x="151.36" y="169.73" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#B02418" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">λ</text><circle cx="150" cy="34" r="3.4" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="160" y="32" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#0E244E" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B  Bastei</text><circle cx="185.61" cy="176.83" r="3.4" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="195.61" y="190.83" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#0E244E" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">L  Lilienstein</text><circle cx="95.47" cy="252.7" r="3.4" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="85.47" y="266.7" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#0E244E" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">K  Königstein</text><text x="177.81" y="109.41" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3,2 km</text><text x="112.74" y="147.35" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4,9 km</text><line x1="272" y1="74" x2="272" y2="30" stroke="#6E7E9F" stroke-width="1.3" marker-end="url(#f5-ar-6E7E9F)"/><text x="272" y="90" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="middle">N</text></svg>
+      <figcaption>Abbildung 2: Kartenskizze mit Bastei, Lilienstein und Festung Königstein (nicht maßstäblich).</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Begründen Sie, dass das Dreieck $PQB$ bei $B$ einen Winkel von $16°$ hat, und berechnen Sie die Länge der Strecke $\overline{QB}$.</li>
+      <li>Berechnen Sie, wie hoch die Plattform über dem Elbufer liegt.</li>
+      <li>Berechnen Sie die Entfernung zwischen dem Lilienstein und der Festung Königstein.</li>
+      <li>Berechnen Sie die Größe des Winkels $\lambda$, unter dem man vom Lilienstein aus die Bastei und die Festung Königstein sieht.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Ein neues Turmdach in Görlitz</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Turm in der Görlitzer Altstadt hat einen quadratischen Grundriss mit $8$ m Seitenlänge. Er erhält ein Dach in Form einer geraden quadratischen Pyramide, deren Seitenkanten $9$ m lang sind (siehe Abbildung, nicht maßstäblich). Die Dachflächen werden mit Kupferblech gedeckt.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 430 335" width="430" height="335" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schraegbild des Turmdachs als quadratische Pyramide ABCDS mit Grundkante 8 m und Seitenkante 9 m; rot die Hoehe h, gruen die Hoehe einer Dachflaeche"><path d="M 80 286 L 280 286 L 215 66 Z" fill="#F5C242" opacity="0.32"/><path d="M 280 286 L 350 196 L 215 66 Z" fill="#F5C242" opacity="0.18"/><line x1="80" y1="286" x2="280" y2="286" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="280" y1="286" x2="350" y2="196" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="80" y1="286" x2="215" y2="66" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="280" y1="286" x2="215" y2="66" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="350" y1="196" x2="215" y2="66" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="80" y1="286" x2="150" y2="196" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><line x1="150" y1="196" x2="350" y2="196" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><line x1="150" y1="196" x2="215" y2="66" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><line x1="215" y1="241" x2="215" y2="66" stroke="#B02418" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="180" y1="286" x2="215" y2="66" stroke="#799E31" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="215" y1="241" x2="180" y2="286" stroke="#6E7E9F" stroke-width="1.0" stroke-linecap="round" stroke-dasharray="3 3"/><circle cx="80" cy="286" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="72" y="291" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">A</text><circle cx="280" cy="286" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="288" y="291" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="350" cy="196" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="358" y="201" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">C</text><circle cx="150" cy="196" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="157" y="211" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">D</text><circle cx="215" cy="66" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="215" y="57" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">S</text><circle cx="215" cy="241" r="2.4" fill="#6E7E9F" stroke="#FFFFFF" stroke-width="1.4"/><text x="215" y="258" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">M</text><circle cx="180" cy="286" r="2.4" fill="#799E31" stroke="#FFFFFF" stroke-width="1.4"/><text x="180" y="303" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">E</text><text x="240" y="306" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">8 m</text><text x="251" y="156" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">9 m</text><text x="208" y="136.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#B02418" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">h</text></svg>
+      <figcaption>Das Turmdach als Pyramide. Rot: die Höhe h, grün: die Höhe einer Dachfläche.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Berechnen Sie die Höhe $h$ des Daches.</li>
+      <li>Berechnen Sie die Größe des Neigungswinkels der Dachflächen gegen die Waagerechte und den Inhalt der mit Kupfer gedeckten Fläche.</li>
+      <li>Als Alternative wird ein kegelförmiges Dach mit derselben Höhe vorgeschlagen, dessen Grundkreis durch die vier Ecken des Turms verläuft. Weisen Sie nach, dass seine Mantellinie ebenfalls $9$ m lang ist, und berechnen Sie die Größe des Öffnungswinkels des Kegels.</li>
+      <li>Ein Stadtrat meint: „Ein Kegel ist die sparsamere Form, er braucht weniger Kupfer als die Pyramide.“ Beurteilen Sie diese Aussage.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Die Slipanlage an der Talsperre Kriebstein</h3>
+      <p><b>a)</b> Pythagoras im rechtwinkligen Dreieck: $s = \sqrt{14{,}0^2 + 1{,}8^2} = \sqrt{199{,}24} \approx 14{,}1$ m. Neigungswinkel: $\tan\alpha = \frac{1{,}8}{14{,}0}$, also $\alpha \approx 7{,}3°$.</p>
+      <p><b>b)</b> Die Steigung ist das Verhältnis von Höhe zu waagerechter Länge: $\frac{1{,}8}{14{,}0} \approx 0{,}129$, also $12{,}9\ \%$. Das ist weniger als $15\ \%$, die Rampe hält die Empfehlung ein.</p>
+      <p><b>c)</b> Grundfläche: $G = \frac{1}{2} \cdot 14{,}0 \cdot 1{,}8 = 12{,}6\ \mathrm{m}^2$. Volumen: $V = G \cdot 4{,}5 = 56{,}7\ \mathrm{m}^3$. Fahrten: $\frac{56{,}7}{8} \approx 7{,}1$. Nach sieben Fahrten fehlen noch $0{,}7\ \mathrm{m}^3$, es sind also <b>8 Fahrten</b> nötig.</p>
+      <p><b>d)</b> Die Fahrfläche ist ein Rechteck mit den Seiten $s$ und $4{,}5$ m: $A = s \cdot 4{,}5 \approx 63{,}5\ \mathrm{m}^2$; mit dem gerundeten Wert $s = 14{,}1$ m sind es $63{,}45\ \mathrm{m}^2$. Sechs Eimer reichen in beiden Fällen nur für $60\ \mathrm{m}^2$, also müssen <b>7 Eimer</b> gekauft werden.</p>
+      <p class="why">Bei b) sind $12{,}9\ \%$ <b>kein</b> Winkel von $12{,}9°$. Die Steigung in Prozent ist $\tan\alpha$, der Winkel selbst ist nur $7{,}3°$. Bei c) und d) wird <b>aufgerundet</b>, auch wenn die Nachkommastelle klein ist: $7{,}1$ Fahrten heißen $8$ Fahrten.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Peilung zur Bastei</h3>
+      <p><b>a)</b> Im Dreieck $PQB$ ist der Winkel bei $Q$ der Nebenwinkel von $47°$, also $180° - 47° = 133°$. Winkelsumme: $180° - 31° - 133° = 16°$. Sinussatz: $\overline{QB} = \frac{140 \cdot \sin 31°}{\sin 16°} \approx 261{,}6$ m.</p>
+      <p><b>b)</b> Im rechtwinkligen Dreieck $QFB$ ist die Höhe $h = \overline{FB}$ die Gegenkathete von $47°$: $h = 261{,}6 \cdot \sin 47° \approx 191{,}3$ m. Die Plattform liegt rund $191$ m über dem Elbufer. Wer $\overline{QB}$ auf $262$ m gerundet hat, erhält $191{,}6$ m, also knapp $192$ m; beides ist richtig gerechnet. Zweiter Weg ohne Sinussatz: Mit $x = \overline{FQ}$ gilt $h = x \cdot \tan 47°$ und $h = (x + 140) \cdot \tan 31°$. Gleichsetzen ergibt $x \approx 178{,}4$ m und wieder $h \approx 191{,}3$ m.</p>
+      <p><b>c)</b> Kosinussatz im Dreieck $BLK$: $\overline{LK}^2 = 3{,}2^2 + 4{,}9^2 - 2 \cdot 3{,}2 \cdot 4{,}9 \cdot \cos 28° \approx 6{,}561$, also $\overline{LK} \approx 2{,}56$ km.</p>
+      <p><b>d)</b> Sinussatz: $\sin\lambda = \frac{4{,}9 \cdot \sin 28°}{2{,}561} \approx 0{,}898$. Der Rechner liefert $63{,}9°$. Doch $\lambda$ liegt der <b>längsten</b> Seite $\overline{BK}$ gegenüber und ist deshalb der größte Winkel im Dreieck; mit $63{,}9°$ bliebe für $K$ der größere Winkel $88{,}1°$. Also gilt $\lambda = 180° - 63{,}9° \approx 116{,}1°$. Kontrolle mit dem Kosinussatz: $\cos\lambda = \frac{3{,}2^2 + 2{,}561^2 - 4{,}9^2}{2 \cdot 3{,}2 \cdot 2{,}561} \approx -0{,}440$, also $\lambda \approx 116{,}1°$. Mit dem gerundeten Wert $2{,}56$ km ergibt sich $116{,}0°$.</p>
+      <p class="why">Der Sinussatz liefert zu $\sin\lambda \approx 0{,}898$ <b>zwei</b> Winkel, $63{,}9°$ und $116{,}1°$; der Rechner zeigt nur den spitzen. Liegt der gesuchte Winkel der längsten Seite gegenüber, ist der Kosinussatz der sichere Weg: Ein negativer Kosinus verrät den stumpfen Winkel sofort.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Ein neues Turmdach in Görlitz</h3>
+      <p><b>a)</b> Der Fußpunkt $M$ der Höhe ist der Mittelpunkt des Quadrats. Die halbe Diagonale ist $\frac{8\sqrt{2}}{2} = 4\sqrt{2} \approx 5{,}66$ m. Im rechtwinkligen Dreieck $AMS$: $h = \sqrt{9^2 - (4\sqrt{2})^2} = \sqrt{81 - 32} = \sqrt{49} = 7$ m.</p>
+      <p><b>b)</b> Im Schnitt durch $M$ und die Mitte $E$ einer Grundkante steigt die Dachfläche auf $4$ m waagerechter Strecke um $7$ m: $\tan\varphi = \frac{7}{4}$, also $\varphi \approx 60{,}3°$. Höhe einer Dachfläche (grün): $h_s = \sqrt{7^2 + 4^2} = \sqrt{65} \approx 8{,}06$ m, ebenso aus $\sqrt{9^2 - 4^2}$. Kupferfläche: $4 \cdot \frac{1}{2} \cdot 8 \cdot \sqrt{65} = 16\sqrt{65} \approx 129{,}0\ \mathrm{m}^2$.</p>
+      <p><b>c)</b> Der Grundkreis ist der Umkreis des Quadrats, sein Radius die halbe Diagonale $r = 4\sqrt{2}$ m. Mantellinie: $m = \sqrt{r^2 + h^2} = \sqrt{32 + 49} = 9$ m, genau so lang wie die Seitenkante der Pyramide. Der Öffnungswinkel $\omega$ ist der Winkel an der Spitze des Achsenschnitts: $\tan\frac{\omega}{2} = \frac{4\sqrt{2}}{7} \approx 0{,}808$, also $\frac{\omega}{2} \approx 38{,}94°$ und $\omega \approx 77{,}9°$.</p>
+      <p><b>d)</b> Mantelfläche des Kegels: $M = \pi \cdot r \cdot m = \pi \cdot 4\sqrt{2} \cdot 9 \approx 159{,}9\ \mathrm{m}^2$. Das sind rund $24\ \%$ <b>mehr</b> als die $129{,}0\ \mathrm{m}^2$ der Pyramide; für dieses Dach ist die Aussage falsch. Der Grund: Der Grundkreis muss die Ecken des Turms umschließen und ist mit $\pi \cdot 32 \approx 100{,}5\ \mathrm{m}^2$ viel größer als das Quadrat mit $64\ \mathrm{m}^2$, das Dach steht ringsum über. Ein Kegel über dem Inkreis mit $r = 4$ m und $m = \sqrt{65} \approx 8{,}06$ m bräuchte zwar nur $\pi \cdot 4 \cdot \sqrt{65} \approx 101{,}3\ \mathrm{m}^2$, ließe aber die vier Ecken des Turms offen.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 250 215" width="250" height="215" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Draufsicht: das Turmquadrat mit 8 m Seitenlaenge, sein Umkreis und gestrichelt sein Inkreis"><circle cx="125" cy="100" r="84.85" fill="#F5C242" opacity="0.18"/><circle cx="125" cy="100" r="84.85" fill="none" stroke="#B02418" stroke-width="1.6"/><circle cx="125" cy="100" r="60" fill="none" stroke="#6E7E9F" stroke-width="1.3" stroke-dasharray="5 4"/><rect x="65" y="40" width="120" height="120" rx="0" fill="#6E7E9F" opacity="0.18"/><rect x="65" y="40" width="120" height="120" rx="0" fill="none" stroke="#0E244E" stroke-width="1.6"/><line x1="125" y1="100" x2="185" y2="40" stroke="#B02418" stroke-width="1.4" stroke-linecap="round"/><circle cx="125" cy="100" r="2.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="165" y="72" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#B02418" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">r</text><text x="125" y="178" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">8 m</text><text x="125" y="202.85" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#B02418" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Umkreis</text></svg>
+        <figcaption>Zu c) und d), Draufsicht: Der Kegel steht über dem Umkreis, der gestrichelte Inkreis würde die Ecken des Turms nicht abdecken.</figcaption>
+      </figure>
+      <figure class="fig">
+        <svg viewBox="0 0 270 170" width="270" height="170" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Achsenschnitt des Kegels mit Hoehe 7 m, Mantellinie 9 m und dem Oeffnungswinkel omega"><path d="M 50.15 140 L 219.85 140 L 135 35 Z" fill="#F5C242" stroke="none" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" opacity="0.22"/><path d="M 50.15 140 L 219.85 140 L 135 35 Z" fill="none" stroke="#0E244E" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><line x1="135" y1="140" x2="135" y2="35" stroke="#B02418" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="4 3"/><path d="M 116.14 58.33 A 30 30 0 0 0 153.86 58.33" fill="none" stroke="#799E31" stroke-width="1.4"/><text x="135" y="85.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#799E31" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">ω</text><text x="141" y="116.9" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#B02418" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">7 m</text><text x="189.43" y="81.5" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#2C3C60" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">9 m</text><text x="92.57" y="158" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">r ≈ 5,66 m</text></svg>
+        <figcaption>Zu c): der Achsenschnitt des Kegels mit dem Öffnungswinkel ω.</figcaption>
+      </figure>
+      <p class="why">Bei b) ist der Neigungswinkel der <b>Dachfläche</b> gefragt, gemessen über der Mitte einer Grundkante. Wer stattdessen die Seitenkante nimmt, rechnet $\tan\beta = \frac{7}{4\sqrt{2}}$ und erhält $\beta \approx 51{,}1°$: den Neigungswinkel der Kante, rund neun Grad zu wenig.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      // A formula is an inline-block, so a comma or full stop right after it can wrap
+      // onto the next line all by itself. Keep the two together (Doc, 09.09.2026).
+      const next = parts[i + 1];
+      const tail = next && /^[.,;:!?)\]]/.test(next) ? next[0] : '';
+      if (tail) {
+        parts[i + 1] = next.slice(1);
+        const keep = document.createElement('span');
+        keep.className = 'nowrap';
+        keep.appendChild(span);
+        keep.appendChild(document.createTextNode(tail));
+        frag.appendChild(keep);
+        return;
+      }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// Per task its own solution, right under the task (Doc, 07.09.2026). The block
+// is copied from the solutions section on first click - after KaTeX has run, so
+// the formulas come along rendered. The original stays where it is: the
+// solutions page in print and the big toggle above keep working unchanged.
+document.querySelectorAll('.task .solbtn').forEach((btn, i) => {
+  let box = null;
+  btn.onclick = () => {
+    if (!box) {
+      const src = document.querySelectorAll('#sol .sol')[i];
+      if (!src) return;
+      box = src.cloneNode(true);
+      box.className = 'sol solinline';
+      box.hidden = true;
+      btn.after(box);
+    }
+    box.hidden = !box.hidden;
+    btn.textContent = box.hidden ? 'Lösung anzeigen' : 'Lösung verbergen';
+  };
+});
+</script>
+</body>
+</html>
