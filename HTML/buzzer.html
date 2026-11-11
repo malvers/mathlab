@@ -194,6 +194,36 @@
             color: var(--orange); background: transparent; border: 1px solid rgba(245, 194, 66, 0.5); border-radius: 12px;
         }
         #code:focus { outline: none; border-color: var(--orange); }
+        /* Doc, 11.11.2026: "für den Buzzer idealerweise direkt einen Button, wo man draufklickt und den QR-Code scannen
+           kann" - the way in when the camera app did not open the link: big, on top, typing the code stays below */
+        #scan {
+            width: min(88vw, 380px); min-height: 58px; padding: 0 14px; cursor: pointer; touch-action: manipulation;
+            display: flex; align-items: center; justify-content: center; gap: 10px; white-space: nowrap;
+            font-family: inherit; font-size: clamp(0.85rem, 4vw, 1.1rem); font-weight: 700; letter-spacing: 0.1em;
+            color: var(--text); background: rgba(0, 210, 255, 0.12); border: 1px solid rgba(0, 210, 255, 0.6); border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.18);
+        }
+        #scan img { width: 1.7em; height: 1.7em; flex: none; pointer-events: none; -webkit-user-drag: none; }
+        #scan:active { transform: scale(0.97); }
+        #scan-oder { font-size: 0.75rem; letter-spacing: 0.2em; color: var(--leise); }
+        /* the camera, over everything: the picture, a frame to aim with, one line, and the way back */
+        #scanner {
+            position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 18px; padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+            background: rgba(8, 20, 42, 0.96);
+        }
+        #scan-bild { position: relative; width: min(88vw, 60vh, 440px); aspect-ratio: 1; border-radius: 18px; overflow: hidden;
+            background: #000; box-shadow: 0 0 0 1px rgba(0, 210, 255, 0.4); }
+        #scan-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        #scan-rahmen { position: absolute; inset: 14%; border: 3px solid var(--orange); border-radius: 14px;
+            box-shadow: 0 0 0 100vmax rgba(8, 20, 42, 0.35); pointer-events: none; }
+        #scan-text { font-size: clamp(0.8rem, 3.8vw, 0.95rem); letter-spacing: 0.08em; color: var(--text); min-height: 1.4em; }
+        #scan-text.fehler { color: var(--orange); }
+        #scan-zu {
+            min-width: 160px; min-height: 48px; padding: 0 22px; cursor: pointer;
+            font-family: inherit; font-size: 0.9rem; letter-spacing: 0.1em;
+            color: var(--text); background: transparent; border: 1px solid rgba(234, 240, 247, 0.4); border-radius: 10px;
+        }
         #los {
             min-width: 160px; min-height: 48px; padding: 0 22px; cursor: pointer;
             font-family: inherit; font-size: 0.9rem; letter-spacing: 0.1em;
@@ -221,6 +251,8 @@
 
 <body>
     <div id="code-feld" hidden>
+        <button type="button" id="scan"><img alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f4f7.png"><span>QR-CODE SCANNEN</span></button>
+        <div id="scan-oder">ODER</div>
         <label for="code">CODE VON DER TAFEL</label>
         <input id="code" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Code von der Tafel">
         <button type="button" id="los">WEITER</button>
@@ -249,6 +281,11 @@
         <div id="text-zeile"><span id="text-rest">280</span><button type="button" id="text-los" disabled>SENDEN</button></div>
     </div>
     <div id="hinweis" role="status"></div>
+    <div id="scanner" hidden role="dialog" aria-label="QR-Code scannen">
+        <div id="scan-bild"><video id="scan-video" playsinline muted autoplay></video><div id="scan-rahmen"></div></div>
+        <div id="scan-text" role="status">QR-CODE VON DER TAFEL INS BILD HALTEN</div>
+        <button type="button" id="scan-zu">ABBRECHEN</button>
+    </div>
 
 
     <!-- in a live tour (tours/vorrechnen.html) the taps go to a pretend class (js/buzzer-demo-backend.js), never to
@@ -567,22 +604,142 @@
                     buzz();
                 }
             });
-            // no QR, no code: type it from the board
+            // no QR, no code: scan it or type it from the board
             if (/^\d{4}$/.test(code)) bereit();
             else {
                 $('code-feld').hidden = false;
                 const feld = $('code');
-                const weiter = () => {
-                    const c = feld.value.replace(/\D/g, '');
-                    if (!/^\d{4}$/.test(c)) { sag('Der Code hat vier Ziffern.', true); return; }
+                const nimm = c => {                       // the code is there - typed or scanned
                     code = c;
                     history.replaceState(null, '', '?c=' + c);
                     sag('');
                     bereit();
                 };
+                const weiter = () => {
+                    const c = feld.value.replace(/\D/g, '');
+                    if (!/^\d{4}$/.test(c)) { sag('Der Code hat vier Ziffern.', true); return; }
+                    nimm(c);
+                };
                 $('los').addEventListener('click', weiter);
                 feld.addEventListener('keydown', e => { if (e.key === 'Enter') weiter(); });
-                feld.focus();
+                scanner(nimm);
+                // no keyboard straight away: on a phone it would cover the scan key, the main way in
+                if (!matchMedia('(pointer: coarse)').matches) feld.focus();
+            }
+
+            // ---- the QR scanner (Doc, 11.11.2026: "für den Buzzer idealerweise direkt einen Button, wo man draufklickt
+            // und den QR-Code scannen kann"). The back camera, a look ~6 times a second: the browser's own
+            // BarcodeDetector where it has one (Chrome on Android), else jsQR (MIT, one fixed version, loaded on the
+            // first tap only) - iOS Safari has no BarcodeDetector. A QR of buzzer.html?c=1234 or a bare 1234 goes straight
+            // in, like typing; any other QR says so and the camera keeps looking. No camera, or not allowed: a friendly
+            // line, and typing stays.
+            function scanner(nimm) {
+                const JSQR = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+                const box = $('scanner'), video = $('scan-video'), zeile = $('scan-text');
+                let strom = null, an = false, nativ = null, lib = null, zuletzt = 0, fremdBis = 0;
+                const leinwand = document.createElement('canvas');
+                const lc = leinwand.getContext('2d', { willReadFrequently: true });
+                const codeAus = t => {                     // buzzer.html?c=1234, or 1234 alone
+                    const s = String(t || '').trim();
+                    if (/^\d{4}$/.test(s)) return s;
+                    try { const c = new URL(s).searchParams.get('c'); if (/^\d{4}$/.test(c || '')) return c; } catch (_) { }
+                    const m = s.match(/[?&]c=(\d{4})(?!\d)/);
+                    return m ? m[1] : '';
+                };
+                const sagen = (t, fehler) => { zeile.textContent = t; zeile.classList.toggle('fehler', !!fehler); };
+                function stopp() {
+                    an = false;
+                    if (strom) strom.getTracks().forEach(t => t.stop());
+                    strom = null;
+                    video.srcObject = null;
+                    box.hidden = true;
+                }
+                function ladeLib() {
+                    if (window.jsQR) return Promise.resolve(window.jsQR);
+                    if (!lib) lib = new Promise((ok, no) => {
+                        const sc = document.createElement('script');
+                        sc.src = JSQR; sc.async = true;
+                        sc.onload = () => (window.jsQR ? ok(window.jsQR) : no(new Error('jsQR')));
+                        sc.onerror = () => { lib = null; no(new Error('jsQR')); };
+                        document.head.appendChild(sc);
+                    });
+                    return lib;
+                }
+                async function finde() {                  // the text of a QR in the picture now, or ''
+                    if (!video.videoWidth) return '';
+                    if (nativ) {
+                        const r = await nativ.detect(video);
+                        return r && r[0] ? r[0].rawValue : '';
+                    }
+                    const w = Math.min(640, video.videoWidth), h = Math.round(video.videoHeight * w / video.videoWidth);
+                    leinwand.width = w; leinwand.height = h;
+                    lc.drawImage(video, 0, 0, w, h);
+                    const r = window.jsQR(lc.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: 'dontInvert' });
+                    return r ? r.data : '';
+                }
+                async function schau(t) {
+                    if (!an) return;
+                    if (t - zuletzt > 160) {
+                        zuletzt = t;
+                        let text = '';
+                        try { text = await finde(); } catch (_) { /* one bad frame */ }
+                        if (!an) return;
+                        if (text) {
+                            const c = codeAus(text);
+                            if (c) {
+                                if (navigator.vibrate) navigator.vibrate(60);
+                                stopp();
+                                feld.value = c;
+                                nimm(c);
+                                return;
+                            }
+                            fremdBis = t + 1800;
+                            sagen('DAS IST KEIN BUZZER-CODE', true);
+                        } else if (t > fremdBis) sagen('QR-CODE VON DER TAFEL INS BILD HALTEN');
+                    }
+                    requestAnimationFrame(schau);
+                }
+                const feld = $('code');
+                async function start() {
+                    sag('');
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        sag('Hier gibt es keine Kamera – bitte den Code von der Tafel eintippen.', true);
+                        return;
+                    }
+                    try {
+                        if ('BarcodeDetector' in window && !nativ) {
+                            const f = await BarcodeDetector.getSupportedFormats();
+                            if (f.includes('qr_code')) nativ = new BarcodeDetector({ formats: ['qr_code'] });
+                        }
+                    } catch (_) { nativ = null; }
+                    try {
+                        if (!nativ) await ladeLib();
+                    } catch (_) {
+                        sag('Der Scanner lädt gerade nicht – bitte den Code eintippen.', true);
+                        return;
+                    }
+                    try {
+                        strom = await navigator.mediaDevices.getUserMedia({ audio: false,
+                            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } });
+                    } catch (e) {
+                        const n = e && e.name;
+                        sag(n === 'NotAllowedError' || n === 'SecurityError'
+                            ? 'Die Kamera ist nicht erlaubt – bitte den Code eintippen.'
+                            : n === 'NotFoundError' || n === 'OverconstrainedError'
+                                ? 'Keine Kamera gefunden – bitte den Code eintippen.'
+                                : 'Die Kamera startet nicht – bitte den Code eintippen.', true);
+                        return;
+                    }
+                    video.srcObject = strom;
+                    box.hidden = false;
+                    sagen('QR-CODE VON DER TAFEL INS BILD HALTEN');
+                    try { await video.play(); } catch (_) { /* autoplay with muted + playsinline */ }
+                    an = true;
+                    requestAnimationFrame(schau);
+                }
+                $('scan').addEventListener('click', start);
+                $('scan-zu').addEventListener('click', () => { stopp(); feld.focus(); });
+                document.addEventListener('visibilitychange', () => { if (document.hidden && an) stopp(); });
             }
         })();
     </script>

@@ -338,7 +338,17 @@
             const svg = qr.firstElementChild;
             if (svg) svg.style.cssText = 'width:100%;height:100%;display:block';
         } catch (_) { qr.textContent = link(); qr.style.color = '#0b1a33'; }
-        k.append(titel, qr);
+        // the code under it, just in case (Doc, 11.11.2026: "dass der Code ... drunter steht") - buzzer.html asks for it
+        const zahl = document.createElement('div');
+        zahl.style.cssText = 'display:flex;align-items:baseline;gap:.6em;font-family:Orbitron,sans-serif;color:#eaf0f7';
+        const wort = document.createElement('span');
+        wort.style.cssText = 'font-size:clamp(.7rem,1.6vw,.9rem);letter-spacing:.18em;color:#8a93a3';
+        wort.textContent = 'CODE';
+        const ziffern = document.createElement('span');
+        ziffern.style.cssText = 'font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700;letter-spacing:.3em;text-indent:.3em';
+        ziffern.textContent = code();
+        zahl.append(wort, ziffern);
+        k.append(titel, qr, zahl);
         return k;
     }
     // the QR library comes along only when the card is needed

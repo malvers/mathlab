@@ -745,8 +745,13 @@ addEventListener('contextmenu', e => {
     q.addData(link);
     q.make();
     const qr = q.createSvgTag({ scalable: true, margin: 0 });
+    // and the code under it, just in case (Doc, 11.11.2026: "dass der Code ... drunter steht, just in case") - for a
+    // phone whose camera does not open the link: buzzer.html asks for exactly this. Under the box, which keeps its
+    // place and size (deck.css .buzzer-qr .bq-code)
+    const code = String(Buzzer.code()).replace(/[^0-9]/g, '');
+    const line = '<span class="bq-code"><small>CODE</small> ' + code + '</span>';
     // every box, the overview's copies too
-    document.querySelectorAll('.buzzer-qr').forEach(function (b) { b.innerHTML = qr; });
+    document.querySelectorAll('.buzzer-qr').forEach(function (b) { b.innerHTML = qr + line; });
   }
   (window.ladeSkript ? Promise.resolve() : lade('../js/lade-skript.js'))
     .then(function () { return window.Buzzer ? null : lade('../js/buzzer.js'); })
