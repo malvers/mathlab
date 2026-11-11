@@ -283,7 +283,7 @@
                 if (/zu viele/.test(fehler)) { sag('Gerade drücken sehr viele – gleich nochmal.', true); return; }
                 merke(null);
                 // 409: it was counted already; any other refusal (the question too old, ...): nothing left to answer
-                if (res.ok || res.status === 409) danke('SUPER – DANKE!', 'frage', 'super');
+                if (res.ok || res.status === 409) { zurueckT = Date.now(); danke('SUPER – DANKE!', 'frage', 'super'); }
                 else { zeige('frage'); sag(''); }
             }
 
@@ -441,13 +441,22 @@
             // (the table: half of all "verstanden" came 1.6-5 s after their question). So the red key takes no tap
             // during its first seconds - it simply stays red.
             const OFFEN_SPERRE = 10000;
+            // ... and the same the other way round (Doc, 11.11.2026, FOS25-2: "Wenn die Schülerinnen und Schüler die
+            // nicht verstanden Taste drücken, und zurücknehmen, kommt es sofort zurück"): the taps after a take-back hit
+            // the yellow key again and raised a new question at once (the table: 9 of 12 "verstanden" this morning were
+            // followed by a new question within 4 s). So after a take-back the yellow key, too, rests for its first seconds.
+            const FRAGE_SPERRE = 10000;
+            let zurueckT = 0;
             knopf.addEventListener('click', () => {
                 if (zustand === 'offen') {
                     const o = offeneFrage();
                     if (o && o.t && Date.now() - o.t < OFFEN_SPERRE) return;
                     verstanden();
                 }
-                else if (zustand === 'frage') buzz();           // the green moment takes no tap
+                else if (zustand === 'frage') {             // the green moment takes no tap
+                    if (Date.now() - zurueckT < FRAGE_SPERRE) return;
+                    buzz();
+                }
             });
             // no QR, no code: type it from the board
             if (/^\d{4}$/.test(code)) bereit();
