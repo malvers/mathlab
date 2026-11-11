@@ -193,7 +193,14 @@ function dock(){
   const av = Math.round(Math.min(46, Math.max(26, 24 * s)));
   document.documentElement.style.setProperty('--hudbtn', btn + 'px');
   document.documentElement.style.setProperty('--askav', av + 'px');
-  const cy = r.top + 522 * s;                  // middle of the footer band = middle of the footer text
+  // The buttons keep a finger's size; on a narrow screen (a phone upright: the slide 390 px wide, its footer band ~15 px
+  // high) they no longer fit into the footer band and lay over the slide's last line (Grace, 11.11.2026: ai-wasserzeichen
+  // #23 and #24 at 390 px). There the slide has empty room under it - so the whole dock moves under the slide, the
+  // slide keeps its size. On a beamer, a laptop and a phone across the slide fills the height: nothing changes.
+  const need = Math.max(btn, av), band = 36 * s;    // the footer band, 504-540 of the slide
+  const outside = need > band + 4 && innerHeight - r.bottom >= need + 12;
+  const cy = outside ? r.bottom + 6 + need / 2     // under the slide
+                     : r.top + 522 * s;            // middle of the footer band = middle of the footer text
   let right = Math.max(8, Math.round(innerWidth - (r.right - 16 * s)));
   if (ask) {
     ask.style.right = right + 'px'; ask.style.bottom = 'auto'; ask.style.top = Math.round(cy - av / 2) + 'px';
@@ -213,9 +220,11 @@ function dock(){
   const hudUsed = [].some.call(hud.children, b => !b.hidden && b.getBoundingClientRect().width);
   const gap = 3, top = Math.round(cy - btn / 2) + 'px';
   const nextX = left - (hudUsed ? 8 : 0) - btn;     // screen px
-  deck.style.setProperty('--pnright', Math.max(16, (r.right - (nextB ? nextX - gap : left - 12)) / s) + 'px');
+  // under the slide the page number needs no room for the buttons: back to its place in the footer
+  if (outside) deck.style.removeProperty('--pnright');
+  else deck.style.setProperty('--pnright', Math.max(16, (r.right - (nextB ? nextX - gap : left - 12)) / s) + 'px');
   if (prevB && nextB) {
-    const w = pn ? pn.getBoundingClientRect() : null;
+    const w = pn && !outside ? pn.getBoundingClientRect() : null;   // under the slide: right before the buttons
     const prevX = w && w.width ? w.left - gap - btn : nextX - 4 - btn;
     [[prevB, prevX], [nextB, nextX]].forEach(([b, x]) => {
       b.style.position = 'fixed'; b.style.left = Math.round(x) + 'px'; b.style.top = top;
