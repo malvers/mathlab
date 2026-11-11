@@ -638,6 +638,42 @@ addEventListener('contextmenu', e => {
   if (e.target.closest && e.target.closest('input, textarea, [contenteditable]:not([contenteditable="false"])')) return;
   e.preventDefault();
 });
+/* The buzzer's QR on a slide (Doc, 11.11.2026: "den QR-Code machen für das Buzzer-Tool ... eine Extra-Seite"): any
+   slide of any deck may hold <div class="buzzer-qr"></div> (deck.css), and this fills it with the QR of
+   buzzer.html?c=<code>. The code is this computer's code of the day (Buzzer.code(), js/buzzer.js); the presenter's bar
+   listens to the same one in a deck with such a QR (presBuzzer), and a code typed in there shows up here at once (the
+   storage event - both windows share the code). The class always goes to the live page, so it works from localhost too. */
+(function () {
+  if (!document.querySelector('.slide .buzzer-qr')) return;
+  const own = [].find.call(document.scripts, function (s) { return /\/deck\.js(\?|$)/.test(s.src); });
+  const base = own ? own.src : location.href;
+  function lade(src) {
+    return new Promise(function (ok, no) {
+      const s = document.createElement('script');
+      s.src = new URL(src, base).href; s.onload = ok; s.onerror = no;
+      document.head.appendChild(s);
+    });
+  }
+  let shown = '';
+  function draw() {
+    const link = Buzzer.link();
+    if (link === shown) return;
+    shown = link;
+    const q = qrcode(0, 'L');                        // L: bigger modules in a small field - a beamer shows it clean
+    q.addData(link);
+    q.make();
+    const qr = q.createSvgTag({ scalable: true, margin: 0 });
+    // every box, the overview's copies too
+    document.querySelectorAll('.buzzer-qr').forEach(function (b) { b.innerHTML = qr; });
+  }
+  (window.ladeSkript ? Promise.resolve() : lade('../js/lade-skript.js'))
+    .then(function () { return window.Buzzer ? null : lade('../js/buzzer.js'); })
+    .then(function () { return typeof qrcode !== 'undefined' ? null : lade('../svp/qrcode.min.js'); })
+    .then(function () {
+      draw();
+      addEventListener('storage', function (e) { if (e.key === 'buzzer-code') draw(); });
+    }, function () { /* no buzzer here (offline file copy): the box stays empty and hidden */ });
+})();
 // the lab bar sits right on top of its lab: each slide places its lab frame itself, so read that frame's top.
 // A note that runs under the bar (a long one, mathe11-nichtlinear) pushes it up above the note instead.
 // A bar Doc placed himself in the deck editor (deck-label.js: it has a left of its own) stays where he put it; the
@@ -2787,6 +2823,9 @@ const link = (function () {
       let z = null;
       try { z = await Buzzer.klassenCode(); } catch (e) { /* offline for a moment */ }
       if (code) return;                              // typed in meanwhile
+      // the deck shows its own QR (.buzzer-qr): the class taps this computer's code - the bar takes that one, not the
+      // busiest of the school (Doc, 11.11.2026), counted from the moment the presenter opens
+      if (document.querySelector('.slide .buzzer-qr')) return nimm(Buzzer.code(), z ? z.maxId : 0);
       if (z) nimm(z.code, z.maxId);
       else if (++tries < 360) setTimeout(suche, 20000);   // nothing tapped today yet: ask again (two hours)
     }

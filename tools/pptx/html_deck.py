@@ -259,6 +259,11 @@ class HtmlDeck:
       <p class="kicker">%s</p>
       <h1>%s</h1>
       <p class="sub">%s</p>""" % (markup(kicker), markup(title), markup(sub)))
+        # right after the title the buzzer slide, as a stub deck.js fills from HTML/decks/vorspann/buzzer.html (Doc,
+        # 11.11.2026: "baue bitte diese Folie praktisch in alle Decks ein"). Not in a deck whose Solita clips are
+        # recorded already: they are named by slide index (audio/<deck>/sNN-MM.mp3) and would all be one off.
+        if not os.path.isdir(os.path.join(OUT_DIR, "audio", self.name)):
+            self.slides.append('<section class="slide" data-aus="vorspann/buzzer.html#1"></section>')
 
     def chapter(self, num, title, sub, image=None, credit=None, credit_url=None):
         """Chapter divider. With `image` a picture sits on the right and the text
