@@ -42,6 +42,23 @@ window.svpPlanParts.push(function (P) {
        2nd. Until the appointments are there (they load later, and only for Doc) the plan week decides, as it
        does everywhere else. Run again once the dates are painted. */
     let talkData = null;
+    /* Doc, 12.11.2026 (inf12, Stunde 17-18: "schreib da auch die Kids hin"): behind each talk the names of its
+       speakers, the way they signed up on the Vortraege page. The names are sealed against Doc's public key
+       (svp-crypto.js, table svp_vortrag_namen) - so they show where the page can open them: Doc logged in with
+       his key unlocked. Anywhere else (a classroom PC, a pupil) the line stays as it was, and a talk nobody signed
+       up for shows no name either. "klasse|id" -> ["Name", ...] in slot order. */
+    let talkNames = {};
+    function namesOf(e) {
+        const seen = [];
+        e.ks.forEach(function (k) {
+            (talkNames[k + '|' + e.id] || []).forEach(function (n) { if (seen.indexOf(n) < 0) seen.push(n); });
+        });
+        return seen;
+    }
+    function label(e) {
+        const n = namesOf(e);
+        return e.text + (n.length ? ' (' + n.join(', ') + ')' : '');
+    }
     function clearTalk(ref) {
         delete ref.talk;
         const head = ref.subHeadL;
@@ -60,13 +77,13 @@ window.svpPlanParts.push(function (P) {
                 if (list && list.length) {
                     const cut = Math.ceil(list.length / 2);
                     const mine = svpTermine.slot(P.planRows, ref.i).half ? list.slice(cut) : list.slice(0, cut);
-                    if (mine.length) talk = [['Vortrag', mine.join(' · ')]];
+                    if (mine.length) talk = [['Vortrag', mine.map(label).join(' · ')]];
                 }
             } else {
                 const g = ref.kw != null && talkData.byKw[+ref.kw];
                 if (g) {
                     const labels = Object.keys(g);
-                    const texts = labels.map(function (l) { return g[l].join(' · '); });
+                    const texts = labels.map(function (l) { return g[l].map(label).join(' · '); });
                     /* the same talk in every Lerngruppe: one line without the group. Every one of them must have it -
                        a week with a talk in 9a alone read as both groups' talk (Doc, 02.10.2026, after 9b moved to
                        KW 46: "Big Data und Empfehlungsalgorithmen sind noch da oben") */
@@ -176,16 +193,56 @@ window.svpPlanParts.push(function (P) {
                 if (!iso) return;
                 const w = P.isoWeek(new Date(iso + 'T12:00:00'));   /* the one markCurrentWeek uses */
                 const g = (byKw[w] = byKw[w] || {});
-                (g[k[1]] = g[k[1]] || []).push((pos + 1) + ' · ' + e.title);
+                /* the talk, and where its speakers' names stand (klasse keys and topic id, see loadTalkNames) */
+                const entry = { text: (pos + 1) + ' · ' + e.title, ks: dbKlasse[k[0]], id: e.id };
+                (g[k[1]] = g[k[1]] || []).push(entry);
                 const day = String(iso).replace(/-/g, '');
-                (byDay[day] = byDay[day] || []).push((pos + 1) + ' · ' + e.title);
+                (byDay[day] = byDay[day] || []).push(entry);
                 termine.push({ iso: iso, label: k[1] || '', text: (pos + 1) + ' · ' + e.title });
             });
         });
         talkData = { byKw: byKw, byDay: byDay, nKlassen: klassen.length };
         placeTalks();
+        loadTalkNames(key).catch(function (e) { console.warn('svp talk names:', e); });
         if (P.newsTalks) P.newsTalks(termine);
         markTalksDone(key, themen, dbKlasse).catch(function (e) { console.warn('svp talks done:', e); });
+    }
+
+    /* The speakers' names (see talkNames): only with Doc's session, and only once his key is unlocked - the
+       ciphertext column is not even readable without a session. svp-crypto.js comes from next to svp-plan.js
+       when the page does not have it yet. One query for the whole plan; placeTalks then paints them in. */
+    async function loadTalkNames(plan) {
+        const a = window.svpAuth;
+        if (!a || !a.hasSession || !a.hasSession() || !a.api) return;
+        if (!window.svpCrypto) {
+            const me = document.querySelector('script[src*="svp-plan.js"]');
+            if (!me) return;
+            await new Promise(function (ok, no) {
+                const s = document.createElement('script');
+                s.src = new URL('svp-crypto.js', me.src).href;
+                s.onload = ok;
+                s.onerror = no;
+                document.head.appendChild(s);
+            });
+        }
+        const C = window.svpCrypto;
+        if (!C || !C.available) return;
+        try { await C.ready; } catch (e) { return; }
+        if (!C.hasPrivate()) return;
+        const res = await a.api('svp_vortrag_namen?plan=eq.' + encodeURIComponent(plan) +
+            '&taken=is.true&select=klasse,idx,slot,name_enc&order=idx,slot');
+        if (!res.ok) return;
+        const rows = await res.json();
+        const names = {};
+        for (const r of rows) {
+            if (!r.name_enc) continue;
+            let n = '';
+            try { n = String(await C.open(r.name_enc) || '').trim(); } catch (e) { n = ''; }
+            if (!n) continue;
+            (names[r.klasse + '|' + r.idx] = names[r.klasse + '|' + r.idx] || []).push(n);
+        }
+        talkNames = names;
+        placeTalks();
     }
 
     /* Der Vortraege-Knopf wird gruen, sobald jedes Thema dieser Lerngruppe
