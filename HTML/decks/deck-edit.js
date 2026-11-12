@@ -44,6 +44,12 @@
     // a widget (live-frame) is wider than what it draws: while editing it takes no pointer, so a box or picture under
     // its see-through rim can still be taken (Doc, 29.10.2026: "Ich kann ihn da kaum bewegen ... dass ein Widget da drüber liegt")
     'html.deck-edit .slide .live-frame{pointer-events:none}',
+    // a figure (.pic, 816 x 330, drawn SVG) lies over the whole width of the slide, also over the text lines left of
+    // its drawing: while editing its empty box and its SVG take no pointer, only what stands in it (the figure's words,
+    // pictures) - so a line under it opens again (Doc, 12.11.2026, mathe11-pq-herleitung slide 11: "Kommt zwar das
+    // Edit-Ding, aber wenn ich die Boxen klicke, passiert nichts")
+    'html.deck-edit .slide .pic{pointer-events:none}',
+    'html.deck-edit .slide .pic > :not(svg){pointer-events:auto}',
     /* thin and grey: the frames say where a text is, they are not the thing to look at
        (Doc, 22.09.2026: "alle Linien duenner und gray") - the deck's own muted blue-grey, never black */
     // 1 px out, not 3: sub-points stand 6 px apart and their frames ran into each other (Doc, 29.10.2026: "dass die
