@@ -5,6 +5,8 @@
 window.BUCH = {
     title: 'Prüfungstraining Mathematik · Abitur, BLF und Vergleichsarbeit',
     short: 'Prüfungstraining',
+    // the dedication page at the front of the print edition (js/buch-druck.js), kapitel.py WIDMUNG
+    widmung: 'Für Franziska und Franz',
     description: 'Interaktives Übungsbuch für die Prüfungen in Sachsen: Abitur am Beruflichen Gymnasium, Besondere Leistungsfeststellung in Klasse 10 und Vergleichsarbeit in Klasse 11 am Beruflichen Gymnasium, 35 Kapitel mit 96 Aufgaben im Prüfungsformat, Lösungen, Fallen, Widgets und Selbsttests.',
     chapters: [
         { file: 'abi-ueberblick.html', lb: 'Abitur · Überblick', k: '1', title: 'So ist das Abitur gebaut',

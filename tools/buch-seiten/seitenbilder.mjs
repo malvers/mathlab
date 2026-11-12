@@ -4,10 +4,22 @@
  * Doc, 27.10.2026, on the phone: "Die lädt sehr langsam" - the overview set all 164 pages of Mathe 11 with Paged.js on
  * every opening (20 s on the Mac, ~40 s on a phone). Now the pages are set once, here, and the overview shows pictures.
  *
+ * THE RULE (Doc, 12.11.2026: "Wir sollen nie wieder die ganzen Bücher neu rendern"): set again only what changed.
+ *   - One page changed and nothing moved (a front page, a picture, a line that keeps its length): --seite N.
+ *   - A change that leaves the pages as they are but is part of the fingerprint (a layout file used by other editions only):
+ *     --umstempeln for exactly those books.
+ *   - A whole book only when its pages shift (a new chapter, text that reflows) - --seite refuses then and says so.
+ *   - Never a blanket --alle run: it sets every book whose fingerprint differs, and one central file (js/buch-gruss.js, the
+ *     print CSS) is in all 116 fingerprints, so it means hours for pages that did not change. --alle stays for a single
+ *     book that is not online yet or for a check, and only on Doc's word.
+ *
  *     node tools/buch-seiten/seitenbilder.mjs mathe11 [mathe12 …]     render, upload to R2, read back
- *     node tools/buch-seiten/seitenbilder.mjs --alle                   every book whose pictures are out of date
+ *     node tools/buch-seiten/seitenbilder.mjs --seite 3 mathe11 …      only sheet 3 into the online set (see seiteTauschen)
+ *     node tools/buch-seiten/seitenbilder.mjs --umstempeln mathe11-en …  only the new fingerprint into seiten.json (see umstempeln)
+ *     node tools/buch-seiten/seitenbilder.mjs --alle                   every book whose pictures are out of date (see the rule)
+ *     node tools/buch-seiten/seitenbilder.mjs --alle --pruefen         only the list of books out of date, nothing is set
  *     --basis http://localhost:8765   render another site than https://docalvers.de (a test: the pictures then show that state)
- *     --nur-lokal                     no upload, the files stay in the temp folder
+ *     --nur-lokal                     no upload, the files stay in the temp folder (with --seite: a check, "unverändert" or not)
  *     --parallel N                    set N books at a time (default 3: the M3 has four fast cores, one stays for the Mac)
  *     --letter | --a4                the other page format (druck.html?format=…) into buch/seiten/<buch>-letter|-a4/; a book's
  *                                     own format (kapitel.js format, default US Letter since 07.11.2026) goes into buch/seiten/<buch>/ as always
@@ -53,7 +65,8 @@ const opt = name => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] 
 const BASE = (opt('--basis') || 'https://docalvers.de').replace(/\/$/, '');
 const LIVE = BASE === 'https://docalvers.de', LOCAL = args.includes('--nur-lokal');
 const JOBS = Math.max(1, +opt('--parallel') || 3);
-const named = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--basis' && args[i - 1] !== '--parallel');
+const SEITE = Math.max(0, Math.floor(+opt('--seite') || 0)), UMSTEMPELN = args.includes('--umstempeln');
+const named = args.filter((a, i) => !a.startsWith('--') && !['--basis', '--parallel', '--seite'].includes(args[i - 1]));
 
 // every book with a print edition
 function books() {
@@ -106,31 +119,37 @@ async function online(book) {
     } catch (_) { return null; }
 }
 
+// ---------- the print edition laid out by Paged.js in a tab, and what the sprites need to know about its pages ----------
+// twice the pixels for the figures that druck.html freezes into pictures, so they stay sharp in the PDF;
+// the screenshots for the sprites stay at one pixel per CSS pixel (scale: 'css')
+async function setzen(ctx, book) {
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(BASE + '/buch/' + book + '/druck.html' + (other(book) ? '?format=' + other(book) : ''), { waitUntil: 'load', timeout: 120000 });
+    await page.waitForSelector('body.d-ready', { timeout: 600000 });
+    // the status bar and the LOCAL badge must not land on a sheet
+    await page.addStyleTag({ content: '.d-bar, #local-badge { display: none !important; }' });
+    const meta = await page.evaluate(() => {
+        const pages = [...document.querySelectorAll('.pagedjs_page')];
+        const r = pages[0].getBoundingClientRect();
+        // per page the jump targets of its blocks, in document order: the overview answers "where is the reader"
+        // with the same queries as on the set pages (js/buch-druck.js, zeige)
+        const seiten = pages.map(p => {
+            const zs = [];
+            p.querySelectorAll('[data-ziel]').forEach(e => { if (zs[zs.length - 1] !== e.dataset.ziel) zs.push(e.dataset.ziel); });
+            return zs;
+        });
+        return { w: Math.round(r.width), h: Math.round(r.height), seiten, kurz: (window.BUCH && window.BUCH.short) || '' };
+    });
+    return { page, meta, errors };
+}
+
 // ---------- render: druck.html, every sheet as a screenshot, put together into the sprites in a second tab ----------
 async function render(browser, book, v, out) {
-    // twice the pixels for the figures that druck.html freezes into pictures, so they stay sharp in the PDF;
-    // the screenshots for the sprites stay at one pixel per CSS pixel (scale: 'css')
     const ctx = await browser.newContext({ viewport: { width: 1000, height: 1200 }, deviceScaleFactor: 2 });
     try {
-        const page = await ctx.newPage();
-        const errors = [];
-        page.on('pageerror', e => errors.push(e.message));
-        await page.goto(BASE + '/buch/' + book + '/druck.html' + (other(book) ? '?format=' + other(book) : ''), { waitUntil: 'load', timeout: 120000 });
-        await page.waitForSelector('body.d-ready', { timeout: 600000 });
-        // the status bar and the LOCAL badge must not land on a sheet
-        await page.addStyleTag({ content: '.d-bar, #local-badge { display: none !important; }' });
-        const meta = await page.evaluate(() => {
-            const pages = [...document.querySelectorAll('.pagedjs_page')];
-            const r = pages[0].getBoundingClientRect();
-            // per page the jump targets of its blocks, in document order: the overview answers "where is the reader"
-            // with the same queries as on the set pages (js/buch-druck.js, zeige)
-            const seiten = pages.map(p => {
-                const zs = [];
-                p.querySelectorAll('[data-ziel]').forEach(e => { if (zs[zs.length - 1] !== e.dataset.ziel) zs.push(e.dataset.ziel); });
-                return zs;
-            });
-            return { w: Math.round(r.width), h: Math.round(r.height), seiten, kurz: (window.BUCH && window.BUCH.short) || '' };
-        });
+        const { page, meta, errors } = await setzen(ctx, book);
         const n = meta.seiten.length, sh = Math.round(SW * meta.h / meta.w);
         const scols = Math.ceil(Math.sqrt(n * meta.h / meta.w * 0.75)), srows = Math.ceil(n / scols);   // a sprite a bit wider than tall
 
@@ -266,12 +285,123 @@ async function upload(book, out, json) {
     if (!back || back.v !== json.v) throw new Error('seiten.json ist online noch nicht die neue');
 }
 
+// ---------- --seite N: one sheet into the online set, the rest stays as it is ----------
+// Doc, 12.11.2026, when the acknowledgement filled the empty back of the dedication in every German edition: "wieso dauert
+// das ein paar Stunden? Bis man dann nur eine Seite einfügen … Nicht die ganzen PDFs neu rendern lassen". The book is laid
+// out once as for a full run (Paged.js, about half a minute), but only sheet N is shot and printed. The online set is
+// downloaded and only that page goes in: into the PDF with qpdf, into s.webp and its l-<k>.webp, into seiten.json (its jump
+// targets, the new fingerprint). It refuses when anything else moved - another number of pages, another page size, other
+// jump targets on any other page - because then the whole book has to be set. After the swap pdftotext compares the text
+// of every other page with the old PDF: same number of pages, same order.
+// The returned diff says how far the new sheet is from its picture online: the mean difference per colour channel (0-255)
+// against the large picture. Below GLEICH the page did not change (the WebP of the old picture alone makes ~1): then only
+// the fingerprint goes up, as with --umstempeln. With --nur-lokal nothing goes up at all - a check.
+const GLEICH = 2;
+async function seiteTauschen(browser, book, v, out, N) {
+    const alt = await online(book);
+    if (!alt) throw new Error('nicht online - das Buch muss ganz gesetzt werden');
+    const n0 = alt.seiten.length;
+    if (N > n0) throw new Error('Seite ' + N + ' gibt es nicht (' + n0 + ' Seiten)');
+    const lname = 'l-' + Math.floor((N - 1) / PER) + '.webp';
+    // the online set: the PDF and the two pictures that hold sheet N
+    mkdirSync(path.join(out, 'alt'), { recursive: true });
+    for (const f of [alt.pdf.datei, 's.webp', lname]) {
+        const r = await fetchRetry(MEDIA + KEY(book) + f + '?t=' + Date.now());
+        if (!r.ok) throw new Error('laden ' + f + ': HTTP ' + r.status);
+        writeFileSync(path.join(out, 'alt', f), Buffer.from(await r.arrayBuffer()));
+    }
+    const ctx = await browser.newContext({ viewport: { width: 1000, height: 1200 }, deviceScaleFactor: 2 });
+    try {
+        const { page, meta, errors } = await setzen(ctx, book);
+        const n = meta.seiten.length;
+        if (n !== n0 || meta.w !== alt.w || meta.h !== alt.h) throw new Error(n + ' statt ' + n0 + ' Seiten oder ein anderes Format - das Buch muss ganz gesetzt werden');
+        const moved = meta.seiten.map((z, i) => (i !== N - 1 && JSON.stringify(z) !== JSON.stringify(alt.seiten[i]) ? i + 1 : 0)).filter(Boolean);
+        if (moved.length) throw new Error('auch Seite ' + moved.slice(0, 5).join(', ') + (moved.length > 5 ? ' …' : '') + ' hat sich verschoben - das Buch muss ganz gesetzt werden');
+        const png = (await page.locator('.pagedjs_page').nth(N - 1).screenshot({ type: 'png', animations: 'disabled', scale: 'css' })).toString('base64');
+
+        // the pictures, in a second tab as in render: the sheet at its place in l-<k>, and in two halvings into s.webp
+        const comp = await ctx.newPage();
+        const b64 = f => readFileSync(path.join(out, 'alt', f)).toString('base64');
+        const res = await comp.evaluate(async ([png, sB, lB, i, W, H, s, PER, LC]) => {
+            const bmp = async (b, type) => createImageBitmap(await (await fetch('data:' + type + ';base64,' + b)).blob());
+            const img = await bmp(png, 'image/png'), Sold = await bmp(sB, 'image/webp'), Lold = await bmp(lB, 'image/webp');
+            const j = i % PER, x = (j % LC) * W, y = Math.floor(j / LC) * H;
+            const L = new OffscreenCanvas(Lold.width, Lold.height), lx = L.getContext('2d');
+            lx.drawImage(Lold, 0, 0);
+            const T = new OffscreenCanvas(W, H), tx = T.getContext('2d');
+            tx.fillStyle = '#fff'; tx.fillRect(0, 0, W, H); tx.drawImage(img, 0, 0, W, H);
+            const a = lx.getImageData(x, y, W, H).data, b = tx.getImageData(0, 0, W, H).data;
+            let d = 0;
+            for (let q = 0; q < a.length; q += 4) d += Math.abs(a[q] - b[q]) + Math.abs(a[q + 1] - b[q + 1]) + Math.abs(a[q + 2] - b[q + 2]);
+            lx.fillStyle = '#fff'; lx.fillRect(x, y, W, H); lx.drawImage(img, x, y, W, H);
+            const S = new OffscreenCanvas(Sold.width, Sold.height), sx = S.getContext('2d');
+            sx.drawImage(Sold, 0, 0);
+            sx.imageSmoothingQuality = 'high';
+            const half = new OffscreenCanvas(Math.round(W / 2), Math.round(H / 2)), hx = half.getContext('2d');
+            hx.imageSmoothingQuality = 'high';
+            hx.fillStyle = '#fff'; hx.fillRect(0, 0, half.width, half.height); hx.drawImage(img, 0, 0, half.width, half.height);
+            const sxp = (i % s.cols) * s.w, syp = Math.floor(i / s.cols) * s.h;
+            sx.fillStyle = '#fff'; sx.fillRect(sxp, syp, s.w, s.h); sx.drawImage(half, sxp, syp, s.w, s.h);
+            const enc = async c => {
+                const u = new Uint8Array(await (await c.convertToBlob({ type: 'image/webp', quality: 0.8 })).arrayBuffer());
+                let t = ''; for (let p = 0; p < u.length; p += 0x8000) t += String.fromCharCode.apply(null, u.subarray(p, p + 0x8000));
+                return btoa(t);
+            };
+            return { diff: d / (W * H * 3), l: await enc(L), s: await enc(S) };
+        }, [png, b64('s.webp'), b64(lname), N - 1, meta.w, meta.h, alt.s, PER, LC]);
+
+        // the PDF: sheet N alone from the same pages, then qpdf puts it in place of the old one
+        await page.evaluate(() => document.documentElement.classList.remove('d-screen'));   // what "beforeprint" does (js/buch-druck.js)
+        const one = path.join(out, 'seite.pdf'), oldPdf = path.join(out, 'alt', alt.pdf.datei), newPdf = path.join(out, alt.pdf.datei);
+        await page.pdf({ path: one, preferCSSPageSize: true, printBackground: true, pageRanges: String(N) });
+        if (execFileSync('qpdf', ['--show-npages', one], { encoding: 'utf8' }).trim() !== '1') throw new Error('PDF: Seite ' + N + ' allein ist nicht eine Seite');
+        const parts = [];
+        if (N > 1) parts.push(oldPdf, '1-' + (N - 1));
+        parts.push(one, '1');
+        if (N < n) parts.push(oldPdf, (N + 1) + '-z');
+        execFileSync('qpdf', [oldPdf, '--pages', ...parts, '--', newPdf]);
+        const texts = f => execFileSync('pdftotext', ['-layout', f, '-'], { encoding: 'utf8', maxBuffer: 1 << 28 }).split('\f');
+        const ta = texts(oldPdf), tb = texts(newPdf);
+        if (ta.length !== tb.length || ta.length - 1 !== n) throw new Error('PDF: ' + (tb.length - 1) + ' Seiten, vorher ' + (ta.length - 1) + ', gesetzt ' + n);
+        const off = ta.findIndex((t, i) => i !== N - 1 && t !== tb[i]);
+        if (off >= 0) throw new Error('PDF: Seite ' + (off + 1) + ' ist nicht mehr dieselbe');
+
+        writeFileSync(path.join(out, lname), Buffer.from(res.l, 'base64'));
+        writeFileSync(path.join(out, 's.webp'), Buffer.from(res.s, 'base64'));
+        const json = { ...alt, v, erstellt: new Date().toISOString(), pdf: { ...alt.pdf, bytes: statSync(newPdf).size }, seiten: meta.seiten };
+        writeFileSync(path.join(out, 'seiten.json'), JSON.stringify(json));
+        if (errors.length) console.log('  ' + book + ': Fehler auf der Seite: ' + errors.slice(0, 3).join(' | '));
+        return { json, diff: res.diff, text: tb[N - 1].replace(/\s+/g, ' ').trim().slice(0, 60) };
+    } finally { await ctx.close(); }
+}
+
+// ---------- --umstempeln: the live fingerprint into seiten.json, nothing else ----------
+// For a change that is in a book's fingerprint but provably leaves its pages as they are (12.11.2026: js/buch-gruss.js is
+// in all 116 fingerprints, the acknowledgement goes into the German editions only). Only for books named one by one, never
+// with --alle: the proof that the pages stayed is the caller's - e.g. --seite N --nur-lokal on two of them, "unverändert".
+async function umstempeln(book, v, out) {
+    const alt = await online(book);
+    if (!alt) throw new Error('nicht online - das Buch muss ganz gesetzt werden');
+    if (alt.v === v) return 'schon aktuell';
+    if (LOCAL) return 'würde umgestempelt: ' + alt.v + ' → ' + v;
+    mkdirSync(out, { recursive: true });
+    writeFileSync(path.join(out, 'seiten.json'), JSON.stringify({ ...alt, v, umgestempelt: new Date().toISOString() }));
+    await put(path.join(out, 'seiten.json'), KEY(book) + 'seiten.json', 'application/json', 'public, max-age=60');
+    const back = await online(book);
+    if (!back || back.v !== v) throw new Error('seiten.json ist online noch nicht die neue');
+    return 'umgestempelt: ' + alt.v + ' → ' + v;
+}
+
 // ---------- which books ----------
 let todo = named.length ? named : null;
 if (!todo && !args.includes('--alle')) {
-    console.error('node tools/buch-seiten/seitenbilder.mjs <buch> [<buch> …] | --alle   [--basis URL] [--nur-lokal] [--letter | --a4]');
+    console.error('node tools/buch-seiten/seitenbilder.mjs <buch> [<buch> …] | --alle   [--seite N | --umstempeln] [--basis URL] [--nur-lokal] [--letter | --a4]');
     process.exit(1);
 }
+// --seite and --umstempeln work on books named one by one (the rule in the head of this file)
+if ((SEITE || UMSTEMPELN) && (!named.length || args.includes('--alle'))) { console.error('--seite und --umstempeln nur mit einzeln genannten Büchern, nie mit --alle'); process.exit(1); }
+if (SEITE && UMSTEMPELN) { console.error('--seite oder --umstempeln, nicht beides'); process.exit(1); }
+if (args.includes('--seite') && !SEITE) { console.error('--seite braucht eine Seitenzahl ab 1 (Seite 1 = der Einband)'); process.exit(1); }
 if (LIVE) for (let k = 0; deploying(); k++) {
     if (k === 40) { console.error('Der Pages-Lauf läuft seit 10 Minuten - später noch einmal.'); process.exit(1); }
     if (k === 0) console.log('Pages-Lauf läuft noch, ich warte …');
@@ -288,12 +418,25 @@ if (todo) {
         try { if (!j || j.v !== await fingerprint(b)) todo.push(b); } catch (e) { console.log(b + ': ' + e.message + ' (nicht online?)'); }
     }
     console.log(todo.length ? 'veraltet: ' + todo.join(', ') : 'Alle ' + all.length + ' Bücher sind aktuell.');
+    if (args.includes('--pruefen')) process.exit(todo.length ? 1 : 0);   // --alle --pruefen: only this list, nothing is set
 }
 
 if (!LOCAL && todo.length) try { r2(); } catch (e) { console.error(e.message); process.exit(1); }   // before hours of setting, not after
 
-const browser = await chromium.launch({ headless: true, args: ['--mute-audio'] });
 let failed = 0;
+// a fresh folder per run for the one-page swap: only what it writes goes up (upload takes every .webp in it)
+const outOf = book => SEITE ? path.join(os.tmpdir(), 'seitenbilder-seite', book + (other(book) ? '-' + other(book) : '') + '-' + Date.now())
+    : path.join(os.tmpdir(), 'seitenbilder', book + (other(book) ? '-' + other(book) : ''));
+if (UMSTEMPELN) {
+    // no browser, no pictures: one seiten.json after the other
+    for (const book of todo) {
+        try { console.log(book + ': ' + await umstempeln(book, await fingerprint(book), outOf(book) + '-stempel')); }
+        catch (e) { failed++; console.error(book + ': ' + e.message); }
+    }
+    process.exit(failed ? 1 : 0);
+}
+
+const browser = await chromium.launch({ headless: true, args: ['--mute-audio'] });
 const queue = todo.slice();
 try {
     // several books at a time, each in its own tab: setting a book keeps about one core busy (measured 02.11.2026:
@@ -303,8 +446,19 @@ try {
         // the fingerprint before the pages: a deploy during the run leaves the old one, and the next --alle comes back
         let v;
         try { v = await fingerprint(book); } catch (e) { failed++; console.error(book + ': ' + e.message); continue; }
-        const out = path.join(os.tmpdir(), 'seitenbilder', book + (other(book) ? '-' + other(book) : ''));
+        const out = outOf(book);
         mkdirSync(out, { recursive: true });
+        if (SEITE) {
+            try {
+                const r = await seiteTauschen(browser, book, v, out, SEITE);
+                const s = Math.round((Date.now() - t0) / 1000), was = 'Unterschied ' + r.diff.toFixed(2) + ', „' + r.text + '“';
+                if (r.diff < GLEICH) console.log(book + ': Seite ' + SEITE + ' unverändert (' + was + '), ' + s + ' s'
+                    + (LOCAL ? '' : ' - ' + await umstempeln(book, v, out + '-stempel')));
+                else if (LOCAL) console.log(book + ': Seite ' + SEITE + ' neu (' + was + '), ' + s + ' s  → ' + out);
+                else { await upload(book, out, r.json); console.log(book + ': Seite ' + SEITE + ' getauscht (' + was + '), online in ' + Math.round((Date.now() - t0) / 1000) + ' s'); }
+            } catch (e) { failed++; console.error(book + ': ' + e.message); }
+            continue;
+        }
         try {
             console.log(book + ': setzen …');
             const json = await render(browser, book, v, out);

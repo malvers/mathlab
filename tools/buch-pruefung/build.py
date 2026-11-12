@@ -315,7 +315,7 @@ def overview(c, where):
     return frame(c["k"], c["title"], c["lb"], body, where)
 
 
-def kapitel_js(book):
+def kapitel_js(book, widmung=""):
     rows = []
     for c in book:
         rows.append("        { file: %s, lb: %s, k: %s, title: %s,\n          sub: %s, when: %s, ustd: 0 }"
@@ -324,7 +324,9 @@ def kapitel_js(book):
             " * tools/buch-pruefung/build.py.\n"
             " * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.\n"
             " */\nwindow.BUCH = {\n    title: 'Prüfungstraining Mathematik · Abitur, BLF und Vergleichsarbeit',\n    short: 'Prüfungstraining',\n"
-            "    description: 'Interaktives Übungsbuch für die Prüfungen in Sachsen: Abitur am Beruflichen Gymnasium, Besondere "
+            + ("    // the dedication page at the front of the print edition (js/buch-druck.js), kapitel.py WIDMUNG\n"
+               "    widmung: %s,\n" % js(widmung) if widmung else "")
+            + "    description: 'Interaktives Übungsbuch für die Prüfungen in Sachsen: Abitur am Beruflichen Gymnasium, Besondere "
             "Leistungsfeststellung in Klasse 10 und Vergleichsarbeit in Klasse 11 am Beruflichen Gymnasium, %d Kapitel mit %d Aufgaben "
             "im Prüfungsformat, Lösungen, Fallen, Widgets und Selbsttests.',\n"
             "    chapters: [\n%s\n    ]\n};\n" % (len(book), sum(1 for c in book if "sheet" in c) * 3, ",\n".join(rows)))
@@ -352,7 +354,7 @@ def main():
                 mods.append(m)
         if not only or c["file"] in only:
             open(os.path.join(OUT, c["file"] + ".html"), "w", encoding="utf-8").write(page)
-    open(os.path.join(OUT, "kapitel.js"), "w", encoding="utf-8").write(kapitel_js(kapitel.BUCH))
+    open(os.path.join(OUT, "kapitel.js"), "w", encoding="utf-8").write(kapitel_js(kapitel.BUCH, getattr(kapitel, "WIDMUNG", "")))
     for name in ("index.html", "druck.html"):
         tpl = open(os.path.join(HERE, name + ".tpl"), encoding="utf-8").read()
         n_tasks = sum(len(got[c["sheet"]].tasks) for c in kapitel.BUCH if "sheet" in c)

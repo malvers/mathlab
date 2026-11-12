@@ -13,6 +13,9 @@ LK = "Nur LK"
 K10 = "Klasse 10"
 K11 = "BGY Klasse 11"
 
+# the dedication page of the print edition (Doc, 12.11.2026: "die Widmung ist bitte für Franziska und Franz. Also weiblich zuerst.")
+WIDMUNG = "Für Franziska und Franz"
+
 
 def Q(text, ans, py, sol, ph="Ergebnis", tol=None):
     return dict(text=text, ans=ans, py=py, sol=sol, ph=ph, tol=tol)
