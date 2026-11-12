@@ -63,8 +63,9 @@
                 ],
                 sig: 'Dr. Michael R. Alvers, im November 2026',
                 // under the signature, Solita with her name as she signs (Doc, 12.11.2026: "von Solita unter die DS ein Bild
-                // machen ... Solita J. Neural, Executive ..."); the print-sharp portrait, not the 200 px avatar
-                bild: { src: 'resources/team/team_02.png', name: 'Solita J. Neural', rolle: 'Executive Assistant to Doc Alvers' },
+                // machen ... Solita J. Neural, Executive ..."; then "macht Solita rechts und to Dr. Michael R. Alvers"); the
+                // print-sharp portrait, not the 200 px avatar
+                bild: { src: 'resources/team/team_02.png', name: 'Solita J. Neural', rolle: 'Executive Assistant to Dr. Michael R. Alvers' },
             },
         },
         en: {
