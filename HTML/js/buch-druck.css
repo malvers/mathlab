@@ -182,9 +182,15 @@ body.b-print .katex-display { margin: 0.6em 0; }
 .d-luecke-notiz svg { display: block; }
 .d-luecke-notiz line { stroke: #c9d3e2; stroke-width: 0.12; }
 .d-buecher-h { margin: 0 0 4mm; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 9pt; letter-spacing: 1.4px; color: #0e244e; }
-.d-buecher { display: grid; grid-template-columns: repeat(var(--cols, 7), 1fr); gap: 3mm 0; justify-items: center; perspective: 900px; }
-.d-buecher img { height: var(--h); width: auto; border-radius: 2px 4px 4px 2px; transform: rotateY(-24deg); transform-origin: left center;
+.d-buecher { display: grid; grid-template-columns: repeat(var(--cols, 7), 1fr); gap: 3mm 0; justify-items: center; }
+/* On paper and in the PDF the covers lean in 2D: Chrome cannot put a 3D turn into a PDF and printed each cover as a
+   raster of about 47 x 84 px (one pixel per CSS pixel) instead of its 690 x 977 px JPEG - blocky as soon as one zooms in
+   (Doc, 12.11.2026: "Das sieht ja grauenhaft aus"). A 2D slant keeps the JPEG. On the screen the 3D turn stays
+   (html.d-screen - @media print does not work under Paged.js, see above). */
+.d-buecher img { height: var(--h); width: auto; border-radius: 2px 4px 4px 2px; transform: skewY(-6deg) scaleX(0.9); transform-origin: left center;
     box-shadow: 4px 5px 9px rgba(14, 36, 78, 0.35); }
+html.d-screen .d-buecher { perspective: 900px; }
+html.d-screen .d-buecher img { transform: rotateY(-24deg); }
 .d-buecher img.d-dieses { outline: 2px solid rgb(245, 194, 66); outline-offset: 2px; }
 body.b-print .b-check-score { display: none; }
 body.b-print .b-answer { margin: 6pt 0 2pt; padding-top: 14pt; border-bottom: 1px solid #b8c3d4; width: 60%; font-size: 9pt; color: #6d8199; }

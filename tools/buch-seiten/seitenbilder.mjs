@@ -15,6 +15,7 @@
  *
  *     node tools/buch-seiten/seitenbilder.mjs mathe11 [mathe12 …]     render, upload to R2, read back
  *     node tools/buch-seiten/seitenbilder.mjs --seite 3 mathe11 …      only sheet 3 into the online set (see seiteTauschen)
+ *     node tools/buch-seiten/seitenbilder.mjs --seite wand mathe11 …   only the sheet with the cover wall, found per book
  *     node tools/buch-seiten/seitenbilder.mjs --umstempeln mathe11-en …  only the new fingerprint into seiten.json (see umstempeln)
  *     node tools/buch-seiten/seitenbilder.mjs --alle                   every book whose pictures are out of date (see the rule)
  *     node tools/buch-seiten/seitenbilder.mjs --alle --pruefen         only the list of books out of date, nothing is set
@@ -65,7 +66,9 @@ const opt = name => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] 
 const BASE = (opt('--basis') || 'https://docalvers.de').replace(/\/$/, '');
 const LIVE = BASE === 'https://docalvers.de', LOCAL = args.includes('--nur-lokal');
 const JOBS = Math.max(1, +opt('--parallel') || 3);
-const SEITE = Math.max(0, Math.floor(+opt('--seite') || 0)), UMSTEMPELN = args.includes('--umstempeln');
+// --seite wand: the sheet with the cover wall "Alle 24 Lehrbücher" (js/buch-druck.js gapBooks), found per book after the layout
+const WAND = opt('--seite') === 'wand';
+const SEITE = WAND ? -1 : Math.max(0, Math.floor(+opt('--seite') || 0)), UMSTEMPELN = args.includes('--umstempeln');
 const named = args.filter((a, i) => !a.startsWith('--') && !['--basis', '--parallel', '--seite'].includes(args[i - 1]));
 
 // every book with a print edition
@@ -304,17 +307,26 @@ async function seiteTauschen(browser, book, v, out, N) {
     if (!alt) throw new Error('nicht online - das Buch muss ganz gesetzt werden');
     const n0 = alt.seiten.length;
     if (N > n0) throw new Error('Seite ' + N + ' gibt es nicht (' + n0 + ' Seiten)');
-    const lname = 'l-' + Math.floor((N - 1) / PER) + '.webp';
     // the online set: the PDF and the two pictures that hold sheet N
     mkdirSync(path.join(out, 'alt'), { recursive: true });
-    for (const f of [alt.pdf.datei, 's.webp', lname]) {
+    const laden = async f => {
         const r = await fetchRetry(MEDIA + KEY(book) + f + '?t=' + Date.now());
         if (!r.ok) throw new Error('laden ' + f + ': HTTP ' + r.status);
         writeFileSync(path.join(out, 'alt', f), Buffer.from(await r.arrayBuffer()));
-    }
+    };
+    for (const f of [alt.pdf.datei, 's.webp']) await laden(f);
     const ctx = await browser.newContext({ viewport: { width: 1000, height: 1200 }, deviceScaleFactor: 2 });
     try {
         const { page, meta, errors } = await setzen(ctx, book);
+        if (N === -1) {                                // --seite wand: the sheet that holds the cover wall
+            const w = await page.evaluate(() => [...document.querySelectorAll('.pagedjs_page')]
+                .map((p, i) => (p.querySelector('.d-luecke-buecher') ? i + 1 : 0)).filter(Boolean));
+            if (!w.length) return { keine: true };
+            if (w.length > 1) throw new Error('mehrere Bücherwände (Seite ' + w.join(', ') + ') - einzeln mit --seite N');
+            N = w[0];
+        }
+        const lname = 'l-' + Math.floor((N - 1) / PER) + '.webp';
+        await laden(lname);
         const n = meta.seiten.length;
         if (n !== n0 || meta.w !== alt.w || meta.h !== alt.h) throw new Error(n + ' statt ' + n0 + ' Seiten oder ein anderes Format - das Buch muss ganz gesetzt werden');
         const moved = meta.seiten.map((z, i) => (i !== N - 1 && JSON.stringify(z) !== JSON.stringify(alt.seiten[i]) ? i + 1 : 0)).filter(Boolean);
@@ -371,13 +383,21 @@ async function seiteTauschen(browser, book, v, out, N) {
         if (ta.length !== tb.length || ta.length - 1 !== n) throw new Error('PDF: ' + (tb.length - 1) + ' Seiten, vorher ' + (ta.length - 1) + ', gesetzt ' + n);
         const off = ta.findIndex((t, i) => i !== N - 1 && t !== tb[i]);
         if (off >= 0) throw new Error('PDF: Seite ' + (off + 1) + ' ist nicht mehr dieselbe');
+        // a change only on paper (12.11.2026, the cover wall: 3D on the screen, 2D in the PDF) leaves the screenshot as it
+        // was - the sheet in the PDF counts as changed by its text or by the pictures in it (their sizes in pixels)
+        const bilder = (f, k) => JSON.stringify(JSON.parse(execFileSync('qpdf', ['--json', '--json-key=pages', f], { encoding: 'utf8', maxBuffer: 1 << 28 }))
+            .pages[k].images.map(im => im.width + 'x' + im.height).sort());
+        const pdf = ta[N - 1] !== tb[N - 1] || bilder(oldPdf, N - 1) !== bilder(one, 0);
 
-        writeFileSync(path.join(out, lname), Buffer.from(res.l, 'base64'));
-        writeFileSync(path.join(out, 's.webp'), Buffer.from(res.s, 'base64'));
+        // the pictures go up only when the screenshot changed: re-encoding an unchanged sprite would only lose quality
+        if (res.big) {
+            writeFileSync(path.join(out, lname), Buffer.from(res.l, 'base64'));
+            writeFileSync(path.join(out, 's.webp'), Buffer.from(res.s, 'base64'));
+        }
         const json = { ...alt, v, erstellt: new Date().toISOString(), pdf: { ...alt.pdf, bytes: statSync(newPdf).size }, seiten: meta.seiten };
         writeFileSync(path.join(out, 'seiten.json'), JSON.stringify(json));
         if (errors.length) console.log('  ' + book + ': Fehler auf der Seite: ' + errors.slice(0, 3).join(' | '));
-        return { json, diff: res.diff, big: res.big, text: tb[N - 1].replace(/\s+/g, ' ').trim().slice(0, 60) };
+        return { json, N, pdf, diff: res.diff, big: res.big, text: tb[N - 1].replace(/\s+/g, ' ').trim().slice(0, 60) };
     } finally { await ctx.close(); }
 }
 
@@ -457,11 +477,13 @@ try {
         if (SEITE) {
             try {
                 const r = await seiteTauschen(browser, book, v, out, SEITE);
-                const s = Math.round((Date.now() - t0) / 1000), was = r.big + ' Pixel anders, im Mittel ' + r.diff.toFixed(2) + ', „' + r.text + '“';
-                if (!r.big) console.log(book + ': Seite ' + SEITE + ' unverändert (' + was + '), ' + s + ' s'
+                const s = Math.round((Date.now() - t0) / 1000);
+                if (r.keine) { console.log(book + ': keine Bücherwand, ' + s + ' s' + (LOCAL ? '' : ' - ' + await umstempeln(book, v, out + '-stempel'))); continue; }
+                const was = r.big + ' Pixel anders, im Mittel ' + r.diff.toFixed(2) + (r.big ? '' : r.pdf ? ', nur im PDF anders' : '') + ', „' + r.text + '“';
+                if (!r.big && !r.pdf) console.log(book + ': Seite ' + r.N + ' unverändert (' + was + '), ' + s + ' s'
                     + (LOCAL ? '' : ' - ' + await umstempeln(book, v, out + '-stempel')));
-                else if (LOCAL) console.log(book + ': Seite ' + SEITE + ' neu (' + was + '), ' + s + ' s  → ' + out);
-                else { await upload(book, out, r.json); console.log(book + ': Seite ' + SEITE + ' getauscht (' + was + '), online in ' + Math.round((Date.now() - t0) / 1000) + ' s'); }
+                else if (LOCAL) console.log(book + ': Seite ' + r.N + ' neu (' + was + '), ' + s + ' s  → ' + out);
+                else { await upload(book, out, r.json); console.log(book + ': Seite ' + r.N + ' getauscht (' + was + '), online in ' + Math.round((Date.now() - t0) / 1000) + ' s'); }
             } catch (e) { failed++; console.error(book + ': ' + e.message); }
             continue;
         }
