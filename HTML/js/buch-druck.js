@@ -781,9 +781,9 @@
             'Tutti i ' + n + ' libri di testo, gratis online', 'Les ' + n + ' manuels, gratuits en ligne') + ' · docalvers.de</p><div class="d-buecher"></div>';
         box.lastChild.style.setProperty('--h', ch + 'px');
         box.lastChild.style.setProperty('--cols', cols);
-        // a book not yet translated shows its German cover in the other editions
+        // a book not yet translated shows its German cover in the other editions - data-ersatz, taken by bildFertig() below
         box.lastChild.innerHTML = BUECHER.map(b => '<img src="../../resources/og/buch-' + b + lang + '-cover.jpg" alt=""' + (b === Buch.book ? ' class="d-dieses"' : '') +
-            (lang ? ' onerror="this.onerror=null;this.src=\'../../resources/og/buch-' + b + '-cover.jpg\'"' : '') + '>').join('');
+            (lang ? ' data-ersatz="../../resources/og/buch-' + b + '-cover.jpg"' : '') + '>').join('');
     }
     async function fillGaps() {
         await Buch.fotosReady;
@@ -914,8 +914,20 @@
         frag.appendChild(book);
         await window.PagedPolyfill.preview(frag, undefined, document.getElementById('d-pages'));
         await fillGaps();
-        // pictures added after the setting have to be there before anyone prints (tools/kdp/kdp.mjs waits for d-ready)
-        await Promise.all(Array.from(document.querySelectorAll('.d-luecke img, .d-gequetscht img')).map(i => i.complete ? null : new Promise(r => { i.onload = i.onerror = r; })));
+        // pictures added after the setting have to be there before anyone prints (tools/kdp/kdp.mjs waits for d-ready).
+        // A missing translated cover falls back to the German one first (12.11.2026: the old wait set i.onerror and so
+        // replaced the inline fallback - when the 404 came late, the training book's cover was simply missing in the wall)
+        const bildFertig = i => new Promise(r => {
+            const check = () => {
+                if (!i.complete) return;                                   // still loading
+                if (!i.naturalWidth && i.dataset.ersatz && !i.dataset.ersetzt) { i.dataset.ersetzt = '1'; i.src = i.dataset.ersatz; return; }
+                r();                                                       // there, or finally missing
+            };
+            i.addEventListener('load', check);
+            i.addEventListener('error', check);
+            check();
+        });
+        await Promise.all(Array.from(document.querySelectorAll('.d-luecke img, .d-gequetscht img')).map(bildFertig));
         const pages = document.querySelectorAll('.pagedjs_page').length;
         const dauer = Math.round((performance.now() - t0) / 1000);
         say(tr(pages + ' Seiten fertig in ' + dauer + ' s. Drucken: Strg/Cmd + P → „Als PDF speichern“.',
