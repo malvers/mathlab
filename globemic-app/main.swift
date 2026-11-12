@@ -29,6 +29,8 @@ enum Timing {
     static let finish = 4.0     // the longest wait for the last words of a local dictation
     static let paste = 0.40     // the clipboard goes back once the app has pasted
     static let ask = 0.50       // the longest an app may take to say where its cursor is
+    static let wake = 0.10      // how often an app that was just woken is asked again for its cursor
+    static let wakeFor = 1.50   // how long it is asked; after that the text is pasted at the end
     static let notice = 1.20    // how long the HUD shows "nothing heard" and the like
 }
 
@@ -155,6 +157,29 @@ enum Clipboard {
 
 enum Focus {
     private static let textRoles: Set<String> = ["AXTextField", "AXTextArea", "AXComboBox", "AXSearchField"]
+    /// How the note of takesText starts when the app gave no focused element at all.
+    static let unreadable = "focus unreadable"
+
+    /// Some apps build their accessibility tree only once a screen reader announces itself. The
+    /// new Teams draws its whole window in a web view that runs as a child process, and until then
+    /// it names no focused element at all, so the words only came at the end (Doc, 11.11.2026:
+    /// "im Teams sehe ich die Wörter nicht kommen"). The flag goes to the app and its direct child
+    /// processes; the caller takes it back with sleep() once it has asked, the tree stays built.
+    static func wake(_ pid: pid_t) -> [pid_t] {
+        var kids = [pid_t](repeating: 0, count: 64)
+        let count = proc_listchildpids(pid, &kids, Int32(MemoryLayout<pid_t>.size * kids.count))
+        let pids = [pid] + kids.prefix(Int(max(0, min(count, Int32(kids.count)))))
+        for p in pids { flag(p, true) }
+        return pids
+    }
+
+    static func sleep(_ pids: [pid_t]) { for p in pids { flag(p, false) } }
+
+    private static func flag(_ pid: pid_t, _ on: Bool) {
+        let app = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(app, Float(Timing.ask))
+        AXUIElementSetAttributeValue(app, "AXEnhancedUserInterface" as CFString, on ? kCFBooleanTrue : kCFBooleanFalse)
+    }
 
     /// True only when the cursor of the app sits in something that takes text. Typed letters
     /// anywhere else are shortcuts (in Gmail "e" archives, "#" deletes). Electron apps like
@@ -167,7 +192,7 @@ enum Focus {
         var value: CFTypeRef?
         let asked = AXUIElementCopyAttributeValue(app, kAXFocusedUIElementAttribute as CFString, &value)
         guard asked == .success, let focused = value, CFGetTypeID(focused) == AXUIElementGetTypeID() else {
-            return (false, "focus unreadable \(asked.rawValue)")
+            return (false, "\(unreadable) \(asked.rawValue)")
         }
         let element = focused as! AXUIElement
         var role: CFTypeRef?
@@ -626,6 +651,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var target: pid_t = 0       // the app the text goes to
     private var strayed = false         // another app came to the front during this hold
     private var typesLive = false       // the cursor is in a text field, so guesses go in right away
+    private var lastText = ""           // the newest guess, typed at once when typing live starts late
+    private var wakeTimer: Timer?       // asks a woken app again for its cursor (Focus.wake)
     private var sends = false           // a messenger: Return goes out on release
 
     private var enabled: Bool {
@@ -806,6 +833,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         target = frontApp
         strayed = false
         typesLive = false
+        lastText = ""
+        wakeTimer?.invalidate()
         sends = sendsOnRelease.contains(NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "")
         typist.reset()
         guard live.start({ [weak self] text in self?.liveText(text) }) else {
@@ -826,11 +855,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.hud.level(live.level())
         }
         log(typesLive ? "local: talking, typing live (\(kind))" : "local: talking, pasting at the end (\(kind))")
+        if !takes && kind.hasPrefix(Focus.unreadable) { wakeFocus() }
+    }
+
+    /// An app that named no focused element at all (the new Teams) is woken for screen readers and
+    /// asked again for a moment while Doc speaks. Once its cursor shows up in a text field, the
+    /// words said so far go in at once and the rest live; if not, the text is pasted at the end.
+    private func wakeFocus() {
+        let woken = Focus.wake(target)
+        let start = Date()
+        wakeTimer = Timer.scheduledTimer(withTimeInterval: Timing.wake, repeats: true) { [weak self] timer in
+            guard let self = self else { timer.invalidate(); Focus.sleep(woken); return }
+            let waited = Date().timeIntervalSince(start)
+            guard self.phase == .talking, !self.strayed, waited < Timing.wakeFor else {
+                timer.invalidate()
+                Focus.sleep(woken)
+                log(String(format: "local: woke the app, cursor still unreadable after %.1f s", waited))
+                return
+            }
+            let (takes, kind) = Focus.takesText(self.target)
+            if !takes && kind.hasPrefix(Focus.unreadable) { return }
+            timer.invalidate()
+            Focus.sleep(woken)
+            self.typesLive = takes
+            log(String(format: takes ? "local: woke the app, typing live after %.1f s (%@)"
+                                     : "local: woke the app after %.1f s, no text field (%@)", waited, kind))
+            if takes { self.liveText(self.lastText) }
+        }
     }
 
     /// Every new guess goes into the field right away, but only while its app stays in front:
     /// once another one came up, the rest of this hold types nothing.
     private func liveText(_ text: String) {
+        lastText = text
         if frontApp != target { strayed = true }
         if typesLive && !strayed { typist.show(Spoken.apply(text).text) }
     }
