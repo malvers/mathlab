@@ -208,6 +208,9 @@
      the grade of A + B comes from svp/leistungstest.html once Teil B is entered
      there, so no pupil sees a grade that is not the final one. */
   const PART_B = Number(CFG.partB) > 0 ? Number(CFG.partB) : 0;
+  /* QUIZ.noGrades: a quiz without grades, e.g. for colleagues (Doc, 12.11.2026: "nimm HIER Noten -> Fux raus") - points
+     and percent only, no Note after submitting, no Notenspiegel in the dashboard; Mission Control reads it too */
+  const NO_GRADES = CFG.noGrades === true;
 
   function gradeFor(pct) {
     for (let i = 0; i < GRADE_SCALE.length; i++) {
@@ -454,7 +457,11 @@
     const resEl = document.getElementById('result');
     resEl.style.display = 'block';
     const pctOwn = Math.round(score / QUESTIONS.length * 100);
-    if (PART_B) {
+    if (NO_GRADES) {
+      document.getElementById('score').innerHTML =
+        score + ' / ' + QUESTIONS.length + ' <span style="font-size:0.6em">· <span style="color:' + barColor(pctOwn) + '">' +
+        pctOwn + ' %</span></span>';
+    } else if (PART_B) {
       document.getElementById('score').innerHTML =
         score + ' / ' + QUESTIONS.length + ' <span style="font-size:0.6em">· Punkte in Teil A</span>' +
         '<div style="font-size:0.45em; margin-top:8px">Die Note gibt es zusammen mit Teil B.</div>';
@@ -878,6 +885,7 @@
   function renderGradeMirror(subs) {
     const el = document.getElementById('dashgrades');
     if (!el) return;
+    if (NO_GRADES) { el.closest('.card').style.display = 'none'; return; }
     if (PART_B) {
       el.textContent = 'Die Noten gibt es erst zusammen mit Teil B (Papier) – deshalb hier kein Notenspiegel.';
       return;

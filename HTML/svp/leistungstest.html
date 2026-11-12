@@ -280,6 +280,8 @@
         .lt-tab td.grade.good { color: var(--phi); }
         .lt-tab td.grade.low { color: var(--lt-red); }
         .lt-tab td.grade.none { color: var(--muted); }
+        /* a test without grades (QUIZ.noGrades, the staff-meeting quiz): no Note column, no "Noten -> FuxNoten" */
+        body.lt-nograde .lt-tab th.grade, body.lt-nograde .lt-tab td.grade, body.lt-nograde #ltFux, body.lt-nograde #ltFuxBox { display: none !important; }
         /* --- Mission Control: live state of the running test -------------- */
         .lt-mc { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 12px; }
         .lt-mc[hidden] { display: none; }
@@ -1185,7 +1187,7 @@
 
                 /* "Nachschreiben" right after Status, so Teil B (inserted before the last head cell) still
                    lands in front of Note */
-                let html = '<tr><th>Klarname</th><th>Code</th><th>Status</th><th>Nachschreiben</th><th>Ergebnis</th><th>Note</th></tr>';
+                let html = '<tr><th>Klarname</th><th>Code</th><th>Status</th><th>Nachschreiben</th><th>Ergebnis</th><th class="grade">Note</th></tr>';
                 entries.forEach(function (e) {
                     html += '<tr data-code="' + esc(e.code) + '"><td>' + (e.name ? esc(shownName(e)) : LOCKED) +
                         '</td><td class="code">' + codeHtml(e.code) +
@@ -1266,7 +1268,10 @@
                                     questions: q.questions || [], partB: Number(q.partB) || 0,
                                     gradeScale: f.contentWindow.quizGradeScale || q.gradeScale || [],
                                     gradeUnit: f.contentWindow.quizGradeUnit || '',
-                                    gradeRule: f.contentWindow.quizGradeRule || '' })));
+                                    gradeRule: f.contentWindow.quizGradeRule || '',
+                                    /* QUIZ.noGrades: a test without grades, e.g. the staff-meeting quiz (Doc, 12.11.2026:
+                                       "nimm HIER Noten -> Fux raus") - no grade on tile, list, detail, no FuxNoten */
+                                    noGrades: q.noGrades === true })));
                             } catch (e) { no(e); }
                             f.remove();
                         };
@@ -1288,6 +1293,7 @@
                 if (!url || !entries.length || !window.svpAuth) return;
                 const codes = entries.map(function (e) { return e.code; });
                 quizMeta(url).then(function (meta) {
+                    document.body.classList.toggle('lt-nograde', !!meta.noGrades);
                     const pool = poolOf(meta, url);
                     codes.forEach(function (code) {
                         const key = pool + '|' + code;
@@ -1331,6 +1337,7 @@
                 return st ? st[1] : '';
             }
             function gradeOf(meta, res, code) {
+                if (meta.noGrades) return '';
                 if (meta.partB) {
                     /* a Klassenarbeit with Teil B: graded only once B is in */
                     const s = sumAB(meta, res, code);
@@ -1351,6 +1358,7 @@
                Both go through the functions of the final grade (gradeOf, gradeAB) with this test's own scale from
                the test page (meta.gradeScale / gradeUnit) - never a second scale. null before the first answer. */
             function liveHint(meta, row, correct, code) {
+                if (meta && meta.noGrades) return null;
                 if (!meta || !row || !(row.total > 0) || !(row.answered > 0) || typeof correct !== 'number') return null;
                 const c = Math.max(0, Math.min(correct, row.answered)), rate = c / row.answered;
                 if (!meta.partB) {
@@ -1521,7 +1529,7 @@
                 if (!res) return who + ' — noch keine Abgabe';
                 if (!meta.partB) {
                     return who + ' — ' + res.score + '/' + res.total +
-                        ' (' + Math.round(res.score / res.total * 100) + ' %) · ' + gradeText(meta, gradeOf(meta, res));
+                        ' (' + Math.round(res.score / res.total * 100) + ' %)' + (meta.noGrades ? '' : ' · ' + gradeText(meta, gradeOf(meta, res)));
                 }
                 const s = sumAB(meta, res, code);
                 return who + ' — A ' + res.score + '/' + res.total + (s
@@ -3090,6 +3098,10 @@
             function restore() {
                 gen++;
                 const myGen = gen;
+                /* a test without grades (QUIZ.noGrades) hides the Note column and "Noten -> FuxNoten" from the start */
+                const tu = testUrl();
+                if (tu) quizMeta(tu).then(function (m) { if (testUrl() === tu) document.body.classList.toggle('lt-nograde', !!m.noGrades); })
+                    .catch(function () { /* the page did not load: the switch stays as it was */ });
                 const all = load();
                 const key = groupKey();
                 const rec = key && all[key];
