@@ -178,6 +178,8 @@
             CONFIG.viewportOnlyZoom || _manualDesiredScale == null
                 ? autoBaseline
                 : Math.min(_manualDesiredScale, fit);
+        // narrow screen: the chrome is a drawer over the lab, as large as the width allows (see installDrawer)
+        if (isDrawerMode()) s = getDrawerScale();
         s = Math.min(SAFETY_MAX, Math.max(SAFETY_MIN, s));
         document.documentElement.style.setProperty('--cyber-left-scale', String(s));
         window.dispatchEvent(
@@ -198,6 +200,149 @@
             _resizeRaf = null;
             publishResolvedScale();
         });
+    }
+
+    /**
+     * Narrow screens - a phone upright, or held across (width ≤ 700 px or height ≤ 480 px): the lab takes the whole
+     * width and the left chrome (mini-rail + side panel) becomes a drawer behind one ☰ button top left, at a readable
+     * size (Doc, 12.11.2026: "auch den zweiten Punkt kann sie gerne so machen"). Until then the chrome shrank with the
+     * window: at 390 px to a fifth of its size, 88 px wide, its buttons 11 px. Laptop and beamer stay as they were; a lab
+     * on a deck slide (IN_DECK) never gets the drawer. The layout switch itself is CSS (@media below), so a lab's own
+     * resize handler already measures the new stage; JS adds the button, the open state and the drawer's scale.
+     */
+    var NARROW_MQ = '(max-width: 700px), (max-height: 480px)';
+    var DRAWER_GAP = 56; // px of the lab left visible right of the open drawer - a tap there closes it
+    var _narrowMql = null;
+
+    function isDrawerMode() {
+        return !!_narrowMql && _narrowMql.matches && document.documentElement.classList.contains('cyber-drawer');
+    }
+
+    /** Drawer scale: rail + panel fill the width up to DRAWER_GAP, never wider than the desktop cap. */
+    function getDrawerScale() {
+        var vw = document.documentElement.clientWidth || window.innerWidth || 390; // layout viewport: pinch zoom leaves it
+        return Math.min(getMaxAutoScale(), (vw - DRAWER_GAP) / getNaturalExpanded());
+    }
+
+    var DRAWER_CSS =
+        '.cyber-drawer-btn{display:none;position:fixed;z-index:2102;top:max(14px,env(safe-area-inset-top));' +
+        'left:max(7px,env(safe-area-inset-left));width:48px;height:48px;margin:0;padding:0;align-items:center;' +
+        'justify-content:center;color:#fff;background:rgba(15,23,42,.85);border:1px solid rgba(0,210,255,.3);' +
+        'border-radius:6px;box-shadow:0 4px 15px rgba(0,0,0,.4);cursor:pointer;touch-action:manipulation;' +
+        '-webkit-tap-highlight-color:transparent}' +
+        '.cyber-drawer-btn svg{width:26px;height:26px;stroke-width:1.5;filter:drop-shadow(0 0 5px rgba(0,210,255,.3))}' +
+        '.cyber-drawer-btn .ico-close,html.cyber-drawer-open .cyber-drawer-btn .ico-menu{display:none}' +
+        'html.cyber-drawer-open .cyber-drawer-btn .ico-close{display:block}' +
+        '.cyber-drawer-scrim{position:fixed;inset:0;z-index:2099;background:rgba(0,0,10,.5);opacity:0;visibility:hidden;' +
+        'transition:opacity .28s,visibility 0s linear .28s}' +
+        '@media ' + NARROW_MQ + '{' +
+        'html.cyber-drawer body.cyber-shell-grid{grid-template-columns:0 minmax(0,1fr)!important;' +
+        'grid-template-rows:minmax(0,100vh)!important;grid-template-rows:minmax(0,100dvh)!important;' +
+        'height:100vh!important;height:100dvh!important;max-height:100vh!important;max-height:100dvh!important}' +
+        // a lab with the optional right rail keeps its third column
+        'html.cyber-drawer body.cyber-shell-grid:has(>#right-rail){grid-template-columns:0 minmax(0,1fr) ' +
+        'calc(var(--cyber-rail-w) * min(var(--cyber-left-scale,1),1.12))!important}' +
+        // the stage is always the second column here - also over a lab's own old narrow rule (mandelbrot: row 2 at ≤ 560 px)
+        'html.cyber-drawer body.cyber-shell-grid>#main-content{grid-column:2!important;grid-row:1!important;' +
+        'height:100vh!important;height:100dvh!important}' +
+        'html.cyber-drawer body.cyber-shell-grid>#cyber-left-chrome{position:fixed!important;top:0;left:0;' +
+        'height:100vh;height:100dvh;transform:translateX(-100%);visibility:hidden;' +
+        'transition:transform .28s cubic-bezier(.16,1,.3,1),visibility 0s linear .28s}' +
+        'html.cyber-drawer.cyber-drawer-open body.cyber-shell-grid>#cyber-left-chrome{transform:none;visibility:visible;' +
+        'box-shadow:0 0 40px rgba(0,0,0,.6);transition:transform .28s cubic-bezier(.16,1,.3,1)}' +
+        'html.cyber-drawer body.cyber-shell-grid #cyber-left-chrome-inner{' +
+        'height:calc(100dvh / min(var(--cyber-left-scale,1),1.12))}' +
+        'html.cyber-drawer .cyber-drawer-btn{display:flex}' +
+        'html.cyber-drawer.cyber-drawer-open .cyber-drawer-scrim{opacity:1;visibility:visible;transition:opacity .28s}' +
+        // the coach box sat top left where the button is now: it moves down under it
+        'html.cyber-drawer #math-coach-box{top:72px}' +
+        '}' +
+        '@media (prefers-reduced-motion:reduce){html.cyber-drawer body.cyber-shell-grid>#cyber-left-chrome,' +
+        '.cyber-drawer-scrim{transition:none!important}}';
+
+    var ICON_MENU =
+        '<svg class="ico-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">' +
+        '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+    var ICON_CLOSE =
+        '<svg class="ico-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">' +
+        '<line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>';
+
+    function setDrawer(open) {
+        var root = document.documentElement;
+        var btn = document.querySelector('.cyber-drawer-btn');
+        var chrome = document.getElementById('cyber-left-chrome');
+        open = !!open && isDrawerMode();
+        if (open) {
+            // in the drawer the side panel is always open: the drawer itself is what folds away
+            var panel = document.getElementById('side-panel');
+            if (panel && panel.classList.contains('collapsed')) panel.classList.remove('collapsed');
+            publishResolvedScale();
+        } else if (chrome && document.activeElement && chrome.contains(document.activeElement) && btn) {
+            btn.focus(); // focus must not stay inside a hidden drawer
+        }
+        root.classList.toggle('cyber-drawer-open', open);
+        if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    /** A page that hides the whole chrome itself (?widget of token-lab, wortvorhersage ...) gets no button either. */
+    function syncDrawerButton() {
+        var btn = document.querySelector('.cyber-drawer-btn');
+        var chrome = document.getElementById('cyber-left-chrome');
+        if (!btn || !chrome) return;
+        btn.style.visibility = getComputedStyle(chrome).display === 'none' ? 'hidden' : '';
+    }
+
+    function installDrawer() {
+        if (IN_DECK || document.querySelector('.cyber-drawer-btn') || !window.matchMedia) return;
+        var root = document.documentElement;
+        var style = document.createElement('style');
+        style.id = 'cyber-drawer-css';
+        style.textContent = DRAWER_CSS;
+        document.head.appendChild(style);
+        root.classList.add('cyber-drawer');
+        _narrowMql = window.matchMedia(NARROW_MQ);
+
+        var railToggle = document.querySelector('#mini-rail .nav-btn[onclick*="toggleSidebar"]');
+        var label = (railToggle && railToggle.getAttribute('title')) || 'Menü';
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cyber-drawer-btn';
+        btn.title = label;
+        btn.setAttribute('aria-label', label);
+        btn.setAttribute('aria-controls', 'cyber-left-chrome');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.innerHTML = ICON_MENU + ICON_CLOSE;
+        btn.addEventListener('click', function () {
+            setDrawer(!root.classList.contains('cyber-drawer-open'));
+        });
+        var scrim = document.createElement('div');
+        scrim.className = 'cyber-drawer-scrim';
+        scrim.addEventListener('click', function () {
+            setDrawer(false);
+        });
+        document.body.appendChild(scrim);
+        document.body.appendChild(btn);
+
+        // the rail's own ☰ would fold the panel inside the drawer: in drawer mode it closes the drawer instead
+        window.addEventListener('click', function (e) {
+            if (!isDrawerMode() || !e.target.closest) return;
+            if (!e.target.closest('#mini-rail .nav-btn[onclick*="toggleSidebar"]')) return;
+            e.stopPropagation();
+            e.preventDefault();
+            setDrawer(false);
+        }, true);
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && root.classList.contains('cyber-drawer-open')) setDrawer(false);
+        });
+        var onChange = function () {
+            if (!_narrowMql.matches) setDrawer(false);
+            publishResolvedScale();
+            syncDrawerButton();
+        };
+        if (_narrowMql.addEventListener) _narrowMql.addEventListener('change', onChange);
+        else if (_narrowMql.addListener) _narrowMql.addListener(onChange);
+        window.addEventListener('load', syncDrawerButton);
+        syncDrawerButton();
     }
 
     function wrapChrome() {
@@ -232,6 +377,7 @@
             window.visualViewport.addEventListener('resize', scheduleViewportReflow);
         }
 
+        installDrawer();
         publishResolvedScale();
 
         return true;

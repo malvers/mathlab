@@ -825,6 +825,13 @@ addEventListener('contextmenu', e => {
   s.src = new URL('deck-verweise.js', own ? own.src : location.href).href;
   document.head.appendChild(s);
 })();
+// the lab bar's link label is set here, one place for every deck (Doc, 12.11.2026: "Beschriftung, ja, kann sie so
+// machen"): "Öffne das Lab in neuem Tab" in a deck's file shows as "Lab in neuem Tab öffnen ↗", the same pattern for
+// "Öffne DOCPAD …" and "Öffne die Seite …". Any other text a bar carries stays as written.
+document.querySelectorAll('.labbar a[target="_blank"]').forEach(a => {
+  const m = a.textContent.trim().match(/^Öffne (?:das |die |den |der )?(.+?) in neuem Tab$/);
+  if (m) a.textContent = m[1] + ' in neuem Tab öffnen ↗';
+});
 // the lab bar sits right on top of its lab: each slide places its lab frame itself, so read that frame's top.
 // A note that runs under the bar (a long one, mathe11-nichtlinear) pushes it up above the note instead.
 // A bar Doc placed himself in the deck editor (deck-label.js: it has a left of its own) stays where he put it; the
