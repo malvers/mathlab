@@ -470,6 +470,123 @@ const trommel = (function () {
     a.play().catch(() => { });
   });
 })();
+
+/* ————— Jeopardy music on J ———————————————————————————————————————————————————
+ * Doc, 12.11.2026: "dass ich auf J Jeopardy Musik kriege? Idealerweise die Originale." On Doc's Mac J plays his own copy
+ * of the original "Think!" (Merv Griffin), audio/privat/jeopardy.mp3 next to this file - that folder is in .gitignore,
+ * it never goes into the repo nor onto docalvers.de (Doc: "Lokale Datei."). Where it is missing (online) J opens the
+ * show's own think music in a small YouTube player over the slide's top right corner (js/video-lightbox.js, mini; Doc:
+ * "ganz kleines YouTube-Fensterchen"), embedded, never copied: the official Jeopardy! channel (youtube.com/@jeopardy,
+ * UCnxxhf9PSA3VJ4Q80pWJoow), "Final Jeopardy!: TV Theme Music | JEOPARDY!", e1WmddIHHDk, only its 30 s of think music
+ * (19-49 s; the clip itself reads the clue before and shows the answers after). ?jeopardy=youtube tries the player on
+ * Doc's Mac too. On a phone upright the player sits under the slide and its buttons.
+ * J again or the player's x stops it with a short fade; at its end it stops by itself. While Solita speaks (her
+ * narration or one of her answers) the music goes down to a fifth and comes back after her - the 30 s go on, they are a
+ * clock. In a show the beamer window plays it: J in the presenter window tells it so, and the presenter shows an/aus.
+ */
+const jeopardy = (function () {
+  const VIDEO = 'https://youtu.be/e1WmddIHHDk?start=19&end=49';
+  const own = [].find.call(document.scripts, function (s) { return /\/deck\.js(\?|$)/.test(s.src); });
+  const base = own ? own.src : location.href;
+  const FILE = new URL('audio/privat/jeopardy.mp3', base).href;
+  const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)   // the file exists on Doc's Mac only
+    && new URLSearchParams(location.search).get('jeopardy') !== 'youtube';
+  const SOFT = 0.2, FADE = 400;
+  let on = false, a = null, p = null, probe = null, lib = null;
+  let level = 1, goal = 1, watch = 0, ramp = 0;
+
+  function hasFile() {
+    if (!LOCAL) return Promise.resolve(false);
+    if (!probe) probe = fetch(FILE, { method: 'HEAD', cache: 'no-store' }).then(function (r) { return r.ok; }, function () { return false; });
+    return probe;
+  }
+  function loadPlayer() {                              // js/video-lightbox.js, on the first J only
+    if (window.VideoLightbox) return Promise.resolve();
+    if (!lib) lib = new Promise(function (ok, no) {
+      const s = document.createElement('script');
+      s.src = new URL('../js/video-lightbox.js', base).href;
+      s.onload = ok;
+      s.onerror = function () { lib = null; no(); };
+      document.head.appendChild(s);
+    });
+    return lib;
+  }
+  function speaking() { return narr.playing || !!document.querySelector('.sf-stop:not([hidden])'); }
+  function set(v) { level = v; if (a) a.volume = v; if (p) p.volume(v * 100); }
+  function glide(to) {                                 // a short ramp to the new level
+    clearInterval(ramp);
+    const from = level, n = FADE / 40;
+    let i = 0;
+    ramp = setInterval(function () { i++; set(from + (to - from) * i / n); if (i >= n) clearInterval(ramp); }, 40);
+  }
+  function duck() {
+    const want = speaking() ? SOFT : 1;
+    if (want !== goal) { goal = want; glide(want); }
+  }
+  // the player's corner: over the slide's top right. A phone upright has room under the slide and its buttons, a small
+  // one above the slide - it covers as little of the slide as it can; the LOCAL pill of serve.py (Doc's Mac) stays free.
+  function place(box) {
+    const r = deck.getBoundingClientRect(), m = 12, size = 200;
+    const pill = document.getElementById('local-badge');
+    const below = ['hud', 'nav', 'nav-prev', 'nav-next', 'ask'].reduce(function (y, id) {   // the slide and its dock
+      const el = document.getElementById(id), b = el && el.getBoundingClientRect();
+      return b && b.width && b.height ? Math.max(y, b.bottom) : y;
+    }, r.bottom);
+    const free = pill ? pill.getBoundingClientRect().bottom + 14 : m;
+    const top = innerHeight - below >= size + 2 * m ? below + m : Math.max(free, r.top - m - size);
+    box.style.top = Math.round(top) + 'px';
+    box.style.right = Math.round(Math.max(m, innerWidth - r.right + m)) + 'px';
+  }
+  function tell(state) { link.music(state); }          // the presenter window shows "an"/"aus"
+  function start() {
+    on = true; tell(true);
+    level = goal = speaking() ? SOFT : 1;
+    hasFile().then(function (file) {
+      if (!on) return;                                 // J again meanwhile
+      watch = setInterval(duck, 200);
+      if (file) {
+        const el = a = new Audio(FILE);
+        el.volume = level;
+        el.addEventListener('ended', function () { if (a === el) stop(true); });
+        el.play().catch(function () { if (a === el) stop(true); });
+        return;
+      }
+      loadPlayer().then(function () {
+        if (!on) return;
+        const h = VideoLightbox.mini(VIDEO, {
+          title: 'Jeopardy! – Think!', place: place,
+          onend: function () { if (p === h) stop(true); },
+          onclose: function () { if (p === h) { p = null; stop(true); } }   // its x
+        });
+        p = h;
+        if (h && level < 1) h.volume(level * 100);
+      }, function () { stop(true); if (window.DeckNote) DeckNote('Jeopardy-Musik: YouTube nicht erreichbar'); });
+    });
+  }
+  function stop(now) {                                 // now: it ended, or its x closed it
+    if (!on) return;
+    on = false; tell(false);
+    clearInterval(watch); clearInterval(ramp);
+    const fa = a, fp = p, from = level;
+    a = p = null;                                      // a new J starts afresh while this one fades
+    const end = function () { if (fa) fa.pause(); if (fp) fp.close(); };
+    if (now) { end(); return; }
+    let i = 0;
+    const n = FADE / 40, t = setInterval(function () {
+      i++;
+      const v = from * (1 - i / n);
+      if (fa) fa.volume = Math.max(0, v);
+      if (fp) fp.volume(v * 100);
+      if (i >= n) { clearInterval(t); end(); }
+    }, 40);
+  }
+  return {
+    toggle: function () {
+      if (PRESENTER) { link.send({ t: 'jeopardy' }); return; }   // the beamer window plays it
+      if (on) stop(); else start();
+    }
+  };
+})();
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
   const k = e.key;
@@ -495,6 +612,9 @@ addEventListener('keydown', e => {
   else if (k === 'End') { si = Math.max(0, seek(slides.length - 1, -1)); step = groups(slides[si]); paint(); }
   else if (k === 'a' || k === 'A') { narr.stop(); step = groups(slides[si]); paint(); }   // everything on this slide in (Doc, 17.09.2026)
   else if (k === 'f' || k === 'F') { full(); }
+  else if ((k === 'j' || k === 'J') && !(e.target.closest && e.target.closest('input, textarea, select, [contenteditable]'))) {
+    jeopardy.toggle(); e.preventDefault();            // the think music (Doc, 12.11.2026)
+  }
 });
 addEventListener('click', e => {
   // links (lab bar, picture credits) open - they do not turn the page as well
@@ -993,6 +1113,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
       [K(['1', '7', 'Enter']), 'Zu Folie 17 springen'],
       [K(['O']) + hint('Overview'), 'Übersicht aller Folien'],
       [K(['F']) + hint('Fullscreen'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
+      [K(['J']) + hint('Jeopardy'), 'Jeopardy-Musik, 30 s – noch einmal J beendet sie'],
       null,
       [K(['Leertaste', '/', 'P']), 'Während Solita erklärt: Pause / weiter – ein Pfeil springt, sie spricht dort weiter' + pic],
       null,
@@ -2431,6 +2552,7 @@ const link = (function () {
       if (m.p) return;                               // another presenter window: not ours to follow
       if (m.t === 'end') { window.close(); return; }   // Esc on the beamer ended the show
       if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); laser.mirrorOn(m.on); return; }
+      if (m.t === 'jeopardy-on') { toast(m.on ? 'Jeopardy-Musik an (J)' : 'Jeopardy-Musik aus (J)'); return; }
       if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }
       if (m.t === 'ask-out') { if (window.DeckAsk) DeckAsk.shown(m); return; }   // the beamer's answer box, mirrored
       if (m.t === 'ani') { aniApply(m); return; }    // Start / Pause / Stop pressed on the board
@@ -2459,6 +2581,7 @@ const link = (function () {
       if (fsOn()) fsExit();
     }
     else if (m.t === 'play') { if (narr.toggle) narr.toggle(); }
+    else if (m.t === 'jeopardy') jeopardy.toggle();                          // J in the presenter: the music plays here
     else if (m.t === 'ani') aniApply(m);                                     // a drawn animation started there
     else if (m.t === 'ask') { if (window.DeckAsk) DeckAsk.ask(m.q); }          // asked in the presenter: answered here
     else if (m.t === 'ask-live') { if (window.DeckAsk) DeckAsk.live(m.q); }    // dictated there, already on screen here
@@ -3408,6 +3531,7 @@ const link = (function () {
     return { render: render };
   }
   return { present: present, send: send,
+           music: function (on) { if (linked) send({ t: 'jeopardy-on', on: !!on }); },   // the beamer's J music, for the presenter
            skip: function (i, on) { send({ t: 'skip', i: i, on: !!on }); },
            // Start / Pause / Stop of a drawn animation (aniCtl), only within a show
            ani: function (i, k, act, at) { if (linked) send({ t: 'ani', si: i, k: k, act: act, at: at }); } };
