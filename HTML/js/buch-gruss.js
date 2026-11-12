@@ -31,28 +31,40 @@
                 'Viel Freude und viel Erfolg!',
             ],
             // the acknowledgement on the back of the dedication page, print edition only (js/buch-druck.js danksagung()).
-            // Doc, 09.11.2026: "schreib mir bitte für die Bücher eine Danksagung" - "auf die Rückseite der Widmung".
-            // Counts as of 09.11.2026: 87 labs + 7 tours (js/labs-config.js), 24 books, 127 editions (buch/ folders),
-            // the rest from the Making of (decks/mathe11-lehrbuch.html, counted 02.11.2026); no real error report yet.
+            // Doc, 09.11.2026: "schreib mir bitte für die Bücher eine Danksagung" - "auf die Rückseite der Widmung";
+            // 12.11.2026 his accepted text ("Text GO") and "dank kann in alle Bücher DE".
+            // Counts as of 12.11.2026, by the rules of 09.11. and 29.10.: 88 labs + 7 tours in js/labs-config.js (an entry
+            // that is only an app - DocPad, Solita, Tracker ... - is no lab), 24 books in 130 editions (buch/ folders, 5
+            // languages, some 9), 11,574 questions in 643 quiz pages (js/quiz-engine.js) + 213 text tasks in HTML/aufgaben;
+            // buch_feedback holds 3 test reports only (10.10. x2, 27.10.), no real error report.
             dank: {
-                aktiv: false,       // Doc, 09.11.2026: "push aber noch nicht einbauen" - true puts it on page 2 of every German print edition
+                aktiv: true,        // every German print edition (Doc, 12.11.2026: "dank kann in alle Bücher DE"); other languages have no dank
                 titel: 'Danksagung',
                 text: [
-                    'Dieses Buch hat einen Autor und einen Partner, ohne den es nicht existieren würde: Künstliche Intelligenz (KI), ganz besonders Claude von Anthropic.',
-                    'Für mich war Albert Einstein immer der Größte. Ich hätte nie gedacht, dass ihn irgendetwas toppt. KI toppt ihn.',
-                    'KI hat mein Leben verändert. Durch sie konnte ich docalvers.de bauen, das Doc Alvers Mathe-Labor. Seit April 2026 sind dort ' +
-                    '(Stand November 2026) 94 Labs und Touren entstanden, 11.650 Übungsaufgaben und 24 Lehrbücher in 127 Ausgaben und 5 Sprachen, ' +
-                    'teilweise in 9. Das erste Buch war in 1 Stunde und 28 Minuten fertig, für 0,49 € Anteil am Abo. ' +
-                    'Ein Verlag hätte dafür rund 112.000 € gebraucht.',
-                    'Auch im Alltag hilft sie mir: Sie sucht Flüge heraus, sagt mir, an welchem Gate ich stehen muss, findet Zugverbindungen und das ' +
-                    'Fundbüro der Bahn und hält meine Finanzen in Ordnung. Und wenn etwas wichtig ist, ruft mich Solita, meine virtuelle Assistentin, ' +
-                    'auf dem Smartphone an.',
-                    'Die Ideen und jede Entscheidung bleiben meine Sache, und für jeden Fehler stehe ich gerade. Das Tempo und die Geduld verdanke ich der KI.',
-                    'Danke auch meinen Schülerinnen und Schülern und allen, die mit „Fehler melden“ helfen möchten, diese Bücher besser zu machen ' +
-                    '(bis heute gibt es noch keinen Fehlerreport 😊).',
+                    'Dieses Buch hat einen Autor und eine Partnerin: Solita, eine Assistentin mit Künstlicher ' +
+                    'Intelligenz (KI), gebaut auf Claude von Anthropic.',
+                    'Für mich war Albert Einstein immer der Größte. Die Relativitätstheorie war für mich ' +
+                    'eigentlich das absolute Nonplusultra. Ich hätte nie gedacht, dass irgendetwas sie toppt. KI ' +
+                    'toppt selbst die Relativitätstheorie.',
+                    'Künstliche Intelligenz hat mein Leben verändert. Durch sie konnte ich docalvers.de bauen, ' +
+                    'das Doc Alvers Mathe-Labor. Seit April 2026 sind dort (Stand November 2026) 95 Labs und ' +
+                    'Touren entstanden, 11.787 Übungsaufgaben und 24 Lehrbücher in 130 Ausgaben und 5 Sprachen, ' +
+                    'teilweise in 9. Das erste Buch war in 1 Stunde und 28 Minuten fertig, für 0,49 € Anteil am ' +
+                    'Abo. Ein Verlag hätte dafür rund 112.000 € gebraucht, eine IT-Firma für die interaktive ' +
+                    'Fassung in 5 Sprachen rund 360.000 €.',
+                    'Auch im Alltag hilft sie mir: Sie sucht Flüge heraus, sagt mir, an welchem Gate ich warten ' +
+                    'muss, findet Zugverbindungen und das Fundbüro der Bahn und hält meine Finanzen in Ordnung. ' +
+                    'Und wenn etwas wichtig ist, ruft mich Solita auf dem Smartphone an.',
+                    'Die Ideen und jede Entscheidung bleiben meine Sache, und für jeden Fehler stehe ich gerade. ' +
+                    'Das Tempo und die Geduld verdanke ich der Künstlichen Intelligenz.',
+                    'Danke auch meinen Schülerinnen und Schülern und allen, die mit „Fehler melden“ helfen ' +
+                    'möchten, diese Bücher besser zu machen (bis heute gibt es noch keinen Fehlerreport 😊).',
                     'Ich bin wirklich dankbar. Und das meine ich genau so.',
                 ],
                 sig: 'Dr. Michael R. Alvers, im November 2026',
+                // under the signature, Solita with her name as she signs (Doc, 12.11.2026: "von Solita unter die DS ein Bild
+                // machen ... Solita J. Neural, Executive ..."); the print-sharp portrait, not the 200 px avatar
+                bild: { src: 'resources/team/team_02.png', name: 'Solita J. Neural', rolle: 'Executive Assistant to Doc Alvers' },
             },
         },
         en: {

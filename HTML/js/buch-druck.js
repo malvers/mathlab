@@ -460,13 +460,17 @@
 
     // ---------- the acknowledgement: page 2, the back of the dedication (Doc, 09.11.2026: "auf die Rückseite der Widmung") ----------
     // Print only. The text lives in js/buch-gruss.js beside the foreword (dank, in the edition's language); an edition
-    // without one (or with dank.aktiv false, Doc's switch: written, not built in yet) keeps the empty back, so the foreword
-    // still opens on a right-hand page.
+    // without one (or with dank.aktiv false) keeps the empty back, so the foreword still opens on a right-hand page.
+    // On since 12.11.2026 for every German edition (Doc: "dank kann in alle Bücher DE"); it fills the back that was empty,
+    // so no page moves.
     async function danksagung() {
         const G = await Buch.gruss(), D = G && G[Buch.lang] && G[Buch.lang].dank;
         if (!D || !D.aktiv) return null;
+        // Solita under the signature (dank.bild): her portrait like Doc's in the foreword, her two lines beside it
+        const bild = D.bild ? '<div class="d-dank-bild"><img src="../../' + D.bild.src + '" alt="' + D.bild.name + '">' +
+            '<p><b>' + D.bild.name + '</b><br>' + D.bild.rolle + '</p></div>' : '';
         return el('section', 'd-dank', '<h1>' + D.titel + '</h1><div class="b-text">' + D.text.map(p => '<p>' + p + '</p>').join('') + '</div>' +
-            '<p class="d-dank-sig">' + D.sig + '</p>');
+            '<p class="d-dank-sig">' + D.sig + '</p>' + bild);
     }
 
     // ---------- the imprint: page 2, the back of the foreword, in every book and language ----------
