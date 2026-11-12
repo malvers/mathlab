@@ -100,13 +100,13 @@ const LABS_DATA = [
     {
         "id": "lehrbuch-pruefung",
         "href": "buch/pruefung/index.html",
-        "title": "Prüfungstraining Abitur und BLF",
-        "description": "Das interaktive Übungsbuch für die Prüfungen in Sachsen: Abitur am Beruflichen Gymnasium und Besondere Leistungsfeststellung in Klasse 10 am Gymnasium. Sechsundzwanzig Kapitel mit 72 eigenen Aufgaben im Prüfungsformat – Teil A ohne Hilfsmittel, Analysis, Geometrie, Lineare Algebra, Stochastik, Trigonometrie, Körper – dazu Lösungswege, die typische Falle jeder Aufgabe, Selbsttests mit neuen Zahlen und zwei Generalproben mit Uhr. Ohne Anmeldung.",
-        "tagline": "Buch / Prüfungstraining / 26 Kapitel",
+        "title": "Prüfungstraining Abitur, BLF und Vergleichsarbeit",
+        "description": "Das interaktive Übungsbuch für die Prüfungen in Sachsen: Abitur am Beruflichen Gymnasium, Besondere Leistungsfeststellung in Klasse 10 am Gymnasium und Vergleichsarbeit in Klasse 11 am Beruflichen Gymnasium. Fünfunddreißig Kapitel mit 96 eigenen Aufgaben im Prüfungsformat – Teil A ohne Hilfsmittel, Analysis, Geometrie, Lineare Algebra, Gleichungssysteme, Stochastik, Trigonometrie, Körper – dazu Lösungswege, die typische Falle jeder Aufgabe, Selbsttests mit neuen Zahlen und drei Generalproben mit Uhr. Ohne Anmeldung.",
+        "tagline": "Buch / Prüfungstraining / 35 Kapitel",
         "icon": LAB_ICONS["lehrbuch-pruefung"],
         "category": "buecher funktionen stochastik geometrie oberstufe",
         "school": "uebung",   // own section "Übungsmaterial" in the books view (Doc, 02.11.2026)
-        "keywords": "buch buecher uebungsbuch prüfungstraining pruefungstraining pruefung abitur abiturvorbereitung abi blf besondere leistungsfeststellung klasse 10 klasse 13 berufliches gymnasium bgy gymnasium sachsen teil a ohne hilfsmittel ankreuzen pflichtaufgabe analysis funktionenschar integral extremwert steckbrief wachstum geometrie schattenwurf lineare algebra leontief stochastik binomialverteilung hypothesentest erwartungswert trigonometrie koerper generalprobe simulation",
+        "keywords": "buch buecher uebungsbuch prüfungstraining pruefungstraining pruefung abitur abiturvorbereitung abi blf besondere leistungsfeststellung vergleichsarbeit va klasse 10 klasse 11 klasse 13 berufliches gymnasium bgy gymnasium sachsen teil a ohne hilfsmittel ankreuzen pflichtaufgabe analysis funktionenschar integral extremwert steckbrief wachstum geometrie schattenwurf lineare algebra leontief stochastik binomialverteilung hypothesentest erwartungswert trigonometrie koerper gleichungssystem lgs gauss vierfeldertafel exponentialfunktion generalprobe simulation",
         "color": "gold"
     },
     {

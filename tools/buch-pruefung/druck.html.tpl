@@ -32,7 +32,7 @@
             <div class="b-titel-main">
                 <p class="b-titel-kicker">INTERAKTIVES ÜBUNGSBUCH · DRUCKAUSGABE</p>
                 <h1>Mathematik</h1>
-                <p class="b-titel-sub">Prüfungstraining<br><b>Abitur · BLF</b></p>
+                <p class="b-titel-sub">Prüfungstraining<br><b>Abitur · BLF · Vergleichsarbeit</b></p>
             </div>
             <div class="b-titel-foot"><span>SACHSEN</span><span>SCHULJAHR 2026/27</span></div>
         </div>

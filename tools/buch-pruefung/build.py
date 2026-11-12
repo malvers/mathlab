@@ -4,7 +4,7 @@
     python3 tools/buch-pruefung/build.py            # all chapters, index.html, druck.html, kapitel.js
     python3 tools/buch-pruefung/build.py abi-schar  # only these chapters
 
-Tasks, figures, solutions and traps come unchanged from the generators of the sheets (tools/aufgaben/abi, blf): each one
+Tasks, figures, solutions and traps come unchanged from the generators of the sheets (tools/aufgaben/abi, blf, va): each one
 runs here with Sheet.save replaced, so its verify() checks every number and nothing is written to HTML/aufgaben. What a
 chapter adds around them (lead, key box, widget, self-checks) stands in kapitel.py; every self-check answer is recomputed
 here. Same rule as the other books: run it to frame the chapters, after that the HTML is the source - a later run
@@ -28,10 +28,10 @@ sys.path.insert(0, HERE)
 import textaufgaben as T                                            # noqa: E402
 
 AFB = {1: "AFB I · REPRODUZIEREN", 2: "AFB II · ZUSAMMENHÄNGE", 3: "AFB III · BEURTEILEN"}
-TOP = "PRÜFUNGSTRAINING · ABITUR · BLF"
+TOP = "PRÜFUNGSTRAINING · ABITUR · BLF · VA"
 BASE = ["buch-plot.js", "buch-funktionen.js"]
 FOOT = ("Doc Alvers Mathe-Labor · Prüfungstraining Mathematik · nach den Aufgabentypen der sächsischen Abitur- und "
-        "BLF-Prüfungen 2021/22 bis 2024/25.")
+        "BLF-Prüfungen und der Vergleichsarbeiten Klasse 11 von 2021/22 bis 2024/25.")
 FOOT2 = "Alle Texte, Aufgaben und Abbildungen sind eigene Inhalte. Die Originalprüfungen werden nicht wiedergegeben."
 
 
@@ -45,7 +45,7 @@ def esc(text):
 
 # ---------------------------------------------------------------- sheets ---
 def sheets():
-    """All 24 sheets as Sheet objects, every verify() run."""
+    """All 32 sheets as Sheet objects, every verify() run: Abitur, BLF and, since 12.11.2026, the Vergleichsarbeit."""
     got = {}
 
     def save(self, path=None):
@@ -56,7 +56,8 @@ def sheets():
 
     T.Sheet.save = save
     for f in sorted(glob.glob(os.path.join(REPO, "tools", "aufgaben", "abi", "*.py"))
-                    + glob.glob(os.path.join(REPO, "tools", "aufgaben", "blf", "*.py"))):
+                    + glob.glob(os.path.join(REPO, "tools", "aufgaben", "blf", "*.py"))
+                    + glob.glob(os.path.join(REPO, "tools", "aufgaben", "va", "*.py"))):
         runpy.run_path(f, run_name="__main__")
     return got
 
@@ -319,11 +320,13 @@ def kapitel_js(book):
     for c in book:
         rows.append("        { file: %s, lb: %s, k: %s, title: %s,\n          sub: %s, when: %s, ustd: 0 }"
                     % (js(c["file"] + ".html"), js(c["lb"]), js(str(c["k"])), js(c["title"]), js(c["sub"]), js(c["when"])))
-    return ("/* kapitel.js — the chapters of the training book, Abitur first, then the BLF. Written by tools/buch-pruefung/build.py.\n"
+    return ("/* kapitel.js — the chapters of the training book, Abitur first, then the BLF, then the Vergleichsarbeit. Written by\n"
+            " * tools/buch-pruefung/build.py.\n"
             " * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.\n"
-            " */\nwindow.BUCH = {\n    title: 'Prüfungstraining Mathematik · Abitur und BLF',\n    short: 'Prüfungstraining',\n"
-            "    description: 'Interaktives Übungsbuch für die Prüfungen in Sachsen: Abitur am Beruflichen Gymnasium und Besondere "
-            "Leistungsfeststellung in Klasse 10, %d Kapitel mit %d Aufgaben im Prüfungsformat, Lösungen, Fallen, Widgets und Selbsttests.',\n"
+            " */\nwindow.BUCH = {\n    title: 'Prüfungstraining Mathematik · Abitur, BLF und Vergleichsarbeit',\n    short: 'Prüfungstraining',\n"
+            "    description: 'Interaktives Übungsbuch für die Prüfungen in Sachsen: Abitur am Beruflichen Gymnasium, Besondere "
+            "Leistungsfeststellung in Klasse 10 und Vergleichsarbeit in Klasse 11 am Beruflichen Gymnasium, %d Kapitel mit %d Aufgaben "
+            "im Prüfungsformat, Lösungen, Fallen, Widgets und Selbsttests.',\n"
             "    chapters: [\n%s\n    ]\n};\n" % (len(book), sum(1 for c in book if "sheet" in c) * 3, ",\n".join(rows)))
 
 
@@ -336,7 +339,7 @@ def main():
     only = set(sys.argv[1:])
     where = widget_modules()
     got = sheets()
-    assert len(got) == 24, len(got)
+    assert len(got) == 32, len(got)
     used = {c["sheet"] for c in kapitel.BUCH if "sheet" in c}
     assert used == set(got), "sheets without a chapter: %s" % (set(got) - used)
     os.makedirs(OUT, exist_ok=True)
@@ -352,8 +355,10 @@ def main():
     open(os.path.join(OUT, "kapitel.js"), "w", encoding="utf-8").write(kapitel_js(kapitel.BUCH))
     for name in ("index.html", "druck.html"):
         tpl = open(os.path.join(HERE, name + ".tpl"), encoding="utf-8").read()
+        n_tasks = sum(len(got[c["sheet"]].tasks) for c in kapitel.BUCH if "sheet" in c)
         open(os.path.join(OUT, name), "w", encoding="utf-8").write(tpl.replace("__SCRIPTS__", scripts(mods))
-                                                                  .replace("__N__", str(len(kapitel.BUCH))))
+                                                                  .replace("__N__", str(len(kapitel.BUCH)))
+                                                                  .replace("__TASKS__", str(n_tasks)))
     print("%d chapters, %d self-check questions, all recomputed" % (len(kapitel.BUCH), n_q))
 
 

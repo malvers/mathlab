@@ -7,9 +7,11 @@ import json
 
 ABI = "Abitur · "
 BLF = "BLF · "
+VA = "Vergleichsarbeit · "
 GL = "GK und LK"
 LK = "Nur LK"
 K10 = "Klasse 10"
+K11 = "BGY Klasse 11"
 
 
 def Q(text, ans, py, sol, ph="Ergebnis", tol=None):
@@ -210,6 +212,77 @@ UEBERBLICK_BLF = """<section class="b-sec" id="auftakt" data-toc="Auftakt" data-
     <div class="b-rueck"><div><h4>DANN FUNKTIONEN UND TRIGONOMETRIE</h4><p>Sie tragen in Teil B die meisten Punkte: Kapitel 21 bis 23.</p></div>
         <div><p>Danach Körper in Kapitel 24 und Daten und Zufall in Kapitel 25.</p></div></div>
     <div class="b-rueck"><div><h4>ZUM SCHLUSS</h4><p>Die Generalprobe in Kapitel 26 läuft mit Uhr.</p></div>
+        <div><p>Rechne sie auf Papier, in einem Stück und ohne Lösungen.</p></div></div>
+</section>"""
+
+UEBERBLICK_VA = """<section class="b-sec" id="auftakt" data-toc="Auftakt" data-toc-k="A" data-toc-short="Auftakt" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">KAPITEL 27 · VERGLEICHSARBEIT · ÜBERBLICK · BGY KLASSE 11</p>
+            <h1>So ist die Vergleichsarbeit gebaut</h1>
+            <p class="b-hero-lead">Die Vergleichsarbeit schreiben alle Schülerinnen und Schüler der Klasse 11 am Beruflichen Gymnasium, landesweit am selben Tag mit denselben Aufgaben, 2027 am Freitag, 19. März.
+                Sie wird wie eine Klassenarbeit benotet. Dieses Kapitel zeigt, was die Auswertung der letzten vier Jahrgänge ergeben hat.</p>
+            <div class="b-chips"><span class="b-chip">90 MINUTEN</span><span class="b-chip">45 BE</span><span class="b-chip">2021/22 BIS 2024/25</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="beverteilung" data-teile='[["Teil A",15],["Aufgabe 1",8],["Aufgabe 2",7],["Aufgabe 3",15]]'></div>
+    </div>
+    <div class="b-text"><p>Die Leiste oben zeigt die Bewertungseinheiten (BE) des Jahrgangs 2024/25, zusammen 45 BE. Aufbau und Hilfsmittel sind dieselben wie bei der BLF am Gymnasium in Teil 2 dieses Buchs.</p></div>
+</section>
+
+<section class="b-sec" id="aufbau" data-kind="le" data-toc="Teil A und Teil B" data-toc-k="1" data-toc-short="Aufbau">
+    <div class="b-band"><span class="b-band-tag">AUFBAU</span><span class="b-band-sub">STAND DER LETZTEN VIER JAHRGÄNGE</span></div>
+    <h2><span class="b-no">1</span>Teil A und Teil B</h2>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">TEIL A · OHNE HILFSMITTEL</div>
+            <div class="b-text"><p>Erlaubt sind nur Zeichengeräte und das Wörterbuch. Du löst direkt auf dem Aufgabenblatt, nach 25 Minuten wird Teil A eingesammelt.</p>
+                <ul>
+                    <li><b>6 BE:</b> sechs Ankreuzaufgaben mit fünf Möglichkeiten, je 1 BE</li>
+                    <li><b>9 BE:</b> zwei kurze Aufgaben, der Rechenweg muss nachvollziehbar sein</li>
+                </ul></div>
+        </div>
+        <div class="b-box">
+            <div class="b-box-title">TEIL B · MIT MMS UND FORMELSAMMLUNG</div>
+            <div class="b-text"><p>Für 30 BE bleiben rund 65 Minuten. Alle drei Aufgaben sind zu bearbeiten, es gibt keine Wahl. Bis 2022/23 war statt des MMS der grafikfähige Taschenrechner erlaubt.</p>
+                <ul>
+                    <li><b>Aufgabe 1:</b> eine Funktion</li>
+                    <li><b>Aufgabe 2:</b> ein Körper und eine Wahrscheinlichkeit, 2022/23 stattdessen Trigonometrie</li>
+                    <li><b>Aufgabe 3:</b> eine lange Sachaufgabe aus Sachsen, quer durch alle Gebiete</li>
+                </ul></div>
+        </div>
+    </div>
+    <div class="b-box b-merk">
+        <div class="b-box-title">MERKE · FORM UND NÄHERUNGSWERTE</div>
+        <div class="b-text"><p>Für die Form gibt es höchstens 2 BE Abzug, und nur bei schweren oder gehäuften Verstößen.</p>
+            <p>Wo ein exakter Wert erwartet wird, bringt ein richtiger Näherungswert trotzdem die volle Punktzahl.</p></div>
+    </div>
+</section>
+
+<section class="b-sec" id="punkte" data-kind="le" data-toc="Punkte und Noten" data-toc-k="2" data-toc-short="Punkte">
+    <div class="b-band"><span class="b-band-tag">PUNKTE</span><span class="b-band-sub">BEWERTUNGSEINHEITEN UND NOTENSKALA</span></div>
+    <h2><span class="b-no">2</span>Punkte und Noten</h2>
+    <div class="b-table-wrap"><table class="b-table">
+        <tr><th>Jahr</th><th>Teil A</th><th>Aufgabe 1</th><th>Aufgabe 2</th><th>Aufgabe 3</th><th class="b-sum">Gesamt</th></tr>
+        <tr><td>2021/22</td><td>6 + 9</td><td>7</td><td>7</td><td>16</td><td class="b-sum">45</td></tr>
+        <tr><td>2022/23</td><td>6 + 9</td><td>8</td><td>7</td><td>15</td><td class="b-sum">45</td></tr>
+        <tr><td>2023/24</td><td>6 + 9</td><td>8</td><td>8</td><td>14</td><td class="b-sum">45</td></tr>
+        <tr><td>2024/25</td><td>6 + 9</td><td>8</td><td>7</td><td>15</td><td class="b-sum">45</td></tr>
+    </table></div>
+    <div class="b-table-wrap"><table class="b-table">
+        <tr><th>BE</th><td>ab 39</td><td>32–38</td><td>25–31</td><td>18–24</td><td>9–17</td><td>bis 8</td></tr>
+        <tr><th>Note</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+    </table></div>
+    <div class="b-text"><p>Die Notenskala stand so in den Hinweisen der Jahrgänge 2023/24 und 2024/25, etwas milder als bei der BLF. Für eine Vier reichen 18 von 45 BE.
+        Die lange Sachaufgabe trägt jedes Jahr rund ein Drittel aller Punkte.</p></div>
+</section>
+
+<section class="b-sec" id="plan" data-kind="rueckblick" data-toc="So übst du" data-toc-k="R" data-toc-short="So übst du">
+    <div class="b-band"><span class="b-band-tag">SO ÜBST DU</span><span class="b-band-sub">DIE REIHENFOLGE LOHNT SICH</span></div>
+    <div class="b-rueck"><div><h4>ZUERST TEIL A</h4><p>Ohne Rechner gibt es keine zweite Chance. Die Kapitel 28 und 29 trainieren genau das.</p></div>
+        <div><p>Stell dir bei beiden Kapiteln einen Wecker auf 25 Minuten.</p></div></div>
+    <div class="b-rueck"><div><h4>DANN FUNKTIONEN UND GLEICHUNGSSYSTEME</h4><p>Sie tragen in Teil B die meisten Punkte: Kapitel 30, 31 und 34.</p></div>
+        <div><p>Danach Trigonometrie und Körper in Kapitel 32 und Zufall in Kapitel 33.</p></div></div>
+    <div class="b-rueck"><div><h4>ZUM SCHLUSS</h4><p>Die Generalprobe in Kapitel 35 läuft mit Uhr.</p></div>
         <div><p>Rechne sie auf Papier, in einem Stück und ohne Lösungen.</p></div></div>
 </section>"""
 
@@ -874,4 +947,229 @@ BUCH = [
                Q(r"$20\,\%$ von $35\,\%$ von $1000$ Gästen haben eine Jahreskarte. Wie viele sind das?", "70", "1000*0.35*0.2", r"$1000 \cdot 0{,}35 \cdot 0{,}2 = 70$", "Gäste"),
                Q(r"Eine Rutsche fällt $5$ m auf $5$ m waagerechter Strecke. Wie groß ist ihr Neigungswinkel in Grad?", "45", "degrees(atan(1))", r"$\tan \alpha = 1$", "α ="),
                Q(r"$C(t) = 0{,}6 \cdot 0{,}85^t$. Wie groß ist $C(0)$?", "0,6", "0.6", r"$0{,}85^0 = 1$", "C =")]),
+
+    dict(file="va-ueberblick", k=27, title="So ist die Vergleichsarbeit gebaut", lb=VA + "Überblick", when=K11,
+         sub="90 Minuten, 45 BE, Teil A ohne Hilfsmittel, Teil B mit MMS, Notenskala", body=UEBERBLICK_VA),
+
+    dict(file="va-teila", sheet="va-bgy11-teila", k=28, title="Teil A, Satz 1", lb=VA + "Teil A", when=K11,
+         sub="Ankreuzen, zwei parallele Geraden und eine Raute, die Tombola ohne Zurücklegen",
+         chips=["TEIL A", "25 MINUTEN", "OHNE HILFSMITTEL"],
+         lead=r"Die ersten 25 Minuten der Vergleichsarbeit schreibst du ohne Rechner und ohne Formelsammlung, direkt auf dem Aufgabenblatt. Danach wird Teil A eingesammelt. Prozent, Wurzeln, Geraden und Bäume müssen deshalb im Kopf sitzen.",
+         pruef=["Sechs Ankreuzaufgaben mit je 1 BE", "Geraden durch zwei Punkte, Parallelen, Flächen im Koordinatensystem",
+                "Prozent und Größen im Kopf", "Ein Baum ohne Zurücklegen, auch rückwärts gelesen"],
+         hero=G(["0.5*x+2", "0.5*x-2"], "-5.5,5.5", "-3.5,3.5", [[-4, 0], [0, 2], [4, 0], [0, -2]], "Zwei parallele Geraden, ihre Achsenschnittpunkte bilden eine Raute"),
+         checkin=[Q(r"Um wie viel Prozent sinkt ein Wert von $50$ auf $40$?", "20", "(50-40)/50*100", r"Die Änderung $10$ bezieht sich auf den alten Wert: $\frac{10}{50} = 20\,\%$", "Prozent"),
+                  Q(r"Wie groß ist $\sqrt{2} \cdot \sqrt{8}$?", "4", "sqrt(2)*sqrt(8)", r"$\sqrt{2 \cdot 8} = \sqrt{16} = 4$"),
+                  Q(r"Wie groß ist der Anstieg der Geraden durch $(-2 \mid 1)$ und $(2 \mid 3)$?", "0,5", "(3-1)/(2+2)", r"$\frac{3 - 1}{2 - (-2)} = \frac{2}{4} = 0{,}5$", "m =")],
+         merke=("MERKE · DAS SITZT OHNE RECHNER",
+                [r"**Prozent:** Eine Änderung bezieht sich immer auf den alten Wert: $\frac{\text{Änderung}}{\text{alter Wert}}$.",
+                 r"**Wurzeln:** $\sqrt{a} \cdot \sqrt{b} = \sqrt{a \cdot b}$, aber $\sqrt{a} + \sqrt{b}$ ist **nicht** $\sqrt{a + b}$.",
+                 r"**Einheiten:** $1\ \ell = 1\ \mathrm{dm}^3$. Ein Würfel mit $5$ dm Kantenlänge fasst $125\ \ell$.",
+                 r"**Parallele Geraden** haben denselben Anstieg. **Raute:** $A = \frac{e \cdot f}{2}$ aus den beiden Diagonalen.",
+                 r"**Ohne Zurücklegen:** Auf der zweiten Stufe ändern sich Zähler und Nenner. Die Äste eines Knotens ergeben zusammen $1$."]),
+         methode=("STRATEGIE · ANKREUZEN",
+                  ["Jede Ankreuzaufgabe zählt 1 BE, es gibt keine Teilpunkte und keinen Abzug. Lass deshalb nie ein Feld leer.",
+                   "Streiche zuerst aus, was sicher falsch ist. Eine Probe mit einer einfachen Zahl entscheidet oft schneller als jede Umformung."]),
+         widgets=[W("gerade", "INTERAKTIV · EINE GERADE DURCH ZWEI PUNKTE", r"Zieh die beiden Punkte. Das grüne Dreieck zeigt $\Delta x$ und $\Delta y$, darunter stehen Steigung, y-Achsenabschnitt und Gleichung.")],
+         repeat=[L("../mathe11/lb2.html", "GLEICHUNGEN, FORMELN, FIGUREN", "Mathematik 11 · Kapitel 2"),
+                 L("../mathe11/lb3-1.html", "FUNKTIONEN UND IHRE EIGENSCHAFTEN", "Mathematik 11 · Kapitel 3.1"),
+                 L("../mathe11/lb1.html", "MEHRSTUFIGE ZUFALLSVERSUCHE", "Mathematik 11 · Kapitel 1")],
+         kern=[r"Prozent bezieht sich auf den alten Wert, Wurzeln werden nur beim Multiplizieren zusammengefasst. Falsches zuerst ausschließen.",
+               r"Gleicher Anstieg heißt parallel. Die Raute füllt genau die Hälfte des Rechtecks aus ihren Diagonalen.",
+               r"Den Baum rückwärts lesen: Erst beide Stufen zusammen legen die Zahl der Lose fest. „Mindestens ein“ läuft über das Gegenereignis."],
+         test=[Q(r"Ein Preis sinkt von $80$ € auf $60$ €. Um wie viel Prozent ist er gesunken?", "25", "20/80*100", r"$\frac{20}{80} = 25\,\%$, bezogen auf den alten Preis.", "Prozent"),
+               Q(r"Die Gerade $h$ ist parallel zu $y = 2x + 1$ und geht durch $(3 \mid 2)$. Wie groß ist ihr $y$-Achsenabschnitt $n$?", "-4", "2-2*3", r"$2 = 2 \cdot 3 + n$, also $n = -4$.", "n ="),
+               Q(r"Eine Raute hat die Diagonalen $6$ und $10$. Wie groß ist ihr Flächeninhalt?", "30", "6*10/2", r"$\frac{6 \cdot 10}{2} = 30$, die Hälfte des umschließenden Rechtecks.", "A ="),
+               Q(r"$3$ rote und $2$ blaue Kugeln, zweimal ohne Zurücklegen. Wie groß ist die Wahrscheinlichkeit für mindestens eine blaue?", "7/10", "1-3/5*2/4", r"Gegenereignis „zweimal rot“: $1 - \frac{3}{5} \cdot \frac{2}{4} = 1 - \frac{3}{10} = \frac{7}{10}$", "P =")]),
+
+    dict(file="va-teila2", sheet="va-bgy11-teila2", k=29, title="Teil A, Satz 2", lb=VA + "Teil A", when=K11,
+         sub="Noch sechsmal ankreuzen, die Exponentialfunktion zur Basis 2, Rechtecke unter einer Hyperbel",
+         chips=["TEIL A", "25 MINUTEN", "OHNE HILFSMITTEL"],
+         lead=r"Der zweite Satz bringt, was im ersten fehlt: Grundwert und Prozentsatz, Gleichungen mit zwei Lösungen, Sinus und Potenzen von 2. Rechne ihn an einem anderen Tag, wieder mit Wecker auf 25 Minuten.",
+         pruef=["Grundwert, Prozentwert und Prozentsatz", "Potenzen von $2$ ohne Rechner, Graphen spiegeln und verschieben",
+                r"Hyperbeln $y = \frac{k}{x}$ durch einen Punkt legen", "Zwei Gleichungen für zwei Unbekannte aus einem Sachtext"],
+         hero=G(["2^x", "2^(-x)"], "-3.5,3.5", "-0.5,8.5", [[0, 1]], "Der Graph von 2 hoch x und sein Spiegelbild an der y-Achse"),
+         checkin=[Q(r"$30\,\%$ einer Klasse sind $9$ Personen. Wie viele Personen hat die Klasse?", "30", "9/0.3", r"Grundwert $G = \frac{W}{p} = \frac{9}{0{,}3} = 30$", "Personen"),
+                  Q(r"Wie groß ist $2^{-2}$?", "1/4", "2**-2", r"$2^{-2} = \frac{1}{2^2} = \frac{1}{4}$", "Wert"),
+                  Q(r"Der Graph von $f(x) = \frac{k}{x}$ geht durch $(2 \mid 5)$. Wie groß ist $k$?", "10", "2*5", r"$5 = \frac{k}{2}$, also $k = 10$.", "k =")],
+         merke=("MERKE · PROZENT, POTENZEN, HYPERBEL",
+                [r"**Grundwert:** $G = \frac{W}{p}$. Sind $30\,\%$ genau $48$ Personen, ist $G = \frac{48}{0{,}3} = 160$.",
+                 r"**Potenzen:** $2^{-n} = \frac{1}{2^n}$ und $2^{x + 2} = 2^2 \cdot 2^x = 4 \cdot 2^x$.",
+                 r"**Spiegeln an der $y$-Achse:** $x$ durch $-x$ ersetzen. Aus $2^x$ wird $2^{-x} = \left(\frac{1}{2}\right)^x$.",
+                 r"**Verschieben:** Ein Plus im Exponenten verschiebt nach **links**, ein Plus hinter der Potenz nach **oben**.",
+                 r"**Hyperbel:** Bei $f(x) = \frac{k}{x}$ hat jedes Rechteck unter dem Graphen den Flächeninhalt $u \cdot \frac{k}{u} = k$."]),
+         widgets=[W("potenzfunktion", "INTERAKTIV · POTENZFUNKTIONEN", r"Wähle einen Exponenten. Mit „Verwandte zeigen“ erscheinen die Graphen mit derselben Art von Exponent dazu. Die Hyperbel ist $x^{-1} = \frac{1}{x}$.", n="-1"),
+                  W("expgleichung", r"INTERAKTIV · $a^x = b$ LÖSEN", r"Gib Basis und rechte Seite ein. Brüche und Kommazahlen gehen auch.")],
+         repeat=[L("../mathe11/lb3-2.html", "WACHSTUM UND ZERFALL", "Mathematik 11 · Kapitel 3.2"),
+                 L("../mathe11/lb3-7.html", "GRAPHEN UND PARAMETER", "Mathematik 11 · Kapitel 3.7"),
+                 L("../mathe11/lb2.html", "GLEICHUNGEN, FORMELN, FIGUREN", "Mathematik 11 · Kapitel 2")],
+         kern=[r"Grundwert, Prozentwert und Prozentsatz zuerst benennen. Bei „genau eine Aussage ist falsch“ hilft eine Probe an einer markanten Stelle.",
+               r"$2^{x + 2}$ ist $4 \cdot 2^x$: einmal nach links verschoben, einmal gestreckt. Spiegeln an der $y$-Achse heißt $x$ durch $-x$ ersetzen.",
+               r"Zwei Unbekannte brauchen zwei Gleichungen. Die negative Lösung passt zu keiner Länge und wird verworfen."],
+         test=[Q(r"$15\,\%$ der Befragten sind $27$ Personen. Wie viele wurden befragt?", "180", "27/0.15", r"$G = \frac{27}{0{,}15} = 180$", "Personen"),
+               Q(r"An welcher Stelle nimmt $f(x) = 2^x$ den Wert $32$ an?", "5", "log2(32)", r"$2^5 = 32$", "x ="),
+               Q(r"$h(x) = 2^{x + 3}$ lässt sich als $h(x) = c \cdot 2^x$ schreiben. Wie groß ist $c$?", "8", "2**3", r"$2^{x + 3} = 2^3 \cdot 2^x = 8 \cdot 2^x$", "c ="),
+               Q(r"Ein Rechteck unter dem Graphen von $f(x) = \frac{18}{x}$ hat die Ecke $Q(6 \mid 3)$. Wie groß ist sein Flächeninhalt?", "18", "6*3", r"$6 \cdot 3 = 18 = k$, für jeden Punkt $Q$ auf dem Graphen.", "A =")]),
+
+    dict(file="va-funktionen", sheet="va-bgy11-funktionen", k=30, title="Funktionen", lb=VA + "Teil B", when=K11,
+         sub="Parabel mit Dreieck und Senkrechter, Potenzfunktion und Gerade, der Brückenbogen",
+         chips=["TEIL B", "AUFGABE 1", "MIT MMS"],
+         lead=r"Aufgabe 1 in Teil B ist eine Funktion. In den letzten Jahrgängen war es eine Parabel in Scheitelform, eine Potenzfunktion dritten Grades oder eine verschobene Exponentialfunktion. Du rechnest mit dem MMS, aber der Weg muss trotzdem erkennbar sein.",
+         pruef=["Scheitelpunkt, Wertebereich, Nullstellen", "Dreiecke und Geraden aus besonderen Punkten, auch senkrecht",
+                "Gemeinsame Punkte von Graph und Gerade, Abstände", "Eine Parabel als Modell: Brückenbogen und Durchfahrtshöhe"],
+         hero=G(["-0.5*(x-1)^2+8"], "-4,6", "-1,9", [[1, 8], [-3, 0], [5, 0]], "Nach unten geöffnete Parabel mit ihrem Scheitel und den beiden Nullstellen"),
+         checkin=[Q(r"Wo liegt der Scheitel von $f(x) = -2 \cdot (x + 3)^2 + 1$? Gib die $x$-Koordinate an.", "-3", "-3", r"$(x + 3)$ verschiebt nach links: $S(-3 \mid 1)$.", "x ="),
+                  Q(r"Eine Gerade hat den Anstieg $-2$. Welchen Anstieg hat eine Senkrechte zu ihr?", "0,5", "-1/(-2)", r"$m_2 = -\frac{1}{m_1} = -\frac{1}{-2} = \frac{1}{2}$", "m ="),
+                  Q(r"Wie groß ist die Nullstelle von $f(x) = (x + 1)^3 - 8$?", "1", "8**(1/3)-1", r"$(x + 1)^3 = 8$, also $x + 1 = 2$.", "x =")],
+         merke=("MERKE · FUNKTIONEN UND GERADEN",
+                [r"**Scheitelform:** $f(x) = a \cdot (x - d)^2 + e$ hat den Scheitel $S(d \mid e)$. Ist $a < 0$, ist der Wertebereich $y \leq e$.",
+                 r"**Senkrecht:** Zwei Geraden stehen senkrecht aufeinander, wenn $m_1 \cdot m_2 = -1$.",
+                 r"**Gemeinsame Punkte:** Funktionsterme gleichsetzen. Eine Gleichung dritten Grades hat höchstens drei Lösungen.",
+                 r"**Abstand:** $d = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$."]),
+         widgets=[W("parabel", "INTERAKTIV · PARABEL-WERKSTATT", r"Zieh den Scheitel oder nutze die Regler. Die gestrichelte Kurve ist die Normalparabel $y = x^2$."),
+                  W("potenzfunktion", "INTERAKTIV · POTENZFUNKTIONEN", r"Wähle einen Exponenten. Mit „Verwandte zeigen“ erscheinen die Graphen mit derselben Art von Exponent dazu.", n="3")],
+         repeat=[L("../mathe11/lb3-3.html", "QUADRATISCHE FUNKTIONEN UND GLEICHUNGEN", "Mathematik 11 · Kapitel 3.3"),
+                 L("../mathe11/lb3-1.html", "FUNKTIONEN UND IHRE EIGENSCHAFTEN", "Mathematik 11 · Kapitel 3.1"),
+                 L("../mathe11/lb3-7.html", "GRAPHEN UND PARAMETER", "Mathematik 11 · Kapitel 3.7")],
+         kern=[r"Aus der Scheitelform liest du Scheitel und Wertebereich ab. Für die Senkrechte wird der Anstieg umgekehrt und mit $-1$ multipliziert.",
+               r"Gleichsetzen liefert die gemeinsamen Punkte, der Graph im MMS zeigt, wie viele es sind.",
+               r"Der Ursprung unter dem Scheitel macht die Parabel symmetrisch. Gemessen wird dort, wo es eng wird, und über dem richtigen Wasserstand."],
+         test=[Q(r"$f(x) = -(x - 2)^2 + 9$. Wie groß ist die größere Nullstelle?", "5", "2+3", r"$(x - 2)^2 = 9$, also $x = 2 \pm 3$.", "x ="),
+               Q(r"Wie groß ist der Flächeninhalt des Dreiecks mit den Ecken $N_1(-1 \mid 0)$, $N_2(5 \mid 0)$ und $S(2 \mid 9)$?", "27", "6*9/2", r"Grundseite $6$, Höhe $9$: $\frac{6 \cdot 9}{2} = 27$", "A ="),
+               Q(r"Eine Gerade hat den Anstieg $\frac{1}{3}$. Welchen Anstieg hat eine Senkrechte zu ihr?", "-3", "-1/(1/3)", r"$-\frac{1}{1/3} = -3$", "m ="),
+               Q(r"Ein Bogen wird durch $b(x) = -\frac{1}{50}x^2 + 8$ beschrieben. Wie hoch ist er bei $x = 5$?", "7,5", "-25/50+8", r"$-\frac{25}{50} + 8 = 7{,}5$", "b =")]),
+
+    dict(file="va-exponential", sheet="va-bgy11-exponential", k=31, title="Exponential-, Sinus- und Wurzelfunktionen", lb=VA + "Teil B", when=K11,
+         sub="Exponentialfunktion mit Asymptote, ein Medikament wird abgebaut, Riesenrad mit Aussicht",
+         chips=["TEIL B", "MIT MMS"],
+         lead=r"In zwei der vier ausgewerteten Jahrgänge war Aufgabe 1 eine verschobene Exponentialfunktion. Eine Wurzel- und eine Sinusfunktion tauchten in der langen Sachaufgabe auf. Hier lernst du, die Zahlen im Funktionsterm zu lesen.",
+         pruef=["Wertebereich, Monotonie und Asymptote", "Die Parameter $a$ und $b$ aus zwei Punkten",
+                "Halbwertszeit und Uhrzeiten im Sachzusammenhang", r"Sinus und Wurzel deuten, beide Lösungen von $\sin z = c$ finden"],
+         hero=G(["0.5*2^x-4", "-4"], "-4,5", "-5,9", [[3, 0], [0, -3.5]], "Eine verschobene Exponentialfunktion mit ihrer Asymptote"),
+         checkin=[Q(r"$m(t) = 100 \cdot 0{,}8^t$. Um wie viel Prozent nimmt $m$ pro Stunde ab?", "20", "(1-0.8)*100", r"Der Faktor $0{,}8$ heißt: Es bleiben $80\,\%$, also $20\,\%$ weniger.", "Prozent"),
+                  Q(r"Wie groß ist $\sin\left(\frac{\pi}{2}\right)$?", "1", "sin(pi/2)", r"$\sin 90° = 1$", "Wert"),
+                  Q(r"Welche Zahl $x$ löst $2^x = 16$?", "4", "log2(16)", r"$2^4 = 16$", "x =")],
+         merke=("MERKE · EXPONENTIAL, SINUS, WURZEL",
+                [r"**Verschoben:** $f(x) = a \cdot 2^x + b$ mit $a > 0$ hat den Wertebereich $y > b$. Die Gerade $y = b$ ist Asymptote.",
+                 r"**Abnahme:** $m(t) = a \cdot b^t$ mit $0 < b < 1$. Aus $20\,\%$ Abbau wird $b = 0{,}8$. **Halbwertszeit:** $b^t = \frac{1}{2}$.",
+                 r"**Sinus:** $h(t) = a \cdot \sin(b \cdot t) + d$ schwankt zwischen $d - a$ und $d + a$, die kleinste Periode ist $\frac{2\pi}{b}$.",
+                 r"**Zwei Lösungen:** Zu $\sin z = c$ gehört neben $z_1$ auch $\pi - z_1$. Das MMS rechnet dabei im Bogenmaß."]),
+         widgets=[W("expgleichung", r"INTERAKTIV · $a^x = b$ LÖSEN", r"Gib Basis und rechte Seite ein. Brüche und Kommazahlen gehen auch."),
+                  W("sinus", "INTERAKTIV · SINUS-WERKSTATT", r"Verändere die vier Parameter einzeln und beobachte, was mit der Kurve passiert. Gestrichelt: $\sin x$.")],
+         repeat=[L("../mathe11/lb3-2.html", "WACHSTUM UND ZERFALL", "Mathematik 11 · Kapitel 3.2"),
+                 L("../mathe11/lb3-4.html", "PERIODISCHE VORGÄNGE", "Mathematik 11 · Kapitel 3.4"),
+                 L("../mathe11/lb3-6.html", "UMKEHRFUNKTIONEN UND LOGARITHMUS", "Mathematik 11 · Kapitel 3.6")],
+         kern=[r"Die Zahl hinter der Potenz ist die Asymptote und gehört nicht zum Wertebereich. Bei zwei Punkten zuerst den mit $x = 0$ nehmen: $2^0 = 1$.",
+               r"Zwei Messwerte durcheinander teilen ergibt $b^2$. Der Faktor ist das, was bleibt, die Halbwertszeit kommt aus $b^t = \frac{1}{2}$.",
+               r"Amplitude und Mittellinie stehen im Term, die zweite Lösung kommt aus der Symmetrie. Die Wurzel wächst langsamer als ihr Argument."],
+         test=[Q(r"$f(x) = 3 \cdot 2^x - 6$. Wie groß ist die Nullstelle?", "1", "log2(2)", r"$3 \cdot 2^x = 6$, also $2^x = 2$.", "x ="),
+               Q(r"$g(x) = a \cdot 2^x + b$ geht durch $(0 \mid 3)$ und $(1 \mid 5)$. Wie groß ist $a$?", "2", "5-3", r"$a + b = 3$ und $2a + b = 5$, die Differenz ergibt $a = 2$.", "a ="),
+               Q(r"Nach wie vielen Stunden ist bei $m(t) = 100 \cdot 0{,}8^t$ nur noch die Hälfte da? Runde auf eine Stelle.", "3,1", "log(0.5)/log(0.8)", r"$t = \frac{\lg 0{,}5}{\lg 0{,}8} \approx 3{,}1$", "t =", "0.05"),
+               Q(r"$h(t) = 20 \cdot \sin\left(\frac{\pi}{10} t\right) + 25$. Wie groß ist die kleinste Periode?", "20", "2*pi/(pi/10)", r"$\frac{2\pi}{\pi/10} = 20$", "p =")]),
+
+    dict(file="va-geometrie", sheet="va-bgy11-geometrie", k=32, title="Trigonometrie und Körper", lb=VA + "Teil B", when=K11,
+         sub="Slipanlage in Kriebstein, Peilung zur Bastei, ein Turmdach in Görlitz",
+         chips=["TEIL B", "AUFGABE 2 ODER 3", "MIT FORMELSAMMLUNG"],
+         lead=r"Eine Rampe, eine Peilung, ein Dach: In der Vergleichsarbeit stecken Dreiecke und Körper in Aufgabe 2 und oft auch in der langen Sachaufgabe. Zerlege die Figur, such das rechtwinklige Dreieck und runde erst am Ende.",
+         pruef=["Steigung in Prozent und Neigungswinkel", "Sinussatz und Kosinussatz im allgemeinen Dreieck",
+                "Pyramide und Kegel: Höhe aus der Seitenkante, Mantelfläche", "Auf- und Abrunden im Sachzusammenhang"],
+         hero={"widget": "dreieck-hero", "data-motiv": "vermessung", "data-aria": "Vermessung: eine Standlinie und die Winkel zur Spitze"},
+         checkin=[Q(r"Eine Rampe steigt auf $10$ m waagerechter Länge um $1$ m. Wie groß ist ihre Steigung in Prozent?", "10", "1/10*100", r"$\frac{1}{10} = 10\,\%$", "Prozent"),
+                  Q(r"Wie groß ist $\tan 45°$?", "1", "tan(radians(45))", r"Gegenkathete und Ankathete sind gleich lang.", "Wert"),
+                  Q(r"Ein Quadrat hat die Seitenlänge $8$. Wie lang ist seine halbe Diagonale? Runde auf zwei Stellen.", "5,66", "4*sqrt(2)", r"$\frac{8\sqrt{2}}{2} = 4\sqrt{2} \approx 5{,}66$", "d =", "0.006")],
+         merke=("MERKE · DREIECKE UND KÖRPER",
+                [r"**Steigung:** $\frac{\text{Höhe}}{\text{waagerechte Länge}} = \tan \alpha$. $12{,}9\,\%$ Steigung sind **kein** Winkel von $12{,}9°$.",
+                 r"**Sinussatz:** $\frac{a}{\sin \alpha} = \frac{b}{\sin \beta}$. **Kosinussatz:** $c^2 = a^2 + b^2 - 2ab \cdot \cos \gamma$.",
+                 r"**Pyramide:** Höhe, halbe Diagonale und Seitenkante bilden ein rechtwinkliges Dreieck. **Kegelmantel:** $M = \pi \cdot r \cdot s$.",
+                 r"**Aufrunden:** Fahrten, Eimer und Rollen werden aufgerundet, auch bei $7{,}1$."]),
+         widgets=[W("dreieckloeser", "INTERAKTIV · DER DREIECKSLÖSER", r"Wähle, was gegeben ist, und stell die Werte ein. Der Löser zeigt jeden Schritt mit dem passenden Satz und zeichnet das Dreieck, bei SSW auch ein zweites."),
+                  W("pyramidekegel", "INTERAKTIV · DAS DREIECK IM KEGEL", r"Verändere Radius und Höhe. Höhe, Radius und Mantellinie bilden immer ein rechtwinkliges Dreieck.")],
+         repeat=[L("../mathe11/lb2.html", "GLEICHUNGEN, FORMELN, FIGUREN", "Mathematik 11 · Kapitel 2"),
+                 L("../mathegy10/lb3-1.html", "SINUSSATZ, KOSINUSSATZ, FLÄCHENINHALT", "Mathematik GY 10 · Kapitel 3.1"),
+                 L("../mathegy9/lb3-3.html", "PYRAMIDE UND KREISKEGEL", "Mathematik GY 9 · Kapitel 3.3")],
+         kern=[r"Erst Pythagoras für die schräge Fläche, dann $\tan \alpha$. Die Steigung in Prozent ist $\tan \alpha$, nicht der Winkel.",
+               r"Den Winkel bei $B$ aus den Höhenwinkeln, dann Sinussatz für die Strecke und das rechtwinklige Teildreieck für die Höhe.",
+               r"Die halbe Diagonale führt von der Seitenkante zur Höhe. Für den Neigungswinkel der Dachfläche zählt die Mitte der Grundkante."],
+         test=[Q(r"Eine Rampe steigt auf $20$ m waagerechter Länge um $3$ m. Wie groß ist ihr Neigungswinkel in Grad? Runde auf eine Stelle.", "8,5", "degrees(atan(3/20))", r"$\tan \alpha = 0{,}15$, also $\alpha \approx 8{,}5°$", "α =", "0.05"),
+               Q(r"Es sind $a = 5$, $b = 8$ und $\gamma = 60°$. Wie groß ist $c$?", "7", "sqrt(25+64-80*cos(radians(60)))", r"$c^2 = 25 + 64 - 80 \cdot 0{,}5 = 49$", "c ="),
+               Q(r"Eine quadratische Pyramide hat die Grundkante $6$ und die Seitenkante $\sqrt{34}$. Wie groß ist ihre Höhe?", "4", "sqrt(34-18)", r"Halbe Diagonale $3\sqrt{2}$, also $h^2 = 34 - 18 = 16$.", "h ="),
+               Q(r"Du brauchst $63{,}2$ m² Beschichtung, ein Eimer reicht für $10$ m². Wie viele Eimer kaufst du?", "7", "ceil(63.2/10)", r"$6{,}32$ wird aufgerundet.", "Eimer")]),
+
+    dict(file="va-stochastik", sheet="va-bgy11-stochastik", k=33, title="Mehrstufige Zufallsexperimente", lb=VA + "Teil B", when=K11,
+         sub="Drei Lose mit derselben Chance, Tassen ohne Zurücklegen, die Mensa-Vierfeldertafel",
+         chips=["TEIL B", "AUFGABE 2", "MIT MMS"],
+         lead=r"Drei Lose, drei Tassen, eine Umfrage: In jeder der vier ausgewerteten Vergleichsarbeiten kam eine Wahrscheinlichkeit dran, meist mit „alle gleich“ und „genau eins“. Ein Baum oder eine Vierfeldertafel bringt Ordnung, bevor du rechnest.",
+         pruef=["Pfadregeln bei unabhängigen Stufen", "Ziehen ohne Zurücklegen",
+                "„Mindestens eins“ über das Gegenereignis", "Vierfeldertafel und die richtige Bezugsgruppe"],
+         hero={"widget": "baum-hero"},
+         checkin=[Q(r"Eine Münze wird dreimal geworfen. Wie groß ist die Wahrscheinlichkeit für dreimal Kopf?", "1/8", "0.5**3", r"$\left(\frac{1}{2}\right)^3 = \frac{1}{8}$", "P ="),
+                  Q(r"$5$ rote und $5$ blaue Kugeln. Nach einer roten wird ohne Zurücklegen eine zweite gezogen. Wie groß ist die Wahrscheinlichkeit, dass sie rot ist?", "4/9", "4/9", r"Es liegen noch $9$ Kugeln da, davon $4$ rote.", "P ="),
+                  Q(r"$P(\text{Gewinn}) = 0{,}2$. Wie groß ist die Wahrscheinlichkeit für eine Niete?", "0,8", "1-0.2", r"Gegenereignis: $1 - 0{,}2 = 0{,}8$", "P =")],
+         merke=("MERKE · MEHRSTUFIG",
+                [r"**Pfadregeln:** Längs eines Pfades multiplizieren, mehrere Pfade addieren.",
+                 r"**Mindestens eins:** $P = 1 - P(\text{keins})$. $3 \cdot 0{,}2$ zählt Pfade mehrfach.",
+                 r"**Genau eins:** die Wahrscheinlichkeit eines Pfades mal die Zahl der Reihenfolgen, bei drei Stufen also mal $3$.",
+                 r"**Ohne Zurücklegen:** Zähler und Nenner ändern sich von Zug zu Zug.",
+                 r"**Bezugsgruppe:** Im Nenner steht die Gruppe, unter der gezählt wird. $\frac{180}{240}$ und $\frac{180}{244}$ fragen Verschiedenes."]),
+         widgets=[W("baum", "INTERAKTIV · BAUMDIAGRAMM-WERKSTATT", r"Stelle die Urne ein, wähle mit oder ohne Zurücklegen und klicke rechts auf die Enden der Pfade. Die Werkstatt rechnet beide Pfadregeln vor."),
+                  W("vierfeld-trainer", "INTERAKTIV · VIERFELDERTAFEL-TRAINER", r"Vier Felder sind gegeben (gelb). Fülle die anderen aus und prüfe. „Neue Tafel“ würfelt eine neue Aufgabe.")],
+         repeat=[L("../mathe11/lb1.html", "WAHRSCHEINLICHKEITEN MEHRSTUFIGER ZUFALLSVERSUCHE", "Mathematik 11 · Kapitel 1"),
+                 L("../mathegy10/lb2-1.html", "ZUFALLSGRÖSSEN UND PFADREGELN", "Mathematik GY 10 · Kapitel 2.1")],
+         kern=[r"Bei unabhängigen Losen bleibt die Wahrscheinlichkeit gleich. „Mindestens einen“ rechnest du über „keinen“.",
+               r"Ohne Zurücklegen wird der Nenner kleiner. Bei „genau eins“ und „alle verschieden“ zählen die Reihenfolgen mit.",
+               r"Erst die Tafel vollständig füllen, dann für jeden Anteil die Bezugsgruppe benennen."],
+         test=[Q(r"Jedes fünfte Los gewinnt. Wie groß ist die Wahrscheinlichkeit, mit zwei Losen mindestens einmal zu gewinnen?", "0,36", "1-0.8**2", r"$1 - 0{,}8^2 = 1 - 0{,}64 = 0{,}36$", "P ="),
+               Q(r"Mit derselben Chance $0{,}2$: Wie groß ist die Wahrscheinlichkeit für genau einen Gewinn bei zwei Losen?", "0,32", "2*0.2*0.8", r"Zwei Reihenfolgen: $2 \cdot 0{,}2 \cdot 0{,}8 = 0{,}32$", "P ="),
+               Q(r"$6$ von $12$ Tassen zeigen die Frauenkirche. Zwei werden ohne Zurücklegen gezogen. Wie groß ist die Wahrscheinlichkeit, dass beide sie zeigen?", "5/22", "6/12*5/11", r"$\frac{6}{12} \cdot \frac{5}{11} = \frac{30}{132} = \frac{5}{22}$", "P ="),
+               Q(r"$180$ von $240$ Mensa-Essern sind zufrieden. Wie viel Prozent der Mensa-Esser sind das?", "75", "180/240*100", r"Bezugsgruppe sind die $240$ Mensa-Esser: $\frac{180}{240} = 75\,\%$", "Prozent")]),
+
+    dict(file="va-lgs", sheet="va-bgy11-lgs", k=34, title="Lineare Gleichungssysteme", lb=VA + "Teil B", when=K11,
+         sub="Raddampfer nach Pillnitz, Futter im Zoo Leipzig mit dem Gauß-Verfahren, ein Fahrradverleih mit freiem Parameter",
+         chips=["TEIL B", "AUFGABE 3", "MIT MMS"],
+         lead=r"Zwei Preise, zwei Anzahlen, eine Gesamteinnahme: In der langen Sachaufgabe stand in den letzten beiden Jahrgängen ein Gleichungssystem. Wer es sicher aufstellt, holt sich dort die ersten Punkte.",
+         pruef=["Ein Gleichungssystem aus einem Sachtext aufstellen", "Lösen mit dem Gauß-Verfahren, mit Probe",
+                "Lösungen im Sachzusammenhang deuten, auch in Prozent", "Systeme mit unendlich vielen Lösungen und einem Parameter"],
+         hero=G(["-x+5", "0.5*x+2"], "-1,7", "-1,6", [[2, 3]], "Zwei Geraden schneiden sich: Der Schnittpunkt löst beide Gleichungen"),
+         checkin=[Q(r"$x + y = 10$ und $x - y = 4$. Wie groß ist $x$?", "7", "(10+4)/2", r"Addieren: $2x = 14$", "x ="),
+                  Q(r"Ein Kinderpreis von $9$ € wird um $20\,\%$ ermäßigt. Wie viel Euro kostet die Karte dann?", "7,2", "9*0.8", r"$80\,\%$ von $9$ €: $9 \cdot 0{,}8 = 7{,}20$ €", "€"),
+                  Q(r"$2x + y = 7$ und $y = 3$. Wie groß ist $x$?", "2", "(7-3)/2", r"$2x = 4$", "x =")],
+         merke=("MERKE · GLEICHUNGSSYSTEME",
+                [r"**Aufstellen:** Eine Gleichung für die Anzahlen, eine für das Geld. Die Preise stehen als Faktoren vor den Anzahlen.",
+                 r"**Gauß-Verfahren:** Durch Addieren von Vielfachen entsteht eine Dreiecksform, dann wird von unten nach oben eingesetzt.",
+                 r"**Tabelle:** Die Spalte einer Sorte liefert die Koeffizienten ihrer Variablen.",
+                 r"**Weniger Gleichungen als Unbekannte:** unendlich viele Lösungen, eine Unbekannte bleibt frei. Erst ganze, nicht negative Anzahlen schränken ein."]),
+         widgets=[W("gauss", "INTERAKTIV · GAUSS-WERKSTATT", r"Wähle eine Umformung, Zielzeile, zweite Zeile und den Faktor $k$, dann „Ausführen“. Oder lass dir mit „Nächster Schritt“ den nächsten Gauß-Schritt zeigen. „Neues LGS“ würfelt ein System mit ganzzahliger Lösung.")],
+         repeat=[L("../mathe11/lb4.html", "LINEARE GLEICHUNGSSYSTEME UND MATRIZEN", "Mathematik 11 · Kapitel 4"),
+                 L("../mathe11/lb2.html", "GLEICHUNGEN, FORMELN, FIGUREN", "Mathematik 11 · Kapitel 2")],
+         kern=[r"Eine Gleichung für die Personen, eine für das Geld. Um $20\,\%$ ermäßigt heißt mal $0{,}8$.",
+               r"Die Tabelle spaltenweise lesen, dann Gauß. Die Probe in allen drei Gleichungen sichert die Lösung.",
+               r"Zwei Gleichungen für drei Unbekannte: unendlich viele Lösungen. Ganze, nicht negative Anzahlen lassen nur wenige Flotten übrig."],
+         test=[Q(r"$300$ Fahrgäste zahlen $18$ € oder $9$ €, zusammen $4\,500$ €. Wie viele zahlen $18$ €?", "200", "(4500-9*300)/9", r"$18x + 9 \cdot (300 - x) = 4500$, also $9x = 1800$.", "Anzahl"),
+               Q(r"$x + y + z = 6$, $y + z = 5$ und $z = 2$. Wie groß ist $x$?", "1", "6-5", r"Von unten: $z = 2$, $y = 3$, $x = 1$.", "x ="),
+               Q(r"Für den Fahrradverleih gilt $x + y + z = 60$ und $12x + 30y + 40z = 1\,440$. Wie viele E-Bikes $y$ sind es bei $z = 9$?", "26", "(1440-12*60-28*9)/18", r"$12$-mal die erste Gleichung abziehen: $18y + 28z = 720$, mit $z = 9$ also $18y = 468$.", "y ="),
+               Q(r"Wie viel Euro kosten $4$ kg zu $2{,}40$ €, $5$ kg zu $1{,}80$ € und $2$ kg zu $3{,}00$ € zusammen?", "24,6", "2.4*4+1.8*5+3*2", r"$9{,}60 + 9{,}00 + 6{,}00 = 24{,}60$", "€")]),
+
+    dict(file="va-simulation", sheet="va-bgy11-simulation", k=35, title="Generalprobe Teil B", lb=VA + "Generalprobe", when=K11,
+         sub="Teil B mit Zeit und Hilfsmitteln wie im Ernstfall: 8 + 7 + 15 BE",
+         chips=["TEIL B", "30 BE", "65 MINUTEN"],
+         lead=r"Drei Aufgaben, 30 BE, rund 65 Minuten: Das ist Teil B der Vergleichsarbeit. Leg MMS und Formelsammlung bereit, starte die Uhr und schau erst am Ende in die Lösungen.",
+         pruef=["Alle drei Aufgaben in einem Durchgang", "Punkte in jeder Teilaufgabe, wie in der echten Arbeit",
+                "Eine lange Sachaufgabe aus Sachsen: Gleichungssystem, Parabel, Trigonometrie"],
+         hero=G(["-0.5*x^2+2*x+6", "-x+6"], "-2.5,7", "-1.5,9", [[0, 6], [6, 0]], "Eine Parabel und die Gerade durch zwei ihrer Achsenschnittpunkte"),
+         checkin=[Q(r"$90$ Minuten Gesamtzeit, Teil A dauert $25$ Minuten. Wie viele Minuten bleiben für Teil B?", "65", "90-25", r"$90 - 25 = 65$", "Minuten"),
+                  Q(r"Wie viele BE hat dieser Teil B?", "30", "8+7+15", r"$8 + 7 + 15 = 30$", "BE"),
+                  Q(r"Ab wie vielen von $45$ BE gibt es in der Vergleichsarbeit eine Vier?", "18", "18", r"Nach der Skala der letzten beiden Jahrgänge ergeben $18$ bis $24$ BE eine Vier.", "BE")],
+         merke=("MERKE · SO GEHST DU VOR",
+                [r"**Erst lesen:** Verschaffe dir einen Überblick über alle drei Aufgaben.",
+                 r"**Rechenweg zeigen:** Auch mit dem MMS muss erkennbar sein, was du gerechnet hast.",
+                 r"**Näherungswerte:** Ein richtiger Näherungswert bringt auch dort die volle Punktzahl, wo ein exakter Wert erwartet wird.",
+                 r"**Einheiten:** Antworte im Sachzusammenhang, mit Einheit und sinnvoll gerundet."]),
+         widgets=[W("pruefungsuhr", "DEINE UHR · 65 MINUTEN", r"Starte die Uhr, wenn du beginnst. Sie läuft nur, solange diese Seite offen ist.", min=65)],
+         kern=[r"Scheitel und Nullstellen, dann die Gerade durch die Achsenschnittpunkte. Beim Berühren muss die Diskriminante null sein.",
+               r"Zylinder plus Kegel, $5\,\%$ Verlust, dann abrunden. Ohne Zurücklegen ändert sich der zweite Bruch.",
+               r"Gleichungssystem, Parabel, Durchfahrtsbreite und ein Kosinussatz mit $180° - 48°$: quer durch alles, wie in jeder Vergleichsarbeit."],
+         test=[Q(r"Wie groß ist die größere Nullstelle von $-\frac{1}{2}x^2 + 2x + 6$?", "6", "(4+8)/2", r"$x^2 - 4x - 12 = 0$, also $(x - 6)(x + 2) = 0$.", "x ="),
+               Q(r"$6$ Engel und $4$ Bergmänner, zwei ohne Zurücklegen. Wie groß ist die Wahrscheinlichkeit für zwei Bergmänner?", "2/15", "4/10*3/9", r"$\frac{4}{10} \cdot \frac{3}{9} = \frac{12}{90} = \frac{2}{15}$", "P ="),
+               Q(r"Ein Boot ändert seine Fahrtrichtung um $48°$. Wie groß ist der Winkel im Dreieck an dieser Ecke in Grad?", "132", "180-48", r"$180° - 48° = 132°$", "Winkel"),
+               Q(r"Ein Zylinder hat $r = 1$ cm und $h = 9$ cm. Sein Volumen ist $k \cdot \pi$ cm³. Wie groß ist $k$?", "9", "1*1*9", r"$\pi \cdot 1^2 \cdot 9 = 9\pi$", "k =")]),
 ]

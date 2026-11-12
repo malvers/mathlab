@@ -1,10 +1,11 @@
-/* kapitel.js — the chapters of the training book, Abitur first, then the BLF. Written by tools/buch-pruefung/build.py.
+/* kapitel.js — the chapters of the training book, Abitur first, then the BLF, then the Vergleichsarbeit. Written by
+ * tools/buch-pruefung/build.py.
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
  */
 window.BUCH = {
-    title: 'Prüfungstraining Mathematik · Abitur und BLF',
+    title: 'Prüfungstraining Mathematik · Abitur, BLF und Vergleichsarbeit',
     short: 'Prüfungstraining',
-    description: 'Interaktives Übungsbuch für die Prüfungen in Sachsen: Abitur am Beruflichen Gymnasium und Besondere Leistungsfeststellung in Klasse 10, 26 Kapitel mit 72 Aufgaben im Prüfungsformat, Lösungen, Fallen, Widgets und Selbsttests.',
+    description: 'Interaktives Übungsbuch für die Prüfungen in Sachsen: Abitur am Beruflichen Gymnasium, Besondere Leistungsfeststellung in Klasse 10 und Vergleichsarbeit in Klasse 11 am Beruflichen Gymnasium, 35 Kapitel mit 96 Aufgaben im Prüfungsformat, Lösungen, Fallen, Widgets und Selbsttests.',
     chapters: [
         { file: 'abi-ueberblick.html', lb: 'Abitur · Überblick', k: '1', title: 'So ist das Abitur gebaut',
           sub: 'Teil A und Teil B, Punkte, Aufgabentypen, Operatoren, Reihenfolge zum Üben', when: 'GK und LK', ustd: 0 },
@@ -57,6 +58,24 @@ window.BUCH = {
         { file: 'blf-stochastik.html', lb: 'BLF · Teil B', k: '25', title: 'Daten und Zufall',
           sub: 'Kreisdiagramm, gewichtetes Mittel, Ziehen ohne Zurücklegen, faire Spiele', when: 'Klasse 10', ustd: 0 },
         { file: 'blf-simulation.html', lb: 'BLF · Generalprobe', k: '26', title: 'Generalprobe Teil B',
-          sub: 'Teil B mit Zeit und Hilfsmitteln wie im Ernstfall: 10 + 6 + 14 BE', when: 'Klasse 10', ustd: 0 }
+          sub: 'Teil B mit Zeit und Hilfsmitteln wie im Ernstfall: 10 + 6 + 14 BE', when: 'Klasse 10', ustd: 0 },
+        { file: 'va-ueberblick.html', lb: 'Vergleichsarbeit · Überblick', k: '27', title: 'So ist die Vergleichsarbeit gebaut',
+          sub: '90 Minuten, 45 BE, Teil A ohne Hilfsmittel, Teil B mit MMS, Notenskala', when: 'BGY Klasse 11', ustd: 0 },
+        { file: 'va-teila.html', lb: 'Vergleichsarbeit · Teil A', k: '28', title: 'Teil A, Satz 1',
+          sub: 'Ankreuzen, zwei parallele Geraden und eine Raute, die Tombola ohne Zurücklegen', when: 'BGY Klasse 11', ustd: 0 },
+        { file: 'va-teila2.html', lb: 'Vergleichsarbeit · Teil A', k: '29', title: 'Teil A, Satz 2',
+          sub: 'Noch sechsmal ankreuzen, die Exponentialfunktion zur Basis 2, Rechtecke unter einer Hyperbel', when: 'BGY Klasse 11', ustd: 0 },
+        { file: 'va-funktionen.html', lb: 'Vergleichsarbeit · Teil B', k: '30', title: 'Funktionen',
+          sub: 'Parabel mit Dreieck und Senkrechter, Potenzfunktion und Gerade, der Brückenbogen', when: 'BGY Klasse 11', ustd: 0 },
+        { file: 'va-exponential.html', lb: 'Vergleichsarbeit · Teil B', k: '31', title: 'Exponential-, Sinus- und Wurzelfunktionen',
+          sub: 'Exponentialfunktion mit Asymptote, ein Medikament wird abgebaut, Riesenrad mit Aussicht', when: 'BGY Klasse 11', ustd: 0 },
+        { file: 'va-geometrie.html', lb: 'Vergleichsarbeit · Teil B', k: '32', title: 'Trigonometrie und Körper',
+          sub: 'Slipanlage in Kriebstein, Peilung zur Bastei, ein Turmdach in Görlitz', when: 'BGY Klasse 11', ustd: 0 },
+        { file: 'va-stochastik.html', lb: 'Vergleichsarbeit · Teil B', k: '33', title: 'Mehrstufige Zufallsexperimente',
+          sub: 'Drei Lose mit derselben Chance, Tassen ohne Zurücklegen, die Mensa-Vierfeldertafel', when: 'BGY Klasse 11', ustd: 0 },
+        { file: 'va-lgs.html', lb: 'Vergleichsarbeit · Teil B', k: '34', title: 'Lineare Gleichungssysteme',
+          sub: 'Raddampfer nach Pillnitz, Futter im Zoo Leipzig mit dem Gauß-Verfahren, ein Fahrradverleih mit freiem Parameter', when: 'BGY Klasse 11', ustd: 0 },
+        { file: 'va-simulation.html', lb: 'Vergleichsarbeit · Generalprobe', k: '35', title: 'Generalprobe Teil B',
+          sub: 'Teil B mit Zeit und Hilfsmitteln wie im Ernstfall: 8 + 7 + 15 BE', when: 'BGY Klasse 11', ustd: 0 }
     ]
 };

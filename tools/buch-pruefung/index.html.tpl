@@ -18,7 +18,7 @@
 
 <header class="b-top">
     <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
-    <span class="b-top-book">PRÜFUNGSTRAINING · ABITUR · BLF</span>
+    <span class="b-top-book">PRÜFUNGSTRAINING · ABITUR · BLF · VA</span>
     <div class="b-progress"></div>
 </header>
 <nav class="b-strip" aria-label="Abschnitte"></nav>
@@ -39,7 +39,7 @@
             <div class="b-titel-main">
                 <p class="b-titel-kicker">INTERAKTIVES ÜBUNGSBUCH</p>
                 <h1>Mathematik</h1>
-                <p class="b-titel-sub">Prüfungstraining<br><b>Abitur · BLF</b></p>
+                <p class="b-titel-sub">Prüfungstraining<br><b>Abitur · BLF · Vergleichsarbeit</b></p>
             </div>
             <div class="b-titel-foot"><span>SACHSEN</span><span>SCHULJAHR 2026/27</span></div>
         </div>
@@ -47,17 +47,19 @@
             <p class="b-kicker">INTERAKTIVES ÜBUNGSBUCH · SACHSEN</p>
             <h2>Üben wie in der Prüfung</h2>
             <div class="b-text">
-                <p>Vier Jahrgänge Abitur und drei Jahrgänge BLF haben wir Aufgabe für Aufgabe ausgewertet. Daraus sind 72 eigene Aufgaben im Prüfungsformat entstanden:
-                    jeweils drei Aufgaben je Baustein, vom Reproduzieren bis zum Beurteilen, mit Lösungsweg, mit der typischen Falle und mit zwei Generalproben unter echter Zeit.</p>
+                <p>Vier Jahrgänge Abitur, drei Jahrgänge BLF und vier Jahrgänge Vergleichsarbeit haben wir Aufgabe für Aufgabe ausgewertet. Daraus sind __TASKS__ eigene Aufgaben im Prüfungsformat entstanden:
+                    jeweils drei Aufgaben je Baustein, vom Reproduzieren bis zum Beurteilen, mit Lösungsweg, mit der typischen Falle und mit drei Generalproben unter echter Zeit.</p>
             </div>
             <div class="b-chips">
                 <span class="b-chip">__N__ KAPITEL</span>
-                <span class="b-chip">72 AUFGABEN</span>
+                <span class="b-chip">__TASKS__ AUFGABEN</span>
                 <span class="b-chip">ABITUR BGY · BLF KLASSE 10</span>
+                <span class="b-chip">VERGLEICHSARBEIT BGY 11</span>
             </div>
             <div class="b-start-acts">
                 <a class="b-btn b-go" href="abi-ueberblick.html">Mit dem Abitur beginnen →</a>
                 <a class="b-btn" href="blf-ueberblick.html">Mit der BLF beginnen →</a>
+                <a class="b-btn" href="va-ueberblick.html">Mit der Vergleichsarbeit beginnen →</a>
                 <a class="b-btn" href="#kapitel">Inhalt</a>
                 <a class="b-btn" href="druck.html">Als PDF drucken</a>
             </div>
@@ -66,9 +68,10 @@
 </section>
 
 <section class="b-sec" id="kapitel" data-toc="Inhalt" data-toc-k="I" data-toc-short="Inhalt">
-    <div class="b-band"><span class="b-band-tag">INHALT</span><span class="b-band-sub">ERST DAS ABITUR, DANN DIE BLF</span></div>
-    <div class="b-text"><p>Das Buch hat zwei Hälften. Die erste führt durch das Abitur am Beruflichen Gymnasium, die zweite durch die Besondere Leistungsfeststellung in Klasse 10 am Gymnasium.
-        Beide beginnen mit einem Kapitel, das zeigt, wie die Prüfung gebaut ist, und enden mit einer Generalprobe unter echter Zeit. Rechts siehst du, für wen das Kapitel gedacht ist und wie viele Selbsttests du schon gelöst hast.</p></div>
+    <div class="b-band"><span class="b-band-tag">INHALT</span><span class="b-band-sub">ABITUR, BLF, VERGLEICHSARBEIT</span></div>
+    <div class="b-text"><p>Das Buch hat drei Teile. Der erste führt durch das Abitur am Beruflichen Gymnasium, der zweite durch die Besondere Leistungsfeststellung in Klasse 10 am Gymnasium,
+        der dritte durch die Vergleichsarbeit in Klasse 11 am Beruflichen Gymnasium.
+        Alle drei beginnen mit einem Kapitel, das zeigt, wie die Prüfung gebaut ist, und enden mit einer Generalprobe unter echter Zeit. Rechts siehst du, für wen das Kapitel gedacht ist und wie viele Selbsttests du schon gelöst hast.</p></div>
     <div class="b-chapters"></div>
 </section>
 
@@ -105,7 +108,7 @@
 </section>
 
 <footer class="b-foot">
-    <p>Doc Alvers Mathe-Labor · Prüfungstraining Mathematik · nach den Aufgabentypen der sächsischen Abitur- und BLF-Prüfungen 2021/22 bis 2024/25.</p>
+    <p>Doc Alvers Mathe-Labor · Prüfungstraining Mathematik · nach den Aufgabentypen der sächsischen Abitur- und BLF-Prüfungen und der Vergleichsarbeiten Klasse 11 von 2021/22 bis 2024/25.</p>
     <p>Alle Texte, Aufgaben und Abbildungen sind eigene Inhalte. Die Originalprüfungen werden nicht wiedergegeben.</p>
 </footer>
 
