@@ -3168,6 +3168,31 @@
                 if (hit) { elTest.value = hit.value; demoMode = false; testPicked = true; }
             }
 
+            /* #codes=7K3M,4PXR,... - an anonymous group's codes arrive by link, one click per browser
+               (Doc, 12.11.2026, the staff-meeting quiz: Mission Control runs on the Mac at localhost:8765
+               and on the beamer at docalvers.de, two browsers with two stores, and the slips are printed
+               already). Only codes, never names; only for the group the link's ?ziel= chose; an existing
+               group of this browser is replaced only after a yes. The hash leaves the address at once. */
+            function codesFromHash() {
+                const m = /^#codes=([0-9A-Za-z,]+)$/.exec(location.hash || '');
+                if (!m) return;
+                history.replaceState(null, '', location.pathname + location.search);
+                const codes = [];
+                m[1].toUpperCase().split(',').forEach(function (c) {
+                    if (/^[2-9A-HJ-NP-Z]{4}$/.test(c) && codes.indexOf(c) < 0) codes.push(c);
+                });
+                if (!codes.length || codes.length > 60 || !testPicked || demoMode) return;
+                const key = groupKey(), all = load(), old = all[key];
+                const had = old && Array.isArray(old.ids) ? old.ids.map(function (x) { return x.code; }) : [];
+                if (had.join(',') === codes.join(',')) return;
+                if (!window.confirm(had.length
+                    ? 'Die Gruppe ' + key + ' hat in diesem Browser schon ' + had.length + ' Codes. Durch die ' +
+                      codes.length + ' Codes aus dem Link ersetzen?'
+                    : codes.length + ' Codes für ' + key + ' in diesem Browser übernehmen?')) return;
+                all[key] = { test: testUrl(), ids: codes.map(function (c) { return { code: c }; }) };
+                try { localStorage.setItem(STORE, JSON.stringify(all)); } catch (e) { /* private mode */ }
+            }
+
             /* ?test fills the demo class in, the same switch the quiz pages use
                for their demo pool. Nothing is overwritten that is already there. */
             function demoFromUrl() {
@@ -3473,6 +3498,11 @@
             elNames.value = '';
             addDemoGroup();
             zielFromUrl();
+            codesFromHash();
+            /* the same page open already: a link that differs only in its hash does not reload */
+            window.addEventListener('hashchange', function () {
+                if (/^#codes=/.test(location.hash)) { codesFromHash(); restore(); }
+            });
             restore();
             demoFromUrl();
             migratePlaintext();
