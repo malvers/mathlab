@@ -444,14 +444,20 @@ const trommel = (function () {
  * Doc, 02.11.2026, the closing slide: "noch den Sound einblenden, wenn docalvers.de unten kommt. Wo die alle so jubeln".
  * The step plays its file when its click comes - only on one step forward, as the drum roll; turning back or leaving
  * the slide stops it. The presenter window stays silent.
+ * A short line of Solita's works the same way (Doc, 11.11.2026, the stamp "Tokens rock!" on ai-wasserzeichen: "Egal, ob
+ * Solita da spricht oder nicht: Wenn das erscheint, soll sie sagen 'Tokens rock!'"): data-ton="audio/<deck>/name.mp3",
+ * a clip in her folder plays at her pace (narr TEMPO, window.deckTempo). Not in the editor, not when a slide is opened
+ * built (a link with #16), since that is no step forward.
  */
 (function () {
   let lastSi = -1, lastStep = -1, audio = null;
   const holen = src => { if (!audio || audio.dataset.src !== src) { audio = new Audio(src); audio.preload = 'auto'; audio.dataset.src = src; } return audio; };
+  // Solita's quiet clock asks this before it turns the page, so a step's sound is never cut off (narr still())
+  window.deckTon = { laeuft: function () { return !!audio && !audio.paused && !audio.ended; } };
   painted.push(function () {
     const vor = si === lastSi && step === lastStep + 1, gleich = si === lastSi && step === lastStep, zurueck = si !== lastSi || step < lastStep;
     lastSi = si; lastStep = step;
-    if (gleich || PRESENTER) return;
+    if (gleich || PRESENTER || document.documentElement.classList.contains('deck-edit')) return;
     if (audio && zurueck) audio.pause();
     const teile = [...slides[si].querySelectorAll('.step[data-ton]')];
     if (!teile.length) return;
@@ -460,6 +466,7 @@ const trommel = (function () {
     if (!e) return;
     const a = holen(e.dataset.ton);
     a.currentTime = 0;
+    if (/^audio\//.test(e.dataset.ton)) { a.preservesPitch = true; a.playbackRate = window.deckTempo || 1; }   // her voice
     a.play().catch(() => { });
   });
 })();
@@ -1471,6 +1478,7 @@ const narr = (function () {
   const TEMPO_ALLE = 0.92;                             // Doc picked sample 33 by ear (11.11.2026)
   const tempoUrl = parseFloat(new URLSearchParams(location.search).get('tempo'));
   const TEMPO = tempoUrl >= 0.5 && tempoUrl <= 1.5 ? tempoUrl : data.tempo > 0 ? data.tempo : TEMPO_ALLE;
+  window.deckTempo = TEMPO;                           // her short lines on a step (data-ton) keep the same pace
   let audio = null, aSlide = -1, part = 0;
   let left = null;                                    // the clip a turn by hand cut off: {a, s, p}
   let wait = 0;                                       // pending pause after a clip or before the next slide
@@ -1507,8 +1515,33 @@ const narr = (function () {
     [btn, big, face].forEach(b => { b.title = t; b.setAttribute('aria-label', t); });
     big.classList.toggle('playing', api.playing);     // its rings rest while she talks (deck.css)
   }
+  // A slide without words of hers can still have its clicks (Doc, 11.11.2026, the token slide of ai-wasserzeichen: "Egal,
+  // ob Solita da spricht oder nicht: Wenn das erscheint, soll sie sagen 'Tokens rock!'"): narration "demo" for a slide
+  // without parts runs on a quiet clock instead of a clip - the same actions as in a clip (step:N, buttons, labs), so its
+  // clicks come one by one and a step's own sound (data-ton) plays; after its last entry the slide stands its usual moment.
+  // A sound still playing then is let finish first, and the slide stands as after her last word (Doc, 12.11.2026, picked
+  // a 2.3 s "Tokens… rock!" for the stamp - turning the page would have cut its "rock").
+  let stillSi = -1, stillTick = 0;
+  function still(n) {
+    const list = data.demo[n], clock = { currentTime: 0, ontimeupdate: null };
+    let end = list[list.length - 1][0] + 1500;
+    const t0 = performance.now();
+    stillSi = n;
+    demo(n, clock, 0);
+    clearInterval(stillTick);
+    stillTick = setInterval(function () {
+      // paused or turned away: the clock stops, and starts again from its top when she goes on here (its clicks only add)
+      if (!api.playing || si !== n) { clearInterval(stillTick); stillSi = -1; return; }
+      clock.currentTime = (performance.now() - t0) / 1000;
+      if (clock.ontimeupdate) clock.ontimeupdate();
+      if (window.deckTon && window.deckTon.laeuft()) end = Math.max(end, clock.currentTime * 1000 + 100);
+      if (clock.currentTime * 1000 >= end) { clearInterval(stillTick); stillSi = -1; part = 1; run(); }   // done: on
+    }, 100);
+  }
   function run() {
     if (!api.playing) return;
+    if (!parts(si) && part === 0 && stillSi !== si && ((data.demo || {})[si] || []).length) { still(si); return; }
+    if (!parts(si) && part === 0 && stillSi === si) return;   // its quiet clock still runs
     if (part >= parts(si)) {                          // slide done: everything in, then on
       step = groups(slides[si]); paint();
       if (si >= slides.length - 1) { api.playing = false; audio = null; show(); return; }

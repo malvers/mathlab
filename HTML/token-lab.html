@@ -83,7 +83,7 @@
         /* the deck's frame (1133 px): all nine examples on ONE line (Doc, 11.11.2026: "Emoji ist auf der naechsten Zeile") */
         body.tk-widget #tk-sheet { padding: 12px 18px 6px; gap: 6px; }
         body.tk-widget #tk-grid { margin-top: auto; }   /* free height split: half above the lines, half above the ticker */
-        body.tk-widget #tk-band { padding: 3px 0; margin: auto 0 0; }
+        body.tk-widget #tk-band { padding: 5.5px 0; margin: auto 0 0; }   /* 5 px higher (Doc, 12.11.2026) */
         /* "Text zerlegen" in the deck frame: bigger boxes and text fill the frame instead of a strip under the numbers */
         body.tk-widget:not(.tk-m-bpe) #tk-sheet { --chip-h: 52px; }
         /* Doc, 11.11.2026: "das Labor total oben-zentriert ... ein bisschen auseinanderziehen": the lines start at the top
@@ -109,6 +109,7 @@
             font-size: 15px; letter-spacing: .6px; color: rgba(14, 36, 78, .75); }
         #tk-count b { font-size: 30px; font-weight: 700; color: #0E244E; }
         #tk-count .tk-arrow { color: rgb(176, 36, 24); font-size: 22px; }
+        #tk-count .tk-dot { color: rgba(14, 36, 78, .5); font-size: 22px; }
 
         #tk-chips, #tk-bpe-chips { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 6px;
             min-height: calc(var(--chip-h) + 18px); }
@@ -153,11 +154,14 @@
            wie oben beim Ticker auf dem Stoffverteilungsplan. Vielleicht durchaus schneller"). The same way as the SVP
            ticker (svp-news.css): the line stands twice, the animation moves by exactly one copy and starts again. */
         #tk-grid { margin-top: auto; }
-        #tk-band { flex: 0 0 auto; margin: 26px 0 auto; overflow: hidden; white-space: nowrap; padding: 5px 0;
+        #tk-band { flex: 0 0 auto; margin: 26px 0 auto; overflow: hidden; white-space: nowrap; padding: 7.5px 0;
             border-top: 1px solid rgba(14, 36, 78, .15); border-bottom: 1px solid rgba(14, 36, 78, .15);
             -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
             mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
         #tk-band .run { display: inline-block; }
+        /* on a deck slide the ticker can wait for a click of the slide (see bandOnClick): its place stays free */
+        #tk-band { transition: opacity .6s ease; }
+        #tk-band.wartet { opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s linear .3s; }
         #tk-band.runs .run { animation: tk-band var(--dauer, 60s) linear infinite; }
         #tk-band:hover .run, #tk-band.halt .run { animation-play-state: paused; }
         #tk-band .line { display: inline-block; white-space: nowrap; }
@@ -176,6 +180,11 @@
         #tk-foot a { color: inherit; text-decoration-skip-ink: none; text-underline-offset: 2px; }
         /* the switch between the two views, in red so one finds it */
         #tk-mode { margin-left: auto; border-color: rgba(176, 36, 24, .55); color: rgb(176, 36, 24); white-space: nowrap; }
+        /* as far from the right edge as from the bottom (Doc, 12.11.2026: "so weit nach rechts, dass der Abstand so ist
+           wie nach unten"): the margin is the sheet's bottom padding minus its right one - 12 - 26 here, 6 - 18 in the
+           deck's frame, 12 - 14 on a phone */
+        #tk-mode { margin-right: -14px; }
+        body.tk-widget #tk-mode { margin-right: -12px; }
         #tk-mode:hover { background: rgba(176, 36, 24, .08); border-color: rgb(176, 36, 24); }
 
         @media (min-width: 1200px) and (min-height: 760px) {
@@ -204,11 +213,12 @@
             .tk-lab.zwei span:last-child::before { content: "· darunter "; }
             #tk-input { font-size: 19px; }
             .tk-chip > span { font-size: 20px; }
-            #tk-count b { font-size: 24px; }
+            #tk-count { gap: 6px; font-size: 13.5px; flex-wrap: wrap; }   /* words, characters and tokens in one line at 390 px */
+            #tk-count b { font-size: 22px; }
             #tk-bottom { flex-direction: column; align-items: flex-start; }
             #tk-grid { margin-top: 0; }
             #tk-band { margin: 16px 0 auto; }
-            #tk-mode { margin-left: 0; }
+            #tk-mode { margin-left: 0; align-self: flex-end; margin-right: -2px; }
         }
     </style>
     <script src="js/farbschema.js"></script>
@@ -417,9 +427,68 @@
         // ------------------------------------------------------------- "Text zerlegen" ---
         // the text box is as high as its text
         function fitInput() { input.style.height = 'auto'; input.style.height = input.scrollHeight + 2 + 'px'; }
-        window.addEventListener('resize', fitInput);
+        window.addEventListener('resize', () => { slotsKey = ''; fixSlots(); fitInput(); });
+
+        // words as a reader counts them (Doc, 12.11.2026: "Erst Wörter, dann Zeichen, dann Token"): punctuation and emoji
+        // are no words, a number (3,5 · 1.000) is one, a hyphenated word (E-Mail-Adresse) is one; Chinese has no spaces,
+        // the browser's word segmenter finds its words (今天天气很好 = 今天 · 天气 · 很好)
+        const SEG = window.Intl && Intl.Segmenter ? new Intl.Segmenter('de', { granularity: 'word' }) : null;
+        function countWords(text) {
+            if (!SEG) return (text.match(/[\p{L}\p{M}\p{N}]+(?:[-‐'’.,][\p{L}\p{M}\p{N}]+)*/gu) || []).length;
+            let n = 0, prevWord = false, joint = false;
+            for (const s of SEG.segment(text)) {
+                if (s.isWordLike) {
+                    if (!(prevWord && joint)) n++;
+                    prevWord = true;
+                    joint = false;
+                } else {
+                    joint = prevWord && /^[-‐]$/.test(s.segment);   // a hyphen right between two words joins them
+                    if (!joint) prevWord = false;
+                }
+            }
+            return n;
+        }
+
+        function countHTML(words, chars, tokens) {
+            return '<span><b>' + fmt(words) + '</b> ' + (words === 1 ? 'Wort' : 'Wörter') + '</span>'
+                + '<span class="tk-dot">·</span><span><b>' + fmt(chars) + '</b> Zeichen</span><span class="tk-arrow">→</span>'
+                + '<span><b>' + fmt(tokens) + '</b> ' + (tokens === 1 ? 'Token' : 'Tokens') + '</span>';
+        }
+
+        // Switching between the examples nothing jumps (Doc, 12.11.2026: "Box von dem Satz springt in der Breite, das ist
+        // nicht gut"): the box was as wide as the count beside it left over, and that count is wider for "16 Tokens" than
+        // for "8". So the count gets the width of the widest example's count and the box the height of the example that
+        // needs the most lines - both measured with the real fonts at the current size, again on every resize. A longer
+        // text typed in may still grow them, never shrink them below that.
+        let slotsKey = '';
+        function fixSlots() {
+            const count = $('tk-count');
+            if (!tok || !input.offsetWidth) return;                    // not loaded yet, or the BPE view is showing
+            const key = innerWidth + 'x' + innerHeight;
+            if (key === slotsKey) return;
+            slotsKey = key;
+            const keepText = input.value, keepCount = count.innerHTML;
+            count.style.minWidth = '';
+            let w = 0;
+            for (const [, t] of PRESETS) {
+                count.innerHTML = countHTML(countWords(t), Array.from(t).length, tok.encode(t).length);
+                w = Math.max(w, count.getBoundingClientRect().width);
+            }
+            count.innerHTML = keepCount;
+            count.style.minWidth = Math.ceil(w) + 'px';
+            input.style.minHeight = '';
+            let h = 0;
+            for (const [, t] of PRESETS) {
+                input.value = t;
+                input.style.height = 'auto';
+                h = Math.max(h, input.scrollHeight + 2);
+            }
+            input.value = keepText;
+            input.style.minHeight = h + 'px';
+        }
 
         function render() {
+            fixSlots();
             fitInput();
             const text = input.value;
             const chips = $('tk-chips');
@@ -427,9 +496,8 @@
             if (!tok) return;
             const ids = tok.encode(text);
             const chars = Array.from(text).length;
-            const words = (text.match(/\S+/g) || []).length;
-            $('tk-count').innerHTML = '<span><b>' + fmt(chars) + '</b> Zeichen</span><span class="tk-arrow">→</span><span><b>'
-                + fmt(ids.length) + '</b> Tokens</span>';
+            const words = countWords(text);
+            $('tk-count').innerHTML = countHTML(words, chars, ids.length);
             setStat('tk-s-chars', fmt(chars));
             setStat('tk-s-tokens', fmt(ids.length));
             setStat('tk-s-words', fmt(words));
@@ -660,9 +728,25 @@
         // a finger on the ticker holds it, the next touch lets it run again
         $('tk-band').addEventListener('touchstart', () => $('tk-band').classList.toggle('halt'), { passive: true });
 
+        // On a deck slide the ticker comes with a click of the slide (Doc, 12.11.2026: "erst auf Klick erscheinen lassen"):
+        // the slide carries a click step with data-lab-zeigt="band" - the deck turns it on (.on) like any other step, and
+        // the ticker shows from then on. The lab on its own, or a slide without that step, shows the ticker as before.
+        (function bandOnClick() {
+            let mark = null;
+            try {
+                const f = window.frameElement, slide = f && f.closest('.slide');
+                mark = slide && slide.querySelector('[data-lab-zeigt="band"]');
+            } catch (e) { return; }                                        // not one of our decks
+            if (!mark) return;
+            const sync = () => $('tk-band').classList.toggle('wartet', !mark.classList.contains('on'));
+            new MutationObserver(sync).observe(mark, { attributes: true, attributeFilter: ['class'] });
+            sync();
+        })();
+
         function start() {
             const t = Q.get('text');
             if (t) { input.value = t; render(); } else choose(0);
+            if (document.fonts) document.fonts.ready.then(() => { slotsKey = ''; render(); });   // measured again with the webfonts
             bandFill();
             if (Q.get('modus') === 'bpe') setMode('bpe');
         }

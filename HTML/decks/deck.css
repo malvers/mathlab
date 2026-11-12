@@ -93,7 +93,7 @@ b{font-weight:600;color:var(--fg,var(--formel))}   /* bold inside a colour keeps
 .ziel,.pic .fl.ziel{display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:baseline;text-align:left}   /* .pic .fl centres a figure's words */
 .ziel-tag{font-family:Orbitron,system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;
   text-transform:uppercase;line-height:1;color:var(--ink);background:var(--orange);padding:5px 8px 4px 10.5px;border-radius:5px}
-.ziel-tag.eng{letter-spacing:1.4px;padding:4px 11px 3px 12.4px;border-radius:999px;margin-right:10px}   /* a tighter orange pill in front of a line, e.g. "Ehrlich gesagt" under a title (Doc, 11.11.2026: "in Orange ... Etwas enger", then "Die Ecken links und rechts muessen schon schoen rund sein") */
+.ziel-tag.eng{display:inline-block;letter-spacing:1.4px;padding:5px 9.1px 4px 10.5px;margin-right:10px}   /* a tighter orange tag in front of a line, e.g. "Ehrlich gesagt" under a title (Doc, 11.11.2026: "in Orange ... Etwas enger"): a sibling of the "Ziel" tag - its small round corners (5px) and padding, only the letter spacing tighter (the right padding minus the trailing 1.4px), inline-block so it is as high as "Ziel" in its line; no pill any more (Doc, 12.11.2026: "Die soll schon viereckig sein, aber mit kleinen runden Ecken. Keine so eine Pille") */
 /* an arrow between two formulas, drawn instead of KaTeX's thin \Longrightarrow: a line and a stealth head in anthracite,
    the arrows of the figures (Doc, 11.11.2026: "den Pfeil auf Folie 3 finde ich nicht so schön"). Sized in em, so it
    grows with the formula; its middle sits on the formula's axis, at the height of the = bars.
@@ -470,6 +470,14 @@ a.side-credit:hover{color:var(--red);text-decoration:underline}
 .stempel span{font:700 26px Orbitron,system-ui,sans-serif;letter-spacing:.5px;color:var(--stroke)}
 @media screen{.stempel.step.on:not(.past){animation:stempel-pop .55s cubic-bezier(.3,1.5,.5,1)}}
 @keyframes stempel-pop{from{opacity:0;transform:rotate(-16deg) scale(.4)}to{opacity:1;transform:rotate(-4deg) scale(1)}}
+/* the big one: across most of the slide, over everything, more askew (Doc, 11.11.2026: "'Tokens rock' wuerde ich ja fast voll
+   ueber das ganze Bild packen"); <div class="stempel gross step kommt" ...> placed by left/top like the small one */
+.stempel.gross{gap:26px;padding:18px 46px 18px 26px;border-width:5px;border-radius:30px;background:rgba(255,255,255,.94);
+  box-shadow:0 16px 44px rgba(14,36,78,.38);transform:rotate(-7deg);z-index:6}
+.stempel.gross img{width:112px;height:112px}
+.stempel.gross span{font-size:62px;letter-spacing:1px}
+@media screen{.stempel.gross.step.on:not(.past){animation:stempel-pop-gross .6s cubic-bezier(.3,1.5,.5,1)}}
+@keyframes stempel-pop-gross{from{opacity:0;transform:rotate(-20deg) scale(.3)}to{opacity:1;transform:rotate(-7deg) scale(1)}}
 
 /* --- table_top ---------------------------------------------------------- */
 .dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
