@@ -293,10 +293,12 @@ async function upload(book, out, json) {
 // targets, the new fingerprint). It refuses when anything else moved - another number of pages, another page size, other
 // jump targets on any other page - because then the whole book has to be set. After the swap pdftotext compares the text
 // of every other page with the old PDF: same number of pages, same order.
-// The returned diff says how far the new sheet is from its picture online: the mean difference per colour channel (0-255)
-// against the large picture. Below GLEICH the page did not change (the WebP of the old picture alone makes ~1): then only
-// the fingerprint goes up, as with --umstempeln. With --nur-lokal nothing goes up at all - a check.
-const GLEICH = 2;
+// Whether sheet N changed is told by its pixels against the large picture online: big counts the pixels that differ by
+// more than STARK in a colour channel. The WebP of the old picture stays below that; a moved line does not (12.11.2026:
+// two lines of the acknowledgement moved down a few px - the mean difference was only 1.28, so a mean alone cannot tell).
+// Not a single such pixel: the page did not change, only the fingerprint goes up, as with --umstempeln. diff, the mean
+// difference per channel (0-255), is shown as well. With --nur-lokal nothing goes up at all - a check.
+const STARK = 160;
 async function seiteTauschen(browser, book, v, out, N) {
     const alt = await online(book);
     if (!alt) throw new Error('nicht online - das Buch muss ganz gesetzt werden');
@@ -322,7 +324,7 @@ async function seiteTauschen(browser, book, v, out, N) {
         // the pictures, in a second tab as in render: the sheet at its place in l-<k>, and in two halvings into s.webp
         const comp = await ctx.newPage();
         const b64 = f => readFileSync(path.join(out, 'alt', f)).toString('base64');
-        const res = await comp.evaluate(async ([png, sB, lB, i, W, H, s, PER, LC]) => {
+        const res = await comp.evaluate(async ([png, sB, lB, i, W, H, s, PER, LC, STARK]) => {
             const bmp = async (b, type) => createImageBitmap(await (await fetch('data:' + type + ';base64,' + b)).blob());
             const img = await bmp(png, 'image/png'), Sold = await bmp(sB, 'image/webp'), Lold = await bmp(lB, 'image/webp');
             const j = i % PER, x = (j % LC) * W, y = Math.floor(j / LC) * H;
@@ -331,8 +333,12 @@ async function seiteTauschen(browser, book, v, out, N) {
             const T = new OffscreenCanvas(W, H), tx = T.getContext('2d');
             tx.fillStyle = '#fff'; tx.fillRect(0, 0, W, H); tx.drawImage(img, 0, 0, W, H);
             const a = lx.getImageData(x, y, W, H).data, b = tx.getImageData(0, 0, W, H).data;
-            let d = 0;
-            for (let q = 0; q < a.length; q += 4) d += Math.abs(a[q] - b[q]) + Math.abs(a[q + 1] - b[q + 1]) + Math.abs(a[q + 2] - b[q + 2]);
+            let d = 0, big = 0;
+            for (let q = 0; q < a.length; q += 4) {
+                const r = Math.abs(a[q] - b[q]), g = Math.abs(a[q + 1] - b[q + 1]), u = Math.abs(a[q + 2] - b[q + 2]);
+                d += r + g + u;
+                if (Math.max(r, g, u) > STARK) big++;
+            }
             lx.fillStyle = '#fff'; lx.fillRect(x, y, W, H); lx.drawImage(img, x, y, W, H);
             const S = new OffscreenCanvas(Sold.width, Sold.height), sx = S.getContext('2d');
             sx.drawImage(Sold, 0, 0);
@@ -347,8 +353,8 @@ async function seiteTauschen(browser, book, v, out, N) {
                 let t = ''; for (let p = 0; p < u.length; p += 0x8000) t += String.fromCharCode.apply(null, u.subarray(p, p + 0x8000));
                 return btoa(t);
             };
-            return { diff: d / (W * H * 3), l: await enc(L), s: await enc(S) };
-        }, [png, b64('s.webp'), b64(lname), N - 1, meta.w, meta.h, alt.s, PER, LC]);
+            return { diff: d / (W * H * 3), big, l: await enc(L), s: await enc(S) };
+        }, [png, b64('s.webp'), b64(lname), N - 1, meta.w, meta.h, alt.s, PER, LC, STARK]);
 
         // the PDF: sheet N alone from the same pages, then qpdf puts it in place of the old one
         await page.evaluate(() => document.documentElement.classList.remove('d-screen'));   // what "beforeprint" does (js/buch-druck.js)
@@ -371,7 +377,7 @@ async function seiteTauschen(browser, book, v, out, N) {
         const json = { ...alt, v, erstellt: new Date().toISOString(), pdf: { ...alt.pdf, bytes: statSync(newPdf).size }, seiten: meta.seiten };
         writeFileSync(path.join(out, 'seiten.json'), JSON.stringify(json));
         if (errors.length) console.log('  ' + book + ': Fehler auf der Seite: ' + errors.slice(0, 3).join(' | '));
-        return { json, diff: res.diff, text: tb[N - 1].replace(/\s+/g, ' ').trim().slice(0, 60) };
+        return { json, diff: res.diff, big: res.big, text: tb[N - 1].replace(/\s+/g, ' ').trim().slice(0, 60) };
     } finally { await ctx.close(); }
 }
 
@@ -451,8 +457,8 @@ try {
         if (SEITE) {
             try {
                 const r = await seiteTauschen(browser, book, v, out, SEITE);
-                const s = Math.round((Date.now() - t0) / 1000), was = 'Unterschied ' + r.diff.toFixed(2) + ', „' + r.text + '“';
-                if (r.diff < GLEICH) console.log(book + ': Seite ' + SEITE + ' unverändert (' + was + '), ' + s + ' s'
+                const s = Math.round((Date.now() - t0) / 1000), was = r.big + ' Pixel anders, im Mittel ' + r.diff.toFixed(2) + ', „' + r.text + '“';
+                if (!r.big) console.log(book + ': Seite ' + SEITE + ' unverändert (' + was + '), ' + s + ' s'
                     + (LOCAL ? '' : ' - ' + await umstempeln(book, v, out + '-stempel')));
                 else if (LOCAL) console.log(book + ': Seite ' + SEITE + ' neu (' + was + '), ' + s + ' s  → ' + out);
                 else { await upload(book, out, r.json); console.log(book + ': Seite ' + SEITE + ' getauscht (' + was + '), online in ' + Math.round((Date.now() - t0) / 1000) + ' s'); }
