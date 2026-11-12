@@ -33,6 +33,41 @@
     });
 
     /**
+     * The middle dot "·" (and ⋅ ∙) is always a round one from Times New Roman, in every lab with this shell (Doc,
+     * 04.11.2026: "Ich möchte damit immer Punkte sehen. Mit Times New Roman"; 12.11.2026, token-lab "·ist": "macht bitte
+     * Punkte immer Times (rund)") - Orbitron and Raleway draw it as a small square. The decks do it with 'Deck Punkt' in
+     * deck.css; the labs have no shared font stack, so every web font face of the page gets a twin with the same family,
+     * weight and style that holds only these three characters from Times. Added through document.fonts, the twin comes
+     * after the CSS faces and wins for them; same descriptors, so no weight or other letter changes. Monospace faces
+     * keep their own dot (columns), KaTeX keeps its own (formulas).
+     */
+    var DOTS = 'U+00B7, U+22C5, U+2219';
+    var _dotTwins = {};
+    function roundDots() {
+        if (!document.fonts || typeof FontFace === 'undefined') return;
+        var faces = [];
+        document.fonts.forEach(function (f) { faces.push(f); });
+        faces.forEach(function (f) {
+            var fam = String(f.family || '').replace(/^["']|["']$/g, '');
+            if (!fam || f.unicodeRange === DOTS || /^KaTeX|Mono|^Lab Ziffern$|^Deck Punkt$|Times/i.test(fam)) return;
+            var key = fam + '|' + f.weight + '|' + f.style + '|' + f.stretch;
+            if (_dotTwins[key]) return;
+            _dotTwins[key] = true;
+            var bold = (parseInt(String(f.weight), 10) || 400) >= 600;
+            var src = bold ? "local('Times New Roman Bold'), local('TimesNewRomanPS-BoldMT'), local('Times Bold')"
+                : "local('Times New Roman'), local('TimesNewRomanPSMT'), local('Times')";
+            try {
+                var twin = new FontFace(fam, src, { weight: f.weight, style: f.style, stretch: f.stretch, unicodeRange: DOTS });
+                document.fonts.add(twin);
+                twin.load().catch(function () {});
+            } catch (e) { /* a face this browser cannot copy: its own dot stays */ }
+        });
+    }
+    roundDots();
+    document.addEventListener('DOMContentLoaded', roundDots);
+    window.addEventListener('load', roundDots);
+
+    /**
      * Lab shown on a deck slide (iframe inside .labframe, also in the presenter view clones):
      * the mini-rail is always gone there (Doc, 17.09.2026) - the deck has its own navigation.
      * The rail column collapses to 0 and the sidebar sits flush at the left edge.

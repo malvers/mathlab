@@ -1586,7 +1586,27 @@ addEventListener('load', () => {
     try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
     catch (err) { el.textContent = el.dataset.tex; }
   });
+  gluePairs(document);
 });
+// A short formula, "und" / "oder" / "bis" and a short formula stay on one line (Doc, 12.11.2026, mathe11-pq-herleitung
+// slide 11: the red "−" of "+ und −" broke into the next line - "Das sieht doof aus"; a no-break space does not help,
+// Chrome breaks between a formula and a space anyway). Only short ones: at most 6 visible characters each (a sign, a
+// number, x², -3, \sqrt{2}), so the pair never gets wider than a few words and a long formula keeps its own breaks.
+// The deck files stay as they are; an edited line (deck-edit.js) loses the glue until the page loads again.
+function gluePairs(root) {
+  const plain = s => (s || '').replace(/\\textcolor\{[^}]*\}/g, '')
+    .replace(/\\(?:mathbin|mathord|mathrel|mathbf|boldsymbol|mathrm|mathit)\b/g, '').replace(/\\[,;! ]/g, '').replace(/[{}\s]/g, '');
+  const short = el => el && el.nodeType === 1 && el.classList.contains('tex') && plain(el.dataset.tex).length <= 6;
+  root.querySelectorAll('.tex').forEach(a => {
+    const t = a.nextSibling, b = t && t.nextSibling;
+    if (!short(a) || !short(b) || a.parentNode.classList.contains('tex-paar')) return;
+    if (t.nodeType !== 3 || !/^[  ]+(und|oder|bis)[  ]+$/.test(t.data)) return;
+    const w = document.createElement('span');
+    w.className = 'tex-paar';
+    a.before(w);
+    w.append(a, t, b);
+  });
+}
 // Solita reads the deck (Doc, 15.09.2026: "NIEMALS Browserstimme! So wie beim DocPad!") - the
 // clips come from tools/pptx/deck_audio.mjs with her DocPad voice, nothing is synthesised here.
 // Part 0 of a slide is spoken when it appears, part k while click group k comes in, then on.
