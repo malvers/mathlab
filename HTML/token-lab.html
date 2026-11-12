@@ -176,8 +176,16 @@
         @media (prefers-reduced-motion: reduce) { #tk-band.runs .run { animation: none; } }
 
         #tk-bottom { flex: 0 0 auto; display: flex; align-items: center; gap: 16px; }
-        #tk-foot { font-size: 12px; color: rgba(14, 36, 78, .55); }
-        #tk-foot a { color: inherit; text-decoration-skip-ink: none; text-underline-offset: 2px; }
+        /* the legend: a small token box shows what the dot means, then the source - no dots as separators any more
+           (Doc, 12.11.2026: "· = Leerzeichen davor" was not clear, and the same dot right after it as a separator
+           "sieht komisch aus") */
+        #tk-foot { font-size: 12px; color: rgba(14, 36, 78, .55); display: flex; flex-wrap: wrap; align-items: center;
+            column-gap: 24px; row-gap: 4px; }
+        #tk-foot .tk-legend { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+        #tk-foot .tk-mini { font-family: Raleway, sans-serif; font-size: 14px; line-height: 1.2; color: #0E244E; white-space: pre;
+            padding: 1px 6px; border-radius: 4px; border: 1px solid #B02418; background: rgba(176, 36, 24, .14); }
+        #tk-foot .tk-mini .sp { color: rgba(14, 36, 78, .55); font-weight: 700; }   /* small here: a little bolder than in the boxes */
+        #tk-foot a { color: inherit; text-decoration-skip-ink: none; text-underline-offset: 2px; white-space: nowrap; }
         /* the switch between the two views, in red so one finds it */
         #tk-mode { margin-left: auto; border-color: rgba(176, 36, 24, .55); color: rgb(176, 36, 24); white-space: nowrap; }
         /* as far from the right edge as from the bottom (Doc, 12.11.2026: "so weit nach rechts, dass der Abstand so ist
@@ -288,8 +296,8 @@
                 <div id="tk-msg"></div>
                 <div id="tk-band" aria-label="Einträge des Wortschatzes"><div class="run"><span class="line"></span><span class="line" aria-hidden="true"></span></div></div>
                 <div id="tk-bottom">
-                    <div id="tk-foot"><b style="font-size:16px;line-height:0">·</b> = Leerzeichen davor ·
-                        Wortschatz <b>o200k_base</b> (GPT-4o, Phi-4-mini) · zerlegt mit <a href="https://github.com/niieani/gpt-tokenizer" target="_blank" rel="noopener">gpt-tokenizer</a> 4.1.0 (MIT)</div>
+                    <div id="tk-foot"><span class="tk-legend"><span class="tk-mini" aria-hidden="true"><span class="sp">·</span>Wetter</span>Punkt = Leerzeichen vor dem Wort</span>
+                        <span>Wortschatz <b>o200k_base</b> (GPT-4o, Phi-4-mini), zerlegt mit <a href="https://github.com/niieani/gpt-tokenizer" target="_blank" rel="noopener">gpt-tokenizer</a> 4.1.0 (MIT)</span></div>
                     <button type="button" class="tk-btn" id="tk-mode"><span>So entsteht ein Token</span><svg class="ic" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M2 1 L9 5 L2 9 Z"/></svg></button>
                 </div>
             </div>
