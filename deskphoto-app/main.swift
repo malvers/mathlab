@@ -469,6 +469,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         set { UserDefaults.standard.set(newValue, forKey: AppDelegate.shownKey) }
     }
 
+    /// Doc sits at the Mac, confirmed by DocHere's camera ("doc"). The photos show only then (13.11.2026, Doc: "Wenn ich
+    /// hier nicht da bin, sollen die verschwinden" - "natürlich sollen sie nur auftauchen, wenn ich hier sitze"). Off at
+    /// start, on lock, screen saver and sleep, and for every other answer (away, other, unknown, no answer): rather
+    /// hidden once too often than shown once too many. "Fotos zeigen" stays the master switch; off, no camera at all.
+    private var present = false
+    private var misses = 0                       // answers in a row that were not "doc"
+    private var lastAnswer = Date.distantPast    // DocHere's heartbeat: no answer for 15 s counts as not Doc
+    private var visible: Bool { shown && present }
+
     func applicationDidFinishLaunching(_ note: Notification) {
         bar = DocBarClient(id: "de.docalvers.deskphoto", name: "DocPhoto",
                            symbol: "photo.on.rectangle.angled") { [weak self] item in
@@ -476,7 +485,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         for rec in store.recs {
-            if let item = PhotoItem(rec: rec, owner: self, visible: shown) { items.append(item) }
+            if let item = PhotoItem(rec: rec, owner: self, visible: visible) { items.append(item) }
         }
         save()   // drops records whose file has gone
         placeAll()   // a print whose monitor is not connected now lies on a screen that is, for the moment
@@ -494,6 +503,70 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         NotificationCenter.default.addObserver(self, selector: #selector(screensChanged),
                                                name: NSApplication.didChangeScreenParametersNotification, object: nil)
+        watchPresence()
+    }
+
+    // MARK: Doc at the Mac? (DocHere)
+
+    /// DocHere keeps its camera on for us while we ask for it (one steady green light, one look per second on mains,
+    /// every 5 s on battery) and sends each answer. One "doc" shows the photos; two other answers in a row hide them,
+    /// so a single unclear frame does not make them flicker. Lock, screen saver and sleep hide them at once; DocHere
+    /// stops its camera there by itself. Doc, 13.11.2026: "Aber eben durchgehend laufen lassen. Was blöde wäre, wenn
+    /// das immer grün blinkt."
+    private func watchPresence() {
+        let dnc = DistributedNotificationCenter.default()
+        dnc.addObserver(forName: Notification.Name("de.docalvers.dochere.who"), object: nil, queue: .main) { [weak self] n in
+            self?.answered((n.userInfo?["answer"] as? String) ?? "")
+        }
+        for name in ["com.apple.screenIsLocked", "com.apple.screensaver.didstart"] {
+            dnc.addObserver(forName: Notification.Name(name), object: nil, queue: .main) { [weak self] _ in self?.absent() }
+        }
+        for name in ["com.apple.screenIsUnlocked", "com.apple.screensaver.didstop"] {
+            dnc.addObserver(forName: Notification.Name(name), object: nil, queue: .main) { [weak self] _ in self?.request() }
+        }
+        let ws = NSWorkspace.shared.notificationCenter
+        for name in [NSWorkspace.screensDidSleepNotification, NSWorkspace.willSleepNotification,
+                     NSWorkspace.sessionDidResignActiveNotification] {
+            ws.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in self?.absent() }
+        }
+        for name in [NSWorkspace.screensDidWakeNotification, NSWorkspace.didWakeNotification,
+                     NSWorkspace.sessionDidBecomeActiveNotification] {
+            ws.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in self?.request() }
+        }
+        Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in self?.heartbeat() }
+        request()
+    }
+
+    /// Asks DocHere to keep watching (renewed every 5 s; DocHere stops 30 s after the last request) - or to stop.
+    private func request() {
+        DistributedNotificationCenter.default().postNotificationName(
+            Notification.Name("de.docalvers.dochere.watch"), object: "de.docalvers.deskphoto",
+            userInfo: ["on": shown ? "1" : "0"], deliverImmediately: true)
+    }
+
+    private func heartbeat() {
+        if shown { request() }
+        if present && Date().timeIntervalSince(lastAnswer) > 15 { absent() }   // DocHere silent: hide
+    }
+
+    private func answered(_ answer: String) {
+        lastAnswer = Date()
+        guard shown else { return }
+        if answer == "doc" { misses = 0 } else { misses += 1 }
+        let now = answer == "doc" ? true : (misses >= 2 ? false : present)
+        if now != present { present = now; applyVisibility() }
+    }
+
+    private func absent() {
+        misses = 2
+        guard present else { return }
+        present = false
+        applyVisibility()
+    }
+
+    private func applyVisibility() {
+        items.forEach { $0.setVisible(visible) }
+        publishMenu()
     }
 
     // MARK: menu
@@ -508,7 +581,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let n = self.items.count
         let fotos = n == 1 ? "1 Foto" : "\(n) Fotos"
         let status = n == 0 ? "kein Foto abgelegt"
-                   : shown ? "\(fotos) auf dem Schreibtisch" : "\(fotos) ausgeblendet"
+                   : !shown ? "\(fotos) ausgeblendet"
+                   : present ? "\(fotos) auf dem Schreibtisch" : "\(fotos) – nur sichtbar, wenn du da bist"
         bar.publish(status: status, items: items)
     }
 
@@ -544,7 +618,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                width: width,
                                angle: 0)     // straight, like the widgets beside it
             // A photo added while the desk is hidden stays hidden too: hiding is for privacy.
-            if let item = PhotoItem(rec: rec, owner: self, visible: shown) { items.append(item) }
+            if let item = PhotoItem(rec: rec, owner: self, visible: visible) { items.append(item) }
         }
         save()
         publishMenu()
@@ -587,8 +661,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func toggleShown() {
         shown.toggle()
-        items.forEach { $0.setVisible(shown) }
-        publishMenu()
+        present = false             // on: they show after DocHere's first "doc"; off: DocHere's camera goes off
+        request()
+        applyVisibility()
     }
 
     @objc private func toggleLogin() {
@@ -606,7 +681,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func quit() { NSApp.terminate(nil) }
 
-    func applicationWillTerminate(_ note: Notification) { bar.withdraw() }
+    func applicationWillTerminate(_ note: Notification) {
+        bar.withdraw()
+        DistributedNotificationCenter.default().postNotificationName(      // DocHere's camera off
+            Notification.Name("de.docalvers.dochere.watch"), object: "de.docalvers.deskphoto",
+            userInfo: ["on": "0"], deliverImmediately: true)
+    }
 
     // MARK: per-photo menu actions
 

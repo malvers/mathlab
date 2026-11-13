@@ -27,6 +27,14 @@ Everything personal stays outside the repo, in `~/Library/Application Support/Do
     --crops             the aligned 112 x 112 crops into faces/crops/, to check the alignment
     --ask-who           one look: doc, other, away or unknown
 
+## Watching for DocPhoto
+
+DocPhoto shows its desktop photos only while Doc sits here. While it asks for it (distributed notification
+`de.docalvers.dochere.watch`, renewed every 5 s, DocHere stops 30 s after the last request), the camera stays on
+without pausing - one steady green light - and one frame is checked every second on mains power, every 5 s on
+battery. Each answer (`doc`, `other`, `unknown`, `away`) goes out as `de.docalvers.dochere.who`. Lock, display
+asleep or DocHere off: the camera stops. Measured 13.11.2026 on mains: about 10 % of one core.
+
 On/off and the login item live in DocBar. Off means no looks in the background and a plain
 D, a Solita call still looks once.
 

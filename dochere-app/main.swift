@@ -11,9 +11,16 @@
 // there (faces/other-*.jpg are other people), --crops writes the upright face crops to check.
 // --test <seconds> prints what Vision measures, to find the thresholds. No pictures either.
 // --every <seconds> ignores keyboard and mouse and looks this often, to try it out.
+//
+// Watching on demand (13.11.2026, for DocPhoto: the photos show only while Doc sits here): while another tool asks
+// for it (distributed notification de.docalvers.dochere.watch, renewed at least every 30 s), the camera stays on
+// without pausing - one steady green light, no blinking - and one frame is checked every second on mains power,
+// every 5 s on battery. Each answer ("doc", "other", "unknown", "away") goes out as de.docalvers.dochere.who.
+// Screen locked, display asleep, DocHere off, or no request for 30 s: the camera stops.
 
 import AVFoundation
 import Cocoa
+import IOKit.ps
 import ServiceManagement
 import Vision
 
@@ -190,6 +197,57 @@ final class Eye: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     }
 }
 
+/// The camera kept running for DocPhoto (see the header): one frame every `interval` seconds is measured, the rest
+/// are dropped. The camera itself runs at its lowest frame rate.
+final class Watcher: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
+    private let session = AVCaptureSession()
+    private let queue = DispatchQueue(label: "de.docalvers.dochere.watch")
+    private let report: (Seen) -> Void
+    private var firstFrame: Date?
+    private var next = Date.distantPast
+    private var interval = 1.0              // only touched on `queue`
+
+    init(report: @escaping (Seen) -> Void) { self.report = report }
+
+    func start() -> Bool {
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .unspecified),
+              let input = try? AVCaptureDeviceInput(device: camera), session.canAddInput(input) else { return false }
+        session.sessionPreset = .medium
+        session.addInput(input)
+        let output = AVCaptureVideoDataOutput()
+        output.alwaysDiscardsLateVideoFrames = true
+        output.setSampleBufferDelegate(self, queue: queue)
+        session.addOutput(output)
+        // as few frames as the camera allows - one per second is all that is looked at
+        if (try? camera.lockForConfiguration()) != nil {
+            if let slow = camera.activeFormat.videoSupportedFrameRateRanges.map({ $0.minFrameRate }).min() {
+                let fps = max(slow, 2)
+                let d = CMTime(value: 1000, timescale: CMTimeScale(fps * 1000))
+                camera.activeVideoMinFrameDuration = d
+                camera.activeVideoMaxFrameDuration = d
+            }
+            camera.unlockForConfiguration()
+        }
+        queue.async { [session] in session.startRunning() }
+        return true
+    }
+
+    func stop() { queue.async { [session] in session.stopRunning() } }
+
+    func every(_ seconds: Double) { queue.async { [weak self] in self?.interval = seconds } }
+
+    func captureOutput(_ output: AVCaptureOutput, didOutput buffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        let now = Date()
+        if firstFrame == nil { firstFrame = now }
+        guard let start = firstFrame, now.timeIntervalSince(start) >= Timing.warmUp, now >= next,
+              let frame = CMSampleBufferGetImageBuffer(buffer) else { return }
+        next = now.addingTimeInterval(interval)
+        var seen = Detector.measure(frame)
+        if seen.person { seen.picture = picture(frame) }
+        DispatchQueue.main.async { [report] in report(seen) }
+    }
+}
+
 // MARK: - app
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -202,6 +260,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var published = ""
     private var who = ""                    // "doc", "other" or "" when nobody or no prints
     private lazy var identity = Identity()
+    private var watcher: Watcher?
+    private var watchWanted = Date.distantPast   // a tool asked for watching until then
+    private var lastWatch = ""                   // the last answer, logged only when it changes
+    static let whoNote = Notification.Name("de.docalvers.dochere.who")
+    static let watchNote = Notification.Name("de.docalvers.dochere.watch")
+
+    private var onBattery: Bool {
+        guard let info = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
+              let type = IOPSGetProvidingPowerSourceType(info)?.takeUnretainedValue() else { return false }
+        return (type as String) == "Battery Power"
+    }
 
     /// "doc" or "other" for the person in this look, logged with the likeness (numbers only).
     private func identify(_ seen: Seen?) -> String {
@@ -335,12 +404,57 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             UserDefaults.standard.set(true, forKey: "loginSet")
             try? SMAppService.mainApp.register()
         }
+        DistributedNotificationCenter.default().addObserver(forName: AppDelegate.watchNote, object: nil, queue: .main) {
+            [weak self] note in
+            let on = (note.userInfo?["on"] as? String) == "1"
+            self?.watchWanted = on ? Date().addingTimeInterval(30) : .distantPast
+            self?.tick()
+        }
         Timer.scheduledTimer(withTimeInterval: Timing.poll, repeats: true) { [weak self] _ in self?.tick() }
         tick()
     }
 
+    /// Starts or stops the steady camera for DocPhoto; on battery it looks every 5 s instead of every second.
+    private func manageWatch() {
+        let wanted = enabled && Date() < watchWanted && !screenLocked && CGDisplayIsAsleep(CGMainDisplayID()) == 0
+        if wanted, watcher == nil, eye == nil {
+            withCamera { [weak self] allowed in
+                guard let self = self, allowed, self.watcher == nil else { return }
+                let w = Watcher { [weak self] seen in self?.watched(seen) }
+                if w.start() { self.watcher = w; log("watching for DocPhoto") }
+            }
+        } else if !wanted, let w = watcher {
+            w.stop()
+            watcher = nil
+            lastWatch = ""
+            log("watching stopped")
+            tellWho("away")       // DocPhoto hides at once
+        }
+        watcher?.every(onBattery ? 5 : 1)
+    }
+
+    private func watched(_ seen: Seen) {
+        guard watcher != nil else { return }
+        var answer = "away"
+        if seen.person {
+            if let image = seen.picture, identity.ready, let found = identity.who(image) { answer = found.answer }
+            else { answer = "unknown" }
+        }
+        update(seen.person, "watching")
+        who = answer == "doc" || answer == "other" ? answer : ""
+        if answer != lastWatch { log("watch: " + answer); lastWatch = answer }
+        tellWho(answer)
+        publish()
+    }
+
+    private func tellWho(_ answer: String) {
+        DistributedNotificationCenter.default().postNotificationName(AppDelegate.whoNote, object: "de.docalvers.dochere",
+                                                                     userInfo: ["answer": answer], deliverImmediately: true)
+    }
+
     private func tick() {
-        if enabled && eye == nil {
+        manageWatch()
+        if enabled && eye == nil && watcher == nil {
             if screenLocked {
                 update(false, "screen locked")
             } else if secondsSinceInput < inputCounts {
