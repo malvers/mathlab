@@ -744,6 +744,17 @@ const LABS_DATA = [
         "color": "purple"
     },
     {
+        "id": "mnist-netz",
+        "href": "mnist-netz.html",
+        "title": "Ein Netz lernt Ziffern",
+        "description": "Ein kleines neuronales Netz, dem man beim Lernen zusieht: 196 Pixel einer handgeschriebenen Ziffer laufen durch zwei Schichten mit je 16 Neuronen zu zehn Ausgängen für 0 bis 9. Es trainiert live auf 3.000 echten MNIST-Ziffern, Beispiel für Beispiel mit Backpropagation, und die Trefferquote auf 300 Testziffern, die es nie gesehen hat, steigt mit. Untrainiert rät es immer falsch. Das Tempo reicht von 5 bis 1.000 Beispielen pro Sekunde, die Reihe 0–9 wählt eine Ziffer, N zeigt eine andere.",
+        "tagline": "Informatik / KI / Neuronen & Backpropagation",
+        "icon": LAB_ICONS["mnist-netz"],
+        "category": "informatik neu hot grade9 grade10 grade11 grade12",
+        "keywords": "mnist ziffern handschrift neuronales netz neuron neuronen perzeptron schicht schichten gewichte backpropagation training sigmoid softmax trefferquote testziffern ki kuenstliche intelligenz maschinelles lernen zahlenerkennung",
+        "color": "purple"
+    },
+    {
         "id": "token-lab",
         "href": "token-lab.html",
         "title": "Tokenizer",
@@ -753,6 +764,17 @@ const LABS_DATA = [
         "category": "informatik neu hot grade9 grade10 grade11 grade12",
         "keywords": "token tokens tokenizer tokenisierung wortschatz vokabular byte pair encoding bpe gpt chatgpt sprachmodell llm ki kuenstliche intelligenz o200k tiktoken woerter silben emoji bytes",
         "color": "gold"
+    },
+    {
+        "id": "wortvorhersage",
+        "href": "wortvorhersage.html",
+        "title": "Wortvorhersage",
+        "description": "So lernt ein Sprachmodell, einen Satz fortzusetzen, im Zeitraffer: Hinter der Vorgabe steht erst Buchstabensalat, dann rastet Wort für Wort ein, und mit jedem Durchlauf trifft das Netz mehr. „Patches“ zeigt, wie Training wirklich läuft: Das Netz sagt alle Stellen zugleich vorher, zuerst werden Satzzeichen und häufige Wörter grün, zuletzt seltene. Die Leertaste holt den nächsten Satz, jedes Mal schneller. Regler für Vorgabe, gelernten Korpus und Tempo; oben lässt sich ein eigener Satz eintippen.",
+        "tagline": "Informatik / KI / Sprachmodell & Training",
+        "icon": LAB_ICONS["wortvorhersage"],
+        "category": "informatik neu hot grade9 grade10 grade11 grade12",
+        "keywords": "wortvorhersage wort vorhersage naechstes wort sprachmodell llm gpt chatgpt ki kuenstliche intelligenz training durchlauf epoche korpus satz fortsetzen patches buchstabensalat neuronales netz maschinelles lernen",
+        "color": "green"
     },
     {
         "id": "subtraktion",

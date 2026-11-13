@@ -8,7 +8,7 @@
  *
  * Sources per lab: its own HTML (visible control/heading text), the lab-specific
  * JS it loads (catalogue literals like `name: 'Würfel (Hexaeder)'`), inline
- * i18n fallbacks (`getOr('key', 'Deutscher Text')`) and every German i18n key
+ * i18n fallbacks (`getOr('key', 'Deutscher Text')`, `T('key', 'Deutscher Text')`) and every German i18n key
  * the lab uses — including whole namespaces behind a `T('…')` helper.
  *
  * Run:  node tools/build-labs-terms.mjs
@@ -126,6 +126,9 @@ function termsFor(lab) {
         for (const m of body.matchAll(/create(?:Card|Slider|Button|Toggle|Checkbox)\s*\(\s*[^,()]+,\s*(['"])((?:(?!\1)[^\\\n])*)\1/g)) add(m[2]);
         // German fallbacks next to an i18n key
         for (const m of body.matchAll(/getOr\s*\(\s*['"][^'"]+['"]\s*,\s*(['"])((?:(?!\1)[^\\\n])*)\1/g)) add(m[2]);
+        // ... and next to a key of the lab's own helper, T('btn_play', 'Start') - labs that build their buttons in
+        // template literals (wortvorhersage, mnist-netz) had no term at all before (13.11.2026)
+        for (const m of body.matchAll(/\bT\s*\(\s*['"][a-zA-Z0-9_.-]+['"]\s*,\s*(['"])((?:(?!\1)[^\\\n])*)\1/g)) add(m[2]);
         // i18n keys the lab uses
         for (const m of body.matchAll(/CyberI18n\.(?:get|getOr)\s*\(\s*['"]([a-zA-Z0-9_.-]+)['"]/g)) {
             if (I18N[m[1]]) add(I18N[m[1]]);

@@ -1634,6 +1634,17 @@ const LAB_ICONS = {
             <path d="M18 68 L16 82 M26 68 L24 82 M13 72 L29 72 M12 78 L28 78" stroke="#D73728" stroke-width="3.5" stroke-linecap="round" fill="none" />
             <rect x="36" y="73" width="52" height="5" rx="2.5" fill="#F5C242" opacity=".55" />
         </svg>`,
+    "wortvorhersage": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the training sentence (white), below it the prediction: learned words green, the next word locking in
+                 (gold), the rest still letter salad (red) -->
+            <rect x="8" y="14" width="26" height="14" rx="5" fill="rgba(255, 255, 255, 0.7)" />
+            <rect x="38" y="14" width="18" height="14" rx="5" fill="rgba(255, 255, 255, 0.7)" />
+            <rect x="60" y="14" width="32" height="14" rx="5" fill="rgba(255, 255, 255, 0.7)" />
+            <rect x="8" y="40" width="26" height="16" rx="5" fill="#799E31" />
+            <rect x="40" y="38.5" width="22" height="19" rx="6" fill="none" stroke="#F5C242" stroke-width="5" />
+            <text x="67" y="55" font-family="monospace" font-size="18" font-weight="700" fill="#D73728">q%</text>
+            <text x="8" y="84" font-family="monospace" font-size="18" font-weight="700" fill="#D73728" opacity=".8">#xÜ?k7&amp;</text>
+        </svg>`,
     "numberrecognition": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- a 5x7 pixel digit "3" as the net sees it; the tall gold bar is the class it picks -->
             <g fill="rgba(255, 255, 255, 0.08)">
@@ -1657,6 +1668,36 @@ const LAB_ICONS = {
                 <rect x="80" y="30" width="6" height="53" fill="#F5C242" />
                 <rect x="88" y="71" width="6" height="12" fill="rgba(157, 232, 255, 0.5)" />
             </g>
+        </svg>`,
+    "mnist-netz": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a pixel "7" goes through two hidden layers to the outputs; the gold output is the digit the net picks -->
+            <g stroke="rgba(255, 255, 255, 0.28)" stroke-width="1.2">
+                <line x1="40" y1="50" x2="56" y2="30" /><line x1="40" y1="50" x2="56" y2="50" /><line x1="40" y1="50" x2="56" y2="70" />
+                <line x1="56" y1="30" x2="74" y2="30" /><line x1="56" y1="30" x2="74" y2="50" /><line x1="56" y1="30" x2="74" y2="70" />
+                <line x1="56" y1="50" x2="74" y2="30" /><line x1="56" y1="50" x2="74" y2="50" /><line x1="56" y1="50" x2="74" y2="70" />
+                <line x1="56" y1="70" x2="74" y2="30" /><line x1="56" y1="70" x2="74" y2="50" /><line x1="56" y1="70" x2="74" y2="70" />
+                <line x1="74" y1="30" x2="91" y2="24" /><line x1="74" y1="50" x2="91" y2="24" /><line x1="74" y1="70" x2="91" y2="24" />
+                <line x1="74" y1="30" x2="91" y2="50" /><line x1="74" y1="50" x2="91" y2="50" /><line x1="74" y1="70" x2="91" y2="50" />
+                <line x1="74" y1="30" x2="91" y2="76" /><line x1="74" y1="50" x2="91" y2="76" /><line x1="74" y1="70" x2="91" y2="76" />
+            </g>
+            <g fill="rgba(255, 255, 255, 0.08)">
+                <rect x="6" y="32" width="7" height="7" /><rect x="14" y="32" width="7" height="7" /><rect x="22" y="32" width="7" height="7" /><rect x="30" y="32" width="7" height="7" />
+                <rect x="6" y="40" width="7" height="7" /><rect x="14" y="40" width="7" height="7" /><rect x="22" y="40" width="7" height="7" /><rect x="30" y="40" width="7" height="7" />
+                <rect x="6" y="48" width="7" height="7" /><rect x="14" y="48" width="7" height="7" /><rect x="22" y="48" width="7" height="7" /><rect x="30" y="48" width="7" height="7" />
+                <rect x="6" y="56" width="7" height="7" /><rect x="14" y="56" width="7" height="7" /><rect x="22" y="56" width="7" height="7" /><rect x="30" y="56" width="7" height="7" />
+                <rect x="6" y="64" width="7" height="7" /><rect x="14" y="64" width="7" height="7" /><rect x="22" y="64" width="7" height="7" /><rect x="30" y="64" width="7" height="7" />
+            </g>
+            <g fill="#00D2FF">
+                <rect x="6" y="32" width="7" height="7" /><rect x="14" y="32" width="7" height="7" /><rect x="22" y="32" width="7" height="7" /><rect x="30" y="32" width="7" height="7" />
+                <rect x="30" y="40" width="7" height="7" /><rect x="22" y="48" width="7" height="7" /><rect x="22" y="56" width="7" height="7" /><rect x="14" y="64" width="7" height="7" />
+            </g>
+            <g fill="rgba(0, 210, 255, 0.25)" stroke="#00D2FF" stroke-width="1.8">
+                <circle cx="56" cy="30" r="5" /><circle cx="56" cy="50" r="5" /><circle cx="56" cy="70" r="5" />
+                <circle cx="74" cy="30" r="5" /><circle cx="74" cy="50" r="5" /><circle cx="74" cy="70" r="5" />
+            </g>
+            <circle cx="91" cy="24" r="4.5" fill="rgba(255, 255, 255, 0.1)" stroke="rgba(255, 255, 255, 0.6)" stroke-width="1.6" />
+            <circle cx="91" cy="50" r="7" fill="rgba(245, 194, 66, 0.4)" stroke="#F5C242" stroke-width="2.2" />
+            <circle cx="91" cy="76" r="4.5" fill="rgba(255, 255, 255, 0.1)" stroke="rgba(255, 255, 255, 0.6)" stroke-width="1.6" />
         </svg>`,
     "fallingpi": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- the unit square, the quarter circle in it, darts inside (green) and outside (red) -->
