@@ -140,19 +140,42 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
     for (const sheet of document.styleSheets) imports(sheet);
     return out.sort().join(',');
   }
-  function busy() {
+  // why the page must not reload right now - '' when it may (the name is shown on the waiting pill below)
+  function why() {
     const a = document.activeElement;
-    if (a && a.matches && (a.isContentEditable || a.matches(TYPING))) return true;
-    if (document.fullscreenElement) return true;
-    if (document.documentElement.classList.contains('deck-edit')) return true;   // a reload would drop the editing
-    if (document.documentElement.classList.contains('presenter')) return true;
+    if (a && a.matches && (a.isContentEditable || a.matches(TYPING))) return 'Eingabefeld';
+    if (document.fullscreenElement) return 'Vollbild';
+    if (document.documentElement.classList.contains('deck-edit')) return 'Editor';   // a reload would drop the editing
+    if (document.documentElement.classList.contains('presenter')) return 'Referentenansicht';
     const ask = document.getElementById('ask-panel');
-    if (ask && !ask.hidden) return true;
-    try { if (typeof narr !== 'undefined' && narr.playing) return true; } catch (e) { }
+    if (ask && !ask.hidden) return 'Solita-Feld offen';
+    try { if (typeof narr !== 'undefined' && narr.playing) return 'Solita spricht'; } catch (e) { }
     // any page can say "not now" without this file knowing it (filmkritik.html: a remark is being
     // recorded or the film is running - a reload would lose both)
-    try { if (typeof window.__liveReloadBusy === 'function' && window.__liveReloadBusy()) return true; } catch (e) { }
-    return false;
+    try { if (typeof window.__liveReloadBusy === 'function' && window.__liveReloadBusy()) return 'beschäftigt'; } catch (e) { }
+    return '';
+  }
+  // A change that has to wait used to be invisible: the page just stayed old, and only a hand reload brought the new
+  // version (Doc, 13.11.2026, pq deck: "Der Auto-Reload hat nicht funktioniert"). Now a small pill says that a newer
+  // version is waiting and why; a click on it reloads at once. The next free moment reloads anyway, as before.
+  let pill = null;
+  function waiting(reason) {
+    if (!pill) {
+      pill = document.createElement('button');
+      pill.type = 'button';
+      pill.id = 'live-reload-wartet';
+      pill.style.cssText = 'position:fixed;top:40px;right:8px;z-index:2147483647;font:700 12px/1 Arial,sans-serif;'
+        + 'letter-spacing:.04em;padding:6px 10px;border:0;border-radius:6px;background:#B02418;color:#fff;cursor:pointer;'
+        + 'box-shadow:0 2px 8px rgba(0,0,0,.25)';
+      pill.addEventListener('click', function () { location.reload(); });
+    }
+    pill.textContent = '\u21bb Neue Fassung wartet (' + reason + ') \u00b7 Klick l\u00e4dt';
+    const host = document.fullscreenElement || document.body;        // in fullscreen only the fullscreen element shows
+    if (host && pill.parentNode !== host) host.appendChild(pill);
+  }
+  function reloadOrWait() {
+    const r = why();
+    if (r) waiting(r); else location.reload();
   }
   function check() {
     if (document.visibilityState !== 'visible') return;
@@ -172,12 +195,12 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
           return fetch('/__live/stamp?page=' + encodeURIComponent(page) + '&refs=' + encodeURIComponent(alt), { cache: 'no-store' })
             .then(function (r) { return r.json(); })
             .then(function (k) {
-              if (k.stamp !== altStamp) { if (!busy()) location.reload(); return; }   // busy: asked again next round
+              if (k.stamp !== altStamp) { reloadOrWait(); return; }   // busy: asked again next round
               first = j.stamp; firstRefs = now;
             });
         }
-        if (j.stamp === first || busy()) return;
-        location.reload();
+        if (j.stamp === first) return;
+        reloadOrWait();
       })
       .catch(function () { });                        // server restarting: next round
   }
