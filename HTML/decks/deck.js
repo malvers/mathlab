@@ -3275,6 +3275,92 @@ const link = (function () {
       .then(suche, function () { /* no buzzer here (offline file copy): the bar stays as it was */ });
   }
 
+  /* The buzzer without a presenter view (Doc, 13.11.2026: at the Mac without a second screen the deck showed nothing of
+     the class's taps - no firework, nowhere what was pressed; "Die Idee zum Buzzer ist gut, machen."). The deck window
+     listens itself when it shows the buzzer's QR (.buzzer-qr: the class taps this computer's code, as in presBuzzer) and
+     runs on Doc's own machine (localhost, or signed in to the SVP) - never on a student's screen. A cheer bursts the
+     firework over the slide; a small pill beside the buttons bottom left says what came, with its count since the deck
+     opened: "nicht verstanden" (still open, a click: seen), "zu langsam" / "zu schnell" (last 2 minutes), "Feuerwerk"
+     (every press). Each pill goes again 6 s after its last rise and never covers the slide's body. While a presenter view
+     is linked this stays quiet: that one shows it all and sends the firework here, so nothing comes twice. Nothing is
+     written to the buzzer's storage (a reload of this window must not reset the presenter's count). */
+  function soloBuzzer() {
+    if (PRESENTER || !document.querySelector('.slide .buzzer-qr')) return;
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem('svp-session')); } catch (e) { }
+    if (!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !(s && s.refresh_token)) return;
+    const APPLE = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/';
+    const ART = {
+      frage: ['button', '1f914', 'NICHT VERSTANDEN', 'Nicht verstanden, noch offen – Klick: gesehen'],
+      langsam: ['span', '1f40c', 'ZU LANGSAM', 'Zu langsam (letzte 2 Minuten)'],
+      schnell: ['span', '1f3c3', 'ZU SCHNELL', 'Zu schnell (letzte 2 Minuten)'],
+      feuer: ['span', '1f386', 'FEUERWERK', 'So oft wurde Feuerwerk gedrückt, seit das Deck offen ist']
+    };
+    const box = document.createElement('div');
+    box.id = 'buzz-solo'; box.className = 'p-buzz'; box.setAttribute('role', 'status');
+    box.innerHTML = Object.keys(ART).map(function (art) {
+      const a = ART[art];
+      return '<' + a[0] + ' class="pb ' + art + '" hidden title="' + a[3] + '"' + (a[0] === 'button' ? ' type="button"' : '') + '>'
+        + '<img alt="" draggable="false" src="' + APPLE + a[1] + '.png"><span>' + a[2] + '</span><b></b></' + a[0] + '>';
+    }).join('');
+    document.body.appendChild(box);
+    const stand = { frage: 0, langsam: 0, schnell: 0, feuer: 0 }, uhr = {};
+    let frageBasis = null, tempoErst = true;
+    // a presenter view of this deck is up (a closed popup this window opened does not count)
+    const presenterDa = function () { return linked && !(mine && (!peer || peer.closed)); };
+    function zeige(art, n) {
+      n = n > 0 ? n : 0;
+      const vorher = stand[art], p = box.querySelector('.' + art);
+      stand[art] = n;
+      p.querySelector('b').textContent = n > 99 ? '99+' : String(n);
+      if (!n) { clearTimeout(uhr[art]); p.classList.remove('an'); p.hidden = true; return; }
+      if (n <= vorher || presenterDa() || EDITING()) return;          // only a rise shows
+      const nav = document.getElementById('nav'), r = nav && nav.getBoundingClientRect();
+      box.style.left = (r && r.width ? Math.round(r.right + 10) : 10) + 'px';
+      p.hidden = false;
+      requestAnimationFrame(function () { p.classList.add('an'); });
+      if (p.animate) p.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(1)' }],
+        { duration: 600, iterations: 2, easing: 'ease-out' });
+      clearTimeout(uhr[art]);
+      uhr[art] = setTimeout(function () {
+        p.classList.remove('an');
+        uhr[art] = setTimeout(function () { p.hidden = true; }, 800);  // after the fade (deck.css #buzz-solo .pb)
+      }, 6000);
+    }
+    box.querySelector('.frage').addEventListener('click', function (e) {
+      e.stopPropagation();                                             // not a click on the slide (next step)
+      if (window.Buzzer) Buzzer.gesehen();
+    });
+    const own = [].find.call(document.scripts, function (x) { return /\/deck\.js(\?|$)/.test(x.src); });
+    const base = own ? own.src : location.href;
+    function lade(src) {
+      return new Promise(function (ok, no) {
+        const x = document.createElement('script');
+        x.src = new URL(src, base).href; x.onload = ok; x.onerror = no;
+        document.head.appendChild(x);
+      });
+    }
+    (window.ladeSkript ? Promise.resolve() : lade('../js/lade-skript.js'))
+      .then(function () { return window.Buzzer ? null : lade('../js/buzzer.js'); })
+      .then(function () {
+        // "nicht verstanden": what was open when the deck opened is the base, a "seen" (lower count) moves it down
+        Buzzer.start(function (n) {
+          if (frageBasis === null || n < frageBasis) frageBasis = n;
+          zeige('frage', n - frageBasis);
+        });
+        // the first tempo count is what came before the deck opened: taken, not shown
+        Buzzer.tempo(function (t) {
+          if (tempoErst) { tempoErst = false; stand.langsam = t.langsam; stand.schnell = t.schnell; return; }
+          zeige('langsam', t.langsam); zeige('schnell', t.schnell);
+        });
+        if (Buzzer.jubel) Buzzer.jubel(function () {
+          if (presenterDa()) return;                                   // the presenter bursts it here itself
+          zeige('feuer', stand.feuer + 1);
+          feuerwerk(0.12, 0.12, 0.88, 0.5);
+        });
+      }, function () { /* no buzzer here (offline file copy): nothing to show */ });
+  }
+
   function presenterView() {
     const svg = function (d) {
       return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
@@ -3562,6 +3648,7 @@ const link = (function () {
     if (ready) render();
     return { render: render };
   }
+  soloBuzzer();                                      // the class's taps in the plain deck window (no presenter view)
   return { present: present, send: send,
            music: function (on) { if (linked) send({ t: 'jeopardy-on', on: !!on }); },   // the beamer's J music, for the presenter
            skip: function (i, on) { send({ t: 'skip', i: i, on: !!on }); },

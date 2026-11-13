@@ -963,9 +963,18 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 .p-buzz .pb img{width:1.6em;height:1.6em;flex:none;pointer-events:none}
 .p-buzz .pb b{font-size:1.25em;color:inherit}
 .p-buzz .pb.schnell img{transform:scaleX(-1)}   /* the runner mirrored, as on the phone (Doc, 01.10.2026) */
-#pres .p-buzz .pb.frage,#pres .p-buzz .pb.langsam{background:rgb(245,194,66);color:#0b1a33}
-#pres .p-buzz .pb.schnell{background:rgb(176,36,24);color:#fff}
-#pres .p-buzz .pb.feuer{background:rgb(121,158,49);color:#fff}   /* the Feuerwerk counter in φ green (Doc, 13.11.2026) */
+#pres .p-buzz .pb.frage,#pres .p-buzz .pb.langsam,#buzz-solo .pb.frage,#buzz-solo .pb.langsam{background:rgb(245,194,66);color:#0b1a33}
+#pres .p-buzz .pb.schnell,#buzz-solo .pb.schnell{background:rgb(176,36,24);color:#fff}
+#pres .p-buzz .pb.feuer,#buzz-solo .pb.feuer{background:rgb(121,158,49);color:#fff}   /* the Feuerwerk counter in φ green (Doc, 13.11.2026) */
+/* the same pills in the plain deck window, when no presenter view is up (deck.js soloBuzzer, Doc 13.11.2026): in the
+   footer strip right of the buttons (left set from #nav), small, each one fading out 6 s after its last rise */
+#buzz-solo{position:fixed;left:10px;bottom:8px;z-index:9;margin:0;gap:6px;font:700 11px Orbitron,system-ui,sans-serif;
+  letter-spacing:.06em;pointer-events:none}
+#buzz-solo .pb{opacity:0;transition:opacity .8s ease;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#buzz-solo .pb.an{opacity:.95;pointer-events:auto}
+#buzz-solo button.pb{font:inherit;letter-spacing:inherit;border:0;cursor:pointer}
+html.deck-edit #buzz-solo{display:none}
+@media print{#buzz-solo{display:none}}
 #pres .p-buzz .pb.frage{cursor:pointer}
 #pres .p-buzz .pb.frage:hover{color:#0b1a33;filter:brightness(1.08)}
 #pres .p-buzz .pb-ruhe{opacity:.4;font-weight:400;letter-spacing:.12em}
