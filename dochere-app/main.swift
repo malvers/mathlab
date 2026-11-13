@@ -15,7 +15,8 @@
 // Watching on demand (13.11.2026, for DocPhoto: the photos show only while Doc sits here): while another tool asks
 // for it (distributed notification de.docalvers.dochere.watch, renewed at least every 30 s), the camera stays on
 // without pausing - one steady green light, no blinking - and one frame is checked every second on mains power,
-// every 5 s on battery. Each answer ("doc", "other", "unknown", "away") goes out as de.docalvers.dochere.who.
+// every 5 s on battery. Each answer ("doc", "other", "unknown", "away") goes out as de.docalvers.dochere.who,
+// steadied (struct Steady) so that one bad frame in a dark room does not switch it.
 // Screen locked, display asleep, DocHere off, or no request for 30 s: the camera stops.
 
 import AVFoundation
@@ -66,15 +67,31 @@ struct Seen {
     var body: Float = 0
     var figure: Float = 0
 
+    var light: Float = 0            // mean brightness of the whole frame, 0…1
+
     var picture: CGImage? = nil     // the frame that showed the person, in memory only, for "who"
 
     var person: Bool { face >= Threshold.face || body >= Threshold.body || figure >= Threshold.figure }
     var text: String { String(format: "face %.2f body %.2f figure %.3f", face, body, figure) }
 }
 
+private let sharedContext = CIContext()
+
 func picture(_ frame: CVPixelBuffer) -> CGImage? {
     let image = CIImage(cvPixelBuffer: frame)
-    return CIContext().createCGImage(image, from: image.extent)
+    return sharedContext.createCGImage(image, from: image.extent)
+}
+
+/// Mean brightness of a frame, 0…1 (Core Image's area average, one pixel read back).
+func brightness(_ frame: CVPixelBuffer) -> Float {
+    let image = CIImage(cvPixelBuffer: frame)
+    guard let out = CIFilter(name: "CIAreaAverage", parameters: [kCIInputImageKey: image,
+                                                                  kCIInputExtentKey: CIVector(cgRect: image.extent)])?.outputImage
+    else { return 0 }
+    var px = [UInt8](repeating: 0, count: 4)
+    sharedContext.render(out, toBitmap: &px, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
+                         format: .RGBA8, colorSpace: nil)
+    return (0.299 * Float(px[0]) + 0.587 * Float(px[1]) + 0.114 * Float(px[2])) / 255
 }
 
 enum Detector {
@@ -243,8 +260,53 @@ final class Watcher: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
               let frame = CMSampleBufferGetImageBuffer(buffer) else { return }
         next = now.addingTimeInterval(interval)
         var seen = Detector.measure(frame)
+        seen.light = brightness(frame)
         if seen.person { seen.picture = picture(frame) }
         DispatchQueue.main.async { [report] in report(seen) }
+    }
+}
+
+// MARK: - steady answers
+
+/// Steadies the watching camera's answers (13.11.2026, Doc in a dark room: "die Bilder gehen weg, kommen wieder,
+/// kommen weg"). One frame is noisy in poor light, so the answer that goes out only changes when the frames agree.
+/// The threshold stays 0.45 for every frame - nobody is taken for Doc more easily than before:
+/// - "doc" comes at once: one frame at or above the threshold.
+/// - Leaving "doc" for "other" takes `leave` faces below the threshold without a Doc frame in between; a person
+///   without a clear face (turned away, too dark for the landmarks) counts for neither and keeps "doc".
+/// - "away" takes `leave` frames in a row without a person.
+/// - Otherwise a stranger is "other" at once, a person without a clear face "unknown".
+/// Measured 13.11.2026 in Doc's dark room (with the dark prints): 1 of 117 frames below 0.45, never 3 in a row.
+struct Steady {
+    static let leave = 3
+
+    enum Frame { case nobody, unclear, face(Float) }
+
+    private(set) var answer = "away"
+    private var low = 0         // faces below the threshold since the last Doc frame
+    private var nobody = 0      // frames in a row without a person
+
+    mutating func add(_ frame: Frame, threshold: Float) -> String {
+        switch frame {
+        case .nobody:
+            nobody += 1
+            if answer != "doc" && answer != "other" || nobody >= Self.leave { answer = "away"; low = 0 }
+        case .unclear:
+            nobody = 0
+            if answer == "away" { answer = "unknown" }
+        case .face(let score):
+            nobody = 0
+            if score >= threshold {
+                answer = "doc"
+                low = 0
+            } else if answer != "doc" {
+                answer = "other"
+            } else {
+                low += 1
+                if low >= Self.leave { answer = "other"; low = 0 }
+            }
+        }
+        return answer
     }
 }
 
@@ -263,6 +325,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var watcher: Watcher?
     private var watchWanted = Date.distantPast   // a tool asked for watching until then
     private var lastWatch = ""                   // the last answer, logged only when it changes
+    private var steady = Steady()                // the watching's answer, changed only when frames agree
+    private var held = 0                         // frames since the last change that Steady held back
     static let whoNote = Notification.Name("de.docalvers.dochere.who")
     static let watchNote = Notification.Name("de.docalvers.dochere.watch")
 
@@ -298,12 +362,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let args = CommandLine.arguments
         if let at = args.firstIndex(of: "--test"), at + 1 < args.count, let seconds = Double(args[at + 1]) {
             test(seconds)
+        } else if let at = args.firstIndex(of: "--measure"), at + 1 < args.count, let seconds = Double(args[at + 1]) {
+            measure(seconds, keep: args.contains("--keep"))
         } else if let at = args.firstIndex(of: "--snap"), at + 1 < args.count {
             snap(URL(fileURLWithPath: args[at + 1]))
         } else if args.contains("--enroll") {
             print(identity.enroll()); exit(0)
         } else if args.contains("--evaluate") {
             print(identity.evaluate()); exit(0)
+        } else if let at = args.firstIndex(of: "--score"), at + 1 < args.count {
+            let prefix = args.firstIndex(of: "--prefix").flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil } ?? ""
+            print(identity.scores(in: URL(fileURLWithPath: args[at + 1]), prefix: prefix)); exit(0)
+        } else if let at = args.firstIndex(of: "--strangers"), at + 1 < args.count {
+            let limit = args.firstIndex(of: "--limit").flatMap { $0 + 1 < args.count ? Int(args[$0 + 1]) : nil } ?? 2000
+            print(identity.strangers(in: URL(fileURLWithPath: args[at + 1]), limit: limit, dim: args.contains("--dim")))
+            exit(0)
         } else if args.contains("--crops") {
             print("\(identity.saveCrops()) crops written"); exit(0)
         } else if args.contains("--ask-who") {
@@ -347,6 +420,58 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         withCamera { [weak self] allowed in
             guard allowed else { self?.finish("unknown", "camera not allowed"); return }
             self?.use(Eye(testing: seconds) { _ in self?.finish("unknown", "test ended") })
+        }
+    }
+
+    /// --measure <seconds>: the steady camera of the watching, one line per frame with everything the decision uses -
+    /// the frame's brightness, person, and for a clear face its crop's brightness, contrast, Vision's quality and the
+    /// likeness to Doc. Numbers only. With --keep the frames that showed a person go to faces/dark/ (700), to tune
+    /// on them; nothing else is written.
+    private func measure(_ seconds: Double, keep: Bool) {
+        let dir = Store.faces.appendingPathComponent("dark")
+        if keep {
+            Store.prepare()
+            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: dir.path)
+        }
+        let stamp = Int(Date().timeIntervalSince1970)
+        withCamera { [weak self] allowed in
+            guard let self = self else { return }
+            guard allowed else { self.finish("unknown", "camera not allowed"); return }
+            let start = Date()
+            var n = 0
+            var steady = Steady()
+            let threshold = self.identity.engine.threshold
+            print("engine \(self.identity.engine.name), threshold \(threshold), \(self.identity.doc.count) prints")
+            let w = Watcher { [weak self] seen in
+                guard let self = self else { return }
+                let t = Date().timeIntervalSince(start)
+                var line = String(format: "%5.1f s  frame %.2f  %@", t, seen.light, seen.text)
+                var frame = Steady.Frame.nobody
+                if let image = seen.picture {
+                    if let found = self.identity.look(image) {
+                        let c = found.cut
+                        frame = .face(found.score)
+                        line += String(format: " | crop %.2f contrast %.2f quality %.2f share %.2f | score %.3f",
+                                        c.light, c.contrast, c.quality, c.share, found.score)
+                    } else {
+                        frame = .unclear
+                        line += " | no clear face"
+                    }
+                    if keep, let data = NSBitmapImageRep(cgImage: image).representation(using: .jpeg, properties: [.compressionFactor: 0.9]) {
+                        n += 1
+                        let url = dir.appendingPathComponent(String(format: "frame-%d-%03d.jpg", stamp, n))
+                        if (try? data.write(to: url, options: .atomic)) != nil { Store.lock(url) }
+                    }
+                } else {
+                    line += " | nobody"
+                }
+                line += " -> " + steady.add(frame, threshold: threshold)
+                print(line)
+                fflush(stdout)
+                if t >= seconds { self.finish("unknown", "measure ended") }
+            }
+            if w.start() { self.watcher = w } else { self.finish("unknown", "no camera") }
         }
     }
 
@@ -421,28 +546,45 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             withCamera { [weak self] allowed in
                 guard let self = self, allowed, self.watcher == nil else { return }
                 let w = Watcher { [weak self] seen in self?.watched(seen) }
-                if w.start() { self.watcher = w; log("watching for DocPhoto") }
+                if w.start() { self.watcher = w; self.steady = Steady(); self.held = 0; log("watching for DocPhoto") }
             }
         } else if !wanted, let w = watcher {
             w.stop()
             watcher = nil
             lastWatch = ""
+            steady = Steady()
             log("watching stopped")
             tellWho("away")       // DocPhoto hides at once
         }
         watcher?.every(onBattery ? 5 : 1)
     }
 
+    /// One frame of the watching, steadied (see Steady). The log gets each change with the frame's numbers and how
+    /// many frames since the last change disagreed with the answer and were held back.
     private func watched(_ seen: Seen) {
         guard watcher != nil else { return }
-        var answer = "away"
+        var frame = Steady.Frame.nobody
+        var score: Float?
         if seen.person {
-            if let image = seen.picture, identity.ready, let found = identity.who(image) { answer = found.answer }
-            else { answer = "unknown" }
+            if let image = seen.picture, let found = identity.look(image) { frame = .face(found.score); score = found.score }
+            else { frame = .unclear }
         }
-        update(seen.person, "watching")
+        let answer = steady.add(frame, threshold: identity.engine.threshold)
+        let raw: String
+        switch frame {
+        case .nobody: raw = "away"
+        case .unclear: raw = "unknown"
+        case .face(let s): raw = s >= identity.engine.threshold ? "doc" : "other"
+        }
+        if raw != answer { held += 1 }
+        update(answer != "away", "watching")
         who = answer == "doc" || answer == "other" ? answer : ""
-        if answer != lastWatch { log("watch: " + answer); lastWatch = answer }
+        if answer != lastWatch {
+            log(String(format: "watch: %@ (%@light %.2f, %d frames held before)", answer,
+                       score.map { String(format: "score %.3f, ", $0) } ?? "", seen.light, held))
+            lastWatch = answer
+            held = 0
+        }
         tellWho(answer)
         publish()
     }

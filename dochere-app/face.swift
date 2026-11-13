@@ -49,6 +49,28 @@ struct FaceCut {
     let crop: CGImage       // 112×112, eyes and mouth where the template wants them
     let quality: Float      // Vision's capture quality, 0…1 (sharp, frontal, well lit is high)
     let share: Float        // face width as a share of the picture width
+    let light: Float        // mean brightness of the crop, 0…1
+    let contrast: Float     // spread (standard deviation) of the crop's brightness, 0…1
+}
+
+enum Tone {
+    /// Mean and spread of a picture's grey values, 0…1.
+    static func of(_ image: CGImage) -> (light: Float, contrast: Float) {
+        let w = image.width, h = image.height
+        var px = [UInt8](repeating: 0, count: w * h)
+        let drawn: Bool = px.withUnsafeMutableBytes { buf in
+            guard let ctx = CGContext(data: buf.baseAddress, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w,
+                                      space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue)
+            else { return false }
+            ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+            return true
+        }
+        guard drawn, !px.isEmpty else { return (0, 0) }
+        let n = Float(px.count)
+        let mean = px.reduce(Float(0)) { $0 + Float($1) } / n
+        let spread = px.reduce(Float(0)) { $0 + (Float($1) - mean) * (Float($1) - mean) } / n
+        return (mean / 255, sqrt(spread) / 255)
+    }
 }
 
 enum FaceCutter {
@@ -73,7 +95,9 @@ enum FaceCutter {
         let score = quality.results?.first?.faceCaptureQuality ?? 0
 
         guard let crop = warp(image, from: points) else { return nil }
-        return FaceCut(crop: crop, quality: score, share: Float(face.boundingBox.width))
+        let tone = Tone.of(crop)
+        return FaceCut(crop: crop, quality: score, share: Float(face.boundingBox.width), light: tone.light,
+                       contrast: tone.contrast)
     }
 
     /// Eyes and mouth corners in picture pixels, top-left origin, ordered like the template.
@@ -218,10 +242,16 @@ final class Identity {
         return doc.enumerated().filter { $0.offset != skip }.map { Likeness.cosine(p, $0.element) }.max()
     }
 
+    /// The largest face in a frame with its likeness to Doc, nil without a clear face or prints.
+    func look(_ image: CGImage) -> (cut: FaceCut, score: Float)? {
+        guard ready, let cut = FaceCutter.largest(in: image), let score = likeness(cut.crop) else { return nil }
+        return (cut, score)
+    }
+
     /// "doc" or "other" for the largest face in a frame, nil without a clear face or prints.
     func who(_ image: CGImage) -> (answer: String, score: Float)? {
-        guard ready, let cut = FaceCutter.largest(in: image), let score = likeness(cut.crop) else { return nil }
-        return (score >= engine.threshold ? "doc" : "other", score)
+        guard let found = look(image) else { return nil }
+        return (found.score >= engine.threshold ? "doc" : "other", found.score)
     }
 
     /// Doc's prints from every faces/doc-*.jpg; the others are kept for the test.
@@ -256,7 +286,9 @@ final class Identity {
         for (i, url) in docs.enumerated() {
             guard let image = Store.image(url), let cut = FaceCutter.largest(in: image),
                   let s = likeness(cut.crop, skipping: i) else { lines.append("\(url.lastPathComponent): -"); continue }
-            lines.append(String(format: "doc   %@ %.3f %@", url.lastPathComponent, s, s >= engine.threshold ? "ok" : "MISSED"))
+            lines.append(String(format: "doc   %@ %.3f %@  (crop %.2f contrast %.2f quality %.2f share %.2f)",
+                                url.lastPathComponent, s, s >= engine.threshold ? "ok" : "MISSED",
+                                cut.light, cut.contrast, cut.quality, cut.share))
         }
         for url in Self.pictures(prefix: "other-") {
             guard let image = Store.image(url), let cut = FaceCutter.largest(in: image),
@@ -264,6 +296,84 @@ final class Identity {
             lines.append(String(format: "other %@ %.3f %@", url.lastPathComponent, s, s < engine.threshold ? "ok" : "TAKEN FOR DOC"))
         }
         return lines.joined(separator: "\n")
+    }
+
+    /// How a folder of Doc's frames (e.g. faces/dark/ from --measure --keep) scores against his prints: the spread,
+    /// and how many would be below the threshold (and below 0.40). Numbers only.
+    func scores(in folder: URL, prefix: String) -> String {
+        let files = ((try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? [])
+            .filter { ["jpg", "jpeg", "png"].contains($0.pathExtension.lowercased()) && $0.lastPathComponent.hasPrefix(prefix) }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        var s: [Float] = []
+        var noFace = 0
+        for url in files {
+            guard let image = Store.image(url), let cut = FaceCutter.largest(in: image), let v = likeness(cut.crop)
+            else { noFace += 1; continue }
+            s.append(v)
+        }
+        let sorted = s.sorted()
+        func pct(_ p: Double) -> Float { sorted.isEmpty ? 0 : sorted[min(sorted.count - 1, Int(Double(sorted.count) * p))] }
+        return String(format: "%d frames (%d without a clear face), %d prints: min %.3f  p10 %.3f  median %.3f  max %.3f"
+                        + "  | below threshold %d, below 0.40 %d", sorted.count, noFace, doc.count, sorted.first ?? 0,
+                      pct(0.1), pct(0.5), sorted.last ?? 0, sorted.filter { $0 < engine.threshold }.count,
+                      sorted.filter { $0 < 0.40 }.count)
+    }
+
+    /// The safety test against strangers: the first picture of each person in a folder of folders (LFW's layout),
+    /// at most `limit` people, each against all of Doc's prints. With `dim` every picture is first made to look
+    /// like a camera frame in a dark room (a quarter of the light on an 8-bit sensor, read noise, then the gain
+    /// that brings it back up). Numbers only, no names.
+    func strangers(in folder: URL, limit: Int, dim: Bool) -> String {
+        let fm = FileManager.default
+        let people = ((try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? [])
+            .filter { $0.hasDirectoryPath }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+        var scores: [Float] = []
+        var noFace = 0
+        for person in people {
+            guard scores.count + noFace < limit else { break }
+            guard let first = ((try? fm.contentsOfDirectory(at: person, includingPropertiesForKeys: nil)) ?? [])
+                .filter({ ["jpg", "jpeg", "png"].contains($0.pathExtension.lowercased()) })
+                .sorted(by: { $0.lastPathComponent < $1.lastPathComponent }).first,
+                  var image = Store.image(first) else { continue }
+            if dim, let dark = Self.darkRoom(image, seed: UInt64(scores.count + noFace + 1)) { image = dark }
+            guard let cut = FaceCutter.largest(in: image), let s = likeness(cut.crop) else { noFace += 1; continue }
+            scores.append(s)
+        }
+        let sorted = scores.sorted()
+        func pct(_ p: Double) -> Float { sorted.isEmpty ? 0 : sorted[min(sorted.count - 1, Int(Double(sorted.count) * p))] }
+        let top = sorted.suffix(5).reversed().map { String(format: "%.3f", $0) }.joined(separator: " ")
+        return String(format: "strangers%@: %d faces (%d without a clear face), %d prints of Doc, threshold %.2f\n"
+                        + "median %.3f  p99 %.3f  p99.9 %.3f  max %.3f  | >= 0.40: %d  >= threshold: %d\ntop 5: %@",
+                      dim ? " (dark room)" : "", sorted.count, noFace, doc.count, engine.threshold,
+                      pct(0.5), pct(0.99), pct(0.999), sorted.last ?? 0,
+                      sorted.filter { $0 >= 0.40 }.count, sorted.filter { $0 >= engine.threshold }.count, top)
+    }
+
+    /// A picture as a webcam in a dark room sees it: a quarter of the light, rounded to 8 bits, read noise
+    /// (sigma 1.5 levels), then four times the gain. Deterministic for a seed.
+    static func darkRoom(_ image: CGImage, seed: UInt64) -> CGImage? {
+        let w = image.width, h = image.height
+        var px = [UInt8](repeating: 0, count: w * h * 4)
+        var rng = seed &* 6364136223846793005 &+ 1442695040888963407
+        func gauss() -> Float {
+            func uniform() -> Float {
+                rng = rng &* 6364136223846793005 &+ 1442695040888963407
+                return (Float(rng >> 40) + 0.5) / Float(1 << 24)
+            }
+            return sqrt(-2 * log(uniform())) * cos(2 * .pi * uniform())
+        }
+        return px.withUnsafeMutableBytes { buf -> CGImage? in
+            guard let ctx = CGContext(data: buf.baseAddress, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                                      space: CGColorSpaceCreateDeviceRGB(),
+                                      bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return nil }
+            ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+            let p = buf.bindMemory(to: UInt8.self)
+            for i in 0..<(w * h * 4) where i % 4 != 3 {
+                let dark = (Float(p[i]) / 4).rounded() + 1.5 * gauss()
+                p[i] = UInt8(max(0, min(255, (dark * 4).rounded())))
+            }
+            return ctx.makeImage()
+        }
     }
 
     /// Writes the upright crops next to the pictures (faces/crops/), to check the cutting by eye.

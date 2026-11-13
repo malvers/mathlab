@@ -26,13 +26,33 @@ Everything personal stays outside the repo, in `~/Library/Application Support/Do
     --evaluate          each doc photo against the others, other-*.jpg against all
     --crops             the aligned 112 x 112 crops into faces/crops/, to check the alignment
     --ask-who           one look: doc, other, away or unknown
+    --measure <s>       the watching camera, one line per frame: brightness, face, quality, score, steady answer
+                        (--keep also writes the frames with a person to faces/dark/, to tune on them)
+    --score <dir>       how a folder of Doc's frames scores (--prefix <name> picks some)
+    --strangers <dir>   LFW-style folder of folders: one picture per person against Doc's prints
+                        (--dim makes each look like a dark-room webcam frame, --limit <n>, default 2000)
+
+## In the dark (13.11.2026)
+
+Doc in a dark room, lit by the screen: the face was found in nearly every frame, but its score against the
+daytime prints wandered (median 0.62, 10 of 116 frames below 0.45, the lowest 0.28), and DocPhoto, which hides
+after two misses, flickered. Two changes:
+
+- Five frames from the dark room are enrolled as `doc-11-dunkel-1..5.jpg`: on a second dark measurement 1 of 117
+  frames below 0.45 (median 0.71). LFW stays clear: 2000 strangers max 0.355, made dark (`--dim`) max 0.382,
+  none at 0.40 or above. The old prints are kept as `doc-prints-vor-dunkel-1311.json`.
+- The watching answers are steadied (`Steady` in main.swift); the threshold stays 0.45 for every frame. "doc"
+  comes back with one frame at 0.45 or more; leaving it for "other" takes three faces below 0.45 without a Doc
+  frame between; a person without a clear face keeps the answer; "away" takes three empty frames in a row. The
+  log gets each change with score, brightness and how many frames were held back.
 
 ## Watching for DocPhoto
 
 DocPhoto shows its desktop photos only while Doc sits here. While it asks for it (distributed notification
 `de.docalvers.dochere.watch`, renewed every 5 s, DocHere stops 30 s after the last request), the camera stays on
 without pausing - one steady green light - and one frame is checked every second on mains power, every 5 s on
-battery. Each answer (`doc`, `other`, `unknown`, `away`) goes out as `de.docalvers.dochere.who`. Lock, display
+battery. Each answer (`doc`, `other`, `unknown`, `away`), steadied as described under "In the dark", goes out as
+`de.docalvers.dochere.who`. Lock, display
 asleep or DocHere off: the camera stops. Measured 13.11.2026 on mains: about 10 % of one core.
 
 On/off and the login item live in DocBar. Off means no looks in the background and a plain
