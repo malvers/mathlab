@@ -9,7 +9,7 @@ APP="/Applications/DocHere.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
-swiftc -O -o "$APP/Contents/MacOS/DocHere" main.swift ../docbar-app/docbarclient.swift -framework Cocoa -framework AVFoundation -framework ServiceManagement -framework Vision
+swiftc -O -o "$APP/Contents/MacOS/DocHere" main.swift face.swift ../docbar-app/docbarclient.swift -framework Cocoa -framework AVFoundation -framework ServiceManagement -framework Vision -framework CoreML
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
