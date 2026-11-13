@@ -354,11 +354,20 @@
             /* Sunday (8th child, after the back arrow) placed by hand too, else the grid pushes it into a second row */
             .wk-head > :nth-child(8), .wk-head .nav-step[data-step="1"] { grid-area: 1 / 8; }
             .wk-head .nav-step[data-step="1"] { justify-self: end; }
+            /* the back arrow the same way on the left: into the Monday column, its left edge on the table's left line
+               (Doc, 13.11.2026: "das Dreieck nach links bitte auch bündig machen wie das rechte"); Monday (2nd child)
+               shares the cell, Tuesday starts in column 3 so the auto-placement does not fill the empty hour column */
+            .wk-head > :nth-child(2), .wk-head .nav-step[data-step="-1"] { grid-area: 1 / 2; }
+            .wk-head .nav-step[data-step="-1"] { justify-self: start; position: relative; z-index: 1; }   /* above Monday, which comes later */
+            .wk-head > :nth-child(3) { grid-column-start: 3; }
         }
         @container kal (min-width: 1100px) {
             .mo-head, .mo-grid { grid-template-columns: 34px repeat(7, minmax(0, 1fr)); margin-right: 12px; }
             .mo-head > :nth-child(8), .mo-head .nav-step[data-step="1"] { grid-area: 1 / 8; }
             .mo-head .nav-step[data-step="1"] { justify-self: end; }
+            .mo-head > :nth-child(2), .mo-head .nav-step[data-step="-1"] { grid-area: 1 / 2; }
+            .mo-head .nav-step[data-step="-1"] { justify-self: start; position: relative; z-index: 1; }
+            .mo-head > :nth-child(3) { grid-column-start: 3; }
         }
         .mo-cell {
             display: flex; flex-direction: column; align-items: stretch; gap: 3px; min-width: 0; min-height: 92px; padding: 4px 3px;
@@ -461,6 +470,22 @@
         li.off { opacity: .5; }
         .ev-meta .note { color: var(--lambda); }
         @media (max-width: 640px) { .mo-cell .chip.cl { background: rgba(var(--tint), .7); } }
+        /* legal holidays in Saxony (computed in kalender-core.js, no rows): the whole day in φ green - in the week its
+           head, its all-day cell and its column, in the month its cell, in the day list its box - and the name as a
+           green chip (Doc, 13.11.2026: "einen Tag [der] Feiertag ist, macht den irgendwie grün, sodass er sich von den
+           anderen absetzt") */
+        :root { --hol-a: .17; }
+        html.svp-light { --hol-a: .15; }
+        .ch { --c: var(--c-green); --on: var(--ink-navy); }
+        .wk-dayname.holiday, .wk-allday > div.holiday, .wk-lines > .holiday, .wk-col.holiday, .mo-cell.holiday {
+            background-color: rgba(var(--c-green), var(--hol-a));
+        }
+        .mo-cell.holiday.sel { background: linear-gradient(rgba(var(--tint), .14), rgba(var(--tint), .14)), rgba(var(--c-green), var(--hol-a)); }
+        .day.holiday {
+            background: linear-gradient(rgba(var(--c-green), var(--hol-a)), rgba(var(--c-green), var(--hol-a))), var(--card);
+            border-color: rgba(var(--c-green), .55);
+        }
+        .day.holiday .day-head .pill { --c: var(--c-green); --on: var(--ink-navy); }
         /* the call switches in the settings */
         .settings .switch { height: 40px; }
         .ed-note:empty { display: none; }
@@ -633,7 +658,7 @@
             let agendaDays = AGENDA_DAYS;
 
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-            const colorOf = ev => (ev.lesson ? 'l' : [1, 2, 3].includes(ev.color) ? ev.color : 2);   // 'l' -> class cl
+            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : [1, 2, 3].includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch
             const isOff = occ => !!(occ.ev.lesson && occ.ev.lesson.code === 'cancelled');
             // appointments mirrored from Google / Outlook (tools/kalender/feeds.mjs): read-only here, marked G / O
             const FEED_NAMES = { google: 'Google', outlook: 'Outlook' };
@@ -693,9 +718,20 @@
                 }
                 return out;
             }
-            /* appointments and lessons together, sorted like K.expand */
+            /* the legal holidays in [from, to) as all-day occurrences (key "H|YYYY-MM-DD"; ev.holiday = true) - computed by
+               K.holidayOf, never stored, so the reminder watcher does not ring for them */
+            function holidayOccs(from, to) {
+                const out = [];
+                for (let d = K.startOfDay(from); d < to; d = K.addDays(d, 1)) {
+                    const name = K.holidayOf(d);
+                    if (name) out.push({ ev: { id: 'H' + K.ymd(d), title: name, all_day: true, holiday: true }, start: d, end: K.addDays(d, 1), key: 'H|' + K.ymd(d) });
+                }
+                return out;
+            }
+            const isHoliday = d => !!K.holidayOf(d);
+            /* appointments, lessons and holidays together, sorted like K.expand */
             function occsIn(from, to) {
-                return K.expand(items, from, to).concat(lessonOccs(from, to))
+                return K.expand(items, from, to).concat(lessonOccs(from, to), holidayOccs(from, to))
                     .sort((a, b) => a.start - b.start || (b.ev.all_day ? 1 : 0) - (a.ev.all_day ? 1 : 0) || a.end - b.end);
             }
 
@@ -805,7 +841,7 @@
                 const rel = relDay(day);
                 const isToday = K.sameDay(day, now);
                 for (const o of occs) shownOcc.set(o.key, o);
-                return `<section class="day${isToday ? ' today' : ''}" data-day="${K.ymd(day)}"><div class="day-head">` +
+                return `<section class="day${isToday ? ' today' : ''}${isHoliday(day) ? ' holiday' : ''}" data-day="${K.ymd(day)}"><div class="day-head">` +
                     `<h2 class="pill">${esc(rel || dayLabel(day))}</h2>${rel ? `<span class="sub">${esc(longDay(day))}</span>` : ''}` +
                     (addBtn ? `<button class="add" type="button" data-add="${K.ymd(day)}" aria-label="Termin an diesem Tag">${ICON_ADD}</button>` : '') +
                     `</div><ul class="evs">${occs.map(o => evRow(o, now)).join('')}</ul></section>`;
@@ -850,16 +886,16 @@
                 const h0 = 0, H = 24;   // the whole day; fitWeek opens the box at 8:00
                 shownOcc = new Map();
                 let html = '<div class="wk-head">' + STEP_BTN(-1) + days.map(d =>
-                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${dayName(d.getDay())}<b>${d.getDate()}</b></button>`).join('') + STEP_BTN(1) + '</div>';
+                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}${isHoliday(d) ? ' holiday' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${dayName(d.getDay())}<b>${d.getDate()}</b></button>`).join('') + STEP_BTN(1) + '</div>';
                 if (allday.length) {
                     html += WK_SEP + '<div class="wk-allday"><div></div>' + days.map(d => {
                         const here = allday.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                         here.forEach(o => shownOcc.set(o.key, o));
-                        return '<div>' + here.map(o => `<button type="button" class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}" title="${esc(o.ev.title)}">${esc(o.ev.title)}</button>`).join('') + '</div>';
+                        return (isHoliday(d) ? '<div class="holiday">' : '<div>') + here.map(o => `<button type="button" class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}" title="${esc(o.ev.title)}">${esc(o.ev.title)}</button>`).join('') + '</div>';
                     }).join('') + '</div>';
                 }
                 html += WK_SEP + '<div class="wk-frame"><div class="wk-lines" aria-hidden="true"><div></div>' +
-                    days.map(d => `<div${K.sameDay(d, now) ? ' class="today"' : ''}></div>`).join('') + '</div>' +
+                    days.map(d => `<div class="${K.sameDay(d, now) ? 'today' : ''}${isHoliday(d) ? ' holiday' : ''}"></div>`).join('') + '</div>' +
                     `<div class="wk-body"><div class="wk-grid" data-h0="${h0}"><div class="wk-hours">` + [...Array(H)].map((_, i) => `<div><span>${String(h0 + i).padStart(2, '0')}</span>${i === H - 1 ? `<span class="end">${h0 + H}</span>` : ''}</div>`).join('') + '</div>';
                 html += days.map(d => {
                     const dEnd = K.addDays(d, 1);
@@ -883,7 +919,7 @@
                         clusterEnd = Math.max(clusterEnd, x.em);
                     }
                     flush();
-                    let col = `<div class="wk-col${K.sameDay(d, now) ? ' today' : ''}" data-day="${K.ymd(d)}" style="height:calc(var(--hour) * ${H})">`;
+                    let col = `<div class="wk-col${K.sameDay(d, now) ? ' today' : ''}${isHoliday(d) ? ' holiday' : ''}" data-day="${K.ymd(d)}" style="height:calc(var(--hour) * ${H})">`;
                     for (const x of here) {
                         shownOcc.set(x.o.key, x.o);
                         const top = `calc(var(--hour) * ${x.sm / 60})`, height = `calc(var(--hour) * ${(x.em - x.sm) / 60} - 2px)`;
@@ -932,14 +968,16 @@
                 const start = mondayOf(first);
                 const cells = [...Array(42)].map((_, i) => K.addDays(start, i));
                 $('period').innerHTML = esc(K.MONTH_LONG[first.getMonth()]) + `<small>${first.getFullYear()}</small>`;
-                const occs = K.expand(items, start, K.addDays(start, 42));
+                const occs = K.expand(items, start, K.addDays(start, 42)).concat(holidayOccs(start, K.addDays(start, 42)))
+                    .sort((a, b) => a.start - b.start || (b.ev.holiday ? 1 : 0) - (a.ev.holiday ? 1 : 0));   // the holiday's name first
                 shownOcc = new Map();
                 let html = '<div class="mo-head">' + STEP_BTN(-1) + [1, 2, 3, 4, 5, 6, 0].map(i => `<span>${dayName(i)}</span>`).join('') + STEP_BTN(1) + '</div><div class="mo-grid">';
                 for (const d of cells) {
                     const here = occs.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                     const school = lessonOccs(d, K.addDays(d, 1)).some(o => !isOff(o));   // one quiet mark for the lessons
-                    const cls = (d.getMonth() !== first.getMonth() ? ' out' : '') + (K.sameDay(d, now) ? ' today' : '') + (K.sameDay(d, selDay) ? ' sel' : '');
-                    html += `<button type="button" class="mo-cell${cls}" data-day="${K.ymd(d)}" aria-label="${esc(longDay(d))}${here.length ? ', ' + here.length + ' Termin' + (here.length > 1 ? 'e' : '') : ''}${school ? ', Unterricht' : ''}">` +
+                    const cls = (d.getMonth() !== first.getMonth() ? ' out' : '') + (K.sameDay(d, now) ? ' today' : '') + (K.sameDay(d, selDay) ? ' sel' : '') + (isHoliday(d) ? ' holiday' : '');
+                    const nApp = here.filter(o => !o.ev.holiday).length;   // the holiday is named, not counted as an appointment
+                    html += `<button type="button" class="mo-cell${cls}" data-day="${K.ymd(d)}" aria-label="${esc(longDay(d))}${isHoliday(d) ? ', ' + esc(K.holidayOf(d)) : ''}${nApp ? ', ' + nApp + ' Termin' + (nApp > 1 ? 'e' : '') : ''}${school ? ', Unterricht' : ''}">` +
                         `<span class="n">${d.getDate()}</span><span class="evs">` +
                         here.slice(0, 3).map(o => `<span class="chip c${colorOf(o.ev)}">${esc((o.ev.all_day ? '' : K.hhmm(o.start) + ' ') + o.ev.title)}</span>`).join('') +
                         (here.length > 3 ? `<span class="plus">+${here.length - 3}</span>` : '') +
@@ -999,6 +1037,10 @@
             /* a tapped occurrence: an appointment opens the editor; a lesson or a mirrored Google / Outlook appointment
                only says what it is - Untis, Google or Outlook owns it, and the next mirror would undo a change here */
             function openOcc(occ) {
+                if (occ.ev.holiday) {
+                    ask([occ.ev.title, longDay(occ.start), '', 'Gesetzlicher Feiertag in Sachsen.'].join('\n'), [{ label: 'OK', value: null, cls: 'yes' }]);
+                    return;
+                }
                 const feed = feedOf(occ.ev);
                 if (feed) {
                     const ev = occ.ev, last = K.addDays(occ.end, -1);

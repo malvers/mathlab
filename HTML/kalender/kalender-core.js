@@ -584,6 +584,41 @@
             (rooms.length ? ', in Raum ' + rooms.join(' und ') : '') + '.';
     }
 
+    /* ---------- legal holidays in Saxony ----------
+       Computed, not stored: no rows to enter or to double, and every year is right (Doc, 13.11.2026: "die gesetzlichen
+       Feiertage Sachsen eintragen", "macht den irgendwie grün"). Fronleichnam is left out - in Saxony it is a holiday
+       only in some Sorbian communities; Easter and Whit Sunday are Sundays and not statutory holidays here. */
+    function easterSunday(y) {   // Gregorian calendar, the anonymous algorithm (Meeus/Jones/Butcher)
+        const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4;
+        const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+        const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+        const n = h + l - 7 * m + 114;
+        return new Date(y, Math.floor(n / 31) - 1, (n % 31) + 1);
+    }
+    const holidayYears = {};
+    /* { 'YYYY-MM-DD': name } for one year */
+    function holidaysSN(y) {
+        if (holidayYears[y]) return holidayYears[y];
+        const e = easterSunday(y), nov22 = new Date(y, 10, 22);
+        const map = {};
+        [
+            [new Date(y, 0, 1), 'Neujahr'],
+            [addDays(e, -2), 'Karfreitag'],
+            [addDays(e, 1), 'Ostermontag'],
+            [new Date(y, 4, 1), 'Tag der Arbeit'],
+            [addDays(e, 39), 'Christi Himmelfahrt'],
+            [addDays(e, 50), 'Pfingstmontag'],
+            [new Date(y, 9, 3), 'Tag der Deutschen Einheit'],
+            [new Date(y, 9, 31), 'Reformationstag'],
+            [addDays(nov22, -((nov22.getDay() + 4) % 7)), 'Buß- und Bettag'],   // the Wednesday before 23 November
+            [new Date(y, 11, 25), '1. Weihnachtstag'],
+            [new Date(y, 11, 26), '2. Weihnachtstag']
+        ].forEach(([d, name]) => { map[ymd(d)] = name; });
+        return (holidayYears[y] = map);
+    }
+    /* the holiday's name on this day, or '' */
+    const holidayOf = d => holidaysSN(d.getFullYear())[ymd(d)] || '';
+
     return {
         DAY, WD_CODES, DEFAULT_REMIND, DEFAULT_REMIND_ALLDAY,
         WEEKDAY_SHORT, WEEKDAY_LONG, MONTH_LONG, MONTH_SHORT,
@@ -591,6 +626,7 @@
         parseRule, occurrences, expand, remindOf, reminders,
         parseIcs, unzipIcs, parseQuick,
         spokenSentence, spokenTime, spokenIn,
-        lessonBlocks, coachingBlocks, terminBlocks, lessonTitle, lessonSentence, subjectSpoken
+        lessonBlocks, coachingBlocks, terminBlocks, lessonTitle, lessonSentence, subjectSpoken,
+        easterSunday, holidaysSN, holidayOf
     };
 });
