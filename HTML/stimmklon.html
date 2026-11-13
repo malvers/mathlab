@@ -990,7 +990,13 @@
 
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-            if (e.target.tagName === 'BUTTON') return;      // let the button's own click handle it, once
+            // A focused button handles Space/Enter itself (its own click, once). Every other key belongs to the page:
+            // a button clicked with the mouse kept the focus and swallowed the arrows and 1/2/3 (13.11.2026, Doc:
+            // "Ich will das mit den Tasten machen wie früher").
+            if (e.target.tagName === 'BUTTON') {
+                if (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter') return;
+                e.target.blur();
+            }
             if (tab !== 'rec') return spektrumTaste(e);
             if (e.code === 'Space' && !e.repeat) { e.preventDefault(); laeuft ? stoppe() : starte(); }
             if (e.code === 'ArrowRight') $('btnNext').click();
@@ -1064,9 +1070,11 @@
             takes = d.takes || {};
             nachgesprochen = d.nachgesprochen || [];
             // (the folder used to be shown here; Doc wanted the line out - it lives in the handoff)
-            // start at the first line that is missing or truncated, so a resumed session picks up there
+            // Start at the reference story when it is recorded: that is the demo (original, clone, comparison).
+            // Otherwise at the first line that is missing or truncated, so a resumed session picks up there.
+            const ref = takes[REFERENZ] ? sichtbar().findIndex(s => s.id === REFERENZ) : -1;
             const offen = sichtbar().findIndex(s => !takes[s.id] || taugtNicht(s, takes[s.id]));
-            i = offen < 0 ? 0 : offen;
+            i = ref >= 0 ? ref : (offen < 0 ? 0 : offen);
             zeichne();
         });
     </script>
