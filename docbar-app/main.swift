@@ -14,6 +14,12 @@ private enum Style {
     static let pad: CGFloat = 8
     static let icon = "d.circle"        // D as in Doc: letter drawn, ring only an outline
     static let iconFilled = "d.circle.fill" // reversed: white D punched out of a coloured disc
+    static let iconOther = "exclamationmark.circle.fill"      // somebody else sits at the Mac (DocHere)
+    // Lambda orange as the warning colour (Doc: "in einer anderen Farbe als grün ... ob gelb passt"). Measured
+    // 13.11.2026: yellow on a light bar is only 1.4:1, so it is a yellow disc with a blue "!" - the decks' ink blue
+    // 25,52,130, 6.8:1, readable on every bar - with or without caffeine (Doc: "blau auf Gelb nehmen").
+    static let warnYellow = NSColor(red: 245 / 255, green: 194 / 255, blue: 66 / 255, alpha: 1)
+    static let warnInk = NSColor(red: 25 / 255, green: 52 / 255, blue: 130 / 255, alpha: 1)
     static let hereGreen = NSColor(red: 121 / 255, green: 158 / 255, blue: 49 / 255, alpha: 1)
     static let alertRed = NSColor(red: 176 / 255, green: 36 / 255, blue: 24 / 255, alpha: 1)
     static let font = NSFont.systemFont(ofSize: 13)
@@ -386,7 +392,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func refreshIcon(_ apps: [DocBarMenu]) {
         guard let button = statusItem.button else { return }
         let alerting = apps.contains { $0.alert == true && isRunning($0) }
-        let here = apps.contains { $0.here == true && isRunning($0) }
+        // Doc, 13.11.2026: "wenn hier jemand anders sitzt, dass da irgendwie ein Ausrufezeichen sitzt. Dass man
+        // sofort sieht, ich bin das nicht." The "!" replaces the D, the colours stay as they are.
+        let other = apps.contains { $0.other == true && isRunning($0) }
+        let here = !other && apps.contains { $0.here == true && isRunning($0) }
         // Bigger than the system default: the D is the one icon of ours left up there.
         // The ring is drawn thin so it matches the fine frames of the neighbouring
         // status items (measured: their frame is a single point, semibold is 2.5).
@@ -418,12 +427,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // since macOS 26 — the log showed two every 4 s while nothing changed. Only redraw
         // when the state or the bar's ink does.
         let bar = button.effectiveAppearance.bestMatch(from: [.aqua, .vibrantLight, .darkAqua, .vibrantDark])
-        let key = "\(alerting)-\(here)-\(bar?.rawValue ?? "")"
+        let key = "\(alerting)-\(here)-\(other)-\(bar?.rawValue ?? "")"
         guard key != iconKey else { return }
         iconKey = key
 
         let layers: [NSImage?]
-        if alerting && here {
+        if other {
+            // always blue on the yellow disc, with caffeine too (Doc: "Ich fand das Blau auf Gelb besser")
+            layers = [symbol(Style.iconOther, .semibold, [Style.warnInk, Style.warnYellow])]
+        } else if alerting && here {
             // Phi green on red is only 2.2:1, so this D is bolder than the white one. The disc
             // has its own D filled in red, else the clear letter would let the bar show through.
             layers = [symbol(Style.iconFilled, .semibold, [Style.alertRed, Style.alertRed]),
@@ -441,7 +453,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             layers = [symbol(Style.icon, .light)]
         }
         button.image = loweredByOne(layers)
-        button.image?.isTemplate = !alerting && !here
+        button.image?.isTemplate = !alerting && !here && !other
+        blink(other ? button.image : nil)
+    }
+
+    /// The "!" pulses calmly, about once a second (Doc: "Das Ausrufezeichen kann man blinken lassen"): the full
+    /// image and a faint copy take turns. The button's alpha would be cheaper, but since macOS 26 Control Center
+    /// draws the status items and ignores it (measured 13.11.2026: five frames, all the same) - so two images, and
+    /// only while somebody else sits there.
+    private var blinkTimer: Timer?
+    private func blink(_ full: NSImage?) {
+        blinkTimer?.invalidate(); blinkTimer = nil
+        guard let full = full, let button = statusItem.button else { return }
+        let faint = NSImage(size: full.size)
+        faint.lockFocus()
+        full.draw(in: NSRect(origin: .zero, size: full.size), from: .zero, operation: .sourceOver, fraction: 0.3)
+        faint.unlockFocus()
+        var bright = true
+        blinkTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak button] _ in
+            bright.toggle()
+            button?.image = bright ? full : faint
+        }
     }
 
     /// Redraws the panel and resizes the popover to what the panel now needs.

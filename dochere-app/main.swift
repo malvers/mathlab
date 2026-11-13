@@ -495,7 +495,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let key = "\(status)|\(startsAtLogin)"
         guard key != published else { return }
         published = key
-        bar?.publish(status: status, items: items, primary: "toggle", here: enabled && here, toggle: enabled)
+        bar?.publish(status: status, items: items, primary: "toggle", here: enabled && here, toggle: enabled,
+                     other: enabled && here && who == "other")     // DocBar shows "!" instead of the D
     }
 
     private func clicked(_ item: String) {
