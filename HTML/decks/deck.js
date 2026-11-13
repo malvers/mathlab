@@ -478,8 +478,8 @@ const trommel = (function () {
  * show's own think music in a small YouTube player over the slide's top right corner (js/video-lightbox.js, mini; Doc:
  * "ganz kleines YouTube-Fensterchen"), embedded, never copied: the official Jeopardy! channel (youtube.com/@jeopardy,
  * UCnxxhf9PSA3VJ4Q80pWJoow), "Final Jeopardy!: TV Theme Music | JEOPARDY!", e1WmddIHHDk, only its 30 s of think music
- * (19-49 s; the clip itself reads the clue before and shows the answers after). ?jeopardy=youtube tries the player on
- * Doc's Mac too. On a phone upright the player sits under the slide and its buttons.
+ * (19-49 s; the clip itself reads the clue before and shows the answers after). On a phone upright the player sits
+ * under the slide and its buttons. Since 13.11.2026 the player is off (YOUTUBE below): J plays only on Doc's Mac.
  * J again or the player's x stops it with a short fade; at its end it stops by itself. While Solita speaks (her
  * narration or one of her answers) the music goes down to a fifth and comes back after her - the 30 s go on, they are a
  * clock. In a show the beamer window plays it: J in the presenter window tells it so, and the presenter shows an/aus.
@@ -493,8 +493,9 @@ const jeopardy = (function () {
   const own = [].find.call(document.scripts, function (s) { return /\/deck\.js(\?|$)/.test(s.src); });
   const base = own ? own.src : location.href;
   const FILE = new URL('audio/privat/jeopardy.mp3', base).href;
-  const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)   // the file exists on Doc's Mac only
-    && new URLSearchParams(location.search).get('jeopardy') !== 'youtube';
+  // the file exists on Doc's Mac only. ?jeopardy=youtube is ignored since there is no YouTube any more (Doc, 13.11.2026:
+  // an old tab with it had a silent J and no J in the help)
+  const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   const SOFT = 0.2, FADE = 400;
   let on = false, a = null, p = null, probe = null, lib = null;
   let level = 1, goal = 1, watch = 0, ramp = 0;
