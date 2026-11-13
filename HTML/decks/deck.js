@@ -486,6 +486,10 @@ const trommel = (function () {
  */
 const jeopardy = (function () {
   const VIDEO = 'https://youtu.be/e1WmddIHHDk?start=19&end=49';
+  // Doc, 13.11.2026: no YouTube any more ("so ein Mitschnitt von der direkten TV-Show ... es reicht doch völlig, wenn ich
+  // das bei mir habe, denn ich bin ja der Präsenter"). Without his private mp3, J does nothing and is not in the help.
+  // The player code below stays; true here would bring it back.
+  const YOUTUBE = false;
   const own = [].find.call(document.scripts, function (s) { return /\/deck\.js(\?|$)/.test(s.src); });
   const base = own ? own.src : location.href;
   const FILE = new URL('audio/privat/jeopardy.mp3', base).href;
@@ -551,6 +555,7 @@ const jeopardy = (function () {
         el.play().catch(function () { if (a === el) stop(true); });
         return;
       }
+      if (!YOUTUBE) { stop(true); return; }            // no private file here, and no YouTube (Doc, 13.11.2026)
       loadPlayer().then(function () {
         if (!on) return;
         const h = VideoLightbox.mini(VIDEO, {
@@ -581,7 +586,9 @@ const jeopardy = (function () {
     }, 40);
   }
   return {
+    available: LOCAL || YOUTUBE,                       // the help shows J only where it can play
     toggle: function () {
+      if (!LOCAL && !YOUTUBE) return;                  // online: J does nothing (Doc, 13.11.2026)
       if (PRESENTER) { link.send({ t: 'jeopardy' }); return; }   // the beamer window plays it
       if (on) stop(); else start();
     }
@@ -1113,7 +1120,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
       [K(['1', '7', 'Enter']), 'Zu Folie 17 springen'],
       [K(['O']) + hint('Overview'), 'Übersicht aller Folien'],
       [K(['F']) + hint('Fullscreen'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
-      [K(['J']) + hint('Jeopardy'), 'Jeopardy-Musik, 30 s – noch einmal J beendet sie'],
+      ...(jeopardy.available ? [[K(['J']) + hint('Jeopardy'), 'Jeopardy-Musik, 30 s – noch einmal J beendet sie']] : []),
       null,
       [K(['Leertaste', '/', 'P']), 'Während Solita erklärt: Pause / weiter – ein Pfeil springt, sie spricht dort weiter' + pic],
       null,
