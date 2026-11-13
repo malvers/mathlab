@@ -362,7 +362,9 @@
             .wk-head > :nth-child(3) { grid-column-start: 3; }
         }
         @container kal (min-width: 1100px) {
-            .mo-head, .mo-grid { grid-template-columns: 34px repeat(7, minmax(0, 1fr)); margin-right: 12px; }
+            /* the left side column is empty here (the back arrow stands in the Monday column), so it shrinks to nothing and
+               the left gets the same 12px as the right (Doc, 13.11.2026: "Rechts ist gut, links ist zu groß. Bitte links.") */
+            .mo-head, .mo-grid { grid-template-columns: 0 repeat(7, minmax(0, 1fr)); margin: 0 12px; }
             .mo-head > :nth-child(8), .mo-head .nav-step[data-step="1"] { grid-area: 1 / 8; }
             .mo-head .nav-step[data-step="1"] { justify-self: end; }
             .mo-head > :nth-child(2), .mo-head .nav-step[data-step="-1"] { grid-area: 1 / 2; }
@@ -509,9 +511,9 @@
             </button>
             <div class="row2">
                 <div class="seg views" id="views" role="tablist" aria-label="Ansicht">
-                    <button type="button" role="tab" data-view="agenda" aria-selected="true">Tag</button>
-                    <button type="button" role="tab" data-view="week" aria-selected="false">Woche</button>
-                    <button type="button" role="tab" data-view="month" aria-selected="false">Monat</button>
+                    <button type="button" role="tab" data-view="agenda" aria-selected="true" title="Tag (Taste T)" aria-keyshortcuts="T">Tag</button>
+                    <button type="button" role="tab" data-view="week" aria-selected="false" title="Woche (Taste W)" aria-keyshortcuts="W">Woche</button>
+                    <button type="button" role="tab" data-view="month" aria-selected="false" title="Monat (Taste M)" aria-keyshortcuts="M">Monat</button>
                 </div>
                 <div class="nav" id="nav" hidden>
                     <!-- Material Icons "chevron_left" / "chevron_right" (Apache 2.0) -->
@@ -1578,6 +1580,17 @@
                     if (t && (t.isContentEditable || /^(TEXTAREA|SELECT)$/.test(t.tagName) || (t.tagName === 'INPUT' && !(t.id === 'text' && !t.value)))) return;
                     e.preventDefault();
                     step(e.key === 'ArrowRight' ? 1 : -1);
+                });
+                // T / W / M switch to Tag / Woche / Monat (Doc, 13.11.2026) - never while typing (here an empty entry field
+                // counts too: a "T" may start a title), not with a dialog open, not with Cmd / Ctrl / Alt (Cmd-W, Cmd-T)
+                document.addEventListener('keydown', e => {
+                    const v = { t: 'agenda', w: 'week', m: 'month' }[(e.key || '').toLowerCase()];
+                    if (!v || e.altKey || e.ctrlKey || e.metaKey || e.repeat || e.defaultPrevented) return;
+                    if ($('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('settings').hidden) return;
+                    const t = e.target;
+                    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+                    e.preventDefault();
+                    if (v !== view) setView(v);
                 });
                 // another window size: the week fits its hour box and the month names again - on the phone not for the
                 // address bar sliding in and out, that would make the hours jump while scrolling
