@@ -18,17 +18,46 @@
         else localStorage.removeItem(SESSION_KEY);
     }
 
+    /* Several tabs share one session, and Supabase rotates the refresh token: each one is good for a single refresh.
+       With DocCal, a plan and the notes open side by side, every tab refreshed with the same token, the second one lost,
+       wiped the shared session and logged all tabs out (Doc, 13.11.2026: "Session abgelaufen — bitte neu ..."; auth log
+       07:57: refresh_token_already_used twice). Now a tab first takes a newer session another tab stored, refreshes
+       only once at a time, and on a failed refresh looks whether another tab has just refreshed before it logs out. */
+    function storedSession() {
+        try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (e) { return null; }
+    }
+    /* take the stored session when another tab refreshed or logged in meanwhile (a logout elsewhere is left alone) */
+    function syncSession() {
+        const s = storedSession();
+        if (s && s.refresh_token && (!session || s.refresh_token !== session.refresh_token)) session = s;
+    }
+    const isFresh = s => !!(s && s.access_token && s.expires_at && Date.now() / 1000 < s.expires_at - 60);
+
+    let refreshing = null;   // the refresh running in this tab - everyone who needs a token meanwhile waits for it
     /* Refresh the access token via plain fetch when it is about to expire. */
     async function ensureFreshToken() {
+        syncSession();
         if (!session) throw new Error('nicht angemeldet');
-        if (session.expires_at && Date.now() / 1000 < session.expires_at - 60) return;
+        if (isFresh(session)) return;
+        if (!refreshing) refreshing = refreshSession().finally(() => { refreshing = null; });
+        return refreshing;
+    }
+    async function refreshSession() {
+        const used = session.refresh_token;
         const res = await fetch(DB_URL + '/auth/v1/token?grant_type=refresh_token', {
             method: 'POST',
             headers: { apikey: DB_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refresh_token: session.refresh_token })
+            body: JSON.stringify({ refresh_token: used })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
+            /* the token may have been used by another tab a moment ago - its new session is (or is about to be)
+               in localStorage: wait for it up to 3 s before giving up */
+            for (let i = 0; i < 12; i++) {
+                const s = storedSession();
+                if (s && s.refresh_token && s.refresh_token !== used) { session = s; return; }
+                await new Promise(ok => setTimeout(ok, 250));
+            }
             storeSession(null);
             throw new Error('Session abgelaufen — bitte neu anmelden');
         }
@@ -252,7 +281,7 @@
         DB_URL: DB_URL,
         DB_KEY: DB_KEY,
         get session() { return session; },
-        hasSession: function () { return !!(session && session.refresh_token); },
+        hasSession: function () { syncSession(); return !!(session && session.refresh_token); },
         storeSession: storeSession,
         ensureFreshToken: ensureFreshToken,
         api: api,
