@@ -683,6 +683,8 @@
                04.09.2026). Without the parameter the page is a blank bogen. */
             let talk = '';
             try { talk = new URLSearchParams(location.search).get('v') || ''; } catch (e) { }
+            /* the plan a talk belongs to: its id is plan-Lerngruppe-row-role (vortraege.js talkId), e.g. "inf13-a-3-coach" */
+            const planOfTalk = function () { return String(talk).split('-')[0]; };
 
             /* A talk is graded twice: the Coach and the audience. How the two
                count is set in svp-noten.js, shared with the list of talks (Doc,
@@ -949,8 +951,12 @@
                     ROLE_LABEL.publikum + ' ' + fmt(other.got) + ' (×' + WEIGHT.publikum + ') · ' +
                     (state.lang === 'de' ? 'zusammen ' : 'together ');
                 const b = document.createElement('b');
-                b.textContent = fmt(total) + ' ' + sh.of + ' ' + mine.max +
-                    ' · ' + fmt(pct * 100) + ' % · ' + (state.lang === 'de' ? 'Note ' : 'grade ') + svpNoten.note(pct);
+                /* Notenpunkte for BGY 12/13 first, the share small behind them (Doc, 12.11.2026: "im Gymnasium zählt
+                   das Punktesystem"); the mark 1-6 elsewhere, as before (svp-noten.js mark) */
+                const m = svpNoten.mark ? svpNoten.mark(pct, planOfTalk()) : { np: false, value: svpNoten.note(pct) };
+                b.textContent = fmt(total) + ' ' + sh.of + ' ' + mine.max + ' · ' +
+                    (m.np ? m.value + ' NP · ' + fmt(pct * 100) + ' %'
+                          : fmt(pct * 100) + ' % · ' + (state.lang === 'de' ? 'Note ' : 'grade ') + m.value);
                 elSummary.appendChild(txt);
                 elSummary.appendChild(b);
             }
@@ -969,8 +975,11 @@
                 elBig.textContent = fmt(t.got) + ' / ' + t.max;
                 /* In parentheses behind the table title - the bonus without
                    its own pair, no brackets inside brackets. */
+                /* this sheet alone: on a BGY 12/13 talk its Notenpunkte before the share (svp-noten.js) */
+                const one = window.svpNoten && svpNoten.mark ? svpNoten.mark(t.got / t.max, planOfTalk()) : null;
                 elNote.textContent = '(' + fmt(t.got) + ' ' + sh.of + ' ' + t.max +
                     (t.bonus ? ' + ' + t.bonus + ' ' + sh.bonus : '') +
+                    (one && one.np ? ' · ' + one.value + ' NP' : '') +
                     ' · ' + fmt(t.got / t.max * 100) + ' %)';
                 drawSummary();
             }

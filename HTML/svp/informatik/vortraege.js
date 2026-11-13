@@ -2121,7 +2121,10 @@
         const N = window.svpNoten;
         const s = sheetPts[i] || {};
         const pct = N ? N.combine(s.coach, s.publikum) : null;
-        return pct === null ? null : { pct: pct, note: N.note(pct) };
+        if (pct === null) return null;
+        /* Notenpunkte for BGY 12/13, the mark 1-6 elsewhere (svp-noten.js mark; an older svp-noten.js: the mark) */
+        const m = N.mark ? N.mark(pct, PLAN) : { np: false, value: N.note(pct), unit: 'Note', note: N.note(pct) };
+        return { pct: pct, note: m.value, m: m };
     }
 
     /* Is there a mark for this talk? Both sheets in (then it is worked out)
@@ -2139,7 +2142,7 @@
         const given = noteGiven(i);
         const t = given ? NOTE_GIVEN : NOTE_NONE;
         return '<span class="vt-note-box">' +
-            '<span class="vt-grade-lbl">Note</span>' +
+            '<span class="vt-grade-lbl">' + gradeUnit() + '</span>' +
             '<span class="vt-note locked' + (given ? '' : ' none') + '" id="notelock-' + i + '"' +
             ' title="' + t + '" aria-label="' + t + '">' + (given ? '***' : '–') + '</span>' +
             '</span>';
@@ -2149,6 +2152,10 @@
        hand-set mark (Doc, 04.11.2026: "neben der automatisch ausgerechneten Note
        noch ein Feld, wo ich per Hand korrigieren kann"); left empty, the
        computed mark counts - the field shows it as a grey placeholder. */
+    /* "NP" on the plans marked in Notenpunkte (BGY 12/13), "Note" elsewhere - svp-noten.js decides */
+    function gradeUnit() {
+        return window.svpNoten && svpNoten.scaleOf && svpNoten.scaleOf(PLAN) === 'np' ? 'NP' : 'Note';
+    }
     function noteHtml(i, pos) {
         if (!gradesVisible()) return noteLockHtml(i);
         const c = noteCalc(i);
@@ -2156,14 +2163,16 @@
         const over = noteOver[i] || '';
         const W = window.svpNoten ? svpNoten.WEIGHT : null;
         const why = c
-            ? 'Errechnet: Note ' + c.note + ' aus ' + pctTxt(c.pct) +
+            ? 'Errechnet: ' + (c.m.np ? c.m.value + ' Notenpunkte (Note ' + c.m.note + ')' : 'Note ' + c.m.value) +
+                ' aus ' + pctTxt(c.pct) +
                 (W ? ' (Coach ×' + W.coach + ', Team ×' + W.publikum + ')' : '')
             : s.coach ? 'Der Team-Bogen fehlt noch'
             : s.publikum ? 'Der Coach-Bogen fehlt noch' : 'Noch kein Bogen abgegeben';
         return '<span class="vt-note-box">' +
-            '<span class="vt-grade-lbl">Note</span>' +
+            '<span class="vt-grade-lbl">' + gradeUnit() + '</span>' +
             '<span class="vt-note calc' + (c ? '' : ' none') + '" title="' + esc(why) + '"' +
-            ' aria-label="Errechnete Note für Thema ' + (pos + 1) + '">' + (c ? c.note : '–') + '</span>' +
+            ' aria-label="Errechnete ' + (gradeUnit() === 'NP' ? 'Notenpunkte' : 'Note') + ' für Thema ' + (pos + 1) + '">' +
+            (c ? c.note : '–') + '</span>' +
             (c ? '<span class="vt-note-pct">' + pctTxt(c.pct) + '</span>' : '') +
             /* an arrow, not a word: the row has to keep Abgabe and Meldung on one line */
             '<span class="vt-grade-lbl" title="Endnote">→</span>' +
