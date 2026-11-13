@@ -3224,10 +3224,14 @@ const link = (function () {
     el.innerHTML = '<button type="button" class="pb-ruhe" title="Buzzer-Code der Klasse – Klick: anderen Code eingeben"></button>'
       + pill('frage', 'button', '1f914', 'NICHT VERSTANDEN', 'Nicht verstanden, noch offen – Klick: gesehen')
       + pill('langsam', 'span', '1f40c', 'ZU LANGSAM', 'Zu langsam (letzte 2 Minuten)')
-      + pill('schnell', 'span', '1f3c3', 'ZU SCHNELL', 'Zu schnell (letzte 2 Minuten)');
+      + pill('schnell', 'span', '1f3c3', 'ZU SCHNELL', 'Zu schnell (letzte 2 Minuten)')
+      // how often the phones pressed "Feuerwerk" since this presenter view opened - every press, also those that join a
+      // firework already in the air (Doc, 13.11.2026: "einen Zähler ..., wie viel Mal Feuerwerk gedrückt wurde")
+      + pill('feuer', 'span', '1f386', 'FEUERWERK', 'So oft wurde in dieser Präsentation Feuerwerk gedrückt');
     const ruhe = el.querySelector('.pb-ruhe');
-    const pills = { frage: el.querySelector('.frage'), langsam: el.querySelector('.langsam'), schnell: el.querySelector('.schnell') };
-    const stand = { frage: 0, langsam: 0, schnell: 0 };
+    const pills = { frage: el.querySelector('.frage'), langsam: el.querySelector('.langsam'), schnell: el.querySelector('.schnell'),
+      feuer: el.querySelector('.feuer') };
+    const stand = { frage: 0, langsam: 0, schnell: 0, feuer: 0 };
     let code = null;
     function setze(art, n) {
       const p = pills[art], vorher = stand[art];
@@ -3237,7 +3241,7 @@ const link = (function () {
       p.querySelector('b').textContent = n > 99 ? '99+' : String(n);
       if (n > vorher && p.animate) p.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(1)' }],
         { duration: 600, iterations: 2, easing: 'ease-out' });
-      ruhe.hidden = stand.frage + stand.langsam + stand.schnell > 0;
+      ruhe.hidden = stand.frage + stand.langsam + stand.schnell + stand.feuer > 0;
     }
     function nimm(c, ab) {
       code = Buzzer.nimmCode(c, ab);
@@ -3246,7 +3250,8 @@ const link = (function () {
       el.hidden = false;
       Buzzer.start(function (n) { setze('frage', n); });
       Buzzer.tempo(function (s) { setze('langsam', s.langsam); setze('schnell', s.schnell); });
-      if (Buzzer.jubel) Buzzer.jubel(feuerHier);    // the phones' EUPHORIE: a mini firework (buzzer.js from 11.11.2026)
+      // the phones' Feuerwerk key: a mini firework (buzzer.js from 11.11.2026), and one more on the counter
+      if (Buzzer.jubel) Buzzer.jubel(function () { setze('feuer', stand.feuer + 1); feuerHier(); });
     }
     pills.frage.onclick = function () { Buzzer.gesehen(); };
     ruhe.onclick = function () {
