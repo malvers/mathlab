@@ -307,7 +307,7 @@ final class PhotoItem {
     let borderless: Bool                  // cut-out, drawn unclipped, see hasTransparency
     weak var owner: AppDelegate?
 
-    init?(rec: PhotoRec, owner: AppDelegate) {
+    init?(rec: PhotoRec, owner: AppDelegate, visible: Bool = true) {
         guard let image = NSImage(contentsOfFile: rec.path),
               let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil),
               cg.height > 0 else { return nil }
@@ -339,7 +339,7 @@ final class PhotoItem {
         view.item = self
 
         apply()
-        panel.orderFront(nil)
+        if visible { panel.orderFront(nil) }
     }
 
     /// Rebuilds the window geometry from the record, keeping the photo centred.
@@ -403,6 +403,11 @@ final class PhotoItem {
 
     func close() { window.orderOut(nil) }
 
+    /// Shows or hides the print without touching its record: position, size and angle stay.
+    func setVisible(_ on: Bool) {
+        if on { window.orderFront(nil) } else { select(false); window.orderOut(nil) }
+    }
+
     func showMenu(at event: NSEvent) {
         let menu = NSMenu()
         menu.addItem(withTitle: "Gerade ausrichten", action: #selector(AppDelegate.menuStraighten(_:)), keyEquivalent: "")
@@ -428,6 +433,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var startsAtLogin: Bool { SMAppService.mainApp.status == .enabled }
 
+    /// "Fotos zeigen": off hides every print at once (13.11.2026, Doc: things on the desk
+    /// others should not see) without putting anything away; photos.json stays as it is.
+    /// Remembered in the user defaults, so a hidden desk stays hidden after a restart or login.
+    private static let shownKey = "photosShown"
+    private var shown: Bool {
+        get { UserDefaults.standard.object(forKey: AppDelegate.shownKey) as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: AppDelegate.shownKey) }
+    }
+
     func applicationDidFinishLaunching(_ note: Notification) {
         bar = DocBarClient(id: "de.docalvers.deskphoto", name: "DocPhoto",
                            symbol: "photo.on.rectangle.angled") { [weak self] item in
@@ -435,7 +449,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         for rec in store.recs {
-            if let item = PhotoItem(rec: rec, owner: self) { items.append(item) }
+            if let item = PhotoItem(rec: rec, owner: self, visible: shown) { items.append(item) }
         }
         save()   // drops records whose file has gone
         publishMenu()
@@ -457,18 +471,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: menu
 
     private func publishMenu() {
-        var items: [DocBarItem] = [DocBarItem("add", "Foto ablegen …")]
+        var items: [DocBarItem] = []
+        if !self.items.isEmpty || !shown { items.append(DocBarItem("show", "Fotos zeigen", state: shown)) }
+        items.append(DocBarItem("add", "Foto ablegen …"))
         if !self.items.isEmpty { items.append(DocBarItem("clear", "Alle Fotos wegräumen")) }
         items.append(DocBarItem("login", "Beim Anmelden starten", state: startsAtLogin))
 
         let n = self.items.count
-        let status = n == 0 ? "kein Foto abgelegt" : (n == 1 ? "1 Foto auf dem Schreibtisch"
-                                                             : "\(n) Fotos auf dem Schreibtisch")
+        let fotos = n == 1 ? "1 Foto" : "\(n) Fotos"
+        let status = n == 0 ? "kein Foto abgelegt"
+                   : shown ? "\(fotos) auf dem Schreibtisch" : "\(fotos) ausgeblendet"
         bar.publish(status: status, items: items)
     }
 
     private func handle(_ item: String) {
         switch item {
+        case "show": toggleShown()
         case "add": addPhoto()
         case "clear": removeAll()
         case "login": toggleLogin()
@@ -497,7 +515,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                centerX: Double(spot.x), centerY: Double(spot.y),
                                width: width,
                                angle: 0)     // straight, like the widgets beside it
-            if let item = PhotoItem(rec: rec, owner: self) { items.append(item) }
+            // A photo added while the desk is hidden stays hidden too: hiding is for privacy.
+            if let item = PhotoItem(rec: rec, owner: self, visible: shown) { items.append(item) }
         }
         save()
         publishMenu()
@@ -535,6 +554,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         items.removeAll()
         save()
         paths.forEach(trashOwnCopy)
+        publishMenu()
+    }
+
+    @objc private func toggleShown() {
+        shown.toggle()
+        items.forEach { $0.setVisible(shown) }
         publishMenu()
     }
 
