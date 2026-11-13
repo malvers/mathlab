@@ -306,6 +306,10 @@ final class PhotoItem {
     private let aspect: Double            // width / height of the image
     let borderless: Bool                  // cut-out, drawn unclipped, see hasTransparency
     weak var owner: AppDelegate?
+    /// Centre of the window while the print lies somewhere else for the moment, because its own place (rec) is on
+    /// a screen that is not connected right now - a monitor unplugged, only the laptop, a beamer instead.
+    /// nil: it lies at its own place. Never saved; see place(fallback:nudge:).
+    private var stand: NSPoint? = nil
 
     init?(rec: PhotoRec, owner: AppDelegate, visible: Bool = true) {
         guard let image = NSImage(contentsOfFile: rec.path),
@@ -353,7 +357,8 @@ final class PhotoItem {
 
         let winW = boxW + 2 * shadowPad
         let winH = boxH + 2 * shadowPad
-        window.setFrame(NSRect(x: rec.centerX - winW / 2, y: rec.centerY - winH / 2,
+        let c = stand ?? NSPoint(x: rec.centerX, y: rec.centerY)    // a stand-in place stays while it lasts
+        window.setFrame(NSRect(x: Double(c.x) - winW / 2, y: Double(c.y) - winH / 2,
                                width: winW, height: winH), display: true)
 
         view.frame = NSRect(origin: .zero, size: CGSize(width: winW, height: winH))
@@ -393,12 +398,34 @@ final class PhotoItem {
 
     func openOriginal() { NSWorkspace.shared.open(URL(fileURLWithPath: rec.path)) }
 
-    /// Writes the live window position back into the record and saves.
+    /// Writes the live window position back into the record and saves. On a stand-in place only a real move by
+    /// hand counts as a new place; resizing or turning it there keeps its own place for when the monitor is back.
     func commit() {
         let f = window.frame
+        if let s = stand, abs(Double(f.midX - s.x)) < 1, abs(Double(f.midY - s.y)) < 1 {
+            owner?.save()                                     // size/angle changed, the place stays its own
+            return
+        }
+        stand = nil
         rec.centerX = Double(f.midX)
         rec.centerY = Double(f.midY)
         owner?.save()
+    }
+
+    /// Puts the print at its own place. When that place is on no connected screen, it goes onto `fallback` for the
+    /// moment (offset by `nudge` steps, so several do not hide each other) and the record is NOT changed: when the
+    /// monitor comes back, the print is where it was (13.11.2026: unplugging the LG used to move all photos to the
+    /// laptop for good). Returns true when it had to take a stand-in place.
+    @discardableResult
+    func place(fallback: NSRect?, nudge: Int) -> Bool {
+        stand = nil
+        apply()
+        let f = window.frame
+        guard let vis = fallback, !NSScreen.screens.contains(where: { $0.frame.intersects(f) }) else { return false }
+        let step = 28.0 * Double(nudge)
+        stand = NSPoint(x: Double(vis.midX) + step, y: Double(vis.midY) - step)
+        apply()
+        return true
     }
 
     func close() { window.orderOut(nil) }
@@ -452,6 +479,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if let item = PhotoItem(rec: rec, owner: self, visible: shown) { items.append(item) }
         }
         save()   // drops records whose file has gone
+        placeAll()   // a print whose monitor is not connected now lies on a screen that is, for the moment
         publishMenu()
 
         // One monitor for all prints; global sees the click while other apps are in front,
@@ -643,15 +671,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: housekeeping
 
-    /// Pulls prints back onto a visible screen after a monitor was unplugged.
-    @objc private func screensChanged() {
+    /// A monitor came or went: every print goes to its own place, or - while that monitor is missing - onto a
+    /// connected screen for the moment, without saving that spot (see PhotoItem.place).
+    @objc private func screensChanged() { placeAll() }
+
+    private func placeAll() {
+        let vis = (NSScreen.main ?? NSScreen.screens.first)?.visibleFrame
+        var away = 0
         for item in items {
-            let f = item.window.frame
-            let onScreen = NSScreen.screens.contains { $0.frame.intersects(f) }
-            if !onScreen, let vis = NSScreen.main?.visibleFrame {
-                item.window.setFrameOrigin(NSPoint(x: vis.midX - f.width / 2, y: vis.midY - f.height / 2))
-                item.commit()
-            }
+            if item.place(fallback: vis, nudge: away) { away += 1 }
         }
     }
 
