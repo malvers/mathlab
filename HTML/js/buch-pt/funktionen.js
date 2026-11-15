@@ -87,6 +87,12 @@ window.BuchPT && BuchPT.add('funktionen', {
         'Richtig.': 'Certo.',
         'Nicht ganz.': 'Não exatamente.',
         'Entscheide mit den Knöpfen. Danach siehst du Definitions- und Wertebereich.': 'Decide com os botões. Depois vês o domínio e o contradomínio.',
+        // lage: the intercept is b in Portugal (y = mx + b)
+        '$g$: Anstieg $m_1$': '$g$: declive $m_1$',
+        '$g$: Achsenabschnitt $n_1$': '$g$: ordenada na origem $b_1$',
+        '$h$: Anstieg $m_2$': '$h$: declive $m_2$',
+        '$h$: Achsenabschnitt $n_2$': '$h$: ordenada na origem $b_2$',
+        'Zwei Geraden und ihre Lage zueinander': 'Duas retas e a sua posição relativa',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -154,6 +160,16 @@ window.BuchPT && BuchPT.add('funktionen', {
         ['genau einmal', 'exatamente uma vez'],
         ['Jede senkrechte Gerade trifft die Kurve höchstens einmal: eine Funktion. ', 'Cada reta vertical interseta a curva no máximo uma vez: é uma função. '],
         ["$, $W = ", "$, $D' = "],
+        // lage
+        ['Gleicher Anstieg und gleicher Achsenabschnitt: <b>identisch</b>. Jeder Punkt ist gemeinsam.', 'Mesmo declive e mesma ordenada na origem: <b>coincidentes</b>. Todos os pontos são comuns.'],
+        ['Gleicher Anstieg $m_1 = m_2$, verschiedene Achsenabschnitte: <b>parallel</b>. Es gibt keinen Schnittpunkt.', 'Mesmo declive $m_1 = m_2$, ordenadas na origem diferentes: <b>estritamente paralelas</b>. Não há ponto de interseção.'],
+        ['$: Die Geraden sind <b>orthogonal</b> (senkrecht zueinander).', '$: as retas são <b>perpendiculares</b>.'],
+        ['Verschiedene Anstiege: Die Geraden <b>schneiden</b> sich.', 'Declives diferentes: as retas são <b>concorrentes</b>.'],
+        ['$ ergibt $x = \\dfrac{n_2 - n_1}{m_1 - m_2} = ', '$ dá $x = \\dfrac{b_2 - b_1}{m_1 - m_2} = '],
+        ['Gleichsetzen: $', 'Igualando: $'],
+        ['$, also ', '$, logo '],
+        [' · Schnittwinkel $', ' · ângulo das retas $'],
+        ['parallel zur $x$-Achse', 'paralela ao eixo $Ox$'],
     ],
     rule: [
         // pt0: notation of the module, for every book
