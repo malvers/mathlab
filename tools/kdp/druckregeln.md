@@ -87,3 +87,24 @@ Zeile des Übergangs-Widgets allein, weil die Grafik im Druck eine ganze Seite f
 **Weißraum am Seitenende** füllt `fillGaps()` in `buch-druck.js`: ab 38 mm ein Foto aus `luecken` in
 `js/buch-fotos.js` (pro Kapitel eine Liste zum Thema, jedes Foto einmal je Buch, keins, das schon im Text steht),
 ab 70 mm sonst Karo „Meine Notizen“. Ein neues Buch bekommt deshalb gleich seine `luecken`-Listen.
+
+## 9. Kein Bild unter 150 ppi in der Datei, die hochgeht
+
+Geprüft wird die **Datei**, nicht die Website: `druckcheck.mjs` misst jedes Rasterbild im KDP-Manuskript und im
+Umschlag (`~/Documents/kdp/<buch>/<buch>-manuskript.pdf` und `-cover.pdf`, oder `--pdf=<datei>`) in der Größe, in der es
+gedruckt wird (`tools/kdp/pdf-aufloesung.mjs`, braucht nur qpdf). **Unter 150 ppi ist ein Fehler**, Exit-Code 1, die Datei
+darf nicht hochgeladen werden. 150 bis 299 ppi ist eine Warnung mit Seitenzahl, weil KDP 300 dpi wünscht.
+Schnell, ohne Browser: `node tools/kdp/druckcheck.mjs <buch> --nur-pdf`.
+
+- **Ohne grünen druckcheck kein Upload.** Das gilt für jede neue Fassung, auch für ein Update desselben Buchs.
+- **Übernommene Seiten zählen wie neue.** Werden Seiten per qpdf aus einer älteren Datei übernommen (nur einzelne Seiten
+  neu setzen, siehe die Regel „nie das ganze Buch neu rendern“), dann wird die fertig zusammengesetzte Datei geprüft, nicht
+  nur die neuen Seiten. Genau dort lag der Fehler.
+
+Vorfall (15.11.2026, Doc: „stellt bitte unbedingt sicher, dass nie wieder im Buch dort hochgeht mit diesen schlecht
+aufgelösten Grafiken“): Das KDP-Manuskript von GY 12 LK bekam neue Seiten 1–2 (Widmung, Danksagung), die Seiten 3–240
+kamen aus der Datei vom 08.11. Darin stand auf S. 4 noch die Cover-Wand „Alle 24 Lehrbücher“ mit **72 ppi**, online war sie
+seit dem 12.11. scharf. Die alte Datei fällt mit diesem Check durch (S. 4, 24 Bilder ab 72 ppi), die getauschte besteht
+(893 ppi). Gemessen am selben Buch: eingefrorene 2D-Grafiken etwa 310 ppi, WebGL-Grafiken 192 ppi (ihre Renderer
+begrenzen das Pixelverhältnis auf 2). Das gibt eine Warnung, aber keinen Fehler. Wer sie auf 300 ppi bringen will, hebt
+das Pixelverhältnis im Druck an.

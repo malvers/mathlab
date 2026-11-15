@@ -10,16 +10,47 @@
  *   rule 8  a single line of a paragraph alone at the foot or the top of a page (orphan, widow)
  * plus Paged.js errors ("Layout repeated") and script errors. Exit code 1 when something was found.
  * Rules 2 (dark on dark) and 4 (empty boxes) still need eyes: look at the pages.
+ *
+ * Rule 9 (since 15.11.2026) checks the FILES that go up, not the website: every raster image in the KDP manuscript and
+ * cover (default ~/Documents/kdp/<buch>/<buch>-manuskript.pdf and -cover.pdf, or --pdf=<file>, more than once) is
+ * measured at the size it is printed (tools/kdp/pdf-aufloesung.mjs). Under 150 ppi = error, exit code 1, no upload;
+ * 150-299 ppi = warning. Doc, 15.11.2026, after the old 72-ppi cover wall went up in mathegy12lk: "stellt bitte unbedingt
+ * sicher, dass nie wieder im Buch dort hochgeht mit diesen schlecht aufgelösten Grafiken."
+ *     node tools/kdp/druckcheck.mjs mathegy12lk --nur-pdf          only rule 9, no browser (seconds)
  */
 import { chromium } from '../../videopipeline/node_modules/playwright/index.mjs';
+import { existsSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { bildAufloesung, FEHLER_PPI, WARN_PPI, MIN_INCH } from './pdf-aufloesung.mjs';
 
 // --letter / --a4: the other page format than the book's own (kapitel.js format)
 const args = process.argv.slice(2), FMT = args.includes('--letter') ? 'letter' : args.includes('--a4') ? 'a4' : '';
 const [BOOK, BASE = 'https://docalvers.de'] = args.filter(a => !a.startsWith('--'));
-if (!BOOK || !/^[a-z0-9-]+$/.test(BOOK)) { console.error('usage: node tools/kdp/druckcheck.mjs <buch> [basis-url] [--letter | --a4]'); process.exit(1); }
+if (!BOOK || !/^[a-z0-9-]+$/.test(BOOK)) { console.error('usage: node tools/kdp/druckcheck.mjs <buch> [basis-url] [--letter | --a4] [--pdf=<datei>] [--nur-pdf]'); process.exit(1); }
+
+let found = 0;
+
+// ---------- rule 9: the resolution of every image in the files that go to KDP ----------
+const KDP_DIR = path.join(os.homedir(), 'Documents', 'kdp', BOOK.replace(/-(en|es|fr|it|sw|pt|nl|tr)$/, ''));
+const given = args.filter(a => a.startsWith('--pdf=')).map(a => path.resolve(a.slice(6)));
+const pdfs = given.length ? given : ['-manuskript.pdf', '-cover.pdf'].map(x => path.join(KDP_DIR, BOOK + x)).filter(existsSync);
+if (!pdfs.length) console.log('Regel 9: keine KDP-Datei gefunden (' + KDP_DIR + '), nichts gemessen.');
+for (const f of pdfs) {
+    const imgs = bildAufloesung(f).filter(b => Math.max(b.wIn, b.hIn) >= MIN_INCH);
+    const bad = imgs.filter(b => b.ppi < FEHLER_PPI), warn = imgs.filter(b => b.ppi >= FEHLER_PPI && b.ppi < WARN_PPI);
+    const pages = xs => [...new Set(xs.map(b => b.page))].map(p => {
+        const lo = Math.round(Math.min(...xs.filter(b => b.page === p).map(b => b.ppi)));
+        return 'S. ' + p + ' (' + xs.filter(b => b.page === p).length + ' Bild' + (xs.filter(b => b.page === p).length > 1 ? 'er' : '') + ', ab ' + lo + ' ppi)';
+    });
+    console.log('\nRegel 9 · ' + path.basename(f) + ': ' + imgs.length + ' Bilder gemessen');
+    if (bad.length) { found += bad.length; console.log('  FEHLER, unter ' + FEHLER_PPI + ' ppi, so darf die Datei nicht hochgeladen werden:'); pages(bad).forEach(x => console.log('    ' + x)); }
+    if (warn.length) { console.log('  Warnung, ' + FEHLER_PPI + '–' + (WARN_PPI - 1) + ' ppi (KDP wünscht 300):'); pages(warn).forEach(x => console.log('    ' + x)); }
+    if (!bad.length && !warn.length) console.log('  alle Bilder ab ' + WARN_PPI + ' ppi');
+}
+if (args.includes('--nur-pdf')) process.exit(found ? 1 : 0);
 
 const browser = await chromium.launch({ headless: true, args: ['--mute-audio'] });
-let found = 0;
 try {
     const page = await (await browser.newContext({ viewport: { width: 1200, height: 900 } })).newPage();
     const errors = [];
@@ -78,7 +109,7 @@ try {
     list('Regel 3 · breiter als der Satzspiegel:', r.wide);
     list('Regel 8 · eine einzelne Zeile allein am Seitenende oder -anfang:', r.lone);
     list('Fehler beim Setzen:', errors);
-    if (!found) console.log('Regeln 1, 3 und 8: alles in Ordnung. Regeln 2 und 4 bitte ansehen (tools/kdp/druckregeln.md).');
+    if (!found) console.log('Regeln 1, 3, 8 und 9: alles in Ordnung. Regeln 2 und 4 bitte ansehen (tools/kdp/druckregeln.md).');
 } finally {
     await browser.close();
 }
