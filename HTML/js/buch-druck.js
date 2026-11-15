@@ -785,6 +785,128 @@
         box.lastChild.innerHTML = BUECHER.map(b => '<img src="../../resources/og/buch-' + b + lang + '-cover.jpg" alt=""' + (b === Buch.book ? ' class="d-dieses"' : '') +
             (lang ? ' data-ersatz="../../resources/og/buch-' + b + '-cover.jpg"' : '') + '>').join('');
     }
+    // The cover wall, on the screen and on paper. Chrome cannot put a 3D CSS turn into a PDF: it rasterised every cover at
+    // one pixel per CSS pixel (~72 ppi), and the 2D stand-ins of 12. and 15.11. only bent the outline while the picture
+    // stayed flat (Doc, 15.11.2026: "es sind nur die Hintergründe gedreht. Das geht gar nicht ... Bitte so machen wie in
+    // The Making of"). So the wall is painted here with the very 3D of the screen, read from js/buch-druck.css: the
+    // perspective of .d-buecher (--wand-persp) and its perspective-origin, the turn rotateY(--wand-dreh) about each cover's
+    // transform-origin, its border-radius, box-shadow and outline (the gold one of this book). A turn about the vertical axis
+    // keeps every vertical line of a cover a vertical line, only moved and scaled, so the cover is drawn column by column -
+    // exact, not an approximation. One JPEG of the whole wall at 4.5 px per CSS px (432 ppi, whatever the screen's pixel
+    // ratio); on the screen it stays hidden and the CSS 3D shows.
+    // Even gaps: the perspective makes the covers left of the middle narrower than those on the right, so in their grid cells
+    // the gaps grew towards the front left (Doc, 15.11.2026: "der Abstand. Vorne links ist größer ... ein Tick zu viel"). The
+    // columns are moved (--wand-dx, used by the CSS turn as well) until every gap between two turned covers is the same and
+    // the outer margins are half a gap - on the screen and on paper alike.
+    async function paintWall(wall) {
+        const num = s => parseFloat(s) || 0;
+        const imgs = Array.from(wall.querySelectorAll('img:not(.d-buecher-druck)')).filter(i => i.naturalWidth);
+        const ws = getComputedStyle(wall), m = ws.getPropertyValue('--wand-dreh').trim().match(/^(-?[\d.]+)(deg|rad|turn|grad)?$/);
+        const D = num(ws.perspective);
+        if (!imgs.length || !m || !D) return;
+        const th = +m[1] * ({ rad: 1, turn: 2 * Math.PI, grad: Math.PI / 200 }[m[2]] || Math.PI / 180);
+        const CA = Math.cos(th), SA = -Math.sin(th);                       // rotateY(th): x = q cos th, z = -q sin th (z > 0 towards the viewer)
+        const sc = q => D / (D - q * SA);                                   // the perspective's scale for a point q px right of the axis
+        // the layout boxes without the turn (the CSS 3D of the screen is in getBoundingClientRect)
+        imgs.forEach(i => { i.style.transform = 'none'; });
+        const wr = wall.getBoundingClientRect(), z = wall.offsetWidth ? wr.width / wall.offsetWidth : 1, f = Math.abs(z - 1) > 0.01 ? z : 1;
+        const boxes = imgs.map(i => {
+            const r = i.getBoundingClientRect(), cs = getComputedStyle(i);
+            return { i, cs, x: (r.left - wr.left) / f, y: (r.top - wr.top) / f, w: r.width / f, h: r.height / f, t: num(cs.transformOrigin) };
+        });
+        imgs.forEach(i => { i.style.transform = ''; });
+        const W = wr.width / f, [ox, oy] = ws.perspectiveOrigin.split(' ').map(num);
+        // a point (u, v) of a cover (CSS px from the top left corner of its box at b.x) after the turn and the perspective,
+        // in .d-buecher's px - and back: the u that lands at x (x does not depend on v)
+        const at = (b, u, v) => { const q = u - b.t, s = sc(q); return [ox + (b.x + b.t + q * CA - ox) * s, oy + (b.y + v - oy) * s]; };
+        const back = (b, x) => b.t + D * (x - b.x - b.t) / (D * CA + (x - ox) * SA);
+        // the columns, left to right, and their left edges for equal gaps g (outer margins g / 2); how far the last one misses
+        // the right end is linear in g, so two tries give the exact g
+        const cols = [];
+        boxes.forEach(b => {
+            let c = cols.find(c => Math.abs(c.x - b.x) < 0.5);
+            if (!c) cols.push(c = { x: b.x, w: 0, t: b.t, boxes: [] });
+            c.w = Math.max(c.w, b.w); c.boxes.push(b);
+        });
+        cols.sort((a, b) => a.x - b.x);
+        const lay = g => {
+            let P = g / 2;
+            cols.forEach(c => { c.L = (P - ox) / sc(-c.t) + ox - c.t * (1 - CA); P = at({ x: c.L, y: 0, t: c.t }, c.w, 0)[0] + g; });
+            return P - g - (W - g / 2);
+        };
+        const m0 = lay(0), m1 = lay(10);
+        lay(-m0 * 10 / (m1 - m0));
+        cols.forEach(c => c.boxes.forEach(b => {
+            b.i.style.setProperty('--wand-dx', (c.L - b.x).toFixed(3) + 'px');   // the screen's CSS turn moves the same way
+            b.x = c.L;
+        }));
+
+        // the look of each cover from its CSS, and the room it needs around it (shadow gone after 3 sigma = 1.5 x blur)
+        boxes.forEach(b => {
+            const cs = b.cs, sh = cs.boxShadow !== 'none' && cs.boxShadow.match(/^(rgba?\([^)]*\)|#[0-9a-f]+|[a-z]+)\s+(-?[\d.]+)px\s+(-?[\d.]+)px\s+([\d.]+)px/i);
+            b.r = ['borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomRightRadius', 'borderBottomLeftRadius'].map(k => num(cs[k]));
+            b.sh = sh ? { c: sh[1], x: +sh[2], y: +sh[3], blur: +sh[4] } : null;
+            b.ol = cs.outlineStyle !== 'none' && num(cs.outlineWidth) ? { c: cs.outlineColor, w: num(cs.outlineWidth), o: num(cs.outlineOffset) } : null;
+            const e = b.sh ? 1.5 * b.sh.blur : 0, o = b.ol ? b.ol.o + b.ol.w : 0;
+            const pad = d => Math.ceil(Math.max(o, b.sh ? e + d : 0)) + 1;
+            b.PL = pad(b.sh ? -b.sh.x : 0); b.PR = pad(b.sh ? b.sh.x : 0); b.PT = pad(b.sh ? -b.sh.y : 0); b.PB = pad(b.sh ? b.sh.y : 0);
+        });
+        const K = 4.5;
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+        boxes.forEach(b => [[-b.PL, -b.PT], [b.w + b.PR, -b.PT], [-b.PL, b.h + b.PB], [b.w + b.PR, b.h + b.PB]].forEach(([u, v]) => {
+            const [x, y] = at(b, u, v);
+            x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+        }));
+        x0 = Math.floor(x0); y0 = Math.floor(y0);
+        const cv = document.createElement('canvas');
+        cv.setAttribute('data-fs-keep', '');                                // colours as they are (js/farbschema.js)
+        cv.width = Math.ceil((x1 - x0) * K); cv.height = Math.ceil((y1 - y0) * K);
+        const g = cv.getContext('2d');
+        g.fillStyle = '#ffffff'; g.fillRect(0, 0, cv.width, cv.height);   // JPEG on white like freezeCanvases(): the page is white
+        g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+        const L = K * 1.12;                                                 // the flat cover a little finer: the near side grows up to ~10 %
+        for (const b of boxes) {
+            // 1. the cover flat, as CSS paints it before the turn: shadow, picture in its rounded box, outline on top
+            const LW = b.w + b.PL + b.PR, LH = b.h + b.PT + b.PB, lc = document.createElement('canvas');
+            lc.setAttribute('data-fs-keep', '');
+            lc.width = Math.ceil(LW * L); lc.height = Math.ceil(LH * L);
+            const c = lc.getContext('2d'), far = LW + 50;
+            c.setTransform(L, 0, 0, L, b.PL * L, b.PT * L);
+            if (b.sh) {
+                // canvas blurs a shadow like CSS (sigma = half the blur) but in device pixels: the shape itself lies off the canvas
+                c.shadowColor = b.sh.c; c.shadowBlur = b.sh.blur * L; c.shadowOffsetX = (far + b.sh.x) * L; c.shadowOffsetY = b.sh.y * L;
+                c.fillStyle = '#000000';
+                c.beginPath(); c.roundRect(-far, 0, b.w, b.h, b.r); c.fill();
+                c.shadowColor = 'rgba(0, 0, 0, 0)';
+            }
+            c.save();
+            c.beginPath(); c.roundRect(0, 0, b.w, b.h, b.r); c.clip();
+            c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+            c.drawImage(b.i, 0, 0, b.w, b.h);
+            c.restore();
+            if (b.ol) {                                                     // outline: round like the box, offset outside it
+                const d = b.ol.o + b.ol.w / 2;
+                c.strokeStyle = b.ol.c; c.lineWidth = b.ol.w;
+                c.beginPath(); c.roundRect(-d, -d, b.w + 2 * d, b.h + 2 * d, b.r.map(r => (r ? r + d : 0))); c.stroke();
+            }
+            // 2. turned: every pixel column of the wall takes its strip of the flat cover, moved and scaled as the perspective says
+            const xa = at(b, -b.PL, 0)[0], xb = at(b, b.w + b.PR, 0)[0];
+            for (let k = Math.floor((xa - x0) * K), ke = Math.ceil((xb - x0) * K); k < ke; k++) {
+                const ua = Math.max(-b.PL, back(b, x0 + k / K)), ub = Math.min(b.w + b.PR, back(b, x0 + (k + 1) / K));
+                if (ub <= ua) continue;
+                const um = (ua + ub) / 2, top = at(b, um, -b.PT)[1], bot = at(b, um, b.h + b.PB)[1];
+                g.drawImage(lc, (ua + b.PL) * L, 0, (ub - ua) * L, LH * L, k, (top - y0) * K, 1, (bot - top) * K);
+            }
+        }
+        const out = new Image();
+        out.className = 'd-buecher-druck';
+        out.alt = '';
+        out.style.cssText = 'left:' + x0 + 'px;top:' + y0 + 'px;width:' + cv.width / K + 'px;height:' + cv.height / K + 'px';
+        out.src = cv.toDataURL('image/jpeg', 0.92);
+        await out.decode().catch(() => {});
+        wall.appendChild(out);
+        wall.classList.add('d-gemalt');                                     // on paper the painted wall, the <img>s step back (css)
+    }
     async function fillGaps() {
         await Buch.fotosReady;
         const F = window.BUCH_FOTOS || {}, vorn = F.vorn || {}, luecken = (F.luecken || {})[Buch.book] || {}, used = new Set();
@@ -928,6 +1050,8 @@
             check();
         });
         await Promise.all(Array.from(document.querySelectorAll('.d-luecke img, .d-gequetscht img')).map(bildFertig));
+        // the cover wall for the paper, once its covers are there (a wall that fails keeps the CSS 3D - druckcheck rule 9 sees it)
+        for (const wall of document.querySelectorAll('.d-buecher')) await paintWall(wall).catch(e => console.error('Bücherwand:', e));
         const pages = document.querySelectorAll('.pagedjs_page').length;
         const dauer = Math.round((performance.now() - t0) / 1000);
         say(tr(pages + ' Seiten fertig in ' + dauer + ' s. Drucken: Strg/Cmd + P → „Als PDF speichern“.',
