@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 129 labs, 2333 terms, 2026-11-13
+ * 131 labs, 2361 terms, 2026-11-15
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -17,6 +17,7 @@ const LABS_TERMS = {
     "batman": ["Batman", "bei", "Center chin", "gestrichelter Balken", "Head outline", "Inner ears", "Jaw lobes", "Klammern", "NaN rot", "nicht definiert", "orange/grün", "Wings (lower curve)", "Wings (upper ellipse)"],
     "bb84": ["Basentreffer einfärben", "LAUSCHERIN", "LEHRMODUS", "NEUER LAUF", "Öffentlich verglichen", "Photonen", "Photonenzeile", "PROTOKOLL", "Schlüsselzeile", "SIFTING UND TEST", "Spaltennummern", "VIELE LÄUFE", "Zufallsausgang zeigen"],
     "beweisinwinkellsumme": ["Am Pivot-Punkt", "BEWEIS INNENWINKELSATZ", "Innenwinkel im Dreieck", "MATHEMATISCHER BEWEIS", "Parallele durch Punkt"],
+    "billardkette": ["ABWEICHUNG", "Anfangsfehler α₀", "Anzahl Kugeln", "armenian", "brahmic", "cjk", "cyrillic", "Ergebnis", "EXAKT", "georgian", "hangul", "KUGEL", "Kugelreihe", "latin", "Lücke durch Durchmesser a/d", "Stoß", "Überhöhung quer", "VERSATZ /"],
     "binaer": ["Aufgabe — klicken legt die Zahl hin", "Binärzahlen", "Das Brett ist voll — höher geht es hier nicht", "das wandert eine Stelle nach oben", "Die Zahl liegt jetzt auf dem Brett", "Diese Stelle fasst nur bis", "liegt auf dem Brett", "Richtig!", "Tipp eine Zahl ein — Enter übernimmt sie", "WARUM NUR ZWEI?", "Weg damit - leg die Zahl selbst", "Zweiersystem"],
     "binomischeslabor": ["AUFTEILUNG", "Beweis 1. Binomische Formel", "GESAMT", "P-WERT", "Tipp: Ziehe den Mittelpunkt im Quadrat!"],
     "brahmagupta": ["ABWEICHUNG VON 90°", "ALLE VIER LOTE", "BEWEIS", "BEWEIS (SCHRITT FÜR SCHRITT)", "Bogen", "BRETSCHNEIDER", "DIAGONALEN SENKRECHT", "DIE ANDERE SEITE", "DIE KETTE", "DIFFERENZ", "ECKEN AUF DEM KREIS", "FLÄCHE (GAUSS)", "FORMEL (FLÄCHE)", "FORMEL VON BRAHMAGUPTA", "GEGENSEITE", "GLEICHE ERGÄNZUNG", "GLEICHSCHENKLIG", "INNENWINKELSATZ", "K (BRAHMAGUPTA)", "KONSTRUKTION", "LÖSUNG ZEIGEN", "M ↔ MITTE", "MESSWERTE", "PERIPHERIEWINKEL", "SATZ (LOT & MITTE)", "SATZ VON BRAHMAGUPTA", "SCHEITELWINKEL", "SCHRITT 1 • PERIPHERIEWINKEL", "SCHRITT 2 • INNENWINKELSATZ", "SCHRITT 3 • GLEICHE ERGÄNZUNG", "SCHRITT 4 • SCHEITELWINKEL", "SCHRITT 5 • DIE KETTE", "SCHRITT 6 • GLEICHSCHENKLIG", "SCHRITT 7 • DIE ANDERE SEITE", "SEITE", "Summe", "Umfang", "VORAUSSETZUNG", "VORAUSSETZUNG & BEHAUPTUNG", "VORAUSSETZUNGEN"],
@@ -33,6 +34,7 @@ const LABS_TERMS = {
     "differentiallabor": ["Cosinus-Welle", "DIFFERENTIALRECHNUNG", "Exponentialfunktion", "FUNKTIONALITÄT", "Kubische Funktion", "Logarithmus", "Normalparabel", "Punkt Reset (x₀)", "Punkt-Position (x₀)", "Sinus-Welle", "VISUALISIERUNG"],
     "dividieren": ["Dividend", "Divisor", "SCHRIFTLICHE DIVISION"],
     "docpad": ["AES-GCM", "DocPad", "ÖFFNEN", "Passwort"],
+    "docwolken": ["Eigenrotation", "letzte", "Stadtlichter", "Tag und Nacht", "Was man sieht", "Wolken", "Wolken-Deckkraft", "Wolken-Deutlichkeit", "Zeitpunkt", "Zeitraffer"],
     "dreiecksbillard": ["armenian", "brahmic", "Breite von A", "cjk", "cyrillic", "Dreieck", "Fenster", "Fenster zeigen", "georgian", "Gleich breit", "Gleichseitig (60°, 60°, 60°)", "hangul", "Laser", "latin", "Reflexionen pro Sekunde", "Spur", "Treffer bis Stopp", "Winkel α", "Winkel β"],
     "einsundeins": ["ABSPIELEN", "add", "Befehl", "Bit-Spannung (Ebene 5)", "Hex", "KI-Prolog (Ebene 0)", "mov", "Was er tut"],
     "equationocr": ["Bestimmtes Integral", "Binomialkoeffizient", "Bruch", "Cauchy-Integral", "CLEAR", "Dirac", "Druck", "Einstein", "Einstein-Feldgleichungen", "ERKENNEN", "Eulersche Identität", "FORMELN", "Gauss-Integral", "GOOGLE GEMINI API", "KOMPLEX", "KOSTENKONTROLLE", "Maxwell (Ampère)", "Maxwell (Gauß)", "Navier–Stokes", "Newton Gravitation", "Outline (off → KaTeX HTML)", "Potenzregel", "Pythagoras", "Quadratische Formel", "RELOAD", "Riemann ζ", "Scale", "Schrödinger", "Stift", "Taylor e^x", "Thinking (default on)", "VERSTANDEN", "ZEICHNEN"],

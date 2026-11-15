@@ -724,6 +724,24 @@ const LAB_ICONS = {
                 style="height: 80px; width: auto; display: block; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);">
         </span>
     </span>`,
+    "billardkette": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a row of billiard balls (billardkette.html), above it the aiming error growing exponentially from ball to ball -->
+            <polyline points="12,60.5 16,60.2 20,59.8 24,59.4 28,58.9 32,58.3 36,57.5 40,56.6 44,55.5 48,54.3 52,52.7 56,50.8 60,48.6 64,45.9 68,42.7 72,38.9 76,34.2 80,28.7 84,22.0 88,14.0"
+                fill="none" stroke="#D73728" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="16" cy="78" r="8" fill="#FFFFFF" />
+            <circle cx="38" cy="78" r="8" fill="#F5C242" />
+            <circle cx="60" cy="78" r="8" fill="#799E31" />
+            <circle cx="82" cy="78" r="8" fill="#00D2FF" />
+        </svg>`,
+    "docwolken": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the globe with a cloud spiral and a cloud band (docwolken.html), a weather satellite top right -->
+            <circle cx="46" cy="54" r="32" fill="rgba(0, 210, 255, 0.12)" stroke="#00D2FF" stroke-width="2.5" />
+            <path d="M46 54 a5 5 0 1 1 5 -5 a9 9 0 0 1 -9 13 a14 14 0 0 1 -12 -16" fill="none" stroke="#FFFFFF"
+                stroke-width="4" stroke-linecap="round" />
+            <path d="M24 70 q8 -5 16 0 t16 0 t12 -2" fill="none" stroke="rgba(255, 255, 255, 0.8)" stroke-width="3.5" stroke-linecap="round" />
+            <rect x="80" y="12" width="7" height="7" rx="1.5" fill="#F5C242" />
+            <path d="M72 15.5 H79 M88 15.5 H95" stroke="#F5C242" stroke-width="4" />
+        </svg>`,
     "dreiecksbillard": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- a laser bouncing in a triangle, one window on the rim (dreiecksbillard.html) - every bend lies on a side -->
             <path d="M10 86 L90 86 L62 14 Z" fill="none" stroke="#F5C242" stroke-width="3.5" stroke-linejoin="round" />

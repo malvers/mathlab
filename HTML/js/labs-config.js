@@ -326,6 +326,28 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "billardkette",
+        "href": "billardkette.html",
+        "title": "Billard-Kette",
+        "description": "Eine Reihe Billardkugeln, die weiße Kugel startet mit einem winzigen Zielfehler. Bei jedem Stoß wächst der Fehler um den Faktor a/d – Lücke durch Kugeldurchmesser –, also exponentiell, bis die Kette abreißt: der Schmetterlingseffekt zum Anfassen. Das Lab rechnet jeden Stoß exakt mit Kreisgeometrie und zeigt den Tisch von oben, eine Tabelle und ein Diagramm mit logarithmischer Skala, exakt gegen Formel. Ist die Lücke kleiner als eine Kugel, schrumpft der Fehler dagegen. Und wie genau müsste man für 50 Stöße zielen? Genauer als ein Proton. Nach einem Vortrag bei „Physik am Samstag“ an der TU Dresden.",
+        "tagline": "Chaos / Exponentielle Instabilität / Billard",
+        "icon": LAB_ICONS["billardkette"],
+        "category": "physik funktionen neu uni grade10 grade11 grade12",
+        "keywords": "billardkette billard kugeln kugel stoss stoesse chaos schmetterlingseffekt exponentiell exponentielles wachstum instabilitaet anfangsbedingungen zielfehler winkel fehler kette abreissen kreisgeometrie logarithmisch logarithmische skala kugelstosspendel pool proton physik am samstag tu dresden",
+        "color": "gold"
+    },
+    {
+        "id": "docwolken",
+        "href": "docwolken.html",
+        "title": "DocWolken",
+        "description": "Echte Satellitenbilder der Wolken auf einem drehbaren 3D-Globus. Ein Ring aus Wettersatelliten (Meteosat, GOES, Himawari) misst die Wärmestrahlung bei 10,8 Mikrometern – kalte Wolken leuchten hell, darum sieht man sie auch nachts. EUMETSAT setzt daraus alle drei Stunden ein weltweites Bild zusammen; das Lab spielt die letzten 24, 48 oder 72 Stunden als Zeitraffer ab, mit Tag und Nacht zur Bildzeit, Stadtlichtern und Wolkenschatten. Sprünge nach Europa, Afrika, Asien, Australien, Amerika und in den Pazifik.",
+        "tagline": "Wetter / Satelliten / 3D-Globus",
+        "icon": LAB_ICONS["docwolken"],
+        "category": "apps physik neu",
+        "keywords": "docwolken wolken wetter satellit satelliten satellitenbild satellitenbilder globus erde 3d meteosat goes himawari eumetsat infrarot waermestrahlung zeitraffer tag nacht stadtlichter wolkenschatten tief sturm hurrikan zyklon europa afrika asien australien amerika pazifik",
+        "color": "blue"
+    },
+    {
         "id": "dreiecksbillard",
         "href": "dreiecksbillard.html",
         "title": "Dreiecks-Billard",
