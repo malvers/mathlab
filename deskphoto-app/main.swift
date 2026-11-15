@@ -49,11 +49,14 @@ final class Store {
 
 // MARK: - Geometry helpers
 
-/// Corner radius of a photo, in proportion to its width so it keeps its look when
-/// scaled. 0.056 is measured from the chat-bubble cut-out on Doc's desktop (37.5 px
-/// radius on 669 px), so a photo at the same width has the same corners as it and as
-/// the system widgets beside it (about 19 pt at the default 340 pt).
-private func cornerRadius(for width: Double) -> CGFloat { CGFloat(max(6, width * 0.056)) }
+/// Corner radius of a photo: one fixed size for every photo at every size, the one of the system widgets beside them
+/// (about 19 pt). It used to grow with the photo (0.056 of its width), and a big photo got big round corners (Doc,
+/// 15.11.2026: "dass die Rundungen von der Größe des Bildes abhängen. Nee, machen wir nie. Macht das bitte so, wie
+/// die kleinen Rundungen rechts überall."). A very small photo keeps at most a sixth of its shorter side.
+private let photoCorner: Double = 19
+private func cornerRadius(for size: CGSize) -> CGFloat {
+    CGFloat(min(photoCorner, Double(min(size.width, size.height)) / 6))
+}
 
 /// Padding around the photo inside its window, so the corner grips and a tilted
 /// photo still fit.
@@ -77,6 +80,113 @@ private func hasTransparency(_ cg: CGImage) -> Bool {
     let px = data.bindMemory(to: UInt8.self, capacity: n * n * 4)
     for i in stride(from: 3, to: n * n * 4, by: 4) where px[i] < 250 { return true }
     return false
+}
+
+// MARK: - Snapping to the other photos
+
+/// A photo being moved or sized snaps to the edges and middles of the other photos when it comes within `reach`, and
+/// is free again once it is pulled further (Doc, 15.11.2026: "dass die auf diese Höhe erstmal snappen, nur wenn man sie
+/// wirklich rausdrängt. Dass sie dann frei beweglich sind. Nicht so hart, aber so vielleicht wie bei PowerPoint").
+/// Every step is worked out from where the mouse alone would put it, so nothing sticks. Rectangles are the photos as
+/// they stand on the screen (a turned one by its outline), in screen coordinates. Nothing is ever moved by itself.
+enum Snap {
+    static let reach: CGFloat = 8
+    /// Sideways much softer, and only like with like - left on left, middle on middle, right on right - never a left
+    /// edge onto a right one, so photos kept a few pixels apart are not pulled together (Doc, 15.11.2026: "der Snap
+    /// nach links und rechts ist zu hart, weil wenn die ein paar Pixel zwischendrin haben, kann man nicht mehr fein
+    /// justieren").
+    static let reachX: CGFloat = 3
+
+    private static func xs(_ r: NSRect) -> [CGFloat] { [r.minX, r.midX, r.maxX] }
+    private static func ys(_ r: NSRect) -> [CGFloat] { [r.minY, r.midY, r.maxY] }
+
+    /// A guide along x = v (vertical) or y = v, over the photo and every other photo with an edge or middle on it.
+    private static func guide(vertical: Bool, at v: CGFloat, _ r: NSRect, _ others: [NSRect]) -> NSRect {
+        let on = others.filter { o in (vertical ? xs(o) : ys(o)).contains { abs($0 - v) < 0.5 } } + [r]
+        let pad: CGFloat = 10
+        if vertical {
+            let lo = on.map(\.minY).min()! - pad, hi = on.map(\.maxY).max()! + pad
+            return NSRect(x: v - 0.5, y: lo, width: 1, height: hi - lo)
+        }
+        let lo = on.map(\.minX).min()! - pad, hi = on.map(\.maxX).max()! + pad
+        return NSRect(x: lo, y: v - 0.5, width: hi - lo, height: 1)
+    }
+
+    /// Moving: the shift that lays one of the photo's edges or middles onto another photo's, per axis, and the guides.
+    static func move(_ r: NSRect, among others: [NSRect], x: Bool, y: Bool) -> (dx: CGFloat, dy: CGFloat, guides: [NSRect]) {
+        func best(_ pairs: [(CGFloat, CGFloat)], within limit: CGFloat) -> CGFloat? {
+            var d: CGFloat? = nil
+            for (a, b) in pairs where abs(b - a) <= limit && abs(b - a) < abs(d ?? .infinity) { d = b - a }
+            return d
+        }
+        let sameKind = others.flatMap { o in zip(xs(r), xs(o)).map { ($0, $1) } }          // left-left, mid-mid, right-right
+        let anyKind = others.flatMap { o in ys(r).flatMap { a in ys(o).map { (a, $0) } } }
+        let dx = x ? best(sameKind, within: reachX) : nil
+        let dy = y ? best(anyKind, within: reach) : nil
+        let moved = r.offsetBy(dx: dx ?? 0, dy: dy ?? 0)
+        var lines: [NSRect] = []
+        if dx != nil, let v = xs(moved).enumerated().first(where: { i, a in others.contains { abs(xs($0)[i] - a) < 0.5 } })?.element {
+            lines.append(guide(vertical: true, at: v, moved, others))
+        }
+        if dy != nil, let v = ys(moved).first(where: { a in others.flatMap(ys).contains { abs($0 - a) < 0.5 } }) {
+            lines.append(guide(vertical: false, at: v, moved, others))
+        }
+        return (dx ?? 0, dy ?? 0, lines)
+    }
+
+    /// Sizing a straight photo of width `w` (shape kept: height w / aspect). With `anchor` the opposite corner stays and
+    /// the corner (sx, sy) moves; without, it grows about `centre`. Returns the width whose moving edge lies on another
+    /// photo's edge or middle, if one is within reach, and its guide.
+    static func size(width w: CGFloat, aspect: CGFloat, anchor: NSPoint?, corner sx: CGFloat, _ sy: CGFloat,
+                     centre: NSPoint, among others: [NSRect]) -> (width: CGFloat, guides: [NSRect]) {
+        var bestW = w, bestD = reach + 1, line: (Bool, CGFloat)? = nil
+        // a moving side edge only onto the same edge of another photo, and only within reachX (see reachX)
+        let sides = anchor != nil ? others.map { sx > 0 ? $0.maxX : $0.minX } : others.flatMap { [$0.minX, $0.maxX] }
+        for b in sides {
+            let nw = anchor.map { (b - $0.x) / sx } ?? 2 * abs(b - centre.x)
+            let d = anchor == nil ? abs(nw - w) / 2 : abs(nw - w)          // how far the moving edge has to go
+            if nw >= 90, nw <= 2400, d <= reachX, d < bestD { bestW = nw; bestD = d; line = (true, b) }
+        }
+        for b in others.flatMap(ys) {
+            let nh = anchor.map { (b - $0.y) / sy } ?? 2 * abs(b - centre.y)
+            let d = anchor == nil ? abs(nh - w / aspect) / 2 : abs(nh - w / aspect)
+            if nh * aspect >= 90, nh * aspect <= 2400, d < bestD { bestW = nh * aspect; bestD = d; line = (false, b) }
+        }
+        guard bestD <= reach, let (vertical, v) = line else { return (w, []) }
+        let h = bestW / aspect
+        let r: NSRect
+        if let a = anchor {
+            r = NSRect(x: min(a.x, a.x + sx * bestW), y: min(a.y, a.y + sy * h), width: bestW, height: h)
+        } else {
+            r = NSRect(x: centre.x - bestW / 2, y: centre.y - h / 2, width: bestW, height: h)
+        }
+        return (bestW, [guide(vertical: vertical, at: v, r, others)])
+    }
+}
+
+/// The thin guide lines while a photo has snapped, in the palette's λ orange, just above the photos and still below
+/// every ordinary window; they never take a click.
+final class Guides {
+    static let shared = Guides()
+    private var lines: [NSPanel] = []
+
+    func show(_ rects: [NSRect]) {
+        while lines.count < rects.count {
+            let p = NSPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+            p.isOpaque = false
+            p.backgroundColor = NSColor(srgbRed: 245 / 255, green: 194 / 255, blue: 66 / 255, alpha: 0.95)
+            p.hasShadow = false
+            p.ignoresMouseEvents = true
+            p.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 2)
+            p.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenNone]
+            lines.append(p)
+        }
+        for (i, p) in lines.enumerated() {
+            if i < rects.count { p.setFrame(rects[i], display: true); p.orderFront(nil) } else { p.orderOut(nil) }
+        }
+    }
+
+    func hide() { lines.forEach { $0.orderOut(nil) } }
 }
 
 // MARK: - The view that draws one print
@@ -165,7 +275,7 @@ final class PhotoView: NSView {
         paper.position = CGPoint(x: bounds.midX, y: bounds.midY)
         paper.transform = CATransform3DMakeRotation(CGFloat(angle), 0, 0, 1)
         photo.frame = paper.bounds
-        photo.cornerRadius = rounded ? cornerRadius(for: Double(paperSize.width)) : 0
+        photo.cornerRadius = rounded ? cornerRadius(for: paperSize) : 0
         for (i, h) in handles.enumerated() {
             let x: CGFloat = (i == 0 || i == 3) ? 0 : paperSize.width
             let y: CGFloat = (i < 2) ? 0 : paperSize.height
@@ -273,8 +383,15 @@ final class PhotoView: NSView {
         case .move:
             // shift: only sideways, the height stays exactly (Doc, 15.11.2026: "wenn ich das Bild bewege und Shift
             // gedrückt habe, soll es bitte in Y gleich bleiben")
-            window?.setFrameOrigin(NSPoint(x: startOrigin.x + (now.x - startMouse.x),
-                                           y: mods.contains(.shift) ? startOrigin.y : startOrigin.y + (now.y - startMouse.y)))
+            guard let win = window else { break }
+            var o = NSPoint(x: startOrigin.x + (now.x - startMouse.x),
+                            y: mods.contains(.shift) ? startOrigin.y : startOrigin.y + (now.y - startMouse.y))
+            let snap = Snap.move(NSRect(origin: o, size: win.frame.size).insetBy(dx: shadowPad, dy: shadowPad),
+                                 among: item?.owner?.photoRects(except: item) ?? [], x: true, y: !mods.contains(.shift))
+            o.x += snap.dx
+            o.y += snap.dy
+            win.setFrameOrigin(o)
+            Guides.shared.show(snap.guides)
         case .transform:
             // A corner scales the print from the opposite corner, which stays where it is; control scales it about its
             // middle instead; option turns it about its middle, the size kept. The shape always stays (Doc, 15.11.2026:
@@ -282,10 +399,21 @@ final class PhotoView: NSView {
             // halte, dann soll es sozusagen zentral zoomen").
             let dx = Double(now.x - startCenter.x)
             let dy = Double(now.y - startCenter.y)
+            let others = item?.owner?.photoRects(except: item) ?? []
+            let straight = abs(startAngle) < 0.001                    // a turned photo sizes freely, without snapping
+            let aspectNow = paperSize.height > 0 ? paperSize.width / paperSize.height : 1
             if mods.contains(.option) {
+                Guides.shared.hide()
                 item?.setTransform(width: startWidth, angle: startAngle + (atan2(dy, dx) - startVector))
             } else if mods.contains(.control) {
-                item?.setTransform(width: startWidth * max(8, hypot(dx, dy)) / startDistance, angle: startAngle)
+                var width = CGFloat(startWidth * max(8, hypot(dx, dy)) / startDistance)
+                var lines: [NSRect] = []
+                if straight {
+                    (width, lines) = Snap.size(width: width, aspect: aspectNow, anchor: nil, corner: corner.x, corner.y,
+                                               centre: startCenter, among: others)
+                }
+                Guides.shared.show(lines)
+                item?.setTransform(width: Double(width), angle: startAngle)
             } else {
                 // the mouse seen from the fixed corner, in the paper's frame, projected onto the diagonal
                 let ax = Double(now.x - anchor.x), ay = Double(now.y - anchor.y)
@@ -293,7 +421,15 @@ final class PhotoView: NSView {
                 let lx = ax * ca - ay * sa, ly = ax * sa + ay * ca
                 let aspect = paperSize.height > 0 ? Double(paperSize.width / paperSize.height) : 1
                 let w = (Double(corner.x) * lx + Double(corner.y) * ly / aspect) / (1 + 1 / (aspect * aspect))
-                let width = min(2400, max(90, w))
+                var width = min(2400, max(90, w))
+                var lines: [NSRect] = []
+                if straight {
+                    let snapped = Snap.size(width: CGFloat(width), aspect: CGFloat(aspect), anchor: anchor,
+                                            corner: corner.x, corner.y, centre: startCenter, among: others)
+                    width = Double(snapped.width)
+                    lines = snapped.guides
+                }
+                Guides.shared.show(lines)
                 let centre = onScreen(anchor, Double(corner.x) * width / 2, Double(corner.y) * width / aspect / 2,
                                       angle: startAngle)
                 item?.setTransform(width: width, angle: startAngle, center: centre)
@@ -309,24 +445,53 @@ final class PhotoView: NSView {
         if !dragged && event.clickCount == 1 { toggleHandles() }
         mode = .none
         dragged = false
+        Guides.shared.hide()
         NSCursor.arrow.set()
         item?.commit()
     }
 
-    /// Scrolling scales the print; holding option turns it instead.
+    /// Option + scrolling turns the print. Scrolling alone no longer zooms - the size changes only at the corners (Doc,
+    /// 15.11.2026: "den Zoom mit dem Wheel rausnehmen") - and goes on to whatever lies behind, unswallowed.
     override func scrollWheel(with event: NSEvent) {
-        guard let item = item else { return }
-        if event.modifierFlags.contains(.option) {
-            item.rotate(by: Double(event.scrollingDeltaY) * 0.004)
-        } else {
-            item.scale(by: 1 + Double(event.scrollingDeltaY) * 0.006)
-        }
+        guard let item = item, event.modifierFlags.contains(.option) else { super.scrollWheel(with: event); return }
+        item.rotate(by: Double(event.scrollingDeltaY) * 0.004)
     }
 
     override func rightMouseDown(with event: NSEvent) { item?.showMenu(at: event) }
+
+    // MARK: keys
+
+    /// The arrow keys move the selected print by a point, with shift by ten, as in PowerPoint and Keynote - no
+    /// snapping, saved like a drag (Doc, 15.11.2026: "wenn das Bild selektiert ist, möchte ich das auch mit den
+    /// Pfeiltasten pixelgenau positionieren können"). Only while a print has the keys - after a click on it; any other
+    /// app's typing never comes here.
+    override var acceptsFirstResponder: Bool { true }
+    override var needsPanelToBecomeKey: Bool { true }
+
+    override func keyDown(with event: NSEvent) {
+        guard selected, let win = window else { return }
+        let step: CGFloat = event.modifierFlags.contains(.shift) ? 10 : 1
+        var d = NSPoint.zero
+        switch event.keyCode {
+        case 123: d.x = -step       // left
+        case 124: d.x = step        // right
+        case 125: d.y = -step       // down
+        case 126: d.y = step        // up
+        default: return
+        }
+        win.setFrameOrigin(NSPoint(x: win.frame.origin.x + d.x, y: win.frame.origin.y + d.y))
+        item?.commit()
+    }
 }
 
 // MARK: - One photo: window + view + record
+
+/// A borderless panel cannot take the keyboard by itself; a print's must, for the arrow keys. It stays a non-activating
+/// panel: a click on a print gives it the keys without bringing DocPhoto to the front, a click elsewhere takes them back.
+final class PhotoPanel: NSPanel {
+    override var canBecomeKey: Bool { true }
+}
+
 
 final class PhotoItem {
     private(set) var rec: PhotoRec
@@ -353,7 +518,7 @@ final class PhotoItem {
         self.aspect = Double(cg.width) / Double(cg.height)
         self.borderless = hasTransparency(cg)
 
-        let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 10, height: 10),
+        let panel = PhotoPanel(contentRect: NSRect(x: 0, y: 0, width: 10, height: 10),
                             styleMask: [.borderless, .nonactivatingPanel],
                             backing: .buffered, defer: false)
         panel.isOpaque = false
@@ -847,6 +1012,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func save() { store.replace(items.map { $0.rec }) }
+
+    /// The other photos as they stand on the screen (their outline, without the window's padding), to snap to.
+    func photoRects(except me: PhotoItem?) -> [NSRect] {
+        items.filter { $0 !== me && $0.window.isVisible }.map { $0.window.frame.insetBy(dx: shadowPad, dy: shadowPad) }
+    }
 }
 
 let app = NSApplication.shared
