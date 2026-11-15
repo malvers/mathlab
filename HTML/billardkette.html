@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- what the lab does, read by "Frag Solita" when a deck slide embeds this lab -->
+    <meta name="solita-about" content="Billard-Kette: Eine Reihe Billardkugeln mit Durchmesser d liegt mit gleichen Lücken a hintereinander. Die weiße Kugel startet mit einem winzigen Richtungsfehler alpha_0, trifft die nächste Kugel leicht seitlich, und diese läuft entlang der Verbindungslinie der Mittelpunkte weiter – schiefer als zuvor. Für kleine Winkel gilt x = a sin alpha_0 = d sin alpha_1, also alpha_1 ≈ (a/d) alpha_0 und nach n Stößen alpha_n ≈ alpha_0 (a/d)^n: exponentielle Instabilität (Vortrag Physik am Samstag, TU Dresden). Die Kette reißt ab, wenn der Versatz (a+d) sin alpha_n die Kugelgröße d erreicht, also nach etwa n ≈ ln(d/((a+d) alpha_0)) / ln(a/d) Stößen. Das Lab rechnet jeden Stoß exakt mit Kreisgeometrie, zeigt den Tisch in der Draufsicht (quer einstellbar überhöht), eine Tabelle und ein Diagramm mit logarithmischer Skala, exakt gegen Formel. Ist a/d kleiner als 1 (Lücke kleiner als eine Kugel, z. B. a = 4, d = 5), schrumpft der Fehler bei jedem Stoß; bei a = d bleibt er für kleine Winkel gleich; berühren sich die Kugeln (a = 0, Kugelstoßpendel), ist er nach dem ersten Stoß weg. Ein Knopf zeigt, wie genau man für 10, 20 oder 50 Stöße zielen müsste – bei a/d = 2 und echten Pool-Kugeln für 50 Stöße genauer als ein Proton.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Billard-Kette</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <script src="morpheus/vendor/katex/katex.min.js"></script>
+    <style>
+        /* lab-specific bits only - buttons, cards, sliders and the coach box come from the central files */
+
+        /* the stage holds three panels (table, chart, numbers); on a small screen they stack and the stage scrolls */
+        #canvas-container {
+            overflow-x: hidden; overflow-y: auto; scrollbar-gutter: stable;
+            scrollbar-width: thin; scrollbar-color: rgba(0, 210, 255, 0.35) transparent;
+        }
+        #canvas-container::-webkit-scrollbar { width: 6px; }
+        #canvas-container::-webkit-scrollbar-thumb { background: rgba(0, 210, 255, 0.35); border-radius: 3px; }
+        #bk-stage { position: relative; display: flex; flex-direction: column; gap: 16px; padding: 10px 24px 24px; box-sizing: border-box; }
+        #bk-spacer { flex: none; }
+        #bk-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+        #bk-row2 { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; min-width: 0; }
+        .bk-panel {
+            position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; flex: 1 1 auto;
+            box-sizing: border-box; padding: 12px 14px 14px; container-type: inline-size;
+            background: rgba(10, 20, 40, 0.4); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(8, 20, 42, 0.4);
+        }
+        .bk-head {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-height: 26px; margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 2px; color: #00d2ff;
+        }
+        .bk-head .bk-h { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+        .bk-head .bk-h::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #00d2ff; box-shadow: 0 0 10px #00d2ff; }
+        .bk-status { flex: 1 1 220px; font-family: 'Outfit', sans-serif; font-size: 0.95rem; letter-spacing: 0; color: rgba(255, 255, 255, 0.88); line-height: 1.35; }
+        .bk-status b { font-weight: 600; color: #fff; }
+        .bk-status .bk-tag { margin-left: 2px; }
+        /* the shot button on the stage: the side panel is folded away on a phone */
+        #bk-play {
+            margin-left: auto; width: 44px; height: 34px; min-height: 0; padding: 0 !important;
+            display: flex; align-items: center; justify-content: center; flex: none;
+        }
+        #bk-play svg { width: 16px; height: 16px; flex: none; }
+        .bk-wrap { position: relative; flex: 1 1 auto; min-height: 0; }
+        #canvas-container .bk-wrap canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+        #canvas-container #canvas { cursor: default; touch-action: pan-y; }
+        #canvas-container #bk-chart { touch-action: pan-y; }
+
+        /* chart legend: identity never by colour alone - a dot, a line and a dashed line, each with its words */
+        .bk-legend { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: -2px 0 8px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; color: rgba(255, 255, 255, 0.75); }
+        .bk-legend > span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+        .bk-legend svg { flex: none; }
+
+        /* the numbers, collision by collision */
+        .bk-scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: rgba(0, 210, 255, 0.35) transparent; }
+        .bk-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .bk-scroll::-webkit-scrollbar-thumb { background: rgba(0, 210, 255, 0.35); border-radius: 3px; }
+        #bk-data { width: 100%; border-collapse: collapse; }
+        #bk-data th {
+            position: sticky; top: 0; z-index: 1; background: rgb(12, 26, 50); padding: 6px 5px; text-align: right; white-space: nowrap;
+            font-family: 'Orbitron', sans-serif; font-weight: 400; font-size: 0.6rem; letter-spacing: 1px; color: rgba(255, 255, 255, 0.55);
+        }
+        #bk-data th .katex { font-size: 1.25em; letter-spacing: 0; color: rgba(255, 255, 255, 0.75); }
+        #bk-data td {
+            padding: 4px 5px; text-align: right; white-space: nowrap; border-top: 1px solid rgba(255, 255, 255, 0.07);
+            font-family: KaTeX_Main, 'Times New Roman', serif; font-size: 1rem; color: rgba(255, 255, 255, 0.88);
+        }
+        #bk-data th:first-child, #bk-data td:first-child { text-align: left; }
+        #bk-data td sup { font-size: 0.7em; line-height: 0; }
+        #bk-data tr.hl td { background: rgba(0, 210, 255, 0.10); }
+        #bk-data tr.miss td { background: rgba(176, 36, 24, 0.16); }
+        #bk-data .bk-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; box-shadow: inset -2px -2px 3px rgba(8, 20, 42, 0.45); }
+        #bk-data .bk-muted { font-family: 'Outfit', sans-serif; font-size: 0.85rem; color: rgba(255, 255, 255, 0.45); }
+        @container (max-width: 430px) { #bk-data .bk-dev { display: none; } }
+        .bk-note { margin-top: 8px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; line-height: 1.45; color: rgba(255, 255, 255, 0.6); }
+
+        /* a small red label - a rectangle with small corners, not a pill */
+        .bk-tag {
+            display: inline-block; padding: 1px 6px 2px; border-radius: 5px; background: rgb(176, 36, 24); color: #fff;
+            font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 1px; vertical-align: 1px;
+        }
+
+        /* side panel bits */
+        .bk-btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 4px 0 10px; }
+        .bk-btn-grid.one { grid-template-columns: 1fr; }
+        .bk-info { font-size: 0.9rem; line-height: 1.55; color: rgba(255, 255, 255, 0.75); margin-top: 6px; }
+        .bk-info b { color: #fff; font-weight: 600; }
+        .bk-res { font-size: 0.95rem; line-height: 1.55; color: rgba(255, 255, 255, 0.85); margin: 2px 0 8px; }
+        .bk-res div + div { margin-top: 4px; }
+        .bk-res b { color: #fff; font-weight: 600; }
+        .bk-res .bk-small { font-size: 0.85rem; color: rgba(255, 255, 255, 0.6); }
+        .val-display sup { font-size: 0.7em; line-height: 0; }
+        /* marks under the a/d slider: 1 = the border, 2 = the slide */
+        .bk-ticks { position: relative; height: 18px; margin-top: -4px; }
+        .bk-ticks span {
+            position: absolute; top: 0; transform: translateX(-50%); text-align: center;
+            font-family: 'Orbitron', sans-serif; font-size: 0.6rem; color: rgba(255, 255, 255, 0.55); white-space: nowrap;
+        }
+        .bk-ticks span::before { content: ''; display: block; width: 1px; height: 5px; margin: 0 auto 1px; background: currentColor; }
+        .bk-ticks span.bk-slide { color: rgb(245, 194, 66); }
+
+        /* "Wie genau müsste man zielen?" - an own dialog in the lab's look, never a browser box */
+        #bk-aim {
+            position: absolute; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+            padding: 16px; box-sizing: border-box; background: rgba(8, 20, 42, 0.62); backdrop-filter: blur(4px);
+        }
+        #bk-aim[hidden] { display: none; }
+        /* phone: the floating menu button sits top left - the dialog starts below it, like the coach box */
+        html.cyber-drawer #bk-aim { padding-top: 72px; }
+        .bk-aim-box {
+            width: min(760px, 100%); max-height: 100%; overflow-y: auto; box-sizing: border-box; padding: 18px 22px 20px;
+            background: rgba(10, 20, 40, 0.94); border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(8, 20, 42, 0.7); color: #fff; font-family: 'Outfit', sans-serif;
+            scrollbar-width: thin; scrollbar-color: rgba(0, 210, 255, 0.35) transparent;
+        }
+        .bk-aim-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .bk-aim-top .bk-head { margin: 0; flex: 1 1 auto; }
+        .bk-x {
+            width: 30px; height: 30px; padding: 0; flex: none; display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 7px; background: rgba(0, 210, 255, 0.08); color: #00d2ff; cursor: pointer;
+        }
+        .bk-x:hover { background: rgba(0, 210, 255, 0.2); }
+        .bk-aim-box p { margin: 6px 0; line-height: 1.5; color: rgba(255, 255, 255, 0.85); }
+        .bk-aim-formula { margin: 8px 0 12px; text-align: center; font-size: 1.05rem; }
+        .bk-aim-row {
+            display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 4px 14px; align-items: center;
+            padding: 12px 0; border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .bk-aim-n { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 1px; color: #00d2ff; }
+        .bk-aim-val { font-size: 1.02rem; line-height: 1.45; }
+        .bk-aim-val .bk-num { font-family: KaTeX_Main, 'Times New Roman', serif; font-size: 1.08em; }
+        .bk-aim-val sup { font-size: 0.7em; line-height: 0; }
+        .bk-aim-val .bk-small { font-size: 0.88rem; color: rgba(255, 255, 255, 0.6); }
+        .bk-aim-row .cyber-btn { min-height: 0; height: 40px; padding: 0 14px !important; }
+        .bk-aim-src { margin-top: 12px; font-size: 0.8rem; line-height: 1.5; color: rgba(255, 255, 255, 0.5); }
+        @media (max-width: 560px) {
+            .bk-aim-box { padding: 14px 14px 16px; }
+            .bk-aim-row { grid-template-columns: minmax(0, 1fr) auto; }
+            .bk-aim-val { grid-column: 1 / -1; grid-row: 2; }
+        }
+        @media (max-width: 700px) {
+            #bk-stage { padding: 10px 12px 18px; }
+            .bk-panel { padding: 10px 10px 12px; }
+        }
+    </style>
+    <script src="js/farbschema.js"></script>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box" class="visible" data-scroll>
+                <div class="coach-title" id="coach-title-slot">EXPONENTIELLE INSTABILITÄT</div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <div id="bk-stage">
+                <div id="bk-spacer"></div>
+                <div id="bk-main">
+                    <section class="bk-panel" id="bk-tablebox" aria-label="Billardtisch in der Draufsicht">
+                        <div class="bk-head">
+                            <span class="bk-h">DRAUFSICHT</span>
+                            <span class="bk-status" id="bk-status" aria-live="polite"></span>
+                            <button type="button" class="cyber-btn" id="bk-play" title="Stoß (Leertaste)" aria-label="Stoß">
+                                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 2 L14 8 L4 14 Z" fill="currentColor"/></svg>
+                            </button>
+                        </div>
+                        <div class="bk-wrap" id="bk-tablewrap"><canvas id="canvas" role="img" aria-label="Billardtisch: Queue, weiße, rote, blaue und schwarze Kugel in einer Reihe"></canvas></div>
+                    </section>
+                    <div id="bk-row2">
+                        <section class="bk-panel" id="bk-chartbox" aria-label="Fehlwinkel je Stoß, logarithmisch">
+                            <div class="bk-head"><span class="bk-h">FEHLWINKEL JE STOSS · LOG-SKALA</span></div>
+                            <div class="bk-legend" id="bk-legend"></div>
+                            <div class="bk-wrap" id="bk-chartwrap"><canvas id="bk-chart" role="img" aria-label="Diagramm: Fehlwinkel exakt und nach Formel, logarithmische Skala"></canvas></div>
+                        </section>
+                        <section class="bk-panel" id="bk-databox" aria-label="Tabelle Stoß für Stoß">
+                            <div class="bk-head"><span class="bk-h">STOSS FÜR STOSS</span></div>
+                            <div class="bk-scroll">
+                                <table id="bk-data">
+                                    <thead><tr>
+                                        <th data-tex="n"></th>
+                                        <th>KUGEL</th>
+                                        <th><span data-tex="|\alpha_n|"></span> EXAKT</th>
+                                        <th data-tex="\alpha_0\cdot\left(\frac{a}{d}\right)^{n}"></th>
+                                        <th class="bk-dev">ABWEICHUNG</th>
+                                        <th title="Abstand der Bahn vom Mittelpunkt der nächsten Kugel, in Vielfachen von d">VERSATZ / <span data-tex="d"></span></th>
+                                    </tr></thead>
+                                    <tbody id="bk-rows"></tbody>
+                                </table>
+                            </div>
+                            <div class="bk-note" id="bk-note"></div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="bk-aim" hidden>
+            <div class="bk-aim-box" role="dialog" aria-modal="true" aria-labelledby="bk-aim-title">
+                <div class="bk-aim-top">
+                    <div class="bk-head"><span class="bk-h" id="bk-aim-title">WIE GENAU MÜSSTE MAN ZIELEN?</span></div>
+                    <button type="button" class="bk-x" id="bk-aim-x" title="Schließen (Esc)" aria-label="Schließen">
+                        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><path d="M2 2 L12 12 M12 2 L2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+                <div id="bk-aim-body"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Debug output goes into the central DEBUG window, never into the console.
+        if (/[?&]debug=1\b/.test(location.search)) {
+            var s = document.createElement('script');
+            s.src = 'js/debug-window.js';
+            s.onload = function () { try { DebugWindow.show(); } catch (e) { } };
+            document.head.appendChild(s);
+        }
+    </script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/coach-box.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Billard-Kette',
+        });
+        // responsive: table, chart and numbers stack on a small screen, so only a genuinely tiny one gets the warning
+        CyberUI.init({ screenWarning: false });
+        CyberUI.ensureScreenWarning({
+            minWidth: 320, minHeight: 420,
+            message: 'Für die Billard-Kette ist der Bildschirm sehr klein – quer halten hilft.',
+        });
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+        // on a narrow screen the table needs the room more than the controls do (0 is no screen, see trigonometrie)
+        if (window.innerWidth > 0 && window.innerWidth < 900) document.getElementById('side-panel').classList.add('collapsed');
+    </script>
+    <script src="js/billardkette.js"></script>
+</body>
+
+</html>
