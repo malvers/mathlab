@@ -558,6 +558,25 @@
     /* "Inf · FOG25-1" */
     const lessonTitle = l => l.subject + (l.classes && l.classes.length ? ' · ' + l.classes.join(', ') : '');
 
+    /* The Stoffverteilungsplan of a lesson, as a path from the site's root (Doc, 15.11.2026: "dass ich in meinem
+       Kalender beim Klick auf eine Stunde auch direkt in den Stoffverteilungsplan komme"): the plan page of its class
+       and subject from svp-map.json (written by tools/webuntis.js status - the same file meinplan.html links with),
+       opened at the lesson's week (?kw=, the plan scrolls there and lights it up) and, where several groups share one
+       plan (FOS 12), in this group's view (?g=, coupled classes are listed as "FOG25-2,FOW25-2", compared sorted).
+       null when no plan fits - coaching, IA, subjects without a plan. */
+    function svpPlanPath(l, map) {
+        const pages = (map && map.pages) || [];
+        const subject = String((l && l.subject) || ''), classes = ((l && l.classes) || []).map(String);
+        const hit = pages.find(p => (!p.subjects || !p.subjects.length || p.subjects.includes(subject)) &&
+            classes.some(c => (p.classes || []).includes(c)));
+        if (!hit || !l.day) return null;
+        const key = v => (Array.isArray(v) ? v : String(v).split(',')).map(x => String(x).trim()).filter(Boolean).sort().join('|');
+        const groups = hit.groups || [];
+        const g = groups.length > 1 ? groups.find(x => key(x) === key(classes)) : null;
+        const [y, m, d] = String(l.day).split('-').map(Number);
+        return hit.page + '?kw=' + isoWeek(new Date(y, m - 1, d)) + (g ? '&g=' + encodeURIComponent(String(g).replace(/[^A-Za-z0-9-]+/g, '_')) : '');
+    }
+
     /* the subject as Solita says it */
     function subjectSpoken(s) {
         const t = String(s || '').trim();
@@ -626,7 +645,7 @@
         parseRule, occurrences, expand, remindOf, reminders,
         parseIcs, unzipIcs, parseQuick,
         spokenSentence, spokenTime, spokenIn,
-        lessonBlocks, coachingBlocks, terminBlocks, lessonTitle, lessonSentence, subjectSpoken,
+        lessonBlocks, coachingBlocks, terminBlocks, lessonTitle, lessonSentence, subjectSpoken, svpPlanPath,
         easterSunday, holidaysSN, holidayOf
     };
 });

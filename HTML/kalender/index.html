@@ -413,12 +413,16 @@
         }
         .dlg p.msg { margin: 0 0 18px; font: 17px/1.45 Raleway, sans-serif; color: var(--text); white-space: pre-line; }
         .dlg-btns { display: flex; gap: 10px; flex-wrap: wrap; }
-        .dlg-btns button {
+        .dlg-btns button, .dlg-btns a {
             flex: 1 1 0; min-width: 96px; height: 50px; border-radius: 10px; cursor: pointer; padding: 0 10px;
             font: 700 13px Orbitron, sans-serif; letter-spacing: .04em;
             background: transparent; color: var(--text); border: 1px solid var(--line);
         }
-        .dlg-btns button.yes { background: var(--lambda); color: var(--on-lambda); border: 0; }
+        /* a button that is a link (the lesson's Stoffverteilungsplan): looks like the others, opens a new tab */
+        .dlg-btns a { display: flex; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; text-decoration: none; }
+        .dlg-btns a svg { width: 18px; height: 18px; fill: currentColor; flex: none; }
+        .dlg-btns .wide { flex-basis: 100%; }
+        .dlg-btns button.yes, .dlg-btns a.yes { background: var(--lambda); color: var(--on-lambda); border: 0; }
         .dlg-btns button.danger { background: rgb(var(--c-red)); color: var(--ink-light); border: 0; }
         .dlg-btns button.left { flex: 0 0 auto; margin-right: auto; }
 
@@ -649,6 +653,15 @@
             const ICON_PLACE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
             const ICON_REPEAT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>';
             const ICON_ADD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+            // Material Icons (Apache 2.0): "menu_book" - the lesson's Stoffverteilungsplan
+            const ICON_PLAN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg>';
+
+            /* The Stoffverteilungsplan lives on docalvers.de (and on localhost while testing); the phone app on
+               doc-kalender.pages.dev has no copy of it, so from there the links and the map go to docalvers.de.
+               (Written without "../": tools/kalender_pages.py rewrites that prefix for the app's own files.) */
+            const SVP_ORIGIN = /^(localhost|127\.0\.0\.1|(www\.)?docalvers\.de)$/.test(location.hostname) ? '' : 'https://docalvers.de';
+            const SVP_MAP_KEY = 'kalender-svp-map';
+            let svpMap = null;         // svp-map.json: which plan page belongs to which class and subject (K.svpPlanPath)
 
             let items = [];            // rows of calendar_event
             let lessons = [];          // rows of calendar_lesson: the timetable, mirrored from Untis by the watcher on the Mac
@@ -706,6 +719,23 @@
                 if (ls) lessons = ls;
                 if (se) setting = se[0] || null;
                 cache();
+            }
+
+            /* which plan belongs to which class and subject - public, no login; the last one is kept for offline use */
+            function loadSvpMap() {
+                return fetch(SVP_ORIGIN + '/svp/svp-map.json', { cache: 'no-cache' })
+                    .then(r => (r.ok ? r.json() : null))
+                    .then(m => {
+                        if (!m || !Array.isArray(m.pages)) return;
+                        svpMap = m;
+                        try { localStorage.setItem(SVP_MAP_KEY, JSON.stringify(m)); } catch (e) { }
+                    })
+                    .catch(() => { });
+            }
+            /* the lesson's Stoffverteilungsplan at its week, or null (no plan for it, or the map not there yet) */
+            function svpUrl(l) {
+                const p = K.svpPlanPath(l, svpMap);
+                return p ? SVP_ORIGIN + p : null;
             }
 
             /* the lessons in [from, to) as occurrences like the appointments' (key "L|id"; ev.lesson = the row) */
@@ -1063,7 +1093,11 @@
                 else if (l.code === 'irregular') lines.push('Geändert (Vertretung oder Verlegung).');
                 if (l.note) lines.push(...(/^coaching/i.test(l.subject) ? ['', ...l.note.split(' · ')] : [l.note]));
                 lines.push('', 'Aus dem Stundenplan (Untis).');
-                ask(lines.join('\n'), [{ label: 'OK', value: null, cls: 'yes' }]);
+                // a lesson with a plan: its Stoffverteilungsplan at this week, first and focused (Enter opens it)
+                const plan = svpUrl(l);
+                ask(lines.join('\n'), plan
+                    ? [{ label: 'Stoffverteilungsplan', href: plan, icon: ICON_PLAN, cls: 'yes wide' }, { label: 'OK', value: null }]
+                    : [{ label: 'OK', value: null, cls: 'yes' }]);
             }
 
             function setView(v) {
@@ -1086,11 +1120,14 @@
                 render();
             }
 
-            /* ---------- question dialog: buttons [{ label, cls, value }] -> the value of the tapped one (Escape: null) ---------- */
+            /* ---------- question dialog: buttons [{ label, cls, value }] -> the value of the tapped one (Escape: null) ----------
+               A button with href is a link (new tab) that also closes the dialog, its value null; icon: an svg before the label */
             function ask(text, buttons) {
                 return new Promise(done => {
                     $('dlgText').textContent = text;
-                    $('dlgBtns').innerHTML = buttons.map((b, i) => `<button type="button" class="${b.cls || ''}" data-i="${i}">${esc(b.label)}</button>`).join('');
+                    $('dlgBtns').innerHTML = buttons.map((b, i) => b.href
+                        ? `<a class="${b.cls || ''}" data-i="${i}" href="${esc(b.href)}" target="_blank" rel="noopener">${b.icon || ''}${esc(b.label)}</a>`
+                        : `<button type="button" class="${b.cls || ''}" data-i="${i}">${esc(b.label)}</button>`).join('');
                     $('dlg').hidden = false;
                     $('dlgBtns').firstChild.focus();
                     const close = v => {
@@ -1103,7 +1140,10 @@
                         if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(null); }
                     };
                     document.addEventListener('keydown', key, true);
-                    $('dlgBtns').onclick = e => { const b = e.target.closest('button'); if (b) close(buttons[+b.dataset.i].value); };
+                    $('dlgBtns').onclick = e => {   // a link opens itself (no preventDefault) and just closes the dialog
+                        const b = e.target.closest('button, a');
+                        if (b) close(b.tagName === 'A' ? null : buttons[+b.dataset.i].value);
+                    };
                     $('dlg').onclick = e => { if (e.target === $('dlg')) close(null); };
                 });
             }
@@ -1469,6 +1509,8 @@
                 try { items = JSON.parse(localStorage.getItem(CACHE_KEY)) || []; } catch (e) { items = []; }
                 try { lessons = JSON.parse(localStorage.getItem(LESSON_KEY)) || []; } catch (e) { lessons = []; }
                 try { setting = JSON.parse(localStorage.getItem(SETTING_KEY)) || null; } catch (e) { setting = null; }
+                try { svpMap = JSON.parse(localStorage.getItem(SVP_MAP_KEY)) || null; } catch (e) { svpMap = null; }
+                loadSvpMap();   // once per visit - the map changes with the school year, not by the minute
                 try { $('text').value = localStorage.getItem(DRAFT_KEY) || ''; } catch (e) { }
                 try { view = localStorage.getItem(VIEW_KEY) || 'agenda'; } catch (e) { }
                 setView(view);
