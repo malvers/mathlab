@@ -278,6 +278,7 @@ function stepMarks(root, st){
   // a part of a line that comes with a click of its own (<b class="step kommt">): the line keeps the triangle and the
   // box (Doc, 29.10.2026: "lass bitte die rund 4,1 Mio auf Click erscheinen")
   const cur = ganz ? null : first && first.matches('.kommt') && first.parentElement.closest('p.line.step') || first;
+  const abflug = flugVor(root, top);                 // before the toggles: the parts a copy flies to with this click
   all.forEach(e => {
     const g = grp(e);
     e.classList.toggle('on', g < st); e.classList.toggle('past', g < top); e.classList.toggle('now', e === cur);
@@ -294,6 +295,103 @@ function stepMarks(root, st){
   // the buttons of a drawn animation come with the last click of their figure (aniCtl data-mit, Doc 11.11.2026)
   root.querySelectorAll('.ani-ctl[data-mit]').forEach(e => e.classList.toggle('mit-da', clickOf(root, +e.dataset.mit) < st));
   leuchten(root);
+  flug(root, abflug);
+}
+// A copy of a formula flies from its line to a part elsewhere on the slide, on the click that brings the part (Doc,
+// 14.11.2026, pq slide 14: "wenn du das x plus p halbe zum Quadrat in Klammern da hochfliegen lässt, wenn die Box
+// kommt"). The source carries data-flug="name", the part data-flug-von="name" and "step kommt". The copy leaves the
+// source (which stays) and turns into the part on the way, glyph by glyph: every character and fraction bar flies
+// from its place in the source to its place in the part and grows or shrinks to its size, all in FLUG_MS - a big
+// \dfrac becomes a small \tfrac smoothly and nothing jumps on landing (Doc: "wenn die Formel aufschlägt, ändert die
+// ihr Design unterwegs ... Das muss smooth sein"). A glyph the part draws from another font (a bracket of another
+// size) fades over into that one on the way. The part waits hidden (.flug-wartet) and stands there once the copy has
+// landed. Formulas whose glyphs do not match fly as one copy, evenly scaled. Only on the newest click forward, on the
+// slide on screen or the presenter's live one - not in previews, a slide built in full or the editor; a click back
+// takes it all away. Overview and paper show the part in place.
+const FLUG_MS = 900, FLUG_EASE = 'cubic-bezier(.45,0,.25,1)';
+function flugVor(root, top) {
+  if (ganz || document.documentElement.classList.contains('deck-edit')) return [];
+  if (!slides.includes(root) && !root.classList.contains('live')) return [];
+  return [...root.querySelectorAll('[data-flug-von].step')].filter(e => !e.classList.contains('on') && grp(e) === top);
+}
+function flugGlyphen(f) {                          // a formula's glyphs in order: characters and fraction bars
+  const out = [];
+  (f.querySelector('.katex-html') || f).querySelectorAll('*').forEach(e => {
+    const t = [...e.childNodes].filter(n => n.nodeType === 3).map(n => n.data).join('').replace(/[\s​]/g, '');
+    if (t || e.classList.contains('frac-line')) out.push({ e: e, t: t || '—' });
+  });
+  return out;
+}
+function flugEnde(ziel) {
+  (ziel.flugTeile || []).forEach(d => d.remove());
+  ziel.flugTeile = null;
+  ziel.classList.remove('flug-wartet');
+}
+function flug(root, neu) {
+  root.querySelectorAll('[data-flug-von].step:not(.on)').forEach(flugEnde);
+  if (!neu.length || !root.isConnected || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const R = root.getBoundingClientRect(), k = R.width / 960;
+  if (!k) return;
+  const box = b => ({ x: (b.left - R.left) / k, y: (b.top - R.top) / k, w: b.width / k, h: b.height / k });
+  const kern = e => e.querySelector('.katex-html') || e;
+  // a layer on the slide showing e exactly where it stands: one glyph, or the whole formula (ganz)
+  function schicht(e, ganz) {
+    const cs = getComputedStyle(e), d = document.createElement('div');
+    let innen;
+    if (ganz) {
+      innen = e.cloneNode(true); innen.removeAttribute('data-flug');
+      d.style.fontSize = cs.fontSize; d.style.lineHeight = cs.lineHeight;
+    } else if (e.classList.contains('frac-line')) {
+      const b = box(e.getBoundingClientRect());
+      innen = document.createElement('div');
+      innen.style.cssText = 'width:' + b.w + 'px;height:' + b.h + 'px;background:currentColor';
+    } else {
+      innen = document.createElement('span');
+      innen.textContent = [...e.childNodes].filter(n => n.nodeType === 3).map(n => n.data).join('');
+      innen.style.cssText = 'font-family:' + cs.fontFamily + ';font-size:' + cs.fontSize + ';font-style:' + cs.fontStyle
+        + ';font-weight:' + cs.fontWeight;
+    }
+    d.className = 'flug-kopie'; d.style.color = cs.color;
+    d.appendChild(innen); root.appendChild(d);
+    const a = box((ganz ? kern(e) : e).getBoundingClientRect()), c = box((ganz ? kern(innen) : innen).getBoundingClientRect());
+    d.style.left = (a.x - c.x) + 'px'; d.style.top = (a.y - c.y) + 'px';   // c measured with the layer at 0,0
+    return { d: d, a: a, i: [c.x, c.y] };
+  }
+  // the transform that lays a layer's own box onto box X (origin top left)
+  function auf(L, X) {
+    const sx = X.w / L.a.w, sy = X.h / L.a.h, ox = L.a.x - L.i[0], oy = L.a.y - L.i[1];
+    return 'translate(' + (X.x - ox - sx * L.i[0]) + 'px,' + (X.y - oy - sy * L.i[1]) + 'px) scale(' + sx + ',' + sy + ')';
+  }
+  const opt = { duration: FLUG_MS, easing: FLUG_EASE, fill: 'forwards' };
+  neu.forEach(ziel => {
+    const quelle = root.querySelector('[data-flug="' + ziel.dataset.flugVon + '"]');
+    if (!quelle) return;
+    flugEnde(ziel);
+    ziel.classList.add('flug-wartet');
+    const teile = [], anis = [], gq = flugGlyphen(quelle), gz = flugGlyphen(ziel);
+    if (gq.length && gq.length === gz.length && gq.every((g, n) => g.t === gz[n].t)) {
+      gq.forEach((g, n) => {
+        const h = gz[n].e, A = box(g.e.getBoundingClientRect()), Z = box(h.getBoundingClientRect());
+        if (!A.w || !A.h || !Z.w || !Z.h) return;
+        const cq = getComputedStyle(g.e), cz = getComputedStyle(h);
+        if (g.t === '—' || cq.fontFamily === cz.fontFamily) {          // the same glyph, only bigger or smaller
+          const L = schicht(g.e); teile.push(L.d);
+          anis.push(L.d.animate([{ transform: 'none', color: cq.color }, { transform: auf(L, Z), color: cz.color }], opt));
+        } else {                                                         // drawn otherwise there: fade over on the way
+          const L1 = schicht(g.e), L2 = schicht(h); teile.push(L1.d, L2.d);
+          anis.push(L1.d.animate([{ transform: 'none', opacity: 1 }, { transform: auf(L1, Z), opacity: 0 }], opt));
+          anis.push(L2.d.animate([{ transform: auf(L2, A), opacity: 0 }, { transform: 'none', opacity: 1 }], opt));
+        }
+      });
+    } else {                                                             // one copy, evenly scaled onto the part's middle
+      const L = schicht(quelle, true), z = box(kern(ziel).getBoundingClientRect()), s = z.w / L.a.w;
+      teile.push(L.d);
+      anis.push(L.d.animate([{ transform: 'none' },
+        { transform: auf(L, { x: z.x, y: z.y + z.h / 2 - L.a.h * s / 2, w: z.w, h: L.a.h * s }) }], opt));
+    }
+    ziel.flugTeile = teile;
+    Promise.all(anis.map(a => a.finished)).then(() => { if (ziel.flugTeile === teile) flugEnde(ziel); }, () => {});
+  });
 }
 // Patches that light up behind a number when their click comes (deck.css .leuchten; Doc, 11.11.2026, the perceptron's
 // 3,70 in the neuron and in the formula: "die müssen unbedingt synchron leuchten", "lieber ... mit Flächen"): only on the

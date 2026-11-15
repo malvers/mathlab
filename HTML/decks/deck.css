@@ -164,9 +164,12 @@ svg.pfeil path{fill:currentColor}
 /* a part that only flashes never shows a triangle of its own - its click may have no line (the term turns red first) */
 @media screen{html:not(.deck-edit) :not(.ov-thumb) > .slide .step.flash.now::after{display:none}}
 /* a slide whose formulas come one by one needs no triangle (section class "ohne-dreieck"): the bullet stays a bullet
-   (Doc, 10.11.2026: "da ja die Formeln erscheinen. Da müssen wir die Dreiecke nicht zeigen") */
+   (Doc, 10.11.2026: "da ja die Formeln erscheinen. Da müssen wir die Dreiecke nicht zeigen"); a sub-point keeps its
+   small green square the same way */
 @media screen{html:not(.deck-edit) :not(.ov-thumb) > .slide.ohne-dreieck p.line.l0.step.now::before{position:static;width:7px;height:7px;
-  margin:0 13px 0 -20px;background:var(--ink);animation:none}}
+  margin:0 13px 0 -20px;background:var(--ink);animation:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide.ohne-dreieck p.line.l1.step.now::before{position:static;width:6px;height:6px;
+  margin:0 14px 0 -20px;background:var(--green);animation:none}}
 @media screen{
   html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.box-spaeter.now::before,
   html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.box-spaeter.now::after{animation:step-now .3s ease-out 1.8s both}
@@ -612,6 +615,26 @@ html.lab-voll #nav,html.lab-voll #hud,html.lab-voll #ask{opacity:0;pointer-event
     transition:transform .7s cubic-bezier(.3,.7,.2,1)}
   html:not(.deck-edit) :not(.ov-thumb) > .slide .wachsen.step:not(.on){transform:scaleX(0)}
 }
+/* a part of a line that makes room on its click ("step kommt platz"): before it, it is 0 wide, so what follows stands
+   where it would without it; on the click it opens to its own width and pushes the rest of the line aside, its own
+   words uncovered from the left as it opens, nothing scaled. An empty one with style="--platz:.4em" is a gap that
+   opens with it; a box behind it in the same inline grid grows along (Doc, 13.11.2026, pq slide 14: "das Plus Q ist
+   gleich 0 aus der Position von oben nach rechts verschieben. Und dabei die Box mitwachsen lassen"). Editing, the
+   overview and paper show it open. The width animates in Chrome (interpolate-size); elsewhere it opens at once */
+.slide .platz{display:inline-block;width:var(--platz,max-content);white-space:nowrap;vertical-align:baseline}
+@media screen{
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .platz{overflow-x:clip;interpolate-size:allow-keywords;
+    transition:width .8s cubic-bezier(.4,0,.2,1),opacity .6s ease,visibility 0s linear 0s}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .platz.step:not(.on){width:0}
+}
+/* a part that takes another colour from click k on ("faerben" data-ab="k" style="--farbe:#B02418"), fading over in
+   0.6 s; a click back takes it back (Doc, 14.11.2026, pq slide 14: "Wenn die letzte Formel erscheint, dass oben auch
+   in Rot machen, dass man da den Zusammenhang so richtig gut sieht"). Editing, the overview and paper show the colour */
+.slide .faerben[data-ab]{color:var(--farbe)}
+@media screen{
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .faerben[data-ab]{transition:color .6s ease}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .faerben[data-ab]:not(.ab-da){color:inherit}
+}
 /* a piece that flies to its place ("fliegen", an SVG <g> or a figure's .fl word, drawn where it lands): it stands where
    --von puts it (style="--von:translate(95px,-65px) rotate(-90deg)", turned about its own middle) and flies home on its
    click ("step kommt fliegen" data-g="k") or - already there before - from click k on ("step kommt fliegen" data-g="j"
@@ -627,6 +650,15 @@ html.lab-voll #nav,html.lab-voll #hud,html.lab-voll #ask{opacity:0;pointer-event
   html:not(.deck-edit) :not(.ov-thumb) > .slide .fliegen.step:not([data-ab]).on,
   html:not(.deck-edit) :not(.ov-thumb) > .slide .fliegen[data-ab].ab-da{animation:fliegen 1.4s ease-in-out .5s both}
 }
+/* a copy of a formula that flies from its line to a part elsewhere on the slide and turns into it on the way, glyph
+   by glyph (deck.js flug): the source carries data-flug="name", the part data-flug-von="name" with "step kommt" - it
+   waits hidden (.flug-wartet) until the copy has landed on it (Doc, 14.11.2026, pq slide 14: "das x plus p halbe zum
+   Quadrat in Klammern da hochfliegen lassen, wenn die Box kommt", "Das muss smooth sein"). The copy's layers only
+   live during the flight; paper never sees them */
+.flug-kopie{position:absolute;left:0;top:0;margin:0;white-space:nowrap;line-height:normal;pointer-events:none;z-index:7;transform-origin:0 0}
+.slide .flug-wartet{visibility:hidden}
+@media print{.flug-kopie{display:none}}
+html.deck-edit .flug-kopie{display:none}
 /* a box in the middle of a veiled slide, a click of its own ("vorhang step kommt sanft"), and from click data-ab on
    small at the top right beside the heading, the veil gone (Doc, 30.10.2026: "lass in der Mitte eine Box erscheinen
    und blende die Folie ein bisschen aus" ... "verkleinern und nach rechts oben schieben hinter die Überschrift").
