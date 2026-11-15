@@ -272,13 +272,17 @@ final class Watcher: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
 /// kommen weg"). One frame is noisy in poor light, so the answer that goes out only changes when the frames agree.
 /// The threshold stays 0.45 for every frame - nobody is taken for Doc more easily than before:
 /// - "doc" comes at once: one frame at or above the threshold.
-/// - Leaving "doc" for "other" takes `leave` faces below the threshold without a Doc frame in between; a person
-///   without a clear face (turned away, too dark for the landmarks) counts for neither and keeps "doc".
+/// - Leaving "doc" for "other" takes `notDoc` faces below the threshold without a Doc frame in between; a person
+///   without a clear face (turned away, too dark for the landmarks), or a face turned too far to be judged (Pose),
+///   counts for neither and keeps "doc".
 /// - "away" takes `leave` frames in a row without a person.
 /// - Otherwise a stranger is "other" at once, a person without a clear face "unknown".
 /// Measured 13.11.2026 in Doc's dark room (with the dark prints): 1 of 117 frames below 0.45, never 3 in a row.
+/// 15.11.2026 (Doc: "wenn ich mich zur Seite drehe, erkennt er mich nicht mehr. Und dann gehen die Bilder weg, kommen die
+/// Bilder wieder"): a head held turned for a few seconds gave 3 weak frames in a row - now 5, and only judgeable ones.
 struct Steady {
     static let leave = 3
+    static let notDoc = 5
 
     enum Frame { case nobody, unclear, face(Float) }
 
@@ -303,10 +307,29 @@ struct Steady {
                 answer = "other"
             } else {
                 low += 1
-                if low >= Self.leave { answer = "other"; low = 0 }
+                if low >= Self.notDoc { answer = "other"; low = 0 }
             }
         }
         return answer
+    }
+}
+
+/// Whether a face is turned so that its score can say "not Doc" (15.11.2026). The camera sits on the MacBook to Doc's
+/// side, so his usual pose is already turned: looking at the big screen yaw 35..60 degrees, scores 0.68 on average;
+/// turned further, nearly in profile (65..80), 3 of 4 frames fell below 0.45 although it was him. A face outside this
+/// range (or looking far up or down) that does not match is "unclear" - it keeps the answer. A match counts at any
+/// angle, as before, so nobody is taken for Doc more easily; and a stranger facing the Mac (yaw near 0) is judged.
+enum Pose {
+    static let yaw: ClosedRange<Float> = -25...60
+    static let pitch: Float = 25
+
+    static func judgeable(_ cut: FaceCut) -> Bool {
+        (cut.yaw.isNaN || yaw.contains(cut.yaw)) && (cut.pitch.isNaN || abs(cut.pitch) <= pitch)
+    }
+
+    /// The frame Steady gets for a face with this likeness.
+    static func frame(_ cut: FaceCut, score: Float, threshold: Float) -> Steady.Frame {
+        score >= threshold || judgeable(cut) ? .face(score) : .unclear
     }
 }
 
@@ -451,9 +474,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 if let image = seen.picture {
                     if let found = self.identity.look(image) {
                         let c = found.cut
-                        frame = .face(found.score)
-                        line += String(format: " | crop %.2f contrast %.2f quality %.2f share %.2f | score %.3f",
-                                        c.light, c.contrast, c.quality, c.share, found.score)
+                        frame = Pose.frame(c, score: found.score, threshold: threshold)
+                        line += String(format: " | crop %.2f contrast %.2f quality %.2f share %.2f yaw %.0f pitch %.0f | score %.3f",
+                                        c.light, c.contrast, c.quality, c.share, c.yaw, c.pitch, found.score)
                     } else {
                         frame = .unclear
                         line += " | no clear face"
@@ -565,8 +588,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard watcher != nil else { return }
         var frame = Steady.Frame.nobody
         var score: Float?
+        var yaw = Float.nan
         if seen.person {
-            if let image = seen.picture, let found = identity.look(image) { frame = .face(found.score); score = found.score }
+            if let image = seen.picture, let found = identity.look(image) {
+                frame = Pose.frame(found.cut, score: found.score, threshold: identity.engine.threshold)
+                score = found.score
+                yaw = found.cut.yaw
+            }
             else { frame = .unclear }
         }
         let answer = steady.add(frame, threshold: identity.engine.threshold)
@@ -581,7 +609,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         who = answer == "doc" || answer == "other" ? answer : ""
         if answer != lastWatch {
             log(String(format: "watch: %@ (%@light %.2f, %d frames held before)", answer,
-                       score.map { String(format: "score %.3f, ", $0) } ?? "", seen.light, held))
+                       score.map { String(format: "score %.3f, yaw %.0f, ", $0, yaw) } ?? "", seen.light, held))
             lastWatch = answer
             held = 0
         }

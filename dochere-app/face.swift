@@ -51,6 +51,8 @@ struct FaceCut {
     let share: Float        // face width as a share of the picture width
     let light: Float        // mean brightness of the crop, 0…1
     let contrast: Float     // spread (standard deviation) of the crop's brightness, 0…1
+    let yaw: Float          // the head turned left/right in degrees (Vision; 0 = looking into the camera), nan if unknown
+    let pitch: Float        // the head up/down in degrees, nan if unknown
 }
 
 enum Tone {
@@ -88,6 +90,15 @@ enum FaceCutter {
         try? handler.perform([marks])
         guard let face = marks.results?.max(by: { $0.boundingBox.width < $1.boundingBox.width }),
               let points = keyPoints(face, image) else { return nil }
+        // how the head is turned, in a pass of its own: run together with the landmarks it moved their points (and every
+        // print with them - 15.11.2026, doc-04 fell from 0.68 to 0.27)
+        let pose = VNDetectFaceRectanglesRequest()
+        pose.revision = VNDetectFaceRectanglesRequestRevision3
+        try? VNImageRequestHandler(cgImage: image, options: [:]).perform([pose])
+        // the pose of the same face: the rectangle that overlaps it most
+        let overlap = { (r: CGRect) -> CGFloat in let i = r.intersection(face.boundingBox); return i.isNull ? 0 : i.width * i.height }
+        let turned = pose.results?.max(by: { overlap($0.boundingBox) < overlap($1.boundingBox) })
+        let degrees = { (v: NSNumber?) -> Float in v.map { $0.floatValue * 180 / .pi } ?? .nan }
 
         let quality = VNDetectFaceCaptureQualityRequest()
         quality.inputFaceObservations = [face]
@@ -97,7 +108,7 @@ enum FaceCutter {
         guard let crop = warp(image, from: points) else { return nil }
         let tone = Tone.of(crop)
         return FaceCut(crop: crop, quality: score, share: Float(face.boundingBox.width), light: tone.light,
-                       contrast: tone.contrast)
+                       contrast: tone.contrast, yaw: degrees(turned?.yaw), pitch: degrees(turned?.pitch))
     }
 
     /// Eyes and mouth corners in picture pixels, top-left origin, ordered like the template.
@@ -286,9 +297,9 @@ final class Identity {
         for (i, url) in docs.enumerated() {
             guard let image = Store.image(url), let cut = FaceCutter.largest(in: image),
                   let s = likeness(cut.crop, skipping: i) else { lines.append("\(url.lastPathComponent): -"); continue }
-            lines.append(String(format: "doc   %@ %.3f %@  (crop %.2f contrast %.2f quality %.2f share %.2f)",
+            lines.append(String(format: "doc   %@ %.3f %@  (crop %.2f contrast %.2f quality %.2f share %.2f yaw %.0f pitch %.0f)",
                                 url.lastPathComponent, s, s >= engine.threshold ? "ok" : "MISSED",
-                                cut.light, cut.contrast, cut.quality, cut.share))
+                                cut.light, cut.contrast, cut.quality, cut.share, cut.yaw, cut.pitch))
         }
         for url in Self.pictures(prefix: "other-") {
             guard let image = Store.image(url), let cut = FaceCutter.largest(in: image),
@@ -328,7 +339,7 @@ final class Identity {
         let people = ((try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? [])
             .filter { $0.hasDirectoryPath }.sorted { $0.lastPathComponent < $1.lastPathComponent }
         var scores: [Float] = []
-        var noFace = 0
+        var noFace = 0, turned = 0                      // turned: outside the pose band main.swift judges (Pose)
         for person in people {
             guard scores.count + noFace < limit else { break }
             guard let first = ((try? fm.contentsOfDirectory(at: person, includingPropertiesForKeys: nil)) ?? [])
@@ -338,15 +349,16 @@ final class Identity {
             if dim, let dark = Self.darkRoom(image, seed: UInt64(scores.count + noFace + 1)) { image = dark }
             guard let cut = FaceCutter.largest(in: image), let s = likeness(cut.crop) else { noFace += 1; continue }
             scores.append(s)
+            if !(cut.yaw.isNaN || (-25...60).contains(cut.yaw)) || (!cut.pitch.isNaN && abs(cut.pitch) > 25) { turned += 1 }
         }
         let sorted = scores.sorted()
         func pct(_ p: Double) -> Float { sorted.isEmpty ? 0 : sorted[min(sorted.count - 1, Int(Double(sorted.count) * p))] }
         let top = sorted.suffix(5).reversed().map { String(format: "%.3f", $0) }.joined(separator: " ")
         return String(format: "strangers%@: %d faces (%d without a clear face), %d prints of Doc, threshold %.2f\n"
-                        + "median %.3f  p99 %.3f  p99.9 %.3f  max %.3f  | >= 0.40: %d  >= threshold: %d\ntop 5: %@",
+                        + "median %.3f  p99 %.3f  p99.9 %.3f  max %.3f  | >= 0.40: %d  >= threshold: %d\ntop 5: %@\nturned too far to be judged: %d",
                       dim ? " (dark room)" : "", sorted.count, noFace, doc.count, engine.threshold,
                       pct(0.5), pct(0.99), pct(0.999), sorted.last ?? 0,
-                      sorted.filter { $0 >= 0.40 }.count, sorted.filter { $0 >= engine.threshold }.count, top)
+                      sorted.filter { $0 >= 0.40 }.count, sorted.filter { $0 >= engine.threshold }.count, top, turned)
     }
 
     /// A picture as a webcam in a dark room sees it: a quarter of the light, rounded to 8 bits, read noise

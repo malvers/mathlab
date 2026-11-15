@@ -46,6 +46,16 @@ after two misses, flickered. Two changes:
   frame between; a person without a clear face keeps the answer; "away" takes three empty frames in a row. The
   log gets each change with score, brightness and how many frames were held back.
 
+## Head turned (15.11.2026)
+
+The camera sits on the MacBook beside the big screen, so Doc's usual pose is already turned (yaw 35..60 degrees,
+scores 0.68 on average). Turned further, nearly in profile, his score fell below 0.45 in 3 of 4 frames, and a head
+held turned for a few seconds made three weak frames in a row: DocPhoto flickered. Now Vision's head pose comes with
+every face (`yaw`, `pitch` in `--measure`, `--evaluate` and the log), and a weak face outside yaw -25..60 or beyond
+25 degrees up or down is "unclear" - it keeps the answer (`Pose` in main.swift). A match still counts at any angle,
+so the threshold for strangers is untouched (LFW: 2000 strangers max 0.355, dark max 0.382; 134 of them were turned
+too far to be judged). Leaving "doc" now takes five judgeable weak faces without a Doc frame between.
+
 ## Watching for DocPhoto
 
 DocPhoto shows its desktop photos only while Doc sits here. While it asks for it (distributed notification
