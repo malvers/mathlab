@@ -5,6 +5,8 @@
 // size are remembered. An image with transparent pixels is treated as a cut-out:
 // nothing is clipped, the wallpaper shows through its own outline. Every picture
 // is copied into ~/Library/Application Support/DeskPhoto/images when it is added.
+// The photos show only on Doc's LG monitor (found by maker and model, any port) and only while DocHere sees him there;
+// without the LG - laptop alone, beamer, board - none shows anywhere and the camera is not asked for (15.11.2026).
 
 import Cocoa
 import ServiceManagement
@@ -105,6 +107,8 @@ final class PhotoView: NSView {
     private var startAngle: Double = 0
     private var startVector: Double = 0           // angle of centre → mouse at grab time
     private var startDistance: Double = 1
+    private var corner = NSPoint(x: 1, y: 1)       // the grabbed corner in the paper's frame: (±1, ±1)
+    private var anchor: NSPoint = .zero           // screen coordinates of the opposite corner, fixed while scaling
 
     private var selected = false
 
@@ -225,6 +229,12 @@ final class PhotoView: NSView {
             && abs(p.y) <= Double(paperSize.height) / 2 + slack
     }
 
+    /// The point `(x, y)` away from `origin` in the paper's turned frame, in screen coordinates.
+    private func onScreen(_ origin: NSPoint, _ x: Double, _ y: Double, angle a: Double? = nil) -> NSPoint {
+        let t = a ?? angle, ca = cos(t), sa = sin(t)
+        return NSPoint(x: Double(origin.x) + x * ca - y * sa, y: Double(origin.y) + x * sa + y * ca)
+    }
+
     // MARK: mouse
 
     override func mouseDown(with event: NSEvent) {
@@ -244,6 +254,10 @@ final class PhotoView: NSView {
             let dy = Double(startMouse.y - startCenter.y)
             startVector = atan2(dy, dx)
             startDistance = max(8, hypot(dx, dy))
+            let local = paperLocal(convert(event.locationInWindow, from: nil))
+            corner = NSPoint(x: local.x >= 0 ? 1 : -1, y: local.y >= 0 ? 1 : -1)
+            anchor = onScreen(startCenter, -Double(corner.x) * Double(paperSize.width) / 2,
+                              -Double(corner.y) * Double(paperSize.height) / 2)
             NSCursor.crosshair.set()
         } else {
             mode = .move
@@ -254,21 +268,36 @@ final class PhotoView: NSView {
     override func mouseDragged(with event: NSEvent) {
         let now = NSEvent.mouseLocation
         if hypot(now.x - startMouse.x, now.y - startMouse.y) > 2 { dragged = true }
+        let mods = event.modifierFlags
         switch mode {
         case .move:
+            // shift: only sideways, the height stays exactly (Doc, 15.11.2026: "wenn ich das Bild bewege und Shift
+            // gedrückt habe, soll es bitte in Y gleich bleiben")
             window?.setFrameOrigin(NSPoint(x: startOrigin.x + (now.x - startMouse.x),
-                                           y: startOrigin.y + (now.y - startMouse.y)))
+                                           y: mods.contains(.shift) ? startOrigin.y : startOrigin.y + (now.y - startMouse.y)))
         case .transform:
-            // Dragging a corner turns and scales the print at once — the way a photo
-            // moves when you push its corner across a table. Shift keeps the angle,
-            // option keeps the size.
+            // A corner scales the print from the opposite corner, which stays where it is; control scales it about its
+            // middle instead; option turns it about its middle, the size kept. The shape always stays (Doc, 15.11.2026:
+            // "nicht zentral gezoomt ..., sondern wirklich pro Ecke. Und nur wenn ich noch die Control-Taste gedrückt
+            // halte, dann soll es sozusagen zentral zoomen").
             let dx = Double(now.x - startCenter.x)
             let dy = Double(now.y - startCenter.y)
-            let dist = max(8, hypot(dx, dy))
-            let mods = event.modifierFlags
-            let width = mods.contains(.option) ? startWidth : startWidth * dist / startDistance
-            let turn = mods.contains(.shift) ? startAngle : startAngle + (atan2(dy, dx) - startVector)
-            item?.setTransform(width: width, angle: turn)
+            if mods.contains(.option) {
+                item?.setTransform(width: startWidth, angle: startAngle + (atan2(dy, dx) - startVector))
+            } else if mods.contains(.control) {
+                item?.setTransform(width: startWidth * max(8, hypot(dx, dy)) / startDistance, angle: startAngle)
+            } else {
+                // the mouse seen from the fixed corner, in the paper's frame, projected onto the diagonal
+                let ax = Double(now.x - anchor.x), ay = Double(now.y - anchor.y)
+                let ca = cos(-startAngle), sa = sin(-startAngle)
+                let lx = ax * ca - ay * sa, ly = ax * sa + ay * ca
+                let aspect = paperSize.height > 0 ? Double(paperSize.width / paperSize.height) : 1
+                let w = (Double(corner.x) * lx + Double(corner.y) * ly / aspect) / (1 + 1 / (aspect * aspect))
+                let width = min(2400, max(90, w))
+                let centre = onScreen(anchor, Double(corner.x) * width / 2, Double(corner.y) * width / aspect / 2,
+                                      angle: startAngle)
+                item?.setTransform(width: width, angle: startAngle, center: centre)
+            }
         case .none:
             break
         }
@@ -308,8 +337,11 @@ final class PhotoItem {
     weak var owner: AppDelegate?
     /// Centre of the window while the print lies somewhere else for the moment, because its own place (rec) is on
     /// a screen that is not connected right now - a monitor unplugged, only the laptop, a beamer instead.
-    /// nil: it lies at its own place. Never saved; see place(fallback:nudge:).
+    /// nil: it lies at its own place. Never saved; see place(home:shift:nudge:).
     private var stand: NSPoint? = nil
+    /// How far the LG lies from where it lay when the places were recorded (another screen arrangement, e.g. the LG
+    /// alone as the main screen): every print moves with it, so it keeps its place on the LG. Never saved.
+    private var shift = NSPoint.zero
 
     init?(rec: PhotoRec, owner: AppDelegate, visible: Bool = true) {
         guard let image = NSImage(contentsOfFile: rec.path),
@@ -346,8 +378,8 @@ final class PhotoItem {
         if visible { panel.orderFront(nil) }
     }
 
-    /// Rebuilds the window geometry from the record, keeping the photo centred.
-    private func apply() {
+    /// Rebuilds the window geometry from the record, keeping the photo centred (at `centre` while a corner drags it).
+    private func apply(at centre: NSPoint? = nil) {
         let w = rec.width
         let paper = CGSize(width: w, height: w / aspect)
 
@@ -357,7 +389,7 @@ final class PhotoItem {
 
         let winW = boxW + 2 * shadowPad
         let winH = boxH + 2 * shadowPad
-        let c = stand ?? NSPoint(x: rec.centerX, y: rec.centerY)    // a stand-in place stays while it lasts
+        let c = centre ?? stand ?? NSPoint(x: rec.centerX + Double(shift.x), y: rec.centerY + Double(shift.y))   // a stand-in place stays while it lasts
         window.setFrame(NSRect(x: Double(c.x) - winW / 2, y: Double(c.y) - winH / 2,
                                width: winW, height: winH), display: true)
 
@@ -367,11 +399,12 @@ final class PhotoItem {
         view.relayout()
     }
 
-    /// Sets size and angle in one go, keeping the print centred where it lies.
-    func setTransform(width: Double, angle: Double) {
+    /// Sets size and angle in one go, keeping the print centred where it lies - or around `center` (screen
+    /// coordinates; a corner drag keeps the opposite corner still). commit() writes the place afterwards.
+    func setTransform(width: Double, angle: Double, center: NSPoint? = nil) {
         rec.width = min(2400, max(90, width))
         rec.angle = angle
-        apply()
+        if let c = center { stand = nil; apply(at: c) } else { apply(at: NSPoint(x: window.frame.midX, y: window.frame.midY)) }
     }
 
     func scale(by factor: Double) {
@@ -407,22 +440,22 @@ final class PhotoItem {
             return
         }
         stand = nil
-        rec.centerX = Double(f.midX)
-        rec.centerY = Double(f.midY)
+        rec.centerX = Double(f.midX) - Double(shift.x)          // recorded in the arrangement the places were made in
+        rec.centerY = Double(f.midY) - Double(shift.y)
         owner?.save()
     }
 
-    /// Puts the print at its own place. When that place is on no connected screen, it goes onto `fallback` for the
-    /// moment (offset by `nudge` steps, so several do not hide each other) and the record is NOT changed: when the
-    /// monitor comes back, the print is where it was (13.11.2026: unplugging the LG used to move all photos to the
-    /// laptop for good). Returns true when it had to take a stand-in place.
+    /// Puts the print at its own place on the LG (moved along by `shift`). A print whose place is not on the LG - laid
+    /// on the laptop screen once - goes onto the LG for the moment (offset by `nudge` steps, so several do not hide each
+    /// other), and the record is NOT changed. Returns true when it had to take a stand-in place.
     @discardableResult
-    func place(fallback: NSRect?, nudge: Int) -> Bool {
+    func place(home: NSScreen, shift: NSPoint, nudge: Int) -> Bool {
+        self.shift = shift
         stand = nil
         apply()
         let f = window.frame
-        guard let vis = fallback, !NSScreen.screens.contains(where: { $0.frame.intersects(f) }) else { return false }
-        let step = 28.0 * Double(nudge)
+        guard !home.frame.contains(NSPoint(x: f.midX, y: f.midY)) else { return false }
+        let vis = home.visibleFrame, step = 28.0 * Double(nudge)
         stand = NSPoint(x: Double(vis.midX) + step, y: Double(vis.midY) - step)
         apply()
         return true
@@ -476,7 +509,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var present = false
     private var misses = 0                       // answers in a row that were not "doc"
     private var lastAnswer = Date.distantPast    // DocHere's heartbeat: no answer for 15 s counts as not Doc
-    private var visible: Bool { shown && present }
+    private var visible: Bool { shown && present && home != nil }
+
+    /// The one screen the photos live on (15.11.2026, Doc: "dass die nur gezeigt werden, wenn der LG dran ist, nicht auf
+    /// dem Mac selbst"): his LG UltraWide, recognised by maker and model as the monitor reports them (EDID vendor 0x1e6d,
+    /// model 0x77e9), never by its place or its port - he plugs it into either. Without it - on the road, in a classroom
+    /// with a beamer or the Promethean board, the MacBook alone - no photo shows anywhere, and DocHere's camera is not
+    /// asked for. Another monitor: `defaults write de.docalvers.deskphoto homeDisplay <vendor hex>:<model hex>`.
+    private var home: NSScreen?
+    private static func findHome() -> NSScreen? {
+        let parts = (UserDefaults.standard.string(forKey: "homeDisplay") ?? "1e6d:77e9").split(separator: ":")
+        guard parts.count == 2, let vendor = UInt32(parts[0], radix: 16), let model = UInt32(parts[1], radix: 16) else { return nil }
+        return NSScreen.screens.first { s in
+            guard let n = s.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else { return false }
+            let id = CGDirectDisplayID(n.uint32Value)
+            return CGDisplayIsBuiltin(id) == 0 && CGDisplayVendorNumber(id) == vendor && CGDisplayModelNumber(id) == model
+        }
+    }
+    /// Where the LG's corner lay when the places were recorded; remembered the first time it is seen. See PhotoItem.shift.
+    private var homeOrigin: NSPoint {
+        get {
+            let d = UserDefaults.standard
+            if d.object(forKey: "homeOriginX") == nil, let h = home {
+                d.set(Double(h.frame.minX), forKey: "homeOriginX")
+                d.set(Double(h.frame.minY), forKey: "homeOriginY")
+            }
+            return NSPoint(x: d.double(forKey: "homeOriginX"), y: d.double(forKey: "homeOriginY"))
+        }
+    }
 
     func applicationDidFinishLaunching(_ note: Notification) {
         bar = DocBarClient(id: "de.docalvers.deskphoto", name: "DocPhoto",
@@ -484,11 +544,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.handle(item)
         }
 
+        home = AppDelegate.findHome()
         for rec in store.recs {
-            if let item = PhotoItem(rec: rec, owner: self, visible: visible) { items.append(item) }
+            if let item = PhotoItem(rec: rec, owner: self, visible: false) { items.append(item) }
         }
         save()   // drops records whose file has gone
-        placeAll()   // a print whose monitor is not connected now lies on a screen that is, for the moment
+        placeAll()   // every print to its place on the LG; without the LG they stay hidden
         publishMenu()
 
         // One monitor for all prints; global sees the click while other apps are in front,
@@ -541,17 +602,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func request() {
         DistributedNotificationCenter.default().postNotificationName(
             Notification.Name("de.docalvers.dochere.watch"), object: "de.docalvers.deskphoto",
-            userInfo: ["on": shown ? "1" : "0"], deliverImmediately: true)
+            userInfo: ["on": shown && home != nil ? "1" : "0"], deliverImmediately: true)
     }
 
     private func heartbeat() {
-        if shown { request() }
+        if shown && home != nil { request() }
         if present && Date().timeIntervalSince(lastAnswer) > 15 { absent() }   // DocHere silent: hide
     }
 
     private func answered(_ answer: String) {
         lastAnswer = Date()
-        guard shown else { return }
+        guard shown, home != nil else { return }        // without the LG nothing shows, whatever the camera says
         if answer == "doc" { misses = 0 } else { misses += 1 }
         let now = answer == "doc" ? true : (misses >= 2 ? false : present)
         if now != present { present = now; applyVisibility() }
@@ -582,6 +643,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let fotos = n == 1 ? "1 Foto" : "\(n) Fotos"
         let status = n == 0 ? "kein Foto abgelegt"
                    : !shown ? "\(fotos) ausgeblendet"
+                   : home == nil ? "\(fotos) – nur am LG-Monitor"
                    : present ? "\(fotos) auf dem Schreibtisch" : "\(fotos) – nur sichtbar, wenn du da bist"
         bar.publish(status: status, items: items)
     }
@@ -645,7 +707,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return NSPoint(x: f.midX + 34, y: f.midY - 28)
         }
         let mouse = NSEvent.mouseLocation
-        let vis = (NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) }
+        let vis = (home ?? NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) }
                    ?? NSScreen.main)?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
         return NSPoint(x: vis.midX, y: vis.midY)
     }
@@ -751,15 +813,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: housekeeping
 
-    /// A monitor came or went: every print goes to its own place, or - while that monitor is missing - onto a
-    /// connected screen for the moment, without saving that spot (see PhotoItem.place).
-    @objc private func screensChanged() { placeAll() }
+    /// A monitor came or went: with the LG there every print goes to its own place on it; without it they all stay
+    /// hidden - never on the laptop, a beamer or the board - and DocHere's camera is let go. No restart needed.
+    @objc private func screensChanged() {
+        let had = home != nil
+        home = AppDelegate.findHome()
+        placeAll()
+        if had != (home != nil) {
+            if home == nil { present = false; misses = 2 }
+            request()
+        }
+        applyVisibility()
+    }
 
     private func placeAll() {
-        let vis = (NSScreen.main ?? NSScreen.screens.first)?.visibleFrame
+        guard let h = home else { return }               // nothing shows anywhere else
+        let o = homeOrigin
+        let shift = NSPoint(x: h.frame.minX - o.x, y: h.frame.minY - o.y)
         var away = 0
         for item in items {
-            if item.place(fallback: vis, nudge: away) { away += 1 }
+            if item.place(home: h, shift: shift, nudge: away) { away += 1 }
         }
     }
 
