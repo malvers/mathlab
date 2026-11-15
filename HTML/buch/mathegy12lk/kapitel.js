@@ -6,8 +6,8 @@
 window.BUCH = {
     title: 'Mathematik · Gymnasium 12 · Leistungskurs',
     short: 'Mathematik GY 12 LK',
-    // the dedication page at the front of the print edition (js/buch-druck.js; Doc, 15.11.2026, via Marie)
-    widmung: 'Für meine Ute alias Cutie.<br>Danke, dass Du in meinem Leben bist!',
+    // the dedication page at the front of the print edition (js/buch-druck.js; Doc, 15.11.2026, via Marie; 19:48 "nicht für meine Ute, sondern für Ute alias Cutie")
+    widmung: 'Für Ute alias Cutie.<br>Danke, dass Du in meinem Leben bist!',
     description: 'Interaktives Lehrbuch Mathematik für das Gymnasium, Jahrgangsstufe 12, Leistungskurs (Sachsen): Integralrechnung mit Integralfunktion, Hauptsatz und Rotationskörpern in echtem 3D, numerische Integration bis Simpson, normalverteilte Zufallsgrößen und de Moivre-Laplace, Schätzen und Signifikanztests, Abstände und Winkel im Raum mit Hessescher Normalform und windschiefen Geraden, Extremwerte, Spiegelungen, unbegrenzte Flächen, Scharen und Ortskurven und Training für das Abitur, mit Labs, Simulationen und Selbsttests mit sofortiger Rückmeldung.',
     chapters: [
         { file: 'lb5-1.html', lb: 'Lernbereich 5', k: '5.1', title: 'Stammfunktionen und Integrieren',
