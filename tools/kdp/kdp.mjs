@@ -63,11 +63,20 @@ try {
     rmSync(raw);
     const pages = +execFileSync('qpdf', ['--show-npages', interior]).toString().trim();
 
-    // the front of the cover is the cover of druck.html, straight from its source (Paged.js has rebuilt the page by now)
+    // the front of the cover is the cover of druck.html, straight from its source (Paged.js has rebuilt the page by now).
+    // Its classes come along (b-titel-lk = the dark red Leistungskurs cover, b-titel-pruefung = green), and so do the
+    // book's widget scripts: the cover art of a book with its own file (titelbildgy12lk in js/buch-gy12lk.js) was missing
+    // and every LK cover came out navy (15.11.2026, KDP files for mathegy12lk).
     const front = await page.evaluate(async () => {
         const doc = new DOMParser().parseFromString(await (await fetch('druck.html')).text(), 'text/html');
-        return doc.querySelector('.d-cover .b-titel').innerHTML;
+        const t = doc.querySelector('.d-cover .b-titel');
+        const scripts = [...doc.querySelectorAll('script[src]')].map(e => e.getAttribute('src'))
+            .filter(src => /(^|\/)js\/buch-[a-z0-9-]+\.js$/.test(src) && !/buch-druck\.js$/.test(src));
+        return { html: t.innerHTML, cls: t.className, scripts };
     });
+    const ownScripts = front.scripts.filter(src => !/\/js\/buch-(plot|funktionen)\.js$/.test(src))
+        .map(src => '<script src="' + src + '"></script>').join('\n');
+    const variant = /b-titel-lk/.test(front.cls) ? 'k-lk' : /b-titel-pruefung/.test(front.cls) ? 'k-pruefung' : '';
 
     // ---------- cover: back | spine | front ----------
 
@@ -124,6 +133,13 @@ html, body { margin: 0; padding: 0; background: #040a18; -webkit-print-color-adj
 /* back: the glow comes from the spine side */
 .k-back .b-titel { background: radial-gradient(110% 70% at 0% 0%, rgba(245, 194, 66, 0.16), transparent 60%),
     linear-gradient(195deg, #10264a 0%, #081428 55%, #040a18 100%); }
+/* the Leistungskurs books in dark red, the training book in green - the colours of js/buch-titel.css, back and spine too */
+.k-lk .k-back .b-titel { background: radial-gradient(110% 70% at 0% 0%, rgba(245, 194, 66, 0.2), transparent 60%),
+    linear-gradient(195deg, #8c2016 0%, #560f0a 55%, #2c0605 100%); }
+.k-lk .k-spine { background: linear-gradient(180deg, #7a1c13 0%, #560f0a 55%, #2c0605 100%); }
+.k-pruefung .k-back .b-titel { background: radial-gradient(110% 70% at 0% 0%, rgba(245, 194, 66, 0.18), transparent 60%),
+    linear-gradient(195deg, #3a6420 0%, #1f3f14 55%, #0e2009 100%); }
+.k-pruefung .k-spine { background: linear-gradient(180deg, #33581c 0%, #1f3f14 55%, #0e2009 100%); }
 .k-in { position: absolute; left: ${BLEED + 0.8}in; right: 0.8in; top: ${BLEED + 0.75}in; bottom: ${BLEED + 0.75}in; color: #dfe8f4; }
 .k-top { display: flex; align-items: center; gap: 10px; font-family: 'Orbitron', sans-serif; font-size: 9pt; letter-spacing: 2px; color: rgba(255, 255, 255, 0.82); }
 .k-top .b-logo { width: 34px; height: 34px; }
@@ -142,7 +158,7 @@ html, body { margin: 0; padding: 0; background: #040a18; -webkit-print-color-adj
 .k-sp .t b { color: rgb(245, 194, 66); }
 .k-sp .v { font-size: 7pt; color: rgb(245, 194, 66); }
 </style></head><body>
-<div class="k-sheet">
+<div class="k-sheet ${variant}">
   <div class="k-back"><div class="b-titel">
     <div class="k-in">
       <div class="k-top"><span class="b-logo" aria-hidden="true"></span><span>DOC ALVERS MATHE-LABOR</span></div>
@@ -155,7 +171,7 @@ html, body { margin: 0; padding: 0; background: #040a18; -webkit-print-color-adj
     </div>
   </div></div>
   <div class="k-spine"><div class="k-sp"><span class="t" id="k-sp"></span><span class="v">DOC ALVERS MATHE-LABOR</span></div></div>
-  <div class="k-front"><div class="b-titel">${front}</div></div>
+  <div class="k-front"><div class="${front.cls}">${front.html}</div></div>
 </div>
 <script src="../../svp/qrcode.min.js"></script>
 <script src="../../js/labs-icons.js"></script>
@@ -163,6 +179,7 @@ html, body { margin: 0; padding: 0; background: #040a18; -webkit-print-color-adj
 <script src="../../js/buch.js"></script>
 <script src="../../js/buch-plot.js"></script>
 <script src="../../js/buch-funktionen.js"></script>
+${ownScripts}
 <script>
   document.getElementById('k-list').innerHTML = BUCH.chapters.map(c => '<li><b>' + c.k + '</b>' + c.title + '</li>').join('');
   document.getElementById('k-sp').innerHTML = BUCH.title.toUpperCase().replace(/(\\d+)$/, '<b>$1</b>');
