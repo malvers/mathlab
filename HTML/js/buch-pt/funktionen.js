@@ -93,6 +93,9 @@ window.BuchPT && BuchPT.add('funktionen', {
         '$h$: Anstieg $m_2$': '$h$: declive $m_2$',
         '$h$: Achsenabschnitt $n_2$': '$h$: ordenada na origem $b_2$',
         'Zwei Geraden und ihre Lage zueinander': 'Duas retas e a sua posição relativa',
+        // parabelschar
+        'Parameter': 'Parâmetro',
+        'Schar von Parabeln mit einem hervorgehobenen Mitglied': 'Família de parábolas com um membro destacado',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -170,6 +173,10 @@ window.BuchPT && BuchPT.add('funktionen', {
         ['$, also ', '$, logo '],
         [' · Schnittwinkel $', ' · ângulo das retas $'],
         ['parallel zur $x$-Achse', 'paralela ao eixo $Ox$'],
+        // parabelschar
+        ['Nullstellen: $', 'zeros: $'],
+        [' · Scheitel $(', ' · vértice $V('],
+        ['$ · keine Nullstelle', '$ · nenhum zero'],
     ],
     rule: [
         // pt0: notation of the module, for every book
