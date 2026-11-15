@@ -96,6 +96,12 @@ window.BuchPT && BuchPT.add('funktionen', {
         // parabelschar
         'Parameter': 'Parâmetro',
         'Schar von Parabeln mit einem hervorgehobenen Mitglied': 'Família de parábolas com um membro destacado',
+        // ganzrational
+        'Faktor $a$': 'Fator $a$',
+        'Vielfachheit größer': 'multiplicidade maior', 'Vielfachheit kleiner': 'multiplicidade menor',
+        'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Arrasta os zeros ao longo do eixo $Ox$. A multiplicidade 0 retira o fator linear.',
+        'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Função polinomial com zeros que se podem deslocar',
+        'fünffach': 'quíntuplo', 'sechsfach': 'sêxtuplo', 'siebenfach': 'sétuplo', 'achtfach': 'óctuplo', 'neunfach': 'nónuplo',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -177,6 +183,14 @@ window.BuchPT && BuchPT.add('funktionen', {
         ['Nullstellen: $', 'zeros: $'],
         [' · Scheitel $(', ' · vértice $V('],
         ['$ · keine Nullstelle', '$ · nenhum zero'],
+        // ganzrational
+        ['Vorzeichenwechsel, der Graph <b>schneidet</b> die $x$-Achse', 'mudança de sinal, o gráfico <b>atravessa</b> o eixo $Ox$'],
+        ['Vorzeichenwechsel, der Graph schneidet die $x$-Achse <b>flach</b> (Sattelpunkt)', 'mudança de sinal, o gráfico atravessa o eixo $Ox$ de forma <b>achatada</b> (ponto de inflexão)'],
+        ['kein Vorzeichenwechsel, der Graph <b>berührt</b> die $x$-Achse', 'sem mudança de sinal, o gráfico <b>toca</b> o eixo $Ox$'],
+        ['$ · Grad $', '$ · grau $'],
+        ['Für $x \\to +\\infty$ geht $f(x) \\to ', 'Para $x \\to +\\infty$, $f(x) \\to '],
+        ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$; para $x \\to -\\infty$, $f(x) \\to '],
+        ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Só decide a parcela com a potência mais alta: $'],
     ],
     rule: [
         // pt0: notation of the module, for every book
