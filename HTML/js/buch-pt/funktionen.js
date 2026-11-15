@@ -78,6 +78,15 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
         // book pt-6 mathefos11-pt:
+        // funktion
+        'Kurve': 'Curva',
+        'Zieh den türkisen Punkt unten: Die senkrechte Gerade wandert mit. Wie oft trifft sie die Kurve?': 'Arrasta o ponto turquesa em baixo: a reta vertical desloca-se com ele. Quantas vezes interseta a curva?',
+        'Kurve mit verschiebbarer senkrechter Gerade': 'Curva com uma reta vertical que se pode deslocar',
+        'Ist die Kurve der Graph einer Funktion?': 'A curva é o gráfico de uma função?',
+        'keine Funktion': 'não é função',
+        'Richtig.': 'Certo.',
+        'Nicht ganz.': 'Não exatamente.',
+        'Entscheide mit den Knöpfen. Danach siehst du Definitions- und Wertebereich.': 'Decide com os botões. Depois vês o domínio e o contradomínio.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -138,6 +147,13 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
         // book pt-6 mathefos11-pt:
+        // funktion
+        ['$ · Bei $x = ', '$ · Para $x = '],
+        ['$ trifft die Senkrechte die Kurve <b>', '$, a reta vertical interseta a curva <b>'],
+        ['gar nicht', 'nenhuma vez'],
+        ['genau einmal', 'exatamente uma vez'],
+        ['Jede senkrechte Gerade trifft die Kurve höchstens einmal: eine Funktion. ', 'Cada reta vertical interseta a curva no máximo uma vez: é uma função. '],
+        ["$, $W = ", "$, $D' = "],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -175,5 +191,7 @@ window.BuchPT && BuchPT.add('funktionen', {
         // the picture is the same. funktionen.js loads before vektoren.js on those pages.
         [/\\begin\{pmatrix\}((?:(?!\\end\{pmatrix\})[^&])*&(?:(?!\\end\{pmatrix\})[\s\S])*?)\\end\{pmatrix\}/g, '\\left(\\begin{matrix}$1\\end{matrix}\\right)'],
         // book pt-6 mathefos11-pt:
+        // funktion: "die Kurve <b>2-mal</b>"
+        [/<b>(\d+)-mal<\/b>/g, '<b>$1 vezes</b>'],
     ]
 });
