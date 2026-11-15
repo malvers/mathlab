@@ -88,6 +88,15 @@ window.BuchPT && BuchPT.add('stochastik', {
         'Fehler 2. Art zeigen: wahres $p$ =': 'Mostrar o erro de tipo II: $p$ verdadeiro =',
         'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Distribuição binomial sob a hipótese nula, com a região de rejeição',
         // book pt-6 mathefos11-pt:
+        // venn
+        'Ein Glücksrad hat 12 gleich große Felder: $\\Omega = \\{1; 2; \\ldots; 12\\}$. Wähle eine Vorlage oder stell $A$ und $B$ selbst zusammen: Ereignis wählen, dann Zahlen antippen.':
+            'Uma roleta tem 12 setores iguais: $\\Omega = \\{1, 2, \\ldots, 12\\}$. Escolhe um modelo ou constrói tu mesmo $A$ e $B$: escolhe o acontecimento e depois toca nos números.',
+        'Vorlage': 'Modelo',
+        'Ereignis bearbeiten': 'Editar o acontecimento',
+        'Verknüpfung:': 'Operação:',
+        'Verknüpfung': 'Operação',
+        'Mengendiagramm der Ereignisse A und B': 'Diagrama de Venn dos acontecimentos A e B',
+        'Die Zahlen, die in beiden Ereignissen liegen.': 'Os números que estão nos dois acontecimentos.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -155,6 +164,11 @@ window.BuchPT && BuchPT.add('stochastik', {
         
         
         // book pt-6 mathefos11-pt:
+        // venn
+        [' · $A$ und $B$ sind <b>unvereinbar</b> ($A \\cap B = \\emptyset$), es wird nichts doppelt gezählt.', ' · $A$ e $B$ são <b>incompatíveis</b> ($A \\cap B = \\emptyset$): nada é contado duas vezes.'],
+        ['$A \\cap B = \\emptyset$: Die Ereignisse sind <b>unvereinbar</b>, sie können nicht zusammen eintreten.', '$A \\cap B = \\emptyset$: os acontecimentos são <b>incompatíveis</b>, não se podem realizar ao mesmo tempo.'],
+        ['Regel von de Morgan: $', 'Lei de De Morgan: $'],
+        ['$. Wähle die andere Seite und vergleiche: Es ist dieselbe Menge.', '$. Escolhe o outro membro e compara: é o mesmo conjunto.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
