@@ -22,6 +22,7 @@ window.BuchPT && BuchPT.add('lgs', {
         '1 Schritt': '1 passo', '10 Schritte': '10 passos', 'Vier Webseiten und ihre Links': 'Quatro páginas web e as suas ligações',
         // book pt-3 mathe13-pt:
         // book pt-5 mathe13lk-pt:
+        // book pt-6 mathefos11-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs lgs/*)
@@ -46,6 +47,7 @@ window.BuchPT && BuchPT.add('lgs', {
         ['Summe: $', 'Soma: $'],
         // book pt-3 mathe13-pt:
         // book pt-5 mathe13lk-pt:
+        // book pt-6 mathefos11-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -56,5 +58,6 @@ window.BuchPT && BuchPT.add('lgs', {
         [/Schritt (\d+):/g, 'Passo $1:'],
         // book pt-3 mathe13-pt:
         // book pt-5 mathe13lk-pt:
+        // book pt-6 mathefos11-pt:
     ]
 });

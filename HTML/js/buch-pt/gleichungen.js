@@ -18,6 +18,7 @@ window.BuchPT && BuchPT.add('gleichungen', {
         'Länge $a$': 'Comprimento $a$', 'Länge $b$': 'Comprimento $b$', 'Quadrat mit Seitenlänge a + b': 'Quadrado de lado a + b',
         'Zylinder': 'Cilindro', 'Kegel': 'Cone', 'Kugel': 'Esfera', 'Körper': 'Sólido', 'Radius $r$ in cm': 'Raio $r$ em cm',
         'Höhe $h$ in cm': 'Altura $h$ em cm', 'Skizze des Körpers': 'Esboço do sólido',
+        // book pt-6 mathefos11-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gleichungen/*)
@@ -36,6 +37,7 @@ window.BuchPT && BuchPT.add('gleichungen', {
         // binom, koerper (the letters of lb2: A_L, A_T, the slant height g - the rules below)
         ['Der häufigste Fehler: ', 'O erro mais frequente: '], ['. Im Bild fehlen dann die beiden blauen Rechtecke, hier ', '. Na figura faltam então os dois retângulos azuis, aqui '],
         ['Mantellinie $s = ', 'Geratriz $g = '],
+        // book pt-6 mathefos11-pt:
     ],
     rule: [
         // pt0: the solution set is C.S. (conjunto-solução) in Portuguese schools, also in the widget sentences:
@@ -44,5 +46,6 @@ window.BuchPT && BuchPT.add('gleichungen', {
         // book pt-1 mathe11-pt:
         // koerper: lateral and total surface A_L, A_T, the slant height g (geratriz), as Portuguese schools and lb2 write them
         [/\$M = 2\\pi r h/g, '$A_L = 2\\pi r h'], [/\$O = /g, '$A_T = '], [/\\pi r s \\approx/g, '\\pi r g \\approx'],
+        // book pt-6 mathefos11-pt:
     ]
 });

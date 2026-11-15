@@ -77,6 +77,7 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-3 mathe13-pt:
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // book pt-6 mathefos11-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -136,6 +137,7 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-3 mathe13-pt:
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // book pt-6 mathefos11-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -172,5 +174,6 @@ window.BuchPT && BuchPT.add('funktionen', {
         // pmatrix as a row vector: it would turn the rotation matrix of drehmatrix (lb7-2) and the matrices of uebergang (abi) into broken TeX;
         // the picture is the same. funktionen.js loads before vektoren.js on those pages.
         [/\\begin\{pmatrix\}((?:(?!\\end\{pmatrix\})[^&])*&(?:(?!\\end\{pmatrix\})[\s\S])*?)\\end\{pmatrix\}/g, '\\left(\\begin{matrix}$1\\end{matrix}\\right)'],
+        // book pt-6 mathefos11-pt:
     ]
 });

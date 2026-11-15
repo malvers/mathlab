@@ -288,3 +288,7 @@ pt-5 um (`bgy13lk.js`: E → I, ME → u.q.; `vektoren.js`: der Knopf „paralle
 | biquadratische Gleichung · Substitution · Rücksubstitution | equação biquadrada · substituição · voltar à variável $x$ | |
 | Funktionenschar · Ortskurve · kritische Werte | família de funções · lugar geométrico · valores críticos | Fallunterscheidung = discussão de casos |
 | Drehmatrix · Drehwinkel | matriz de rotação · ângulo de rotação | |
+
+## mathefos11-pt (FOS 11, block pt-6)
+
+Terms the book adds (Fachoberschule, Zahlbereiche, Finanzmathematik, Schaltalgebra …) go here.

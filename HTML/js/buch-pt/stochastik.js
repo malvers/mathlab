@@ -87,6 +87,7 @@ window.BuchPT && BuchPT.add('stochastik', {
         'Signifikanzniveau': 'Nível de significância', 'Beobachtete Trefferzahl $k$': 'Número de sucessos observado $k$',
         'Fehler 2. Art zeigen: wahres $p$ =': 'Mostrar o erro de tipo II: $p$ verdadeiro =',
         'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Distribuição binomial sob a hipótese nula, com a região de rejeição',
+        // book pt-6 mathefos11-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -153,6 +154,7 @@ window.BuchPT && BuchPT.add('stochastik', {
         ['$ · tatsächliche Irrtumswahrscheinlichkeit $\\approx ', '$ · probabilidade de erro efetiva $\\approx '], ['Beobachtet $k = ', 'Observado $k = '],
         
         
+        // book pt-6 mathefos11-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -194,5 +196,6 @@ window.BuchPT && BuchPT.add('stochastik', {
         // book pt-3 mathe13-pt:
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
+        // book pt-6 mathefos11-pt:
     ]
 });
