@@ -237,6 +237,9 @@ STEP_TAG = re.compile(r'<[a-z][a-z0-9]*\b[^>]*>')
 DATA_G = re.compile(r'\bdata-g="(\d+)"')
 DATA_BIS = re.compile(r'\bdata-bis="(\d+)"')
 NARRATION = re.compile(r'(<script id="narration" type="application/json">)(.*?)(</script>)', re.S)
+# Solita's words for one slide, inside its <section> (see SOLITA in HTML/decks/deck.js): {"say": [...], "hold", "demo"}.
+# They go wherever the slide goes, and her clips are named after the words - nothing on disk moves with an edit.
+SAY_TAG = re.compile(r'<script type="application/json" class="say">(.*?)</script>', re.S)
 
 
 def _group(tag):
@@ -305,7 +308,7 @@ def line(deck, slide, n, old, op, head=None, tail=None):
             page = page[:top["os"]] + tl + page[top["oe"]:low["os"]] + tt + page[low["oe"]:]
             if gt is not None and gl is not None and gt != gl and alone(gt) and alone(gl):
                 page, spoken = _narration_swap(page, deck, slide, gt + 1, gl + 1)   # their words go along
-            _write(deck, page, gen, what="Zeile verschoben", stuck=spoken)
+            _write(deck, page, gen, what="Zeile verschoben")
             return 200, {"narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
         if op == "del" and len(lines) == 1:
             return 422, {"error": "Die letzte Zeile einer Folie bleibt – sonst gibt es nichts mehr zum Kopieren."}
@@ -347,7 +350,7 @@ def line(deck, slide, n, old, op, head=None, tail=None):
         spoken = False
         if own:
             page, spoken = _narration(page, deck, slide, g + 1, by)
-        _write(deck, page, gen, what={"dup": "Zeile kopiert", "split": "Zeile geteilt"}.get(op, "Zeile gelöscht"), stuck=spoken)
+        _write(deck, page, gen, what={"dup": "Zeile kopiert", "split": "Zeile geteilt"}.get(op, "Zeile gelöscht"))
     reply = {"own": own, "g": g, "narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
     if parts:                                         # the two halves as the file now holds them
         reply.update(html=parts, src=[to_source(p, gen.markup) for p in parts])
@@ -358,16 +361,15 @@ def line(deck, slide, n, old, op, head=None, tail=None):
 SECTION_TAG = re.compile(r"<section\b[^>]*>")
 CLASS_ATTR = re.compile(r'\bclass="([^"]*)"')
 SKIP = "skip"                                         # a hidden slide: stays in the file, no navigation lands on it
-SLIDE_CLIP = re.compile(r"^s(\d{2})-(\d{2})\.mp3$")
 
 
 def slide_op(deck, index, op, to=None):
     """Move a slide inside the deck, hide / show it, or put one in and take one out (the overview in edit
     mode, Doc 21.09.2026). Returns (status, reply).
 
-    Moving rewrites the order of the <section class="slide"> blocks and takes Solita with it: her parts, her
-    hold list and her clips are keyed by slide number, so they are renumbered in the same step. Hiding only
-    sets a class - numbering and narration stay exactly as they are, which is why it is the safe one.
+    Moving rewrites the order of the <section class="slide"> blocks; Solita's words sit inside them and her clips are
+    named after the words (SAY_TAG), so she goes along without anything being renumbered or renamed - a copied slide
+    says the same, a new one is silent. Hiding only sets a class.
     """
     gen = _gen()
     with _lock:
@@ -406,7 +408,7 @@ def slide_op(deck, index, op, to=None):
             page = page[:bounds[0][0]] + "".join(blocks) + page[bounds[-1][1]:]
             page, spoken = _reorder(page, deck, mapping)
             what = {"insert": "Folie eingefügt", "dup": "Folie kopiert", "del": "Folie gelöscht"}[op]
-            _write(deck, page, gen, what=what, stuck=spoken)
+            _write(deck, page, gen, what=what)
             return 200, {"at": at, "narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
         if op != "move":
             return 400, {"error": "unknown op"}
@@ -420,7 +422,7 @@ def slide_op(deck, index, op, to=None):
         order.insert(to, order.pop(index))            # the same move the overview shows
         page = page[:bounds[0][0]] + "".join(blocks[k] for k in order) + page[bounds[-1][1]:]
         page, spoken = _reorder(page, deck, {old: new for new, old in enumerate(order)})
-        _write(deck, page, gen, what="Folie verschoben", stuck=spoken)
+        _write(deck, page, gen, what="Folie verschoben")
     return 200, {"order": order, "narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
 
 
@@ -446,133 +448,100 @@ def _copy_slide(block):
 
 
 def _reorder(page, deck, mapping):
-    """The slides changed places: Solita's parts, her hold list and her clips (audio/<deck>/sNN-KK.mp3 with
-    texts.json) follow, so no clip is spoken on the wrong slide. Returns (page, whether anything spoken moved)."""
-    m = NARRATION.search(page)
-    if not m or not m.group(2).strip():
+    """The slides changed places. Solita's words sit inside the slides and travel with them, her clips are named after
+    the words - nothing to renumber (13.11.2026; before, parts, hold list and clips were keyed by slide number and were
+    renamed here). Returns (page, whether a slide with her words changed its place), for the editor's message."""
+    moved = any(v != k for k, v in mapping.items())
+    return page, moved and SAY_TAG.search(page) is not None
+
+
+def _say_span(page, slide):
+    """Where slide `slide` is in the page: (start, end), the same counting as elements()."""
+    gen = _gen()
+    bounds = elements(page, gen)[1]
+    return bounds[slide] if 0 <= slide < len(bounds) else None
+
+
+def _say_get(block):
+    """Solita's words in one slide's block: their dict ({} when she says nothing there)."""
+    m = SAY_TAG.search(block)
+    return json.loads(m.group(1).replace("<\\/", "</")) if m else {}
+
+
+def _say_put(block, data):
+    """The block with Solita's words set to `data` - as the slide's last child, gone when there is nothing left."""
+    m = SAY_TAG.search(block)
+    tag = ('<script type="application/json" class="say">%s</script>'
+           % json.dumps(data, ensure_ascii=False).replace("</", "<\\/")) if data else ""
+    if m:
+        return block[:m.start()] + tag + block[m.end():]
+    if not tag:
+        return block
+    end = block.rindex("</section>")
+    return block[:end] + tag + block[end:]
+
+
+def _say_edit(page, slide, change):
+    """Run change(data) on the words of slide `slide`; returns (page, whether anything spoken changed)."""
+    span = _say_span(page, slide)
+    if not span:
         return page, False
-    data = json.loads(m.group(2).replace("<\\/", "</"))
-    parts = data.get("slides") or {}
-    spoken = False
-    where = lambda k: mapping[k] if k in mapping else k       # None: that slide is gone
-    if parts:
-        data["slides"] = {str(where(int(k))): v for k, v in parts.items() if where(int(k)) is not None}
-        spoken = any(where(int(k)) != int(k) for k in parts)
-    if isinstance(data.get("hold"), list):
-        data["hold"] = sorted(where(h) for h in data["hold"] if where(h) is not None)
-    text = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
-    page = page[:m.start(2)] + text + page[m.end(2):]
-    folder = os.path.join(DECKS, "audio", data.get("deck") or deck[:-5])
-    if os.path.isdir(folder):
-        renames = []
-        for fn in sorted(os.listdir(folder)):
-            c = SLIDE_CLIP.match(fn)
-            if not c:
-                continue
-            old = int(c.group(1))
-            new = where(old)
-            if new != old:
-                renames.append((fn, None if new is None else "s%02d-%02d.mp3" % (new, int(c.group(2)))))
-        if renames:                                   # two passes: a straight rename would overwrite a clip
-            spoken = True
-            for fn, _ in renames:
-                os.replace(os.path.join(folder, fn), os.path.join(folder, fn + ".moving"))
-            for fn, dst in renames:
-                if dst is None:
-                    os.remove(os.path.join(folder, fn + ".moving"))   # the deleted slide's clip - git still has it
-                else:
-                    os.replace(os.path.join(folder, fn + ".moving"), os.path.join(folder, dst))
-            texts_path = os.path.join(folder, "texts.json")
-            if os.path.exists(texts_path):
-                texts = json.load(open(texts_path, encoding="utf-8"))
-                to = dict(renames)
-                texts = {to.get(k, k): v for k, v in texts.items() if to.get(k, k) is not None}
-                with open(texts_path, "w", encoding="utf-8") as f:
-                    f.write(json.dumps(texts, ensure_ascii=False, indent=1))
-    return page, spoken
+    a, b = span
+    data = _say_get(page[a:b])
+    if not data.get("say") or not change(data):
+        return page, False
+    return page[:a] + _say_put(page[a:b], data) + page[b:], True
 
 
 def _narration_swap(page, deck, slide, i, j):
-    """Solita's parts i and j of `slide` change places, and so do their clips - two lines swapped, their words go along.
-    Returns (page, whether anything spoken moved)."""
-    m = NARRATION.search(page)
-    if not m or not m.group(2).strip():
-        return page, False
-    data = json.loads(m.group(2).replace("<\\/", "</"))
-    parts = data.get("slides", {}).get(str(slide))
-    if not parts or max(i, j) >= len(parts):
-        return page, False
-    parts[i], parts[j] = parts[j], parts[i]
-    text = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
-    page = page[:m.start(2)] + text + page[m.end(2):]
-    folder = os.path.join(DECKS, "audio", data.get("deck") or deck[:-5])
-    if os.path.isdir(folder):
-        na, nb = "s%02d-%02d.mp3" % (slide, i), "s%02d-%02d.mp3" % (slide, j)
-        pa, pb = os.path.join(folder, na), os.path.join(folder, nb)
-        if os.path.exists(pa):
-            os.replace(pa, pa + ".swap")
-        if os.path.exists(pb):
-            os.replace(pb, pa)
-        if os.path.exists(pa + ".swap"):
-            os.replace(pa + ".swap", pb)
-        texts_path = os.path.join(folder, "texts.json")
-        if os.path.exists(texts_path):                # same order and format as deck_audio.mjs writes it
-            texts = json.load(open(texts_path, encoding="utf-8"))
-            va, vb = texts.pop(na, None), texts.pop(nb, None)
-            if vb is not None:
-                texts[na] = vb
-            if va is not None:
-                texts[nb] = va
-            with open(texts_path, "w", encoding="utf-8") as f:
-                f.write(json.dumps(texts, ensure_ascii=False, indent=1))
-    return page, True
+    """Solita's parts i and j of `slide` change places - two lines swapped, their words go along, and so does what she
+    shows in them (demo). Her clips are named after the words: nothing on disk moves. Returns (page, spoken)."""
+    def change(d):
+        parts = d["say"]
+        if max(i, j) >= len(parts):
+            return False
+        parts[i], parts[j] = parts[j], parts[i]
+        demo = d.get("demo") or {}
+        di, dj = demo.pop(str(i), None), demo.pop(str(j), None)
+        if dj is not None:
+            demo[str(i)] = dj
+        if di is not None:
+            demo[str(j)] = di
+        return True
+    return _say_edit(page, slide, change)
 
 
 def _narration(page, deck, slide, part, by):
-    """Solita's parts for `slide`: by +1 puts an empty part after `part`, by -1 removes `part` - and her clips
-    (audio/<deck>/sNN-KK.mp3 with texts.json) move along, so no clip is spoken at the wrong line or recorded again.
-    Returns (page, whether anything spoken moved)."""
-    m = NARRATION.search(page)
-    if not m or not m.group(2).strip():
-        return page, False
-    data = json.loads(m.group(2).replace("<\\/", "</"))
-    parts = data.get("slides", {}).get(str(slide))
+    """Solita's parts for `slide`: by +1 puts an empty part after `part` (a copied line: silent, Doc 17.09.2026 "erst mal
+    nix"), by -1 removes `part` - and her demo entries of the later parts move along. Her clips are named after the
+    words: nothing on disk moves. Returns (page, spoken)."""
     at = part + 1 if by > 0 else part                 # the index that is inserted or removed
-    if not parts or at >= len(parts):
-        return page, False                            # nothing spoken after it - nothing moves
-    count = len(parts)
-    if by > 0:
-        parts.insert(at, "")
-    else:
-        parts.pop(at)
-    text = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
-    page = page[:m.start(2)] + text + page[m.end(2):]
-    folder = os.path.join(DECKS, "audio", data.get("deck") or deck[:-5])
-    if os.path.isdir(folder):
-        name = lambda k: "s%02d-%02d.mp3" % (slide, k)
-        texts_path = os.path.join(folder, "texts.json")
-        texts = json.load(open(texts_path, encoding="utf-8")) if os.path.exists(texts_path) else None
-        moves = [(k, k + 1) for k in range(count - 1, at - 1, -1)] if by > 0 else \
-                [(at, None)] + [(k, k - 1) for k in range(at + 1, count)]
-        for src, dst in moves:
-            p = os.path.join(folder, name(src))
-            if dst is None:
-                if os.path.exists(p):
-                    os.remove(p)                      # the removed line's clip - git still has it
-            elif os.path.exists(p):
-                os.replace(p, os.path.join(folder, name(dst)))
-        if texts is not None:                         # same order and format as deck_audio.mjs writes it
-            to = {name(src): (name(dst) if dst is not None else None) for src, dst in moves}
-            texts = {to.get(k, k): v for k, v in texts.items() if to.get(k, k) is not None}
-            with open(texts_path, "w", encoding="utf-8") as f:
-                f.write(json.dumps(texts, ensure_ascii=False, indent=1))
-    return page, True
+    def change(d):
+        parts = d["say"]
+        if at >= len(parts):
+            return False                              # nothing spoken after it - nothing moves
+        if by > 0:
+            parts.insert(at, "")
+        else:
+            parts.pop(at)
+        demo = d.get("demo") or {}
+        moved = {}
+        for k, v in demo.items():
+            n = int(k)
+            if by < 0 and n == at:
+                continue                              # the removed line's demo goes with it
+            moved[str(n + by if n >= at and n > 0 else n)] = v
+        if demo:
+            d["demo"] = moved
+        return True
+    return _say_edit(page, slide, change)
 
 
 def _write(deck, page, gen, record=True, what="Änderung", stuck=False):
     """Write the deck atomically, with EDITED_MARK so html_deck.py leaves it alone from now on. Every write is one
     undo step (deck_undo.py, Doc 17.09.2026: "Undo gemeinsam angehen ... intelligent klein") - texts, lines and pictures
-    alike; `stuck` marks a step that cannot be undone (Solita's clips were moved), record=False is the undo itself."""
+    alike; `stuck` marks a step that cannot be undone (since 13.11.2026 no edit moves files any more, Solita's words
+    are part of the text), record=False is the undo itself."""
     if EDITED_MARK not in page and gen._DECK_START in page:   # a vorspann file is no deck: no build ever writes it
         a = page.index(gen._DECK_START) + len(gen._DECK_START)
         page = page[:a] + EDITED_MARK + page[a:]

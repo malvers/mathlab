@@ -136,6 +136,32 @@
         /* ------------------------------------------------------ Solita erklärt */
         // Her DocPad voice from the deck clips - never a browser voice
         const AUDIO_DIR = 'decks/audio/mathe11-wuerfelspiel/';
+        // Since 13.11.2026 the deck names each clip after its words (SOLITA in decks/deck.js, tools/pptx/narration_migrate.py):
+        // the stations keep their slide-part labels, this table says which file each one is. The labels count the deck
+        // as it was when the stations were written - before the buzzer slide came in on 11.11.2026 and the clips moved one
+        // slide up without this page (it had played the next slide's words since, or none); each entry is checked byte for
+        // byte against the clip the label named then. A clip of the deck spoken anew gets a new name - its entry follows.
+        const CLIP_FILE = {
+            's01-00': '221bf064df0c', 's02-00': 'efee86cf1ba9', 's03-00': '8f4236f52b34', 's03-01': '3ab82eb9ab5a',
+            's03-02': 'b7dce730d746', 's03-03': '449e12639b7c', 's03-04': '6892370cc67c', 's04-00': '81b77590fdab',
+            's05-00': 'bff8127f590c', 's05-01': '66f81c2f1d60', 's05-02': '0f51663eebfc', 's05-03': '4c8568c04d8e',
+            's05-04': '3860862ba80b', 's06-00': '629301e1b80e', 's07-00': '0386ee743cc2', 's07-01': '1fe2efdccdfa',
+            's07-02': '7b0bba89fa10', 's08-00': 'f8bd9717707a', 's08-01': '9b273914058e', 's08-02': 'b66fbbef8d09',
+            's09-00': '0d97ce51bc34', 's09-01': 'c8d40e157849', 's09-02': '7e1cb37fea04', 's09-03': 'e16a3ca30ec1',
+            's09-04': '43d2c8524b37', 's10-00': 'e22bb00970a8', 's11-00': '907755d0a51c', 's12-00': 'ad14fe5501d1',
+            's12-01': '7c6e60cf9af6', 's12-02': '363cd3c3df0d', 's12-03': '64681ea759ec', 's12-04': 'd56dcd397f4a',
+            's13-00': '5239b8947c04', 's14-00': 'def2ebe9daac', 's14-01': 'c385b7c3fb6f', 's14-02': '7faac75dd090',
+            's14-03': '5bd6b2b086b5', 's14-04': '3ecec06ac6c7', 's15-00': 'e2f42094d67e', 's16-00': '7e08ed397491',
+            's16-01': 'c3745bc226cf', 's17-00': '86e4d0099bad', 's17-01': 'b0257e81804e', 's17-02': '5184499d7c70',
+            's17-03': '1a52dad002e0', 's17-04': 'ef2a9f794fc1', 's18-00': 'b67c938eec34', 's18-01': '6ce6727e428f',
+            's18-02': '910eb86fb9d6', 's18-03': 'e9ec7b1561e5', 's18-04': '325e5459ddd9', 's18-05': '2d940abe3e25',
+            's20-00': '3449932d23cf', 's21-00': 'd30fbe19ca45', 's21-01': '293d790666bb', 's21-02': 'bcafff90341f',
+            's21-03': '88b2d9805c7d', 's21-04': '4cb3f49c0942', 's21-05': 'f570b84ba1b5', 's22-00': '00d070859694',
+            's22-01': '39fd8a5dcabd', 's22-02': '09d47a7575bc', 's22-03': '8c3627d5798c', 's22-04': 'b915e0774b28',
+            's23-00': 'e44acf93c0a4', 's23-01': 'bdb3b3d0418c', 's23-02': '9fa77a3e3360', 's23-03': '1a94196710b4',
+            's23-04': 'beb13434f355', 's23-05': 'a61c97373bb9', 's24-00': 'da75a2c2517a', 's24-01': '725e34aa3f94',
+            's24-02': 'efbe88e186cd', 's24-03': '1ba62492b0a5', 's24-04': '516a0e08f9ce'
+        };
         const Solita = { on: false, held: false, queue: [], pos: 0, timer: 0 };
         // Doc: "zu schnell" - breathing room after every sentence and before the next station
         const PAUSE_CLIP = 1400, PAUSE_STATION = 3200;
@@ -213,7 +239,7 @@
             const clip = Solita.queue[Solita.pos];
             if (st.onClip) st.onClip(clip);
             render();
-            solitaAudio.src = AUDIO_DIR + clip + '.mp3';
+            solitaAudio.src = AUDIO_DIR + (CLIP_FILE[clip] || clip) + '.mp3';
             solitaAudio.play().catch(err => {
                 dbg('Solita: Wiedergabe blockiert (' + err.message + ')');
                 solitaStop();

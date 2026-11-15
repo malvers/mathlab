@@ -1,13 +1,24 @@
 // Solita reads an HTML deck (Doc, 15.09.2026: "NIEMALS Browserstimme! So wie beim DocPad!") - the
 // same voice and pipe as ~/IdeaProjects/docpad/tools/make_tour_audio.mjs: the Supabase "tts"
-// function with de-DE-Studio-C. The spoken parts are the ones the build embedded in the deck
-// (html_deck.say -> <script id="narration">), written to HTML/decks/audio/<deck>/sNN-KK.mp3 with a
-// texts.json next to them. Incremental: only changed parts are sent - the Studio voice has a hard
-// quota (HTTP 429: wait a minute and run again). Needs network.
+// function with de-DE-Studio-C. The spoken parts sit in the slides themselves (<script type="application/json"
+// class="say"> in each <section>, see SOLITA in HTML/decks/deck.js), and every clip is named after its words:
+// HTML/decks/audio/<deck>/<first 12 hex of SHA-256 of voice + "\n" + text>.mp3, with a texts.json next to them
+// (file -> what was sent). So the slides can be moved, copied, deleted and merged without touching a clip (Doc,
+// 13.11.2026: "bei jeder Änderung müssen wir da nachfeilen"): only words that have no clip yet are sent - the Studio
+// voice has a hard quota (HTTP 429: wait a minute and run again). Needs network.
 //
-//     node tools/pptx/deck_audio.mjs mathe11-wuerfelspiel
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+//     node tools/pptx/deck_audio.mjs mathe11-wuerfelspiel             make the missing clips
+//     node tools/pptx/deck_audio.mjs mathe11-wuerfelspiel --dry       only list what is missing, nothing is sent
+//     node tools/pptx/deck_audio.mjs ai-wasserzeichen --force Jackpot  speak again every part with that word in it
+//     node tools/pptx/deck_audio.mjs ai-wasserzeichen --force 3fa9c1e2b4d0   ... or that one clip (its file name)
+//
+// A changed pronunciation in SAY below changes what is sent for the parts that have the word, and those - only those -
+// are spoken again on the next run (their file name stays: it hangs on the words in the deck, not on the spelling).
+// --force (repeatable) is for the rest: a clip that came out badly although its words and spelling did not change.
+// Clips no part uses any more stay where they are and are only counted - deleting is Doc's call.
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const ROOT = new URL('../../', import.meta.url).pathname;
 const TTS = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/tts';
@@ -110,16 +121,25 @@ function theCut(a, b, name) {
 // "[en] That's crazy!": the clip is spoken by Solita's English voice, as on the English site (js/solita-core.js), without the
 // German spellings above (Doc, 02.11.2026: "let's speak her English: that's crazy")
 const EN = { voice: 'en-US-Studio-O', code: 'en-US' };
-const deck = process.argv[2];
-if (!deck) { console.error('usage: node tools/pptx/deck_audio.mjs <deck-name>'); process.exit(1); }
+const args = process.argv.slice(2);
+const deck = args.find(a => !a.startsWith('--') && args[args.indexOf(a) - 1] !== '--force');
+const DRY = args.includes('--dry');
+const FORCE = args.flatMap((a, i) => args[i - 1] === '--force' ? [a] : []);
+if (!deck) { console.error('usage: node tools/pptx/deck_audio.mjs <deck-name> [--dry] [--force <word or clip>]...'); process.exit(1); }
 const html = readFileSync(ROOT + 'HTML/decks/' + deck + '.html', 'utf8');
 const m = html.match(/<script id="narration" type="application\/json">([\s\S]*?)<\/script>/);
-if (!m || !m[1].trim()) { console.error(deck + ': no narration in the deck (d.say in the build script?)'); process.exit(1); }
-const N = JSON.parse(m[1].replace(/<\\\//g, '</'));
-const dir = ROOT + 'HTML/decks/audio/' + N.deck + '/';
+const N = m && m[1].trim() ? JSON.parse(m[1].replace(/<\\\//g, '</')) : {};
+if (N.slides) { console.error(deck + ': narration in the old format (by slide number) - run tools/pptx/narration_migrate.py first'); process.exit(1); }
+// every part of every slide, in deck order; the same words twice are one clip
+const say = [...html.matchAll(/<script type="application\/json" class="say">([\s\S]*?)<\/script>/g)]
+  .flatMap(x => JSON.parse(x[1].replace(/<\\\//g, '</')).say || []);
+if (!say.length) { console.error(deck + ': no words of Solita in the slides (d.say in the build script?)'); process.exit(1); }
+const voice = N.voice || VOICE;
+/** The clip's file name for these words - the same rule as clipFile in HTML/decks/deck.js. */
+const clipName = text => createHash('sha256').update(voice + '\n' + text, 'utf8').digest('hex').slice(0, 12) + '.mp3';
+const dir = ROOT + 'HTML/decks/audio/' + (N.deck || deck) + '/';
 mkdirSync(dir, { recursive: true });
 const done = existsSync(dir + 'texts.json') ? JSON.parse(readFileSync(dir + 'texts.json', 'utf8')) : {};
-const pad = n => String(n).padStart(2, '0');
 // Google's per-minute limit counts the whole project: a burst from here once locked Solita's voice for everyone,
 // DocPad and live decks included (16.09.2026, HTTP 429). Serial with 5 s between requests stays clear of it.
 const GAP_MS = 5000;
@@ -144,31 +164,37 @@ async function speak(name, text, ssml, en) {
   return Buffer.from(j.audioContent, 'base64');
 }
 
-let n = 0, sent = 0;
-for (const [s, parts] of Object.entries(N.slides)) {
-  for (let k = 0; k < parts.length; k++) {
-    const name = 's' + pad(+s) + '-' + pad(k) + '.mp3';
-    if (!parts[k].trim()) continue;                   // a line copied in the deck editor: Solita stays quiet there
-    const en = /^\[en\]\s*/.test(parts[k]);
-    const text = en ? parts[k].replace(/^\[en\]\s*/, '') : fix(parts[k]), ssml = pauses(text), key = (en ? '[en] ' : '') + (ssml || text);
-    n++;
-    if (done[name] === key && existsSync(dir + name)) continue;
-    if (sent) await sleep(GAP_MS);
-    const the = !en && /\[the\]/.test(text);
-    if (the && text.match(/\[the\]/g).length > 1) throw new Error(name + ': one [the] per part');
-    let audio;
-    if (the) {                                         // spoken twice, cut together (see theCut above)
-      // the word small after "the", as in Doc's sample 16 ("the perceptron")
-      const a = text.replace('[the]', ''), b = text.replace(/\[the\](\p{L})/u, (x, c) => 'the ' + c.toLowerCase());
-      const first = await speak(name, a, pauses(a), false);
-      await sleep(GAP_MS);
-      audio = theCut(first, await speak(name, b, pauses(b), false), name);
-    } else audio = await speak(name, text, ssml, en);
-    writeFileSync(dir + name, audio);
-    done[name] = key;
-    writeFileSync(dir + 'texts.json', JSON.stringify(done, null, 1));
-    sent++;
-    console.log(name, text.length, 'chars');
-  }
+let n = 0, sent = 0, chars = 0;
+const used = new Set();
+for (const part of say) {
+  if (!part.trim()) continue;                         // a line copied in the deck editor: Solita stays quiet there
+  const name = clipName(part);
+  if (used.has(name)) continue;                       // the same words once more: the same clip
+  used.add(name);
+  const en = /^\[en\]\s*/.test(part);
+  const text = en ? part.replace(/^\[en\]\s*/, '') : fix(part), ssml = pauses(text), key = (en ? '[en] ' : '') + (ssml || text);
+  n++;
+  const forced = FORCE.some(f => name.startsWith(f.replace(/\.mp3$/, '')) || part.toLowerCase().includes(f.toLowerCase()));
+  if (!forced && done[name] === key && existsSync(dir + name)) continue;
+  chars += text.length;
+  if (DRY) { console.log('would make', name, text.length, 'chars' + (forced ? ' (--force)' : ''), '-', part.slice(0, 70)); continue; }
+  if (sent) await sleep(GAP_MS);
+  const the = !en && /\[the\]/.test(text);
+  if (the && text.match(/\[the\]/g).length > 1) throw new Error(name + ': one [the] per part');
+  let audio;
+  if (the) {                                         // spoken twice, cut together (see theCut above)
+    // the word small after "the", as in Doc's sample 16 ("the perceptron")
+    const a = text.replace('[the]', ''), b = text.replace(/\[the\](\p{L})/u, (x, c) => 'the ' + c.toLowerCase());
+    const first = await speak(name, a, pauses(a), false);
+    await sleep(GAP_MS);
+    audio = theCut(first, await speak(name, b, pauses(b), false), name);
+  } else audio = await speak(name, text, ssml, en);
+  writeFileSync(dir + name, audio);
+  done[name] = key;
+  writeFileSync(dir + 'texts.json', JSON.stringify(done, null, 1));
+  sent++;
+  console.log(name, text.length, 'chars');
 }
-console.log(N.deck + ':', n, 'clips ready,', sent, 'new, in', dir);
+const unused = readdirSync(dir).filter(f => /^[0-9a-f]{12}\.mp3$/.test(f) && !used.has(f));
+console.log((N.deck || deck) + ':', n, 'clips,', DRY ? chars + ' chars would be sent' : sent + ' new', 'in', dir
+  + (unused.length ? ' - ' + unused.length + ' clips no slide uses any more (kept)' : ''));

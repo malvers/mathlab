@@ -6,8 +6,9 @@ only while the file is still exactly what that step wrote: nothing done elsewher
 edit, the deck editor in a second tab) is ever thrown away - then the undo just stops with a message. Going forward
 again (redo) works until the next new change.
 
-A step that moved Solita's clips (a bullet line with its own click group, deck_edit._narration) is `stuck`: the clips on
-disk would not move back with the text, so undo stops there instead of mixing up who says what.
+A step that moved Solita's clips on disk was `stuck`: they would not move back with the text, so undo stopped there.
+Since 13.11.2026 none does - her words sit inside the slides and her clips are named after the words - so every edit
+can be undone; the flag stays for whatever might move files again.
 
 The steps lie in <git dir>/deck-undo/<deck>/ - never in the working tree, never committed - at most KEEP per deck,
 the texts once per content. On disk, because serve.py reloads the modules per request; they even survive a restart.

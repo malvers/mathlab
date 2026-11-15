@@ -35,6 +35,9 @@
       } catch (e) { /* the stub says so below */ }
     }
     const src = files[file][nr - 1], own = [...stub.classList];
+    // Solita's words for this place stay the deck's (see SOLITA below), the shared file's own words give way to them
+    const say = stub.querySelector(':scope > script.say');
+    if (say) say.remove();
     if (!src) {
       stub.className = 'slide content';
       stub.innerHTML = '<h3>Folie fehlt</h3><div class="rules"></div><div class="body"><p class="line l0">' +
@@ -44,11 +47,82 @@
       own.forEach(function (c) { stub.classList.add(c); });
       stub.innerHTML = src.innerHTML;
     }
+    if (say) {
+      stub.querySelectorAll(':scope > script.say').forEach(function (s) { s.remove(); });
+      stub.appendChild(say);
+    }
   });
 })();
 
 const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.slide')];
+
+/* Solita's words travel with their slide (Doc, 13.11.2026: "Weil bei jeder Änderung müssen wir da nachfeilen. Können wir
+   uns da nicht ein besseres System ausdenken?"). Each slide that she speaks on carries them itself, as its last child:
+     <script type="application/json" class="say">{"say": [part 0, part 1, ...], "hold": true, "demo": {"0": [[ms, what], ...], "8": [...]}}</script>
+   part 0 when the slide appears, part k while click group k comes in; hold: after it she waits for a click; demo: her
+   actions in clip k (see narr). The deck-wide <script id="narration"> keeps only the deck's settings: deck (the folder
+   audio/<deck>/), minutes, tempo, countdown, voice. A clip is named after its words - the first 12 hex digits of the
+   SHA-256 of voice + "\n" + text (tools/pptx/deck_audio.mjs makes the missing ones) - so moving, copying, deleting or
+   merging slides and lines never renames a clip, the same words are the same file anywhere, and changed words stay
+   silent until their clip is made. Gathered here into the shape the rest of this file reads: {deck, minutes, tempo,
+   countdown, voice, slides: {index: [parts]}, hold: [index], demo: {"index" | "index.part": [...]}}, or null. */
+const SOLITA = (function () {
+  let head = null;
+  try { head = JSON.parse(document.getElementById('narration').textContent || 'null'); } catch (e) { }
+  if (head && head.slides) console.warn('narration: the old format (slides by number) - tools/pptx/narration_migrate.py moves it into the slides');
+  const out = { slides: {}, hold: [], demo: {} };
+  let any = false;
+  slides.forEach(function (s, i) {
+    const tag = s.querySelector(':scope > script.say');
+    if (!tag) return;
+    let d = null;
+    try { d = JSON.parse(tag.textContent); } catch (e) { console.warn('narration: slide ' + (i + 1) + ' has broken words', e); }
+    if (!d) return;
+    any = true;
+    if (Array.isArray(d.say) && d.say.length) out.slides[i] = d.say;
+    if (d.hold) out.hold.push(i);
+    Object.keys(d.demo || {}).forEach(function (k) { out.demo[+k ? i + '.' + k : String(i)] = d.demo[k]; });
+  });
+  if (!any) return null;
+  const file = location.pathname.split('/').pop().replace(/\.html$/, '');
+  return Object.assign(out, {
+    deck: (head && head.deck) || file, voice: (head && head.voice) || 'de-DE-Studio-C',
+    minutes: head && head.minutes, tempo: head && head.tempo, countdown: head && head.countdown
+  });
+})();
+/** SHA-256 of a text's UTF-8 bytes, in hex (FIPS 180-4) - synchronous and on any page, also where crypto.subtle is
+ *  missing (a phone on plain http). The same as node's crypto and Python's hashlib (deck_audio.mjs, narration_migrate.py). */
+function sha256(text) {
+  const prime = n => { for (let d = 2; d * d <= n; d++) if (n % d === 0) return false; return true; };
+  const P = [];
+  for (let n = 2; P.length < 64; n++) if (prime(n)) P.push(n);
+  const frac = x => ((x - Math.floor(x)) * 4294967296) | 0;
+  const K = P.map(p => frac(Math.cbrt(p)));
+  let H = P.slice(0, 8).map(p => frac(Math.sqrt(p)));
+  const b = new TextEncoder().encode(text), n = (((b.length + 8) >> 6) + 1) << 6, m = new Uint8Array(n);
+  m.set(b); m[b.length] = 0x80;
+  const v = new DataView(m.buffer);
+  v.setUint32(n - 8, Math.floor(b.length / 536870912)); v.setUint32(n - 4, (b.length * 8) >>> 0);
+  const w = new Int32Array(64), r = (x, k) => (x >>> k) | (x << (32 - k));
+  for (let o = 0; o < n; o += 64) {
+    for (let i = 0; i < 16; i++) w[i] = v.getInt32(o + 4 * i);
+    for (let i = 16; i < 64; i++) {
+      const x = w[i - 15], y = w[i - 2];
+      w[i] = (r(x, 7) ^ r(x, 18) ^ (x >>> 3)) + w[i - 7] + (r(y, 17) ^ r(y, 19) ^ (y >>> 10)) + w[i - 16];
+    }
+    let [a, bb, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) {
+      const t1 = (h + (r(e, 6) ^ r(e, 11) ^ r(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+      const t2 = ((r(a, 2) ^ r(a, 13) ^ r(a, 22)) + ((a & bb) ^ (a & c) ^ (bb & c))) | 0;
+      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = bb; bb = a; a = (t1 + t2) | 0;
+    }
+    H = [a, bb, c, d, e, f, g, h].map((x, i) => (x + H[i]) | 0);
+  }
+  return H.map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
+}
+/** The file of Solita's clip for these words: audio/<deck>/<12 hex>.mp3 (see SOLITA). */
+const clipFile = text => 'audio/' + SOLITA.deck + '/' + sha256(SOLITA.voice + '\n' + text).slice(0, 12) + '.mp3';
 // The two strokes under a title sit higher now; a title of two lines would run into them, so its slide keeps the old place
 // (.slide.h3-zwei in deck.css). A hidden slide has no layout: each title is measured in a hidden copy, once Orbitron is there.
 // The title slide's h1 the same way: more than two lines ran into the subtitle (.slide.title.h1-lang, Doc 03.11.2026 on the
@@ -1716,15 +1790,14 @@ function gluePairs(root) {
 // Solita reads the deck (Doc, 15.09.2026: "NIEMALS Browserstimme! So wie beim DocPad!") - the
 // clips come from tools/pptx/deck_audio.mjs with her DocPad voice, nothing is synthesised here.
 // Part 0 of a slide is spoken when it appears, part k while click group k comes in, then on.
+// Her words sit in the slides themselves, her clips are named after them (SOLITA, clipFile at the top).
 const narr = (function () {
   const api = { playing: false, stop: function () {} };
-  let data = null;
-  try { data = JSON.parse(document.getElementById('narration').textContent || 'null'); } catch (e) { }
-  if (!data || !data.slides) return api;
+  const data = SOLITA;
+  if (!data) return api;
   const btn = document.getElementById('play');
   const PLAY = '<path d="M6.5 5v14l11-7z" fill="currentColor"/>';
   const PAUSE = '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/>';
-  const pad = n => String(n).padStart(2, '0');
   const parts = s => (data.slides[s] || []).length;
   // her pace (Doc, 11.11.2026: "dass Solita da insgesamt sehr schnell spricht"): her clips play a little slower, the pitch
   // kept, in every deck at once; "demo" counts the place in her clip, so her clicks move along. ?tempo=0.9 tries another
@@ -1820,7 +1893,7 @@ const narr = (function () {
     // a line copied in the deck editor has an empty part (Doc, 17.09.2026: "erst mal nix"): it comes in, a pause, on
     if (!String(data.slides[si][part] || '').trim()) { wait = setTimeout(function () { part++; run(); }, 1200); return; }
     aSlide = si; left = null;
-    audio = new Audio('audio/' + data.deck + '/s' + pad(si) + '-' + pad(part) + '.mp3');
+    audio = new Audio(clipFile(data.slides[si][part]));
     audio.preservesPitch = true; audio.defaultPlaybackRate = audio.playbackRate = TEMPO;
     demo(si, audio, part);
     const began = Date.now(), drawn = drawing(si);
@@ -2225,13 +2298,13 @@ gestartet = true;
   // number, which every slide repeats (13 % of the old context was "Nicht verzagen, ..." 24 times)
   function slideText(s) {
     const c = s.cloneNode(true);
-    c.querySelectorAll('.foot, .pageno').forEach(function (e) { e.remove(); });
+    c.querySelectorAll('.foot, .pageno, script').forEach(function (e) { e.remove(); });   // script: Solita's words (SOLITA)
     c.querySelectorAll('[data-tex]').forEach(function (e) { e.textContent = '$' + e.dataset.tex + '$'; });
     return (c.textContent || '').replace(/\s+/g, ' ').trim();
   }
   let SUMMARY = {}, NARR = null;
   try { SUMMARY = JSON.parse(document.getElementById('summary').textContent || '{}') || {}; } catch (e) { }
-  try { NARR = JSON.parse(document.getElementById('narration').textContent || 'null'); } catch (e) { }
+  NARR = SOLITA;                                   // her words, gathered from the slides (top of this file)
   function overviewLine(i) {                        // a deck built without summaries still gets a line
     if (SUMMARY[String(i)]) return SUMMARY[String(i)];
     const h = slides[i].querySelector('h1, h2, h3');

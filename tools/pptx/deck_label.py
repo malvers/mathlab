@@ -192,7 +192,7 @@ def box(q):
         for g in own:
             page, moved = e._narration(page, deck, slide, g + 1, -1)
             spoken = spoken or moved
-        e._write(deck, page, gen, what="Textbox gelöscht", stuck=spoken)
+        e._write(deck, page, gen, what="Textbox gelöscht")
     return 200, {"narration": spoken, "mtime": e._mtime(deck), "pending": e.pending(deck)}
 
 

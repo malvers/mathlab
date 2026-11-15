@@ -572,11 +572,9 @@ class HtmlDeck:
         self.voice = voice
 
     def render(self):
-        # the spoken parts travel inside the page - deck_audio.mjs reads them from here too
-        narr = (json.dumps({"deck": self.name,
-                            "slides": {str(k): v for k, v in sorted(self.narration.items())},
-                            "hold": sorted(self.holds)},
-                           ensure_ascii=False).replace("</", "<\\/") if self.narration else "")
+        # the spoken parts travel inside their slides (13.11.2026, SOLITA in deck.js) - deck_audio.mjs reads them from
+        # there too and names each clip after its words; the deck-wide script only says where the clips are
+        narr = json.dumps({"deck": self.name}) if self.narration or self.holds else ""
         summ = json.dumps({str(k): v for k, v in sorted(self.summaries.items())},
                           ensure_ascii=False).replace("</", "<\\/")
         # the last slide "Üben & Nachlesen", as a stub deck.js fills from HTML/decks/vorspann/verweise.html (Doc,
@@ -586,6 +584,14 @@ class HtmlDeck:
         # (named by slide index) stay where they are. A deck script can switch it off: deck.verweise = False.
         prefix = self.name.split("-")[0]
         slides = list(self.slides)
+        for k in set(self.narration) | set(self.holds):
+            words = {"say": self.narration.get(k, [])}
+            if k in self.holds:
+                words["hold"] = True
+            tag = ('<script type="application/json" class="say">%s</script>'
+                   % json.dumps(words, ensure_ascii=False).replace("</", "<\\/"))
+            end = slides[k].rindex("</section>")
+            slides[k] = slides[k][:end] + tag + slides[k][end:]
         if getattr(self, "verweise", True) and os.path.isdir(os.path.join(OUT_DIR, "..", "buch", prefix)) \
                 and os.path.isfile(os.path.join(OUT_DIR, "..", "svp", "mathe", prefix + ".html")):
             slides.append('<section class="slide" data-aus="vorspann/verweise.html#1"></section>')
