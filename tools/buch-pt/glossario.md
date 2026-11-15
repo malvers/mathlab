@@ -292,3 +292,38 @@ pt-5 um (`bgy13lk.js`: E → I, ME → u.q.; `vektoren.js`: der Knopf „paralle
 ## mathefos11-pt (FOS 11, block pt-6)
 
 Terms the book adds (Fachoberschule, Zahlbereiche, Finanzmathematik, Schaltalgebra …) go here.
+Block pt-6 (Teixeira, 15.11.2026). Die Fachoberschule bleibt deutsch und wird auf der Startseite erklärt (zwei Jahre, Klasse 11
+mit Praktikum, Fachhochschulreife ≈ Zugang zu den institutos politécnicos). Ausblicke = Perspetivas (Kapitel `k: 'P'`).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Zahlenbereich · natürlich / ganz / rational / reell | conjunto numérico · números naturais / inteiros / racionais / reais | $\mathbb{N}$ mit 0 wie DIN 5473, einmal erklärt ($\mathbb{N}_0$ in Portugal) |
+| abbrechend / periodisch / irrational | dízima finita / infinita periódica / irracional | |
+| Betrag | valor absoluto (módulo) | |
+| Formel umstellen nach $x$ | resolver a fórmula em ordem a $x$ | |
+| Mehrwertsteuer · netto / brutto | IVA · sem IVA / com IVA | 19 % bleibt (deutscher Satz) |
+| Grundwert · Prozentwert · Prozentpunkt | valor de referência · valor da percentagem · ponto percentual | |
+| Wertebereich $W$ | contradomínio $D'$ | |
+| Anstieg $m$ · Achsenabschnitt $n$ | declive $m$ · ordenada na origem $b$ | $y = mx + b$, auch im Widget `lage` ($b_1$, $b_2$) |
+| Steigungswinkel · Punkt-Steigungs-Form | inclinação · equação da reta dados um ponto e o declive | |
+| Grundmenge $G$ · Lösungsmenge $L$ | conjunto universo $U$ · $\text{C.S.}$ | Intervalle zusätzlich: $[120, +\infty[$ |
+| Bruchgleichung · Scheinlösung · Hauptnenner | equação fracionária · solução falsa · denominador comum | |
+| Gleichsetzungs- / Einsetzungs- / Additionsverfahren | método de igualação / de substituição / de adição ordenada | Lösungspaare $(x, y)$; possível e determinado / impossível / possível e indeterminado |
+| parallel / identisch / schneidend / orthogonal | estritamente paralelas / coincidentes / concorrentes / perpendiculares | |
+| Normalparabel · Scheitelpunktform · allgemeine Form | parábola de referência · forma canónica $a(x - h)^2 + k$, $V(h, k)$ · forma geral | p-q-Formel → fórmula resolvente mit $\Delta = b^2 - 4ac$ (auch in lb1-6, exkurse) |
+| quadratische Ergänzung · Nullproduktsatz · Satz von Vieta | completar o quadrado · lei do anulamento do produto · relações de Viète | $x_1 + x_2 = -\tfrac{b}{a}$, $x_1 x_2 = \tfrac{c}{a}$ |
+| Linearfaktorform | forma fatorizada | |
+| ganzrational · Grad · Leitkoeffizient · Absolutglied | polinomial · grau · coeficiente do termo de maior grau · termo independente | |
+| Vielfachheit · Vorzeichenwechsel · Verhalten im Unendlichen | multiplicidade · mudança de sinal · comportamento no infinito | einfach, doppelt … = simples, duplo, triplo, quádruplo, quíntuplo … |
+| Wappen / Zahl | face nacional $N$ / face europeia $E$ | wie pt-1; Ereignis dann $A$ statt $E$ |
+| Ereignismenge · unvereinbar · Additionssatz | conjunto dos acontecimentos · incompatíveis · probabilidade da reunião | Laplace: $\tfrac{\#A}{\#\Omega}$ |
+| Pfadmultiplikation / Pfadaddition | regra do produto / regra da soma | |
+| Zählprinzip · Variation · Kombination | princípio fundamental da contagem · arranjos ${}^nA_k$ · combinações ${}^nC_k$ | |
+| Urnenmodell · mit / ohne Zurücklegen · Reihenfolge | modelo da urna · com / sem reposição · ordem | |
+| Lotto „6 aus 49“ | Lotto alemão «6 de 49» | Superzahl = número suplementar |
+| Zinseszins · Aufzinsungsfaktor · Barwert · Laufzeit | juro composto · fator de capitalização · valor atual · prazo | Buchstaben $K$, $p$ bleiben |
+| Sparplan · Ratentilgung · Annuitätentilgung · Tilgungsplan | plano de poupança · amortização constante · amortização por anuidades · plano de amortização | Restschuld = dívida em falta; effektiver Jahreszins = taxa anual efetiva (TAEG) |
+| Skonto · Dispozins | desconto de pronto pagamento · juro do descoberto | |
+| Gaußsche Zahlenebene · Realteil · Imaginärteil · konjugiert | plano de Argand · parte real · parte imaginária · conjugado | |
+| Schaltalgebra · Wahrheitstafel · Reihe / parallel · Öffner | álgebra de circuitos · tabela de verdade · série / paralelo · contacto normalmente fechado | Konjunktion / Disjunktion / Negation = conjunção / disjunção / negação; Halbaddierer = semissomador |
+| Wechselschaltung (Treppenhaus) | circuito de escada | Lampe an / aus = acesa / apagada |
