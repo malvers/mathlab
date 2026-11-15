@@ -78,6 +78,30 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
         // book pt-6 mathefos11-pt:
+        // funktion
+        'Kurve': 'Curva',
+        'Zieh den türkisen Punkt unten: Die senkrechte Gerade wandert mit. Wie oft trifft sie die Kurve?': 'Arrasta o ponto turquesa em baixo: a reta vertical desloca-se com ele. Quantas vezes interseta a curva?',
+        'Kurve mit verschiebbarer senkrechter Gerade': 'Curva com uma reta vertical que se pode deslocar',
+        'Ist die Kurve der Graph einer Funktion?': 'A curva é o gráfico de uma função?',
+        'keine Funktion': 'não é função',
+        'Richtig.': 'Certo.',
+        'Nicht ganz.': 'Não exatamente.',
+        'Entscheide mit den Knöpfen. Danach siehst du Definitions- und Wertebereich.': 'Decide com os botões. Depois vês o domínio e o contradomínio.',
+        // lage: the intercept is b in Portugal (y = mx + b)
+        '$g$: Anstieg $m_1$': '$g$: declive $m_1$',
+        '$g$: Achsenabschnitt $n_1$': '$g$: ordenada na origem $b_1$',
+        '$h$: Anstieg $m_2$': '$h$: declive $m_2$',
+        '$h$: Achsenabschnitt $n_2$': '$h$: ordenada na origem $b_2$',
+        'Zwei Geraden und ihre Lage zueinander': 'Duas retas e a sua posição relativa',
+        // parabelschar
+        'Parameter': 'Parâmetro',
+        'Schar von Parabeln mit einem hervorgehobenen Mitglied': 'Família de parábolas com um membro destacado',
+        // ganzrational
+        'Faktor $a$': 'Fator $a$',
+        'Vielfachheit größer': 'multiplicidade maior', 'Vielfachheit kleiner': 'multiplicidade menor',
+        'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Arrasta os zeros ao longo do eixo $Ox$. A multiplicidade 0 retira o fator linear.',
+        'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Função polinomial com zeros que se podem deslocar',
+        'fünffach': 'quíntuplo', 'sechsfach': 'sêxtuplo', 'siebenfach': 'sétuplo', 'achtfach': 'óctuplo', 'neunfach': 'nónuplo',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -138,6 +162,35 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
         // book pt-6 mathefos11-pt:
+        // funktion
+        ['$ · Bei $x = ', '$ · Para $x = '],
+        ['$ trifft die Senkrechte die Kurve <b>', '$, a reta vertical interseta a curva <b>'],
+        ['gar nicht', 'nenhuma vez'],
+        ['genau einmal', 'exatamente uma vez'],
+        ['Jede senkrechte Gerade trifft die Kurve höchstens einmal: eine Funktion. ', 'Cada reta vertical interseta a curva no máximo uma vez: é uma função. '],
+        ["$, $W = ", "$, $D' = "],
+        // lage
+        ['Gleicher Anstieg und gleicher Achsenabschnitt: <b>identisch</b>. Jeder Punkt ist gemeinsam.', 'Mesmo declive e mesma ordenada na origem: <b>coincidentes</b>. Todos os pontos são comuns.'],
+        ['Gleicher Anstieg $m_1 = m_2$, verschiedene Achsenabschnitte: <b>parallel</b>. Es gibt keinen Schnittpunkt.', 'Mesmo declive $m_1 = m_2$, ordenadas na origem diferentes: <b>estritamente paralelas</b>. Não há ponto de interseção.'],
+        ['$: Die Geraden sind <b>orthogonal</b> (senkrecht zueinander).', '$: as retas são <b>perpendiculares</b>.'],
+        ['Verschiedene Anstiege: Die Geraden <b>schneiden</b> sich.', 'Declives diferentes: as retas são <b>concorrentes</b>.'],
+        ['$ ergibt $x = \\dfrac{n_2 - n_1}{m_1 - m_2} = ', '$ dá $x = \\dfrac{b_2 - b_1}{m_1 - m_2} = '],
+        ['Gleichsetzen: $', 'Igualando: $'],
+        ['$, also ', '$, logo '],
+        [' · Schnittwinkel $', ' · ângulo das retas $'],
+        ['parallel zur $x$-Achse', 'paralela ao eixo $Ox$'],
+        // parabelschar
+        ['Nullstellen: $', 'zeros: $'],
+        [' · Scheitel $(', ' · vértice $V('],
+        ['$ · keine Nullstelle', '$ · nenhum zero'],
+        // ganzrational
+        ['Vorzeichenwechsel, der Graph <b>schneidet</b> die $x$-Achse', 'mudança de sinal, o gráfico <b>atravessa</b> o eixo $Ox$'],
+        ['Vorzeichenwechsel, der Graph schneidet die $x$-Achse <b>flach</b> (Sattelpunkt)', 'mudança de sinal, o gráfico atravessa o eixo $Ox$ de forma <b>achatada</b> (ponto de inflexão)'],
+        ['kein Vorzeichenwechsel, der Graph <b>berührt</b> die $x$-Achse', 'sem mudança de sinal, o gráfico <b>toca</b> o eixo $Ox$'],
+        ['$ · Grad $', '$ · grau $'],
+        ['Für $x \\to +\\infty$ geht $f(x) \\to ', 'Para $x \\to +\\infty$, $f(x) \\to '],
+        ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$; para $x \\to -\\infty$, $f(x) \\to '],
+        ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Só decide a parcela com a potência mais alta: $'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -175,5 +228,7 @@ window.BuchPT && BuchPT.add('funktionen', {
         // the picture is the same. funktionen.js loads before vektoren.js on those pages.
         [/\\begin\{pmatrix\}((?:(?!\\end\{pmatrix\})[^&])*&(?:(?!\\end\{pmatrix\})[\s\S])*?)\\end\{pmatrix\}/g, '\\left(\\begin{matrix}$1\\end{matrix}\\right)'],
         // book pt-6 mathefos11-pt:
+        // funktion: "die Kurve <b>2-mal</b>"
+        [/<b>(\d+)-mal<\/b>/g, '<b>$1 vezes</b>'],
     ]
 });

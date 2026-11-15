@@ -19,6 +19,12 @@ window.BuchPT && BuchPT.add('gleichungen', {
         'Zylinder': 'Cilindro', 'Kegel': 'Cone', 'Kugel': 'Esfera', 'Körper': 'Sólido', 'Radius $r$ in cm': 'Raio $r$ em cm',
         'Höhe $h$ in cm': 'Altura $h$ em cm', 'Skizze des Körpers': 'Esboço do sólido',
         // book pt-6 mathefos11-pt:
+        // ungleichung
+        'Relationszeichen': 'Sinal',
+        '$a$ (Zahl vor dem $x$)': '$a$ (coeficiente de $x$)',
+        '$c$ (rechte Seite)': '$c$ (segundo membro)',
+        'Zahlenstrahl mit der Lösungsmenge': 'Reta numérica com o conjunto-solução',
+        'wahr': 'verdadeiro', 'falsch': 'falso',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gleichungen/*)
@@ -38,6 +44,15 @@ window.BuchPT && BuchPT.add('gleichungen', {
         ['Der häufigste Fehler: ', 'O erro mais frequente: '], ['. Im Bild fehlen dann die beiden blauen Rechtecke, hier ', '. Na figura faltam então os dois retângulos azuis, aqui '],
         ['Mantellinie $s = ', 'Geratriz $g = '],
         // book pt-6 mathefos11-pt:
+        // ungleichung
+        ['heißt $', 'significa $'],
+        ['Das stimmt für jede Zahl: ', 'É verdade para qualquer número: '],
+        ['Das stimmt für keine Zahl: ', 'Não é verdade para nenhum número: '],
+        ['durch eine negative Zahl: Das Zeichen dreht sich um!', 'por um número negativo: o sinal inverte-se!'],
+        ['Zieh die <b>Probe</b> über den Zahlenstrahl. $x = ', 'Arrasta o <b>teste</b> ao longo da reta numérica. $x = '],
+        ['$ ist ', '$ é '],
+        [': Die Zahl gehört zur Lösungsmenge.', ': o número pertence ao conjunto-solução.'],
+        [': Die Zahl gehört nicht dazu.', ': o número não pertence.'],
     ],
     rule: [
         // pt0: the solution set is C.S. (conjunto-solução) in Portuguese schools, also in the widget sentences:

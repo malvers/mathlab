@@ -88,6 +88,29 @@ window.BuchPT && BuchPT.add('stochastik', {
         'Fehler 2. Art zeigen: wahres $p$ =': 'Mostrar o erro de tipo II: $p$ verdadeiro =',
         'Binomialverteilung unter der Nullhypothese mit Ablehnungsbereich': 'Distribuição binomial sob a hipótese nula, com a região de rejeição',
         // book pt-6 mathefos11-pt:
+        // venn
+        'Ein Glücksrad hat 12 gleich große Felder: $\\Omega = \\{1; 2; \\ldots; 12\\}$. Wähle eine Vorlage oder stell $A$ und $B$ selbst zusammen: Ereignis wählen, dann Zahlen antippen.':
+            'Uma roleta tem 12 setores iguais: $\\Omega = \\{1, 2, \\ldots, 12\\}$. Escolhe um modelo ou constrói tu mesmo $A$ e $B$: escolhe o acontecimento e depois toca nos números.',
+        'Vorlage': 'Modelo',
+        'Ereignis bearbeiten': 'Editar o acontecimento',
+        'Verknüpfung:': 'Operação:',
+        'Verknüpfung': 'Operação',
+        'Mengendiagramm der Ereignisse A und B': 'Diagrama de Venn dos acontecimentos A e B',
+        'Die Zahlen, die in beiden Ereignissen liegen.': 'Os números que estão nos dois acontecimentos.',
+        // urne
+        'Kugeln $n$': 'Bolas $n$',
+        'Ziehungen $k$': 'Extrações $k$',
+        'n kleiner': 'n menor', 'n größer': 'n maior', 'k kleiner': 'k menor', 'k größer': 'k maior',
+        'mit Reihenfolge': 'com ordem',
+        'ohne Reihenfolge': 'sem ordem',
+        'Reihenfolge': 'Ordem',
+        'Zurücklegen': 'Reposição',
+        'Einmal ziehen': 'Tirar uma vez',
+        'URNE': 'URNA',
+        // pascal
+        '$n$ (Zeile)': '$n$ (linha)',
+        '$k$ (Stelle)': '$k$ (posição)',
+        'Pascalsches Dreieck bis zur Zeile 10': 'Triângulo de Pascal até à linha 10',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -155,6 +178,43 @@ window.BuchPT && BuchPT.add('stochastik', {
         
         
         // book pt-6 mathefos11-pt:
+        // venn
+        [' · $A$ und $B$ sind <b>unvereinbar</b> ($A \\cap B = \\emptyset$), es wird nichts doppelt gezählt.', ' · $A$ e $B$ são <b>incompatíveis</b> ($A \\cap B = \\emptyset$): nada é contado duas vezes.'],
+        ['$A \\cap B = \\emptyset$: Die Ereignisse sind <b>unvereinbar</b>, sie können nicht zusammen eintreten.', '$A \\cap B = \\emptyset$: os acontecimentos são <b>incompatíveis</b>, não se podem realizar ao mesmo tempo.'],
+        ['Regel von de Morgan: $', 'Lei de De Morgan: $'],
+        ['$. Wähle die andere Seite und vergleiche: Es ist dieselbe Menge.', '$. Escolhe o outro membro e compara: é o mesmo conjunto.'],
+        // urne (the examples as a whole are rules below; the pieces for tools/buch-en/check.mjs)
+        ['Variation mit Wiederholung', 'Arranjos com repetição'],
+        ['Permutation (alle Kugeln, mit Reihenfolge)', 'Permutações (todas as bolas, com ordem)'],
+        ['Variation ohne Wiederholung', 'Arranjos sem repetição'],
+        ['Kombination ohne Wiederholung', 'Combinações sem repetição'],
+        ['Kombination mit Wiederholung', 'Combinações com repetição'],
+        ['</b> · Beispiel: ', '</b> · exemplo: '],
+        ['Anzahl der Möglichkeiten: ', 'Número de possibilidades: '],
+        ['Gezogen: <b>', 'Saiu: <b>'],
+        ['Ergebnisse als Tupel $(\\ldots)$: Die Reihenfolge zählt.', 'Resultados como sequências $(\\ldots)$: a ordem interessa.'],
+        ['Ergebnisse als Mengen $\\{\\ldots\\}$: Die Reihenfolge zählt nicht.', 'Resultados como conjuntos $\\{\\ldots\\}$: a ordem não interessa.'],
+        [' Genau dafür gibt es die Formel.', ' É precisamente para isso que existe a fórmula.'],
+        ['ein Zahlenschloss mit ', 'um cadeado de combinação com '],
+        [' Rädern zu je ', ' rodas de '],
+        [' Ziffern', ' algarismos'],
+        [' Personen stellen sich in eine Reihe', ' pessoas põem-se em fila'],
+        ['ein Siegerpodest: ', 'um pódio: '],
+        [' Startern auf die Plätze 1 bis ', ' participantes nos lugares 1 a '],
+        ['Lotto: ', 'Lotto: '],
+        [' Zahlen, die Reihenfolge der Ziehung zählt nicht', ' números, a ordem do sorteio não interessa'],
+        [' Kugeln Eis aus ', ' bolas de gelado de '],
+        [' Sorten, eine Sorte darf mehrfach vorkommen', ' sabores, um sabor pode repetir-se'],
+        [' Möglichkeiten sind zu viele zum Auflisten.', ' possibilidades são demasiadas para listar.'],
+        // pascal
+        [': So viele Möglichkeiten gibt es, $', ': é o número de maneiras de escolher $'],
+        ['$ aus $', '$ de $'],
+        ['$ auszuwählen.', '$.'],
+        ['Summenregel (grün umrandet): $', 'Regra da soma (contorno verde): $'],
+        ['$ auswählen heißt $', '$ é deixar de fora $'],
+        ['Pascalsches Dreieck bis zur Zeile ', 'Triângulo de Pascal até à linha '],
+        ['Die Mitte der Zeile: $', 'O meio da linha: $'],
+        ['}$ ist hier sein eigenes Spiegelbild.', '}$ é aqui a sua própria imagem simétrica.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -197,5 +257,14 @@ window.BuchPT && BuchPT.add('stochastik', {
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
         // book pt-6 mathefos11-pt:
+        // urne: the examples with their numbers (singular for 1)
+        [/ein Zahlenschloss mit (\d+) Rädern zu je (\d+) Ziffern/g, (m, k, n) => 'um cadeado de combinação com ' + k + (k === '1' ? ' roda' : ' rodas') + ' de ' + n + ' algarismos'],
+        [/(\d+) Personen stellen sich in eine Reihe/g, '$1 pessoas põem-se em fila'],
+        [/ein Siegerpodest: (\d+) von (\d+) Startern auf die Plätze 1 bis (\d+)/g, (m, k, n, p) => 'um pódio: ' + k + ' de ' + n + ' participantes ' + (p === '1' ? 'no lugar 1' : 'nos lugares 1 a ' + p)],
+        [/Lotto: (\d+) aus (\d+) Zahlen, die Reihenfolge der Ziehung zählt nicht/g, 'Lotto: $1 de $2 números, a ordem do sorteio não interessa'],
+        [/(\d+) Kugeln Eis aus (\d+) Sorten, eine Sorte darf mehrfach vorkommen/g, (m, k, n) => k + (k === '1' ? ' bola' : ' bolas') + ' de gelado de ' + n + ' sabores, um sabor pode repetir-se'],
+        [/(\d{1,3}(?:\.\d{3})*) Möglichkeiten sind zu viele zum Auflisten\./g, '$1 possibilidades são demasiadas para listar.'],
+        // pascal: "$, denn $2$ auswählen heißt $3$ weglassen."
+        [/\$, denn \$(\d+)\$ auswählen heißt \$(\d+)\$ weglassen\./g, (m, k, r) => '$, porque escolher $' + k + '$ é deixar de fora $' + r + '$.'],
     ]
 });
