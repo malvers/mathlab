@@ -230,6 +230,9 @@
         .lt-stats:hover { background: rgba(245, 194, 66, 0.14); }
         html.svp-light .lt-stats:hover { background: rgba(30, 60, 120, 0.08); }
         .lt-stats .st-big { font-size: 1.1rem; letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap; }
+        /* the class average under the label (paintAvg): submitted grades plus the Hochrechnung of the running ones */
+        .lt-stats .st-avg { font-size: 0.8rem; letter-spacing: 0.05em; white-space: nowrap; cursor: help; }
+        .lt-stats .st-avg[hidden], body.lt-nograde .lt-stats .st-avg { display: none !important; }
         /* fewer than three tile columns: the button goes under the bar, full width */
         @media (max-width: 760px) { .lt-mchead { display: block; } .lt-stats { width: 100%; margin-top: 12px; } }
         @media print { .lt-mchead { display: block; } .lt-stats { display: none !important; } }
@@ -563,6 +566,13 @@
         /* submitted = finished: the code's letters and digits all green, so "fertig" reads across the
            room, apart from the score colour of frame and points (Doc, 09.11.2026) */
         .lt-tile.done .tl-code .cd-l, .lt-tile.done .tl-code .cd-n { color: var(--phi); }
+        /* finished = the name on a band across the top of the tile, so who is really done reads at a glance
+           (Doc, 16.11.2026: "grün hinterlegt mit weißer Schrift") - in the score colour like frame and points
+           ("die 1er natürlich grün, aber die 4er dann eben gelb"); white letters on the darker shades, dark ones
+           on the yellows (--res-ink, paintTile). The negative margin eats the tile's padding; 5 + 4 px padding
+           keep the tile exactly as tall as the others. Solid even when WebUntis still says absent. */
+        .lt-tiles .lt-tile.done .tl-name { margin: -9px -11px 0; padding: 5px 11px 4px; border-radius: 8px 8px 0 0;
+            background: var(--res, var(--phi)); color: var(--res-ink, #fff); opacity: 1; }
         .lt-tile.abort { border: 2px solid var(--ypsilon); padding: 9px 11px 9px; opacity: 0.75; }
         /* "abgebrochen" once, as the red pill below; the big line keeps the count reached (Doc, 19.09.2026: "zweimal
            abgebrochen in rot und dann noch mal klein abgebrochen drunter") */
@@ -877,6 +887,7 @@
             </div>
             <button type="button" class="lt-stats" id="ltStats" title="Auswertung des Tests im eigenen Tab (Passwort): Gruppenleistung pro Frage und Einzelleistungen">
                 <span class="st-big">Auswertung</span>
+                <span class="st-avg" id="ltStatsAvg" hidden></span>
             </button>
             </div>
             <div class="lt-scroll">
@@ -1205,6 +1216,7 @@
                         '<span class="tl-bar"><i></i></span></button>';
                 }).join('');
                 tileRes = {};
+                queueAvg();
                 applyView();
                 fitCodes();
                 elDetail.hidden = true;
@@ -1583,6 +1595,18 @@
                 const a = pct <= 50 ? red : orange, b = pct <= 50 ? orange : green;
                 const t = (pct <= 50 ? pct : pct - 50) / 50;
                 return 'rgb(' + a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); }).join(',') + ')';
+            }
+            /* the letters on a band of that colour (the finished tile's name): white while it keeps at least
+               2.6:1 on it (the greens, the reds, the deep oranges), else near-black - white on the yellows
+               of a 3 or 4 could not be read */
+            function inkOn(rgb) {
+                const lin = (rgb.match(/\d+/g) || []).map(function (v) {
+                    v = Number(v) / 255;
+                    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+                });
+                if (lin.length < 3) return '#fff';
+                const L = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+                return 1.05 / (L + 0.05) >= 2.6 ? '#fff' : 'rgb(20, 20, 20)';
             }
             function paintResultRow(code, res, meta) {
                 const td = elTable.querySelector('td.result[data-code="' + code + '"]');
@@ -2721,7 +2745,52 @@
             }
             if (typeof ResizeObserver !== 'undefined') new ResizeObserver(function () { fitCodes(); }).observe(elTiles);
             let tileRes = {};   /* code -> { score, total, grade } | null (no submission) */
+            /* The class average at the top right, under "Auswertung" (Doc, 16.11.2026: "oben rechts ... den
+               aktuellen Durchschnitt (Hochrechnung)"): every grade the tiles show - the submitted ones and, for the
+               ones still running, the "Hochr." of their tile. Aborted, not started, running without a first answer
+               and Teil B still missing do not count. A hint only, written nowhere; the tooltip shows the sum. */
+            let avgQueued = false;
+            function queueAvg() {
+                if (avgQueued) return;
+                avgQueued = true;
+                window.requestAnimationFrame(function () { avgQueued = false; paintAvg(); });
+            }
+            function paintAvg() {
+                const el = document.getElementById('ltStatsAvg');
+                if (!el) return;
+                const meta = liveMeta || (partBMeta && partBMeta.meta) || null;
+                const np = !!(meta && meta.gradeUnit === 'NP');
+                const done = [], proj = [];
+                let noB = 0;
+                entries.forEach(function (e) {
+                    const row = control[e.code] || null;
+                    const st = statusOf(row);
+                    const res = tileRes[e.code];
+                    if (res && st.key !== 'abort') {
+                        if (res.grade !== '' && res.grade != null) done.push(Number(res.grade));
+                        else noB++;
+                        return;
+                    }
+                    if (res || st.key !== 'run') return;
+                    const h = liveHint(liveMeta, row, live[e.code], e.code);
+                    if (h && h.proj !== '' && h.proj != null) proj.push(Number(h.proj));
+                });
+                const all = done.concat(proj).filter(function (x) { return isFinite(x); });
+                if (!all.length || (meta && meta.noGrades)) { el.hidden = true; el.textContent = ''; el.title = ''; return; }
+                const sum = function (a) { return a.reduce(function (s, x) { return s + x; }, 0); };
+                const fmt = function (x) { return x.toFixed(np ? 1 : 2).replace('.', ',') + (np ? ' NP' : ''); };
+                const avg = sum(all) / all.length;
+                el.textContent = 'Ø ' + fmt(avg) + (proj.length ? ' · Hochr.' : '');
+                el.title = 'Klassendurchschnitt – nur ein Hinweis, wird nirgends eingetragen\n' +
+                    (done.length ? done.length + ' abgegeben: Ø ' + fmt(sum(done) / done.length) + '\n' : '') +
+                    (proj.length ? proj.length + ' laufend, ihre Hochrechnung: Ø ' + fmt(sum(proj) / proj.length) + '\n' : '') +
+                    'zusammen ' + all.length + ' Noten: ' + sum(all) + ' / ' + all.length + ' = ' + fmt(avg) + '\n' +
+                    (noB ? noB + ' abgegeben, aber Teil B fehlt noch – zählen nicht mit\n' : '') +
+                    'Abgebrochen, nicht gestartet und ohne erste Antwort zählen nicht mit';
+                el.hidden = false;
+            }
             function paintTile(code) {
+                queueAvg();
                 const t = elTiles.querySelector('.lt-tile[data-code="' + code + '"]');
                 if (!t) return;
                 paintAttendance(t, code);
@@ -2789,8 +2858,11 @@
                     main.appendChild(lv);
                 }
                 bar.style.width = Math.round(frac * 100) + '%';
-                if (res) t.style.setProperty('--res', scoreColor(res.pct));
-                else t.style.removeProperty('--res');
+                if (res) {
+                    const col = scoreColor(res.pct);
+                    t.style.setProperty('--res', col);
+                    t.style.setProperty('--res-ink', inkOn(col));
+                } else { t.style.removeProperty('--res'); t.style.removeProperty('--res-ink'); }
                 t.title = st.tip + (row && row.leaves ? ' \u00b7 ' + row.leaves + '\u00d7 verlassen, zusammen ' +
                     mmss(row.away_secs) + ' min weg' : '');
             }
