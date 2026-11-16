@@ -8,7 +8,9 @@
 //   2. drops it into the inbox ~/.claude/docruf/eingang/ as one JSON file, from where the hook
 //      ~/.claude/hooks/docruf-eingang.sh hands it to the agent Doc works with (or, after a short grace, to any
 //      other agent) - claimed once, so exactly one agent gets it,
-//   3. lets Solita say "Angekommen" on the phone (her recorded MP3, no TTS cost per answer).
+//   3. lets Solita say a short receipt on the phone - a different one each time, never the same twice in a row
+//      (quittungen.mjs; her recorded MP3s, no TTS cost per answer; Doc, 08.11.2026: not "Angekommen"; 15.11.2026:
+//      not always "Ich habe dich gehört").
 //
 // The topic is the channel's only secret and comes from the Keychain (doc-ruf / ntfy-topic), never from the
 // source; this script never prints it.
@@ -16,12 +18,13 @@ import { execFile, execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { pick, file } from './quittungen.mjs';
 
 const HOME = os.homedir();
 const DIR = path.join(HOME, '.claude/docruf');
 const INBOX = path.join(DIR, 'eingang');
 const STATE = path.join(DIR, 'stand.json');
-const MP3 = path.join(DIR, 'angekommen.mp3');
+const MP3 = path.join(DIR, 'gehoert.mp3');           // the old single receipt, only if a new one has no recording
 const LOG = path.join(HOME, 'Library/Logs/docruf-antwort.log');
 const SEND = path.join(path.dirname(new URL(import.meta.url).pathname), 'docruf-send.mjs');
 const NODE = process.execPath;
@@ -65,16 +68,18 @@ function handle(m) {
     confirm();
 }
 
-// Solita's "Angekommen" on the phone; several answers in a row get one confirmation
+// Solita's receipt on the phone, a different one each time (quittungen.mjs); several answers in a row get one
 let pending = null;
 function confirm() {
     clearTimeout(pending);
     pending = setTimeout(() => {
-        const args = [SEND, 'Angekommen.'];
-        if (fs.existsSync(MP3)) args.push(MP3);
+        const q = pick();
+        const mp3 = fs.existsSync(file(q)) ? file(q) : fs.existsSync(MP3) ? MP3 : null;
+        const args = [SEND, mp3 === MP3 ? 'Ich habe dich gehört.' : q.text];
+        if (mp3) args.push(mp3);
         args.push('--wait', '30');
         execFile(NODE, args, { timeout: 60000 }, (err, out, errOut) => {
-            console.log(stamp() + ' Angekommen: ' + (err ? 'keine Quittung (' + (errOut || err.message).trim().slice(0, 120) + ')'
+            console.log(stamp() + ' Quittung „' + args[1] + '“: ' + (err ? 'keine Quittung (' + (errOut || err.message).trim().slice(0, 120) + ')'
                 : out.trim().split('\n').pop()));
         });
     }, 1500);

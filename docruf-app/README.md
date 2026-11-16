@@ -54,7 +54,10 @@ On the Mac the **Mithörer** follows that topic for good (since 08.11.2026, Doc:
 
 1. appends a line to `~/Library/Logs/docruf-antwort.log`,
 2. drops it as a JSON file into the inbox `~/.claude/docruf/eingang/`,
-3. lets Solita say "Angekommen" on the phone (her recorded `~/.claude/docruf/angekommen.mp3`, no TTS cost).
+3. lets Solita say a short receipt on the phone - one of 18 (`quittungen.mjs`: "Ich habe dich gehört.", "Bin dran.",
+   "Wird gemacht, Doc." ...), at random and never the same twice in a row, each recorded once in her voice into
+   `~/.claude/docruf/quittung/` (`node quittungen.mjs --render`), so no answer costs a voice request (Doc 08.11.:
+   not "Angekommen"; 15.11.: "kann man das ein bisschen variieren").
 
 A Claude Code hook in `~/.claude/settings.json` hands each answer to exactly one agent:
 `~/.claude/hooks/docruf-eingang.sh` (with `docruf-eingang.mjs`) runs on UserPromptSubmit, PostToolUse and Stop.
