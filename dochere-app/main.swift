@@ -18,6 +18,12 @@
 // every 5 s on battery. Each answer ("doc", "other", "unknown", "away") goes out as de.docalvers.dochere.who,
 // steadied (struct Steady) so that one bad frame in a dark room does not switch it.
 // Screen locked, display asleep, DocHere off, or no request for 30 s: the camera stops.
+//
+// The background looks are steadied too (16.11.2026, one frame scored 0.104 and DocBar showed "!" for six minutes
+// while Doc typed): each look's face goes through Pose and Steady like the watching, and a stranger needs two
+// judgeable weak faces before "other" (Steady.confirm). While a stranger is suspected or shown, DocHere looks
+// again after a few seconds even while Doc types (Timing.recheck, at most Timing.rechecks quick looks in a row),
+// and while "!" stays it keeps the usual 30 s pace despite keyboard and mouse.
 
 import AVFoundation
 import Cocoa
@@ -36,6 +42,8 @@ enum Timing {
     static let step = 0.25      // pause between two measured frames
     static let giveUp = 10.0    // the camera gets this long, Vision alone loads for about 2 s
     static let prompt = 60.0    // only the first run: time to answer the camera prompt
+    static let recheck = 5.0    // a suspected stranger: the next look this soon, even while Doc types
+    static let rechecks = 3     // quick looks in a row at most, then the usual pace again
 }
 
 enum Threshold {
@@ -286,9 +294,18 @@ struct Steady {
 
     enum Frame { case nobody, unclear, face(Float) }
 
+    /// Judgeable weak faces it takes to call a person "other" when the answer is not "doc": 1 for the watching (a
+    /// frame every second), 2 for the background looks (16.11.2026) - there one bad frame showed DocBar's "!".
+    let confirm: Int
+
+    init(confirm: Int = 1) { self.confirm = confirm }
+
     private(set) var answer = "away"
     private var low = 0         // faces below the threshold since the last Doc frame
     private var nobody = 0      // frames in a row without a person
+
+    /// A weak face was seen but does not make "other" yet (only with confirm > 1).
+    var pending: Bool { answer != "doc" && answer != "other" && low > 0 }
 
     mutating func add(_ frame: Frame, threshold: Float) -> String {
         switch frame {
@@ -303,11 +320,10 @@ struct Steady {
             if score >= threshold {
                 answer = "doc"
                 low = 0
-            } else if answer != "doc" {
-                answer = "other"
-            } else {
+            } else if answer != "other" {
                 low += 1
-                if low >= Self.notDoc { answer = "other"; low = 0 }
+                if low >= (answer == "doc" ? Self.notDoc : confirm) { answer = "other"; low = 0 }
+                else if answer == "away" { answer = "unknown" }
             }
         }
         return answer
@@ -350,6 +366,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var lastWatch = ""                   // the last answer, logged only when it changes
     private var steady = Steady()                // the watching's answer, changed only when frames agree
     private var held = 0                         // frames since the last change that Steady held back
+    private var seenSteady = Steady(confirm: 2)  // the background looks' answer, steadied like the watching
+    private var rechecks = Timing.rechecks       // quick looks left while a stranger is suspected
+    private var recheckAt: Date?                 // a quick look is due then, even while Doc types
     static let whoNote = Notification.Name("de.docalvers.dochere.who")
     static let watchNote = Notification.Name("de.docalvers.dochere.watch")
 
@@ -359,11 +378,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return (type as String) == "Battery Power"
     }
 
-    /// "doc" or "other" for the person in this look, logged with the likeness (numbers only).
+    /// "doc" or "other" for the person in this look, logged with the likeness and head pose (numbers only).
+    /// Only for --ask-who, which answers from one look; the background steadies its looks (judge).
     private func identify(_ seen: Seen?) -> String {
-        guard let image = seen?.picture, identity.ready, let found = identity.who(image) else { return "" }
-        log(String(format: "who: %@ (%@ %.3f)", found.answer, identity.engine.name, found.score))
-        return found.answer
+        guard let image = seen?.picture, identity.ready, let found = identity.look(image) else { return "" }
+        let answer = found.score >= identity.engine.threshold ? "doc" : "other"
+        log(String(format: "who: %@ (%@ %.3f, yaw %.0f, pitch %.0f)", answer, identity.engine.name, found.score,
+                   found.cut.yaw, found.cut.pitch))
+        return answer
     }
 
     private var enabled: Bool {
@@ -622,14 +644,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                                                      userInfo: ["answer": answer], deliverImmediately: true)
     }
 
+    /// When the next look is due although Doc types: soon after a suspected stranger (Timing.recheck), and at the
+    /// usual pace while DocBar shows "!" - so a wrong "!" does not stay for as long as Doc works.
+    private var lookDespiteInput: Date? { recheckAt ?? (who == "other" ? nextLook : nil) }
+
     private func tick() {
         manageWatch()
         if enabled && eye == nil && watcher == nil {
+            let awake = CGDisplayIsAsleep(CGMainDisplayID()) == 0
             if screenLocked {
                 update(false, "screen locked")
+            } else if awake, let due = lookDespiteInput, Date() >= due {
+                look()
             } else if secondsSinceInput < inputCounts {
                 update(true, "input")
-            } else if CGDisplayIsAsleep(CGMainDisplayID()) != 0 {
+            } else if !awake {
                 update(false, "display asleep")     // nobody needs the camera in a dark room
             } else if Date() >= nextLook {
                 look()
@@ -639,15 +668,56 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func look() {
+        let quick = recheckAt != nil
+        recheckAt = nil
         nextLook = Date().addingTimeInterval(lookEvery)
         withCamera { [weak self] allowed in
             guard allowed else { self?.update(false, "camera not allowed"); return }
             self?.use(Eye { seen in
-                self?.eye = nil
-                self?.update(seen?.person ?? false, seen.map { "camera: " + $0.text } ?? "no camera")
-                log("looked: " + (seen?.text ?? "no camera"))
-                self?.who = (seen?.person ?? false) ? (self?.identify(seen) ?? "") : ""
+                guard let self = self else { return }
+                self.eye = nil
+                // keyboard or mouse still mean here, also when the camera missed Doc in a quick look
+                self.update((seen?.person ?? false) || self.secondsSinceInput < self.inputCounts,
+                            seen.map { "camera: " + $0.text } ?? "no camera")
+                log((quick ? "looked again: " : "looked: ") + (seen?.text ?? "no camera"))
+                self.judge(seen)
+                self.publish()
             })
+        }
+    }
+
+    /// Who the background look saw, steadied like the watching (Pose, then Steady with confirm 2). The log gets the
+    /// likeness, the head pose and the steady answer. A look without a person (or without a camera) ends it at once,
+    /// as before: the background's "away" needs no steadying, and Doc coming back must not inherit an old "!".
+    private func judge(_ seen: Seen?) {
+        guard let seen = seen, seen.person else {
+            seenSteady = Steady(confirm: 2)
+            rechecks = Timing.rechecks
+            recheckAt = nil
+            who = ""
+            return
+        }
+        let threshold = identity.engine.threshold
+        var frame = Steady.Frame.unclear
+        var line: String?
+        if let image = seen.picture, identity.ready, let found = identity.look(image) {
+            frame = Pose.frame(found.cut, score: found.score, threshold: threshold)
+            var turned = ""
+            if case .unclear = frame { turned = ", turned too far" }
+            line = String(format: "who: %@ (%@ %.3f, yaw %.0f, pitch %.0f%@)", found.score >= threshold ? "doc" : "other",
+                          identity.engine.name, found.score, found.cut.yaw, found.cut.pitch, turned)
+        }
+        let answer = seenSteady.add(frame, threshold: threshold)
+        who = answer == "doc" || answer == "other" ? answer : ""
+        let suspect = answer == "other" || seenSteady.pending
+        if suspect && rechecks > 0 {
+            rechecks -= 1
+            recheckAt = Date().addingTimeInterval(Timing.recheck)
+        } else if !suspect {
+            rechecks = Timing.rechecks
+        }
+        if let line = line {
+            log(line + " -> " + (seenSteady.pending ? answer + " (weak face, other needs a second one)" : answer))
         }
     }
 

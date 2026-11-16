@@ -197,43 +197,31 @@ document.addEventListener('pointerdown', e => {
 }, true);
 addEventListener('keydown', e => { if (e.key === 'Escape') klappeAuf(false); });
 addEventListener('resize', () => klappeAuf(false));
-function vollbildUmschalten() {
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    else document.documentElement.requestFullscreen().catch(() => {});
-}
 // The dot of the decks (deck.js, Doc 21.09.): orange = not extended - at the
 // board that means mirrored, Win P / Cmd F1 (mirrored and "laptop alone" look
-// the same to the browser); green = extended, the beamer is ready. Only where
-// the browser can tell (Chrome), and not in mission control: it projects already.
+// the same to the browser); green = extended, the working goes alone onto the
+// board. Only where the browser can tell (Chrome), and not in mission control:
+// it projects already. Since the one button (Doc, 16.11.2026) the dot only
+// shows - a tap anywhere on the button does the one thing (tafelKnopf).
 const SCHIRM_BEKANNT = 'isExtended' in screen;
-function zeigeVollbildKnopf() {
-    const b = document.getElementById('werkzeug-vollbild');
+function zeigeTafelKnopf() {
+    const b = document.getElementById('werkzeug-beamer');
     if (!b) return;
-    const an = !!document.fullscreenElement, erweitert = SCHIRM_BEKANNT && screen.isExtended;
+    // running: mission control (the projection is on), or this window in full screen
+    const an = STEUERUNG || !!document.fullscreenElement, erweitert = SCHIRM_BEKANNT && screen.isExtended;
     const punkt = SCHIRM_BEKANNT && !STEUERUNG;
     const sig = [an, erweitert, punkt].join();
     if (b.dataset.sig !== sig) {
         b.dataset.sig = sig;
         b.style.position = 'relative';
-        b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${WERKZEUG_ICONS[an ? 'vollbildAus' : 'vollbild']}</svg>` +
+        b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${WERKZEUG_ICONS.beamer}</svg>` +
             (punkt ? `<span class="schirm-punkt" style="position:absolute;top:-4px;right:-4px;width:11px;height:11px;` +
-                `border-radius:50%;background:${erweitert ? 'rgb(121, 158, 49)' : 'rgb(245, 194, 66)'}"></span>` : '');
-        b.title = an ? 'Vollbild verlassen'
-            : erweitert ? 'Vollbild – der zweite Bildschirm ist erweitert, der Beamer-Knopf ist da'
-            : SCHIRM_BEKANNT ? 'Vollbild – nur ein Bildschirm: gespiegelt? Windows: Win P → Erweitern' : 'Vollbild';
+                `border-radius:50%;pointer-events:none;background:${erweitert ? 'rgb(121, 158, 49)' : 'rgb(245, 194, 66)'}"></span>` : '');
+        const text = an ? 'Tafel beenden' : 'Auf die Tafel – erkennt selbst Spiegeln oder Erweitern';
+        b.title = text;
+        b.setAttribute('aria-label', text);
     }
     leuchte(b, an);
-}
-// a tap on the dot says what the screens do; anywhere else on the button: full screen
-function vollbildKnopf(e) {
-    if (e && e.target && e.target.closest && e.target.closest('.schirm-punkt')) {
-        const erweitert = screen.isExtended;
-        beamerAngebot(erweitert
-            ? 'Der zweite Bildschirm ist erweitert – der Beamer-Knopf in der rechten Leiste projiziert nur die Rechnung.'
-            : 'Nur ein Bildschirm zu sehen. Hängt der Beamer dran, ist er gespiegelt: Windows Win P → „Erweitern“, am Mac ⌘ F1.', erweitert);
-        return;
-    }
-    vollbildUmschalten();
 }
 document.addEventListener('fullscreenchange', () => zeigeWerkzeuge());
 // a beamer plugged in or out, mirrored or extended: at once where the browser
@@ -264,12 +252,10 @@ function zeigeWerkzeuge() {
         // Doc, 26.09.: "den Fullscreen-Button, den Projection-Button und den
         // Hell-Dunkel-Button ganz nach oben in dieser Leiste"
         werkzeuge([
-            // Doc, 26.09.: "Fullscreen immer zeigen, auch wenn kein zweiter Bildschirm
-            // dran ist, den Beamer nur, wenn ein zweiter Bildschirm wirklich dran ist"
-            ['vollbild', 'Vollbild', (e) => vollbildKnopf(e), false],
-            // in mission control it ends the projection
-            ['beamer', STEUERUNG ? 'Beamer beenden' : 'Beamer: nur die Rechnung projizieren',
-                () => { if (STEUERUNG) window.close(); else beamerStart(); }, false],
+            // Doc, 16.11.2026: ONE button "Tafel" instead of full screen + beamer (he pressed the wrong one at
+            // the board) - it finds out itself: extended -> the working alone on the board, mirrored or one
+            // screen -> full screen; again: ends it, in mission control too (tafelKnopf, js/vorrechnen-beamer.js)
+            ['beamer', 'Auf die Tafel – erkennt selbst Spiegeln oder Erweitern', () => tafelKnopf(), false],
             // Doc, 26./27.09.: the anonymous "nicht verstanden" buzzer (js/buzzer.js)
             ['buzzer', 'Buzzer – „nicht verstanden“, anonym (erster Tipp: QR aufs Board)', () => buzzerKnopf(), false],
             // Doc, 27.09.: "rechts einen Button mit einem Porträt" - a name drawn (js/namen-ziehen.js)
@@ -341,14 +327,8 @@ function zeigeWerkzeuge() {
     const hk = document.getElementById('werkzeug-hell');
     hk.setAttribute('aria-pressed', hell ? 'true' : 'false');
     leuchte(hk, hell);
-    // in mission control the beamer button is lit: the projection runs;
-    // elsewhere it only shows with a second screen, extended
-    const bk = document.getElementById('werkzeug-beamer');
-    if (STEUERUNG) leuchte(bk, true);
-    // (the rail's buttons are display:flex !important - hiding needs it too)
-    else if (SCHIRM_BEKANNT && screen.isExtended) bk.style.removeProperty('display');
-    else bk.style.setProperty('display', 'none', 'important');
-    zeigeVollbildKnopf();
+    // the one button "Tafel" always shows; lit while it runs (mission control, or full screen)
+    zeigeTafelKnopf();
     // the preview and the panel only where there are tasks
     ['werkzeug-vorschau', 'werkzeug-aufgaben'].forEach(id => {
         const b = document.getElementById(id);

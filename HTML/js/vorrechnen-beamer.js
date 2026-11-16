@@ -130,18 +130,70 @@ function anzeigeAus() {
     try { if (document.fullscreenElement) document.exitFullscreen(); } catch (_) {}
     location.reload();
 }
+// ── The one button "Tafel" ──────────────────────────────────────────
+// Doc, 16.11.2026: at the board (the school's HP, Promethean, display on
+// "Erweitern") he pressed full screen instead of the beamer and nothing
+// came - "nur noch EIN Knopf", it finds out itself what to do (as full()
+// in decks/deck.js): a second screen, extended, and the page may place
+// windows -> the beamer way (beamerStart): the working alone in full
+// screen on the board, mission control on the laptop. Mirrored, one
+// screen, or a browser without the Window Management API -> plain full
+// screen of this window, the mirrored picture is the board's - no card.
+// Pressed again it ends either; in mission control it closes it (the
+// beamer window then goes back to normal, anzeigeAus).
+const TAFEL_ERLAUBEN = 'Nur Vollbild – die Seite darf keine Fenster auf die Tafel legen. ' +
+    'Erlauben: Schloss links in der Adressleiste → „Fenster verwalten“ → Zulassen, dann noch einmal „Tafel“.';
+async function tafelKnopf() {
+    if (STEUERUNG) { window.close(); return; }
+    if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); return; }
+    // the browser knows there is no second screen (Chrome: screen.isExtended
+    // false = mirrored or the laptop alone), or cannot place windows at all:
+    // full screen at once, without Chrome's question
+    if (!window.getScreenDetails || ('isExtended' in screen && !screen.isExtended)) { tafelVollbild(); return; }
+    const erlaubnis = await fensterErlaubnis();
+    // refused before: Chrome will not ask again - full screen, and how to allow it
+    if (erlaubnis === 'denied') { tafelVollbild(TAFEL_ERLAUBEN); return; }
+    // not asked yet: one sentence first - Chrome's question uses up the tap
+    // that asked it (decks, 16.09.), so the card says a second tap follows
+    if (erlaubnis === 'prompt') {
+        beamerAngebot('Damit die Rechnung allein auf die Tafel kommt, muss die Seite einmal „Fenster verwalten“ dürfen – ' +
+            'gleich fragt der Browser: „Zulassen“, dann noch einmal tippen.', true);
+        return;
+    }
+    beamerStart();
+}
+// "granted" / "prompt" / "denied", or null where the browser cannot tell
+// (the permission was called window-placement before Chrome 111)
+async function fensterErlaubnis() {
+    for (const name of ['window-management', 'window-placement']) {
+        try { return (await navigator.permissions.query({ name })).state; } catch (_) {}
+    }
+    return null;
+}
+// this window in full screen - on the board when it mirrors the laptop.
+// With a note (the permission refused) the card says it; did the tap go to
+// Chrome's question, a fresh one on the card makes it full screen. Without
+// a note nothing shows, even if the browser says no (as the old button)
+function tafelVollbild(hinweis) {
+    const el = document.documentElement;
+    Promise.resolve(el.requestFullscreen ? el.requestFullscreen() : Promise.reject(new Error('no fullscreen')))
+        .then(() => { if (hinweis) beamerAngebot(hinweis, false); })
+        .catch(() => { if (hinweis) beamerAngebot(hinweis + ' Jetzt noch einmal tippen, dann Vollbild.', () => tafelVollbild()); });
+}
 async function beamerStart() {
-    if (!window.getScreenDetails) { beamerAngebot('Dieser Browser kann keinen zweiten Bildschirm ansteuern – bitte Chrome oder Edge.', false); return; }
+    if (!window.getScreenDetails) { tafelVollbild(); return; }
     let sd = null;
     try { sd = await window.getScreenDetails(); } catch (_) {}
-    if (!sd) { beamerAngebot('Die Seite darf keine Fenster auf andere Bildschirme legen – bitte „Fenster verwalten“ erlauben (Schloss in der Adressleiste).', true); return; }
+    // refused just now (or the question closed): full screen of this window, and how to allow it
+    if (!sd) { tafelVollbild(TAFEL_ERLAUBEN); return; }
     const lap = sd.screens.find(x => x.isInternal) || sd.currentScreen;
     const beamer = sd.screens.find(x => x !== lap);
-    if (!beamer) { beamerAngebot('Kein zweiter Bildschirm gefunden. Den Beamer auf „Erweitern“ stellen, nicht „Duplizieren“ (Windows: Win + P, Mac: ⌘ F1) – dann noch einmal.', true); return; }
+    // only one screen after all (mirrored): plain full screen, no card
+    if (!beamer) { tafelVollbild(); return; }
     // Chrome's question "Fenster verwalten" uses up the tap that asked it
     // (decks, 16.09.) - then a fresh tap on the card starts it
     try { await document.documentElement.requestFullscreen({ screen: beamer }); }
-    catch (_) { beamerAngebot('Bereit – noch einmal tippen, dann kommt die Rechnung auf den Beamer.', true); return; }
+    catch (_) { beamerAngebot('Bereit – noch einmal tippen, dann kommt die Rechnung auf die Tafel.', true); return; }
     const w = window.open(location.pathname + '?steuerung', 'vorrechnen-steuerung',
         'popup,left=' + lap.availLeft + ',top=' + lap.availTop + ',width=' + lap.availWidth + ',height=' + lap.availHeight);
     if (!w) {
@@ -152,24 +204,32 @@ async function beamerStart() {
     steuerFenster = w;
     anzeigeAn();
 }
+// nochmal: true = the card's button starts the beamer way, a function = it
+// runs that instead (tafelVollbild), false = only a note, closed with OK
 function beamerAngebot(text, nochmal) {
     let k = document.getElementById('beamer-angebot');
     if (!k) {
         k = document.createElement('div');
         k.id = 'beamer-angebot';
         k.setAttribute('role', 'dialog');
-        k.setAttribute('aria-label', 'Beamer');
-        k.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:rgba(2,8,20,0.6)';
+        k.setAttribute('aria-label', 'Tafel');
+        // above the right rail (z-index 2100), which covered the card's right edge on a narrow screen
+        k.style.cssText = 'position:fixed;inset:0;z-index:2200;display:flex;align-items:center;justify-content:center;background:rgba(2,8,20,0.6)';
         k.innerHTML = '<div style="background:#0b1a33;border:1px solid rgba(0,210,255,0.35);border-radius:18px;padding:28px 32px;' +
-            'max-width:520px;font-family:Orbitron,sans-serif;color:#eaf0f7;text-align:center">' +
+            'margin:0 16px;max-width:520px;font-family:Orbitron,sans-serif;color:#eaf0f7;text-align:center">' +
             '<p class="beamer-text" style="margin:0 0 24px;line-height:1.6;font-size:1rem"></p>' +
             '<div style="display:flex;gap:14px;justify-content:center">' +
-            '<button type="button" class="cyber-btn beamer-los" style="flex:1">AUF DEN BEAMER</button>' +
+            '<button type="button" class="cyber-btn beamer-los" style="flex:1">AUF DIE TAFEL</button>' +
             '<button type="button" class="cyber-btn beamer-nein" style="flex:1">ABBRECHEN</button></div></div>';
         document.body.appendChild(k);
-        k.querySelector('.beamer-los').addEventListener('click', () => { k.remove(); beamerStart(); });
+        k.querySelector('.beamer-los').addEventListener('click', () => { const tun = k.losTun || beamerStart; k.remove(); tun(); });
         k.querySelector('.beamer-nein').addEventListener('click', () => k.remove());
     }
+    k.losTun = typeof nochmal === 'function' ? nochmal : beamerStart;
     k.querySelector('.beamer-text').textContent = text;
-    k.querySelector('.beamer-los').style.display = nochmal ? '' : 'none';
+    // .cyber-btn is display:flex !important (js/buttons-ultra.css) - hiding needs it too
+    const los = k.querySelector('.beamer-los');
+    if (nochmal) los.style.removeProperty('display');
+    else los.style.setProperty('display', 'none', 'important');
+    k.querySelector('.beamer-nein').textContent = nochmal ? 'ABBRECHEN' : 'OK';
 }

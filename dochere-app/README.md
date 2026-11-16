@@ -56,6 +56,16 @@ every face (`yaw`, `pitch` in `--measure`, `--evaluate` and the log), and a weak
 so the threshold for strangers is untouched (LFW: 2000 strangers max 0.355, dark max 0.382; 134 of them were turned
 too far to be judged). Leaving "doc" now takes five judgeable weak faces without a Doc frame between.
 
+## One bad frame in the background (16.11.2026)
+
+A single background look scored 0.104 and DocBar showed "!" for six minutes while Doc typed: the background decided
+on one frame, and keyboard and mouse kept the old answer. Now each background look goes through `Pose` and `Steady`
+like the watching; a stranger needs two judgeable weak faces before "other" (`Steady.confirm`, the watching stays at
+one). While a stranger is suspected or shown, DocHere looks again after 5 s even while Doc types (at most 3 quick
+looks in a row, `Timing.recheck`/`rechecks`), and while "!" stays it keeps the 30 s pace despite keyboard and mouse.
+A look without a person still ends it at once. The log line carries the head pose and the steady answer, e.g.
+`who: doc (model 0.709, yaw -5, pitch 24) -> doc` (a weak face outside the pose range adds `, turned too far`).
+
 ## Watching for DocPhoto
 
 DocPhoto shows its desktop photos only while Doc sits here. While it asks for it (distributed notification
