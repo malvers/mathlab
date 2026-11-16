@@ -3,10 +3,14 @@
 // list only serves as the template a group starts from (Doc: "Vortraege echt unabhaengig,
 // sicher getrennt"); before, one list per plan was shared by all its class pages.
 //
-// The NAMES are personal data and are therefore no longer kept on the device: they live in
-// Supabase (svp_vortrag_namen), sealed with Doc's public key by svp-crypto.js. Every browser can
-// write a name and see WHETHER a slot is taken; reading a name back needs Doc's login plus his
-// key passphrase. Include with
+// The NAMES live in Supabase (svp_vortrag_namen), never on the device. They are readable by
+// everybody, without login or key (Doc, 09.11.2026: "Alle Namen sollen von allen gesehen werden
+// koennen, wer welche Vortraege haelt"; 16.11.2026: "die sollen die Kinder auch sehen, die sollen
+// ueberhaupt nie mehr versteckt sein"): every save writes the plain text, column `name`. Names
+// saved before only exist sealed with Doc's public key (`name_enc`, svp-crypto.js); Doc's browser,
+// logged in and unlocked, publishes them once (backfillNames). Until the migration
+// supabase/migrations/20261116_vortrag_namen_klartext.sql has run, the page keeps the old sealed
+// way (plainCol === false). Include with
 // <script src="vortraege.js" data-plan="fos11" data-klasse="a"></script>.
 (function () {
     const script = document.currentScript;
@@ -375,12 +379,15 @@
     }
 
     /* ------------------------------------------------------------------
-       Names — encrypted, in the cloud, never in plain text on any device.
+       Names — in the cloud, never stored on any device.
        Table svp_vortrag_namen holds one row per (plan, klasse, topic, slot).
-       Anybody may set a slot (the pupils sign up on their own phones), but
-       only the "taken" flag is readable without a key: the name itself is
-       sealed against Doc's public key (svp-crypto.js) and the database does
-       not even hand the ciphertext to an anonymous reader.
+       Anybody may set a slot (the pupils sign up on their own phones), and
+       anybody may read the plain name (column `name`) - the whole class sees
+       who gives which talk, logged in or not. The sealed column `name_enc`
+       (svp-crypto.js) is no longer written; only entries from before
+       16.11.2026 still have it, and Doc's unlocked browser publishes those
+       (backfillNames). Changing a taken slot stays as it was: the database
+       lets an anonymous browser touch it for ten minutes only.
        ------------------------------------------------------------------ */
     const TABLE = 'svp_vortrag_namen';
     const QS = 'plan=eq.' + encodeURIComponent(PLAN) + '&klasse=eq.' + encodeURIComponent(KLASSE);
@@ -428,11 +435,11 @@
     const mine = new Set(Object.keys(loadJSON(MINE_KEY)));
     const markMine = (i, j) => { mine.add(i + '-' + j); const o = {}; mine.forEach((k) => { o[k] = 1; }); saveJSON(MINE_KEY, o); };
 
-    /* The names this browser wrote itself, in MEMORY only - never on the device,
-       that is the whole point of the sealed column. They are what lets a pupil
-       keep typing in his own field instead of running into the "eingetragen"
-       wall in the middle of a word, and they are gone on the next reload.
-       (Doc, 04.09.2026: single letters in the list.) */
+    /* The names this browser wrote itself, in MEMORY only - never on the device.
+       They are what lets a pupil keep typing in his own field instead of
+       running into a read-only field in the middle of a word, and they are
+       gone on the next reload (Doc, 04.09.2026: single letters in the list).
+       The race guard in pushSlot() hangs on them as well. */
     const myNames = new Map();
 
     const A = () => window.svpAuth;
@@ -445,25 +452,47 @@
         el.classList.toggle('bad', !!bad);
     }
 
-    /* Read the slot table. Logged in the ciphertext comes along, anonymously it
-       does not — PostgREST refuses the column, which is exactly the point. */
+    /* Does the database have the plain column yet? null = not asked yet,
+       true = yes, false = the migration has not run: then the page works the
+       old way (names sealed, readable for Doc alone) instead of failing. */
+    let plainCol = null;
+    /* PostgREST's answer to a column it does not know: 42703 in a select,
+       PGRST204 in a request body. Remembered, so the next try leaves it out. */
+    async function lacksPlain(res) {
+        if (res.ok || res.status !== 400) return false;
+        let j = null;
+        try { j = await res.clone().json(); } catch (e) { return false; }
+        const hit = !!j && (j.code === '42703' || j.code === 'PGRST204') && /\bname\b/.test(String(j.message || ''));
+        if (hit) plainCol = false;
+        return hit;
+    }
+
+    /* Read the slot table. The plain name comes for everybody; logged in the
+       old sealed copy comes along as well, anonymously it does not - PostgREST
+       refuses that column to anon. */
     async function fetchSlots() {
         const a = A();
         if (!a) return;
+        const cols = () => 'idx,slot,taken' + (plainCol === false ? '' : ',name');
         let rows = null;
+        let asked = cols();
         if (a.hasSession()) {
             try {
-                const res = await a.api(TABLE + '?' + QS + '&select=idx,slot,taken,name_enc');
+                let res = await a.api(TABLE + '?' + QS + '&select=' + asked + ',name_enc');
+                if (await lacksPlain(res)) res = await a.api(TABLE + '?' + QS + '&select=' + (asked = cols()) + ',name_enc');
                 if (res.ok) rows = await res.json();
             } catch (e) { /* stale session: fall through to the anonymous read */ }
         }
         if (!rows) {
-            const res = await fetch(a.DB_URL + '/rest/v1/' + TABLE + '?' + QS + '&select=idx,slot,taken', {
+            const get = () => fetch(a.DB_URL + '/rest/v1/' + TABLE + '?' + QS + '&select=' + (asked = cols()), {
                 headers: { apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY }
             });
+            let res = await get();
+            if (await lacksPlain(res)) res = await get();
             if (!res.ok) throw new Error('HTTP ' + res.status);
             rows = await res.json();
         }
+        if (asked.indexOf(',name') >= 0) plainCol = true;
         Object.keys(slotMap).forEach((k) => slotMap[k].forEach((s) => { s.taken = false; s.enc = null; s.name = null; }));
         rowsIn.clear();
         slotsRead = true;
@@ -482,28 +511,85 @@
             rowsIn.add(r.idx);
             s.taken = !!r.taken;
             s.enc = r.name_enc || null;
+            s.name = s.taken && r.name != null ? r.name : null;
         });
         await decryptAll();
         await ensureRows();
+        backfillNames();                          /* Doc only; runs once per page load, not awaited */
     }
 
+    /* The plain name from the database is what everybody sees. Only an entry
+       saved before 16.11.2026 can still lack it: unlocked, Doc's browser opens
+       the sealed copy instead (and backfillNames publishes it); anybody else
+       sees the placeholder - or his own entry, which this tab still knows. */
     async function decryptAll() {
-        if (!unlocked()) {
-            Object.keys(slotMap).forEach((id) => slotMap[id].forEach((s, j) => {
-                const k = id + '-' + j;
-                if (!s.taken) myNames.delete(k);     /* freed: forget it */
-                /* Without the key no name is readable - except our own, which
-                   this session still remembers. */
-                s.name = s.taken && myNames.has(k) ? myNames.get(k) : null;
-            }));
-            return;
-        }
+        const canOpen = unlocked();
         for (const id of Object.keys(slotMap)) {
-            for (const s of slotMap[id]) {
-                if (!s.enc) { s.name = null; continue; }
+            for (let j = 0; j < 3; j++) {
+                const s = slotMap[id][j];
+                const k = id + '-' + j;
+                if (!s.taken) { myNames.delete(k); s.name = null; continue; }   /* freed: forget it */
+                if (s.name != null) continue;
+                if (!canOpen || !s.enc) { s.name = myNames.has(k) ? myNames.get(k) : null; continue; }
                 try { s.name = await svpCrypto.open(s.enc); } catch (e) { s.name = '??'; }
             }
         }
+    }
+
+    /* Names sealed before 16.11.2026 have no plain text yet, and only Doc's
+       browser - logged in AND unlocked - can read them. So that browser
+       publishes them: one query for every taken slot of the WHOLE table whose
+       `name` is still empty (one visit of any talk page covers all groups,
+       also those without a page of their own), open each blob, PATCH the text
+       back. Narrow on purpose: `name=is.null` never overwrites a published
+       name, and `name_enc=eq.<blob>` makes sure the text belongs to exactly
+       the entry that was decrypted - a slot changed in the meantime is left
+       alone. The database keeps the entry's time for such a PATCH, so no old
+       entry opens its ten-minute window again (svp_vortrag_namen_touch).
+       Once per page load; afterwards the query simply comes back empty, and
+       the key is never needed for a name again. */
+    let backfillRun = null;
+    let backfillSaid = false;                     /* the backfill reported in the status line */
+    function backfillNames() {
+        const a = A();
+        if (backfillRun || plainCol !== true || !a || !a.hasSession() || !unlocked()) return backfillRun;
+        backfillRun = (async () => {
+            let rows;
+            try {
+                const res = await a.api(TABLE + '?taken=is.true&name=is.null&name_enc=not.is.null' +
+                    '&select=plan,klasse,idx,slot,name_enc&limit=2000');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                rows = await res.json();
+            } catch (e) { backfillSaid = true; setStatus('Alte Namen nicht freigegeben: ' + e.message, true); return 0; }
+            if (!rows.length) return 0;
+            let done = 0, bad = 0;
+            const one = async (r) => {
+                let text;
+                try { text = await svpCrypto.open(r.name_enc); } catch (e) { bad++; return; }
+                if (!text) { bad++; return; }
+                const path = TABLE + '?plan=eq.' + encodeURIComponent(r.plan) +
+                    '&klasse=eq.' + encodeURIComponent(r.klasse) +
+                    '&idx=eq.' + r.idx + '&slot=eq.' + r.slot +
+                    '&name=is.null&name_enc=eq.' + encodeURIComponent(r.name_enc) + '&select=idx';
+                try {
+                    const res = await a.api(path, {
+                        method: 'PATCH', headers: { Prefer: 'return=representation' },
+                        body: JSON.stringify({ name: text })
+                    });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    if ((await res.json()).length) done++;
+                } catch (e) { bad++; }
+            };
+            /* a handful at a time: a few hundred rows in seconds, not minutes */
+            for (let n = 0; n < rows.length; n += 8) await Promise.all(rows.slice(n, n + 8).map(one));
+            if (done || bad) {
+                backfillSaid = true;
+                setStatus((done ? done + (done === 1 ? ' alter Name' : ' alte Namen') + ' für alle sichtbar gemacht' : '') +
+                    (bad ? (done ? ' — ' : '') + bad + ' nicht freigegeben' : '') + '.', !done);
+            }
+            return done;
+        })();
+        return backfillRun;
     }
 
     /* Write one slot. An empty text clears it. Works logged out (that is how a
@@ -520,8 +606,18 @@
     async function pushSlot(i, j, text) {
         const a = A();
         if (!a) throw new Error('Kein Cloud-Zugang');
-        const enc = text ? await svpCrypto.seal(text) : null;
-        const body = { taken: !!text, name_enc: enc, ts: new Date().toISOString() };
+        /* The plain name for everybody; name_enc goes null, so an old sealed
+           copy can never tell a different story than the name on show. Only
+           while the migration has not run, the name is sealed as before. */
+        const bodyFor = async () => {
+            const ts = new Date().toISOString();
+            if (plainCol !== false) return { taken: !!text, name: text || null, name_enc: null, ts: ts };
+            if (text && !(window.svpCrypto && svpCrypto.available && await svpCrypto.hasPublic())) {
+                throw new Error('Kein Schlüssel eingerichtet');
+            }
+            return { taken: !!text, name_enc: text ? await svpCrypto.seal(text) : null, ts: ts };
+        };
+        let body = await bodyFor();
 
         /* CLAIMING a free slot must never overwrite somebody who was a second
            faster. Two browsers that both loaded the page while the slot was free
@@ -536,8 +632,8 @@
            a slot that has been taken for more than ten minutes, so a late
            CLEARING attempt changes nothing either - and without the returned
            rows the page would cheerfully report "gespeichert".
-           Only idx/slot/taken are selected; name_enc is not readable without the
-           key, and asking for it would fail the whole request. */
+           Only idx/slot/taken are selected; name_enc is not readable for anon,
+           and asking for it would fail the whole request. */
         const anon = !a.hasSession();
         /* ... but only when CLAIMING somebody else's ground. Without the
            isMine() exception the browser locked itself out: the debounce saves
@@ -553,11 +649,9 @@
         if (anon) path += '&select=idx,slot,taken';
         const prefer = anon ? 'return=representation' : 'return=minimal';
 
-        let res;
-        if (a.hasSession()) {
-            res = await a.api(path, { method: 'PATCH', headers: { Prefer: prefer }, body: JSON.stringify(body) });
-        } else {
-            res = await fetch(a.DB_URL + '/rest/v1/' + path, {
+        const send = () => a.hasSession()
+            ? a.api(path, { method: 'PATCH', headers: { Prefer: prefer }, body: JSON.stringify(body) })
+            : fetch(a.DB_URL + '/rest/v1/' + path, {
                 method: 'PATCH',
                 headers: {
                     apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY,
@@ -565,7 +659,9 @@
                 },
                 body: JSON.stringify(body)
             });
-        }
+        let res = await send();
+        /* the plain column is not there yet: once more the old, sealed way */
+        if (await lacksPlain(res)) { body = await bodyFor(); res = await send(); }
         if (!res.ok) throw new Error('HTTP ' + res.status);
         if (anon) {
             const rows = await res.json().catch(() => []);
@@ -580,19 +676,19 @@
             }
         }
         S(i)[j].taken = !!text;
-        S(i)[j].enc = enc;
+        S(i)[j].enc = body.name_enc || null;
         S(i)[j].name = text || null;
         if (text) myNames.set(i + '-' + j, text); else myNames.delete(i + '-' + j);
     }
 
     /* One-off migration: names that an earlier version left in this browser's
-       localStorage are sealed, pushed up and then removed from the device. */
+       localStorage are pushed up and then removed from the device. */
     async function migrateLocalNames() {
         const old = loadJSON(KEY_NAMES);
         const keys = Object.keys(old);
         if (!keys.length) return false;
-        if (!window.svpCrypto || !(await svpCrypto.hasPublic())) return false;
-        setStatus('Namen aus diesem Browser werden verschlüsselt übernommen …');
+        if (plainCol === false && !(window.svpCrypto && svpCrypto.available && await svpCrypto.hasPublic())) return false;
+        setStatus('Namen aus diesem Browser werden übernommen …');
         for (const k of keys) {
             const i = parseInt(k, 10);
             const v = Array.isArray(old[k]) ? old[k] : [];
@@ -614,18 +710,20 @@
     /* das "Aktionen"-Menue der Kopfleiste, gebaut in buildPage (svp-drop.js) */
     let vtMenu = null;
 
-    /* A taken slot is read-only for everybody but Doc: without the key the page
-       cannot show a name, and a writable field would only ever overwrite one.
-       A slot THIS browser wrote stays clearable with a click, so a pupil can
-       still fix his own typo without being able to touch anybody else's. */
+    /* A taken slot is read-only for everybody but Doc: the name is on show for
+       the whole class, but a writable field would only ever let one pupil
+       overwrite another. A slot THIS browser wrote stays clearable with a
+       click, so a pupil can still fix his own typo without being able to
+       touch anybody else's. */
     function editable(i, j) {
         const s = S(i)[j];
         if (!s.taken || myNames.has(i + '-' + j)) return true;
-        /* Unlocked, but this name could not be read (session fell back to the
-           anonymous read, or the blob would not open): the field shows "…" or
-           "??" - a placeholder, and a placeholder must never become writable,
-           or the next blur seals it over the real name. */
-        return unlocked() && s.name != null && s.name !== '??';
+        /* Doc, logged in, may correct any entry - no key needed, the name is
+           plain text. But only a field that shows a real name: an old entry
+           not published yet shows "vergeben", "…" or "??" - a placeholder,
+           and a placeholder must never become writable, or the next blur
+           saves it over the real name. */
+        return logged() && s.name != null && s.name !== '??';
     }
 
     function isMine(i, j) {
@@ -635,10 +733,19 @@
     function slotValue(i, j) {
         const s = S(i)[j];
         if (!s.taken) return '';
-        if (unlocked()) return s.name != null ? s.name : '…';
+        if (s.name != null) return s.name;      /* plain name: everybody sees who gives the talk */
+        if (unlocked()) return '…';
         const own = myNames.get(i + '-' + j);
         if (own != null) return own;            /* our own entry, still known */
+        /* an entry from before 16.11.2026 whose plain text Doc's browser has
+           not published yet (backfillNames) */
         return isMine(i, j) ? 'eingetragen' : 'vergeben';
+    }
+
+    /* a read-only field that shows a real name, not a placeholder - styled as a name */
+    function showsName(i, j) {
+        const s = S(i)[j];
+        return s.taken && s.name != null && s.name !== '??';
     }
 
     /* Everything typed but not yet saved has to survive a redraw. render()
@@ -756,14 +863,17 @@
             const n = fieldCount(i);
             const inp = (j) => {
                 const ro = editable(i, j) ? '' : ' readonly';
-                const ttl = editable(i, j) ? '' : (unlocked()
-                    ? ' title="Name nicht lesbar — Seite neu laden"'
+                /* read-only for Doc only while an old sealed entry is not published yet */
+                const ttl = editable(i, j) ? '' : (logged()
+                    ? (unlocked() ? ' title="Name nicht lesbar — Seite neu laden"'
+                        : ' title="Alter, noch verschlüsselter Eintrag — einmal entsperren, dann steht er im Klartext da"')
                     : isMine(i, j)
                         ? ' title="Dein Eintrag — anklicken, um ihn zu löschen"'
                         : ' title="Dieser Platz ist vergeben"');
                 return '<div class="vt-name n' + (j + 1) + '"><input type="text" id="name-' + i + '-' + j +
                     '" value="' + esc(slotValue(i, j)) + '" placeholder="Name ' + (j + 1) + '"' + ro + ttl +
-                    ' autocomplete="off" spellcheck="false" aria-label="Name ' + (j + 1) + ' für Thema ' + (pos + 1) + '"></div>';
+                    /* maxlength: the database takes at most 80 characters (svp_vortrag_namen_name_len) */
+                    ' maxlength="80" autocomplete="off" spellcheck="false" aria-label="Name ' + (j + 1) + ' für Thema ' + (pos + 1) + '"></div>';
             };
             /* One field more goes up to three, one field less down to one - but
                only while the last field is free: folding a taken one away would
@@ -856,8 +966,9 @@
                 const el = $('name-' + i + '-' + j);
                 if (!el) return;
                 el.classList.toggle('locked', !editable(i, j));
+                el.classList.toggle('named', !editable(i, j) && showsName(i, j));
                 if (!editable(i, j)) {
-                    if (isMine(i, j) && !unlocked()) { el.classList.add('mine'); el.addEventListener('click', () => clearMine(i, j)); }
+                    if (isMine(i, j) && !logged()) { el.classList.add('mine'); el.addEventListener('click', () => clearMine(i, j)); }
                     return;
                 }
                 el.classList.toggle('unsaved', failed.has(i + '-' + j));
@@ -1008,7 +1119,8 @@
         if (text === (S(i)[j].name || '') && !!text === S(i)[j].taken) { dirty.delete(i + '-' + j); return; }
         if (lastTried[i + '-' + j] === text) return;   /* refused before, unchanged since */
         try {
-            if (!window.svpCrypto || !(await svpCrypto.hasPublic())) {
+            /* a key is needed only the old way, before the plain column exists */
+            if (plainCol === false && text && !(window.svpCrypto && svpCrypto.available && await svpCrypto.hasPublic())) {
                 failed.add(i + '-' + j);
                 lastTried[i + '-' + j] = text;
                 el.classList.add('unsaved');
@@ -1024,7 +1136,7 @@
             dirty.delete(i + '-' + j);
             delete lastTried[i + '-' + j];
             el.classList.remove('unsaved');
-            setStatus('☁ gespeichert (verschlüsselt)');
+            setStatus('☁ gespeichert');
         } catch (e) {
             if (e.name === 'GraceOver') {
                 clearTimeout(timers[i + '-' + j]);
@@ -1051,7 +1163,11 @@
                 failed.delete(i + '-' + j);
                 dirty.delete(i + '-' + j);
                 setStatus('Dieser Platz wurde gerade von jemand anderem belegt — bitte einen freien waehlen.', true);
-                await refresh();
+                /* NOT awaited: this runs inside chains[key], and refresh() first
+                   waits for every chain - awaiting it here waited for itself, the
+                   field kept the loser's text and the 20 s poll stopped for good
+                   (found by the headless race test, 09.11.2026) */
+                refresh();
                 return;
             }
             failed.add(i + '-' + j);
@@ -1094,7 +1210,9 @@
         b.hidden = !logged || !window.svpCrypto || !svpCrypto.available || (keyExists && unlocked());
         if (b.hidden) { if (vtMenu) vtMenu.sync(); return; }
         if (!keyExists) { b.textContent = '🔑 Schlüssel einrichten'; b.title = 'Einmalig: Schlüsselpaar für die Vortragsnamen anlegen'; }
-        else { b.textContent = '🔓 Namen anzeigen'; b.title = 'Schlüssel-Passwort eingeben, um die Namen zu entschlüsseln'; }
+        /* the names themselves are plain text for everybody; the key opens the
+           marks, the requests - and, once, the old sealed names (backfillNames) */
+        else { b.textContent = '🔓 Entsperren'; b.title = 'Schlüssel-Passwort eingeben: Noten, Meldungen und alte, noch nicht freigegebene Namen entschlüsseln'; }
         if (vtMenu) vtMenu.sync();
     }
 
@@ -1117,7 +1235,12 @@
             return;
         }
         if (unlocked()) return;                   /* nothing to do - the entry is hidden then anyway */
-        svpCrypto.passDialog('unlock', async () => { await refresh(); setStatus('Namen entschlüsselt.'); });
+        svpCrypto.passDialog('unlock', async () => {
+            await refresh();
+            /* the old names go public right now - its count is the message, not "Entsperrt." */
+            if (backfillRun) await backfillRun;
+            if (!backfillSaid) setStatus('Entsperrt.');
+        });
     }
 
     /* ---------- edit mode for the topics (one list per Lerngruppe) ---------- */
@@ -1557,7 +1680,9 @@
                 const res = await a.api(TABLE + '?' + QS, {
                     method: 'PATCH',
                     headers: { Prefer: 'return=minimal' },
-                    body: JSON.stringify({ taken: false, name_enc: null, ts: new Date().toISOString() })
+                    /* `name` only once the column exists - a free slot loses it in the database anyway (touch trigger) */
+                    body: JSON.stringify(Object.assign({ taken: false, name_enc: null, ts: new Date().toISOString() },
+                        plainCol === false ? {} : { name: null }))
                 });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 try { localStorage.removeItem(MINE_KEY); } catch (e) { }
@@ -1785,12 +1910,13 @@
 
     function openMatrix(i, pos, role, roleLabel) {
         const t = list[pos] || {};
-        /* A locked field shows "vergeben"/"eingetragen", not a name - that is a
-           placeholder and has no business on a grading sheet. */
+        /* A locked field may show "vergeben"/"eingetragen" instead of a name (an
+           old sealed entry) - that is a placeholder and has no business on a
+           grading sheet. A locked field with a real, public name goes along. */
         const names = [0, 1, 2]
             .map(function (j) {
                 const el = $('name-' + i + '-' + j);
-                return el && editable(i, j) ? el.value.trim() : '';
+                return el && (editable(i, j) || showsName(i, j)) ? el.value.trim() : '';
             })
             .filter(function (v) { return v; });
         try {
@@ -2409,6 +2535,9 @@
         if (vtMenu) vtMenu.sync();
     }
 
+    /* a taken slot without a readable name: an old entry not published yet */
+    const unpublished = () => Object.keys(slotMap).some((id) => slotMap[id].some((s) => s.taken && s.name == null));
+
     /* What a look at the list turns up without anybody asking: the cases of
        28.10.2026 - names on a card that does not exist, a card still called
        "Neues Thema", a name of one or two letters - and a name twice. */
@@ -2420,7 +2549,7 @@
         const out = [];
         const known = new Set(catalogue.map((e) => e.id));
         const shown = (id) => list.some((e) => e.id === id);
-        const nm = (s) => (unlocked() && s.name ? '„' + s.name + '“' : 'Name');
+        const nm = (s) => (s.name && s.name !== '??' ? '„' + s.name + '“' : 'Name');
         const ids = Object.keys(slotMap).map(Number).sort((a, b) => a - b);
         ids.forEach((id) => {
             const taken = slotMap[id].filter((s) => s.taken);
@@ -2432,7 +2561,8 @@
         list.forEach((e) => {
             if (rowTaken(e.id) && ohneTitel(e)) out.push({ idx: e.id, selbst: true, text: meldOrt(e.id) + ': Namen eingetragen, aber noch kein Titel' });
         });
-        if (!unlocked()) return out;
+        /* the names are plain text, so the checks below run without the key;
+           only an old entry not published yet is skipped */
         const seen = new Map();
         ids.forEach((id) => slotMap[id].forEach((s) => {
             if (!s.taken || s.name == null) return;
@@ -2618,7 +2748,7 @@
             '<div class="svp-gate-card vt-dlg-card vt-panel">' +
                 '<div class="svp-gate-title" id="vt-dlg-title">Meldungen &amp; Prüfung</div>' +
                 '<div class="svp-gate-sub">' + esc((PLAN_DEF.vor || '') + klasseLabel()) + '</div>' +
-                (unlocked() ? '' : '<div class="vt-panel-lock">Namen und Texte sind verschlüsselt. ' +
+                (unlocked() ? '' : '<div class="vt-panel-lock">Die Texte der Meldungen sind verschlüsselt. ' +
                     '<button type="button" class="action" id="vt-panel-unlock">Entsperren</button></div>') +
                 '<div class="vt-dlg-h">Von den Schülern · ' + offen.length + ' offen</div>' +
                 (offen.length ? '<ul class="vt-meld-list">' + offen.map((m) => item(m, false)).join('') + '</ul>'
@@ -2628,7 +2758,7 @@
                 '<div class="vt-dlg-h">Automatisch gefunden · ' + finds.length + '</div>' +
                 (finds.length ? '<ul class="vt-find-list">' + finds.map(findItem).join('') + '</ul>'
                     : '<div class="vt-dlg-empty">Nichts Auffälliges.</div>') +
-                (unlocked() ? '' : '<div class="vt-dlg-note">Doppelte und abgebrochene Namen findet die Prüfung erst entsperrt.</div>') +
+                (unlocked() || !unpublished() ? '' : '<div class="vt-dlg-note">Alte, noch nicht freigegebene Namen prüft die Liste erst entsperrt.</div>') +
                 (gefragt.length ? '<div class="vt-dlg-h">An der Karte gefragt · ' + gefragt.length + '</div>' +
                     '<ul class="vt-find-list asked">' + gefragt.map((id) => '<li><span class="vt-find-text">' + esc(meldOrt(id)) +
                         ': ' + esc(FRAGEN[meta.fragen[id]][1]) + '</span><button type="button" class="action secondary vt-find-back" data-id="' +
@@ -2688,12 +2818,11 @@
         'tiefer und nimmt eine Kopie wieder heraus. Eine Kopie bekommt <b>eigene, leere Namensfelder</b> &mdash; ' +
         'angemeldet, denn nur dann lassen sich die Pl&auml;tze daf&uuml;r anlegen. Umsortieren r&uuml;hrt keinen ' +
         'Namen an: die Namen h&auml;ngen am Thema, nicht an der Position. ' +
-        'Die <b>Namen</b> liegen dagegen verschl&uuml;sselt in der Cloud: eintragen kann sie jeder, lesen kann sie ' +
-        'nur Doc Alvers &mdash; angemeldet und mit dem Schl&uuml;ssel-Passwort. Ohne Schl&uuml;ssel zeigt die Liste ' +
-        'nur, welche Themen schon vergeben sind. Zwei Namen sind die Regel: <b>+</b> und <b>&minus;</b> am rechten ' +
+        'Die <b>Namen</b> stehen in der Cloud und sind f&uuml;r alle sichtbar &mdash; so sieht jeder, wer welchen ' +
+        'Vortrag h&auml;lt. Eintragen kann sich jeder selbst, einen fremden Eintrag &auml;ndern kann nur Doc Alvers. ' +
+        'Zwei Namen sind die Regel: <b>+</b> und <b>&minus;</b> am rechten ' +
         'Zeilenrand machen daraus ein Trio oder einen einzelnen Vortrag. Ein Feld, in dem schon ein Name steht, ' +
         'l&auml;sst sich nicht wegklappen; erst den Eintrag l&ouml;schen. ' +
-        'Beim Drucken erscheinen die Namen nur im entsperrten Zustand. ' +
         'Das <b>Datum</b> neben dem Titel setzt Doc Alvers angemeldet per Klick. Das Feld <b>Note</b> steht bei jedem ' +
         'Vortrag: <b>&ndash;</b> hei&szlig;t noch keine Note, <b>***</b> hei&szlig;t vergeben. Die Note selbst sieht nur er, ' +
         'angemeldet und entsperrt: links die aus Coach- und Team-Bogen errechnete, hinter dem Pfeil das Feld ' +
@@ -2762,7 +2891,7 @@
                 '</div>' +
             '</div>';
 
-        const menu = window.svpDrop({ label: 'Aktionen', title: 'Bearbeiten, Namen anzeigen, Namen zurücksetzen' });
+        const menu = window.svpDrop({ label: 'Aktionen', title: 'Bearbeiten, Entsperren, Namen zurücksetzen' });
         menu.item({ id: 'btn-edit', html: '&#9998; Bearbeiten', title: 'Thema und Leitfrage editierbar machen' });
         menu.item({ id: 'btn-orig', className: 'secondary', hidden: true,
             text: 'Themen: Original', title: 'Themen auf die eingebaute Liste zurücksetzen (Namen bleiben)' });
@@ -2859,15 +2988,13 @@
         loadBewState();
         await buildSwitch();
         render();                                   /* topics first, names follow */
-        if (!window.svpCrypto || !svpCrypto.available) {
-            setStatus('Verschlüsselung im Browser nicht verfügbar — Namen sind hier nicht bearbeitbar.', true);
-            await loadMeta();                       /* list and dates are plain text, they still come */
-            applyCloudList();
-            render();
-            return;
+        /* The names are plain text and need no WebCrypto; the key only opens
+           marks, requests and old sealed names. So a browser without it (a page
+           not served over https) still shows and takes names. */
+        if (window.svpCrypto && svpCrypto.available) {
+            await svpCrypto.ready;                  /* re-arm an unlocked key after a reload */
+            try { keyExists = await svpCrypto.hasPublic(); } catch (e) { keyExists = false; }
         }
-        await svpCrypto.ready;                      /* re-arm an unlocked key after a reload */
-        try { keyExists = await svpCrypto.hasPublic(); } catch (e) { keyExists = false; }
         await refresh();
         if (await migrateLocalNames()) render();
         /* Somebody else may have signed up meanwhile — but never discard a name

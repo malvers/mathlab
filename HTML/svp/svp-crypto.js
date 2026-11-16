@@ -1,5 +1,8 @@
-// End-to-end encryption for personal data on the svp pages (currently the talk
-// sign-up names, informatik/vortraege.js).
+// End-to-end encryption for personal data on the svp pages (informatik/vortraege.js:
+// the marks, the pupils' requests, the grading sheets - and the talk sign-up names
+// saved before 16.11.2026; since then the names are plain text for everybody, Doc:
+// "die sollen ueberhaupt nie mehr versteckt sein", and Doc's unlocked browser
+// publishes the old sealed ones once).
 //
 // The problem: pupils enter their own names on their own devices, so every
 // browser must be able to WRITE a name — but nobody except Doc may ever READ

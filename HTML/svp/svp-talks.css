@@ -696,12 +696,20 @@ body:has(.vt-list) header.page-head { margin-bottom: 10px; }
     box-shadow: 0 0 0 3px rgba(176, 36, 24, 0.16);
 }
 
-/* a taken slot: shown as "vergeben", not editable and never a name */
+/* a taken slot: not editable. Without a name to show (an old entry not
+   published yet) it reads "vergeben" in muted italics ... */
 .vt-name input.locked {
     color: var(--muted);
     font-style: italic;
     border-style: dashed;
     cursor: not-allowed;
+}
+
+/* ... with a name (public for everybody since 16.11.2026) the name reads
+   like a name; the dashed border still says "not yours to change" */
+.vt-name input.locked.named {
+    color: var(--text);
+    font-style: normal;
 }
 
 /* except the entry this browser made itself — a click takes it back */

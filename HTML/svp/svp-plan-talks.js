@@ -43,10 +43,9 @@ window.svpPlanParts.push(function (P) {
        does everywhere else. Run again once the dates are painted. */
     let talkData = null;
     /* Doc, 12.11.2026 (inf12, Stunde 17-18: "schreib da auch die Kids hin"): behind each talk the names of its
-       speakers, the way they signed up on the Vortraege page. The names are sealed against Doc's public key
-       (svp-crypto.js, table svp_vortrag_namen) - so they show where the page can open them: Doc logged in with
-       his key unlocked. Anywhere else (a classroom PC, a pupil) the line stays as it was, and a talk nobody signed
-       up for shows no name either. "klasse|id" -> ["Name", ...] in slot order. */
+       speakers, the way they signed up on the Vortraege page - for everybody, logged in or not (Doc, 16.11.2026:
+       "die sollen die Kinder auch sehen"; table svp_vortrag_namen, plain column `name`). A talk nobody signed up
+       for shows no name. "klasse|id" -> ["Name", ...] in slot order. */
     let talkNames = {};
     function namesOf(e) {
         const seen = [];
@@ -208,15 +207,48 @@ window.svpPlanParts.push(function (P) {
         markTalksDone(key, themen, dbKlasse).catch(function (e) { console.warn('svp talks done:', e); });
     }
 
-    /* The speakers' names (see talkNames): only with Doc's session, and only once his key is unlocked - the
-       ciphertext column is not even readable without a session. svp-crypto.js comes from next to svp-plan.js
-       when the page does not have it yet. One query for the whole plan; placeTalks then paints them in. */
+    /* The speakers' names (see talkNames): the plain column, read anonymously - one query for the whole plan;
+       placeTalks then paints them in. An entry from before 16.11.2026 may still exist only sealed (its plain text
+       is published by Doc's unlocked talk page, vortraege.js backfillNames), and before the migration
+       20261116_vortrag_namen_klartext.sql there is no plain column at all: for those, as before, Doc's session
+       with his key unlocked opens the sealed copy (openSealed). */
     async function loadTalkNames(plan) {
         const a = window.svpAuth;
-        if (!a || !a.hasSession || !a.hasSession() || !a.api) return;
+        if (!a) return;
+        const bySlot = {};                        /* "klasse|idx|slot" -> { r, n } */
+        let rows = null;
+        try {
+            const res = await fetch(a.DB_URL + '/rest/v1/svp_vortrag_namen?plan=eq.' + encodeURIComponent(plan) +
+                '&taken=is.true&select=klasse,idx,slot,name',
+                { headers: { apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY } });
+            if (res.ok) rows = await res.json();
+        } catch (e) { rows = null; }
+        (rows || []).forEach(function (r) {
+            const n = String(r.name || '').trim();
+            if (n) bySlot[r.klasse + '|' + r.idx + '|' + r.slot] = { r: r, n: n };
+        });
+        /* "klasse|id" -> names in slot order, then paint */
+        const show = function () {
+            const all = Object.keys(bySlot).map(function (k) { return bySlot[k]; });
+            all.sort(function (x, y) { return x.r.idx - y.r.idx || x.r.slot - y.r.slot; });
+            const out = {};
+            all.forEach(function (x) { (out[x.r.klasse + '|' + x.r.idx] = out[x.r.klasse + '|' + x.r.idx] || []).push(x.n); });
+            talkNames = out;
+            placeTalks();
+        };
+        show();
+        const missing = !rows || rows.some(function (r) { return !String(r.name || '').trim(); });
+        if (missing && await openSealed(plan, bySlot)) show();
+    }
+    /* Doc's way for a taken slot without a plain name: only with his session and his key unlocked - the
+       ciphertext column is not even readable without a session. svp-crypto.js comes from next to svp-plan.js
+       when the page does not have it yet. Adds what it opens to bySlot; true when it added anything. */
+    async function openSealed(plan, bySlot) {
+        const a = window.svpAuth;
+        if (!a || !a.hasSession || !a.hasSession() || !a.api) return false;
         if (!window.svpCrypto) {
             const me = document.querySelector('script[src*="svp-plan.js"]');
-            if (!me) return;
+            if (!me) return false;
             await new Promise(function (ok, no) {
                 const s = document.createElement('script');
                 s.src = new URL('svp-crypto.js', me.src).href;
@@ -226,23 +258,23 @@ window.svpPlanParts.push(function (P) {
             });
         }
         const C = window.svpCrypto;
-        if (!C || !C.available) return;
-        try { await C.ready; } catch (e) { return; }
-        if (!C.hasPrivate()) return;
+        if (!C || !C.available) return false;
+        try { await C.ready; } catch (e) { return false; }
+        if (!C.hasPrivate()) return false;
         const res = await a.api('svp_vortrag_namen?plan=eq.' + encodeURIComponent(plan) +
-            '&taken=is.true&select=klasse,idx,slot,name_enc&order=idx,slot');
-        if (!res.ok) return;
-        const rows = await res.json();
-        const names = {};
-        for (const r of rows) {
-            if (!r.name_enc) continue;
+            '&taken=is.true&name_enc=not.is.null&select=klasse,idx,slot,name_enc');
+        if (!res.ok) return false;
+        let added = false;
+        for (const r of await res.json()) {
+            const k = r.klasse + '|' + r.idx + '|' + r.slot;
+            if (bySlot[k]) continue;              /* its plain name is there already */
             let n = '';
             try { n = String(await C.open(r.name_enc) || '').trim(); } catch (e) { n = ''; }
             if (!n) continue;
-            (names[r.klasse + '|' + r.idx] = names[r.klasse + '|' + r.idx] || []).push(n);
+            bySlot[k] = { r: r, n: n };
+            added = true;
         }
-        talkNames = names;
-        placeTalks();
+        return added;
     }
 
     /* Der Vortraege-Knopf wird gruen, sobald jedes Thema dieser Lerngruppe
@@ -250,8 +282,7 @@ window.svpPlanParts.push(function (P) {
        den so gruen wie die Vortraege"). Vergeben heisst: an dem Thema steht
        MINDESTENS ein Name - "die duerfen auch alleine", zwei Plaetze sind die
        Regel, keine Bedingung.
-       Gelesen wird nur das Flag taken; die Namen selbst sind gegen Docs
-       oeffentlichen Schluessel versiegelt und kommen hier gar nicht erst an
+       Gelesen wird nur das Flag taken; die Namen selbst holt loadTalkNames
        (svp/informatik/vortraege.js, Tabelle svp_vortrag_namen). */
     /* Wohin ein Knopf fuehrt - data-href auf den Seiten mit Gruppen-Menue, sonst
        das blanke onclick. Daran wird der Vortraege-Knopf erkannt: frueher hing
