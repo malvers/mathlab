@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leistungstest 1 · Quadratische Gleichungen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathe11-lt1-quadratisch',
+  version: 'v1',
+  requireCode: true,   /* Code vom Zettel, wie in Mission Control */
+  partB: 2,   /* Teil B: Bonus auf Papier, Doc traegt ihn in Mission Control ein */
+  gradeScale: [[86,1],[73,2],[59,3],[41,4],[23,5],[0,6]],   /* = BGY-11-Schluessel auf 20 BE (19/16/13/9/5), Bonus obendrauf, siehe lt1-quadratisch.py */
+  title: 'Leistungstest 1 · Quadratische Gleichungen',
+  subtitle: 'Berufliches Gymnasium · Klasse 11 · Mo 23.11.2026 · Teil A: 20 Fragen, je 1 BE, genau eine Antwort pro Frage · Formelsammlung erlaubt, kein Taschenrechner · Teil B (Bonus, +2 BE) auf Papier',
+  dashSub: 'BGY26 · Klasse 11 · Leistungstest 1 · Teil A online (20 BE), Teil B Bonus auf Papier (+2 BE)',
+  back: 'svp/mathe/mathe11.html', /* opened from the plan */
+  /* Aus den 7 Aufgaben des Papiertests: 1-2 Aufgabe 1, 3-4 Aufgabe 2, 5-7 Aufgabe 3, 8-10 Aufgabe 4 (AFB I), 11-13 Aufgabe 5, 14-16 Aufgabe 6 (AFB II), 17-20 Aufgabe 7 (AFB III). */
+  questions: [
+    {
+      q: 'Löse ohne pq-Formel: $x^2 - 9x = 0$',
+      opts: ['$L = \\{0;\\ 9\\}$', '$L = \\{-3;\\ 3\\}$', '$L = \\{-9;\\ 0\\}$', '$L = \\{9\\}$'],
+      steps: [
+        'Kein absolutes Glied, also $x$ ausklammern: $x(x - 9) = 0$',
+        'Ein Produkt ist null, wenn ein Faktor null ist: $x = 0$ oder $x - 9 = 0$, also $x = 9$',
+        'Falle: durch $x$ teilen. Dann geht die Lösung $x = 0$ verloren.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse ohne pq-Formel: $3x^2 - 48 = 0$',
+      opts: ['$L = \\{4\\}$', '$L = \\{-16;\\ 16\\}$', '$L = \\{\\,\\}$', '$L = \\{-4;\\ 4\\}$'],
+      steps: [
+        '$3x^2 - 48 = 0 \\quad | +48$, dann $3x^2 = 48 \\quad | :3$',
+        '$x^2 = 16$, die Wurzel hat zwei Vorzeichen: $x = 4$ oder $x = -4$',
+        'Falle: die negative Lösung vergessen, die Wurzel nicht ziehen, oder beim Umstellen $x^2 = -16$ rechnen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Gleichung $(x + 3)^2 = 16$ soll ohne Ausmultiplizieren gelöst werden. Welcher Ansatz ist richtig?',
+      opts: ['$x + 3 = 4$ oder $x + 3 = -4$', '$x^2 + 9 = 16$', 'nur $x + 3 = 4$', '$x + 3 = 16$ oder $x + 3 = -16$'],
+      steps: [
+        'In der Klammer steht eine Zahl, deren Quadrat $16$ ist: $4$ oder $-4$',
+        'Falle: nur $+4$ (eine Lösung fehlt), die Wurzel vergessen ($\\pm 16$), oder $(x + 3)^2 = x^2 + 9$ - da fehlt das Glied $6x$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Lösungsmenge hat $(x + 3)^2 = 16$?',
+      opts: ['$L = \\{-1;\\ 7\\}$', '$L = \\{-7;\\ 1\\}$', '$L = \\{1\\}$', '$L = \\{-19;\\ 13\\}$'],
+      steps: [
+        '$x + 3 = 4 \\Rightarrow x = 1$ und $x + 3 = -4 \\Rightarrow x = -7$',
+        'Probe: $(1 + 3)^2 = 16$ ✓ und $(-7 + 3)^2 = (-4)^2 = 16$ ✓',
+        'Falle: $\\{-1;\\ 7\\}$ hat die Vorzeichen verdreht, $\\{-19;\\ 13\\}$ kommt aus $x + 3 = \\pm 16$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Gleichung $3x^2 + 6x - 24 = 0$ soll mit der pq-Formel gelöst werden. Welche Werte setzt man für $p$ und $q$ ein?',
+      opts: ['$p = 2$, $q = -8$', '$p = 6$, $q = -24$', '$p = -2$, $q = 8$', '$p = 2$, $q = -24$'],
+      steps: [
+        'Die pq-Formel braucht die Normalform, vor $x^2$ muss $1$ stehen: $3x^2 + 6x - 24 = 0 \\quad | :3$',
+        '$x^2 + 2x - 8 = 0$, also $p = 2$ und $q = -8$',
+        'Falle: nicht erst durch $3$ geteilt ($p = 6$, $q = -24$), nur teilweise geteilt, oder die Vorzeichen verdreht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Zahl steht beim Lösen von $3x^2 + 6x - 24 = 0$ mit der pq-Formel unter der Wurzel?',
+      opts: ['$12$', '$-7$', '$9$', '$33$'],
+      steps: [
+        'Normalform $x^2 + 2x - 8 = 0$, also $p = 2$, $q = -8$',
+        'Unter der Wurzel: $\\left(\\dfrac{2}{2}\\right)^2 - (-8) = 1 + 8 = 9$',
+        'Falle: $1 - 8 = -7$ (Vorzeichen von $q$), $3^2 + 24 = 33$ (nicht durch $3$ geteilt), $2^2 + 8 = 12$ ($p$ nicht halbiert).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Lösungsmenge hat $3x^2 + 6x - 24 = 0$?',
+      opts: ['$L = \\{2\\}$', '$L = \\{-4;\\ 2\\}$', '$L = \\{-2;\\ 4\\}$', '$L = \\{\\,\\}$'],
+      steps: [
+        '$x_{1,2} = -1 \\pm \\sqrt{9} = -1 \\pm 3$, also $x_1 = 2$ und $x_2 = -4$',
+        'Probe: $3 \\cdot 2^2 + 6 \\cdot 2 - 24 = 12 + 12 - 24 = 0$ ✓ und $3 \\cdot 16 - 24 - 24 = 0$ ✓',
+        'Falle: $\\{-2;\\ 4\\}$ hat die Vorzeichen verdreht, und $L = \\{\\,\\}$ kommt von $\\sqrt{1 - 8}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme mit der Diskriminante, wie viele Lösungen $x^2 - 6x + 5 = 0$ hat.',
+      opts: ['$D = 31$, also zwei Lösungen', '$D = -4$, also keine Lösung', '$D = 4$, also zwei Lösungen', '$D = 14$, also zwei Lösungen'],
+      steps: [
+        '$p = -6$, $q = 5$: $D = (-3)^2 - 5 = 9 - 5 = 4 > 0$, also zwei Lösungen',
+        'Falle: $9 + 5 = 14$ (Vorzeichen von $q$), $5 - 9 = -4$ (verdreht), $36 - 5 = 31$ ($p$ nicht halbiert).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme mit der Diskriminante, wie viele Lösungen $x^2 + 8x + 16 = 0$ hat.',
+      opts: ['$D = 48$, also zwei Lösungen', '$D = 0$, also genau eine Lösung', '$D = 32$, also zwei Lösungen', '$D = 0$, also keine Lösung'],
+      steps: [
+        '$p = 8$, $q = 16$: $D = 4^2 - 16 = 0$, also genau eine Lösung',
+        'Kontrolle: $x^2 + 8x + 16 = (x + 4)^2$, nur $x = -4$ macht das null',
+        'Falle: $D = 0$ heißt nicht „keine Lösung“, unter der Wurzel steht dann $0$ und $\\pm 0$ gibt eine Lösung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme mit der Diskriminante, wie viele Lösungen $x^2 - 4x + 7 = 0$ hat.',
+      opts: ['$D = -3$, also keine Lösung', '$D = 11$, also zwei Lösungen', '$D = 9$, also zwei Lösungen', '$D = 3$, also zwei Lösungen'],
+      steps: [
+        '$p = -4$, $q = 7$: $D = (-2)^2 - 7 = 4 - 7 = -3 < 0$, also keine Lösung',
+        'Falle: $7 - 4 = 3$ (verdreht), $4 + 7 = 11$ (Vorzeichen von $q$), $16 - 7 = 9$ ($p$ nicht halbiert).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für die Nullstellen von $f(x) = -x^2 + 6x - 5$ wird die Gleichung $f(x) = 0$ mit $-1$ multipliziert. Welche Gleichung entsteht?',
+      opts: ['$x^2 + 6x - 5 = 0$', '$x^2 + 6x + 5 = 0$', '$x^2 - 6x + 5 = 0$', '$x^2 - 6x - 5 = 0$'],
+      steps: [
+        'Mal $(-1)$ dreht das Vorzeichen jedes Gliedes: $-x^2 \\to x^2$, $6x \\to -6x$, $-5 \\to 5$',
+        'Falle: nur ein oder zwei Glieder umgedreht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Nullstellen hat $f(x) = -x^2 + 6x - 5$?',
+      opts: ['$x_1 = -5$ und $x_2 = -1$', 'nur $x = 5$', '$x_{1,2} = 3 \\pm \\sqrt{14}$', '$x_1 = 1$ und $x_2 = 5$'],
+      steps: [
+        '$x^2 - 6x + 5 = 0$, $p = -6$, $q = 5$: $x_{1,2} = 3 \\pm \\sqrt{9 - 5} = 3 \\pm 2$',
+        '$x_1 = 5$, $x_2 = 1$. Probe: $f(1) = -1 + 6 - 5 = 0$ ✓ und $f(5) = -25 + 30 - 5 = 0$ ✓',
+        'Falle: $-5$ und $-1$ lösen $x^2 + 6x + 5 = 0$, und $3 \\pm \\sqrt{14}$ kommt aus $x^2 - 6x - 5 = 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In welchem Punkt schneidet der Graph von $f(x) = -x^2 + 6x - 5$ die $y$-Achse?',
+      opts: ['$S_y(0 \\mid 5)$', '$S_y(0 \\mid -5)$', '$S_y(1 \\mid 0)$', '$S_y(-5 \\mid 0)$'],
+      steps: [
+        'Auf der $y$-Achse ist $x = 0$: $f(0) = -0^2 + 6 \\cdot 0 - 5 = -5$',
+        'Falle: $x$ und $y$ vertauscht, oder die Nullstelle $(1 \\mid 0)$ mit dem $y$-Achsenabschnitt verwechselt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Rechteck hat den Umfang $26$ cm und den Flächeninhalt $40\\ \\mathrm{cm^2}$. Welcher Ansatz für die Seiten $a$ und $b$ ist richtig?',
+      opts: ['$2a + 2b = 40$ und $a \\cdot b = 26$', '$a + b = 26$ und $a \\cdot b = 40$', '$a + b = 13$ und $a \\cdot b = 40$', '$4a = 26$ und $a^2 = 40$'],
+      steps: [
+        'Umfang: $2a + 2b = 26 \\quad | :2$, also $a + b = 13$',
+        'Fläche: $a \\cdot b = 40$',
+        'Falle: den Umfang nicht halbiert, Umfang und Fläche vertauscht, oder ein Quadrat angenommen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Rechteck hat den Umfang $26$ cm und den Flächeninhalt $40\\ \\mathrm{cm^2}$. Welche quadratische Gleichung gilt für eine Seite $a$?',
+      opts: ['$a^2 + 13a + 40 = 0$', '$a^2 - 13a - 40 = 0$', '$a^2 - 26a + 40 = 0$', '$a^2 - 13a + 40 = 0$'],
+      steps: [
+        '$a + b = 13$, also $b = 13 - a$, eingesetzt in $a \\cdot b = 40$: $a(13 - a) = 40$',
+        '$13a - a^2 = 40 \\quad | +a^2 - 13a$, also $a^2 - 13a + 40 = 0$',
+        'Falle: beim Umstellen ein Vorzeichen verloren, oder mit $a + b = 26$ gerechnet.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Rechteck hat den Umfang $26$ cm und den Flächeninhalt $40\\ \\mathrm{cm^2}$. Wie lang sind seine Seiten?',
+      opts: ['$10$ cm und $4$ cm', '$8$ cm und $5$ cm', '$-8$ cm und $-5$ cm', '$20$ cm und $2$ cm'],
+      steps: [
+        '$a^2 - 13a + 40 = 0$: $a_{1,2} = \\dfrac{13}{2} \\pm \\sqrt{\\dfrac{169}{4} - \\dfrac{160}{4}} = \\dfrac{13}{2} \\pm \\dfrac{3}{2}$, also $8$ und $5$',
+        'Probe: $2 \\cdot 8 + 2 \\cdot 5 = 26$ ✓ und $8 \\cdot 5 = 40$ ✓',
+        'Falle: $10 \\cdot 4$ und $20 \\cdot 2$ sind auch $40$, haben aber den Umfang $28$ und $44$. Eine Länge ist nie negativ.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Gleichung $x^2 + px + 9 = 0$ soll genau eine Lösung haben. Welche Bedingung muss gelten?',
+      opts: ['$\\left(\\dfrac{p}{2}\\right)^2 + 9 = 0$', '$p^2 - 9 = 0$', '$\\left(\\dfrac{p}{2}\\right)^2 - 9 = 0$', '$\\left(\\dfrac{p}{2}\\right)^2 - 9 > 0$'],
+      steps: [
+        'Genau eine Lösung heißt: Die Diskriminante ist $0$',
+        'Mit $q = 9$: $D = \\left(\\dfrac{p}{2}\\right)^2 - 9 = 0$',
+        'Falle: $D > 0$ gibt zwei Lösungen, $+9$ hat das Vorzeichen von $q$ verdreht, $p^2 - 9$ vergisst das Halbieren.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welche Werte von $p$ hat $x^2 + px + 9 = 0$ genau eine Lösung?',
+      opts: ['$p = 3$ oder $p = -3$', 'nur $p = 6$', '$p = 18$ oder $p = -18$', '$p = 6$ oder $p = -6$'],
+      steps: [
+        '$\\left(\\dfrac{p}{2}\\right)^2 - 9 = 0 \\quad | +9$, also $\\dfrac{p^2}{4} = 9 \\quad | \\cdot 4$',
+        '$p^2 = 36$, die Wurzel hat zwei Vorzeichen: $p = 6$ oder $p = -6$',
+        'Falle: das negative Vorzeichen vergessen, $\\dfrac{p}{2} = \\pm 3$ nicht verdoppelt, oder $\\dfrac{p}{2} = \\pm 9$ ohne Wurzel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Gleichung $x^2 + px + 9 = 0$ hat für einen positiven Wert von $p$ genau eine Lösung. Welche Lösungsmenge hat sie dann?',
+      opts: ['$L = \\{3\\}$', '$L = \\{-3;\\ 3\\}$', '$L = \\{\\,\\}$', '$L = \\{-3\\}$'],
+      steps: [
+        'Der positive Wert ist $p = 6$: $x^2 + 6x + 9 = (x + 3)^2 = 0$',
+        'Nur $x = -3$ macht die Klammer null, also $L = \\{-3\\}$',
+        'Falle: Vorzeichen verdreht ($\\{3\\}$), eine zweite Lösung erfunden, oder „$D = 0$ heißt keine Lösung“.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Gleichung $x^2 + px + 9 = 0$ hat auch für einen negativen Wert von $p$ genau eine Lösung. Welche Lösungsmenge hat sie dann?',
+      opts: ['$L = \\{3\\}$', '$L = \\{\\,\\}$', '$L = \\{-3\\}$', '$L = \\{-3;\\ 3\\}$'],
+      steps: [
+        'Der negative Wert ist $p = -6$: $x^2 - 6x + 9 = (x - 3)^2 = 0$',
+        'Nur $x = 3$ macht die Klammer null, also $L = \\{3\\}$',
+        'Probe: $3^2 - 6 \\cdot 3 + 9 = 9 - 18 + 9 = 0$ ✓'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
