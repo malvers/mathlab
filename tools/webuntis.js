@@ -65,25 +65,59 @@ function totp(secret, timeMs) {
 
 let cookies = '';
 
-async function post(url, body, raw) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...(cookies ? { Cookie: cookies } : {}) },
-    body: JSON.stringify(body),
-  });
-  const setCookie = res.headers.getSetCookie ? res.headers.getSetCookie() : [];
-  for (const c of setCookie) {
-    const kv = c.split(';')[0];
-    if (/^(JSESSIONID|schoolname|traceId)=/.test(kv)) cookies = cookies ? `${cookies}; ${kv}` : kv;
+// Transport errors ("fetch failed", "terminated", a reset socket) are not answers - the request
+// simply did not get through. ~/Library/Logs/webuntis.log holds 84 of them in 730 runs, and on
+// 16.11.2026 one of them killed the 18:00 classbook check of "WebUntis holen" without a trace.
+// So every READ gets two more tries, 1 s and 2 s apart. Writes are never repeated here: after an
+// unclear first submit, a second one is the caller's decision. HTTP error statuses and JSON-RPC
+// errors are real answers and are passed on as before.
+function isTransient(e) {
+  const code = String(e?.cause?.code || e?.code || '');
+  return /fetch failed|terminated|other side closed|socket hang up/i.test(String(e?.message || ''))
+    || /^(ECONNRESET|ECONNREFUSED|ETIMEDOUT|EPIPE|EAI_AGAIN|ENOTFOUND|UND_ERR_\w+)$/.test(code);
+}
+
+async function readRetry(what, fn, tries = 3) {
+  for (let i = 1; ; i++) {
+    try { return await fn(); }
+    catch (e) {
+      if (i >= tries || !isTransient(e)) throw e;
+      process.stderr.write(`  (${what}: ${e.message} - Versuch ${i + 1} von ${tries})\n`);
+      await new Promise(r => setTimeout(r, 1000 * i));
+    }
   }
-  const json = await res.json();
+}
+
+// `retry` only for calls that read: the body is built anew for every try (fresh TOTP in intern
+// calls), and the cookies are taken only from an answer that arrived in full - a half-read reply
+// must not leave a second JSESSIONID behind.
+async function post(url, body, raw, retry = false) {
+  const once = async () => {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(cookies ? { Cookie: cookies } : {}) },
+      body: JSON.stringify(typeof body === 'function' ? body() : body),
+    });
+    const json = await res.json();
+    const setCookie = res.headers.getSetCookie ? res.headers.getSetCookie() : [];
+    for (const c of setCookie) {
+      const kv = c.split(';')[0];
+      if (/^(JSESSIONID|schoolname|traceId)=/.test(kv)) cookies = cookies ? `${cookies}; ${kv}` : kv;
+    }
+    return json;
+  };
+  const label = (typeof body === 'function' ? '' : body?.method) || new URL(url).searchParams.get('m') || 'WebUntis';
+  const json = retry ? await readRetry(label, once) : await once();
   if (raw) return json;                 // caller inspects error/result itself
   if (json.error) throw new Error(`${json.error.message} (code ${json.error.code})`);
   return json.result;
 }
 
+// The public JSON-RPC API has no write methods at all (measured 28.08.2026), so every rpc call
+// is a read and may be repeated.
 async function rpc(method, params) {
-  return post(`${BASE}/WebUntis/jsonrpc.do?school=${SCHOOL}`, { id: 'r', method, params: params ?? {}, jsonrpc: '2.0' });
+  return post(`${BASE}/WebUntis/jsonrpc.do?school=${SCHOOL}`, { id: 'r', method, params: params ?? {}, jsonrpc: '2.0' },
+    false, true);
 }
 
 // ---------- mobile API (jsonrpc_intern.do) - the only one that can write ----------
@@ -98,8 +132,9 @@ function internAuth() {
 
 async function intern(method, params) {
   if (!secret) { console.error(`${method} braucht den App-Schluessel-Login (WEBUNTIS_SECRET).`); process.exit(1); }
+  // Only the get* methods read; submitLessonTopic & Co. write and are never repeated.
   const json = await post(`${BASE}/WebUntis/jsonrpc_intern.do?m=${method}&school=${SCHOOL}&v=i2.2`,
-    { id: 'i', method, params: [{ auth: internAuth(), ...params }], jsonrpc: '2.0' }, true);
+    () => ({ id: 'i', method, params: [{ auth: internAuth(), ...params }], jsonrpc: '2.0' }), true, /^get/i.test(method));
   return json;
 }
 
@@ -132,13 +167,16 @@ async function writeTopic(ttId, text) {
 // one that did not stick is reported as failed, never as done.
 async function openAbsencePeriods(session, from, to) {
   const iso = d => `${String(d).slice(0, 4)}-${String(d).slice(4, 6)}-${String(d).slice(6, 8)}`;
-  const jwt = (await (await fetch(`${BASE}/WebUntis/api/token/new`, { headers: { Cookie: cookies } })).text()).trim();
-  const res = await fetch(`${BASE}/WebUntis/api/rest/view/v1/classreg/open-periods`, {
-    method: 'POST',
-    headers: { Cookie: cookies, Authorization: 'Bearer ' + jwt, 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ teacherId: session.user?.elemId, filter: 'ABSENCE_OPEN', dateRange: { start: iso(from), end: iso(to) } }),
+  // a read despite the POST - repeated on a transport error like every other read
+  const { res, text } = await readRetry('open-periods', async () => {
+    const jwt = (await (await fetch(`${BASE}/WebUntis/api/token/new`, { headers: { Cookie: cookies } })).text()).trim();
+    const res = await fetch(`${BASE}/WebUntis/api/rest/view/v1/classreg/open-periods`, {
+      method: 'POST',
+      headers: { Cookie: cookies, Authorization: 'Bearer ' + jwt, 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ teacherId: session.user?.elemId, filter: 'ABSENCE_OPEN', dateRange: { start: iso(from), end: iso(to) } }),
+    });
+    return { res, text: await res.text() };
   });
-  const text = await res.text();
   // Belt and braces, as in readTopic: should this list ever carry student data, stop.
   if (/"(referencedStudents|students|studentIds|stAbsences)"/.test(text)) throw new Error('Unerwartete Schuelerdaten in open-periods - Abbruch.');
   if (!res.ok) throw new Error(`open-periods HTTP ${res.status}`);
@@ -266,9 +304,11 @@ async function refreshChecked(session, lessons) {
 //   500 -> this period has no entry at all (NOT a failure); an empty entry is 200 with text:''.
 // Session cookies from the app-secret login are enough; no student field in sight.
 async function readTopic(ttId) {
-  const res = await fetch(`${BASE}/WebUntis/api/classreg/lessontopic?periodId=${ttId}`,
-    { headers: { Cookie: cookies, Accept: 'application/json' } });
-  const text = await res.text();
+  const { res, text } = await readRetry('lessontopic', async () => {
+    const res = await fetch(`${BASE}/WebUntis/api/classreg/lessontopic?periodId=${ttId}`,
+      { headers: { Cookie: cookies, Accept: 'application/json' } });
+    return { res, text: await res.text() };
+  });
   // Belt and braces: if this endpoint ever starts carrying student data, stop instead of
   // quietly passing it on.
   if (/"(referencedStudents|students|studentIds)"/.test(text)) {
@@ -296,16 +336,17 @@ async function readTopics(ttIds) {
 async function login(cred) {
   if (cred.WEBUNTIS_SECRET) {
     // App-secret login: server rejects a clientTime that drifts, so use its own clock.
-    const probe = await fetch(`${BASE}/WebUntis/jsonrpc_intern.do?m=getUserData2017&school=${SCHOOL}&v=i2.2`, {
+    const probe = await readRetry('login', () => fetch(`${BASE}/WebUntis/jsonrpc_intern.do?m=getUserData2017&school=${SCHOOL}&v=i2.2`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: 't', method: 'getUserData2017', params: [{ auth: { clientTime: 0, user: cred.WEBUNTIS_USER, otp: 0 } }], jsonrpc: '2.0' }),
-    }).then(r => r.json());
+    }).then(r => r.json()));
     const now = probe?.error?.data?.serverTime ?? Date.now();
+    // logging in only reads the user data, so it may be repeated too (same clientTime and code)
     const result = await post(`${BASE}/WebUntis/jsonrpc_intern.do?m=getUserData2017&school=${SCHOOL}&v=i2.2`, {
       id: 'a', method: 'getUserData2017',
       params: [{ auth: { clientTime: now, user: cred.WEBUNTIS_USER, otp: totp(cred.WEBUNTIS_SECRET, now) } }],
       jsonrpc: '2.0',
-    });
+    }, false, true);
     const sn = `schoolname="${Buffer.from('_' + SCHOOL).toString('base64')}"`;
     cookies = cookies ? `${cookies}; ${sn}` : sn;
     drift = now - Date.now();
@@ -1549,5 +1590,9 @@ async function main() {
   process.exit(1);
 }
 
-main().catch(e => { console.error('Error:', e.message); process.exit(1); })
+// A crash ends with 3, never 1: with --line, exit code 1 means "something is open", and the shell
+// wrapper in "WebUntis holen" (`test $? -le 1`) let a crash pass as exactly that. On 16.11.2026 the
+// 18:00 check died on "fetch failed", the app said "WebUntis geholt." in green, showed no classbook
+// line and no Eintragen button - and nothing was entered.
+main().catch(e => { console.error('Error:', e.message); process.exit(3); })
   .finally(() => { if (cookies) rpc('logout').catch(() => {}); });

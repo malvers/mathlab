@@ -29,11 +29,38 @@
 // gets its own line, and the window grows to whatever it needs. Green rgb(121,158,49) means
 // fine, red rgb(176,36,24) means something wants doing - the palette values as they are, on
 // the labs' almost-black navy, so they look the same in light mode and dark.
+//
+// Since 16.11.2026 a run without its KLASSENBUCH line counts as failed, whatever the exit code
+// says - in the check and in Eintragen alike. That evening the 18:00 check died on a network
+// error; its exit code 1 passed the `test $? -le 1` wrapper as "something open", the window said
+// "WebUntis geholt." in green, had no classbook line and no Eintragen button, and OK closed it
+// without a word. webuntis.js now ends a crash with 3 (and retries its reads), and everything
+// the run prints goes, with a time stamp, to ~/Library/Logs/webuntis-app.log - before, nothing
+// was left to tell what the window had shown.
 
 import AppKit
 
 let REPO = "/Users/malvers/IdeaProjects/forloop"
 let NODE = "/usr/local/bin/node"
+
+// The app's own log: every line the run prints, plus start, end and what was pressed.
+let LOG = URL(fileURLWithPath: NSHomeDirectory() + "/Library/Logs/webuntis-app.log")
+let logStamp: DateFormatter = {
+    let f = DateFormatter()
+    f.locale = Locale(identifier: "en_US_POSIX")
+    f.dateFormat = "yyyy-MM-dd HH:mm:ss"
+    return f
+}()
+func appLog(_ text: String) {
+    guard let data = "\(logStamp.string(from: Date()))  \(text)\n".data(using: .utf8) else { return }
+    if let h = try? FileHandle(forWritingTo: LOG) {
+        defer { try? h.close() }
+        _ = try? h.seekToEnd()
+        try? h.write(contentsOf: data)
+    } else {
+        try? data.write(to: LOG)       // first line: the file does not exist yet
+    }
+}
 
 // The forloop palette, exactly as CLAUDE.md and the labs use it - no lightened variants.
 // They keep their punch because the window is always dark (docNavy below), light mode included.
@@ -67,6 +94,7 @@ final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var buffer = ""
     var writing = false          // second phase: the classbook is being filled
     var pending: [String] = []   // "OFFEN:" lines - what Eintragen would write, for the warning
+    var sawBook = false          // a KLASSENBUCH line arrived in this phase - without it, no success
     func applicationDidFinishLaunching(_ n: Notification) {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: WIN, height: 212),
                           styleMask: [.titled, .closable], backing: .buffered, defer: false)
@@ -166,14 +194,23 @@ final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     func run() {
-        let p = Process()
-        p.executableURL = URL(fileURLWithPath: "/bin/bash")
         // plan-diff and the classbook check both answer 1 for "there is something", which is
-        // not a failure - hence the test wrappers, or the app would go red every time.
-        p.arguments = ["-lc", "cd \"\(REPO)\" && \"\(NODE)\" tools/webuntis.js year && \"\(NODE)\" tools/webuntis.js names"
+        // not a failure - hence the test wrappers, or the app would go red every time. A crash
+        // of webuntis.js ends with 3 since 16.11.2026, so the wrapper no longer lets it through.
+        appLog("START holen")
+        launch("cd \"\(REPO)\" && \"\(NODE)\" tools/webuntis.js year && \"\(NODE)\" tools/webuntis.js names"
             + " && { \"\(NODE)\" tools/plan-diff.mjs --save --line; test $? -le 1; }"
             + " && { \"\(NODE)\" tools/webuntis.js plan --offen --dry --line; test $? -le 1; }"
-            + " && { \"\(NODE)\" tools/webuntis.js pruefungen --line; test $? -le 1; }"]
+            + " && { \"\(NODE)\" tools/webuntis.js pruefungen --line; test $? -le 1; }")
+    }
+
+    // One way to run a phase (fetch or Eintragen): bash -lc, output streamed into consume().
+    // At the end the pipe is drained BEFORE finish() runs - the KLASSENBUCH line of Eintragen is
+    // the very last thing printed, and finish() now treats a missing one as a failure.
+    func launch(_ script: String) {
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/bin/bash")
+        p.arguments = ["-lc", script]
         let pipe = Pipe()
         p.standardOutput = pipe; p.standardError = pipe
         pipe.fileHandleForReading.readabilityHandler = { h in
@@ -183,10 +220,18 @@ final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
             DispatchQueue.main.async { self.consume(s) }
         }
         p.terminationHandler = { proc in
-            DispatchQueue.main.async { self.finish(code: proc.terminationStatus) }
+            let h = pipe.fileHandleForReading
+            h.readabilityHandler = nil
+            let rest = String(decoding: h.readDataToEndOfFile(), as: UTF8.self)
+            DispatchQueue.main.async {
+                if !rest.isEmpty { self.consume(rest) }
+                if !self.buffer.isEmpty { self.consume("\n") }   // a last line without newline
+                self.finish(code: proc.terminationStatus)
+            }
         }
         do { try p.run() } catch {
             status.stringValue = "Konnte node nicht starten: \(error.localizedDescription)"
+            appLog("FEHLER: node nicht gestartet: \(error.localizedDescription)")
             finish(code: 1)
         }
     }
@@ -199,6 +244,7 @@ final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         for raw in parts.dropLast() {
             let line = raw.trimmingCharacters(in: .whitespaces)
             if line.isEmpty { continue }
+            appLog(line)
             if line.hasPrefix("KEINE ÄNDERUNGEN") || line.hasPrefix("ÄNDERUNGEN")
                 || line.hasPrefix("ERSTER LAUF:") {
                 showVerdict(line)
@@ -251,6 +297,7 @@ final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
     // Same idea one line down, for the classbook: green means nothing is missing, red means
     // lessons are still empty - and only then does the Eintragen button appear.
     func showBook(_ line: String) {
+        sawBook = true
         book.stringValue = broken(line)
         book.toolTip = line
         // Red only when there is something to DO: empty lessons, or a write that failed.
@@ -273,7 +320,20 @@ final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func finish(code: Int32) {
         bar.isIndeterminate = false; bar.stopAnimation(nil)
-        if code == 0 {
+        // Safety net (16.11.2026): no KLASSENBUCH line means the classbook was NOT checked - or,
+        // after Eintragen, that nobody knows what got written. That is a failure even with exit
+        // code 0; the status keeps the last line the run printed (usually the error), and there
+        // is no Eintragen button on a check that never happened.
+        if !sawBook {
+            book.stringValue = writing ? "KLASSENBUCH: keine Rückmeldung – ob eingetragen wurde, ist unklar"
+                : "KLASSENBUCH: nicht geprüft – die Abfrage ist abgebrochen"
+            book.toolTip = book.stringValue
+            book.textColor = docRed
+            fill.isHidden = true
+        }
+        // Eintragen whose own line reports failed lessons is not "gefüllt" either.
+        let partly = writing && book.stringValue.contains("FEHLGESCHLAGEN")
+        if code == 0 && sawBook && !partly {
             bar.doubleValue = 80
             title.stringValue = writing ? "Klassenbuch gefüllt." : "WebUntis geholt."
             if !writing {
@@ -281,9 +341,12 @@ final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
                     .joined(separator: "\n")
             }
         } else {
-            title.stringValue = "Fehlgeschlagen (Code \(code))"
+            title.stringValue = partly ? "Eintragen teilweise fehlgeschlagen"
+                : code == 0 ? "Fehlgeschlagen (keine Klassenbuch-Antwort)" : "Fehlgeschlagen (Code \(code))"
+            title.textColor = docRed
             status.textColor = docRed
         }
+        appLog("ENDE \(writing ? "eintragen" : "holen"): Code \(code) · \(title.stringValue)")
         ok.isHidden = false
         ok.isEnabled = true
         relayout()
@@ -305,26 +368,11 @@ final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         bar.startAnimation(nil)
         summary.removeAll()
         buffer = ""
+        sawBook = false              // the check's line does not count for the write
         relayout()
 
-        let p = Process()
-        p.executableURL = URL(fileURLWithPath: "/bin/bash")
-        p.arguments = ["-lc", "cd \"\(REPO)\" && { \"\(NODE)\" tools/webuntis.js plan --offen --line; test $? -le 1; }"]
-        let pipe = Pipe()
-        p.standardOutput = pipe; p.standardError = pipe
-        pipe.fileHandleForReading.readabilityHandler = { h in
-            let d = h.availableData
-            if d.isEmpty { return }
-            let s = String(decoding: d, as: UTF8.self)
-            DispatchQueue.main.async { self.consume(s) }
-        }
-        p.terminationHandler = { proc in
-            DispatchQueue.main.async { self.finish(code: proc.terminationStatus) }
-        }
-        do { try p.run() } catch {
-            status.stringValue = "Konnte node nicht starten: \(error.localizedDescription)"
-            finish(code: 1)
-        }
+        appLog("START eintragen")
+        launch("cd \"\(REPO)\" && { \"\(NODE)\" tools/webuntis.js plan --offen --line; test $? -le 1; }")
     }
 
     // OK and the close button both ask here first. While lessons are still empty and nothing was
@@ -350,14 +398,20 @@ final class App: NSObject, NSApplicationDelegate, NSWindowDelegate {
         a.buttons[1].keyEquivalent = "\u{1b}"   // Esc = leave without writing
         NSApp.activate(ignoringOtherApps: true)
         if a.runModal() == .alertFirstButtonReturn {
+            appLog("Warnung beim Schließen: Eintragen gewählt")
             fillBook()
             return false
         }
+        appLog("Warnung beim Schließen: Nicht eintragen gewählt")
         return true
     }
 
-    @objc func quit() { if mayLeave() { NSApp.terminate(nil) } }
-    func windowShouldClose(_ sender: NSWindow) -> Bool { mayLeave() }
+    @objc func quit() { if mayLeave() { appLog("geschlossen (OK)"); NSApp.terminate(nil) } }
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        let leave = mayLeave()
+        if leave { appLog("geschlossen (Fenster)") }
+        return leave
+    }
     func applicationShouldTerminateAfterLastWindowClosed(_ s: NSApplication) -> Bool { true }
 }
 
