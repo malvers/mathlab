@@ -46,6 +46,15 @@ const ctx = canvas.getContext('2d');
 // control (opened with ?steuerung, Doc writes here) or, while it projects,
 // the board on the beamer that only shows what mission control sends.
 const STEUERUNG = new URLSearchParams(location.search).has('steuerung');
+// Doc, 16.11.2026: "3 Ja, bitte bauen" - the class practises at home: the blackboard in a week of the plan opens
+// vorrechnen.html?kw=47&ueben for everyone without a login, once Doc has opened the week's pill with its eye
+// (svp/svp-plan-tafel.js). The practice mode is one class on the body (vr-ueben): js/vorrechnen.css hides there what
+// only Doc needs in class - the buzzer and its QR, a name drawn, the board sent to the plan, the one button "Tafel"
+// (beamer, full screen, mission control), the reload of the HP, the class's feedback. The parameter stays in the
+// address (only kw and aufgaben leave it, below), so a reload stays in the practice mode. Surface only: the tasks
+// and their solutions are public anyway (js/vorrechnen-aufgaben-*.js).
+const UEBEN = !STEUERUNG && new URLSearchParams(location.search).has('ueben');
+if (UEBEN) document.body.classList.add('vr-ueben');
 let anzeigeModus = false;
 const container = document.getElementById('canvas-container');
 

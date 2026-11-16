@@ -300,6 +300,11 @@ let rechenwegWartet = false;
 let rechenwegLinie = 0;            // the last line the working takes (schaetzeZiel)
 let rechenwegZiel = null;          // in two columns: { gleich, linie } where the next step goes (schaetzeZiel)
 let rechenwegMass = null;          // what the last layout measured and decided - for a look from outside (DevTools)
+// the ☰ of the central drawer (js/cyber-left-chrome.js) where it shows - a narrow screen; else null. Only read here
+function drawerKnopf() {
+    const m = document.querySelector('.cyber-drawer-btn'), r = m && m.getBoundingClientRect();
+    return r && r.width && getComputedStyle(m).visibility !== 'hidden' ? r : null;
+}
 function zeigeRechenweg(verborgenAb) {
     if (anzeigeModus) return;
     if (typeof obenBlass === 'function') obenBlass();   // the board's C: dimmed without ink up there (js/vorrechnen-flug.js)
@@ -506,6 +511,16 @@ function zeigeRechenweg(verborgenAb) {
     // board's first row, the line of the arrows: the counter right behind the left one, "umstellen nach x"
     // centred over the task (once it is laid out, further down); the task starts a quarter line under them
     let obenFrei = 0;
+    // Doc, 16.11.2026, the practice mode on a phone (UEBEN, js/vorrechnen-zustand.js): the drawer's ☰ of a narrow screen
+    // (js/cyber-left-chrome.js, top left over every lab) lay over ◀ and "Aufgabe 1 / 20", and the three labels had shrunk
+    // to 6 px side by side. There ◀ moves right of the ☰ with the counter behind it, and "umstellen nach x" and the
+    // block's name stand each on a row of their own under the ☰, as large as they fit (gestapelt). Doc's view stays.
+    const menue = UEBEN && aufgabenModus ? drawerKnopf() : null, gestapelt = !!menue;
+    const zurueck = document.getElementById('tafel-pfeil-zurueck');
+    if (zurueck) {
+        if (zurueck.dataset.links === undefined) zurueck.dataset.links = zurueck.style.left;
+        zurueck.style.left = gestapelt ? (menue.right - c.left + 3) + 'px' : zurueck.dataset.links;
+    }
     if (aufgabenModus) {
         kopf.style.top = '0px';
         kopf.style.height = ZEILE + 'px';                  // the labels' top:50% is the arrows' middle
@@ -530,7 +545,29 @@ function zeigeRechenweg(verborgenAb) {
         // a narrow board - the three labels shrink together until the middle one clears its neighbours
         const labels = [zaehler, block, nach].filter(Boolean);
         labels.forEach(e => { e.dataset.fs = e.dataset.fs || getComputedStyle(e).fontSize; e.style.fontSize = e.dataset.fs; });
-        for (let i = 0, s = 1; nach && i < 12; i++) {
+        // one row each (see gestapelt above): the counter between ◀ and ▶, the other two centred across the board
+        // under the ☰; back on their shared row when the screen is wide again
+        if (nach) { nach.style.top = gestapelt ? '0px' : '50%'; if (gestapelt) nach.style.transform = 'translateX(-50%)'; }
+        if (block) {
+            block.style.top = gestapelt ? '0px' : '50%';
+            block.style.left = gestapelt ? (c.width / 2) + 'px' : '';
+            block.style.transform = gestapelt ? 'translateX(-50%)' : 'translateY(-50%)';
+            if (gestapelt) block.style.right = 'auto';
+        }
+        if (gestapelt) {
+            const passe = (e, breite) => {
+                const w = e.getBoundingClientRect().width;
+                if (w > breite) e.style.fontSize = parseFloat(e.dataset.fs) * breite / w + 'px';
+            };
+            if (zaehler) passe(zaehler, (pv && pv.width ? pv.left - c.left : c.width - 32) - 8 - parseFloat(zaehler.style.left));
+            let y = Math.max(ZEILE, menue.bottom - c.top) + 4;
+            [nach, block].filter(Boolean).forEach(e => {
+                passe(e, c.width - 2 * RAND);
+                e.style.top = y + 'px';
+                y += e.getBoundingClientRect().height + 4;
+            });
+        }
+        for (let i = 0, s = 1; nach && !gestapelt && i < 12; i++) {
             const n = nach.getBoundingClientRect(), z = zaehler && zaehler.getBoundingClientRect(), b = block && block.getBoundingClientRect();
             if ((!z || z.right + 16 <= n.left) && (!b || n.right + 16 <= b.left)) break;
             s *= 0.92;
@@ -707,8 +744,9 @@ function zeigeRechenweg(verborgenAb) {
         rechenwegWartet = true;
         document.fonts.ready.then(() => { rechenwegWartet = false; zeigeRechenweg(verborgenAb); });
     }
-    // "umstellen nach x" centred over the typeset task (its line was set above, before the layout)
-    if (aufgabenModus && nach) {
+    // "umstellen nach x" centred over the typeset task (its line was set above, before the layout) - not on a row of
+    // its own (gestapelt): there it stays centred on the board
+    if (aufgabenModus && nach && !gestapelt) {
         let links = Infinity, rechts = -Infinity;
         host.querySelectorAll('[data-schritt="aufgabe"] .katex-html').forEach(z => {
             const r = z.getBoundingClientRect();
@@ -728,7 +766,7 @@ function zeigeRechenweg(verborgenAb) {
     // left (a narrow window: MATH + ATH + TH + H ran into it, Doc 28.09.)
     const schema = aufgabenModus && document.getElementById('vorlage-schema');
     if (schema) {
-        schema.style.top = (ZEILE + 4) + 'px';
+        schema.style.top = (gestapelt ? obenFrei : ZEILE + 4) + 'px';           // under the stacked rows, there
         let links = Infinity, unten = -Infinity;
         host.querySelectorAll('[data-schritt="aufgabe"] .katex-html').forEach(z => {
             const r = z.getBoundingClientRect();

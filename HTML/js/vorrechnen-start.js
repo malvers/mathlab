@@ -229,8 +229,9 @@ if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
 
 document.fonts.ready.then(() => {
     buildPanel(); holeStriche(); recompute(); init(); zeigeVorlage();
-    // the buzzer listens on after a reload (live reload, mission control) - if it was on today
-    if (window.Buzzer) { Buzzer.tempo(tempoMeldung, () => pillenStart); texteAnmelden(); Buzzer.weiter(buzzerMeldung); }
+    // the buzzer listens on after a reload (live reload, mission control) - if it was on today; never in the
+    // practice mode (Doc, 16.11.2026: no buzzer there, js/vorrechnen-zustand.js)
+    if (window.Buzzer && !UEBEN) { Buzzer.tempo(tempoMeldung, () => pillenStart); texteAnmelden(); Buzzer.weiter(buzzerMeldung); }
     let warBeispiel = false;
     try { warBeispiel = localStorage.getItem('vorrechnen-beispiel') === '1'; } catch (_) {}
     if (testModus && (!strokes.length || warBeispiel)) beispiel();

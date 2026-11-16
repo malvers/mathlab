@@ -87,6 +87,7 @@ window.svpPlanParts.push(function (P) {
        A hidden pill "Vorrechnen" (aus) goes to Doc alone - grey, with its eye (schalte); the class never gets it. */
     function tafelLinks(ref) {
         if (!ref || window.UNTIS_TERMIN || ref.kw == null || ref.kw === '') return [];
+        knopfNachziehen(ref);    /* the week's blackboard follows its pills' eye (Doc, 16.11.2026, see vorrechnenKnopf) */
         const woche = vorrechnen[String(ref.kw)];
         const an = !!woche && vorrechnenAn(ref);
         const schon = selbstVerlinkt(ref);
@@ -124,33 +125,51 @@ window.svpPlanParts.push(function (P) {
        blocks are read (vorrechnenLaden). Same day: "mach das Tafel Icon hinter Aufgaben und so klein wie die
        anderen" - it stands behind the tabs now, before the pen. And: "das Vorrechen-Icon bitte nur, wenn ich
        eingeloggt bin. Das sollen die Schüler nicht sehen" - built for Doc alone, like the pen next to it. */
+    /* Doc, 16.11.2026: "3 Ja, bitte bauen" - the class gets the blackboard too, to practise at home (until then "nur,
+       wenn ich eingeloggt bin"). Without a login it stands only in a week whose pill Doc has opened with its eye - the
+       same eye opens the deck and the tool, so nothing shows too early (vorrechnenAn; a deck by theme on a page of its
+       own: its eye, sammlungAn) - and it opens vorrechnen.html in its practice mode (&ueben, js/vorrechnen-zustand.js:
+       no buzzer, no names, no board for the plan, no beamer). For Doc everything stays as it was. */
     const knoepfe = [];
     /* Doc, 02.10.2026, Informatik 9: "als Vorrechenlink und als [Deck]" - a deck by theme pinned to a page of its own
-       (SAMMLUNGEN seite) has no Aufgabensammlung there to open Vorrechnen from, so its week's blackboard opens it */
+       (SAMMLUNGEN seite) has no Aufgabensammlung there to open Vorrechnen from, so its week's blackboard opens it.
+       an: the eye of its pill is open - the class sees the blackboard only then */
     function labZiel(ref) {
         const woche = vorrechnen[String(ref.kw)];
-        if (woche) return { param: 'kw=' + encodeURIComponent(ref.kw), titel: woche };
+        if (woche) return { param: 'kw=' + encodeURIComponent(ref.kw), titel: woche, an: vorrechnenAn(ref) };
         const k = Object.keys(sammlungen).find(k => sammlungen[k].seite && String(sammlungen[k].kw) === String(ref.kw));
-        return k == null ? null : { param: 'aufgaben' + (k ? '=' + encodeURIComponent(k) : ''), titel: sammlungen[k].titel };
+        return k == null ? null : { param: 'aufgaben' + (k ? '=' + encodeURIComponent(k) : ''), titel: sammlungen[k].titel,
+            an: sammlungenAn(ref).indexOf(k) >= 0 };
+    }
+    /* where it goes: Doc's lab as before, the class's in the practice mode - null while the class may not see it */
+    function labUrl(ref) {
+        const ziel = labZiel(ref);
+        if (!ziel || !(P.CAN_EDIT_MAT || ziel.an)) return null;
+        return WURZEL + 'vorrechnen.html?' + ziel.param + (P.CAN_EDIT_MAT ? '' : '&ueben');
     }
     function knopfZeigen(k) {
-        const ziel = labZiel(k.ref);
-        k.b.hidden = !ziel;
-        if (ziel) k.b.title = 'Vorrechnen: ' + ziel.titel;
+        const ziel = labZiel(k.ref), url = labUrl(k.ref);
+        k.b.hidden = !url;
+        if (url) k.b.title = (P.CAN_EDIT_MAT ? 'Vorrechnen: ' : 'Vorrechnen üben: ') + ziel.titel;
+    }
+    /* the eye can open or shut a week after the head was built (the cloud's state, svp-plan-sync.js applyEdits): its
+       pills are drawn anew then (tafelLinks), and the blackboard of its head follows them */
+    function knopfNachziehen(ref) {
+        knoepfe.forEach(k => { if (k.ref === ref) knopfZeigen(k); });
     }
     function vorrechnenKnopf(ref, kopf) {
-        if (!P.CAN_EDIT_MAT) return;
         if (!vorrechnenSeite() || window.UNTIS_TERMIN || ref.kw == null || ref.kw === '') return;
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'sub-vorrechnen';
-        b.setAttribute('aria-label', 'Vorrechnen mit den Aufgaben der Woche');
+        b.setAttribute('aria-label', P.CAN_EDIT_MAT ? 'Vorrechnen mit den Aufgaben der Woche'
+            : 'Vorrechnen üben - die Aufgaben der Woche Schritt für Schritt');
         b.appendChild(P.tafelIcon());
         b.addEventListener('mousedown', P.keinMausfokus);
         b.addEventListener('click', function (ev) {
             ev.stopPropagation();   /* sonst klappt der Zeilenklick zu */
-            const ziel = labZiel(ref);
-            if (ziel) window.open(WURZEL + 'vorrechnen.html?' + ziel.param, '_blank', 'noopener');
+            const url = labUrl(ref);
+            if (url) window.open(url, '_blank', 'noopener');
         });
         kopf.appendChild(b);
         const k = { ref, b };

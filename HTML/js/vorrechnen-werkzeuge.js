@@ -178,7 +178,10 @@ function klappePlatz() {
         const gap = parseFloat(getComputedStyle(inner).rowGap) || 0;
         let p = f.previousElementSibling;
         while (p && !p.offsetHeight) p = p.previousElementSibling;       // hidden ones (beamer, ...) take no room
-        const frei = f.offsetTop - (p ? p.offsetTop + p.offsetHeight : f.offsetTop) - gap;
+        // none above the colours (the practice mode, Doc 16.11.2026): the whole margin from the rail's top is free,
+        // and no gap before the first one
+        const oben = (f.offsetParent === inner ? 0 : inner.offsetTop) + (parseFloat(getComputedStyle(inner).paddingTop) || 0);
+        const frei = p ? f.offsetTop - (p.offsetTop + p.offsetHeight) - gap : f.offsetTop - oben;
         // the visible ones need their height and a gap each, the toggle gives its own back
         const noetig = knoepfe.reduce((s, b) => s + (b.offsetHeight ? b.offsetHeight + gap : 0), 0) - k.offsetHeight - gap;
         passt = frei >= noetig;
@@ -286,7 +289,8 @@ function zeigeWerkzeuge() {
         // Preview auch da rein ... zur linken Seite" - the seldom ones sit in a row that slides out of the rail
         // to the left (.rail-klappe, js/cyber-lab-overrides.css); the toggle takes the P's place
         werkzeuge([
-            ['klappe', 'Mehr: Hell / Dunkel, Tafel senden, Vorschau', () => klappeAuf(!klappeOffen()), true],
+            // (the practice mode sends no board: js/vorrechnen-zustand.js, UEBEN)
+            ['klappe', UEBEN ? 'Mehr: Hell / Dunkel, Vorschau' : 'Mehr: Hell / Dunkel, Tafel senden, Vorschau', () => klappeAuf(!klappeOffen()), true],
             ['aufgaben', 'Alle Aufgaben', () => aufgabenPanel(true), false]]);
         const kk = document.getElementById('werkzeug-klappe');
         kk.classList.add('rail-klappe-knopf');
@@ -615,7 +619,9 @@ function aufgabenPanel(auf, sofort = false) {
     const kopf = o.querySelector('#ak-block-' + n);
     if (kopf) o.querySelector('.ak-buehne').scrollTop = kopf.offsetTop - 2;          // the stage scrolls, the tabs stay
     requestAnimationFrame(() => { if (o.dataset.auf) o.classList.add('open'); });      // not when closed before the frame
-    wiedervorlageLaden(o);                                        // the history comes after: the table and the tiles' counts
+    // the history comes after: the table and the tiles' counts - the class's feedback, Doc's alone: not in the
+    // practice mode (Doc, 16.11.2026; its tab is hidden there, js/vorrechnen.css)
+    if (!UEBEN) wiedervorlageLaden(o);
 }
 // every page shown for a moment and measured in ONE layout: the widths read first, then the sizes written (a long
 // formula shrinks to its tile as passeEin does, basis 1.3rem); the stage keeps the tallest page's height
@@ -642,7 +648,7 @@ function aufgabenEinpassen(o) {
 function aufgabenTab(k) {
     const o = akOverlay;
     if (!o || !o.isConnected) return;
-    k = Math.max(-1, Math.min(akSeiten.length - 1, k));
+    k = Math.max(UEBEN ? 0 : -1, Math.min(akSeiten.length - 1, k));        // the practice mode has no Wiedervorlage
     o.dataset.tab = String(k);
     o.querySelectorAll('.ak-tab').forEach((t, j) => {
         const an = j === k + 1;
