@@ -67,6 +67,15 @@
       '<div class="card" id="result" style="display:none">' +
         '<h2>Dein Ergebnis</h2>' +
         '<div class="score" id="score"></div>' +
+        /* the bars and percentages below are the WHOLE CLASS - the kids read them as their own result
+           (Doc, 16.11.2026: "Das muss also riesengroß drüber stehen ... die Kinder denken immer, dass das
+           ihre Leistung ist") */
+        '<div class="classhead">' +
+          '<div class="ch-big">Die ganze Klasse</div>' +
+          '<div class="ch-mid">Ab hier: Klassendurchschnitt \u2013 nicht dein Ergebnis!</div>' +
+          '<div class="ch-small">Balken und Prozente zeigen, wie viele aus der ganzen Klasse die Frage richtig hatten. ' +
+            'Dein eigenes Ergebnis steht oben.</div>' +
+        '</div>' +
         '<div id="review"></div>' +
         '<div class="avg" id="classavg">Klassen-Durchschnitt wird geladen …</div>' +
       '</div>' +
