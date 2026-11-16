@@ -124,6 +124,22 @@
         .tk-chip.byte > span { border-style: dashed; color: rgba(14, 36, 78, .45); }
         .tk-chip.byte > span i { font-style: normal; font-family: Orbitron, sans-serif; font-size: 13px; color: #0E244E;
             vertical-align: super; margin-left: 2px; }
+        /* the bytes of such a piece under its number, and one line that says why it was cut (Doc, 16.11.2026: "die
+           Bytes mit drunter schreiben, dass ich das nie wieder vergesse und beim nächsten Mal lernen kann") */
+        .tk-chip small.hx { color: rgb(176, 36, 24); letter-spacing: .02em; }
+        .tk-qw { position: relative; align-self: flex-start; margin-top: calc(var(--chip-h) / 2 - 13px); }
+        .tk-q { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 1.5px solid rgba(14, 36, 78, .45);
+            background: #fff; color: #0E244E; font-family: Orbitron, sans-serif; font-size: 14px; line-height: 1; cursor: pointer; }
+        .tk-q:hover, .tk-q.open { border-color: rgb(176, 36, 24); color: rgb(176, 36, 24); }
+        .tk-pop { position: absolute; z-index: 30; top: calc(100% + 8px); left: 0; width: min(430px, calc(100vw - 24px));
+            padding: 10px 13px; border-radius: 10px; background: #fff; border: 1.5px solid rgba(14, 36, 78, .25);
+            box-shadow: 0 6px 18px rgba(14, 36, 78, .18); font-family: Raleway, sans-serif; font-size: 15px; line-height: 1.4;
+            color: #0E244E; text-align: left; white-space: normal; }
+        .tk-pop[hidden] { display: none; }
+        .tk-pp { display: block; }
+        .tk-pp + .tk-pp { margin-top: 4px; }
+        .tk-pl { padding-left: 12px; }
+        .tk-pop code { font-family: "IBM Plex Mono", Menlo, monospace; color: rgb(176, 36, 24); }
         .tk-chip.neu > span { background: rgba(121, 158, 49, .45) !important; border-color: #5E7B26 !important;
             box-shadow: 0 0 0 3px rgba(121, 158, 49, .25); }
         body.tk-noid .tk-chip small { display: none; }
@@ -409,6 +425,14 @@
             el.appendChild(document.createTextNode(text.replace(/\n/g, '↵').replace(/ /g, '·')));
         }
 
+        // bytes in hex ("F0 9F 8C"); the leading space shows as "·" like everywhere in the lab
+        const hexBytes = b => Array.from(b, x => x === 32 ? '·' : x.toString(16).toUpperCase().padStart(2, '0')).join(' ');
+        function bytesOf(id) {
+            const v = BPE && BPE[id];
+            if (v === undefined || v === null) return null;
+            return typeof v === 'string' ? new TextEncoder().encode(v) : v;
+        }
+
         function chip(id, text, n, part) {
             const box = document.createElement('div');
             box.className = 'tk-chip' + (part ? ' byte' : '');
@@ -429,6 +453,14 @@
             no.textContent = '#' + fmt(id);
             box.appendChild(s);
             box.appendChild(no);
+            const b = part ? bytesOf(id) : null;
+            if (b) {
+                const hx = document.createElement('small');
+                hx.className = 'hx';
+                hx.textContent = hexBytes(b);
+                box.appendChild(hx);
+                box.title += ': Bytes ' + hexBytes(b);
+            }
             return box;
         }
 
@@ -513,6 +545,7 @@
 
             // a token that is only part of a character decodes to U+FFFD: collect such runs and show the whole
             // character faint in every piece, numbered 1/2, 2/2 ...
+            const split = [];                              // [{ whole, n }] - the characters that were cut
             let i = 0;
             while (i < ids.length) {
                 const one = tok.decode([ids[i]]);
@@ -524,11 +557,54 @@
                     }
                     const whole = tok.decode(ids.slice(i, j)).trim() || '?';
                     for (let k = i; k < j; k++) chips.appendChild(chip(ids[k], whole, k, (k - i + 1) + '/' + (j - i)));
+                    if (whole !== '?' && !split.some(g => g.whole === whole)) split.push({ whole, ids: ids.slice(i, j) });
                     i = j;
                 } else {
                     chips.appendChild(chip(ids[i], one, i, null));
                     i++;
                 }
+            }
+            // why it was cut: behind a "?" after the pieces (Doc, 16.11.2026: "Bitte mit Erklärfragezeichen"), once per
+            // character, with the bytes of every piece - so it can be read again next time
+            if (split.length) {
+                const wrap = document.createElement('span');
+                wrap.className = 'tk-qw';
+                const q = document.createElement('button');
+                q.type = 'button';
+                q.className = 'tk-q';
+                q.textContent = '?';
+                q.title = 'Warum ist das Zeichen zerschnitten?';
+                q.setAttribute('aria-expanded', 'false');
+                const pop = document.createElement('span');
+                pop.className = 'tk-pop';
+                pop.hidden = true;
+                pop.innerHTML = split.map(g => {
+                    const b = new TextEncoder().encode(g.whole), n = g.ids.length;
+                    return '<span class="tk-pp">„' + esc(g.whole) + '“ ist <b>1 Zeichen</b> aus ' + b.length + ' Bytes (<code>' +
+                        hexBytes(b) + '</code>). Als Ganzes steht es nicht im Wortschatz, darum ' + n + ' Stücke:</span>' +
+                        g.ids.map((id, k) => {
+                            const pb = bytesOf(id);
+                            return '<span class="tk-pp tk-pl">' + (k + 1) + '/' + n + ' · #' + fmt(id) + ' = <code>' +
+                                (pb ? hexBytes(pb) : '?') + '</code></span>';
+                        }).join('') +
+                        '<span class="tk-pp">Keines ist allein ein Zeichen. Deshalb steht „' + esc(g.whole) +
+                        '“ blass in jedem Stück, mit 1/' + n + ' … ' + n + '/' + n + '. Punkt = Leerzeichen.</span>';
+                }).join('');
+                q.addEventListener('click', e => {
+                    e.stopPropagation();
+                    pop.hidden = !pop.hidden;
+                    q.setAttribute('aria-expanded', String(!pop.hidden));
+                    q.classList.toggle('open', !pop.hidden);
+                    pop.style.left = '';
+                    if (!pop.hidden) {                         // keep it inside the window on small screens
+                        const r = pop.getBoundingClientRect();
+                        if (r.right > innerWidth - 8) pop.style.left = (pop.offsetLeft - (r.right - innerWidth + 8)) + 'px';
+                    }
+                });
+                pop.addEventListener('click', e => e.stopPropagation());
+                wrap.appendChild(q);
+                wrap.appendChild(pop);
+                chips.appendChild(wrap);
             }
         }
 
@@ -553,6 +629,14 @@
             document.querySelectorAll('#tk-presets button').forEach(b => b.classList.remove('on'));
             render();
         });
+
+        // a click elsewhere closes the "?" explanation of a cut character
+        document.addEventListener('click', () => document.querySelectorAll('.tk-pop').forEach(p => {
+            if (p.hidden) return;
+            p.hidden = true;
+            const q = p.previousElementSibling;
+            if (q) { q.classList.remove('open'); q.setAttribute('aria-expanded', 'false'); }
+        }));
 
         // ------------------------------------------------------- "So entsteht ein Token" ---
         // Byte pair encoding as o200k_base does it: start with the bytes, merge the neighbouring pair whose result has

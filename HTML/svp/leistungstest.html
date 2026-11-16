@@ -525,11 +525,23 @@
         .lt-tile .tl-main, .lt-tile .tl-state { margin-top: 1px; }
         .lt-tile .tl-state { grid-area: state; display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 2px 8px; min-height: 1.4em;
             font-family: Orbitron, system-ui, sans-serif; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted); white-space: nowrap; }
-        /* "1×" beside the points; the tooltip says "1× verlassen" */
-        /* a red badge, white figures, readable from afar (Doc, 11.11.2026: "1x größer bitte, roter HG, weiße Schrift");
-           the negative margins keep the points line - and so the tile - as high as on every other tile */
-        .lt-tile .tl-leave { margin: -6px 0 -6px auto; padding: 2px 7px; border-radius: 999px; background: rgb(176, 36, 24);
-            color: #fff; white-space: nowrap; font-size: 1.3em; font-weight: 700; line-height: 1.2; letter-spacing: 0.04em; }
+        /* "1×" for a pupil who left the test; the tooltip says "1× verlassen" */
+        /* a red badge, white figures, readable from afar (Doc, 11.11.2026: "1x größer bitte, roter HG, weiße Schrift") */
+        /* in the name line, right-aligned, inside the tile (Doc, 16.11.2026: "Steht das überlappt mit den anderen. Du
+           musst es in die Kopfzeile reinmachen.") - out at the corner it covered the next tile's WebUntis circle. It
+           shares the name's grid cell and is lower than the name line, so the tile keeps its height; out of the points
+           line, so it never pushes the points or the hint aside. The name leaves room for it (.has-leave; --lv-n = the
+           digits of the count, paintTile): about 1 em per digit in Orbitron bold, plus "×", the pill's padding and a
+           gap - a long name ends in "…" before the badge, never under it */
+        .lt-tile { --lv-fs: calc(1.3 * var(--row-fs, 0.75rem)); }
+        .lt-tile .tl-leave { grid-area: name; justify-self: end; align-self: center; z-index: 1; margin: 0; padding: 2px 7px;
+            border-radius: 999px; background: rgb(176, 36, 24); color: #fff; white-space: nowrap;
+            font-family: Orbitron, system-ui, sans-serif; font-size: var(--lv-fs); font-weight: 700; line-height: 1.2; letter-spacing: 0.04em; }
+        .lt-tile.has-leave .tl-name { padding-right: calc(var(--lv-fs) * (var(--lv-n, 1) + 0.6) + 20px); }
+        /* on the band of a finished tile: centred on the band (it starts 9 px above the cell), a white ring keeps the
+           red pill clear on the red band of a 6; the band's own 11 px padding comes on top of the room */
+        .lt-tiles .lt-tile.done .tl-leave { margin-top: -8px; box-shadow: 0 0 0 2px #fff; }
+        .lt-tiles .lt-tile.done.has-leave .tl-name { padding-right: calc(var(--lv-fs) * (var(--lv-n, 1) + 0.6) + 31px); }
         /* points line and bar sit low (Doc, 05.11.2026: line 6 px, bar 2 px further down) - taken from the
            bar's gap and the bottom padding, so the tile keeps its height */
         .lt-tile .tl-bar { grid-area: bar; height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 0; }
@@ -2847,16 +2859,24 @@
                     g.textContent = gradeText(res, res.grade);
                     state.appendChild(g);
                 }
-                /* how often the test was left: next to the points, not as a third item in the state line - there
-                   it wrapped and made that one tile taller than the rest (Doc, 18.09.2026: "1× verlassen macht
-                   die Kacheln anders als die anderen ... das meinte ich hoch") */
-                if (row && row.leaves && main.firstChild && main.firstChild.nodeType === 1) {
-                    const lv = document.createElement('span');
+                /* how often the test was left: not as a third item in the state line - there it wrapped and made
+                   that one tile taller than the rest (Doc, 18.09.2026: "1× verlassen macht die Kacheln anders als
+                   die anderen ... das meinte ich hoch") - but in the name line, right-aligned (Doc, 16.11.2026: "Du
+                   musst es in die Kopfzeile reinmachen"). A child of the tile now, not of .tl-main, so clearing
+                   main above does not remove it: kept or dropped here; .has-leave and --lv-n make the name room */
+                const leaves = row && row.leaves && main.firstChild && main.firstChild.nodeType === 1 ? row.leaves : 0;
+                let lv = t.querySelector('.tl-leave');
+                if (leaves && !lv) {
+                    lv = document.createElement('span');
                     lv.className = 'tl-leave';
-                    lv.textContent = row.leaves + '\u00d7';
-                    lv.title = row.leaves + '\u00d7 verlassen';
-                    main.appendChild(lv);
-                }
+                    t.appendChild(lv);
+                } else if (!leaves && lv) { lv.remove(); lv = null; }
+                if (lv) {
+                    lv.textContent = leaves + '\u00d7';
+                    lv.title = leaves + '\u00d7 verlassen';
+                    t.style.setProperty('--lv-n', String(leaves).length);
+                } else t.style.removeProperty('--lv-n');
+                t.classList.toggle('has-leave', !!lv);
                 bar.style.width = Math.round(frac * 100) + '%';
                 if (res) {
                     const col = scoreColor(res.pct);

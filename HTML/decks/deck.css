@@ -730,6 +730,9 @@ html.deck-edit .flug-kopie{display:none}
   p.line.step{width:fit-content}
   html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.now::after{left:-14px;right:-14px;top:-5px;bottom:-5px;width:auto;height:auto;
     border:1.5px solid var(--red);background:none}   /* dark red, trial (Doc, 06.10.2026: "probier mal rot (dunkel)") - was var(--orange) */
+  /* a line whose formula sits in the big quiet frame: that frame's padding reaches beyond the line box, so the red box
+     gets as much room above and below it as the line has (Doc, 16.11.2026: "die rote Box ist zu eng") */
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.now:has(.boxed-soft.big)::after{top:-12px;bottom:-12px}
   /* a key point: while its box is up (the current step) the usual dark red box is filled with a light green ground
      (Doc, 11.11.2026: "erst grün, Hintergrund und keine grüne Box, sondern eine rote Box. Erst wenn die Box
      sichtbar ist ... hinterlegen") */
