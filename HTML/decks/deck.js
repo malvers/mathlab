@@ -204,6 +204,9 @@ function standIns(node, keep) {
 // ?presenter: this window is the presenter view on the laptop (see PRES_JS at the end)
 const PRESENTER = /[?&]presenter(&|=|$)/.test(location.search);
 if (PRESENTER) document.documentElement.classList.add('presenter');
+// how the help and the titles write Cmd+O, the class's overview: Cmd on a Mac, Ctrl elsewhere (both work everywhere)
+const MAC_KEYS = /Mac|iPhone|iPad/.test(navigator.platform);
+const AUD_KEY = MAC_KEYS ? '⌘O' : 'Strg+O';
 // the title slide's night runs live in the beamer window only (deck-flow.js, Doc 18.09.2026) - the presenter keeps
 // the still picture from deck.css: one WebGL scene is enough. Offline or without WebGL the picture simply stays.
 if (!PRESENTER && document.querySelector('.slide.title'))
@@ -1292,6 +1295,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
       [K(['Home', '|', 'End']), 'Erste / letzte Folie'],
       [K(['1', '7', 'Enter']), 'Zu Folie 17 springen'],
       [K(['O']) + hint('Overview'), 'Übersicht aller Folien'],
+      [K([MAC_KEYS ? 'Cmd' : 'Strg', 'O']), 'Übersicht fürs Publikum – mit Referentenansicht nur auf dem Beamer, deine Ansicht bleibt'],
       [K(['F']) + hint('Fullscreen'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
       ...(jeopardy.available ? [[K(['J']) + hint('Jeopardy'), 'Jeopardy-Musik, 30 s – noch einmal J beendet sie']] : []),
       null,
@@ -1407,7 +1411,8 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
   });
 })();
 // overview of all slides: o (or the grid button bottom right) opens it, a click jumps there,
-// Esc, o or a click beside the tiles closes it (Doc, 15.09.2026: "Uebersicht ueber alle Folien")
+// Esc, o or a click beside the tiles closes it (Doc, 15.09.2026: "Uebersicht ueber alle Folien").
+// Cmd+O opens it for the class: in the presenter view on the beamer, not here (link.audKey below).
 (function () {
   const ov = document.createElement('div');
   ov.id = 'overview';
@@ -1432,7 +1437,9 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
   const kb = navigator.keyboard;
   function escLock() { escSync(); }                  // the shared lock (escWants) - the overview is one of its reasons
   escWants.push(function () { return !ov.hidden; });
-  function close() { ov.hidden = true; escLock(false); }
+  // the beamer window tells the presenter view whether its overview stands - Cmd+O there shows a pill and closes it
+  function tell(on) { if (window.DeckLink && DeckLink.ov) DeckLink.ov(on); }
+  function close() { ov.hidden = true; escLock(false); tell(false); }
   function build() {
     slides.forEach(function (s, i) {
       const cell = document.createElement('div');
@@ -1505,11 +1512,23 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
     if (!built) build();
     ov.hidden = false;
     escLock(true);
+    // a lab that had the keys gives them back: Esc and o must reach the overview (Cmd+O also comes from inside a lab)
+    const a = document.activeElement;
+    if (a && a.tagName === 'IFRAME') a.blur();
     marks();
-    [].forEach.call(ov.children, function (c, i) { c.classList.toggle('cur', i === si); });
+    curMark();
     scale();
     if (ov.children[si]) ov.children[si].scrollIntoView({ block: 'center' });
+    tell(true);
   }
+  function curMark() { [].forEach.call(ov.children, function (c, i) { c.classList.toggle('cur', i === si); }); }
+  // the frame follows the deck while the overview stands: with Cmd+O the class sees the overview on the beamer and
+  // the presenter's arrows move the highlighted slide there (Doc, 17.11.2026)
+  painted.push(function () {
+    if (ov.hidden || !built) return;
+    curMark();
+    if (ov.children[si]) ov.children[si].scrollIntoView({ block: 'nearest' });
+  });
   // Hiding and showing runs through here, so the deck window and the presenter stay in step
   // (deck-slidemenu lives in decks/deck-edit.js and calls this; `quiet` = the other window told us).
   window.DeckSlides = {
@@ -2723,6 +2742,7 @@ const link = (function () {
   let showing = false, showAt = 0;                   // this window is on the beamer for a show, since when
   let presFull = false;                              // presenter: has been fullscreen in this show
   let best = -1;                                     // presenter: rank of the best answer to its hello
+  let audOn = false, audWait = 0;                    // presenter: the beamer shows the overview (Cmd+O), waiting for its answer
   try { chan = new BroadcastChannel('deck:' + location.pathname); } catch (e) { }
 
   function send(m) {
@@ -2755,6 +2775,7 @@ const link = (function () {
       if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }
       if (m.t === 'ask-out') { if (window.DeckAsk) DeckAsk.shown(m); return; }   // the beamer's answer box, mirrored
       if (m.t === 'ani') { aniApply(m); return; }    // Start / Pause / Stop pressed on the board
+      if (m.t === 'ov-on') { audShow(!!m.on); return; }   // the beamer's overview opened or closed
       if (m.t === 'here') send({ t: 'go', si: si, step: step, to: m.from });   // the beamer window reloaded
       else if (m.t === 'go') {
         // answers to our hello: the window that opened us beats a fullscreen one beats any other tab
@@ -2769,6 +2790,7 @@ const link = (function () {
       linked = true;
       send({ t: 'go', si: si, step: step, rank: (mine ? 2 : 0) + (fsOn() ? 1 : 0) });
       if (window.DeckAsk) DeckAsk.sync();            // and the answer box as it stands
+      if (window.DeckOverview && DeckOverview.isOpen()) send({ t: 'ov-on', on: true });   // and an overview the class sees
       return;
     }
     if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }   // hidden in the presenter
@@ -2787,6 +2809,7 @@ const link = (function () {
     else if (m.t === 'ask-hush') { if (window.DeckAsk) DeckAsk.hush(); }       // the presenter's mic is on: her voice off
     else if (m.t === 'ask-close') { if (window.DeckAsk) DeckAsk.dismiss(); }   // x or Esc on her answers in the presenter
     else if (m.t === 'go') apply(m);
+    else if (m.t === 'aud-ov') audApply(m.on);                                 // Cmd+O in the presenter: the overview here
     else if (m.t === 'pop') popApply(m);                                       // a box opened in the presenter
     else if (m.t === 'tail') hoverTail.apply(m);                               // the presenter's mouse on a strip
     else if (m.t === 'jubel') feuerwerk(0.12, 0.12, 0.88, 0.5);                // the class cheered: the firework
@@ -2802,6 +2825,68 @@ const link = (function () {
     if (!e.data || !e.data.deckLink || e.origin !== location.origin) return;
     receive(e.data.deckLink, e.source);
   });
+
+  // Cmd+O (Ctrl+O): the overview for the class, not for Doc (Doc, 17.11.2026: "wenn ich Command O drücke ... dass dann
+  // nicht ich den Überblick sehe, sondern dass die Zuschauer den Überblick über die Folien sehen"). In the presenter view
+  // it opens and closes the overview in the beamer window - Doc's view stays, a pill in its bar says the overview stands
+  // there and closes it with a click; Esc closes it too before it ends the show. A click on a tile on the beamer jumps
+  // there and the presenter follows, the presenter's arrows move the frame over there. Without a presenter view (one
+  // screen, mirrored) the one window shows it, as o does. Cmd+O is Chrome's "Datei öffnen" - not one of the keys a
+  // browser keeps for itself (as Cmd+T/W/N/Q are), so preventDefault on the keydown takes it, as Google Docs does.
+  function audKey(e) {
+    if (!(e.metaKey || e.ctrlKey) || e.altKey || e.shiftKey || (e.key !== 'o' && e.key !== 'O')) return false;
+    e.preventDefault(); e.stopImmediatePropagation();   // no file dialog, and no other listener reads it as an o
+    // pressed inside a lab: the keys back to the deck, so the Esc that closes it lands here, not in the lab
+    const a = document.activeElement;
+    if (a && a.tagName === 'IFRAME') a.blur();
+    if (!e.repeat) audToggle();
+    return true;
+  }
+  function audToggle() {
+    const O = window.DeckOverview;
+    if (!O) return;
+    if (!PRESENTER) { if (O.isOpen()) O.close(); else O.open(); return; }
+    const want = !audOn;
+    send({ t: 'aud-ov', on: want });
+    audMark(want);                                   // at once: a second Cmd+O before the answer closes it again
+    // the beamer answers with ov-on at once; no answer = no deck window left: the pill goes and a line says so.
+    // Never Doc's own overview instead - on a busy Mac the answer came late (seconds, measured head-less 17.11.2026)
+    // and he would have seen it for nothing; a late answer simply brings the pill back.
+    clearTimeout(audWait);
+    audWait = setTimeout(function () {
+      audMark(false);
+      if (want) toast('Kein Zuschauerfenster offen – die Übersicht fürs Publikum braucht das Beamer-Fenster');
+    }, 1500);
+  }
+  function audApply(on) {                            // beamer: as the presenter asked - and answer, also if nothing changes
+    const O = window.DeckOverview;
+    if (!O) return;
+    send({ t: 'ov-on', on: !!on });                  // the answer first: building the overview the first time takes a while
+    if (on) O.open(); else O.close();
+  }
+  function audShow(on) {                             // presenter: the beamer says its overview stands or not
+    clearTimeout(audWait);
+    audMark(on);
+  }
+  function audMark(on) {                             // presenter: the pill, and Esc for the page while it stands
+    audOn = on;
+    const pill = document.querySelector('#pres .p-aud');
+    if (pill) pill.hidden = !on;
+    escSync();                                       // in fullscreen Esc stays with the page while it stands
+  }
+  escWants.push(function () { return PRESENTER && audOn; });
+  addEventListener('keydown', audKey, true);         // capture: before every other key listener of the deck
+  // a lab on the slide has the keys once it was clicked: its page gets the same Cmd+O. Only real presses - the
+  // beamer's copy of a lab gets the presenter's keys again (mirror), and that one must not toggle a second time.
+  function audFrame(f) {
+    let w = null;
+    try { w = f.contentWindow; if (w) void w.document; } catch (err) { return; }   // another origin: not ours
+    if (!w || w.__deckAudKey) return;
+    w.__deckAudKey = true;                           // a reload brings a new window, which gets it again
+    w.addEventListener('keydown', function (k) { if (k.isTrusted) audKey(k); }, true);
+  }
+  document.addEventListener('load', function (e) { if (e.target.tagName === 'IFRAME') audFrame(e.target); }, true);
+  document.querySelectorAll('iframe').forEach(audFrame);
 
   // Labs and 3D dice mirrored (Doc, 16.09.2026: "ideal wäre ich bediene die und LG auch ... same for Lab").
   // The same lab runs in both windows; everything done in the presenter's live slide - pointer, mouse, wheel,
@@ -3311,6 +3396,8 @@ const link = (function () {
     if (j && !j.hidden) return;                      // Esc first drops a typed slide number
     // her answers open (or her line has the cursor): Esc closes them, the show goes on (Doc, 09.11.2026)
     if (window.DeckAsk && DeckAsk.escKey && DeckAsk.escKey()) { e.preventDefault(); e.stopImmediatePropagation(); return; }
+    // the class's overview on the beamer (Cmd+O): Esc closes it, the show goes on
+    if (audOn) { e.preventDefault(); e.stopImmediatePropagation(); audToggle(); return; }
     endShow();
   }, true);   // capture: before the slide-number handler clears its box; an open overview still gets Esc first
 
@@ -3546,7 +3633,10 @@ const link = (function () {
         '<div class="p-bar"><span class="p-timer" title="Laufzeit"></span>'
       + '<button type="button" class="p-pause"></button>'
       + '<button type="button" class="p-reset" title="Timer neu starten" aria-label="Timer neu starten">' + svg(RESET) + '</button>'
-      + '<button type="button" class="p-ov" title="Übersicht aller Folien (o)" aria-label="Übersicht aller Folien"></button>'
+      + '<button type="button" class="p-ov" title="Übersicht aller Folien (o) – für das Publikum: ' + AUD_KEY + '" aria-label="Übersicht aller Folien"></button>'
+      // Cmd+O: the overview stands on the beamer - this says so, a click closes it there (audToggle)
+      + '<button type="button" class="p-aud" hidden title="Übersicht beim Publikum schließen (' + AUD_KEY + ' / Esc)">'
+      + '<span class="p-aud-ico"></span><span class="p-aud-txt">Übersicht beim Publikum</span></button>'
       + '<span class="p-buzz" hidden></span>'       // the class's buzzer feedback (presBuzzer)
       + '<span class="p-clock" title="Uhrzeit"></span>'
       + '<button type="button" class="p-end-btn" title="Präsentation beenden (Esc)" aria-label="Präsentation beenden">'
@@ -3773,6 +3863,9 @@ const link = (function () {
     const ovBtn = document.getElementById('ovbtn');
     if (ovBtn) { q('.p-ov').innerHTML = ovBtn.innerHTML; q('.p-ov').onclick = function () { ovBtn.click(); }; }
     else q('.p-ov').remove();
+    if (ovBtn) q('.p-aud-ico').innerHTML = ovBtn.innerHTML;   // the same grid icon in the pill
+    q('.p-aud').onclick = function () { audToggle(); };
+    if (audOn) q('.p-aud').hidden = false;
     q('.p-prev').onclick = function () { prev(); };
     q('.p-next').onclick = function () { next(); };
     // a click on the slide no longer goes on, as on the beamer (Doc, 30.10.2026) - the buttons and arrow keys do
@@ -3823,6 +3916,8 @@ const link = (function () {
   soloBuzzer();                                      // the class's taps in the plain deck window (no presenter view)
   return { present: present, send: send,
            music: function (on) { if (linked) send({ t: 'jeopardy-on', on: !!on }); },   // the beamer's J music, for the presenter
+           // the overview opened or closed in this window: the presenter view hears it if this is its beamer
+           ov: function (on) { if (!PRESENTER && linked) send({ t: 'ov-on', on: !!on }); },
            skip: function (i, on) { send({ t: 'skip', i: i, on: !!on }); },
            // Start / Pause / Stop of a drawn animation (aniCtl), only within a show
            ani: function (i, k, act, at) { if (linked) send({ t: 'ani', si: i, k: k, act: act, at: at }); } };
