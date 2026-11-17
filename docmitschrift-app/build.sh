@@ -5,7 +5,7 @@
 #   docmitschrift-app/build.sh mac        only mitschrift-mac
 set -e
 HERE="$(cd "$(dirname "$0")" && pwd)"
-ADB="$HOME/Library/Android/sdk/platform-tools/adb"
+ADB=$(sh "$HERE/../tools/adb.sh")   # the newest adb on this Mac (tools/adb.sh)
 WHAT="${1:-all}"
 
 if [ "$WHAT" = all ] || [ "$WHAT" = android ]; then

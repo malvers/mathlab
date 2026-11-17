@@ -3,7 +3,7 @@
 # No secrets: the app only opens the public page rueckmeldung.html?c=<code>.
 set -e
 cd "$(dirname "$0")/android"
-ADB="$HOME/Library/Android/sdk/platform-tools/adb"
+ADB=$(sh ../../tools/adb.sh)   # the newest adb on this Mac (tools/adb.sh)
 JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew -q assembleDebug
 APK=app/build/outputs/apk/debug/app-debug.apk
 echo "gebaut: $(pwd)/$APK"

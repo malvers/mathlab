@@ -3,7 +3,7 @@
 # (adb tcpip 5555 or Android's wireless debugging) - Doc, 08.11.2026: "Jetzt brauchen wir das Kabel nie mehr".
 # Prints nothing and exits 1 when the phone is on neither. Used by the apps' build.sh.
 USB=43211JEKB10668
-ADB="$HOME/Library/Android/sdk/platform-tools/adb"
+ADB=$(sh "$(dirname "$0")/adb.sh") || exit 1   # the newest adb on this Mac (tools/adb.sh)
 LIST=$("$ADB" devices)
 if echo "$LIST" | grep -q "^$USB[[:space:]]*device"; then
     echo "$USB"
@@ -11,6 +11,14 @@ if echo "$LIST" | grep -q "^$USB[[:space:]]*device"; then
 fi
 WLAN=$(echo "$LIST" | awk '$2 == "device" && ($1 ~ /:[0-9]+$/ || $1 ~ /_adb-tls-connect/) { print $1; exit }')
 [ -n "$WLAN" ] && { echo "$WLAN"; exit 0; }
+
+# Android's wireless debugging ("Kabelloses Debugging", on since 17.11.2026, home network trusted): the phone
+# announces itself over mDNS as _adb-tls-connect with a port that changes after every restart - connect to it.
+TLS=$("$ADB" mdns services 2>/dev/null | awk '/_adb-tls-connect/ { print $NF; exit }')
+if [ -n "$TLS" ]; then
+    "$ADB" connect "$TLS" >/dev/null 2>&1
+    "$ADB" devices | grep -q "^$TLS[[:space:]]*device" && { echo "$TLS"; exit 0; }
+fi
 
 # The router gives the phone a new address now and then (08.11.2026: 192.168.2.102 -> .100, nothing else had
 # changed, adb tcpip still listened). So drop the stale entry and ask for the phone by its name, which the

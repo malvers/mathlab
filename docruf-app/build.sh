@@ -4,7 +4,7 @@
 # never into the source, and the APK stays on this Mac (it is gitignored), because whoever has it can read the calls.
 set -e
 cd "$(dirname "$0")/android"
-ADB="$HOME/Library/Android/sdk/platform-tools/adb"
+ADB=$(sh ../../tools/adb.sh)   # the newest adb on this Mac (tools/adb.sh)
 DOCRUF_TOPIC=$(security find-generic-password -s doc-ruf -a ntfy-topic -w) || { echo "kein Kanal in der Keychain (doc-ruf / ntfy-topic)"; exit 1; }
 export DOCRUF_TOPIC
 JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew -q assembleDebug
