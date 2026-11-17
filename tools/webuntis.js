@@ -379,6 +379,47 @@ const REPO = path.join(__dirname, '..');
 const UNTIS_CACHE = path.join(REPO, 'HTML', 'svp', 'plandaten', 'untis');
 const WRITTEN_ROW = '_written';   // svp_untis row stundenplan.html reads for its orange L and A
 
+// Lessons WebUntis still carries although they no longer hold (Doc, 17.11.2026: the old Klausur
+// slot BGY24 Thu 19.11. 13:30-14:15 next to the valid 13:30-14:30 - "blende sie bis dahin bei uns
+// aus", i.e. until the school removes it in Untis). `year` leaves them out of plandaten/, so
+// stundenplan.html, meinplan.html (publishPlan) and the test pills never see them. Strict match on
+// day, start, end, subject and classes, so nothing else can vanish by accident.
+const HIDE_FILE = path.join(REPO, 'HTML', 'svp', 'untis-hide.json');
+function loadHidden() {
+  try { return JSON.parse(fs.readFileSync(HIDE_FILE, 'utf8')).lessons || []; } catch (e) { return []; }
+}
+function isHidden(rule, l) {
+  const a = rule.classes || [], b = l.classes || [];
+  return rule.date === l.date && rule.startTime === l.startTime && rule.endTime === l.endTime
+    && rule.subject === l.subject && a.length === b.length && a.every(c => b.includes(c));
+}
+// Drops the hidden lessons from byWeek (Map week -> lessons) and returns how many went. Up to the
+// lesson's day every run says whether Untis still has it - one line each, silent afterwards, so the
+// "WebUntis holen" dialog does not repeat it for the rest of the year.
+function dropHidden(byWeek) {
+  const rules = loadHidden();
+  if (!rules.length) return 0;
+  const hits = rules.map(() => 0);
+  let dropped = 0;
+  for (const [wk, list] of byWeek) {
+    byWeek.set(wk, list.filter(l => {
+      const i = rules.findIndex(r => isHidden(r, l));
+      if (i < 0) return true;
+      hits[i]++; dropped++;
+      return false;
+    }));
+  }
+  const today = Number(ymd(new Date()));
+  rules.forEach((r, i) => {
+    if (r.date < today) return;
+    const what = `${r.date} ${hhmm(r.startTime)}-${hhmm(r.endTime)} ${r.subject} ${(r.classes || []).join(',')}`;
+    console.log(hits[i]
+      ? `Ausgeblendet (steht noch in WebUntis): ${what}`
+      : `Steht nicht mehr in WebUntis - Zeile in untis-hide.json kann weg: ${what}`);
+  });
+  return dropped;
+}
+
 function loadMap() {
   if (!fs.existsSync(MAP_FILE)) return [];
   const raw = JSON.parse(fs.readFileSync(MAP_FILE, 'utf8'));
@@ -1242,6 +1283,7 @@ async function main() {
       meine = normLessons(tt);
     }
     process.stderr.write('\r' + ' '.repeat(44) + '\r');
+    total -= dropHidden(byWeek);
 
     const weeks = [...byWeek.keys()].sort();
     for (const wk of weeks) {
