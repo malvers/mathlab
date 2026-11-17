@@ -624,7 +624,7 @@
                 '<span class="loan-who">' + esc(who(s)) + NB + '• ' + nr(l.book) + '</span></span>' +
                 '<span class="loan-due"><span class="loan-date">' + esc(shortDate(l.due)) + '</span>' +
                 (fresh ? '<span class="badge fresh">neu</span>'
-                    : d.badge ? '<span class="badge ' + d.cls + '">' + d.badge + '</span>' : '<span class="loan-rel">' + esc(d.rel) + '</span>') +
+                    : d.badge ? '<span class="badge ' + d.cls + '">' + d.badge + '</span>' : '<span class="badge fine">ausgeliehen</span>') +
                 '</span></button></li>';
         }).join('') || '<li class="empty">Gerade ist nichts ausgeliehen.</li>';
         $('loanCount').textContent = list.length;

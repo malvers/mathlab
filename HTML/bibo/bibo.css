@@ -271,6 +271,17 @@ html.svp-light .seg button[aria-checked="true"] { background: rgba(var(--tint), 
 /* due today: the same orange, framed in red so it stands out from "bald fällig" */
 .badge.today { background: var(--c-orange); color: var(--c-navy); box-shadow: inset 0 0 0 2px var(--c-red); }
 .badge.fresh { background: var(--c-green); color: var(--c-white); }
+/* lent and not due soon: a green pill as well, so every row of the overview carries one (Doc, 17.11.2026) */
+.badge.fine { background: var(--c-green); color: var(--c-white); }
+/* the pills in the overview all as wide as the longest one ("heute fällig"), centred - one calm column */
+.loan-due .badge { box-sizing: border-box; width: var(--pill-w, 10.8em); text-align: center; }
+/* very narrow phones (320 px): next to the fixed pills long titles broke inside a word ("Sprachrau|m") */
+@media (max-width: 360px) {
+    /* the date and the pill move under the title, in one row - the title gets the full width */
+    .loan { flex-wrap: wrap; row-gap: 8px; }
+    .loan-main { flex-basis: 100%; }
+    .loan-due { flex-direction: row; align-items: center; gap: 10px; margin-left: auto; }
+}
 
 .foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 0 2px; }
 .foot p { margin: 0; font: 13px/1.4 Raleway, sans-serif; color: var(--muted); }
