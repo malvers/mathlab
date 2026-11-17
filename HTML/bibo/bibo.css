@@ -13,7 +13,13 @@
 html.svp-light { color-scheme: light; }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--text); }
+/* overscroll-behavior: pulling down at the top must not reload the page (Chrome's pull-to-refresh) */
+html, body { margin: 0; background: var(--bg); color: var(--text); overscroll-behavior-y: contain; }
+/* the gap every scroll keeps to the screen edges, below the status bar / notch (read by bibo.js as well) */
+html {
+    scroll-padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    scroll-padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
 body {
     font-family: Orbitron, sans-serif;
     padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
@@ -108,6 +114,8 @@ html.svp-light .seg button[aria-checked="true"] { background: rgba(var(--tint), 
     font: 18px Raleway, sans-serif; font-variant-numeric: lining-nums; -webkit-appearance: none; appearance: none;
 }
 .field::placeholder { color: var(--muted); }
+/* the fields are type="search" (see index.html): no clear cross, no magnifier */
+.field::-webkit-search-cancel-button, .field::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }
 .field:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
 .num-row { display: flex; gap: 8px; margin: 12px 0 0; }
 .num-row .field { flex: 1 1 auto; letter-spacing: .08em; }
@@ -148,7 +156,9 @@ html.svp-light .seg button[aria-checked="true"] { background: rgba(var(--tint), 
 /* ---------- the book ---------- */
 .book-info { margin: 14px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); }
 .book-head { display: flex; align-items: flex-start; gap: 8px; }
-.book-title { flex: 1 1 auto; margin: 4px 0 0; font: 700 21px/1.3 Raleway, sans-serif; color: var(--text); overflow-wrap: anywhere; }
+.book-title { flex: 1 1 auto; margin: 4px 0 0; font: 700 21px/1.3 Raleway, sans-serif; color: var(--text); overflow-wrap: anywhere; text-wrap: balance; }
+/* "Nr. 980370", "(Demo 11)": never torn apart at the end of a line */
+.nr { white-space: nowrap; }
 .x {
     flex: 0 0 44px; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 10px; cursor: pointer;
     display: grid; place-items: center; background: transparent; color: var(--muted); font-size: 0;
@@ -168,8 +178,7 @@ html.svp-light .seg button[aria-checked="true"] { background: rgba(var(--tint), 
 .new-book .go { margin-top: 8px; }
 
 /* ---------- names ---------- */
-#nameInput { margin: 12px 0 0; }
-#nameInput::-webkit-search-cancel-button { display: none; }
+#whoInput { margin: 12px 0 0; }
 .hits { list-style: none; margin: 4px 0 0; padding: 0; }
 .hit {
     width: 100%; min-height: 62px; margin: 8px 0 0; padding: 9px 14px; border-radius: var(--radius); cursor: pointer;
@@ -214,13 +223,23 @@ html.svp-light .seg button[aria-checked="true"] { background: rgba(var(--tint), 
 .done-head { display: flex; align-items: center; gap: 10px; }
 .done-head svg { width: 34px; height: 34px; fill: var(--c-green); flex: 0 0 auto; }
 .done-head h2 { margin: 0; font: 700 18px Orbitron, sans-serif; letter-spacing: .06em; color: var(--text); }
-.done-text { margin: 12px 0 0; font: 17px/1.55 Raleway, sans-serif; font-variant-numeric: lining-nums; }
+.done-text { margin: 12px 0 0; font: 17px/1.55 Raleway, sans-serif; font-variant-numeric: lining-nums; text-wrap: pretty; }
 .muted { color: var(--muted); }
-.done-btns { display: flex; gap: 8px; margin: 14px 0 0; }
-.done-btns .next { flex: 1.6 1 0; background: var(--c-orange); border-color: var(--c-orange); color: var(--c-navy); }
+/* a quiet text button: "In der Übersicht zeigen" */
+.link {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: 4px 0 0; padding: 0 2px; cursor: pointer;
+    background: transparent; border: 0; font: 600 15px Raleway, sans-serif; color: var(--lambda);
+    text-decoration: underline; text-underline-offset: 3px;
+}
+.link svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.done-btns { display: flex; gap: 8px; margin: 10px 0 0; }
+/* one line each, down to 320 px phones: the type shrinks a little before anything wraps */
+.done-btns .tool { white-space: nowrap; padding: 0 10px; font-size: clamp(11px, 3.4vw, 13px); }
+.done-btns .next { flex: 1.25 1 0; background: var(--c-orange); border-color: var(--c-orange); color: var(--c-navy); }
+.done-btns .next svg { width: 22px; height: 22px; }
 
 /* ---------- overview ---------- */
-.loan-sum { margin: -6px 0 8px; }
+.loan-sum { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 8px; }
 .loan-sum:empty { display: none; }
 .loans { list-style: none; margin: 0; padding: 0; }
 .loans li + li .loan { border-top-color: var(--row-line); }
@@ -230,11 +249,14 @@ html.svp-light .seg button[aria-checked="true"] { background: rgba(var(--tint), 
 }
 .loan:hover { background: rgba(var(--tint), .08); }
 .loan.over { border-left-color: var(--c-red); }
-.loan.soon { border-left-color: var(--c-orange); }
-.loan.flash { animation: flash 1.6s ease-out; }
-@keyframes flash { from { background: rgba(121, 158, 49, .35); } to { background: transparent; } }
+.loan.soon, .loan.today { border-left-color: var(--c-orange); }
+/* the loan just made: green until the next book, and a short flash once it is on the screen (bibo.js) */
+.loan.fresh { border-left-color: var(--c-green); background: rgba(121, 158, 49, .14); }
+.loan.flash { animation: flash 2.2s ease-out; }
+@keyframes flash { 0%, 35% { background: rgba(121, 158, 49, .45); } 100% { background: rgba(121, 158, 49, .14); } }
+@media (prefers-reduced-motion: reduce) { .loan.flash { animation: none; } }
 .loan-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.loan-title { font: 700 17px/1.3 Raleway, sans-serif; color: var(--text); overflow-wrap: anywhere; }
+.loan-title { font: 700 17px/1.3 Raleway, sans-serif; color: var(--text); overflow-wrap: anywhere; text-wrap: balance; }
 .loan-who { font: 14px/1.35 Raleway, sans-serif; color: var(--muted); font-variant-numeric: lining-nums; }
 .loan-due { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .loan-date { font: 700 14px Orbitron, sans-serif; letter-spacing: .03em; color: var(--text); }
@@ -246,6 +268,9 @@ html.svp-light .seg button[aria-checked="true"] { background: rgba(var(--tint), 
 }
 .badge.over { background: var(--c-red); color: var(--c-white); }
 .badge.soon { background: var(--c-orange); color: var(--c-navy); }
+/* due today: the same orange, framed in red so it stands out from "bald fällig" */
+.badge.today { background: var(--c-orange); color: var(--c-navy); box-shadow: inset 0 0 0 2px var(--c-red); }
+.badge.fresh { background: var(--c-green); color: var(--c-white); }
 
 .foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 0 2px; }
 .foot p { margin: 0; font: 13px/1.4 Raleway, sans-serif; color: var(--muted); }

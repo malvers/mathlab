@@ -39,9 +39,17 @@
     function dueInfo(due) {
         const n = daysFrom(today(), due);
         if (n < 0) return { cls: 'over', badge: 'überfällig', rel: n === -1 ? 'seit gestern' : 'seit ' + (-n) + ' Tagen' };
-        if (n <= SOON_DAYS) return { cls: 'soon', badge: 'bald fällig', rel: n === 0 ? 'heute' : n === 1 ? 'morgen' : 'in ' + n + ' Tagen' };
+        if (n === 0) return { cls: 'today', badge: 'heute fällig', rel: 'heute' };
+        if (n <= SOON_DAYS) return { cls: 'soon', badge: 'bald fällig', rel: n === 1 ? 'morgen' : 'in ' + n + ' Tagen' };
         return { cls: 'fine', badge: '', rel: 'in ' + n + ' Tagen' };
     }
+
+    /* ---------- line breaks: what belongs together stays on one line ---------- */
+    const NB = '\u00a0';   // no-break space
+    // titles: a dash, "&", a number ("11", "11–13") or a roman numeral ("II") stays with the word before it, and so
+    // does a short last word - "Zahlenwerk 11 –" / "Analysis", "Bits & Bytes –" / "Informatik Sek II"
+    const glue = s => String(s).replace(/ (?=(?:[–&-]|\d[\d–-]*|[IVX]+)(?: |$))/g, NB).replace(/ (\S{1,3})$/, NB + '$1');
+    const nr = num => '<span class="nr">Nr.' + NB + esc(num) + '</span>';
 
     /* ---------- storage: one JSON object in localStorage, everything wrapped (private mode, blocked storage) ---------- */
     let db = null;
@@ -70,8 +78,9 @@
     const openLoan = num => db.loans.find(l => l.book === num && !l.back);
     const openLoans = () => db.loans.filter(l => !l.back);
     const loansOf = sid => db.loans.filter(l => l.student === sid && !l.back).length;
-    const who = s => s ? s.name + ' (' + s.cls + ')' : 'unbekannt';
+    const who = s => s ? s.name + ' (' + s.cls.replace(/ /g, NB) + ')' : 'unbekannt';
     const bookTitle = num => (db.books[num] || {}).title || 'Unbekanntes Buch';
+    const LIB_NUM = /^\d{6}$/;   // the library label: exactly six digits
 
     /* ---------- fuzzy name matching: what speech recognition hears is rarely spelled like the class list ---------- */
     const Fuzzy = (() => {
@@ -161,14 +170,44 @@
             });
             return out.filter(r => r.score >= 0.6).sort((a, b) => b.score - a.score);
         }
-        return { rank, koeln, jaroWinkler, norm };
+        // typed into the field: what is typed is meant as written, so only names where every typed word is the start
+        // of a part of the name ("mi" -> Mia, Mila; "mia bei" -> Mia Beispiel). Only when no name starts like that
+        // is it taken as a typo, by spelling alone and strictly (no sound-alike: "Mia" must never bring "Noah").
+        function rankTyped(text, students) {
+            const q = [];
+            let cls = null;
+            for (const t of norm(text).split(/[^a-z0-9]+/).filter(Boolean)) {
+                if (/^\d+$/.test(t)) cls = t; else q.push(t);
+            }
+            if (!q.length) return [];
+            const named = students.map(s => ({ s, parts: norm(s.name).split(/[^a-z]+/).filter(Boolean) }));
+            const bonus = s => cls && norm(s.cls).includes(cls) ? 0.04 : 0;
+            const pre = [];
+            for (const { s, parts } of named) {
+                let sum = 0;
+                for (const t of q) {
+                    let best = 0;
+                    for (const p of parts) if (p.startsWith(t)) best = Math.max(best, p === t ? 1 : 0.7 + 0.3 * t.length / p.length);
+                    if (!best) { sum = -1; break; }
+                    sum += best;
+                }
+                if (sum > 0) pre.push({ id: s.id, score: sum / q.length + bonus(s), exact: q.length >= 2 && q.every(t => parts.includes(t)), name: s.name });
+            }
+            if (pre.length) return pre.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'de'));
+            if (q.join('').length < 3) return [];
+            return named.map(({ s, parts }) => {
+                const best = q.map(t => Math.max(...parts.map(p => jaroWinkler(t, p))));
+                return { id: s.id, score: best.reduce((a, b) => a + b, 0) / best.length + bonus(s), exact: false, name: s.name };
+            }).filter(r => r.score >= 0.86).sort((a, b) => b.score - a.score);
+        }
+        return { rank, rankTyped, koeln, jaroWinkler, norm };
     })();
 
     /* ---------- scanning ---------- */
     const Scan = (() => {
         const WANT = ['code_128', 'code_39', 'itf', 'ean_13', 'ean_8'];
         let engine = null, detector = null, reader = null, zxLoad = null;
-        let stream = null, track = null, video = null, running = false, busy = false, lastTry = 0, raf = 0, onHit = null, onIsbn = null;
+        let stream = null, track = null, video = null, running = false, busy = false, lastTry = 0, raf = 0, onHit = null, onReject = null;
         const c0 = document.createElement('canvas'), c90 = document.createElement('canvas');
 
         function loadZxing() {
@@ -233,11 +272,15 @@
             const r = await detector.detect(src);
             return r.map(x => ({ format: x.format, value: x.rawValue }));
         }
+        // only the library label counts (six digits); an ISBN or any other code on the book (price, product, publisher)
+        // is skipped and named, so the scanner keeps looking for the label
         const isIsbn = h => /^ean_13$/.test(h.format) && /^97[89]/.test(h.value);
+        const isLib = h => LIB_NUM.test(String(h.value || '').trim());
+        const rejectKind = hits => hits.some(isIsbn) ? 'isbn' : hits.length ? 'other' : null;
         function choose(hits) {
-            const good = hits.filter(h => !isIsbn(h) && h.value);
-            if (good.length) return good[0].value.trim();
-            if (hits.length && onIsbn) onIsbn();
+            const lib = hits.find(isLib);
+            if (lib) return lib.value.trim();
+            if (hits.length && onReject) onReject(rejectKind(hits), hits[0].value);
             return null;
         }
 
@@ -254,11 +297,11 @@
             } catch (e) { dbg('detect: ' + e.message); }
             finally { busy = false; }
         }
-        async function start(videoEl, hit, isbn) {
+        async function start(videoEl, hit, reject) {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error(window.isSecureContext ? 'Dieses Gerät gibt keine Kamera frei.' : 'Die Kamera geht nur über https oder localhost.');
             }
-            video = videoEl; onHit = hit; onIsbn = isbn;
+            video = videoEl; onHit = hit; onReject = reject;
             await pick();
             stream = await navigator.mediaDevices.getUserMedia({
                 audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
@@ -292,35 +335,79 @@
             let hits = [];
             if (engine === 'bd') { try { hits = await bdDetect(img); } catch (e) { dbg('photo bd: ' + e.message); } }
             let used = engine;
-            if (!hits.length) {
+            if (!hits.some(isLib)) {   // nothing, or only other codes: ZXing gets a go as well
                 await loadZxing();
-                hits = zxDetect(img, img.naturalWidth, img.naturalHeight, [1280, 1920, 800, 4096]);
+                hits = hits.concat(zxDetect(img, img.naturalWidth, img.naturalHeight, [1280, 1920, 800, 4096]));
                 used = 'zx';
             }
-            const good = hits.filter(h => !isIsbn(h));
-            return { value: good.length ? good[0].value.trim() : null, isbn: !good.length && hits.length > 0, engine: used };
+            const lib = hits.find(isLib);
+            return { value: lib ? lib.value.trim() : null, reject: lib ? null : rejectKind(hits), engine: used };
         }
         return { start, stop, torch, decodeImage, pick, get running() { return running; }, get engine() { return engine; }, loadZxing };
     })();
     const ENGINE_NAME = { bd: 'Erkennung des Browsers', zx: 'ZXing' };
 
     /* ---------- flow state ---------- */
-    const state = { book: null, student: null, due: null, last: null };
+    const state = { book: null, student: null, due: null, last: null, fresh: null };
 
     function resetFlow() {
         state.book = null; state.student = null; state.due = null;
         $('bookInfo').hidden = true; $('bookInfo').innerHTML = '';
         $('whoCard').hidden = true; $('returnCard').hidden = true;
-        $('nameInput').value = ''; $('hits').innerHTML = ''; nameStatus('');
+        $('whoInput').value = ''; $('hits').innerHTML = ''; nameStatus('');
         if (ear && ear.active) ear.stop();
     }
 
-    function openBook(raw) {
-        const num = String(raw || '').replace(/\D/g, '');
-        if (!num) { scanStatus('Bitte eine Buchnummer eingeben.', 'err'); return; }
+    /* ---------- scrolling: bring what matters next onto the screen, keeping the gap of scroll-padding (bibo.css) ---------- */
+    const smooth = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    // position in the page without transforms (the confirmation pops in with a scale animation)
+    function pageTop(el) { let y = 0; for (let e = el; e; e = e.offsetParent) y += e.offsetTop; return y; }
+    function edgeGaps() {
+        const cs = getComputedStyle(document.documentElement);
+        return { top: parseFloat(cs.scrollPaddingTop) || 12, bottom: parseFloat(cs.scrollPaddingBottom) || 12 };
+    }
+    // scroll as little as possible so that everything from the top of `first` to the bottom of `last` is on the
+    // screen; if that is taller than the screen, `keep` ('top' or 'bottom') says which end must be seen
+    function showSpan(first, last, keep) {
+        const g = edgeGaps(), vv = window.visualViewport;
+        const viewH = Math.min(window.innerHeight, vv ? vv.height : Infinity);
+        const top = pageTop(first) - g.top, bottom = pageTop(last) + last.offsetHeight + g.bottom;
+        const now = window.scrollY;
+        let y;
+        if (bottom - top > viewH) y = keep === 'bottom' ? bottom - viewH : top;
+        else if (top < now) y = top;
+        else if (bottom > now + viewH) y = bottom - viewH;
+        else return;
+        y = Math.max(0, Math.round(y));
+        if (Math.abs(y - now) > 1) window.scrollTo({ top: y, behavior: smooth() });
+    }
+    // the soft keyboard: close it (blur) and act once it is gone, else the page measures the small screen above it
+    function dropKeyboard() { const f = document.activeElement; if (f && f.matches && f.matches('input, textarea')) f.blur(); }
+    function afterKeyboard(fn) {
+        const vv = window.visualViewport, t0 = performance.now();
+        const open = () => vv && window.innerHeight - vv.height > 120;
+        const wait = () => { if (!open() || performance.now() - t0 > 700) fn(); else requestAnimationFrame(wait); };
+        requestAnimationFrame(wait);
+    }
+
+    /* ---------- a number comes in: typed, from a USB hand scanner, the camera or a photo ---------- */
+    function enterNumber(raw, how) {
+        const num = String(raw || '').replace(/\s+/g, '');
+        if (LIB_NUM.test(num)) { openBook(num); return true; }
+        if (how === 'usb') $('numInput').value = '';   // a wrong scan must not stick to the next one
+        scanStatus(!num ? 'Bitte die Buch-Nr. eingeben – 6 Ziffern vom Aufkleber.'
+            : /^\d+$/.test(num) ? 'Die Buch-Nr. hat genau 6 Ziffern (hier ' + num.length + ') – bitte den Aufkleber nehmen.'
+                : 'Die Buch-Nr. besteht nur aus 6 Ziffern.', 'err');
+        return false;
+    }
+
+    function openBook(num) {
+        num = String(num);
+        dropKeyboard();
         stopScan();
         hideDone();
         resetFlow();
+        if (state.fresh) { state.fresh = null; renderLoans(); }
         $('numInput').value = '';
         scanStatus('');
         state.book = num;
@@ -328,33 +415,40 @@
         const info = $('bookInfo');
         info.hidden = false;
         if (!b) {
+            // type="search" + autocomplete="off" like every field (index.html): no autofill bar over the keyboard
             info.innerHTML =
-                '<div class="book-head"><p class="book-title">Nr. ' + esc(num) + ' ist noch nicht im Katalog</p>' + closeBtn() + '</div>' +
+                '<div class="book-head"><p class="book-title">' + nr(num) + ' ist noch nicht im Katalog</p>' + closeBtn() + '</div>' +
                 '<p class="note">Kurz eintragen, dann geht es mit der Ausleihe weiter.</p>' +
                 '<form id="newBook" class="new-book" autocomplete="off">' +
-                '<input id="nbTitle" class="field" type="text" required placeholder="Titel" aria-label="Titel des Buches">' +
-                '<div class="two"><input id="nbSubject" class="field" type="text" placeholder="Fach" aria-label="Fach">' +
-                '<input id="nbGrade" class="field" type="text" inputmode="numeric" placeholder="Klasse" aria-label="Klassenstufe"></div>' +
+                '<input id="nbBook" class="field" type="search" required enterkeyhint="next" autocomplete="off" placeholder="Buchtitel" aria-label="Buchtitel">' +
+                '<div class="two"><input id="nbSubject" class="field" type="search" enterkeyhint="next" autocomplete="off" placeholder="Fach" aria-label="Fach">' +
+                '<input id="nbGrade" class="field" type="search" inputmode="numeric" enterkeyhint="done" autocomplete="off" placeholder="Klasse" aria-label="Klassenstufe"></div>' +
                 '<button class="big go" type="submit">Anlegen</button></form>';
+            // "next" on the keyboard goes to the next field instead of sending the form half filled
+            [['nbBook', 'nbSubject'], ['nbSubject', 'nbGrade']].forEach(([a, b]) => $(a).addEventListener('keydown', e => {
+                if (e.key === 'Enter' && (a !== 'nbBook' || $(a).value.trim())) { e.preventDefault(); $(b).focus(); }
+            }));
             $('newBook').onsubmit = e => {
                 e.preventDefault();
-                const title = $('nbTitle').value.trim();
-                if (!title) { $('nbTitle').focus(); return; }
+                const title = $('nbBook').value.trim();
+                if (!title) { $('nbBook').focus(); return; }
                 db.books[num] = { title, subject: $('nbSubject').value.trim(), grade: $('nbGrade').value.trim() };
                 save();
                 dbg('book added ' + num);
                 openBook(num);
             };
-            setTimeout(() => { const f = $('nbTitle'); if (f) f.focus(); }, 50);
-            reveal($('bookCard'));
+            setTimeout(() => { const f = $('nbBook'); if (f) f.focus(); }, 50);
+            requestAnimationFrame(() => showSpan(info, info, 'top'));
             return;
         }
         const loan = openLoan(num);
         info.innerHTML =
-            '<div class="book-head"><p class="book-title">' + esc(b.title) + '</p>' + closeBtn() + '</div>' +
-            '<p class="book-meta">' + [b.subject, b.grade ? 'Klasse ' + b.grade : '', 'Nr. ' + num].filter(Boolean).map(esc).join(' • ') + '</p>' +
+            '<div class="book-head"><p class="book-title">' + esc(glue(b.title)) + '</p>' + closeBtn() + '</div>' +
+            '<p class="book-meta">' + [b.subject, b.grade ? 'Klasse' + NB + b.grade : ''].filter(Boolean).map(esc).concat(nr(num)).join(NB + '• ') + '</p>' +
             '<p class="state ' + (loan ? 'lent' : 'free') + '">' + (loan ? 'ausgeliehen' : 'im Regal') + '</p>';
         if (loan) showReturn(loan); else showWho();
+        // the book and the next step together on the screen, once the keyboard of the number field is gone
+        afterKeyboard(() => showSpan(info, loan ? $('returnBtn') : $('whoInput'), 'top'));
     }
     const closeBtn = () => '<button class="x" type="button" id="bookClose" aria-label="Buch abwählen">' + ICON.close + '</button>';
 
@@ -362,10 +456,9 @@
         state.due = addDays(today(), LOAN_DAYS);
         $('whoCard').hidden = false;
         $('micBtn').hidden = !SR_OK;
-        $('nameInput').placeholder = SR_OK ? 'oder Namen tippen' : 'Namen tippen (oder Tastatur-Mikrofon)';
+        $('whoInput').placeholder = SR_OK ? 'oder Namen tippen' : 'Namen tippen (oder Tastatur-Mikrofon)';
         renderChosen();
         renderDue();
-        reveal($('whoCard'));
     }
 
     function showReturn(loan) {
@@ -374,16 +467,6 @@
         $('retWho').textContent = who(s);
         $('retDates').innerHTML = 'seit ' + esc(longDate(loan.out)) + '<br>fällig ' + esc(longDate(loan.due)) +
             ' <span class="rel">(' + esc(d.rel) + ')</span>' + (d.badge ? ' <span class="badge ' + d.cls + '">' + d.badge + '</span>' : '');
-        reveal($('returnCard'));
-    }
-
-    /* the card that just appeared is scrolled into view on the phone (one column) */
-    function reveal(el) {
-        if (window.matchMedia('(min-width: 900px)').matches) return;
-        requestAnimationFrame(() => {
-            const r = el.getBoundingClientRect();
-            if (r.top < 0 || r.bottom > innerHeight) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
     }
 
     /* ---------- names ---------- */
@@ -391,8 +474,9 @@
     const SR_OK = !!(window.SpeechRecognition || window.webkitSpeechRecognition) && !!window.SolitaListen;
     let lastHits = [];
     function nameStatus(msg, cls) { const el = $('nameStatus'); el.textContent = msg || ''; el.className = 'status' + (cls ? ' ' + cls : ''); }
-    function showHits(text, allowAuto) {
-        lastHits = Fuzzy.rank(text, db.students).slice(0, 3);
+    // typed: strict (start of the name); heard: tolerant (sound-alike, speech recognition misspells names)
+    function showHits(text, allowAuto, typed) {
+        lastHits = (typed ? Fuzzy.rankTyped : Fuzzy.rank)(text, db.students).slice(0, 3);
         const ul = $('hits');
         ul.innerHTML = lastHits.map(h => {
             const s = student(h.id), n = loansOf(h.id);
@@ -410,6 +494,9 @@
         if (ear && ear.active) ear.stop();
         for (const b of $('hits').querySelectorAll('.hit')) b.setAttribute('aria-pressed', String(b.dataset.id === id));
         renderChosen();
+        // next step: the green "Ausleihen bis ..." button, fully on the screen (keyboard closed first)
+        dropKeyboard();
+        afterKeyboard(() => showSpan($('chosen'), $('lendBtn'), 'bottom'));
     }
     function renderChosen() {
         const s = state.student && student(state.student);
@@ -424,13 +511,13 @@
     }
     let gotFinal = false;
     function heard(t, final) {
-        $('nameInput').value = t;
+        $('whoInput').value = t;
         if (final) { gotFinal = true; setMic(false); }
         showHits(t, final && !state.student);   // a name tapped while still listening stays chosen
     }
     function listen() {
         if (ear && ear.active) { ear.stop(); return; }
-        if (!SR_OK) { nameStatus('Spracheingabe geht hier nicht – Namen tippen oder das Mikrofon der Tastatur nutzen.', 'err'); $('nameInput').focus(); return; }
+        if (!SR_OK) { nameStatus('Spracheingabe geht hier nicht – Namen tippen oder das Mikrofon der Tastatur nutzen.', 'err'); $('whoInput').focus(); return; }
         if (!ear) ear = window.SolitaListen({
             lang: 'de-DE',
             silenceMs: 1800,   // a name is short: finished after 1.8 s of quiet
@@ -447,7 +534,7 @@
         gotFinal = false;
         state.student = null;
         renderChosen();
-        $('nameInput').value = '';
+        $('whoInput').value = '';
         $('hits').innerHTML = '';
         ear.start();
     }
@@ -472,8 +559,9 @@
         vibrate();
         dbg('lent ' + l.book + ' to ' + l.student + ' until ' + l.due);
         resetFlow();
+        state.fresh = l.id;
+        renderLoans();
         showDone('lend', l);
-        renderLoans(l.id);
     }
     function giveBack() {
         const l = state.book && openLoan(state.book);
@@ -500,54 +588,78 @@
         state.last = { kind, loan: l };
         const s = student(l.student);
         $('doneTitle').textContent = kind === 'lend' ? 'Ausgeliehen' : 'Zurückgegeben';
-        $('doneText').innerHTML = '<b>' + esc(bookTitle(l.book)) + '</b> <span class="muted">Nr. ' + esc(l.book) + '</span><br>' +
+        $('doneText').innerHTML = '<b>' + esc(glue(bookTitle(l.book))) + '</b> <span class="muted">' + nr(l.book) + '</span><br>' +
             (kind === 'lend' ? 'an ' + esc(who(s)) + '<br>bis <b>' + esc(longDate(l.due)) + '</b>'
                 : 'von ' + esc(who(s)) + ' – steht wieder im Regal');
+        $('showNewBtn').hidden = kind !== 'lend';
         $('doneCard').hidden = false;
         $('doneCard').classList.remove('pop'); void $('doneCard').offsetWidth; $('doneCard').classList.add('pop');
-        reveal($('doneCard'));
+        // with a gap to the top edge (status bar), the whole confirmation on the screen
+        requestAnimationFrame(() => showSpan($('doneCard'), $('doneCard'), 'top'));
     }
     function hideDone() { $('doneCard').hidden = true; }
 
     /* ---------- overview ---------- */
-    function renderLoans(flashId) {
+    // the fresh loan flashes as soon as it is on the screen - at once on the wide layout, on the phone when scrolled to
+    const flashSeen = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+        for (const en of entries) if (en.isIntersecting) { flashRow(en.target); flashSeen.unobserve(en.target); }
+    }, { threshold: 0.6 }) : null;
+    function flashRow(row) { row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash'); }
+    const freshRow = () => state.fresh && $('loans').querySelector('.loan.fresh');
+    function showFresh() {
+        const row = freshRow();
+        if (!row) return;
+        const vv = window.visualViewport, viewH = Math.min(window.innerHeight, vv ? vv.height : Infinity);
+        window.scrollTo({ top: Math.max(0, Math.round(pageTop(row) - (viewH - row.offsetHeight) / 2)), behavior: smooth() });
+        flashRow(row);
+    }
+    function renderLoans() {
         const list = openLoans().sort((a, b) => a.due.localeCompare(b.due) || bookTitle(a.book).localeCompare(bookTitle(b.book)));
-        let over = 0, soon = 0;
+        const n = { over: 0, today: 0, soon: 0 };
         $('loans').innerHTML = list.map(l => {
-            const d = dueInfo(l.due), s = student(l.student);
-            if (d.cls === 'over') over++; else if (d.cls === 'soon') soon++;
-            return '<li><button type="button" class="loan ' + d.cls + (l.id === flashId ? ' flash' : '') + '" data-book="' + esc(l.book) + '">' +
-                '<span class="loan-main"><span class="loan-title">' + esc(bookTitle(l.book)) + '</span>' +
-                '<span class="loan-who">' + esc(who(s)) + ' • Nr. ' + esc(l.book) + '</span></span>' +
+            const d = dueInfo(l.due), s = student(l.student), fresh = l.id === state.fresh;
+            if (d.cls in n) n[d.cls]++;
+            return '<li><button type="button" class="loan ' + d.cls + (fresh ? ' fresh' : '') + '" data-book="' + esc(l.book) + '">' +
+                '<span class="loan-main"><span class="loan-title">' + esc(glue(bookTitle(l.book))) + '</span>' +
+                '<span class="loan-who">' + esc(who(s)) + NB + '• ' + nr(l.book) + '</span></span>' +
                 '<span class="loan-due"><span class="loan-date">' + esc(shortDate(l.due)) + '</span>' +
-                (d.badge ? '<span class="badge ' + d.cls + '">' + d.badge + '</span>' : '<span class="loan-rel">' + esc(d.rel) + '</span>') +
+                (fresh ? '<span class="badge fresh">neu</span>'
+                    : d.badge ? '<span class="badge ' + d.cls + '">' + d.badge + '</span>' : '<span class="loan-rel">' + esc(d.rel) + '</span>') +
                 '</span></button></li>';
         }).join('') || '<li class="empty">Gerade ist nichts ausgeliehen.</li>';
         $('loanCount').textContent = list.length;
         $('loanSum').innerHTML = [
-            over ? '<span class="badge over">' + over + ' überfällig</span>' : '',
-            soon ? '<span class="badge soon">' + soon + ' bald fällig</span>' : ''
-        ].join(' ');
+            n.over ? '<span class="badge over">' + n.over + ' überfällig</span>' : '',
+            n.today ? '<span class="badge today">' + n.today + ' heute fällig</span>' : '',
+            n.soon ? '<span class="badge soon">' + n.soon + ' bald fällig</span>' : ''
+        ].filter(Boolean).join(' ');
+        const row = freshRow();
+        if (row && flashSeen) flashSeen.observe(row);
     }
 
     /* ---------- scanner UI ---------- */
     function scanStatus(msg, cls) { const el = $('scanHint'); el.textContent = msg || ''; el.className = 'status' + (cls ? ' ' + cls : ''); }
-    let torchOn = false, isbnHintAt = 0;
+    let torchOn = false, rejectHintAt = 0;
+    const REJECT_HINT = {
+        isbn: 'Das ist die ISBN – bitte den Aufkleber der Bibliothek scannen.',
+        other: 'Kein Bibliotheks-Code – bitte den Aufkleber scannen.'
+    };
     async function startScan() {
         hideDone();
         $('scanner').hidden = false;
         $('scanBtn').hidden = true;
         $('torchBtn').hidden = true;
         scanStatus('Kamera startet …');
-        reveal($('bookCard'));
+        requestAnimationFrame(() => showSpan($('bookCard'), $('scanner'), 'top'));
         try {
             const r = await Scan.start($('video'), (value, engine) => {
                 vibrate();
                 dbg('scanned ' + value + ' via ' + engine);
                 openBook(value);
-            }, () => {
+            }, (kind, value) => {
+                // another code in the picture: say so (not more often than every 2.5 s) and keep looking for the label
                 const now = Date.now();
-                if (now - isbnHintAt > 2500) { isbnHintAt = now; scanStatus('Das ist die ISBN – bitte den Aufkleber der Bibliothek scannen.', 'err'); }
+                if (now - rejectHintAt > 2500) { rejectHintAt = now; dbg('skipped ' + kind + ' ' + value); scanStatus(REJECT_HINT[kind], 'err'); }
             });
             $('engine').textContent = ENGINE_NAME[r.engine];
             if (!Scan.running) return;   // the first frame already had the code
@@ -577,8 +689,9 @@
             $('engine').textContent = ENGINE_NAME[r.engine];
             dbg('photo: ' + (r.value || '-') + ' via ' + r.engine);
             if (r.value) { vibrate(); openBook(r.value); }
-            else scanStatus(r.isbn ? 'Auf dem Foto ist nur die ISBN – bitte den Aufkleber der Bibliothek fotografieren.'
-                : 'Auf dem Foto war kein Barcode zu lesen – näher ran, gerade halten, oder Nummer eintippen.', 'err');
+            else scanStatus(r.reject === 'isbn' ? 'Auf dem Foto ist nur die ISBN – bitte den Aufkleber der Bibliothek fotografieren.'
+                : r.reject === 'other' ? 'Auf dem Foto ist kein Bibliotheks-Code – bitte den Aufkleber fotografieren.'
+                    : 'Auf dem Foto war kein Barcode zu lesen – näher ran, gerade halten, oder Nummer eintippen.', 'err');
         } catch (e) { scanStatus(e.message, 'err'); }
     }
 
@@ -589,10 +702,13 @@
         root.classList.toggle('svp-light', t === 'light');
         root.classList.toggle('svp-grey', t === 'grey');
         for (const b of $('themeSeg').children) b.setAttribute('aria-checked', String(b.dataset.theme === t));
-        const m = document.querySelector('meta[name=theme-color]');
-        if (m) m.content = getComputedStyle(document.body).backgroundColor;
+        // the browser bars take the page colour of the chosen scheme, whatever the phone's own light/dark setting says
+        const bg = getComputedStyle(document.body).backgroundColor;
+        for (const m of document.querySelectorAll('meta[name=theme-color]')) m.content = bg;
         if (store) try { localStorage.setItem('svp-theme', t); } catch (e) { }
     }
+    const storedTheme = () => { let t = null; try { t = localStorage.getItem('svp-theme'); } catch (e) { } return THEMES.includes(t) ? t : null; };
+    const phoneTheme = () => window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
     function showSettings(on) { $('settings').hidden = !on; $('gearBtn').setAttribute('aria-expanded', String(on)); }
 
     /* ---------- own confirm dialog, never the browser's confirm() ---------- */
@@ -616,10 +732,11 @@
         try { localStorage.setItem(KEY + '-probe', '1'); localStorage.removeItem(KEY + '-probe'); } catch (e) { storeOk = false; }
         save();
 
-        let t = null;
-        try { t = localStorage.getItem('svp-theme'); } catch (e) { }
-        if (!THEMES.includes(t)) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        applyTheme(t, false);
+        applyTheme(storedTheme() || phoneTheme(), false);
+        // nothing chosen in the app: follow the phone when it switches between light and dark
+        const mq = window.matchMedia('(prefers-color-scheme: light)');
+        const follow = () => { if (!storedTheme()) applyTheme(phoneTheme(), false); };
+        if (mq.addEventListener) mq.addEventListener('change', follow); else if (mq.addListener) mq.addListener(follow);
         $('themeSeg').onclick = e => { const b = e.target.closest('button'); if (b) applyTheme(b.dataset.theme, true); };
         $('gearBtn').onclick = () => showSettings($('settings').hidden);
         document.addEventListener('pointerdown', e => {
@@ -634,16 +751,16 @@
         };
         $('photoBtn').onclick = () => $('photoInput').click();
         $('photoInput').onchange = e => { photoChosen(e.target.files && e.target.files[0]); e.target.value = ''; };
-        $('numForm').onsubmit = e => { e.preventDefault(); openBook($('numInput').value); };
+        $('numForm').onsubmit = e => { e.preventDefault(); enterNumber($('numInput').value, 'typed'); };
         $('bookCard').addEventListener('click', e => { if (e.target.closest('#bookClose')) { resetFlow(); hideDone(); } });
 
         $('micBtn').onclick = listen;
-        $('nameInput').addEventListener('input', e => {
+        $('whoInput').addEventListener('input', e => {
             if (ear && ear.active) ear.stop();
             state.student = null; renderChosen();
-            showHits(e.target.value, false);
+            showHits(e.target.value, false, true);
         });
-        $('nameInput').addEventListener('keydown', e => {
+        $('whoInput').addEventListener('keydown', e => {
             if (e.key === 'Enter') { e.preventDefault(); if (lastHits.length) choose(lastHits[0].id); }
         });
         $('hits').addEventListener('click', e => { const b = e.target.closest('.hit'); if (b) choose(b.dataset.id); });
@@ -657,10 +774,11 @@
         $('returnBtn').onclick = giveBack;
         $('undoBtn').onclick = undo;
         $('nextBtn').onclick = startScan;
+        $('showNewBtn').onclick = showFresh;
         $('loans').addEventListener('click', e => { const b = e.target.closest('.loan'); if (b) openBook(b.dataset.book); });
         $('resetBtn').onclick = async () => {
             if (!(await confirmDlg('Alle Ausleihen und neu angelegten Bücher löschen und die Demo-Daten neu laden?', 'Zurücksetzen'))) return;
-            db = seed(); save(); resetFlow(); hideDone(); stopScan(); scanStatus(''); renderLoans();
+            db = seed(); save(); state.fresh = null; resetFlow(); hideDone(); stopScan(); scanStatus(''); renderLoans();
             dbg('demo reset');
         };
 
@@ -669,7 +787,7 @@
             if (e.ctrlKey || e.metaKey || e.altKey || !$('dlg').hidden) return;
             if (e.target.closest && e.target.closest('input, textarea, [contenteditable]')) return;
             if (/^\d$/.test(e.key)) { e.preventDefault(); $('numInput').value += e.key; }
-            else if (e.key === 'Enter' && $('numInput').value) { e.preventDefault(); openBook($('numInput').value); }
+            else if (e.key === 'Enter' && $('numInput').value) { e.preventDefault(); enterNumber($('numInput').value, 'usb'); }
             else if (e.key === 'Escape') { showSettings(false); if (Scan.running) stopScan(); }
         });
         // the camera never keeps running in the background
@@ -687,6 +805,8 @@
     // hooks for the head-less tests and for Doc's debug console
     window.DocBibo = {
         rank: (text) => Fuzzy.rank(text, db.students).map(r => ({ name: student(r.id).name, score: +r.score.toFixed(3), exact: r.exact })),
+        rankTyped: (text) => Fuzzy.rankTyped(text, db.students).map(r => ({ name: student(r.id).name, score: +r.score.toFixed(3), exact: r.exact })),
+        enterNumber: (raw, how) => enterNumber(raw, how || 'typed'),
         heard: (text) => heard(text, true),
         decodeImage: (src) => Scan.decodeImage(src),
         openBook: (num) => openBook(num),

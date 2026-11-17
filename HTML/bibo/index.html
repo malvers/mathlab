@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#08142a">
+    <!-- browser bars (Android status and navigation bar) in the page colour: the phone's light/dark setting first,
+         then the script below and bibo.js set both to the scheme chosen in the app -->
+    <meta name="theme-color" content="#f6f8fc" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#08142a" media="(prefers-color-scheme: dark)">
     <meta name="description" content="DocBibo – Lehrbücher ausleihen: Barcode scannen, Namen sagen, fertig.">
     <title>DocBibo</title>
     <!-- installable app: Android/Chrome via the manifest, iPhone via "Zum Home-Bildschirm" with the apple-* tags -->
@@ -25,6 +28,10 @@
             if (t !== 'dark' && t !== 'grey' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
             if (t === 'light') document.documentElement.classList.add('svp-light');
             if (t === 'grey') document.documentElement.classList.add('svp-grey');
+            // the --bg of that scheme (svp-tokens.css); bibo.js later takes it from the computed style
+            var bg = { dark: '#08142a', grey: '#1a1a1c', light: '#f6f8fc' }[t];
+            var m = document.querySelectorAll('meta[name=theme-color]');
+            for (var i = 0; i < m.length; i++) m[i].content = bg;
         })();
     </script>
     <script>if (/[?&]debug=1\b/.test(location.search)) { var s = document.createElement('script'); s.src = '../js/debug-window.js'; s.onload = function () { try { DebugWindow.show(); } catch (e) { } }; document.head.appendChild(s); }</script>
@@ -89,8 +96,13 @@
                         </div>
                         <p class="engine" id="engine"></p>
                     </div>
+                    <!-- No autofill bar above the keyboard: Chrome on Android shows its key/card/pin bar on every plain
+                         text field (autocomplete="off" does not stop that), but on a type="search" field only when the
+                         field itself has suggestions - and autocomplete="off" removes those. So every field of the app
+                         is type="search" + autocomplete="off", and no label says "Name", "Nummer" or "Titel" (words
+                         Chrome reads as address or card fields). inputmode picks the keyboard. -->
                     <form class="num-row" id="numForm" autocomplete="off">
-                        <input class="field" id="numInput" type="text" inputmode="numeric" enterkeyhint="go" placeholder="Nummer tippen" aria-label="Buchnummer">
+                        <input class="field" id="numInput" type="search" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="Buch-Nr. tippen" aria-label="Buch-Nr., 6 Ziffern">
                         <button class="ok" type="submit">OK</button>
                         <!-- Material Icons "photo_camera" (Apache 2.0) -->
                         <button class="ok photo" id="photoBtn" type="button" aria-label="Foto vom Barcode" title="Foto vom Barcode">
@@ -110,7 +122,7 @@
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
                         <span id="micLabel">Namen sagen</span>
                     </button>
-                    <input class="field" id="nameInput" type="search" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="oder Namen tippen" aria-label="Name der Schülerin oder des Schülers">
+                    <input class="field" id="whoInput" type="search" enterkeyhint="done" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="oder Namen tippen" aria-label="Schülerin oder Schüler">
                     <p class="status" id="nameStatus" role="status"></p>
                     <ul class="hits" id="hits" aria-label="Vorschläge"></ul>
                     <p class="chosen empty" id="chosen">Noch kein Name gewählt.</p>
@@ -152,12 +164,19 @@
                         <h2 id="doneTitle">Ausgeliehen</h2>
                     </div>
                     <p class="done-text" id="doneText"></p>
+                    <!-- Material Icons "south" (Apache 2.0) -->
+                    <button class="link" id="showNewBtn" type="button" hidden>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 15l-1.41-1.41L13 18.17V2h-2v16.17l-4.59-4.59L5 15l7 7 7-7z"/></svg>In der Übersicht zeigen
+                    </button>
                     <div class="done-btns">
                         <!-- Material Icons "undo" (Apache 2.0) -->
                         <button class="tool" id="undoBtn" type="button">
                             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>Rückgängig
                         </button>
-                        <button class="tool next" id="nextBtn" type="button">Nächstes Buch scannen</button>
+                        <!-- Material Symbols "barcode_scanner" (Apache 2.0) -->
+                        <button class="tool next" id="nextBtn" type="button" aria-label="Nächstes Buch scannen">
+                            <svg viewBox="0 -960 960 960" aria-hidden="true" focusable="false"><path d="M40-120v-200h80v120h120v80H40Zm680 0v-80h120v-120h80v200H720ZM160-240v-480h80v480h-80Zm120 0v-480h40v480h-40Zm120 0v-480h80v480h-80Zm120 0v-480h120v480H520Zm160 0v-480h40v480h-40Zm80 0v-480h40v480h-40ZM40-640v-200h200v80H120v120H40Zm800 0v-120H720v-80h200v200h-80Z"/></svg>Nächstes Buch
+                        </button>
                     </div>
                 </div>
             </section>
