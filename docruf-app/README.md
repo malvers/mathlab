@@ -9,10 +9,11 @@ vibration, and when "Ansagen" is on the phone also speaks it, in Solita's own vo
 
 ## How a call travels
 
-1. `~/.claude/hooks/solita-ruf.mjs "text" [auto|phone|0-100]` renders Solita's MP3 and puts
+1. `~/.claude/hooks/solita-ruf.mjs "text" [auto|phone|still|0-100]` renders Solita's MP3 and puts
    it with the text into `~/solita-rufe`, as before.
 2. The watcher `~/.claude/hooks/solita-ruf-waechter.sh` asks DocHere. Doc at the Mac: 35
    over the speakers. Away, or `phone`: `docruf-send.mjs` publishes text and MP3 on ntfy.sh.
+   `still` goes there too, without asking DocHere (see "Silent calls" below).
 3. The app keeps one line open to that topic (foreground service, back after a reboot),
    shows the call, posts its id to `<topic>-ok` as a receipt and plays the MP3. Without an
    MP3, or once it expired (3 h on ntfy.sh), the phone's own voice reads the text.
@@ -20,6 +21,26 @@ vibration, and when "Ansagen" is on the phone also speaks it, in Solita's own vo
 
 Media volume goes up to at least 70 % for a call and back afterwards. Calls older than
 10 min, found after the line was down, are only listed.
+
+## Silent calls (since 1.4, 17.11.2026)
+
+Doc, 17.11.2026: "No voice". A call that must only buzz, e.g. while Doc teaches:
+
+    SOLITA_FORCE=1 node ~/.claude/hooks/solita-ruf.mjs "Doc, hier ist Solita. ..." still
+
+The watcher sends it with `docruf-send.mjs --still`, which tags the ntfy.sh message `still`.
+The app then never speaks it, whatever "Ansagen" says, and posts the banner on a channel of
+its own, "Solita still": vibration, no sound (Android never lets an app change the sound of
+an existing channel, hence the new one), its text readable on the lock screen (1.4.1). Since
+1.4.2 it also shows like any call ("ja, aber auch unter dem Bild von Solita"): on a locked or
+dark phone the call screen comes up, with DocCall in front there is no banner, only the buzz;
+both times her portrait fills the circle with the whole sentence under it at once - no MP3,
+no phone voice, no volume, so no karaoke. It stays as long as reading takes (70 ms a letter,
+at least 6 s; a long one slides up meanwhile), then fades as usual. Receipt and
+"Letzte Rufe" work as for any call, and the MP3 rides along, so a tap in the list plays it
+later. Without a receipt nothing plays on the Mac either, the log only gets a line. An
+answer to a silent call carries the tag too, so the Mithörer's receipt only buzzes as well.
+A phone still on 1.3 ignores the tag and speaks the call, so `still` needs 1.4 on the Pixel.
 
 ## The screen (since 1.3, 07.11.2026)
 
@@ -88,4 +109,4 @@ Android closes the line while the screen is dark), then "Probe-Ruf" behind the g
 
 From the Mac, without Solita's MP3:
 
-    node docruf-app/docruf-send.mjs "Doc, kurzer Test." --wait 20
+    node docruf-app/docruf-send.mjs "Doc, kurzer Test." --wait 20 [--still]

@@ -19,10 +19,14 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
+import android.media.AudioAttributes;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -44,6 +48,9 @@ public class RufService extends Service {
     static final String HOST = "https://ntfy.sh/";
     static final String CH_LINE = "leitung";
     static final String CH_CALL = "rufe";
+    // a channel of its own for silent calls: Android never lets an app change the sound of an existing channel
+    static final String CH_STILL = "rufe_still";
+    static final String TAG_STILL = "still";   // the ntfy.sh tag of a silent call (docruf-send.mjs --still)
     static final int NOTE_LINE = 1;
     static final long STALE_S = 600;            // a call found after a long gap is only listed, not rung
 
@@ -104,8 +111,14 @@ public class RufService extends Service {
         NotificationChannel call = new NotificationChannel(CH_CALL, "Rufe", NotificationManager.IMPORTANCE_HIGH);
         call.enableVibration(true);
         call.setVibrationPattern(new long[]{0, 400, 200, 400, 200, 400});
+        // silent calls: the same buzz and banner, no sound at all (Doc, 17.11.2026: "No voice")
+        NotificationChannel still = new NotificationChannel(CH_STILL, "Solita still", NotificationManager.IMPORTANCE_HIGH);
+        still.setSound(null, null);
+        still.enableVibration(true);
+        still.setVibrationPattern(new long[]{0, 400, 200, 400, 200, 400});
         nm.createNotificationChannel(line);
         nm.createNotificationChannel(call);
+        nm.createNotificationChannel(still);
     }
 
     static PendingIntent openApp(Context c) {
@@ -173,27 +186,56 @@ public class RufService extends Service {
         String title = m.optString("title", "Solita");
         if (title.isEmpty()) title = "Solita";
         String text = m.optString("message");
-        Rufe.add(this, id, time, title, text, audio);
+        // a silent call never makes a sound: never her voice, whatever "Ansagen" says, only a buzz - but it shows like
+        // any call, her portrait with the sentence under it (Doc, 17.11.2026: "No voice", "ja, aber auch unter dem
+        // Bild von Solita"); it is listed like any call, so a tap under "Letzte Rufe" still plays it
+        boolean still = tagged(m, TAG_STILL);
+        Rufe.add(this, id, time, title, text, audio, still);
         if (System.currentTimeMillis() / 1000 - time > STALE_S) return;
 
         NotificationManager nm = getSystemService(NotificationManager.class);
-        boolean speak = Rufe.speak(this);
-        // DocCall in front and speaking aloud: no banner, Solita appears in the circle with her sentence under it
-        // (Doc, 07.11.2026); otherwise a message from her, with her face, and on a dark phone her call screen
-        boolean inApp = MainActivity.visible && speak;
-        if (!inApp) nm.notify(id.hashCode(), callNote(id, time, title, text));
+        boolean speak = !still && Rufe.speak(this);
+        // DocCall in front and speaking aloud (or a silent call): no banner, Solita appears in the circle with her
+        // sentence under it (Doc, 07.11.2026); otherwise a message from her, with her face, and on a dark phone her
+        // call screen
+        boolean inApp = MainActivity.visible && (speak || still);
+        if (!inApp) nm.notify(id.hashCode(), callNote(id, time, title, text, still));
+        else if (still) buzz(this);   // no banner, so no channel to buzz: the same pattern by hand
+        if (still) Ansage.get(this).show(text);   // before the receipt: the screen needs no network
         // a receipt promises that Doc notices the call, otherwise the Mac falls back to its speakers
         if ((inApp || nm.areNotificationsEnabled() || speak) && receipt(topic, id)) Rufe.acked(this, id);
         if (speak) Ansage.get(this).say(text, audio);
+    }
+
+    static final long[] BUZZ = {0, 400, 200, 400, 200, 400};
+
+    /** The calls' vibration without a notification, for a silent call while DocCall is in front. */
+    @SuppressWarnings("deprecation")
+    private static void buzz(Context c) {
+        Vibrator v = c.getSystemService(Vibrator.class);
+        if (v == null || !v.hasVibrator()) return;
+        // as a notification, so the phone's own vibration settings (and silent mode) still apply
+        v.vibrate(VibrationEffect.createWaveform(BUZZ, -1),
+                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
+    }
+
+    /** True when the message carries this ntfy.sh tag ("tags": ["still"]). */
+    private static boolean tagged(JSONObject m, String tag) {
+        JSONArray tags = m.optJSONArray("tags");
+        for (int i = 0; tags != null && i < tags.length(); i++) {
+            if (tag.equals(tags.optString(i))) return true;
+        }
+        return false;
     }
 
     /**
      * The call as a message from Solita, with her round portrait (a conversation, so Android shows her face),
      * and a full-screen intent: on a locked or dark phone DocCall itself comes up like an incoming call
      * ("Denk an den Film Her", Doc, 07.11.2026). With the phone in use Android shows the banner instead.
+     * A silent call goes to its own channel without sound; its call screen shows her sentence without a voice.
      */
-    private Notification callNote(String id, long time, String title, String text) {
-        Notification.Builder b = new Notification.Builder(this, CH_CALL)
+    private Notification callNote(String id, long time, String title, String text, boolean still) {
+        Notification.Builder b = new Notification.Builder(this, still ? CH_STILL : CH_CALL)
                 .setSmallIcon(R.drawable.ic_ruf)
                 .setColor(0xFFF5C242)
                 .setCategory(Notification.CATEGORY_MESSAGE)
@@ -201,12 +243,20 @@ public class RufService extends Service {
                 .setShowWhen(true)
                 .setAutoCancel(true)
                 .setContentIntent(openApp(this))
-                .setFullScreenIntent(PendingIntent.getActivity(this, id.hashCode() + 2,
-                        new Intent(this, MainActivity.class).setAction(MainActivity.ACTION_CALL)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP),
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE), true)
                 .addAction(Sprechen.action(this, id, id.hashCode()))
                 .addAction(Antwort.action(this, id, id.hashCode()));
+        // a silent call brings up the call screen too: her portrait and the whole sentence, without a sound
+        // (Doc, 17.11.2026: "ja, aber auch unter dem Bild von Solita")
+        b.setFullScreenIntent(PendingIntent.getActivity(this, id.hashCode() + 2,
+                new Intent(this, MainActivity.class).setAction(MainActivity.ACTION_CALL)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE), true);
+        if (still) {
+            // Doc's lock screen hides the contents of private notifications; a silent call says nothing aloud,
+            // so its text must be readable on the lock screen too
+            // (Doc, 17.11.2026: "es vibriert aber nur und ich kann keinen Text lesen")
+            b.setVisibility(Notification.VISIBILITY_PUBLIC);
+        }
         if (Build.VERSION.SDK_INT >= 30) {
             Person her = solita(this);
             conversation(this, her);

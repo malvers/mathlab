@@ -42,16 +42,29 @@ final class Rufe {
         return false;
     }
 
-    static synchronized void add(Context c, String id, long time, String title, String text, String audio) {
+    static synchronized void add(Context c, String id, long time, String title, String text, String audio, boolean still) {
         JSONArray a = all(c);
         JSONArray b = new JSONArray();
         try {
-            b.put(new JSONObject().put("id", id).put("time", time).put("title", title).put("text", text).put("audio", audio));
+            JSONObject o = new JSONObject().put("id", id).put("time", time).put("title", title).put("text", text).put("audio", audio);
+            if (still) o.put("still", true);
+            b.put(o);
         } catch (JSONException e) {
             return;
         }
         for (int i = 0; i < a.length() && b.length() < MAX; i++) b.put(a.opt(i));
         prefs(c).edit().putString("rufe", b.toString()).apply();
+    }
+
+    /** A silent call (tag "still"): the answer to it stays silent too, on the phone and in the Mac's receipt. */
+    static synchronized boolean still(Context c, String id) {
+        if (id == null || id.isEmpty()) return false;
+        JSONArray a = all(c);
+        for (int i = 0; i < a.length(); i++) {
+            JSONObject o = a.optJSONObject(i);
+            if (id.equals(o.optString("id"))) return o.optBoolean("still");
+        }
+        return false;
     }
 
     static synchronized void acked(Context c, String id) {

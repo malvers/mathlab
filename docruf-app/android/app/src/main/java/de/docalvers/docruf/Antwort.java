@@ -48,7 +48,7 @@ public class Antwort extends BroadcastReceiver {
         int note = intent.getIntExtra("note", 0);
         PendingResult done = goAsync();
         new Thread(() -> {
-            finished(c, id, note, text, send(text, id));
+            finished(c, id, note, text, send(c, text, id));
             done.finish();
         }, "docruf-antwort").start();
     }
@@ -61,7 +61,8 @@ public class Antwort extends BroadcastReceiver {
     static void finished(Context c, String id, int note, String text, boolean ok) {
         Rufe.answered(c, id, text, ok);
         if (note == 0) return;
-        Notification.Builder b = new Notification.Builder(c, RufService.CH_CALL)
+        // the answer to a silent call is reported on the silent channel: no sound even if the call's banner is gone
+        Notification.Builder b = new Notification.Builder(c, Rufe.still(c, id) ? RufService.CH_STILL : RufService.CH_CALL)
                 .setSmallIcon(R.drawable.ic_ruf)
                 .setColor(0xFFF5C242)
                 .setContentTitle(ok ? "Antwort ist unterwegs ✓" : "Antwort ging nicht raus")
@@ -74,13 +75,17 @@ public class Antwort extends BroadcastReceiver {
         c.getSystemService(NotificationManager.class).notify(note, b.build());
     }
 
-    /** Posts the answer; the id of the call it answers rides in the title. Runs off the main thread. */
-    static boolean send(String text, String id) {
+    /**
+     * Posts the answer; the id of the call it answers rides in the title, and the answer to a silent call carries
+     * the tag "still", so the Mac's receipt (docruf-mithoerer.mjs) stays silent as well. Runs off the main thread.
+     */
+    static boolean send(Context c, String text, String id) {
         String topic = BuildConfig.TOPIC;
         if (topic.isEmpty()) return false;
         try {
             URL u = new URL(RufService.HOST + topic + "-antwort?title="
-                    + URLEncoder.encode(id == null ? "" : id, "UTF-8"));
+                    + URLEncoder.encode(id == null ? "" : id, "UTF-8")
+                    + (Rufe.still(c, id) ? "&tags=" + RufService.TAG_STILL : ""));
             HttpURLConnection h = (HttpURLConnection) u.openConnection();
             h.setConnectTimeout(10000);
             h.setReadTimeout(10000);

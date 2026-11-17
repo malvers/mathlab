@@ -409,7 +409,7 @@ public class MainActivity extends Activity {
         int note = answerNote;
         Context app = getApplicationContext();
         new Thread(() -> {
-            boolean ok = Antwort.send(text, id);
+            boolean ok = Antwort.send(app, text, id);
             Antwort.finished(app, id, note, text, ok);
             runOnUiThread(() -> {
                 show(ok ? "✓ Angekommen" : "Ging nicht raus", ok ? TEXT : UPSILON, true);
@@ -488,6 +488,15 @@ public class MainActivity extends Activity {
             }
         } else if (Ansage.readAt >= 0) {
             i = words.wordAt(Ansage.readAt);
+        } else if (Ansage.silentMs > 0) {
+            // a silent call (Ansage.show): no word lights up; a sentence longer than the caption slides up evenly
+            // while Doc reads it, so its end is in sight before it fades
+            Layout l = caption.getLayout();
+            if (l != null) {
+                int box = caption.getHeight() - caption.getTotalPaddingTop() - caption.getTotalPaddingBottom();
+                float f = Math.min(1f, (System.currentTimeMillis() - Ansage.silentFrom) / (float) Ansage.silentMs);
+                caption.scrollTo(0, Math.max(0, Math.round(f * (l.getHeight() - box))));
+            }
         }
         if (i == lit) return;
         lit = i;

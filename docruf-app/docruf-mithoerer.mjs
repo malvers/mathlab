@@ -10,7 +10,8 @@
 //      other agent) - claimed once, so exactly one agent gets it,
 //   3. lets Solita say a short receipt on the phone - a different one each time, never the same twice in a row
 //      (quittungen.mjs; her recorded MP3s, no TTS cost per answer; Doc, 08.11.2026: not "Angekommen"; 15.11.2026:
-//      not always "Ich habe dich gehört").
+//      not always "Ich habe dich gehört"). The answer to a silent call (tag "still", DocCall 1.4) gets a silent
+//      receipt, which only buzzes (Doc, 17.11.2026: "No voice").
 //
 // The topic is the channel's only secret and comes from the Keychain (doc-ruf / ntfy-topic), never from the
 // source; this script never prints it.
@@ -65,19 +66,24 @@ function handle(m) {
     fs.writeFileSync(path.join(INBOX, '.neu', name), JSON.stringify({ id: m.id, time: m.time, call, text }));
     fs.renameSync(path.join(INBOX, '.neu', name), path.join(INBOX, name));
     console.log(stamp() + ' Antwort ' + m.id + ' im Eingang');
-    confirm();
+    confirm(Array.isArray(m.tags) && m.tags.includes('still'));
 }
 
-// Solita's receipt on the phone, a different one each time (quittungen.mjs); several answers in a row get one
+// Solita's receipt on the phone, a different one each time (quittungen.mjs); several answers in a row get one,
+// and it stays silent when any of them answered a silent call
 let pending = null;
-function confirm() {
+let quiet = false;
+function confirm(still) {
     clearTimeout(pending);
+    quiet = quiet || still;
     pending = setTimeout(() => {
         const q = pick();
         const mp3 = fs.existsSync(file(q)) ? file(q) : fs.existsSync(MP3) ? MP3 : null;
         const args = [SEND, mp3 === MP3 ? 'Ich habe dich gehört.' : q.text];
         if (mp3) args.push(mp3);
         args.push('--wait', '30');
+        if (quiet) args.push('--still');
+        quiet = false;
         execFile(NODE, args, { timeout: 60000 }, (err, out, errOut) => {
             console.log(stamp() + ' Quittung „' + args[1] + '“: ' + (err ? 'keine Quittung (' + (errOut || err.message).trim().slice(0, 120) + ')'
                 : out.trim().split('\n').pop()));

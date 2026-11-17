@@ -40,6 +40,9 @@ final class Ansage {
     // for the karaoke under the circle (Karaoke): her MP3 while it plays, or where the phone's voice is
     static MediaPlayer voice;
     static int readAt = -1;
+    // a silent call on the screen (show): when it started and how long it stays for reading; 0 = none
+    static long silentFrom, silentMs;
+    private static final long STILL_MIN_MS = 6000, STILL_MS_PER_CHAR = 70;
 
     private final Context app;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -131,6 +134,36 @@ final class Ansage {
                 else read(text, done);
             });
         }, "docruf-ansage").start();
+    }
+
+    /**
+     * A silent call on the screen (Doc, 17.11.2026: "ja, aber auch unter dem Bild von Solita"): her portrait and her
+     * sentence under the circle, as when she speaks - but no MP3, no phone voice, no volume, no audio focus, and
+     * DocNote keeps the DJI. Without a voice there is no karaoke: the whole sentence stands at once for as long as
+     * reading it takes (at least 6 s), then fades as usual; a tap on her ends it. From any thread.
+     */
+    void show(String text) {
+        String s = text == null ? "" : text;
+        long ms = Math.max(STILL_MIN_MS, s.length() * STILL_MS_PER_CHAR);
+        main.post(() -> {
+            long mine = System.currentTimeMillis();
+            speaking++;
+            saying = s;
+            silentFrom = mine;
+            silentMs = ms;
+            Runnable[] self = new Runnable[1];
+            Runnable done = () -> {
+                if (!open.remove(self[0])) return;   // ended already (stop)
+                main.removeCallbacks(self[0]);
+                if (silentFrom == mine) silentMs = 0;
+                speaking = Math.max(0, speaking - 1);
+                changed();
+            };
+            self[0] = done;
+            open.add(done);
+            changed();
+            main.postDelayed(done, ms);
+        });
     }
 
     /**

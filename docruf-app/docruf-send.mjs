@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 // DocRuf: sends one call to Doc's phone and waits for the phone's receipt.
 //
-//     node docruf-send.mjs "Doc, hier ist Solíta. ..." [solita.mp3] [--wait 20]
+//     node docruf-send.mjs "Doc, hier ist Solíta. ..." [solita.mp3] [--wait 20] [--still]
 //
 // The topic on ntfy.sh is the channel's only secret and lives in the Keychain (service doc-ruf, account
 // ntfy-topic), never in the source. With an MP3 the phone plays Solita's own voice, without one it reads the
 // text itself. The app posts the message id to <topic>-ok as soon as the call is on the phone.
+// --still tags the call "still": the phone only vibrates, never speaks, shows no call screen, and keeps the MP3
+// for a tap under "Letzte Rufe" (Doc, 17.11.2026: "No voice"). Needs DocCall 1.4 or newer on the phone.
 // Exit 0 with a receipt, 2 without one in time, 1 on errors: ~/.claude/hooks/solita-ruf-waechter.sh falls back
-// to the Mac's speakers on anything but 0.
+// to the Mac's speakers on anything but 0 - except for a still call, which never plays on the Mac.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 
@@ -18,9 +20,11 @@ if (w >= 0) {
     wait = Number(args[w + 1]) || wait;
     args.splice(w, 2);
 }
+const still = args.includes('--still');
+if (still) args.splice(args.indexOf('--still'), 1);
 const [text, mp3] = args;
 if (!text) {
-    console.error('usage: docruf-send.mjs "text" [file.mp3] [--wait seconds]');
+    console.error('usage: docruf-send.mjs "text" [file.mp3] [--wait seconds] [--still]');
     process.exit(1);
 }
 
@@ -36,7 +40,9 @@ const base = 'https://ntfy.sh/' + topic;
 
 // the text rides in the query, which keeps umlauts intact; with an MP3 the body is the attachment
 const sent = Math.floor(Date.now() / 1000);
-const r = await fetch(base + '?' + new URLSearchParams({ title: 'Solita', message: text }), {
+const query = { title: 'Solita', message: text };
+if (still) query.tags = 'still';   // arrives in the app's stream as "tags": ["still"]
+const r = await fetch(base + '?' + new URLSearchParams(query), {
     method: mp3 ? 'PUT' : 'POST',
     headers: mp3 ? { Filename: 'solita.mp3' } : {},
     body: mp3 ? fs.readFileSync(mp3) : '',
