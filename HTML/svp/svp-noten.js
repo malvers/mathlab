@@ -2,7 +2,7 @@
 // the mark scale. Read by informatik/vortraege.js (Doc's mark per talk) and
 // bewertungsmatrix.html (the summary on the Coach sheet), so the two can no
 // longer drift apart. Exposes window.svpNoten = { WEIGHT, SCALE, SCALE_NP, share,
-// combine, note, scaleOf, points, mark }.
+// combine, note, scaleOf, known, points, mark }.
 (function () {
     'use strict';
 
@@ -28,6 +28,13 @@
        BGY 11 (inf11, mathe11), the Oberschule (informatik9) and the FOS keep the 1-6 table above. */
     const NP_PLANS = ['inf12', 'inf13'];
     function scaleOf(plan) { return NP_PLANS.indexOf(String(plan || '')) >= 0 ? 'np' : 'note'; }
+    /* The talk plans on the 1-6 table, by name (vortraege.js PLANS): BGY 11 (inf11, mathe11), the Oberschule
+       (informatik9), the FOS (fos11, fos12). scaleOf() gives 'note' for ANY id that is not an NP plan - right
+       for the list of talks, which only ever passes its own plans. A page that may not know its plan (the
+       Bewertungsmatrix opened without ?v=, a mistyped id) asks known() first and shows no mark instead of a
+       guessed scale. A new plan in vortraege.js goes into NP_PLANS or NOTE_PLANS. */
+    const NOTE_PLANS = ['inf11', 'mathe11', 'informatik9', 'fos11', 'fos12'];
+    function known(plan) { const p = String(plan || ''); return NP_PLANS.indexOf(p) >= 0 || NOTE_PLANS.indexOf(p) >= 0; }
 
     /* Share of its maximum a sheet reached, or null. Shares, not points: the
        two sheets may be filled in different languages, and the German and the
@@ -70,5 +77,5 @@
     }
 
     window.svpNoten = { WEIGHT: WEIGHT, SCALE: SCALE, SCALE_NP: SCALE_NP, share: share, combine: combine, note: note,
-        scaleOf: scaleOf, points: points, mark: mark };
+        scaleOf: scaleOf, known: known, points: points, mark: mark };
 })();

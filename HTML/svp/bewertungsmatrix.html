@@ -17,7 +17,9 @@
     <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
     <link rel="stylesheet" href="svp.css">
+    <link rel="stylesheet" href="../js/cyber-clock.css">
     <script src="svp-gate.js"></script>
+    <script src="../js/cyber-clock.js"></script>
     <style>
         /* Bewertungsmatrix Vortrag - the two sheets (Deutsch / English) of
            MISC/PRE IBB/3.0/Bewertungsmatrix.pptx as one fillable page. The
@@ -378,6 +380,97 @@
             color: var(--bm-bonus);
         }
 
+        /* Grade forecast: a second totals row under the sum (Doc, 17.11.2026).
+           The mark in the verdict colour, the caption says what it covers. */
+        table.bm tfoot tr.bm-pred td {
+            padding-top: 8px;
+            padding-bottom: 9px;
+            border-top: 1px dashed var(--bm-band-line);
+        }
+        table.bm tfoot .bm-pred-sub {
+            display: block;
+            margin-top: 2px;
+            font-size: 0.72rem;
+            font-weight: 400;
+            line-height: 1.35;
+            color: var(--muted);
+        }
+        table.bm tfoot td.bm-pred-val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: var(--bm-big);
+        }
+
+        /* Talk stopwatch (Doc, 17.11.2026): digits of the site's widget
+           (CyberClock), the face fills orange in the last minute and red once
+           the time is over - the full-orange-with-navy of the important pills
+           (--g-wichtig, the same in every scheme) and the Upsilon red, so both
+           read on the dark and the light ground. */
+        .bm-clock {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 18px;
+        }
+        .bm-clock-face {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 14px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--input-bg);
+            color: var(--head);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .bm-clock-face.warn {
+            background: rgb(var(--g-wichtig));
+            color: rgb(var(--g-wichtig-ink));
+            border-color: transparent;
+        }
+        .bm-clock-face.over {
+            background: var(--ypsilon);
+            color: #fff;
+            border-color: transparent;
+        }
+        .bm-clock-sign {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .bm-clock-sign:empty { display: none; }
+        .bm-clock-digits .cyber-digits,
+        .bm-clock-digits.cyber-digits {
+            --cc-size: 2rem;
+            --cc-digit: currentColor;
+            --cc-dw: 0.86em;
+            --cc-sw: 0.42em;
+            --cc-weight: 700;
+            gap: 1px;
+        }
+        .bm-clock-info { flex: 1 1 12rem; min-width: 0; }
+        .bm-clock-phase {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--head);
+        }
+        .bm-clock-sub { margin-top: 3px; font-size: 0.85rem; color: var(--muted); }
+        .bm-clock-btns {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 10px;
+        }
+        .bm-clock-btns .bm-seg[hidden] { display: none; }
+        .bm-clock-btns button.action:disabled { opacity: 0.45; cursor: default; }
+        /* the phase switch is no sheet control - edit mode leaves it alone */
+        body.editing .bm-clock .bm-seg button { opacity: 1; pointer-events: auto; }
+
         /* Edit mode (body.editing): svp.css draws the dashed outline on every
            contenteditable; here only the extra controls. */
         body.editing .bm-seg button { opacity: 0.45; pointer-events: none; }
@@ -465,6 +558,15 @@
             table.bm tfoot tr { background: var(--bm-band); }
             table.bm tfoot td { background: transparent; border: 0 !important; }
             table.bm tfoot td.pts, table.bm tfoot td.got { grid-column: 2; text-align: left; }
+            /* forecast row: caption, then the mark - no empty cells, no label */
+            table.bm tfoot tr.bm-pred { border-top: 1px dashed var(--bm-band-line); }
+            table.bm tfoot tr.bm-pred td.pts, table.bm tfoot tr.bm-pred td.cmt { display: none; }
+            table.bm tfoot tr.bm-pred td.got::before { content: none; }
+            /* stopwatch: face and caption on one line, the buttons below */
+            .bm-clock { gap: 10px 14px; }
+            .bm-clock-digits .cyber-digits, .bm-clock-digits.cyber-digits { --cc-size: 1.7rem; }
+            .bm-clock-sign { font-size: 1.35rem; }
+            .bm-clock-btns { flex-basis: 100%; }
             .bm-fields { grid-template-columns: 1fr; }
             .bm-big { font-size: 1.25rem; }
         }
@@ -554,6 +656,27 @@
         </section>
         -->
 
+        <!-- Talk stopwatch (Doc, 17.11.2026: "ich brauche in der Bewertungsmatrix eine Stoppuhr").
+             Texts come from SHEETS[lang].clock; the script fills and wires it. -->
+        <section class="bm-card bm-clock bm-noprint" id="bmClock" aria-label="Stoppuhr">
+            <div class="bm-clock-face" id="bmClockFace" role="timer" aria-live="off">
+                <span class="bm-clock-sign" id="bmClockSign"></span>
+                <span class="bm-clock-digits" id="bmClockDigits">00:00</span>
+            </div>
+            <div class="bm-clock-info">
+                <div class="bm-clock-phase" id="bmClockPhase">Stoppuhr</div>
+                <div class="bm-clock-sub" id="bmClockSub"></div>
+            </div>
+            <div class="bm-clock-btns">
+                <div class="bm-seg" id="bmClockSeg" role="group" aria-label="Phase" hidden>
+                    <button type="button" data-phase="rede" class="on">Rede</button>
+                    <button type="button" data-phase="fragen">Fragen</button>
+                </div>
+                <button class="action green" type="button" id="bmClockGo">Start</button>
+                <button class="action secondary" type="button" id="bmClockReset">Zur&uuml;cksetzen</button>
+            </div>
+        </section>
+
         <section class="bm-card">
             <div class="bm-fields" id="bmFields"></div>
         </section>
@@ -597,6 +720,7 @@
     <script src="svp-auth.js"></script>
     <script src="svp-crypto.js"></script>
     <script src="svp-noten.js"></script>
+    <script src="svp-gong.js"></script>
     <script>
         (function () {
             'use strict';
@@ -624,6 +748,31 @@
                     really: 'Alles löschen?',
                     yes: 'Ja',
                     no: 'Nein',
+                    pred: {
+                        label: 'Notenprognose',
+                        only: 'nur dieser Bogen',
+                        mix: 'die Vortragsnote rechnet Coach und Team {c} : {p}',
+                        scaleNote: 'Note 1–6',
+                        scaleNp: 'Notenpunkte 15–0',
+                        unknown: 'Klassenstufe unbekannt – Bogen über die Vortragsliste öffnen',
+                        grade: 'Note'
+                    },
+                    clock: {
+                        title: 'Stoppuhr',
+                        rede: 'Rede',
+                        fragen: 'Fragen',
+                        soll: 'Soll',
+                        start: 'Start',
+                        pause: 'Pause',
+                        resume: 'Weiter',
+                        reset: 'Zurücksetzen',
+                        resetBusy: 'Erst anhalten, dann zurücksetzen',
+                        plan: '{n} {who} × {m} min Rede, danach {q} min Fragen',
+                        persons: ['Vortragende/r', 'Vortragende'],
+                        redeWas: 'Rede gedauert: {t} (Soll {s})',
+                        unknown: 'Sollzeit unbekannt – Namen der Vortragenden eintragen',
+                        paused: 'angehalten'
+                    },
                     rows: [
                         { max: 2, bonus: 1, show: '2 + 1', text: 'Abstract erstellt (Inhalt des Vortrages kompakt zusammengefasst, written in English is a bonus)' },
                         { max: 2, sos: true, text: 'Konsultation mit einer Schülerin oder einem Schüler (SoS) gehabt?' },
@@ -659,6 +808,31 @@
                     really: 'Delete everything?',
                     yes: 'Yes',
                     no: 'No',
+                    pred: {
+                        label: 'Grade forecast',
+                        only: 'this sheet only',
+                        mix: 'the talk grade weighs Coach and Team {c} : {p}',
+                        scaleNote: 'grade 1–6',
+                        scaleNp: 'Notenpunkte 15–0',
+                        unknown: 'Year unknown – open this sheet from the list of talks',
+                        grade: 'Grade'
+                    },
+                    clock: {
+                        title: 'Stopwatch',
+                        rede: 'Talk',
+                        fragen: 'Questions',
+                        soll: 'target',
+                        start: 'Start',
+                        pause: 'Pause',
+                        resume: 'Resume',
+                        reset: 'Reset',
+                        resetBusy: 'Pause first, then reset',
+                        plan: '{n} {who} × {m} min talk, then {q} min questions',
+                        persons: ['presenter', 'presenters'],
+                        redeWas: 'Talk took {t} (target {s})',
+                        unknown: 'Target time unknown – enter the presenters’ names',
+                        paused: 'paused'
+                    },
                     rows: [
                         { max: 3, text: 'Abstract created (content of the presentation summarized concisely)?' },
                         { max: 2, sos: true, text: 'Consultation with students (SoS) conducted?' },
@@ -881,6 +1055,15 @@
                     '</td>' +
                     '<td class="got" data-label="' + esc(sh.cols.got) + '" id="bmSum">' + (t.any ? fmt(t.got) : '–') + '</td>' +
                     '<td class="cmt"></td>' +
+                    '</tr>' +
+                    /* grade forecast, filled by drawForecast(); screen only */
+                    '<tr class="bm-pred bm-noprint">' +
+                    '<td class="nr"></td>' +
+                    '<td class="txt"><span>' + esc(sh.pred.label) + '</span>' +
+                    '<span class="bm-pred-sub" id="bmPredSub"></span></td>' +
+                    '<td class="pts"></td>' +
+                    '<td class="got bm-pred-val" id="bmPred">–</td>' +
+                    '<td class="cmt"></td>' +
                     '</tr></tfoot>';
                 elTable.innerHTML = h;
                 /* The send row sits in the totals row (Doc, 16.09.2026). The
@@ -962,11 +1145,58 @@
                 elSummary.appendChild(b);
             }
 
+            /* Grade forecast in the totals (Doc, 17.11.2026: "mach da eine Vorhersage bzgl. Note").
+               It is the talk mark's own rule, applied to THIS sheet alone - nothing computed here:
+               - The talk mark (informatik/vortraege.js noteCalc) is svpNoten.mark(svpNoten.combine(coach,
+                 publikum), PLAN), each sheet counting as got / max - got WITH the bonus points, max WITHOUT
+                 them (the payload sendSheet stores), so a bonus can lift a sheet above 100 %; Coach and Team
+                 weigh WEIGHT.coach : WEIGHT.publikum (3 : 3, svp-noten.js). No rounding of the share: each
+                 mark needs share >= its threshold (1e-9 slack against 0.95 coming out as 0.9499999).
+               - The forecast is svpNoten.mark(got / max, plan) of this sheet, i.e. the talk mark IF the other
+                 sheet reaches the same share. Hence the caption "nur dieser Bogen". The mixed result of both
+                 sheets stays in the summary behind the title (drawSummary), on the Coach sheet.
+               - Scale by plan, as everywhere (svpNoten.scaleOf): inf12/inf13 = BGY 12/13 in Notenpunkte
+                 (SCALE_NP = punktetabelle.html SCALES[12]); inf11, mathe11 (BGY 11), informatik9 (Oberschule),
+                 fos11/fos12 (FOS) = Note 1-6 at 95/80/65/45/25 % (SCALE). The plan is the first part of the
+                 talk id in ?v= (planOfTalk). An unknown or missing plan gets no mark (svpNoten.known), so no
+                 scale is ever guessed.
+               Worked examples (max 42, as on Doc's sheet 42 + 3 Bonus):
+                 inf11 (BGY 11), 18 of 42: 18 / 42 = 0.4286 -> below 0.45, from 0.25 -> Note 5
+                 inf12 (BGY 12), 18 of 42: 0.4286 -> below 0.45, from 0.40 -> 4 NP (Note 4)
+                 inf11, 33.5 of 42: 0.7976 -> below 0.80 -> Note 3; 34 of 42: 0.8095 -> Note 2
+                 inf13, 44 of 42 (two bonus points in it): 1.0476 -> from 0.95 -> 15 NP */
+            function drawForecast() {
+                const out = document.getElementById('bmPred');
+                const sub = document.getElementById('bmPredSub');
+                if (!out || !sub) return;
+                const P = sheet().pred;
+                const N = window.svpNoten;
+                const plan = planOfTalk();
+                out.title = '';
+                if (!(N && N.known && N.known(plan) && N.mark)) {
+                    out.textContent = '–';
+                    sub.textContent = P.unknown;
+                    return;
+                }
+                const np = N.scaleOf(plan) === 'np';
+                sub.textContent = P.only +
+                    (role ? ' · ' + P.mix.replace('{c}', WEIGHT.coach).replace('{p}', WEIGHT.publikum) : '') +
+                    ' · ' + (np ? P.scaleNp : P.scaleNote);
+                const t = totals();
+                if (!t.any || !(t.max > 0)) { out.textContent = '–'; return; }
+                const m = N.mark(t.got / t.max, plan);
+                out.textContent = m.np ? m.value + ' NP' : P.grade + ' ' + m.value;
+                out.title = fmt(t.got) + ' / ' + t.max + ' → ' +
+                    (m.np ? m.value + ' NP (' + P.grade + ' ' + m.note + ')' : P.grade + ' ' + m.value) +
+                    ' · ' + P.only;
+            }
+
             function drawVerdict() {
                 const sh = sheet();
                 const t = totals();
                 const sum = document.getElementById('bmSum');
                 if (sum) sum.textContent = t.any ? fmt(t.got) : '–';
+                drawForecast();
                 if (!t.any) {
                     elBig.textContent = '–';
                     elNote.textContent = '(' + sh.empty + ')';
@@ -1003,6 +1233,7 @@
                 drawVerdict();
                 drawClear();
                 drawNotes();
+                clockDraw();
             }
 
             /* One note for the whole talk (Doc, 04.11.2026: "ein generelles Kommentarfeld ... Sprachstil
@@ -1031,6 +1262,186 @@
                     elNoteBtn.classList.toggle('filled', !!state.notiz.trim());
                 });
             }
+
+            /* ---------- talk stopwatch ----------
+               Doc, 17.11.2026: "ich brauche in der Bewertungsmatrix eine Stoppuhr", then "ja, Gong am Ende
+               aber leise". Target times as on the list of talks (informatik/vortraege.js timeHtml:
+               MIN_PRO_PERSON = 8 per presenter, MIN_FRAGEN = 8 for questions - change both or neither).
+               The number of presenters is read from the Vortragende field (the names the list hands over,
+               separated by commas). With a target: two phases, Rede then Fragen, each counting DOWN to its
+               target, orange in the last minute, red and "+mm:ss" once over, one quiet gong when a target is
+               reached (never again while it runs over). Without names: a plain stopwatch counting up.
+               The state lives in localStorage per talk (both roles share it), so a reload keeps the running
+               time: { phase, run, t0 = start of the running stretch, acc = ms per phase, gong = phases rung }.
+               No key handling and no focus moves - the clock only reacts to clicks on its own buttons. */
+            const MIN_PER_PERSON = 8;
+            const MIN_QUESTIONS = 8;
+            const WARN_MS = 60 * 1000;           /* last minute = orange */
+            const GONG_VOL = 0.28;               /* "leise": about a quarter of the lesson gong */
+            const GONG_LATE_MS = 5000;           /* a target passed while the page was closed rings no more */
+            const CLOCK_KEY = 'svp-bm-uhr' + (talk ? ':' + talk.replace(/-(coach|publikum)$/, '') : '');
+            const elClockFace = document.getElementById('bmClockFace');
+            const elClockSign = document.getElementById('bmClockSign');
+            const elClockDigits = document.getElementById('bmClockDigits');
+            const elClockPhase = document.getElementById('bmClockPhase');
+            const elClockSub = document.getElementById('bmClockSub');
+            const elClockSeg = document.getElementById('bmClockSeg');
+            const elClockGo = document.getElementById('bmClockGo');
+            const elClockReset = document.getElementById('bmClockReset');
+
+            function clockBlank() { return { phase: 'rede', run: false, t0: 0, acc: { rede: 0, fragen: 0 }, gong: {} }; }
+            function clockLoad() {
+                try {
+                    const c = JSON.parse(localStorage.getItem(CLOCK_KEY) || 'null');
+                    if (c && c.acc) {
+                        const b = clockBlank();
+                        return {
+                            phase: c.phase === 'fragen' ? 'fragen' : 'rede',
+                            run: !!c.run,
+                            t0: Number(c.t0) || 0,
+                            acc: { rede: Number(c.acc.rede) || 0, fragen: Number(c.acc.fragen) || 0 },
+                            gong: c.gong || b.gong
+                        };
+                    }
+                } catch (e) { }
+                return clockBlank();
+            }
+            function clockSave() {
+                try { localStorage.setItem(CLOCK_KEY, JSON.stringify(clock)); } catch (e) { }
+            }
+            let clock = clockLoad();
+            let clockTimer = 0;
+
+            /* presenters = names in the Vortragende field ("A, B", "A und B", "A & B") */
+            function presenters() {
+                const s = String(state.fields.presenter || '').trim();
+                if (!s) return 0;
+                return s.split(/\s*(?:[,;\/&+\n]|\bund\b|\band\b)\s*/i).filter(function (x) { return x.trim(); }).length;
+            }
+            function targetMs(phase) {
+                const n = presenters();
+                if (!n) return 0;
+                return (phase === 'fragen' ? MIN_QUESTIONS : n * MIN_PER_PERSON) * 60000;
+            }
+            function elapsedMs(phase) {
+                return clock.acc[phase] + (clock.run && clock.phase === phase ? Math.max(0, Date.now() - clock.t0) : 0);
+            }
+            function pad2(n) { return (n < 10 ? '0' : '') + n; }
+            /* up: whole seconds gone (stopwatch, overtime); down: seconds left, rounded up so the
+               target shows as 16:00 at the start and 00:00 exactly when it is reached */
+            function mmss(ms, up) {
+                const s = Math.max(0, up ? Math.floor(ms / 1000) : Math.ceil(ms / 1000));
+                return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
+            }
+            function setText(el, txt) { if (el.textContent !== txt) el.textContent = txt; }
+
+            function clockDraw() {
+                const L = sheet().clock;
+                const ph = clock.phase;
+                const tgt = targetMs(ph);
+                const el = elapsedMs(ph);
+                let shown, sign = '', cls = '';
+                if (!tgt) shown = mmss(el, true);
+                else if (el < tgt) {
+                    shown = mmss(tgt - el, false);
+                    if (tgt - el <= WARN_MS) cls = 'warn';
+                } else {
+                    shown = mmss(el - tgt, true);
+                    sign = '+';
+                    cls = 'over';
+                }
+                if (elClockDigits.dataset.shown !== shown) {
+                    elClockDigits.dataset.shown = shown;
+                    if (window.CyberClock) CyberClock.digits(elClockDigits, shown);
+                    else elClockDigits.textContent = shown;
+                }
+                setText(elClockSign, sign);
+                elClockFace.classList.toggle('warn', cls === 'warn');
+                elClockFace.classList.toggle('over', cls === 'over');
+
+                const n = presenters();
+                const stopped = !clock.run && el > 0;
+                setText(elClockPhase, tgt ? L[ph] + ' · ' + L.soll + ' ' + mmss(tgt, true) : L.title);
+                let sub;
+                if (!tgt) sub = L.unknown;
+                else if (ph === 'rede') {
+                    sub = L.plan.replace('{n}', n).replace('{who}', L.persons[n === 1 ? 0 : 1])
+                        .replace('{m}', MIN_PER_PERSON).replace('{q}', MIN_QUESTIONS);
+                } else {
+                    sub = L.redeWas.replace('{t}', mmss(elapsedMs('rede'), true)).replace('{s}', mmss(targetMs('rede'), true));
+                }
+                setText(elClockSub, sub + (stopped ? ' · ' + L.paused : ''));
+
+                elClockSeg.hidden = !tgt;
+                for (const b of elClockSeg.querySelectorAll('button[data-phase]')) {
+                    b.classList.toggle('on', b.dataset.phase === ph);
+                    setText(b, L[b.dataset.phase]);
+                }
+                setText(elClockGo, clock.run ? L.pause : (el > 0 || clock.acc.rede > 0 ? L.resume : L.start));
+                elClockGo.classList.toggle('green', !clock.run);
+                elClockGo.classList.toggle('orange', clock.run);
+                setText(elClockReset, L.reset);
+                elClockReset.disabled = clock.run;
+                elClockReset.title = clock.run ? L.resetBusy : '';
+            }
+
+            /* One quiet gong per phase when its target is reached - the central gong (svp-gong.js) at
+               GONG_VOL; looked up at call time. Another tab of the same talk may have rung first. */
+            function clockGong() {
+                if (!clock.run) return;
+                const ph = clock.phase;
+                const tgt = targetMs(ph);
+                if (!tgt || clock.gong[ph]) return;
+                const el = elapsedMs(ph);
+                if (el < tgt) return;
+                const fresh = clockLoad();
+                clock.gong[ph] = true;
+                if (fresh.gong && fresh.gong[ph]) return;
+                clockSave();
+                if (el - tgt < GONG_LATE_MS && window.svpGong && svpGong.play) svpGong.play(GONG_VOL);
+            }
+
+            function clockTick() { clockDraw(); clockGong(); }
+            function clockRun() {
+                if (clock.run && !clockTimer) clockTimer = setInterval(clockTick, 250);
+                if (!clock.run && clockTimer) { clearInterval(clockTimer); clockTimer = 0; }
+                clockTick();
+            }
+            /* close the running stretch into the phase's account */
+            function clockBank() {
+                if (!clock.run) return;
+                const now = Date.now();
+                clock.acc[clock.phase] += Math.max(0, now - clock.t0);
+                clock.t0 = now;
+            }
+
+            elClockGo.addEventListener('click', function () {
+                if (clock.run) { clockBank(); clock.run = false; }
+                else { clock.run = true; clock.t0 = Date.now(); }
+                clockSave();
+                clockRun();
+            });
+            elClockReset.addEventListener('click', function () {
+                if (clock.run) return;
+                clock = clockBlank();
+                clockSave();
+                clockRun();
+            });
+            elClockSeg.addEventListener('click', function (e) {
+                const b = e.target.closest('button[data-phase]');
+                if (!b || b.dataset.phase === clock.phase) return;
+                clockBank();
+                clock.phase = b.dataset.phase;
+                clockSave();
+                clockRun();
+            });
+            /* the same talk open in a second tab follows this one */
+            window.addEventListener('storage', function (e) {
+                if (e.key !== CLOCK_KEY) return;
+                clock = clockLoad();
+                clockRun();
+            });
+            document.addEventListener('visibilitychange', function () { if (!document.hidden) clockTick(); });
 
             /* ---------- edit mode: the sheet itself ---------- */
 
@@ -1404,6 +1815,8 @@
                 if (!inp) return;
                 state.fields[inp.dataset.field] = inp.value;
                 save();
+                /* the presenters' names set the stopwatch's target time */
+                if (inp.dataset.field === 'presenter') clockTick();
             });
 
             elTable.addEventListener('input', function (e) {
@@ -1485,6 +1898,7 @@
             }());
 
             drawAll();
+            clockRun();
             pullRemote();
             if (role === 'coach' && meta) { pullPublikum(); pullOwnCoach(); }
 

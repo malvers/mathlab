@@ -6,6 +6,7 @@
 // unlocks it. Try it: svpGong.test() in the console, or ?gong=test in the URL.
 // Loaded by the Fahrplan app and by every plan page (svp-plan.js); it only asks WebUntis with a login (the
 // teacher's, not the class's), and with several tabs open only one rings. Needs svp-auth.js (svpAuth.api).
+// bewertungsmatrix.html loads it too, for the quiet gong at the end of a talk's time (svpGong.play(vol)).
 (function (global) {
     'use strict';
 
@@ -33,10 +34,10 @@
         [1.52, 0.45, 0.06, 12], [2.00, 0.30, 0.08, 10], [2.41, 0.40, 0.35, 11],
         [2.43, 0.25, 0.40, 9],  [2.97, 0.28, 0.55, 9],  [3.76, 0.22, 0.75, 8],
         [4.53, 0.16, 0.95, 7],  [5.90, 0.10, 1.20, 6],  [7.30, 0.06, 1.40, 5]];
-    function synth(c) {
+    function synth(c, ziel) {
         const out = c.createGain();
         out.gain.value = 0.35;
-        out.connect(c.destination);
+        out.connect(ziel || c.destination);
         const t0 = c.currentTime + 0.05;
         TEILE.forEach(function (p) {
             const o = c.createOscillator(), g = c.createGain(), f = F0 * p[0];
@@ -65,13 +66,22 @@
     const DATEI = new URL('../audio/gong.mp3', (document.currentScript && document.currentScript.src) || location.href).href;
     let bytes = null, puffer = null;
     fetch(DATEI).then(function (r) { return r.ok ? r.arrayBuffer() : null; }).then(function (b) { bytes = b; }).catch(function () {});
-    function gong() {
+    /* vol: optional loudness 0..1 for a quiet gong - the talk stopwatch of bewertungsmatrix.html rings at about
+       a quarter (Doc, 17.11.2026: "Gong am Ende aber leise"). Left out, or anything that is not a number below 1
+       (a click event, say), the gong rings exactly as before, so the lesson gong of the Fahrplan is unchanged. */
+    function gong(vol) {
         const c = unlock();
         if (!c) return;
-        const los = function (b) { const q = c.createBufferSource(); q.buffer = b; q.connect(c.destination); q.start(); };
+        let ziel = c.destination;
+        if (typeof vol === 'number' && isFinite(vol) && vol >= 0 && vol < 1) {
+            ziel = c.createGain();
+            ziel.gain.value = vol;
+            ziel.connect(c.destination);
+        }
+        const los = function (b) { const q = c.createBufferSource(); q.buffer = b; q.connect(ziel); q.start(); };
         if (puffer) los(puffer);
-        else if (bytes) c.decodeAudioData(bytes.slice(0)).then(function (b) { puffer = b; los(b); }, function () { synth(c); });
-        else synth(c);
+        else if (bytes) c.decodeAudioData(bytes.slice(0)).then(function (b) { puffer = b; los(b); }, function () { synth(c, ziel); });
+        else synth(c, ziel);
     }
 
     /* today's block starts, "HH:MM" */
@@ -126,5 +136,6 @@
     const BILD = new URL('svp-gong.png', (document.currentScript && document.currentScript.src) || location.href).href;
     const ICON = '<img src="' + BILD + '" alt="" draggable="false">';
 
-    global.svpGong = { test: gong, starts: function () { return starts.slice(); }, lade: lade, ICON: ICON };
+    /* play(vol): the gong on demand, optionally quieter (see gong above) */
+    global.svpGong = { test: gong, play: gong, starts: function () { return starts.slice(); }, lade: lade, ICON: ICON };
 })(window);
