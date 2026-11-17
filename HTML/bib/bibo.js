@@ -1,4 +1,4 @@
-// DocBibo - prototype step 1: the lending page of the school library (textbooks, room KES 205).
+// DocBib - prototype step 1: the lending page of the school library (textbooks, room KES 205).
 // Scan the label barcode (or type / USB-scan the number) -> the book -> say or type the pupil's name ->
 // "Ausleihen" for four weeks. Scanning a lent book shows its loan and takes it back.
 // Storage is localStorage on this device only (prototype, invented demo data, see bibo-demo.js).

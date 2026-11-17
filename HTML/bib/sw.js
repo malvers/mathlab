@@ -1,9 +1,9 @@
-// DocBibo - service worker (scope /bibo/). It makes the app installable and lets the app shell start offline.
+// DocBib - service worker (scope /bib/). It makes the app installable and lets the app shell start offline.
 // Own files: from the network when it answers (so a new version, and live reload on Doc's Mac, always win), else
 // the stored copy. The fonts and the ZXing scan library (fixed version, iPhone path) are stored after the first load.
 // The loans themselves live in localStorage, not here.
-const VERSION = '2026-11-17-3';
-const SHELL = 'docbibo-shell-' + VERSION;
+const VERSION = '2026-11-17-4';
+const SHELL = 'docbib-shell-' + VERSION; // own prefix: the old /bibo/ kill switch deletes only 'docbibo-shell-*'
 const FILES = ['./', 'bibo.css', 'bibo.js', 'bibo-demo.js', 'manifest.webmanifest', 'icons/icon.svg',
     'icons/app-192.png', 'icons/app-512.png', 'icons/apple-touch-icon.png', '../svp/svp-tokens.css', '../js/solita-listen.js'];
 const ZXING = 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/umd/zxing-browser.min.js';
@@ -18,7 +18,7 @@ self.addEventListener('install', e => e.waitUntil((async () => {
 })()));
 
 self.addEventListener('activate', e => e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k.startsWith('docbibo-shell-') && k !== SHELL) await caches.delete(k);
+    for (const k of await caches.keys()) if (k.startsWith('docbib-shell-') && k !== SHELL) await caches.delete(k);
     await self.clients.claim();
 })()));
 

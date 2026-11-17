@@ -1,4 +1,4 @@
-// DocBibo - demo data for the prototype (step 1). EVERYTHING here is invented: no real pupils, no real books.
+// DocBib - demo data for the prototype (step 1). EVERYTHING here is invented: no real pupils, no real books.
 // The real catalogue and class lists come later by import from the old library program (step 2) and never into
 // this public repo. Book numbers are the six digits of the library label; 980370 is the label Doc photographed,
 // so scanning that real book finds a (made-up) entry and starts a loan.
