@@ -30,6 +30,7 @@ FILES = {
     'kontakt/manifest.json': 'manifest.json',
     'kontakt/icon-192.png': 'icon-192.png',
     'kontakt/icon-512.png': 'icon-512.png',
+    'kontakt/icon-maskable-512.png': 'icon-maskable-512.png',   # the Android home-screen icon (gold on navy, 19.11.2026)
     'kontakt/apple-touch-icon.png': 'apple-touch-icon.png',
     'kontakt/badge-96.png': 'badge-96.png',
     'kontakt/kontakt-k.mp3': 'kontakt-k.mp3',          # notification sound: Morse K ("bitte kommen"), Doc sets it on the phone
