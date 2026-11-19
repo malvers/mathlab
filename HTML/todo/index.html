@@ -39,6 +39,8 @@
             --prio1: 176, 36, 24;
             --prio2: 245, 194, 66;
             --prio3: 121, 158, 49;
+            /* Wiedervorlage (resubmission): the violet of the shared palette (svp-tokens.css --g-violet), apart from the three */
+            --wv: 155, 130, 225;
             --ink-light: rgb(248, 251, 255);
             --ink-navy: rgb(14, 36, 78);
             /* how strongly the buttons and pills are tinted: Blau and Grau need nearly the full colour on the phone
@@ -121,6 +123,7 @@
         .p1 { --c-rgb: var(--prio1); --on: var(--ink-light); }
         .p2 { --c-rgb: var(--prio2); --on: var(--ink-navy); }
         .p3 { --c-rgb: var(--prio3); --on: var(--ink-navy); }
+        .pw { --c-rgb: var(--wv); --on: var(--ink-navy); }
         .pd { --c-rgb: var(--tint); --on: var(--bg); }
         /* Grau's own tint is plain grey ("mausgrau", Doc 06.11.): "Done" takes a slightly bluish grey there */
         html.svp-grey .pd { --c-rgb: 160, 178, 210; }
@@ -152,10 +155,65 @@
         #lists { padding-top: 0; }   /* the top bar's 12px below it = the 12px between the boxes (Doc 06.11.) */
         /* each group in a box like the entry card above, same width (Doc 06.11.: "so eine Box ... wie oben");
            6px side padding puts the pill, the check circles and the input above on one line, 14px in */
-        .grp, .grp-done {
+        .grp, .grp-done, .grp-wv {
             margin: 0 0 12px; padding: 12px 6px 4px;   /* below, not above: a hidden group above leaves no gap */
             background: var(--card); border: 1px solid var(--line); border-radius: 14px;
         }
+        /* Wiedervorlage: the items waiting for their date, below Prio 3 and collapsed by default; the head shows
+           how many and the next date, a tap on it opens and closes the group (Doc 19.11.) */
+        .grp-wv { padding-bottom: 12px; }
+        .grp-wv.open { padding-bottom: 4px; }
+        h2.wv-h { margin: 0; font: inherit; }
+        button.wv-head {
+            display: flex; align-items: center; gap: 10px; width: 100%; min-height: 26px; margin: 0; padding: 0 4px 0 0;
+            background: transparent; border: 0; cursor: pointer; text-align: left; color: var(--muted);
+            font: 14px Raleway, sans-serif; font-variant-numeric: lining-nums;
+        }
+        .grp-wv.open button.wv-head { margin-bottom: 4px; }
+        button.wv-head .pill { margin: 0 0 0 8px; flex: 0 0 auto; }
+        .wv-sum { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .wv-chev { flex: 0 0 24px; width: 24px; height: 24px; fill: currentColor; transition: transform .2s ease; }
+        button.wv-head[aria-expanded="true"] .wv-chev { transform: rotate(180deg); }
+        /* on the phone the long pill leaves too little room: count and next date get a line of their own */
+        @media (max-width: 420px) {
+            button.wv-head { flex-wrap: wrap; row-gap: 6px; }
+            .wv-chev { margin-left: auto; }
+            .wv-sum { order: 3; flex: 1 0 100%; padding-left: 9px; }
+        }
+        /* a waiting item has no grip: keep its mail button in line with the others */
+        .grip-gap { width: 44px; }
+        /* the date of a WV item: a small violet tag under its text - in the group and once it is due at the top */
+        .mid { min-width: 0; }
+        .mid > .txt { display: block; }
+        .wv-tag {
+            display: inline-block; margin: -5px 0 8px 2px; padding: 0 6px; height: 20px; border-radius: 5px;
+            border: 1px solid rgba(var(--wv), var(--btn-rim-a)); background: rgba(var(--wv), var(--pill-a));
+            color: var(--ink-navy); font: 700 11px/18px Orbitron, sans-serif; letter-spacing: .06em; white-space: nowrap;
+        }
+        html.svp-light .wv-tag { color: var(--text); }
+
+        /* the date question of WV: three quick picks, a date field of its own, OK */
+        .wv-what { margin: -10px 0 16px; font: 15px/1.4 Raleway, sans-serif; color: var(--muted);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .wv-what:empty { display: none; }
+        .wv-quick { display: flex; gap: 8px; margin: 0 0 14px; }
+        .wv-quick button {
+            flex: 1 1 0; min-width: 0; height: 58px; border-radius: 10px; cursor: pointer; padding: 0 2px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+            background: rgba(var(--wv), var(--btn-a)); border: 1px solid rgba(var(--wv), var(--btn-rim-a)); color: var(--ink-navy);
+            font: 700 clamp(11px, 3.3vw, 13px) Orbitron, sans-serif; letter-spacing: .02em; white-space: nowrap;
+        }
+        .wv-quick button small { font: 600 13px Raleway, sans-serif; letter-spacing: 0; font-variant-numeric: lining-nums; }
+        html.svp-light .wv-quick button { color: var(--text); }
+        .wv-own { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; font: 15px Raleway, sans-serif; color: var(--text); }
+        .wv-own input {
+            flex: 1 1 auto; min-width: 0; height: 44px; padding: 0 10px; border-radius: 10px;
+            background: var(--bg); color: var(--text); border: 1px solid var(--line);
+            font: 17px Raleway, sans-serif; font-variant-numeric: lining-nums; color-scheme: dark;
+        }
+        html.svp-light .wv-own input { color-scheme: light; }
+        .wv-own input:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
+        .dlg-yes.wv-ok { background: rgb(var(--wv)); color: var(--ink-navy); }
         /* less round, like the buttons above (radius 10 on 44px, here 6 on 26px); all four the same width, text in
            the middle (Doc 06.11.: "sollen also gleich breit sein" - the widest, PRIO 2, is about 79px) */
         .pill {
@@ -271,10 +329,12 @@
                         <button type="button" role="radio" data-theme="light" aria-checked="false"><i style="background: rgb(246, 248, 252)"></i>Hell</button>
                     </div>
                 </div>
-                <div class="prio" id="prio" role="group" aria-label="Hinzufügen in eine Priorität, ausgewählte Aufgabe umstufen, mit leerem Feld filtern">
-                    <button class="p1" type="button" data-prio="1" aria-pressed="false">Prio 1</button>
-                    <button class="p2" type="button" data-prio="2" aria-pressed="false">Prio 2</button>
-                    <button class="p3" type="button" data-prio="3" aria-pressed="false">Prio 3</button>
+                <!-- just the digits on the buttons (Doc 19.11.: "1, 2, 3 ... nicht Prio davor"), plus WV = Wiedervorlage -->
+                <div class="prio" id="prio" role="group" aria-label="Hinzufügen in eine Priorität oder auf Wiedervorlage, ausgewählte Aufgabe umstufen, mit leerem Feld filtern">
+                    <button class="p1" type="button" data-prio="1" aria-pressed="false" aria-label="Prio 1">1</button>
+                    <button class="p2" type="button" data-prio="2" aria-pressed="false" aria-label="Prio 2">2</button>
+                    <button class="p3" type="button" data-prio="3" aria-pressed="false" aria-label="Prio 3">3</button>
+                    <button class="pw" type="button" data-filter="wv" aria-pressed="false" aria-label="Wiedervorlage">WV</button>
                     <button class="pd" type="button" data-filter="done" aria-pressed="false">Done</button>
                 </div>
                 <div class="status" id="status" role="status"></div>
@@ -285,6 +345,8 @@
             <section class="grp p1"><h2 class="pill">Prio 1</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p1" data-prio="1" aria-label="Prio 1"></ul></section>
             <section class="grp p2"><h2 class="pill">Prio 2</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p2" data-prio="2" aria-label="Prio 2"></ul></section>
             <section class="grp p3"><h2 class="pill">Prio 3</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p3" data-prio="3" aria-label="Prio 3"></ul></section>
+            <!-- chevron: Material Icons "expand_more" (Apache 2.0) -->
+            <section class="grp-wv pw" id="wvSec" hidden><h2 class="wv-h"><button class="wv-head" id="wvHead" type="button" aria-expanded="false" aria-controls="wv"><span class="pill">Wiedervorlage</span><span class="wv-sum" id="wvSum"></span><svg class="wv-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg></button></h2><ul class="list open wv" id="wv" aria-label="Wiedervorlage" hidden></ul></section>
             <section class="grp-done pd" id="doneSec"><div class="grp-head"><h2 class="pill">Done</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><button class="del del-all" id="delAll" type="button" aria-label="Alle erledigten löschen"></button></div><ul class="list done" id="done" aria-label="Done"></ul></section>
         </div>
     </div>
@@ -295,6 +357,24 @@
             <div class="dlg-btns">
                 <button class="dlg-no" id="dlgNo" type="button">Abbrechen</button>
                 <button class="dlg-yes" id="dlgYes" type="button">Löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WV asks for the date: a quick pick takes it at once, the own date needs OK -->
+    <div class="dlg-back" id="wvDlg" hidden>
+        <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="wvTitle">
+            <p id="wvTitle">Wiedervorlage am …</p>
+            <p class="wv-what" id="wvWhat"></p>
+            <div class="wv-quick" id="wvQuick">
+                <button type="button" data-step="day">morgen<small></small></button>
+                <button type="button" data-step="week">+1 Woche<small></small></button>
+                <button type="button" data-step="month">+1 Monat<small></small></button>
+            </div>
+            <label class="wv-own"><span>oder am</span><input type="date" id="wvDate" aria-label="Eigenes Datum"></label>
+            <div class="dlg-btns">
+                <button class="dlg-no" id="wvNo" type="button">Abbrechen</button>
+                <button class="dlg-yes wv-ok" id="wvOk" type="button">OK</button>
             </div>
         </div>
     </div>
@@ -319,11 +399,11 @@
             const ICON_MAIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>';
             const ICON_SENT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
 
-            let items = [];          // { id, text, done, done_at, created_at, prio, pos }
+            let items = [];          // { id, text, done, done_at, created_at, prio, pos, wv_date }
             let editingId = null;    // item whose text is being edited in place - no re-render meanwhile
             let dragging = false;    // an item is being dragged - no re-render meanwhile
             let busy = 0;            // writes in flight - a reload now could bring back the old state
-            let filter = 0;          // the one priority shown, 'done' = only the checked items, 0 = all
+            let filter = 0;          // the one priority shown, 'done' = only the checked items, 'wv' = only WV items, 0 = all
 
             const byId = id => items.find(x => x.id === id);
             const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -332,9 +412,47 @@
             function norm(x) {
                 if (!PRIOS.includes(x.prio)) x.prio = 2;
                 if (typeof x.pos !== 'number') x.pos = -ms(x.created_at) / 1000;
+                if (!x.wv_date) x.wv_date = null;
                 return x;
             }
             const byPos = (a, b) => a.pos - b.pos || ms(b.created_at) - ms(a.created_at) || b.id - a.id;
+
+            /* Wiedervorlage (resubmission, Doc 19.11.): wv_date = the day an item comes back, as 'YYYY-MM-DD' in local time.
+               Until then it waits in the collapsed group below Prio 3; from that day on it stands at the top of Prio 1
+               with a small "WV 26.11." tag, until it is checked, gets a new date or another priority.
+               A WV item is stored as Prio 1 with a pos far above every other one (earlier date = higher), so that
+               everyone reading "order by prio, pos" (the morning briefing) gets due items on top of Prio 1 as well -
+               items still waiting are the ones with wv_date > today. */
+            const WV_BASE = -1e12;   // the pos of other items: small numbers or about -1.8e9 (-epoch seconds)
+            const WV_OPEN_KEY = 'todo-wv-open';   // whether the WV group is opened (this device only)
+            const WEEKDAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+            const pad = n => String(n).padStart(2, '0');
+            const isoDay = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+            const parseDay = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d, 12); };
+            const today = () => isoDay(new Date());
+            function inDays(n) { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return isoDay(d); }
+            /* the same day next month, or its last day (31.01. -> 28.02.) */
+            function inAMonth() {
+                const now = new Date(), d = new Date(now.getFullYear(), now.getMonth() + 1, 1, 12);
+                d.setDate(Math.min(now.getDate(), new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
+                return isoDay(d);
+            }
+            /* "26.11." (with the year when it is not this one), optionally with the weekday: "Do 26.11." */
+            function dayLabel(s, weekday) {
+                const d = parseDay(s);
+                const year = d.getFullYear() !== new Date().getFullYear() ? String(d.getFullYear()) : '';
+                return (weekday ? WEEKDAYS[d.getDay()] + ' ' : '') + `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${year}`;
+            }
+            const wvPos = s => { const [y, m, d] = s.split('-').map(Number); return WV_BASE + Date.UTC(y, m - 1, d) / 864e5; };
+            const waiting = (x, t) => !x.done && !!x.wv_date && x.wv_date > (t || today());
+            /* where a new item goes in priority `prio`: above all others of it, but below the WV items on top */
+            function topPos(prio, except) {
+                const group = items.filter(y => !y.done && y.prio === prio && !y.wv_date && y !== except);
+                return group.length ? Math.min(...group.map(y => y.pos)) - 1 : 0;
+            }
+            let wvOpen = false;
+            try { wvOpen = localStorage.getItem(WV_OPEN_KEY) === '1'; } catch (e) { }
+            let lastDay = '';   // the day of the last render: a new day moves the due WV items up
 
             function status(msg, cls) {
                 const el = $('status');
@@ -355,7 +473,7 @@
             }
 
             async function load() {
-                const cols = 'select=id,text,done,done_at,created_at,prio,pos';
+                const cols = 'select=id,text,done,done_at,created_at,prio,pos,wv_date';
                 const [open, done] = await Promise.all([
                     send(`todo?${cols}&done=is.false&order=prio.asc,pos.asc`),
                     send(`todo?${cols}&done=is.true&order=done_at.desc&limit=${DONE_MAX}`)
@@ -364,13 +482,15 @@
                 cache();
             }
 
-            const row = x =>
+            /* an open WV item shows its date under the text; one still waiting has no grip (its group is ordered by date) */
+            const row = (x, t) =>
                 `<li data-id="${x.id}" class="${x.done ? 'done' : ''}">` +
                 `<button class="chk" type="button" aria-label="${x.done ? 'Wieder offen' : 'Abhaken'}">${x.done ? ICON_DONE : ICON_OPEN}</button>` +
-                `<span class="txt">${esc(x.text)}</span>` +
+                `<div class="mid"><span class="txt">${esc(x.text)}</span>` +
+                (x.wv_date && !x.done ? `<span class="wv-tag">WV ${dayLabel(x.wv_date)}</span>` : '') + '</div>' +
                 (x.done ? `<button class="del" type="button" aria-label="Löschen">${ICON_DEL}</button>`
                     : `<span class="acts"><button class="mail" type="button" aria-label="Als Mail an mich" title="Als Mail an mich">${ICON_MAIL}</button>` +
-                      `<button class="grip" type="button" aria-label="Verschieben">${ICON_GRIP}</button></span>`) +
+                      (waiting(x, t) ? '<span class="grip-gap"></span>' : `<button class="grip" type="button" aria-label="Verschieben">${ICON_GRIP}</button>`) + '</span>') +
                 '</li>';
 
             /* The item as a mail to Doc himself, sent by the server at once - no mail app in between
@@ -410,17 +530,31 @@
                     if (r.height) before.set(li.dataset.id, r.top);   // rows of a hidden group have no place to slide from
                 }
 
-                // a filter shows one priority only, its checked items included - or only the checked items
+                // a filter shows one priority only, its checked items included - or only the checked items -
+                // or only the WV items: the due ones in their priority, the waiting ones in their group (opened)
+                const t = today();
+                lastDay = t;
                 const shown = x => !filter || filter === 'done' || x.prio === filter;
-                const open = items.filter(x => !x.done);
+                const open = items.filter(x => !x.done && !waiting(x, t));
                 for (const p of PRIOS) {
                     const grp = $('p' + p).closest('.grp');
-                    grp.hidden = !!filter && p !== filter;
+                    const list = open.filter(x => x.prio === p && (filter !== 'wv' || x.wv_date)).sort(byPos);
+                    grp.hidden = filter === 'wv' ? !list.length : !!filter && p !== filter;
                     grp.querySelector('.grp-note').hidden = filter !== p;
-                    $('p' + p).innerHTML = open.filter(x => x.prio === p).sort(byPos).map(row).join('');
+                    $('p' + p).innerHTML = list.map(x => row(x, t)).join('');
                 }
+                const wv = items.filter(x => waiting(x, t)).sort((a, b) => a.wv_date.localeCompare(b.wv_date) || byPos(a, b));
+                const wvShown = filter === 'wv' || wvOpen;
+                $('wvSec').hidden = filter ? filter !== 'wv' : !wv.length;
+                $('wvSec').classList.toggle('open', wvShown);
+                $('wv').hidden = !wvShown;
+                $('wvHead').setAttribute('aria-expanded', String(wvShown));
+                $('wvHead').querySelector('.wv-chev').style.visibility = filter === 'wv' ? 'hidden' : '';
+                $('wvSum').textContent = filter === 'wv' ? 'nochmal tippen zeigt alles'
+                    : wv.length ? `${wv.length} · nächste ${dayLabel(wv[0].wv_date, true)}` : '';
+                $('wv').innerHTML = wv.map(x => row(x, t)).join('');
                 const done = items.filter(x => x.done && shown(x)).sort((a, b) => ms(b.done_at) - ms(a.done_at) || b.id - a.id);
-                $('done').innerHTML = done.map(row).join('');
+                $('done').innerHTML = done.map(x => row(x, t)).join('');
                 $('doneSec').hidden = !done.length && filter !== 'done';
                 $('doneSec').querySelector('.grp-note').hidden = filter !== 'done';
 
@@ -443,7 +577,7 @@
                 }
             }
 
-            /* a write: change locally at once, then tell the server; on failure undo and say so */
+            /* a write: change locally at once, then tell the server; on failure undo and say so. True when saved */
             async function write(apply, undo, request) {
                 apply();
                 render();
@@ -453,11 +587,13 @@
                     const rows = await request();
                     if (!rows.length) throw new Error('nichts gespeichert');
                     status('');
+                    return true;
                 } catch (e) {
                     undo();
                     render();
                     cache();
                     status('Nicht gespeichert (' + e.message + ') – bitte nochmal.', 'err');
+                    return false;
                 } finally {
                     busy--;
                 }
@@ -526,11 +662,14 @@
                 const a = i > 0 ? byId(ids[i - 1]) : null;
                 const b = i < ids.length - 1 ? byId(ids[i + 1]) : null;
                 const pos = a && b ? (a.pos + b.pos) / 2 : a ? a.pos + 1 : b ? b.pos - 1 : 0;
-                let changes = [[x, { prio, pos }]];
+                // a due WV item dragged into another priority becomes a plain item of it (within Prio 1 it keeps its date)
+                const plain = x.wv_date && x.prio !== prio ? { wv_date: null } : {};
+                let changes = [[x, { prio, pos, ...plain }]];
                 if (a && b && !(a.pos < pos && pos < b.pos)) {
-                    changes = ids.map(byId).map((y, k) => [y, { prio, pos: k }]).filter(([y, n]) => y === x || y.pos !== n.pos);
+                    changes = ids.map(byId).map((y, k) => [y, y === x ? { prio, pos: k, ...plain } : { prio, pos: k }])
+                        .filter(([y, n]) => y === x || y.pos !== n.pos);
                 }
-                const prev = changes.map(([y]) => ({ prio: y.prio, pos: y.pos }));
+                const prev = changes.map(([y]) => ({ prio: y.prio, pos: y.pos, wv_date: y.wv_date }));
                 // after Sortable has finished with its own DOM work
                 setTimeout(() => write(
                     () => changes.forEach(([y, n]) => Object.assign(y, n)),
@@ -539,42 +678,42 @@
                 ), 0);
             }
 
-            // the three Prio buttons and Enter add: never twice at once
+            // the Prio buttons, WV and Enter add: never twice at once
             let adding_ = false;
             function adding(on) {
                 adding_ = on;
                 for (const b of $('prio').children) b.disabled = on;
             }
 
-            /* filter to one priority or to the checked items ('done'); 0 = all. The active button shows its full colour */
+            /* filter to one priority, to the checked items ('done') or to the WV items ('wv'); 0 = all. The active button shows its full colour */
             const btnFilter = b => (b.dataset.prio ? Number(b.dataset.prio) : b.dataset.filter);
             function setFilter(f) {
-                filter = PRIOS.includes(f) || f === 'done' ? f : 0;
+                filter = PRIOS.includes(f) || f === 'done' || f === 'wv' ? f : 0;
                 for (const b of $('prio').children) b.setAttribute('aria-pressed', String(btnFilter(b) === filter));
                 render(false);
             }
 
-            /* add the typed item on top of priority `prio` - the Prio buttons pass theirs, Enter means 2 */
-            async function add(prio) {
+            /* add the typed item on top of priority `prio` - the Prio buttons pass theirs, Enter means 2;
+               with a date `wv` it goes onto Wiedervorlage until that day */
+            async function add(prio, wv) {
                 if (adding_) return;
                 prio = PRIOS.includes(prio) ? prio : 2;
                 // still dictating: end it first, the final text is added right after (onFinal)
-                if (ear && ear.active) { addAfterDictation = prio; ear.stop(); return; }
+                if (ear && ear.active) { addAfterDictation = [prio, wv]; ear.stop(); return; }
                 const text = $('text').value.trim();
                 if (!text) { status('Erst die Aufgabe eintippen.'); $('text').focus(); return; }
-                const group = items.filter(x => !x.done && x.prio === prio);
-                const pos = group.length ? Math.min(...group.map(x => x.pos)) - 1 : 0;
+                const fresh = wv ? { text, prio: 1, pos: wvPos(wv), wv_date: wv } : { text, prio, pos: topPos(prio) };
                 adding(true);
                 busy++;
                 try {
-                    const rows = await send('todo', 'POST', [{ text, prio, pos }]);
+                    const rows = await send('todo', 'POST', [fresh]);
                     if (!rows.length) throw new Error('nichts gespeichert');
                     items.push(norm(rows[0]));
                     // a filter on another priority would hide the new item at once: show everything again
-                    if (filter && filter !== prio) setFilter(0);
+                    if (filter && filter !== (wv ? 'wv' : prio)) setFilter(0);
                     $('text').value = '';
                     saveDraft();
-                    status('');
+                    status(wv ? wvSaid(wv) : '');
                     render();
                     cache();
                 } catch (e) {
@@ -591,14 +730,86 @@
                 const span = $('lists').querySelector(`li[data-id="${id}"] .txt`);
                 if (span) span.blur();   // ends the edit (saves the text), editingId = null
                 const x = byId(id);
-                if (!x || x.prio === prio) return;
-                const group = items.filter(y => !y.done && y.prio === prio && y !== x);
-                const next = { prio, pos: group.length ? Math.min(...group.map(y => y.pos)) - 1 : 0 };
-                const prev = { prio: x.prio, pos: x.pos };
+                // a WV item (waiting or due) becomes a plain item of that priority, also of Prio 1
+                if (!x || (x.prio === prio && !x.wv_date)) return;
+                const next = { prio, pos: topPos(prio, x) };
+                if (x.wv_date) next.wv_date = null;
+                const prev = { prio: x.prio, pos: x.pos, wv_date: x.wv_date };
                 // a filter on another priority would hide the item at once: show everything again
-                if (PRIOS.includes(filter) && filter !== prio) setFilter(0);
+                if ((PRIOS.includes(filter) && filter !== prio) || filter === 'wv') setFilter(0);
                 write(() => Object.assign(x, next), () => Object.assign(x, prev),
                     () => send(`todo?id=eq.${id}`, 'PATCH', next));
+            }
+
+            const wvSaid = day => `Wiedervorlage am ${dayLabel(day, true)}`;
+
+            /* The item `id` comes back on `day`: Prio 1 with the WV pos; a checked item is open again */
+            async function setWv(id, day) {
+                const x = byId(id);
+                if (!x) return;
+                const next = { prio: 1, pos: wvPos(day), wv_date: day, done: false, done_at: null };
+                const prev = { prio: x.prio, pos: x.pos, wv_date: x.wv_date, done: x.done, done_at: x.done_at };
+                if (filter && filter !== 'wv') setFilter(0);
+                if (await write(() => Object.assign(x, next), () => Object.assign(x, prev),
+                    () => send(`todo?id=eq.${id}`, 'PATCH', next))) status(wvSaid(day));
+            }
+
+            /* Ask for the WV date: a quick pick answers at once, the own date with OK (or Enter);
+               Escape, "Abbrechen" or a tap beside it = no date (null) */
+            function askDay(what) {
+                return new Promise(done => {
+                    const picks = { day: inDays(1), week: inDays(7), month: inAMonth() };
+                    for (const b of $('wvQuick').children) {
+                        b.dataset.day = picks[b.dataset.step];
+                        b.querySelector('small').textContent = dayLabel(b.dataset.day, true);
+                    }
+                    $('wvWhat').textContent = what || '';
+                    $('wvDate').min = today();
+                    $('wvDate').value = picks.day;
+                    $('wvDlg').hidden = false;
+                    $('wvQuick').children[0].focus();
+                    const close = day => {
+                        $('wvDlg').hidden = true;
+                        document.removeEventListener('keydown', key, true);
+                        $('wvQuick').onclick = $('wvOk').onclick = $('wvNo').onclick = $('wvDlg').onclick = null;
+                        done(day || null);
+                    };
+                    const own = () => {
+                        const v = $('wvDate').value;
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(v)) close(v); else $('wvDate').focus();
+                    };
+                    const key = e => {
+                        if (e.key === 'Escape') { e.preventDefault(); close(null); }
+                        // Enter on a button presses that button; in the date field it means OK
+                        if (e.key === 'Enter' && !e.target.closest('#wvDlg button')) { e.preventDefault(); own(); }
+                    };
+                    document.addEventListener('keydown', key, true);
+                    $('wvQuick').onclick = e => { const b = e.target.closest('button'); if (b) close(b.dataset.day); };
+                    $('wvOk').onclick = own;
+                    $('wvNo').onclick = () => close(null);
+                    $('wvDlg').onclick = e => { if (e.target === $('wvDlg')) close(null); };
+                });
+            }
+
+            /* The WV button, like the Prio buttons: a selected item goes onto Wiedervorlage, a typed (or dictated)
+               one is added there - both after asking for the date; with an empty field it filters to the WV items */
+            async function wvButton() {
+                if (editingId) {
+                    const id = editingId;
+                    const span = $('lists').querySelector(`li[data-id="${id}"] .txt`);
+                    if (span) span.blur();   // ends the edit (saves the text)
+                    const x = byId(id);
+                    const day = x && await askDay(x.text);
+                    if (day) setWv(id, day);
+                    return;
+                }
+                if ($('text').value.trim() || (ear && ear.active)) {
+                    if (ear && ear.active) ear.stop();   // the final text arrives while the date is being chosen
+                    const day = await askDay($('text').value.trim());
+                    if (day) add(1, day);
+                    return;
+                }
+                setFilter(filter === 'wv' ? 0 : 'wv');
             }
 
             /* tap on a text: edit it in place; Enter or tapping elsewhere saves, Escape reverts */
@@ -634,7 +845,7 @@
             }
 
             /* Dictation: the spoken text lands behind what is already typed, live while speaking */
-            let ear = null, dictBase = '', addAfterDictation = 0;   // the priority to add into once dictation ends, 0 = none
+            let ear = null, dictBase = '', addAfterDictation = null;   // [priority, WV date] to add into once dictation ends
             const join = (a, b) => (a && b ? a + ' ' + b : a || b);
             const capital = t => t.charAt(0).toUpperCase() + t.slice(1);
             function setMic(on) {
@@ -662,7 +873,7 @@
                     onFinal: t => {
                         dictated(t);
                         setMic(false);
-                        if (addAfterDictation) { const p = addAfterDictation; addAfterDictation = 0; add(p); }
+                        if (addAfterDictation) { const [p, wv] = addAfterDictation; addAfterDictation = null; add(p, wv); }
                     },
                     log: m => console.log('[todo]', m)
                 });
@@ -728,6 +939,7 @@
                     const b = e.target.closest('button');
                     if (!b) return;
                     if (b.dataset.filter === 'done') { setFilter(filter === 'done' ? 0 : 'done'); return; }   // never adds
+                    if (b.dataset.filter === 'wv') { wvButton(); return; }
                     const p = Number(b.dataset.prio);
                     // an item selected (its text tapped): it moves into that priority (Doc 05.11.)
                     if (editingId) { reprio(editingId, p); return; }
@@ -752,10 +964,19 @@
                     onStart: () => { dragging = true; },
                     onEnd: evt => { dragging = false; dropped(evt); }
                 });
+                // the head of the WV group opens and closes it (remembered on this device; the WV filter keeps it open)
+                $('wvHead').onclick = () => {
+                    if (filter === 'wv') return;
+                    wvOpen = !wvOpen;
+                    try { localStorage.setItem(WV_OPEN_KEY, wvOpen ? '1' : '0'); } catch (e) { }
+                    render(false);
+                };
                 // back in the foreground (phone) or focused again (Mac): fetch what the other device changed
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden && auth.hasSession() && !$('entry').hidden && !editingId && !dragging && !busy) refresh();
                 });
+                // the app left open over midnight: the WV items due today move up without a reload
+                setInterval(() => { if (!$('lists').hidden && today() !== lastDay) render(); }, 60000);
                 $('loginBtn').onclick = () => auth.loginDialog(showApp, 'Anmelden für deine To-do-Liste');
 
                 if (auth.hasSession()) showApp(); else $('gate').hidden = false;
