@@ -693,6 +693,10 @@
                 <label class="switch"><input id="fGoogle" type="checkbox"><i></i>auch in Google eintragen</label>
                 <input id="fPass" type="password" autocomplete="current-password" placeholder="Solitas Passwort (nur einmal)" aria-label="Solitas Passwort" hidden>
             </div>
+            <!-- "Termin von <label>": the appointment is the guest's (shared_by) - pink, never a reminder (only once a share exists) -->
+            <div class="fld" id="forGuestRow" hidden>
+                <label class="switch"><input id="fForGuest" type="checkbox"><i></i><span id="forGuestText">Termin des Gasts</span></label>
+            </div>
             <!-- "privat": never shown to the guest the calendar is shared with (only once the column exists) -->
             <div class="fld" id="privRow" hidden>
                 <label class="switch"><input id="fPrivate" type="checkbox"><i></i><span id="privText">privat – wird nie geteilt</span></label>
@@ -1548,7 +1552,7 @@
             const CAL_FN = auth.DB_URL + '/functions/v1/calendar';
             const appPass = () => { try { return localStorage.getItem('dev_access') || ''; } catch (e) { return ''; } };
             function syncGoogle() {
-                $('googleRow').hidden = !edState || !edState.googleOk || !!$('fRepeat').value;   // single appointments only
+                $('googleRow').hidden = !edState || !edState.googleOk || !!$('fRepeat').value || guestOn();   // single appointments of Doc's only
                 $('fPass').hidden = $('googleRow').hidden || !$('fGoogle').checked || !!appPass();
             }
             async function toGoogle(row, f) {
@@ -1620,13 +1624,13 @@
                     googleOk: !GUEST && (!ev || (!feedOf(ev) && !guest)) };
                 $('fGoogle').checked = false;
                 $('fPass').value = '';
-                // "privat" only where the column exists, and not on the guest's own entries; no colour choice for those
-                $('privRow').hidden = !shareCols || guest;
+                // "Termin von <label>": Doc gives an appointment to the guest or takes it back (shared_by) - only once a share
+                // and the column exist, never for a mirrored one (Doc, 19.11.2026)
+                $('forGuestRow').hidden = GUEST || !shareCols || !share || !!(ev && feedOf(ev));
+                $('fForGuest').checked = guest;
+                $('forGuestText').textContent = 'Termin von ' + guestName();
                 $('fPrivate').checked = !!(ev && ev.private);
                 $('privText').textContent = share ? 'privat – ' + share.label + ' sieht ihn nicht' : 'privat – wird nie geteilt';
-                $('colorRow').hidden = guest || GUEST;
-                $('remindRow').hidden = GUEST;   // no Solita for the guest's entries (Doc, 19.11.2026)
-                $('edTitle').textContent = ev ? (GUEST ? 'Dein Termin' : guest ? 'Termin von ' + guestName() : 'Termin') : 'Neuer Termin';
                 $('edDel').hidden = !ev;
                 let start, end, allDay;
                 if (ev) {
@@ -1670,8 +1674,7 @@
                     sel.add(opt);
                 }
                 sel.value = rule;
-                $('edNote').textContent = [guest ? 'Eingetragen von ' + guestName() + '.' : '',
-                    ev && ev.rrule ? 'Wiederholt sich – Änderungen gelten für alle Termine der Reihe.' : ''].filter(Boolean).join(' ');
+                syncGuest();
                 syncAllDay();
                 syncGoogle();
                 renderRemind();
@@ -1680,6 +1683,20 @@
                 if (!ev && !$('fTitle').value) setTimeout(() => $('fTitle').focus(), 30);
             }
             function closeEditor() { $('ed').hidden = true; edState = null; }
+            /* the guest's entry or Doc's: the switch where it shows, else what the row already is */
+            const guestOn = () => ($('forGuestRow').hidden ? !!(edState && edState.ev && edState.ev.shared_by) : $('fForGuest').checked);
+            function syncGuest() {
+                const ev = edState.ev, on = guestOn();
+                // "privat" only where the column exists, and not on the guest's entries; no colour choice and no Solita for
+                // those (Doc, 19.11.2026: the guest's entries never ring)
+                $('privRow').hidden = !shareCols || on;
+                $('colorRow').hidden = on || GUEST;
+                $('remindRow').hidden = on || GUEST;
+                $('edTitle').textContent = ev ? (GUEST ? 'Dein Termin' : on ? 'Termin von ' + guestName() : 'Termin') : 'Neuer Termin';
+                $('edNote').textContent = [on ? 'Solita erinnert nicht an Termine von ' + guestName() + '.' : '',
+                    ev && ev.rrule ? 'Wiederholt sich – Änderungen gelten für alle Termine der Reihe.' : ''].filter(Boolean).join(' ');
+                syncGoogle();
+            }
 
             /* the form -> a row for calendar_event, or a message what is missing */
             function formRow() {
@@ -1708,6 +1725,11 @@
                     rrule: $('fRepeat').value || null, remind: rmin, color: edState.color
                 };
                 if (shareCols && !$('privRow').hidden) row.private = $('fPrivate').checked;   // only once the column exists
+                if (!$('forGuestRow').hidden) {   // given to the guest (an entry of theirs keeps its share) or taken back
+                    row.shared_by = $('fForGuest').checked ? (edState.ev && edState.ev.shared_by) || share.id : null;
+                    if (row.shared_by) row.private = false;   // the guest always sees their own entries
+                }
+                if (guestOn()) row.remind = [];   // never a reminder for the guest's entries
                 return { row, s, e };
             }
 
@@ -2051,6 +2073,7 @@
                 $('ed').addEventListener('pointerdown', e => { if (e.target === $('ed')) closeEditor(); });
                 $('fRepeat').addEventListener('change', syncGoogle);
                 $('fGoogle').onchange = syncGoogle;
+                $('fForGuest').onchange = syncGuest;
                 $('fAllDay').onchange = () => {
                     // switching changes which reminders fit: take the defaults of the new kind
                     edState.remind = new Set($('fAllDay').checked ? K.DEFAULT_REMIND_ALLDAY : K.DEFAULT_REMIND);

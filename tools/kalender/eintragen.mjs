@@ -8,6 +8,8 @@
 //        [--location …] [--notes …] [--remind 100,60] [--uid …]   one event from flags
 //   node tools/kalender/eintragen.mjs remove <id>             delete one event (its old version stays in the history)
 //   --dry                                                     show what would be sent - nothing is sent, no token read
+//   --fuer-gast                                               the entry is the GUEST's (the person the calendar is
+//                                                             shared with, pink there); with a file: every entry in it
 //
 // Times are Europe/Berlin wall-clock time ("2026-11-14 10:00" or "2026-11-14T10:00"); this tool turns them into ISO
 // times with the right offset (+01:00 in winter, +02:00 in summer). A time that already carries an offset or Z is kept.
@@ -17,6 +19,10 @@
 // (the day after the last). With a source_uid that already exists the event is replaced, so the same file can be sent
 // again after a correction without doubling anything. Without remind the calendar's default applies (60,15 minutes;
 // all-day: 18:00 the day before).
+// "shared": true (or --fuer-gast) makes it the guest's entry (supabase/migrations/20261119b_calendar_add_shared.sql):
+// no reminder ever (Doc, 19.11.2026: Solita never calls for the guest's entries - a remind along with it is refused
+// here), the guest sees it as their own. "shared": false makes a replaced entry Doc's again; without the key a replaced
+// entry stays whose it was. The guest's name is never needed here - it lives only in the database.
 //
 // Access: like the reminder watcher (waechter.mjs) this has no login. It calls calendar_add / calendar_remove
 // (supabase/migrations/20261107_calendar_write.sql) with the random token that lives only in the Mac's keychain
@@ -32,7 +38,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '..', '..');
 const KEYCHAIN_SERVICE = 'doc-kalender-waechter';
-const FIELDS = ['title', 'starts_at', 'ends_at', 'all_day', 'location', 'notes', 'rrule', 'exdates', 'remind', 'color', 'source_uid'];
+const FIELDS = ['title', 'starts_at', 'ends_at', 'all_day', 'location', 'notes', 'rrule', 'exdates', 'remind', 'color', 'source_uid', 'shared'];
 const WEEKDAY = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 const DAY = 86400000;
 
@@ -146,6 +152,12 @@ function normalize(ev, i) {
         if (![1, 2, 3].includes(ev.color)) fail(what + ': color muss 1, 2 oder 3 sein');
         out.color = ev.color;
     }
+    if (ev.shared != null) {
+        if (typeof ev.shared !== 'boolean') fail(what + ': shared muss true oder false sein');
+        // the database would drop it without a word - say it here instead
+        if (ev.shared && out.remind && out.remind.length) fail(what + ': Termine der geteilten Person bekommen nie eine Erinnerung - remind bitte weglassen');
+        out.shared = ev.shared;
+    }
     return out;
 }
 
@@ -173,6 +185,7 @@ function fromFlags(f) {
         if (parts.some(x => !/^-?\d+$/.test(x))) fail('--remind: Minuten mit Komma, z. B. 100,60 (oder none)');
         ev.remind = parts.map(Number);
     }
+    if (f.fuerGast) ev.shared = true;
     return ev;
 }
 
@@ -192,8 +205,11 @@ function describe(ev, i) {
         lines.push('   ' + date(s) + ' ' + hm(s) + '–' + endTxt + ' Berlin   =   ' + utc(s) + (e ? ' – ' + utc(e) : '') + ' UTC');
     }
     if (ev.location) lines.push('   Ort: ' + ev.location);
+    if (ev.shared === true) lines.push('   Für: die geteilte Person (pink im Kalender)');
+    if (ev.shared === false) lines.push('   Für: Doc (nicht die geteilte Person)');
     const remind = ev.remind || (ev.all_day ? [360] : [60, 15]);
-    lines.push('   Erinnerung: ' + (remind.length ? remind.map(m => m + ' min' + (ev.all_day ? '' : ' (' + hm(new Date(+s - m * 60000)) + ')')).join(', ') : 'keine') + (ev.remind ? '' : ' (Standard)'));
+    if (ev.shared === true) lines.push('   Erinnerung: keine (Termin der geteilten Person)');
+    else lines.push('   Erinnerung: ' + (remind.length ? remind.map(m => m + ' min' + (ev.all_day ? '' : ' (' + hm(new Date(+s - m * 60000)) + ')')).join(', ') : 'keine') + (ev.remind ? '' : ' (Standard)'));
     if (ev.rrule) lines.push('   Wiederholung: ' + ev.rrule);
     if (ev.source_uid) lines.push('   source_uid: ' + ev.source_uid);
     if (ev.notes) lines.push('   Notiz: ' + ev.notes.replace(/\n/g, ' / '));
@@ -208,6 +224,7 @@ function parseArgs(argv) {
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
         if (a === '--dry') { flags.dry = true; continue; }
+        if (a === '--fuer-gast') { flags.fuerGast = true; continue; }
         if (a === '-h' || a === '--help') { flags.help = true; continue; }
         if (a.startsWith('--')) {
             let name = a.slice(2), val;
@@ -226,9 +243,10 @@ function parseArgs(argv) {
 }
 
 const USAGE = [
-    'node tools/kalender/eintragen.mjs add events.json [--dry]',
-    'node tools/kalender/eintragen.mjs add --title "…" --start "2026-11-14 10:00" --end "2026-11-14 12:30" [--location …] [--notes …] [--remind 100,60] [--uid …] [--dry]',
-    'node tools/kalender/eintragen.mjs remove <id> [--dry]'
+    'node tools/kalender/eintragen.mjs add events.json [--fuer-gast] [--dry]',
+    'node tools/kalender/eintragen.mjs add --title "…" --start "2026-11-14 10:00" --end "2026-11-14 12:30" [--location …] [--notes …] [--remind 100,60] [--uid …] [--fuer-gast] [--dry]',
+    'node tools/kalender/eintragen.mjs remove <id> [--dry]',
+    '  --fuer-gast   als Eintrag der geteilten Person (pink), ohne Erinnerung (in der Datei: "shared": true)'
 ].join('\n');
 
 function needToken() {
@@ -252,6 +270,10 @@ async function main() {
             try { text = fs.readFileSync(path.resolve(pos[1]), 'utf8'); } catch (e) { fail('Datei nicht lesbar: ' + pos[1]); }
             try { raw = JSON.parse(text); } catch (e) { fail('kein gültiges JSON in ' + pos[1] + ': ' + e.message); }
             raw = Array.isArray(raw) ? raw : [raw];
+            if (flags.fuerGast) raw = raw.map((ev, i) => {
+                if (ev && typeof ev === 'object' && ev.shared === false) fail('Termin ' + (i + 1) + ': "shared": false widerspricht --fuer-gast');
+                return ev && typeof ev === 'object' && !Array.isArray(ev) ? Object.assign({}, ev, { shared: true }) : ev;
+            });
         } else if (flagMode) raw = [fromFlags(flags)];
         else fail('add braucht eine Datei oder --title/--start\n' + USAGE);
         if (!raw.length || raw.length > 200) fail('1 bis 200 Termine erwartet, nicht ' + raw.length);
@@ -266,7 +288,8 @@ async function main() {
         const token = needToken();
         const rows = await rpc('calendar_add', { p_token: token, p_events: events }, token);
         console.log('');
-        rows.forEach((r, i) => console.log((r.op === 'update' ? 'ersetzt' : 'eingetragen') + ': id ' + r.id + ' - ' + events[i].title));
+        rows.forEach((r, i) => console.log((r.op === 'update' ? 'ersetzt' : 'eingetragen') + ': id ' + r.id + ' - ' + events[i].title +
+            (events[i].shared === true ? ' (geteilte Person)' : '')));
         return;
     }
 
