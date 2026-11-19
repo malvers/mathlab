@@ -561,6 +561,13 @@
         .qr { width: min(280px, 100%); aspect-ratio: 1; margin: 0 auto 14px; padding: 12px; border-radius: 12px; background: rgb(255, 255, 255); }
         .qr svg { display: block; width: 100%; height: 100%; }
         .qr-dlg .set-text { text-align: left; }
+        /* the same link as text, to send it when the guest is not there to scan (Doc, 19.11.2026) - shown only in this
+           one-time dialog, emptied with the QR code */
+        .qr-link {
+            margin: 0 0 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg);
+            color: var(--text); font: 13px/1.4 Raleway, sans-serif; text-align: left; word-break: break-all; user-select: all;
+        }
+        .qr-dlg .dlg-btns { margin-top: 10px; gap: 8px; }
 
         /* guest mode, S4: the week on one sheet - only in the guest's view, Doc's own printing stays as it was */
         #printWeek { display: none; }
@@ -773,8 +780,14 @@
         <div class="dlg qr-dlg" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
             <p class="ed-title" id="qrTitle">QR-Code</p>
             <div class="qr" id="qrBox"></div>
-            <p class="set-text">Einmal scannen lassen, persönlich. Danach ist der Code weg; ein neuer sperrt diesen.</p>
-            <div class="dlg-btns"><button type="button" class="yes" id="qrOk">Fertig</button></div>
+            <!-- or send the same link (Doc, 19.11.2026: "einen Link ... dass nicht erst mein Telefon scannen muss") -->
+            <p class="qr-link" id="qrLink"></p>
+            <p class="set-text">Scannen lassen oder den Link schicken – er öffnet den Kalender ohne Passwort, also nur an diese eine Person. Danach ist er hier weg; ein neuer Code sperrt diesen.</p>
+            <div class="dlg-btns">
+                <button type="button" id="qrCopy">Link kopieren</button>
+                <button type="button" id="qrShare" hidden>Teilen</button>
+                <button type="button" class="yes wide" id="qrOk">Fertig</button>
+            </div>
         </div>
     </div>
 
@@ -1466,6 +1479,9 @@
                 q.addData(link);
                 q.make();
                 $('qrBox').innerHTML = q.createSvgTag({ scalable: true, margin: 0 });
+                $('qrLink').textContent = link;
+                $('qrCopy').textContent = 'Link kopieren';
+                $('qrShare').hidden = !navigator.share;   // the phone's share sheet (WhatsApp ...), where the browser has one
                 $('qrTitle').textContent = 'Zugang für ' + share.label;
                 $('qrDlg').hidden = false;
                 $('qrOk').focus();
@@ -1473,6 +1489,28 @@
             function closeQr() {
                 $('qrDlg').hidden = true;
                 $('qrBox').innerHTML = '';   // the token goes with it
+                $('qrLink').textContent = '';
+            }
+            /* the link from the dialog: to the clipboard, or - if the browser will not - selected for a manual copy */
+            async function copyQrLink() {
+                const link = $('qrLink').textContent;
+                if (!link) return;
+                try {
+                    await navigator.clipboard.writeText(link);
+                    $('qrCopy').textContent = 'Kopiert ✓';
+                } catch (e) {
+                    const r = document.createRange();
+                    r.selectNodeContents($('qrLink'));
+                    getSelection().removeAllRanges();
+                    getSelection().addRange(r);
+                    $('qrCopy').textContent = 'Markiert – bitte kopieren';
+                }
+            }
+            async function shareQrLink() {
+                const link = $('qrLink').textContent;
+                if (!link || !navigator.share) return;
+                try { await navigator.share({ title: 'Kalender von Doc', text: 'Kalender von Doc', url: link }); }
+                catch (e) { if (e && e.name !== 'AbortError') copyQrLink(); }   // no share sheet after all: copy instead
             }
             async function lockShare() {
                 if (!share || !share.active) return;
@@ -2064,6 +2102,8 @@
                 $('shareQr').onclick = shareCode;
                 $('shareLock').onclick = lockShare;
                 $('qrOk').onclick = closeQr;
+                $('qrCopy').onclick = copyQrLink;
+                $('qrShare').onclick = shareQrLink;
                 $('qrDlg').addEventListener('pointerdown', e => { if (e.target === $('qrDlg')) closeQr(); });
                 $('importFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; importFile(f); };
 
