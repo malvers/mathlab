@@ -155,31 +155,12 @@
         #lists { padding-top: 0; }   /* the top bar's 12px below it = the 12px between the boxes (Doc 06.11.) */
         /* each group in a box like the entry card above, same width (Doc 06.11.: "so eine Box ... wie oben");
            6px side padding puts the pill, the check circles and the input above on one line, 14px in */
-        .grp, .grp-done, .grp-wv {
+        .grp, .grp-done {
             margin: 0 0 12px; padding: 12px 6px 4px;   /* below, not above: a hidden group above leaves no gap */
             background: var(--card); border: 1px solid var(--line); border-radius: 14px;
         }
-        /* Wiedervorlage: the items waiting for their date, below Prio 3 and collapsed by default; the head shows
-           how many and the next date, a tap on it opens and closes the group (Doc 19.11.) */
-        .grp-wv { padding-bottom: 12px; }
-        .grp-wv.open { padding-bottom: 4px; }
-        h2.wv-h { margin: 0; font: inherit; }
-        button.wv-head {
-            display: flex; align-items: center; gap: 10px; width: 100%; min-height: 26px; margin: 0; padding: 0 4px 0 0;
-            background: transparent; border: 0; cursor: pointer; text-align: left; color: var(--muted);
-            font: 14px Raleway, sans-serif; font-variant-numeric: lining-nums;
-        }
-        .grp-wv.open button.wv-head { margin-bottom: 4px; }
-        button.wv-head .pill { margin: 0 0 0 8px; flex: 0 0 auto; }
-        .wv-sum { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .wv-chev { flex: 0 0 24px; width: 24px; height: 24px; fill: currentColor; transition: transform .2s ease; }
-        button.wv-head[aria-expanded="true"] .wv-chev { transform: rotate(180deg); }
-        /* on the phone the long pill leaves too little room: count and next date get a line of their own */
-        @media (max-width: 420px) {
-            button.wv-head { flex-wrap: wrap; row-gap: 6px; }
-            .wv-chev { margin-left: auto; }
-            .wv-sum { order: 3; flex: 1 0 100%; padding-left: 9px; }
-        }
+        /* Wiedervorlage is a section like Prio 1-3, after Prio 3 and always there, open, its items by date
+           (Doc 19.11.: "keine Rubrik für Wiedervorlage wie Prio 1, Prio 2, Prio 3. Würde ich schon machen") */
         /* a waiting item has no grip: keep its mail button in line with the others */
         .grip-gap { width: 44px; }
         /* the date of a WV item: a small violet tag under its text - in the group and once it is due at the top */
@@ -345,8 +326,7 @@
             <section class="grp p1"><h2 class="pill">Prio 1</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p1" data-prio="1" aria-label="Prio 1"></ul></section>
             <section class="grp p2"><h2 class="pill">Prio 2</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p2" data-prio="2" aria-label="Prio 2"></ul></section>
             <section class="grp p3"><h2 class="pill">Prio 3</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open" id="p3" data-prio="3" aria-label="Prio 3"></ul></section>
-            <!-- chevron: Material Icons "expand_more" (Apache 2.0) -->
-            <section class="grp-wv pw" id="wvSec" hidden><h2 class="wv-h"><button class="wv-head" id="wvHead" type="button" aria-expanded="false" aria-controls="wv"><span class="pill">Wiedervorlage</span><span class="wv-sum" id="wvSum"></span><svg class="wv-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg></button></h2><ul class="list open wv" id="wv" aria-label="Wiedervorlage" hidden></ul></section>
+            <section class="grp pw" id="wvSec"><h2 class="pill">Wiedervorlage</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><ul class="list open wv" id="wv" aria-label="Wiedervorlage"></ul></section>
             <section class="grp-done pd" id="doneSec"><div class="grp-head"><h2 class="pill">Done</h2><span class="grp-note" hidden>nochmal tippen zeigt alles</span><button class="del del-all" id="delAll" type="button" aria-label="Alle erledigten löschen"></button></div><ul class="list done" id="done" aria-label="Done"></ul></section>
         </div>
     </div>
@@ -418,13 +398,12 @@
             const byPos = (a, b) => a.pos - b.pos || ms(b.created_at) - ms(a.created_at) || b.id - a.id;
 
             /* Wiedervorlage (resubmission, Doc 19.11.): wv_date = the day an item comes back, as 'YYYY-MM-DD' in local time.
-               Until then it waits in the collapsed group below Prio 3; from that day on it stands at the top of Prio 1
+               Until then it waits in the section "Wiedervorlage" below Prio 3; from that day on it stands at the top of Prio 1
                with a small "WV 26.11." tag, until it is checked, gets a new date or another priority.
                A WV item is stored as Prio 1 with a pos far above every other one (earlier date = higher), so that
                everyone reading "order by prio, pos" (the morning briefing) gets due items on top of Prio 1 as well -
                items still waiting are the ones with wv_date > today. */
             const WV_BASE = -1e12;   // the pos of other items: small numbers or about -1.8e9 (-epoch seconds)
-            const WV_OPEN_KEY = 'todo-wv-open';   // whether the WV group is opened (this device only)
             const WEEKDAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
             const pad = n => String(n).padStart(2, '0');
             const isoDay = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -450,8 +429,6 @@
                 const group = items.filter(y => !y.done && y.prio === prio && !y.wv_date && y !== except);
                 return group.length ? Math.min(...group.map(y => y.pos)) - 1 : 0;
             }
-            let wvOpen = false;
-            try { wvOpen = localStorage.getItem(WV_OPEN_KEY) === '1'; } catch (e) { }
             let lastDay = '';   // the day of the last render: a new day moves the due WV items up
 
             function status(msg, cls) {
@@ -531,7 +508,7 @@
                 }
 
                 // a filter shows one priority only, its checked items included - or only the checked items -
-                // or only the WV items: the due ones in their priority, the waiting ones in their group (opened)
+                // or only the WV items: the due ones in their priority, the waiting ones in their own section
                 const t = today();
                 lastDay = t;
                 const shown = x => !filter || filter === 'done' || x.prio === filter;
@@ -544,14 +521,8 @@
                     $('p' + p).innerHTML = list.map(x => row(x, t)).join('');
                 }
                 const wv = items.filter(x => waiting(x, t)).sort((a, b) => a.wv_date.localeCompare(b.wv_date) || byPos(a, b));
-                const wvShown = filter === 'wv' || wvOpen;
-                $('wvSec').hidden = filter ? filter !== 'wv' : !wv.length;
-                $('wvSec').classList.toggle('open', wvShown);
-                $('wv').hidden = !wvShown;
-                $('wvHead').setAttribute('aria-expanded', String(wvShown));
-                $('wvHead').querySelector('.wv-chev').style.visibility = filter === 'wv' ? 'hidden' : '';
-                $('wvSum').textContent = filter === 'wv' ? 'nochmal tippen zeigt alles'
-                    : wv.length ? `${wv.length} · nächste ${dayLabel(wv[0].wv_date, true)}` : '';
+                $('wvSec').hidden = !!filter && filter !== 'wv';   // always there like Prio 1-3, empty: "leer"
+                $('wvSec').querySelector('.grp-note').hidden = filter !== 'wv';
                 $('wv').innerHTML = wv.map(x => row(x, t)).join('');
                 const done = items.filter(x => x.done && shown(x)).sort((a, b) => ms(b.done_at) - ms(a.done_at) || b.id - a.id);
                 $('done').innerHTML = done.map(x => row(x, t)).join('');
@@ -964,13 +935,6 @@
                     onStart: () => { dragging = true; },
                     onEnd: evt => { dragging = false; dropped(evt); }
                 });
-                // the head of the WV group opens and closes it (remembered on this device; the WV filter keeps it open)
-                $('wvHead').onclick = () => {
-                    if (filter === 'wv') return;
-                    wvOpen = !wvOpen;
-                    try { localStorage.setItem(WV_OPEN_KEY, wvOpen ? '1' : '0'); } catch (e) { }
-                    render(false);
-                };
                 // back in the foreground (phone) or focused again (Mac): fetch what the other device changed
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden && auth.hasSession() && !$('entry').hidden && !editingId && !dragging && !busy) refresh();
