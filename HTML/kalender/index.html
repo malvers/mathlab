@@ -36,7 +36,10 @@
             --c-red: 176, 36, 24;
             --c-gold: 245, 194, 66;
             --c-green: 121, 158, 49;
-            --c-pink: 240, 98, 146;   /* entries of the guest the calendar is shared with (Doc, 19.11.2026: "mach pink") */
+            /* entries of the guest the calendar is shared with (Doc, 19.11.2026: first "mach pink", then "türkis", then "noch zu
+               knallig ... ein bisschen heller") - a soft turquoise #9adbd4: navy on it 9.7:1, apart from red, gold, green and
+               the pale lesson blue */
+            --c-turquoise: 154, 219, 212;
             --ink-light: rgb(248, 251, 255);
             --ink-navy: rgb(14, 36, 78);
             --btn-a: .75;
@@ -108,7 +111,7 @@
         .c1 { --c: var(--c-red); --on: var(--ink-light); }
         .c2 { --c: var(--c-gold); --on: var(--ink-navy); }
         .c3 { --c: var(--c-green); --on: var(--ink-navy); }
-        .cs { --c: var(--c-pink); --on: var(--ink-navy); }   /* the guest's own entries (calendar_event.shared_by) */
+        .cs { --c: var(--c-turquoise); --on: var(--ink-navy); }   /* the guest's own entries (calendar_event.shared_by) */
 
         /* ---------- entry: mic, field, gear (like the To-do app) ---------- */
         .row { display: flex; gap: 8px; }
@@ -537,7 +540,7 @@
             #printWeek h2 { margin: 0 0 3pt; font: 700 9pt Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
             #printWeek ul { margin: 0; padding: 0; list-style: none; }
             #printWeek li { margin: 1pt 0; padding: 0 0 0 6pt; border-left: 2.5pt solid rgb(190, 190, 190); }
-            #printWeek li.own { border-left-color: rgb(240, 98, 146); }
+            #printWeek li.own { border-left-color: rgb(var(--c-turquoise)); }
             #printWeek li b { display: inline-block; min-width: 7em; font-variant-numeric: tabular-nums; }
             #printWeek p { margin: 0; color: rgb(110, 110, 110); }
         }
@@ -693,7 +696,7 @@
                 <label class="switch"><input id="fGoogle" type="checkbox"><i></i>auch in Google eintragen</label>
                 <input id="fPass" type="password" autocomplete="current-password" placeholder="Solitas Passwort (nur einmal)" aria-label="Solitas Passwort" hidden>
             </div>
-            <!-- "Termin von <label>": the appointment is the guest's (shared_by) - pink, never a reminder (only once a share exists) -->
+            <!-- "Termin von <label>": the appointment is the guest's (shared_by) - turquoise, never a reminder (only once a share exists) -->
             <div class="fld" id="forGuestRow" hidden>
                 <label class="switch"><input id="fForGuest" type="checkbox"><i></i><span id="forGuestText">Termin des Gasts</span></label>
             </div>
@@ -781,7 +784,7 @@
                 try { return localStorage.getItem(GUEST_TOKEN_KEY) || ''; } catch (e) { return ''; }
             })();
             const GUEST = !!guestToken;
-            const GUEST_COLOR = { own: 's', event: 2, work: 1, yearly: 3 };   // the guest's own pink, Doc's gold, IBB red, yearly green
+            const GUEST_COLOR = { own: 's', event: 2, work: 1, yearly: 3 };   // the guest's own turquoise, Doc's gold, IBB red, yearly green
             const LESSON_WORD = GUEST ? 'Schule' : 'Unterricht';              // the month's quiet mark for the lessons
             let guestShare = null;     // { show_*, can_write } from calendar_shared_rows - the label is left out on purpose
             let guestGone = false;     // the link no longer works (locked, or replaced by a newer QR code)
@@ -820,7 +823,7 @@
             let agendaDays = AGENDA_DAYS;
 
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : [1, 2, 3].includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 's' -> cs (the guest's pink)
+            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : [1, 2, 3].includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 's' -> cs (the guest's turquoise)
             // the guest's name lives only in the database (calendar_share.label); one share for now, so its label names
             // every shared_by row
             const guestName = () => (share && share.label) || 'Gast';
@@ -1273,7 +1276,7 @@
                 if (!GUEST) return;
                 $('text').hidden = $('micBtn').hidden = !guestCanWrite();
                 $('guestText').textContent = 'Du siehst, wann Doc beschäftigt ist. ' + (guestCanWrite()
-                    ? 'Deine Termine sind pink – antippen zum Ändern, oben eintippen für einen neuen.' : 'Eintragen ist gerade aus.');
+                    ? 'Deine Termine sind türkis – antippen zum Ändern, oben eintippen für einen neuen.' : 'Eintragen ist gerade aus.');
             }
 
             /* ---------- the call switches (calendar_setting; the watcher on the Mac reads them every minute) ---------- */
@@ -1619,7 +1622,7 @@
                 $('settings').hidden = true;
                 const occ = o.occ || null;
                 const ev = occ ? occ.ev : null;
-                const guest = !!(ev && ev.shared_by);   // entered by the guest: Doc may change it, it stays theirs (pink)
+                const guest = !!(ev && ev.shared_by);   // entered by the guest: Doc may change it, it stays theirs (turquoise)
                 edState = { ev, occ, remind: new Set(), color: ev && [1, 2, 3].includes(ev.color) ? ev.color : 2, extra: { allDay: !!(ev && ev.all_day), mins: ev ? K.remindOf(ev) : [] },
                     googleOk: !GUEST && (!ev || (!feedOf(ev) && !guest)) };
                 $('fGoogle').checked = false;

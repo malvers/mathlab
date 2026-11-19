@@ -9,7 +9,7 @@
 //   node tools/kalender/eintragen.mjs remove <id>             delete one event (its old version stays in the history)
 //   --dry                                                     show what would be sent - nothing is sent, no token read
 //   --fuer-gast                                               the entry is the GUEST's (the person the calendar is
-//                                                             shared with, pink there); with a file: every entry in it
+//                                                             shared with, turquoise there); with a file: every entry in it
 //
 // Times are Europe/Berlin wall-clock time ("2026-11-14 10:00" or "2026-11-14T10:00"); this tool turns them into ISO
 // times with the right offset (+01:00 in winter, +02:00 in summer). A time that already carries an offset or Z is kept.
@@ -205,7 +205,7 @@ function describe(ev, i) {
         lines.push('   ' + date(s) + ' ' + hm(s) + '–' + endTxt + ' Berlin   =   ' + utc(s) + (e ? ' – ' + utc(e) : '') + ' UTC');
     }
     if (ev.location) lines.push('   Ort: ' + ev.location);
-    if (ev.shared === true) lines.push('   Für: die geteilte Person (pink im Kalender)');
+    if (ev.shared === true) lines.push('   Für: die geteilte Person (türkis im Kalender)');
     if (ev.shared === false) lines.push('   Für: Doc (nicht die geteilte Person)');
     const remind = ev.remind || (ev.all_day ? [360] : [60, 15]);
     if (ev.shared === true) lines.push('   Erinnerung: keine (Termin der geteilten Person)');
@@ -246,7 +246,7 @@ const USAGE = [
     'node tools/kalender/eintragen.mjs add events.json [--fuer-gast] [--dry]',
     'node tools/kalender/eintragen.mjs add --title "…" --start "2026-11-14 10:00" --end "2026-11-14 12:30" [--location …] [--notes …] [--remind 100,60] [--uid …] [--fuer-gast] [--dry]',
     'node tools/kalender/eintragen.mjs remove <id> [--dry]',
-    '  --fuer-gast   als Eintrag der geteilten Person (pink), ohne Erinnerung (in der Datei: "shared": true)'
+    '  --fuer-gast   als Eintrag der geteilten Person (türkis), ohne Erinnerung (in der Datei: "shared": true)'
 ].join('\n');
 
 function needToken() {
