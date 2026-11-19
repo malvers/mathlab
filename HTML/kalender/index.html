@@ -122,6 +122,13 @@
         .c6 { --c: var(--c-orange); --on: var(--ink-navy); }
         .c7 { --c: var(--c-pink); --on: var(--ink-navy); }
         .cs { --c: var(--c-turquoise); --on: var(--ink-navy); }   /* the guest's own entries (calendar_event.shared_by) */
+        /* joint appointments, Doc's and the guest's (calendar_event.together, 20261119d_calendar_together.sql): half λ gold,
+           half the guest's turquoise - navy reads on both (9.2:1 and 9.7:1); borders and shadows take the turquoise */
+        .cw {
+            --c: var(--c-turquoise); --on: var(--ink-navy);
+            --both: linear-gradient(135deg, rgb(var(--c-gold)) 0 50%, rgb(var(--c-turquoise)) 50% 100%);
+            --both-v: linear-gradient(rgb(var(--c-gold)) 0 50%, rgb(var(--c-turquoise)) 50% 100%);
+        }
 
         /* ---------- entry: mic, field, gear (like the To-do app) ---------- */
         .row { display: flex; gap: 8px; }
@@ -486,6 +493,43 @@
         .switch input:checked + i { background: var(--lambda); }
         .switch input:checked + i::after { transform: translateX(20px); }
         .switch input:focus-visible + i { outline: 2px solid var(--lambda); outline-offset: 2px; }
+        /* checks: "Ich" / the guest (Doc, 19.11.2026: "macht da ein drop mit checks", "[Gast] und ich checks") - the box
+           takes the owner's colour, so it doubles as the legend: Doc λ gold, the guest turquoise */
+        .check { display: flex; align-items: center; gap: 10px; min-height: var(--ctl); cursor: pointer; font: 15px Raleway, sans-serif; color: var(--text); }
+        .check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+        .check i { position: relative; flex: none; width: 22px; height: 22px; border-radius: 6px; border: 2px solid rgba(var(--ck, var(--tint)), .9); }
+        .check input:checked + i { background: rgb(var(--ck, var(--tint))); }
+        .check input:checked + i::after {
+            content: ''; position: absolute; left: 5px; top: 1px; width: 6px; height: 12px;
+            border: solid var(--ink-navy); border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
+        }
+        .check input:focus-visible + i { outline: 2px solid var(--lambda); outline-offset: 2px; }
+        .check input:disabled + i { opacity: .55; }
+        .check.ck-doc { --ck: var(--c-gold); }
+        .check.ck-guest { --ck: var(--c-turquoise); }
+        .checks { display: flex; flex-wrap: wrap; gap: 0 22px; }
+        /* the filter in the header: whose appointments show */
+        .filter-wrap { position: relative; flex: 0 0 auto; }
+        .bar .filter-wrap { order: 3; }
+        /* the people button a little wider than the square icons, one control high like them (Doc, 19.11.2026: "macht den
+           Button bitte ein bisschen breiter. Das sieht wirklich echt ziemlich eng aus") - inside .filter-wrap it is no flex
+           item, so the icons' flex basis never reached it and it had shrunk to its 24px icon; on the phone square like mic
+           and gear, the entry field beside it needs the room for its whole "Neuer Termin" */
+        .filter-btn { width: calc(var(--ctl) + 12px); }
+        @media (max-width: 599px) { .filter-btn { width: var(--ctl); } }
+        .filter-btn.on { background: rgba(var(--c-gold), .22); border-color: rgba(var(--c-gold), .85); }
+        .filter-pop {
+            position: absolute; top: calc(100% + 6px); right: 0; z-index: 6;
+            /* as wide as its words plus air instead of hugging the narrow button (an absolute box shrinks to its
+               container), never wider than the screen */
+            width: max-content; min-width: 200px; max-width: calc(100vw - 16px); padding: 12px 18px 10px;
+            border-radius: 12px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
+        }
+        .filter-pop .set-title { margin: 2px 0 8px; }
+        .filter-pop .check + .check { margin-top: 4px; }
+        /* no entry field before it (a guest who may only read): the button is the first in the row, so the popover
+           opens to the right and stays on the screen */
+        .bar:has(> #text[hidden]) .filter-pop { left: 0; right: auto; }
         /* reminder chips: several may be on */
         .chips { display: flex; flex-wrap: wrap; gap: 8px; }
         .chips button {
@@ -516,7 +560,7 @@
         .ed .switch i { width: 38px; height: 22px; border-radius: 11px; }
         .ed .switch i::after { top: 3px; left: 3px; width: 16px; height: 16px; }
         .ed .switch input:checked + i::after { transform: translateX(16px); }
-        .ed #googleRow, .ed #forGuestRow, .ed #privRow { margin-bottom: 0; }   /* the switches stack, one control apart */
+        .ed #googleRow, .ed #privRow { margin-bottom: 0; }   /* the switches stack, one control apart */
         .ed #remindRow { margin-top: 4px; }
         .ed .chips { gap: 6px; }
         .ed .chips button { padding: 0 10px; font-size: 11px; }
@@ -526,6 +570,11 @@
         .ed .dlg-btns { gap: 8px; }
         .ed .dlg-btns button { font-size: 12px; }
         @media (max-width: 560px) { #ed .ed { padding-bottom: max(14px, env(safe-area-inset-bottom)); } }
+
+        .wk-ev.cw, .chip.cw { background: var(--both); }
+        .cw .ev-body { border-left-color: transparent; border-image: var(--both-v) 1; }
+        .hero.cw::before, .hero.cw .hero-bar i { background: var(--both-v); }
+        .hero.cw .hero-bar i { background: linear-gradient(90deg, rgb(var(--c-gold)) 0 50%, rgb(var(--c-turquoise)) 50% 100%); }
 
         /* lessons from Untis: in the scheme's tint, quieter than the appointments; cancelled ones struck through */
         .cl { --c: var(--tint); --on: var(--text); }
@@ -583,6 +632,7 @@
             #printWeek ul { margin: 0; padding: 0; list-style: none; }
             #printWeek li { margin: 1pt 0; padding: 0 0 0 6pt; border-left: 2.5pt solid rgb(190, 190, 190); }
             #printWeek li.own { border-left-color: rgb(var(--c-turquoise)); }
+            #printWeek li.own.both { border-image: linear-gradient(rgb(var(--c-gold)) 0 50%, rgb(var(--c-turquoise)) 50% 100%) 1; }
             #printWeek li b { display: inline-block; min-width: 7em; font-variant-numeric: tabular-nums; }
             #printWeek p { margin: 0; color: rgb(110, 110, 110); }
         }
@@ -604,6 +654,18 @@
             <button class="icon gear" id="gearBtn" type="button" aria-label="Einstellungen" aria-expanded="false" aria-controls="settings">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
             </button>
+            <!-- whose appointments show: Doc's / the guest's (only once the calendar is shared, and in the guest's view);
+                 Material Icons "people" (Apache 2.0) -->
+            <div class="filter-wrap" id="filterWrap" hidden>
+                <button class="icon filter-btn" id="filterBtn" type="button" aria-label="Wessen Termine" aria-expanded="false" aria-controls="filterPop">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                </button>
+                <div class="filter-pop" id="filterPop" role="group" aria-labelledby="filterTitle" hidden>
+                    <p class="set-title" id="filterTitle">Zeigen</p>
+                    <label class="check ck-doc" id="fltMeRow"><input type="checkbox" id="fltMe" checked><i></i><span>Ich</span></label>
+                    <label class="check ck-guest" id="fltOtherRow"><input type="checkbox" id="fltOther" checked><i></i><span id="fltOtherText">Gast</span></label>
+                </div>
+            </div>
             <button class="today-btn" id="todayBtn" type="button" title="Zurück zu heute">Heute</button>
             <div class="row2">
                 <div class="seg views" id="views" role="tablist" aria-label="Ansicht">
@@ -738,9 +800,14 @@
                 <label class="switch"><input id="fGoogle" type="checkbox"><i></i>auch in Google eintragen</label>
                 <input id="fPass" type="password" autocomplete="current-password" placeholder="Solitas Passwort (nur einmal)" aria-label="Solitas Passwort" hidden>
             </div>
-            <!-- "Termin von <label>": the appointment is the guest's (shared_by) - turquoise, never a reminder (only once a share exists) -->
+            <!-- whose appointment: Doc's ("Ich"), the guest's (shared_by, turquoise, never a reminder) or both (together, gold
+                 and turquoise) - only once a share exists; in the guest's view "Ich" is the guest and the other check is Doc -->
             <div class="fld" id="forGuestRow" hidden>
-                <label class="switch"><input id="fForGuest" type="checkbox"><i></i><span id="forGuestText">Termin des Gasts</span></label>
+                <span class="fld-label" id="whoLabel">Wessen Termin?</span>
+                <div class="checks" role="group" aria-labelledby="whoLabel">
+                    <label class="check ck-doc"><input id="fWhoMe" type="checkbox"><i></i><span id="whoMeText">Ich</span></label>
+                    <label class="check ck-guest"><input id="fWhoOther" type="checkbox"><i></i><span id="whoOtherText">Gast</span></label>
+                </div>
             </div>
             <!-- "privat": never shown to the guest the calendar is shared with (only once the column exists) -->
             <div class="fld" id="privRow" hidden>
@@ -868,6 +935,7 @@
             let shareTable = false;    // calendar_share exists (the SQL ran) - only then the gear shows the sharing section
             let share = null;          // the first row of calendar_share, without the hash: { id, label, show_*, can_write, active }
             let shareCols = null;      // calendar_event has private / shared_by: null = not probed yet
+            let togetherCol = null;    // calendar_event has together (20261119d_calendar_together.sql): null = not probed yet
             let busy = 0;             // writes in flight - a reload now could bring back the old state
             let view = 'agenda';       // 'agenda' | 'week' | 'month'
             let anchor = K.startOfDay(new Date());   // the day the week or month view shows
@@ -876,7 +944,9 @@
 
             const COLORS = [1, 2, 3, 4, 5, 6, 7];   // calendar_event.color (20261119c_calendar_colors.sql): red, gold, green, blue, violet, orange, pink
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : COLORS.includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 's' -> cs (the guest's turquoise)
+            // a joint appointment (Doc's and the guest's): a guest row with together - in the guest's view one of their own
+            const isJoint = ev => !!(ev && ev.together && (GUEST ? ev.kind === 'own' : ev.shared_by));
+            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : isJoint(ev) ? 'w' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : COLORS.includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 's' -> cs (the guest's turquoise), 'w' -> cw (joint: gold and turquoise)
             // the guest's name lives only in the database (calendar_share.label); one share for now, so its label names
             // every shared_by row
             const guestName = () => (share && share.label) || 'Gast';
@@ -886,13 +956,26 @@
             const feedOf = ev => { const m = /^(google|outlook):/.exec((ev && ev.source_uid) || ''); return m ? m[1] : null; };
             const srcMark = ev => {
                 if (ev && ev.shared_by) {   // entered by the guest: the first letter of the label, like G / O
-                    const n = guestName();
-                    return `<span class="src" title="von ${esc(n)}" aria-label=", von ${esc(n)}">${esc(n.trim().charAt(0).toUpperCase() || 'G')}</span>`;
+                    const n = guestName(), w = (isJoint(ev) ? 'gemeinsam mit ' : 'von ') + n;
+                    return `<span class="src" title="${esc(w)}" aria-label=", ${esc(w)}">${esc(n.trim().charAt(0).toUpperCase() || 'G')}</span>`;
                 }
                 const f = feedOf(ev);
                 return f ? `<span class="src" title="aus ${FEED_NAMES[f]}" aria-label=", aus ${FEED_NAMES[f]}">${f === 'google' ? 'G' : 'O'}</span>` : '';
             };
             const byId = id => items.find(x => x.id === id);
+
+            /* whose appointments show - the people button in the header (Doc, 19.11.2026: "macht da ein drop mit checks",
+               "[Gast] und ich checks"): "Ich" = Doc's own (with the lessons), the other = the guest's; a joint one shows while
+               either is on, holidays always. In the guest's view "Ich" is the guest and the other one Doc. Remembered per
+               device; never both off. Only where there are two people: once the calendar is shared, and in the guest's view. */
+            const FILTER_KEY = GUEST ? 'kalender-share-filter' : 'kalender-filter';
+            let filter = { me: true, other: true };
+            try { const f = JSON.parse(localStorage.getItem(FILTER_KEY)); if (f && (f.me !== false || f.other !== false)) filter = { me: f.me !== false, other: f.other !== false }; } catch (e) { }
+            const filterShown = () => GUEST || !!share;
+            const filterAll = () => !filterShown() || (filter.me && filter.other);
+            const ownerOf = ev => (ev.holiday ? 'all' : isJoint(ev) ? 'both' : GUEST ? (ev.kind === 'own' ? 'me' : 'other') : (ev.shared_by ? 'other' : 'me'));
+            const passes = ev => { if (filterAll()) return true; const o = ownerOf(ev); return o === 'all' || (o === 'both' ? filter.me || filter.other : filter[o]); };
+            const shownItems = () => (filterAll() ? items : items.filter(passes));
 
             function status(msg, cls) {
                 const el = $('status');
@@ -934,6 +1017,13 @@
                     shareCols = await send('calendar_event?select=private,shared_by&limit=1')
                         .then(() => true, e => (e.message === 'HTTP 400' ? false : null));   // no answer: ask again next time
                 }
+                if (shareCols && togetherCol === null) {   // joint appointments: only once 20261119d ran
+                    togetherCol = await send('calendar_event?select=together&limit=1')
+                        .then(() => true, e => (e.message === 'HTTP 400' ? false : null));
+                }
+                if (shareCols && togetherCol) {
+                    try { return await q(COLS + SHARE_EV_COLS + ',together'); } catch (e) { if (e.message !== 'HTTP 400') throw e; togetherCol = false; }
+                }
                 if (shareCols) {
                     try { return await q(COLS + SHARE_EV_COLS); } catch (e) { if (e.message !== 'HTTP 400') throw e; shareCols = false; }
                 }
@@ -964,16 +1054,19 @@
             }
             // a row of calendar_shared_rows / _save as the page's appointment: no reminders, the colour comes from its kind
             const guestRow = e => ({ id: e.id, kind: e.kind, title: e.title, starts_at: e.starts_at, ends_at: e.ends_at, all_day: !!e.all_day,
-                location: e.location || null, notes: e.notes || null, rrule: e.rrule || null, exdates: e.exdates || [], remind: [], color: 2, source_uid: null });
+                location: e.location || null, notes: e.notes || null, rrule: e.rrule || null, exdates: e.exdates || [], remind: [], color: 2, source_uid: null,
+                together: !!e.together });
             // one of the guest's entries as calendar_shared_save takes it (no id = a new one)
+            // ("together" only once the database knows it - before 20261119d an unknown key would be refused)
             const guestEvent = (ev, more) => Object.assign({ id: ev.id, title: ev.title, starts_at: ev.starts_at, ends_at: ev.ends_at || null,
-                all_day: !!ev.all_day, location: ev.location || null, notes: ev.notes || null, rrule: ev.rrule || null, exdates: ev.exdates || [] }, more);
+                all_day: !!ev.all_day, location: ev.location || null, notes: ev.notes || null, rrule: ev.rrule || null, exdates: ev.exdates || [] },
+                guestShare && guestShare.can_together ? { together: !!ev.together } : {}, more);
             async function guestLoad() {
                 const now = new Date();
                 const d = await guestRpc('calendar_shared_rows', { p_from: K.addDays(now, -42).toISOString(), p_to: K.addDays(now, 400).toISOString() });
                 const sh = d.share || {};
                 guestShare = { show_lessons: !!sh.show_lessons, show_events: !!sh.show_events, show_work: !!sh.show_work,
-                    show_yearly: !!sh.show_yearly, can_write: !!sh.can_write };
+                    show_yearly: !!sh.show_yearly, can_write: !!sh.can_write, can_together: !!sh.can_together };
                 items = (d.events || []).map(guestRow);
                 // the lessons come merged and anonymised ("Schule" blocks): rows like calendar_lesson's without class, room or note
                 lessons = (d.lessons || []).map((l, i) => ({ id: 'g' + i, day: K.ymd(new Date(l.starts_at)), starts_at: l.starts_at, ends_at: l.ends_at,
@@ -1032,6 +1125,7 @@
             /* the lessons in [from, to) as occurrences like the appointments' (key "L|id"; ev.lesson = the row) */
             function lessonOccs(from, to) {
                 const out = [];
+                if (!passes({ lesson: true })) return out;   // the lessons are Doc's (in the guest's view "Schule")
                 for (const l of lessons) {
                     const s = new Date(l.starts_at), e = new Date(l.ends_at);
                     if (s < to && e > from) out.push({
@@ -1054,7 +1148,7 @@
             const isHoliday = d => !!K.holidayOf(d);
             /* appointments, lessons and holidays together, sorted like K.expand */
             function occsIn(from, to) {
-                return K.expand(items, from, to).concat(lessonOccs(from, to), holidayOccs(from, to))
+                return K.expand(shownItems(), from, to).concat(lessonOccs(from, to), holidayOccs(from, to))
                     .sort((a, b) => a.start - b.start || (b.ev.all_day ? 1 : 0) - (a.ev.all_day ? 1 : 0) || a.end - b.end);
             }
 
@@ -1188,7 +1282,7 @@
                     const [y, m, d] = k.split('-').map(Number);
                     return dayBox(new Date(y, m - 1, d), groups.get(k), now, true);
                 }).join('');
-                const later = K.expand(items, to, K.addDays(to, 366)).length;
+                const later = K.expand(shownItems(), to, K.addDays(to, 366)).length;
                 $('moreBtn').hidden = !later;
                 $('moreBtn').textContent = later ? `Weitere Termine (${later} im Jahr danach)` : '';
             }
@@ -1291,7 +1385,7 @@
                 const start = mondayOf(first);
                 const cells = [...Array(42)].map((_, i) => K.addDays(start, i));
                 $('period').innerHTML = esc(K.MONTH_LONG[first.getMonth()]) + `<small>${first.getFullYear()}</small>`;
-                const occs = K.expand(items, start, K.addDays(start, 42)).concat(holidayOccs(start, K.addDays(start, 42)))
+                const occs = K.expand(shownItems(), start, K.addDays(start, 42)).concat(holidayOccs(start, K.addDays(start, 42)))
                     .sort((a, b) => a.start - b.start || (b.ev.holiday ? 1 : 0) - (a.ev.holiday ? 1 : 0));   // the holiday's name first
                 shownOcc = new Map();
                 let html = '<div class="mo-head">' + STEP_BTN(-1) + [1, 2, 3, 4, 5, 6, 0].map(i => `<span>${dayName(i)}</span>`).join('') + STEP_BTN(1) + '</div><div class="mo-grid">';
@@ -1326,13 +1420,40 @@
                 renderSetting();
                 renderShare();
                 renderGuest();
+                renderFilter();
             }
+            /* the people button and its two checks */
+            function renderFilter() {
+                const on = filterShown();
+                $('filterWrap').hidden = !on;
+                if (!on) { showFilter(false); return; }
+                $('fltMe').checked = filter.me;
+                $('fltOther').checked = filter.other;
+                $('fltOtherText').textContent = GUEST ? 'Doc' : guestName();
+                $('fltMeRow').className = 'check ' + (GUEST ? 'ck-guest' : 'ck-doc');     // the box in the owner's colour
+                $('fltOtherRow').className = 'check ' + (GUEST ? 'ck-doc' : 'ck-guest');
+                const all = filter.me && filter.other;
+                $('filterBtn').classList.toggle('on', !all);   // something is hidden: the button says so
+                $('filterBtn').setAttribute('aria-label', 'Wessen Termine' + (all ? '' : filter.me ? ' – nur meine' : ' – nur ' + (GUEST ? 'Docs' : 'die von ' + guestName())));
+            }
+            function showFilter(on) {
+                $('filterPop').hidden = !on;
+                $('filterBtn').setAttribute('aria-expanded', String(on));
+            }
+            function setFilter(which, on) {
+                if (!on && !filter[which === 'me' ? 'other' : 'me']) { renderFilter(); return; }   // never both off
+                filter[which] = on;
+                try { localStorage.setItem(FILTER_KEY, JSON.stringify(filter)); } catch (e) { }
+                render();
+            }
+
             /* guest mode: the entry field only while the guest may write; the words in the settings */
             function renderGuest() {
                 if (!GUEST) return;
                 $('text').hidden = $('micBtn').hidden = !guestCanWrite();
                 $('guestText').textContent = 'Du siehst, wann Doc beschäftigt ist. ' + (guestCanWrite()
-                    ? 'Deine Termine sind türkis – antippen zum Ändern, oben eintippen für einen neuen.' : 'Eintragen ist gerade aus.');
+                    ? 'Deine Termine sind türkis' + (guestShare && guestShare.can_together ? ', gemeinsame mit Doc gold-türkis' : '') +
+                      ' – antippen zum Ändern, oben eintippen für einen neuen.' : 'Eintragen ist gerade aus.');
             }
 
             /* ---------- the call switches (calendar_setting; the watcher on the Mac reads them every minute) ---------- */
@@ -1708,11 +1829,18 @@
                     googleOk: !GUEST && (!ev || (!feedOf(ev) && !guest)) };
                 $('fGoogle').checked = false;
                 $('fPass').value = '';
-                // "Termin von <label>": Doc gives an appointment to the guest or takes it back (shared_by) - only once a share
-                // and the column exist, never for a mirrored one (Doc, 19.11.2026)
-                $('forGuestRow').hidden = GUEST || !shareCols || !share || !!(ev && feedOf(ev));
-                $('fForGuest').checked = guest;
-                $('forGuestText').textContent = 'Termin von ' + guestName();
+                // "Wessen Termin?" Ich / <label>: Doc's, the guest's (shared_by) or both (together) - only once a share and the
+                // columns exist, never for a mirrored one (Doc, 19.11.2026: "[Gast] und ich checks"). Before 20261119d the two
+                // checks act like a switch. In the guest's view: "Ich" (always theirs) and "Doc" (joint) - once the database knows it.
+                const joint = isJoint(ev);
+                edState.canJoint = GUEST ? !!(guestShare && guestShare.can_together) : !!togetherCol;
+                $('forGuestRow').hidden = GUEST ? !edState.canJoint : (!shareCols || !share || !!(ev && feedOf(ev)));
+                $('whoOtherText').textContent = GUEST ? 'Doc' : guestName();
+                $('fWhoMe').parentElement.className = 'check ' + (GUEST ? 'ck-guest' : 'ck-doc');
+                $('fWhoOther').parentElement.className = 'check ' + (GUEST ? 'ck-doc' : 'ck-guest');
+                $('fWhoMe').disabled = GUEST;
+                $('fWhoMe').checked = GUEST || !guest || joint;
+                $('fWhoOther').checked = GUEST ? joint : guest;
                 $('fPrivate').checked = !!(ev && ev.private);
                 $('privText').textContent = share ? 'privat – ' + share.label + ' sieht ihn nicht' : 'privat – wird nie geteilt';
                 $('edDel').hidden = !ev;
@@ -1767,17 +1895,25 @@
                 if (!ev && !$('fTitle').value) setTimeout(() => $('fTitle').focus(), 30);
             }
             function closeEditor() { $('ed').hidden = true; edState = null; }
-            /* the guest's entry or Doc's: the switch where it shows, else what the row already is */
-            const guestOn = () => ($('forGuestRow').hidden ? !!(edState && edState.ev && edState.ev.shared_by) : $('fForGuest').checked);
+            /* Doc's view: the guest's entry (alone or joint) or Doc's - the checks where they show, else what the row already is */
+            const guestOn = () => !GUEST && ($('forGuestRow').hidden ? !!(edState && edState.ev && edState.ev.shared_by) : $('fWhoOther').checked);
+            const jointOn = () => ($('forGuestRow').hidden ? isJoint(edState && edState.ev) : $('fWhoMe').checked && $('fWhoOther').checked);
+            function whoChanged(e) {
+                const me = $('fWhoMe'), other = $('fWhoOther');
+                if (!edState.canJoint && me.checked && other.checked) (e.target === me ? other : me).checked = false;   // one or the other
+                if (!me.checked && !other.checked) e.target.checked = true;   // it is always somebody's
+                syncGuest();
+            }
             function syncGuest() {
-                const ev = edState.ev, on = guestOn();
+                const ev = edState.ev, on = guestOn(), joint = jointOn();
                 // "privat" only where the column exists, and not on the guest's entries; no colour choice and no Solita for
                 // those (Doc, 19.11.2026: the guest's entries never ring)
                 $('privRow').hidden = !shareCols || on;
                 $('colorRow').hidden = on || GUEST;
                 $('remindRow').hidden = on || GUEST;
-                $('edTitle').textContent = ev ? (GUEST ? 'Dein Termin' : on ? 'Termin von ' + guestName() : 'Termin') : 'Neuer Termin';
-                $('edNote').textContent = [on ? 'Solita erinnert nicht an Termine von ' + guestName() + '.' : '',
+                $('edTitle').textContent = ev ? (joint ? 'Gemeinsamer Termin' : GUEST ? 'Dein Termin' : on ? 'Termin von ' + guestName() : 'Termin')
+                    : (joint ? 'Neuer gemeinsamer Termin' : 'Neuer Termin');
+                $('edNote').textContent = [on ? 'Solita erinnert nicht an ' + (joint ? 'gemeinsame Termine.' : 'Termine von ' + guestName() + '.') : '',
                     ev && ev.rrule ? 'Wiederholt sich – Änderungen gelten für alle Termine der Reihe.' : ''].filter(Boolean).join(' ');
                 syncGoogle();
             }
@@ -1809,10 +1945,12 @@
                     rrule: $('fRepeat').value || null, remind: rmin, color: edState.color
                 };
                 if (shareCols && !$('privRow').hidden) row.private = $('fPrivate').checked;   // only once the column exists
-                if (!$('forGuestRow').hidden) {   // given to the guest (an entry of theirs keeps its share) or taken back
-                    row.shared_by = $('fForGuest').checked ? (edState.ev && edState.ev.shared_by) || share.id : null;
+                if (!GUEST && !$('forGuestRow').hidden) {   // given to the guest (an entry of theirs keeps its share), joint, or taken back
+                    row.shared_by = $('fWhoOther').checked ? (edState.ev && edState.ev.shared_by) || share.id : null;
                     if (row.shared_by) row.private = false;   // the guest always sees their own entries
+                    if (togetherCol) row.together = !!row.shared_by && $('fWhoMe').checked;
                 }
+                if (GUEST && !$('forGuestRow').hidden) row.together = $('fWhoOther').checked;   // the guest: joint with Doc or not
                 if (guestOn()) row.remind = [];   // never a reminder for the guest's entries
                 return { row, s, e };
             }
@@ -2064,7 +2202,7 @@
                     const here = occs.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                     const hol = K.holidayOf(d);
                     html += `<section><h2>${esc(longDay(d))}${hol ? ' · ' + esc(hol) : ''}</h2>` + (here.length
-                        ? '<ul>' + here.map(o => `<li${o.ev.kind === 'own' ? ' class="own"' : ''}><b>${o.ev.all_day ? 'ganztägig' : K.hhmm(o.start) + '–' + K.hhmm(o.end)}</b>` +
+                        ? '<ul>' + here.map(o => `<li${o.ev.kind === 'own' ? ' class="own' + (isJoint(o.ev) ? ' both' : '') + '"' : ''}><b>${o.ev.all_day ? 'ganztägig' : K.hhmm(o.start) + '–' + K.hhmm(o.end)}</b>` +
                             `${esc(o.ev.title)}${o.ev.location ? ' · ' + esc(o.ev.location) : ''}</li>`).join('') + '</ul>'
                         : '<p>frei</p>') + '</section>';
                 }
@@ -2090,8 +2228,12 @@
                 try { applyTheme(localStorage.getItem('svp-theme')); } catch (e) { applyTheme('dark'); }
                 $('themeSeg').onclick = e => { const b = e.target.closest('button'); if (b) applyTheme(b.dataset.theme); };
                 $('gearBtn').onclick = () => showSettings($('settings').hidden);
+                $('filterBtn').onclick = () => showFilter($('filterPop').hidden);
+                $('fltMe').onchange = e => setFilter('me', e.target.checked);
+                $('fltOther').onchange = e => setFilter('other', e.target.checked);
                 document.addEventListener('pointerdown', e => {
                     if (!$('settings').hidden && !e.target.closest('#settings, #gearBtn')) showSettings(false);
+                    if (!$('filterPop').hidden && !e.target.closest('#filterWrap')) showFilter(false);
                 });
                 $('importBtn').onclick = () => $('importFile').click();
                 $('callEvents').onchange = e => toggleSetting('call_events', e.target.checked);
@@ -2159,7 +2301,7 @@
                 $('ed').addEventListener('pointerdown', e => { if (e.target === $('ed')) closeEditor(); });
                 $('fRepeat').addEventListener('change', syncGoogle);
                 $('fGoogle').onchange = syncGoogle;
-                $('fForGuest').onchange = syncGuest;
+                $('fWhoMe').onchange = $('fWhoOther').onchange = whoChanged;
                 $('fAllDay').onchange = () => {
                     // switching changes which reminders fit: take the defaults of the new kind
                     edState.remind = new Set($('fAllDay').checked ? K.DEFAULT_REMIND_ALLDAY : K.DEFAULT_REMIND);
@@ -2191,6 +2333,7 @@
                     if (!$('qrDlg').hidden) closeQr();
                     else if (!$('ed').hidden) closeEditor();
                     else if (!$('settings').hidden) showSettings(false);
+                    else if (!$('filterPop').hidden) showFilter(false);
                 });
                 // the arrow keys page the week and the month (Doc, 07.11.2026: "die Pfeiltasten blättern bitte") - not while
                 // typing (an empty entry field does not count), not with a dialog open, not with a modifier (browser history)

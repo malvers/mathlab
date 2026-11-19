@@ -10,6 +10,8 @@
 //   --dry                                                     show what would be sent - nothing is sent, no token read
 //   --fuer-gast                                               the entry is the GUEST's (the person the calendar is
 //                                                             shared with, turquoise there); with a file: every entry in it
+//   --gemeinsam                                               a JOINT entry of Doc and the guest (gold and turquoise,
+//                                                             needs 20261119d_calendar_together.sql); with a file: every one
 //
 // Times are Europe/Berlin wall-clock time ("2026-11-14 10:00" or "2026-11-14T10:00"); this tool turns them into ISO
 // times with the right offset (+01:00 in winter, +02:00 in summer). A time that already carries an offset or Z is kept.
@@ -23,6 +25,8 @@
 // no reminder ever (Doc, 19.11.2026: Solita never calls for the guest's entries - a remind along with it is refused
 // here), the guest sees it as their own. "shared": false makes a replaced entry Doc's again; without the key a replaced
 // entry stays whose it was. The guest's name is never needed here - it lives only in the database.
+// "together": true (or --gemeinsam) makes it a joint entry of Doc and the guest (implies "shared": true, so no reminder
+// either); "together": false makes a replaced joint entry the guest's alone.
 //
 // Access: like the reminder watcher (waechter.mjs) this has no login. It calls calendar_add / calendar_remove
 // (supabase/migrations/20261107_calendar_write.sql) with the random token that lives only in the Mac's keychain
@@ -38,7 +42,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '..', '..');
 const KEYCHAIN_SERVICE = 'doc-kalender-waechter';
-const FIELDS = ['title', 'starts_at', 'ends_at', 'all_day', 'location', 'notes', 'rrule', 'exdates', 'remind', 'color', 'source_uid', 'shared'];
+const FIELDS = ['title', 'starts_at', 'ends_at', 'all_day', 'location', 'notes', 'rrule', 'exdates', 'remind', 'color', 'source_uid', 'shared', 'together'];
 const WEEKDAY = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 const DAY = 86400000;
 
@@ -159,6 +163,12 @@ function normalize(ev, i) {
         if (ev.shared && out.remind && out.remind.length) fail(what + ': Termine der geteilten Person bekommen nie eine Erinnerung - remind bitte weglassen');
         out.shared = ev.shared;
     }
+    if (ev.together != null) {
+        if (typeof ev.together !== 'boolean') fail(what + ': together muss true oder false sein');
+        if (ev.together && ev.shared === false) fail(what + ': together (gemeinsam) geht nicht mit "shared": false');
+        if (ev.together && out.remind && out.remind.length) fail(what + ': gemeinsame Termine bekommen keine Erinnerung - remind bitte weglassen');
+        out.together = ev.together;
+    }
     return out;
 }
 
@@ -186,7 +196,8 @@ function fromFlags(f) {
         if (parts.some(x => !/^-?\d+$/.test(x))) fail('--remind: Minuten mit Komma, z. B. 100,60 (oder none)');
         ev.remind = parts.map(Number);
     }
-    if (f.fuerGast) ev.shared = true;
+    if (f.fuerGast || f.gemeinsam) ev.shared = true;
+    if (f.gemeinsam) ev.together = true;
     return ev;
 }
 
@@ -206,10 +217,11 @@ function describe(ev, i) {
         lines.push('   ' + date(s) + ' ' + hm(s) + '–' + endTxt + ' Berlin   =   ' + utc(s) + (e ? ' – ' + utc(e) : '') + ' UTC');
     }
     if (ev.location) lines.push('   Ort: ' + ev.location);
-    if (ev.shared === true) lines.push('   Für: die geteilte Person (türkis im Kalender)');
+    if (ev.together === true) lines.push('   Für: Doc und die geteilte Person gemeinsam (gold-türkis im Kalender)');
+    else if (ev.shared === true) lines.push('   Für: die geteilte Person (türkis im Kalender)');
     if (ev.shared === false) lines.push('   Für: Doc (nicht die geteilte Person)');
     const remind = ev.remind || (ev.all_day ? [360] : [60, 15]);
-    if (ev.shared === true) lines.push('   Erinnerung: keine (Termin der geteilten Person)');
+    if (ev.shared === true || ev.together === true) lines.push('   Erinnerung: keine (' + (ev.together ? 'gemeinsamer Termin' : 'Termin der geteilten Person') + ')');
     else lines.push('   Erinnerung: ' + (remind.length ? remind.map(m => m + ' min' + (ev.all_day ? '' : ' (' + hm(new Date(+s - m * 60000)) + ')')).join(', ') : 'keine') + (ev.remind ? '' : ' (Standard)'));
     if (ev.rrule) lines.push('   Wiederholung: ' + ev.rrule);
     if (ev.source_uid) lines.push('   source_uid: ' + ev.source_uid);
@@ -226,6 +238,7 @@ function parseArgs(argv) {
         const a = argv[i];
         if (a === '--dry') { flags.dry = true; continue; }
         if (a === '--fuer-gast') { flags.fuerGast = true; continue; }
+        if (a === '--gemeinsam') { flags.gemeinsam = true; continue; }
         if (a === '-h' || a === '--help') { flags.help = true; continue; }
         if (a.startsWith('--')) {
             let name = a.slice(2), val;
@@ -244,10 +257,11 @@ function parseArgs(argv) {
 }
 
 const USAGE = [
-    'node tools/kalender/eintragen.mjs add events.json [--fuer-gast] [--dry]',
-    'node tools/kalender/eintragen.mjs add --title "…" --start "2026-11-14 10:00" --end "2026-11-14 12:30" [--location …] [--notes …] [--remind 100,60] [--uid …] [--fuer-gast] [--dry]',
+    'node tools/kalender/eintragen.mjs add events.json [--fuer-gast | --gemeinsam] [--dry]',
+    'node tools/kalender/eintragen.mjs add --title "…" --start "2026-11-14 10:00" --end "2026-11-14 12:30" [--location …] [--notes …] [--remind 100,60] [--uid …] [--fuer-gast | --gemeinsam] [--dry]',
     'node tools/kalender/eintragen.mjs remove <id> [--dry]',
-    '  --fuer-gast   als Eintrag der geteilten Person (türkis), ohne Erinnerung (in der Datei: "shared": true)'
+    '  --fuer-gast   als Eintrag der geteilten Person (türkis), ohne Erinnerung (in der Datei: "shared": true)',
+    '  --gemeinsam   als gemeinsamer Termin von Doc und der geteilten Person (gold-türkis), ohne Erinnerung (in der Datei: "together": true)'
 ].join('\n');
 
 function needToken() {
@@ -264,6 +278,7 @@ async function main() {
     if (cmd === 'add') {
         const flagMode = ['title', 'start', 'end', 'location', 'notes', 'remind', 'uid'].some(k => k in flags);
         let raw;
+        if (flags.fuerGast && flags.gemeinsam) fail('--fuer-gast oder --gemeinsam, nicht beides');
         if (pos.length > 2) fail('zu viele Angaben: ' + pos.slice(2).join(' '));
         if (pos[1]) {
             if (flagMode) fail('entweder eine Datei oder --title/--start, nicht beides');
@@ -271,9 +286,11 @@ async function main() {
             try { text = fs.readFileSync(path.resolve(pos[1]), 'utf8'); } catch (e) { fail('Datei nicht lesbar: ' + pos[1]); }
             try { raw = JSON.parse(text); } catch (e) { fail('kein gültiges JSON in ' + pos[1] + ': ' + e.message); }
             raw = Array.isArray(raw) ? raw : [raw];
-            if (flags.fuerGast) raw = raw.map((ev, i) => {
-                if (ev && typeof ev === 'object' && ev.shared === false) fail('Termin ' + (i + 1) + ': "shared": false widerspricht --fuer-gast');
-                return ev && typeof ev === 'object' && !Array.isArray(ev) ? Object.assign({}, ev, { shared: true }) : ev;
+            if (flags.fuerGast || flags.gemeinsam) raw = raw.map((ev, i) => {
+                const flag = flags.gemeinsam ? '--gemeinsam' : '--fuer-gast';
+                if (ev && typeof ev === 'object' && ev.shared === false) fail('Termin ' + (i + 1) + ': "shared": false widerspricht ' + flag);
+                return ev && typeof ev === 'object' && !Array.isArray(ev)
+                    ? Object.assign({}, ev, { shared: true }, flags.gemeinsam ? { together: true } : {}) : ev;
             });
         } else if (flagMode) raw = [fromFlags(flags)];
         else fail('add braucht eine Datei oder --title/--start\n' + USAGE);
@@ -290,7 +307,7 @@ async function main() {
         const rows = await rpc('calendar_add', { p_token: token, p_events: events }, token);
         console.log('');
         rows.forEach((r, i) => console.log((r.op === 'update' ? 'ersetzt' : 'eingetragen') + ': id ' + r.id + ' - ' + events[i].title +
-            (events[i].shared === true ? ' (geteilte Person)' : '')));
+            (events[i].together === true ? ' (gemeinsam)' : events[i].shared === true ? ' (geteilte Person)' : '')));
         return;
     }
 
