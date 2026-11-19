@@ -34,6 +34,7 @@ FILES = {
     'svp/qrcode.min.js': 'svp/qrcode.min.js',        # the guest's access as a QR code (sharing, settings)
     # the app's own icon (Material "event"), see kalender/icons/icon.svg
     'kalender/icons/icon.svg': 'icons/icon.svg',
+    'kalender/icons/favicon.svg': 'icons/favicon.svg',          # the tab icon, cut to fill its square
     'kalender/icons/apple-touch-icon.png': 'icons/apple-touch-icon.png',
     'kalender/icons/app-192.png': 'icons/app-192.png',
     'kalender/icons/app-512.png': 'icons/app-512.png',

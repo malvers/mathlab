@@ -32,6 +32,7 @@ FILES = {
     'js/solita-listen.js': 'js/solita-listen.js',    # dictation
     # the app's own icon (checklist), see todo/icons/icon.svg
     'todo/icons/icon.svg': 'icons/icon.svg',
+    'todo/icons/favicon.svg': 'icons/favicon.svg',          # the tab icon, cut to fill its square
     'todo/icons/apple-touch-icon.png': 'icons/apple-touch-icon.png',
     'todo/icons/app-192.png': 'icons/app-192.png',
     'todo/icons/app-512.png': 'icons/app-512.png',

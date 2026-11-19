@@ -34,6 +34,7 @@ FILES = {
     'js/solita-listen.js': 'js/solita-listen.js',    # dictation
     # the app's own icon (hand with heart), see grateful/icons/icon.svg
     'grateful/icons/icon.svg': 'icons/icon.svg',
+    'grateful/icons/favicon.svg': 'icons/favicon.svg',          # the tab icon, cut to fill its square
     'grateful/icons/apple-touch-icon.png': 'icons/apple-touch-icon.png',
     'grateful/icons/app-192.png': 'icons/app-192.png',
     'grateful/icons/app-512.png': 'icons/app-512.png',
