@@ -76,17 +76,25 @@ async function loadMessages() {
   await loadActiveReceipt(peer); // the peer's delivered/read marks for my messages
   // Only fetch MY messages from the server (less load + fewer metadata to every client). The strict
   // client-side filter below still narrows to this peer. Fallback to unfiltered if the OR-filter errors.
-  const mine = `pubkey.eq."${myPubB64}",recipient_pubkey.eq."${myPubB64}"`;
+  // Pair mode: "me" and "peer" are SETS (earlier phones' keys too) so the history survives a re-pairing.
+  const selfKeys = pairMode ? [...pairSelfPubs] : [myPubB64];
+  const peerKeys = pairMode ? [...pairPeerPubs] : [peer];
+  const mine = selfKeys.map(k => `pubkey.eq."${k}",recipient_pubkey.eq."${k}"`).join(',');
   let { data, error } = await client.from('messages').select('*').or(mine).order('created_at', { ascending: true });
   if (error) {
     dbg('Server-Filter fehlgeschlagen, lade ungefiltert: ' + error.message);
     ({ data, error } = await client.from('messages').select('*').order('created_at', { ascending: true }));
   }
-  if (error) { dbg('Fehler beim Laden: ' + error.message); return; }
+  if (error) {
+    dbg('Fehler beim Laden: ' + error.message);
+    // Pair mode opens straight into this one chat → on a flaky phone network try again by itself
+    if (pairMode) setTimeout(() => { if (activePeer && activePeer.pubkey === peer) loadMessages(); }, 4000);
+    return;
+  }
   // Strict 1:1 by IDENTITY (signing pubkey): keep ONLY messages between me and this peer.
   const rows = (data || []).filter(m =>
-    (m.pubkey === myPubB64 && m.recipient_pubkey === peer) ||
-    (m.pubkey === peer      && m.recipient_pubkey === myPubB64));
+    (selfKeys.includes(m.pubkey) && peerKeys.includes(m.recipient_pubkey)) ||
+    (peerKeys.includes(m.pubkey) && selfKeys.includes(m.recipient_pubkey)));
   dbg(`${rows.length} 1:1-Nachrichten mit ${activePeer.name}`);
   messagesEl.innerHTML = '';
   for (const msg of rows) await renderMsg(msg);
@@ -254,7 +262,7 @@ function glideToBottom(el, force) {
 }
 // If this device's own identity was deleted elsewhere (Konto gelöscht) → log out automatically.
 async function checkAccountAlive() {
-  if (!myPubB64 || !chatReady) return;
+  if (pairMode || !myPubB64 || !chatReady) return; // pair mode has no directory entry → never "deleted"
   const { data, error } = await client.from('identities').select('name_id').eq('pubkey', myPubB64).limit(1);
   if (error || (data && data.length)) return; // can't tell, or still alive → nothing to do
   dbg('Eigene Identität ist weg (Konto gelöscht) — Gerät wird abgemeldet');
@@ -289,8 +297,9 @@ function formatText(s) {
 async function renderMsg(msg) {
   // Skip if this message id is already on screen (realtime INSERT + loadMessages can race)
   if (msg.id != null && messagesEl.querySelector(`[data-id="${msg.id}"]`)) return;
-  // 1:1: my own messages go right, the peer's go left (decided by signing pubkey = our identity)
-  const isSelf = msg.pubkey === myPubB64;
+  // 1:1: my own messages go right, the peer's go left (decided by signing pubkey = our identity).
+  // Pair mode: messages from my earlier phones' keys are mine too.
+  const isSelf = msg.pubkey === myPubB64 || (pairMode && pairSelfPubs.has(msg.pubkey));
   const div = document.createElement('div');
   div.className = 'msg ' + (isSelf ? 'self' : 'other');
   if (msg.id != null) div.dataset.id = msg.id;
@@ -333,7 +342,11 @@ async function renderMsg(msg) {
     const bind = msg.room_id || msg.recipient_pubkey || '';
     const sigOk = await verifyText(msg.content + '|' + bind, msg.sig, msg.pubkey);
     const expectedPub = isRoom ? null : (isSelf ? myPubB64 : (activePeer && activePeer.pubkey));
-    if (!sigOk || (expectedPub && msg.pubkey !== expectedPub)) {
+    // Pair mode: the signer must be one of the pair's known keys (mine if self, the partner's if not)
+    const signerOk = pairMode && !isRoom
+      ? (isSelf ? pairSelfPubs.has(msg.pubkey) : pairPeerPubs.has(msg.pubkey))
+      : !(expectedPub && msg.pubkey !== expectedPub);
+    if (!sigOk || !signerOk) {
       badge = '<span class="unverified" title="Signatur ungültig — mögliche Fälschung">⚠️</span> ';
       div.classList.add('forged');
     }

@@ -44,8 +44,17 @@ async function enablePush() {
     userVisibleOnly: true,
     applicationServerKey: urlB64ToUint8(VAPID_PUBLIC)
   });
-  const j = sub.toJSON();
+  const error = await savePushSubscription(sub);
+  if (error) { dbg('Push: Speichern fehlgeschlagen — ' + error.message); return; }
+  dbg('Push: aktiviert, Abo gespeichert (endpoint …' + sub.endpoint.slice(-12) + ')');
+  refreshPushBell();
+  uiConfirm('Benachrichtigungen sind aktiviert. 🔔', { alert: true, okText: 'Super' });
+}
 
+// Store this device's subscription under the CURRENT signing key (the Edge Function looks it up by
+// recipient_pubkey). Returns the Supabase error or null.
+async function savePushSubscription(sub) {
+  const j = sub.toJSON();
   await ensureClient();
   const { error } = await client.from('push_subscriptions').upsert({
     pubkey: myPubB64,
@@ -54,11 +63,22 @@ async function enablePush() {
     auth: j.keys.auth,
     rooms: pushRoomIds()
   }, { onConflict: 'endpoint' });
+  return error || null;
+}
 
-  if (error) { dbg('Push: Speichern fehlgeschlagen — ' + error.message); return; }
-  dbg('Push: aktiviert, Abo gespeichert (endpoint …' + sub.endpoint.slice(-12) + ')');
-  refreshPushBell();
-  uiConfirm('Benachrichtigungen sind aktiviert. 🔔', { alert: true, okText: 'Super' });
+// Silent re-sync on start: if push is already allowed and subscribed, point the subscription at the
+// current key (after a re-pairing the device has a new key → pings must follow it). Never prompts.
+async function syncPushSubscription() {
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted' || !('serviceWorker' in navigator)) return false;
+    const reg = await navigator.serviceWorker.getRegistration();
+    const sub = reg && await reg.pushManager.getSubscription();
+    if (!sub || !myPubB64) return false;
+    const error = await savePushSubscription(sub);
+    if (error) { dbg('Push-Abgleich fehlgeschlagen — ' + error.message); return false; }
+    dbg('Push-Abo auf den aktuellen Schlüssel abgeglichen');
+    return true;
+  } catch (e) { dbg('Push-Abgleich: ' + (e && e.message || e)); return false; }
 }
 
 // Show the 🔔 next to the name only when a push subscription really exists (survives reloads).

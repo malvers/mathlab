@@ -94,6 +94,7 @@ const searchVal = () => document.getElementById('contact-search').value;
 setInterval(() => { if (chatReady) renderContacts(searchVal()); }, 60000);
 
 async function loadContacts() {
+  if (pairMode) return; // pair mode has no directory — the partner comes from the pairing
   // Load the directory of EVERY group I'm in (each scoped + decrypted with its own group key),
   // so the sidebar can show all my groups with their members underneath.
   const me = (myNameEl.value || '').toLowerCase();

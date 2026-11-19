@@ -366,6 +366,7 @@ document.getElementById('back-btn').onclick = () => document.getElementById('app
 // between files (esp. Safari) and hit an undefined function. DOMContentLoaded fires once all the
 // parser-blocking scripts at the end of <body> have run, so every helper is defined by then.
 function vgpStartup() {
+  if (pairMode) { pairStartup(); return; } // pair mode: no account screen at all (js/vgp-pair.js)
   const cached = sessionStorage.getItem(SESSION_PWD_KEY);
   if (vaultExists() && cached) {
     openVault(cached).then(async v => {

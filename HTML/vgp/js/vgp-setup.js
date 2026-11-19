@@ -69,6 +69,12 @@ function normGroups(p, activePwd) {
 }
 let chatReady = false;
 let signingUp = false; // true only during the sign-up flow (skip the "account deleted?" check then)
+// Pair mode (js/vgp-mode.js decides in <head>; js/vgp-pair.js runs it). In pair mode the device's
+// identity is the pair-device key, and the 1:1 history may span earlier keys of both partners
+// (each re-pairing on a new phone adds one) → loadMessages/renderMsg accept these sets.
+const pairMode = window.VGP_MODE === 'paar';
+let pairSelfPubs = new Set();   // all my signing pubkeys in this pair (current + earlier phones)
+let pairPeerPubs = new Set();   // all the partner's signing pubkeys (current + earlier phones)
 
 const messagesEl = document.getElementById('messages');
 const msgInput = document.getElementById('msg-input');
