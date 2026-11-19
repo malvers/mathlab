@@ -149,7 +149,8 @@ function normalize(ev, i) {
         out.remind = ev.remind;
     }
     if (ev.color != null) {
-        if (![1, 2, 3].includes(ev.color)) fail(what + ': color muss 1, 2 oder 3 sein');
+        // 1 rot, 2 gold, 3 grün, 4 blau, 5 violett, 6 orange, 7 pink (4-7 need 20261119c_calendar_colors.sql)
+        if (![1, 2, 3, 4, 5, 6, 7].includes(ev.color)) fail(what + ': color muss 1 bis 7 sein (1 rot, 2 gold, 3 grün, 4 blau, 5 violett, 6 orange, 7 pink)');
         out.color = ev.color;
     }
     if (ev.shared != null) {

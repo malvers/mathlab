@@ -36,6 +36,12 @@
             --c-red: 176, 36, 24;
             --c-gold: 245, 194, 66;
             --c-green: 121, 158, 49;
+            /* four more for the editor's colour row (Doc, 19.11.2026: "unten mehr Farben bitte") - the same in every scheme
+               too; text on them (--on below) at least 5.4:1, as readable as on red and green */
+            --c-blue: 52, 98, 200;
+            --c-violet: 175, 150, 235;
+            --c-orange: 240, 140, 60;
+            --c-pink: 240, 130, 175;
             /* entries of the guest the calendar is shared with (Doc, 19.11.2026: first "mach pink", then "türkis", then "noch zu
                knallig ... ein bisschen heller") - a soft turquoise #9adbd4: navy on it 9.7:1, apart from red, gold, green and
                the pale lesson blue */
@@ -111,6 +117,10 @@
         .c1 { --c: var(--c-red); --on: var(--ink-light); }
         .c2 { --c: var(--c-gold); --on: var(--ink-navy); }
         .c3 { --c: var(--c-green); --on: var(--ink-navy); }
+        .c4 { --c: var(--c-blue); --on: var(--ink-light); }
+        .c5 { --c: var(--c-violet); --on: var(--ink-navy); }
+        .c6 { --c: var(--c-orange); --on: var(--ink-navy); }
+        .c7 { --c: var(--c-pink); --on: var(--ink-navy); }
         .cs { --c: var(--c-turquoise); --on: var(--ink-navy); }   /* the guest's own entries (calendar_event.shared_by) */
 
         /* ---------- entry: mic, field, gear (like the To-do app) ---------- */
@@ -491,6 +501,31 @@
         }
         .colors button[aria-checked="true"] { border-color: rgb(var(--c)); padding: 3px; }
         .ed-note { margin: -4px 0 12px; font: 14px/1.4 Raleway, sans-serif; color: var(--muted); }
+        /* the appointment editor tighter and a little smaller (Doc, 19.11.2026: "alles in Y ein bisschen enger und
+           wahrscheinlich auch kleiner"): less air between the rows, smaller words, switches and chips - every target
+           stays one control high (--ctl), the fields keep 16px so a phone does not zoom in; settings and other dialogs
+           keep the roomier look */
+        .ed { padding: 16px 16px 14px; }
+        .ed .ed-title { margin: 0 0 8px; font-size: 13px; }
+        .ed .fld { margin-bottom: 8px; }
+        .ed .fld > span, .ed .fld-label { margin-bottom: 3px; font-size: 10px; }
+        .ed .fld input, .ed .fld select, .ed .fld textarea { padding: 0 10px; font-size: 16px; }
+        .ed .fld textarea { min-height: 52px; padding: 6px 10px; line-height: 1.35; }
+        .ed .two { gap: 8px; }
+        .ed .switch { gap: 8px; font-size: 15px; }
+        .ed .switch i { width: 38px; height: 22px; border-radius: 11px; }
+        .ed .switch i::after { top: 3px; left: 3px; width: 16px; height: 16px; }
+        .ed .switch input:checked + i::after { transform: translateX(16px); }
+        .ed #googleRow, .ed #forGuestRow, .ed #privRow { margin-bottom: 0; }   /* the switches stack, one control apart */
+        .ed #remindRow { margin-top: 4px; }
+        .ed .chips { gap: 6px; }
+        .ed .chips button { padding: 0 10px; font-size: 11px; }
+        .ed .colors { flex-wrap: wrap; gap: 6px; }
+        .ed .ed-note { margin: 0 0 8px; font-size: 13px; }
+        .ed .ed-note:empty { display: none; }
+        .ed .dlg-btns { gap: 8px; }
+        .ed .dlg-btns button { font-size: 12px; }
+        @media (max-width: 560px) { #ed .ed { padding-bottom: max(14px, env(safe-area-inset-bottom)); } }
 
         /* lessons from Untis: in the scheme's tint, quieter than the appointments; cancelled ones struck through */
         .cl { --c: var(--tint); --on: var(--text); }
@@ -708,7 +743,11 @@
             <div class="fld" id="colorRow"><span class="fld-label" id="colLabel">Farbe</span>
                 <div class="colors" id="fColor" role="radiogroup" aria-labelledby="colLabel">
                     <button type="button" class="c2" role="radio" data-color="2" aria-label="Gold"></button>
+                    <button type="button" class="c6" role="radio" data-color="6" aria-label="Orange"></button>
                     <button type="button" class="c1" role="radio" data-color="1" aria-label="Rot"></button>
+                    <button type="button" class="c7" role="radio" data-color="7" aria-label="Pink"></button>
+                    <button type="button" class="c5" role="radio" data-color="5" aria-label="Violett"></button>
+                    <button type="button" class="c4" role="radio" data-color="4" aria-label="Blau"></button>
                     <button type="button" class="c3" role="radio" data-color="3" aria-label="Grün"></button>
                 </div>
             </div>
@@ -822,8 +861,9 @@
             let selDay = K.startOfDay(new Date());   // the chosen day in the month view
             let agendaDays = AGENDA_DAYS;
 
+            const COLORS = [1, 2, 3, 4, 5, 6, 7];   // calendar_event.color (20261119c_calendar_colors.sql): red, gold, green, blue, violet, orange, pink
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : [1, 2, 3].includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 's' -> cs (the guest's turquoise)
+            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : COLORS.includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 's' -> cs (the guest's turquoise)
             // the guest's name lives only in the database (calendar_share.label); one share for now, so its label names
             // every shared_by row
             const guestName = () => (share && share.label) || 'Gast';
@@ -865,6 +905,9 @@
                 const opts = { method: method || 'GET', headers: { Prefer: prefer || 'return=representation' } };
                 if (body !== undefined) opts.body = JSON.stringify(body);
                 const res = await auth.api(path, opts);
+                // a colour the database does not take yet (before 20261119c_calendar_colors.sql ran): say so, not "HTTP 400"
+                if (res.status === 400 && body !== undefined && (await res.clone().json().catch(() => ({}))).code === '23514')
+                    throw new Error('diese Farbe kennt die Datenbank noch nicht');
                 if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'Kein Zugriff mit diesem Konto'
                     : res.status === 404 ? 'Der Kalender ist in der Datenbank noch nicht eingerichtet' : 'HTTP ' + res.status);
                 return res.json();
@@ -1623,7 +1666,7 @@
                 const occ = o.occ || null;
                 const ev = occ ? occ.ev : null;
                 const guest = !!(ev && ev.shared_by);   // entered by the guest: Doc may change it, it stays theirs (turquoise)
-                edState = { ev, occ, remind: new Set(), color: ev && [1, 2, 3].includes(ev.color) ? ev.color : 2, extra: { allDay: !!(ev && ev.all_day), mins: ev ? K.remindOf(ev) : [] },
+                edState = { ev, occ, remind: new Set(), color: ev && COLORS.includes(ev.color) ? ev.color : 2, extra: { allDay: !!(ev && ev.all_day), mins: ev ? K.remindOf(ev) : [] },
                     googleOk: !GUEST && (!ev || (!feedOf(ev) && !guest)) };
                 $('fGoogle').checked = false;
                 $('fPass').value = '';
