@@ -71,16 +71,19 @@
         .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
         .bar #micBtn { order: 1; }
         .bar #text { order: 2; flex: 1 1 0; }
-        .bar #gearBtn { order: 3; }
+        /* "Heute" right before "Tag" (Doc, 19.11.2026: "vor 'Tag' machen, weil das Suchfeld ist ja eh ziemlich groß") -
+           on wide screens directly left of the views, on the phone at the end of the first row: the entry field gives up the room */
+        .bar #todayBtn { order: 3; }
+        .bar #gearBtn { order: 4; }
         /* views and back/period/forward share one line: on the phone the second row, on wide screens inside the one row */
-        .bar .row2 { order: 4; flex: 1 1 100%; display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .bar .row2 { order: 5; flex: 1 1 100%; display: flex; align-items: center; gap: 8px; min-width: 0; }
         .row2 .views { flex: 1 1 0; min-width: 0; }
         .row2 .nav { flex: 0 1 auto; min-width: 0; }
         .row2 .nav .period { cursor: pointer; min-width: 84px; }
         @media (max-width: 599px) {
-            .row2 .today-btn { display: none; }   /* on the phone a tap on the period goes back to today */
-            .row2 .views button { font-size: 11px; letter-spacing: .02em; gap: 0; }
-            .row2 .views { gap: 4px; }
+            /* the view names never squeezed below their text: the period takes its short form instead */
+            .row2 .views button { font-size: 11px; letter-spacing: .02em; gap: 0; padding: 0 4px; min-width: max-content; }
+            .row2 .views { gap: 4px; min-width: max-content; }
             .row2 .nav { gap: 4px; }
             .row2 .nav button.icon { flex-basis: 32px; width: 32px; }
             .row2 .nav .period { font-size: 12px; }
@@ -89,10 +92,10 @@
         @media (min-width: 900px) {
             .bar { flex-wrap: nowrap; }
             .bar #text { flex: 1 1 200px; }
-            .bar .row2 { order: 3; flex: 0 1 740px; }
+            .bar .row2 { order: 4; flex: 0 1 650px; }
             .row2 .views { flex: 0 0 330px; }
             .row2 .nav { flex: 1 1 auto; }
-            .bar #gearBtn { order: 4; }
+            .bar #gearBtn { order: 5; }
         }
         .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -136,7 +139,7 @@
         .set-text a { color: var(--lambda); }
         .set-sep { border: 0; border-top: 1px solid var(--line); margin: 16px 0 14px; }
         .seg { display: flex; gap: 8px; }
-        .seg button {
+        .seg button, button.today-btn {
             flex: 1 1 0; min-width: 0; height: 44px; border-radius: 10px; cursor: pointer; padding: 0;
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             background: transparent; color: var(--text); border: 1px solid var(--line);
@@ -157,18 +160,16 @@
         .views button { height: var(--ctl); }
         .views button[aria-selected="true"] { background: rgba(var(--c-gold), var(--btn-a)); border-color: rgba(var(--c-gold), var(--btn-rim-a)); color: var(--ink-navy); }
         html.svp-light .views button[aria-selected="true"] { color: var(--text); }
-        /* back, the period, forward, today */
+        /* Heute: the view buttons' look (.seg button), as wide as its word */
+        button.today-btn { flex: 0 0 auto; height: var(--ctl); padding: 0 14px; }
+        @media (max-width: 599px) { button.today-btn { padding: 0 10px; } }
+        /* back, the period, forward */
         .nav { display: flex; align-items: center; gap: 8px; }
         .nav .period {
             flex: 1 1 auto; min-width: 0; text-align: center; font: 700 clamp(13px, 3.8vw, 15px)/1.2 Orbitron, sans-serif;
             letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .nav .period small { display: block; font: 500 11px/1.4 Orbitron, sans-serif; letter-spacing: .08em; color: var(--muted); }
-        .nav .today-btn {
-            flex: 0 0 auto; height: var(--ctl); padding: 0 14px; border-radius: 10px; cursor: pointer;
-            background: transparent; color: var(--text); border: 1px solid var(--line);
-            font: 700 12px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase;
-        }
 
         /* ---------- Agenda ---------- */
         .hero {
@@ -513,6 +514,7 @@
             <button class="icon gear" id="gearBtn" type="button" aria-label="Einstellungen" aria-expanded="false" aria-controls="settings">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
             </button>
+            <button class="today-btn" id="todayBtn" type="button" title="Zurück zu heute">Heute</button>
             <div class="row2">
                 <div class="seg views" id="views" role="tablist" aria-label="Ansicht">
                     <button type="button" role="tab" data-view="agenda" aria-selected="true" title="Tag (Taste T)" aria-keyshortcuts="T">Tag</button>
@@ -524,7 +526,6 @@
                     <button class="icon" id="prevBtn" type="button" aria-label="Zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
                     <span class="period" id="period" aria-live="polite" title="Zurück zu heute"></span>
                     <button class="icon" id="nextBtn" type="button" aria-label="Weiter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
-                    <button class="today-btn" id="todayBtn" type="button">Heute</button>
                 </div>
             </div>
         </div>
@@ -1114,10 +1115,12 @@
                 }
                 render();
             }
+            /* back to today in the view at hand: the week or month with today, in "Tag" the list's top (today) */
             function goToday() {
                 anchor = K.startOfDay(new Date());
                 selDay = anchor;
                 render();
+                if (view === 'agenda') window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
             /* ---------- question dialog: buttons [{ label, cls, value }] -> the value of the tapped one (Escape: null) ----------
