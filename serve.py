@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Local dev server for HTML/ - like `python3 -m http.server`, plus a LOCAL badge.
 
-Every HTML page served from here gets a small fixed "LOCAL" pill top right,
-so a local tab can never be mistaken for docalvers.de again. Nothing in the
+Every HTML page served from here gets a red glowing frame around the whole window
+(the "LOCAL badge", id local-badge), so a local tab can never be mistaken for
+docalvers.de again. Nothing in the
 repo is touched: the badge is injected on the way out, only by this server.
 Other local servers (pinker2) import inject() from here, so the badge lives once.
 
@@ -37,15 +38,57 @@ LIVE_RELOAD = b'<script src="/__live/reload.js"></script>\n'
 PORT = 8765
 BIND = '127.0.0.1'
 
-# Arial on purpose: debug overlays never wear Orbitron. Upsilon red tag, click-through, above everything, not on paper.
-BADGE = (b'<div id="local-badge" style="position:fixed;top:8px;right:8px;z-index:2147483647;'
-         b'pointer-events:none;font:700 15px/1 Arial,sans-serif;letter-spacing:.14em;'
-         b'padding:7px 11px;border-radius:5px;background:rgb(176,36,24);color:#fff;'
-         b'box-shadow:0 2px 8px rgba(0,0,0,.35)">LOCAL</div>'
-         b'<style>@media print{#local-badge{display:none}}</style>'
+# Doc, 19.11.2026: the "LOCAL" pill top right covered toolbar buttons (kalender) - "dass das ganze Ding so rot
+# umrandet ist, so mit so einem Schein, wie das ist, wenn du dir den Chrome schnappst". So the badge is now a red
+# glowing frame around the whole window: Upsilon red, click-through, above everything, not on paper. It keeps the
+# id local-badge, so every page, tour and recording that hides or removes the badge still does. The doubled id +
+# !important outrank the old per-page moves of the pill (buch.css, vorrechnen.css, buch-druck.js): a frame has
+# nowhere to go. display stays free for the pages that hide it.
+# Arial on purpose for the lag tag: debug overlays never wear Orbitron.
+BADGE = (b'<div id="local-badge" aria-hidden="true"></div>'
+         b'<style>#local-badge#local-badge{position:fixed!important;inset:0!important;width:auto!important;'
+         b'height:auto!important;margin:0!important;transform:none!important;z-index:2147483647;pointer-events:none;'
+         b'box-shadow:inset 0 0 0 2px rgb(176,36,24),inset 0 0 18px 4px rgba(176,36,24,.55)}'
+         b'#local-badge>span{position:absolute;left:6px;bottom:6px;font:700 9px/1 Arial,sans-serif;'
+         b'letter-spacing:.08em;padding:2px 6px;border-radius:3px;background:rgb(176,36,24);color:#fff}'
+         b'@media print{#local-badge{display:none}}</style>'
          # a page in a frame (a deck's live widget, the 3D die) is part of the page around it, which wears the badge
          # already - a second one sat inside the slide (07.10.2026, unendliche-summe-live.html on slide 10)
-         b'<script>if(window.top!==window){var lb=document.getElementById("local-badge");if(lb)lb.remove()}</script>\n')
+         b'<script>if(window.top!==window){var lb=document.getElementById("local-badge");if(lb)lb.remove()}</script>'
+         # Doc, 19.11.2026: "der geht nicht ganz nach rechts bis zur Browserfensterkante". With classic scroll bars
+         # (a mouse on the Mac) a fixed box ends at the page's scroll bar or at its reserved gutter (kalender, todo:
+         # scrollbar-gutter stable) and no page content can paint there. So while the frame measures such a strip,
+         # the root scroll bar is drawn by us - same width, so nothing moves - with the frame's red edge and glow on
+         # its outer side, and the frame itself slides under it so its own right line does not show twice. A
+         # reserved gutter without a scroll bar gets overflow-y:scroll (a scroll bar exactly where the gutter is),
+         # unless the body's overflow would then stop locking the page. Overlay scroll bars: no strip, nothing done.
+         # No pulse any more: a scroll bar cannot pulse along with the frame.
+         b'<script>(function(){var b=document.getElementById("local-badge");if(!b||!window.ResizeObserver)return;'
+         b'var de=document.documentElement,st=document.createElement("style"),gx=0,gy=0,gut=false,th,tr,'
+         # the frame's own profile, measured off its box-shadow: 2 px line, then the glow fading out over ~24 px
+         b'R="rgb(176,36,24)",P=",rgba(176,36,24,.31) 2px,rgba(176,36,24,.17) 8px,rgba(176,36,24,.06) 14px,rgba(176,36,24,0) 24px)";'
+         b'function L(d){return "linear-gradient(to "+d+","+R+" 2px"+P}'
+         b'st.id="local-badge-bar";b.parentNode.insertBefore(st,b.nextSibling);'
+         # hidden (focus / beamer modes) or removed (recordings, tours): the red scroll bar goes with the frame
+         b'function fit(){if(!b.isConnected||getComputedStyle(b).display==="none"){if(gx||gy){gx=gy=0;st.textContent=""}return}'
+         b'var r=b.getBoundingClientRect(),'
+         # the strip the frame misses on the right / at the bottom (the frame is already pushed out by gx / gy)
+         b'x=Math.round(innerWidth-r.right)+gx,y=Math.round(innerHeight-r.bottom)+gy;x=x>1?x:0;y=y>1?y:0;'
+         b'if(x===gx&&y===gy)return;if(!gx&&!gy){var h=getComputedStyle(de);gut=/stable/.test(h.scrollbarGutter)'
+         b'&&/visible|auto/.test(h.overflowY)&&getComputedStyle(document.body).overflowY==="visible";'
+         # the page's own scrollbar-color (svp: thumb + trough) stays, only the red edge is added on top
+         b'var c=h.scrollbarColor&&h.scrollbarColor!=="auto"?h.scrollbarColor.match(/rgba?\\([^)]*\\)|#\\w+|[a-z]+/gi):0;'
+         b'th=c&&c[0]||"rgba(128,128,128,.55)";tr=c&&c[1]||"transparent"}'
+         b'gx=x;gy=y;var n=Math.max(x,y);st.textContent=!n?"":'
+         b'"html{scrollbar-width:auto!important;scrollbar-color:auto!important"+(gut?";overflow-y:scroll":"")+"}"'
+         b'+"html::-webkit-scrollbar{width:"+n+"px;height:"+n+"px;background:transparent}"'
+         b'+"html::-webkit-scrollbar-track:vertical{background:"+L("left")+","+L("bottom")+","+L("top")+","+tr+"}"'
+         b'+"html::-webkit-scrollbar-track:horizontal{background:"+L("top")+","+L("right")+","+L("left")+","+tr+"}"'
+         b'+"html::-webkit-scrollbar-corner{background:"+L("left")+","+L("top")+","+tr+"}"'
+         b'+"html::-webkit-scrollbar-thumb{background:"+th+";background-clip:padding-box;'
+         b'border:4px solid transparent;border-radius:99px}"'
+         b'+"html #local-badge#local-badge{right:-"+x+"px!important;bottom:-"+y+"px!important}"}'
+         b'new ResizeObserver(fit).observe(b)})()</script>\n')
 
 BODY_END = re.compile(rb'</body\s*>', re.IGNORECASE)
 
@@ -94,11 +137,12 @@ def behind():
 
 def inject(html, extra=b'', lag=False):
     """Put the badge (and `extra`) right before the last </body>; pages without one get it appended.
-    lag=True (only this server, not the ones importing inject) adds "· N hinter GitHub" to the badge."""
+    lag=True (only this server, not the ones importing inject) adds a tiny "N hinter GitHub" tag bottom left
+    inside the frame - only when the checkout is behind; the frame alone carries no text."""
     badge = BADGE
     n = behind() if lag else 0
     if n:
-        badge = BADGE.replace(b'>LOCAL</div>', ('>LOCAL \u00b7 %d hinter GitHub</div>' % n).encode('utf-8'))
+        badge = BADGE.replace(b'"true"></div>', ('"true"><span>%d hinter GitHub</span></div>' % n).encode('utf-8'))
     hits = list(BODY_END.finditer(html))
     if not hits:
         return html + badge + extra

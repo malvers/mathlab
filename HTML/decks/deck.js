@@ -704,16 +704,15 @@ const jeopardy = (function () {
     if (want !== goal) { goal = want; glide(want); }
   }
   // the player's corner: over the slide's top right. A phone upright has room under the slide and its buttons, a small
-  // one above the slide - it covers as little of the slide as it can; the LOCAL pill of serve.py (Doc's Mac) stays free.
+  // one above the slide - it covers as little of the slide as it can. (serve.py's LOCAL sign is a click-through frame
+  // around the window since 19.11.2026, no pill in the corner any more - nothing to keep free.)
   function place(box) {
     const r = deck.getBoundingClientRect(), m = 12, size = 200;
-    const pill = document.getElementById('local-badge');
     const below = ['hud', 'nav', 'nav-prev', 'nav-next', 'ask'].reduce(function (y, id) {   // the slide and its dock
       const el = document.getElementById(id), b = el && el.getBoundingClientRect();
       return b && b.width && b.height ? Math.max(y, b.bottom) : y;
     }, r.bottom);
-    const free = pill ? pill.getBoundingClientRect().bottom + 14 : m;
-    const top = innerHeight - below >= size + 2 * m ? below + m : Math.max(free, r.top - m - size);
+    const top = innerHeight - below >= size + 2 * m ? below + m : Math.max(m, r.top - m - size);
     box.style.top = Math.round(top) + 'px';
     box.style.right = Math.round(Math.max(m, innerWidth - r.right + m)) + 'px';
   }
