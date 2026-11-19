@@ -38,6 +38,202 @@ LIVE_RELOAD = b'<script src="/__live/reload.js"></script>\n'
 PORT = 8765
 BIND = '127.0.0.1'
 
+# Doc, 19.11.2026: "der geht nicht ganz nach rechts bis zur Browserfensterkante". With classic scroll bars (a mouse on
+# the Mac) a fixed box ends at the page's scroll bar or at its reserved gutter (kalender, todo: scrollbar-gutter
+# stable) and no page content can paint there. So while the frame measures such a strip, the root scroll bar is drawn
+# by us - same width, so nothing moves - with the frame's red edge and glow on its outer side, and the frame itself
+# slides under it so its own right line does not show twice. A reserved gutter without a scroll bar gets
+# overflow-y:scroll (a scroll bar exactly where the gutter is), unless the body's overflow would then stop locking
+# the page. Overlay scroll bars: no strip, nothing done. No pulse: a scroll bar cannot pulse along with the frame.
+# Doc, 19.11.2026: "dann machst du ihn in der Hintergrundfarbe ... Das soll direkt übergehen" - the strip shows,
+# row by row, the colour the page shows right next to it (DocCal's white toolbar, then the page background, with the
+# toolbar's bottom line), read again on theme changes, DOM changes, scrolling and resizing; the thumb stays faint.
+FRAME_JS = """(function () {
+    var b = document.getElementById("local-badge");
+    if (!b || !window.ResizeObserver || !document.elementsFromPoint) return;
+    var de = document.documentElement, gx = 0, gy = 0, gut = false, th = "", painted = "", queued = 0, last = 0, mo = null;
+    var R = "rgb(176,36,24)", P = ",rgba(176,36,24,.31) 2px,rgba(176,36,24,.17) 8px,rgba(176,36,24,.06) 14px,rgba(176,36,24,0) 24px)";
+    function L(d) { return "linear-gradient(to " + d + "," + R + " 2px" + P; }   // the frame's own profile, measured
+    var st = document.createElement("style"), sk = document.createElement("style");   // bar shape / bar colours
+    st.id = "local-badge-bar"; sk.id = "local-badge-paint";
+    b.parentNode.insertBefore(sk, b.nextSibling); b.parentNode.insertBefore(st, b.nextSibling);
+    function rgba(t) {
+        var m = (t || "").match(/-?[\\d.]+/g);
+        if (!m || m.length < 3) return [0, 0, 0, 0];
+        var f = /^color\\(srgb/.test(t) ? 255 : 1;
+        return [m[0] * f, m[1] * f, m[2] * f, m.length > 3 ? +m[3] : 1];
+    }
+    function canvas() {
+        var k = rgba(getComputedStyle(de).backgroundColor);
+        if (k[3]) return k;
+        k = rgba(getComputedStyle(document.body).backgroundColor);
+        return k[3] ? k : [255, 255, 255, 1];
+    }
+    function css(k) { return "rgb(" + Math.round(k[0]) + "," + Math.round(k[1]) + "," + Math.round(k[2]) + ")"; }
+    // a fixed, window-wide ::before / ::after of body or html with a picture (svp's "natur" photo): what lies behind
+    function backdrop() {
+        var els = [document.body, de], ps = ["::before", "::after"], i, j, s;
+        for (i = 0; i < 2; i++) for (j = 0; j < 2; j++) {
+            s = getComputedStyle(els[i], ps[j]);
+            if (s.content !== "none" && s.display !== "none" && s.position === "fixed" && s.backgroundImage !== "none"
+                && s.top === "0px" && s.left === "0px" && s.right === "0px" && s.bottom === "0px") return s;
+        }
+        return null;
+    }
+    var bd = null, prop = false, imgs = {};
+    // what the page shows at a point: backgrounds (or a top / bottom border) stacked front to back, the canvas below;
+    // with a backdrop the rest is left see-through, the backdrop's own layers fill it in
+    function colorAt(x, y) {
+        var els = document.elementsFromPoint(x, y), c = [0, 0, 0], a = 0, i, s, k, r, w, bt, bb;
+        for (i = 0; i < els.length && a < 0.995; i++) {
+            if (bd && (els[i] === de || (els[i] === document.body && prop))) break;   // painted behind the backdrop
+            s = getComputedStyle(els[i]);
+            if (bd && s.backgroundImage !== "none" && /fixed/.test(s.backgroundAttachment)) break;   // the photo again
+            bt = parseFloat(s.borderTopWidth) || 0; bb = parseFloat(s.borderBottomWidth) || 0;
+            if (bt || bb) {   // a top / bottom border line, over the element's own background
+                r = els[i].getBoundingClientRect(); k = null;
+                if (bt && y < r.top + bt) k = rgba(s.borderTopColor);
+                else if (bb && y >= r.bottom - bb) k = rgba(s.borderBottomColor);
+                if (k && k[3]) { w = (1 - a) * k[3]; c[0] += w * k[0]; c[1] += w * k[1]; c[2] += w * k[2]; a += w; }
+            }
+            k = rgba(s.backgroundColor);
+            if (!k[3]) continue;
+            w = (1 - a) * k[3]; c[0] += w * k[0]; c[1] += w * k[1]; c[2] += w * k[2]; a += w;
+        }
+        if (a < 0.995) {
+            if (bd) return a ? "rgba(" + Math.round(c[0] / a) + "," + Math.round(c[1] / a) + "," + Math.round(c[2] / a) + "," + a.toFixed(3) + ")" : "transparent";
+            k = canvas(); w = 1 - a; c[0] += w * k[0]; c[1] += w * k[1]; c[2] += w * k[2];
+        }
+        return css(c);
+    }
+    // the column just left of the strip, top to bottom, as hard colour stops (every 8 px, exact at each change)
+    function column(x, h) {
+        var prev = colorAt(x, 0), from = 0, ok = 0, stops = [], y, k, c;
+        while (ok < h - 1) {
+            y = Math.min(ok + 8, h - 1);
+            if (colorAt(x, y) === prev) { ok = y; continue; }
+            for (k = ok + 1; (c = colorAt(x, k)) === prev; k++);
+            stops.push(prev + " " + from + "px " + k + "px"); prev = c; from = ok = k;
+        }
+        stops.push(prev + " " + from + "px");
+        return "linear-gradient(" + (stops.length > 1 ? stops.join(",") : prev + "," + prev) + ")";
+    }
+    function split(t) {   // a comma list of CSS values, commas inside brackets left alone
+        var out = [], depth = 0, cur = "", i, ch;
+        for (i = 0; i < t.length; i++) {
+            ch = t[i];
+            if (ch === "(") depth++; else if (ch === ")") depth--;
+            if (ch === "," && !depth) { out.push(cur.trim()); cur = ""; } else cur += ch;
+        }
+        out.push(cur.trim());
+        return out;
+    }
+    function len(v, free) { return /%$/.test(v) ? parseFloat(v) / 100 * free : parseFloat(v) || 0; }
+    // a picture that ends right at the page edge: its last pixel column, drawn out over the strip
+    var cv = null, cols = {};
+    function edge(f, u, sx, y0, th) {
+        var key = u + "|" + Math.round(sx) + "|" + Math.round(y0) + "|" + Math.round(th), N = 48, i, d, out = [];
+        if (key in cols) return cols[key];
+        try {
+            cv = cv || document.createElement("canvas"); cv.width = 1; cv.height = N;
+            var g = cv.getContext("2d"); g.clearRect(0, 0, 1, N);
+            g.drawImage(f, Math.max(0, Math.min(f.naturalWidth - 1, Math.floor(sx))), 0, 1, f.naturalHeight, 0, 0, 1, N);
+            d = g.getImageData(0, 0, 1, N).data;
+            for (i = 0; i < N; i++) out.push("rgba(" + d[4 * i] + "," + d[4 * i + 1] + "," + d[4 * i + 2] + "," + (d[4 * i + 3] / 255).toFixed(3) + ") " + (y0 + (i + 0.5) * th / N).toFixed(1) + "px");
+            return (cols[key] = "linear-gradient(" + out.join(",") + ")");
+        } catch (e) { return (cols[key] = ""); }   // a picture from another site: the plain colour has to do
+    }
+    // the backdrop's layers continued into the strip: same tile size and place as on the page (box w x h), moved by w
+    function behind(s, w, h) {
+        var im = split(s.backgroundImage), sz = split(s.backgroundSize), pos = split(s.backgroundPosition),
+            rep = split(s.backgroundRepeat), out = [], i, u, n, m, f, tw, th, p;
+        for (i = 0; i < im.length; i++) {
+            u = im[i].match(/^url\\(\\s*["']?([^"')]+)/); n = null;
+            if (u) {
+                f = imgs[u[1]];
+                if (!f) { f = imgs[u[1]] = new Image(); f.onload = later; f.src = u[1]; }
+                if (!f.naturalWidth) continue;   // still loading - the next paint has it
+                n = [f.naturalWidth, f.naturalHeight];
+            }
+            m = (sz[i % sz.length] || "auto").split(" ");
+            if (m[0] === "cover" || m[0] === "contain") {
+                f = n ? Math[m[0] === "cover" ? "max" : "min"](w / n[0], h / n[1]) : 0;
+                tw = n ? n[0] * f : w; th = n ? n[1] * f : h;
+            } else {
+                tw = m[0] === "auto" ? 0 : len(m[0], w); th = !m[1] || m[1] === "auto" ? 0 : len(m[1], h);
+                if (!tw && !th) { tw = n ? n[0] : w; th = n ? n[1] : h; }
+                else if (!tw) tw = n ? th * n[0] / n[1] : w;
+                else if (!th) th = n ? tw * n[1] / n[0] : h;
+            }
+            p = (pos[i % pos.length] || "0% 0%").split(" ");
+            m = len(p[0], w - tw); f = len(p[1] || "50%", h - th);
+            if (u && m + tw < w + 1 && !/^repeat|round|space/.test(rep[i % rep.length] || "")) {
+                u = edge(imgs[u[1]], u[1], (w - 1 - m) / tw * n[0], f, th);
+                if (u) out.push(u);
+                continue;
+            }
+            out.push(im[i] + " " + (m - w) + "px " + f + "px/" + tw + "px " + th + "px " + (rep[i % rep.length] || "repeat"));
+        }
+        return out;
+    }
+    function paint() {
+        queued = 0; last = Date.now();
+        if (!gx && !gy) return;
+        var w = innerWidth - gx, x = Math.max(0, w - 1), h = Math.max(1, innerHeight - gy), hs = getComputedStyle(de);
+        bd = backdrop(); prop = !rgba(hs.backgroundColor)[3] && hs.backgroundImage === "none";
+        var under = "";
+        if (bd) {
+            var k = rgba(bd.backgroundColor), more = behind(bd, w, h);
+            under = (more.length ? "," + more.join(",") : "") + "," + (k[3] ? bd.backgroundColor : css(canvas()));
+        }
+        var low = colorAt(x, h - 1), t = "html::-webkit-scrollbar-track:vertical{background:" + L("left") + "," + L("bottom") + "," + L("top") + "," + column(x, h) + under + "}"
+            + "html::-webkit-scrollbar-track:horizontal{background:" + L("top") + "," + L("right") + "," + L("left") + ",linear-gradient(" + low + "," + low + ")" + under + "}"
+            + "html::-webkit-scrollbar-corner{background:" + L("left") + "," + L("top") + ",linear-gradient(" + low + "," + low + ")" + under + "}";
+        if (t === painted) return;
+        painted = t; sk.textContent = t;
+        // Chrome keeps painting a custom scroll bar as it was built - a new track style alone does not show:
+        // take the bar away and give it back within this task (layout in between, no frame painted without it)
+        var keep = st.textContent; st.textContent = ""; de.getBoundingClientRect(); st.textContent = keep;
+    }
+    function later() {   // at most every 150 ms, in a frame
+        if (queued || (!gx && !gy)) return;
+        queued = setTimeout(function () { requestAnimationFrame(paint); }, Math.max(0, 150 - (Date.now() - last)));
+    }
+    function fit() {
+        if (!b.isConnected || getComputedStyle(b).display === "none") {   // hidden (focus / beamer) or removed (recordings)
+            if (gx || gy) { gx = gy = 0; st.textContent = sk.textContent = painted = ""; if (mo) mo.disconnect(); }
+            return;
+        }
+        var r = b.getBoundingClientRect();
+        // the strip the frame misses on the right / at the bottom (the frame is already pushed out by gx / gy)
+        var x = Math.round(innerWidth - r.right) + gx, y = Math.round(innerHeight - r.bottom) + gy;
+        x = x > 1 ? x : 0; y = y > 1 ? y : 0;
+        if (x === gx && y === gy) return;
+        if (!gx && !gy) {
+            var h = getComputedStyle(de);
+            gut = /stable/.test(h.scrollbarGutter) && /visible|auto/.test(h.overflowY) && getComputedStyle(document.body).overflowY === "visible";
+            // the page's own thumb colour (svp) stays; otherwise a faint grey
+            var c = h.scrollbarColor && h.scrollbarColor !== "auto" ? h.scrollbarColor.match(/rgba?\\([^)]*\\)|#\\w+|[a-z]+/gi) : 0;
+            th = c && c[0] || "rgba(128,128,128,.4)";
+        }
+        gx = x; gy = y;
+        var n = Math.max(x, y);
+        if (!n) { st.textContent = sk.textContent = painted = ""; if (mo) mo.disconnect(); return; }
+        st.textContent = "html{scrollbar-width:auto!important;scrollbar-color:auto!important" + (gut ? ";overflow-y:scroll" : "") + "}"
+            + "html::-webkit-scrollbar{width:" + n + "px;height:" + n + "px;background:transparent}"
+            + "html::-webkit-scrollbar-thumb{background:" + th + ";background-clip:padding-box;border:4px solid transparent;border-radius:99px}"
+            + "html #local-badge#local-badge{right:-" + x + "px!important;bottom:-" + y + "px!important}";
+        paint();
+        if (!mo) mo = new MutationObserver(later);   // theme switches, a toolbar that appears, ...
+        mo.observe(de, { attributes: true, childList: true, subtree: true });
+    }
+    // fit() resizes the frame itself - outside the observer's callback, or Chrome reports a "ResizeObserver loop"
+    new ResizeObserver(function () { requestAnimationFrame(fit); later(); }).observe(b);
+    addEventListener("scroll", later, { passive: true });
+    if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener("change", later);
+})()"""
+
+
 # Doc, 19.11.2026: the "LOCAL" pill top right covered toolbar buttons (kalender) - "dass das ganze Ding so rot
 # umrandet ist, so mit so einem Schein, wie das ist, wenn du dir den Chrome schnappst". So the badge is now a red
 # glowing frame around the whole window: Upsilon red, click-through, above everything, not on paper. It keeps the
@@ -55,40 +251,7 @@ BADGE = (b'<div id="local-badge" aria-hidden="true"></div>'
          # a page in a frame (a deck's live widget, the 3D die) is part of the page around it, which wears the badge
          # already - a second one sat inside the slide (07.10.2026, unendliche-summe-live.html on slide 10)
          b'<script>if(window.top!==window){var lb=document.getElementById("local-badge");if(lb)lb.remove()}</script>'
-         # Doc, 19.11.2026: "der geht nicht ganz nach rechts bis zur Browserfensterkante". With classic scroll bars
-         # (a mouse on the Mac) a fixed box ends at the page's scroll bar or at its reserved gutter (kalender, todo:
-         # scrollbar-gutter stable) and no page content can paint there. So while the frame measures such a strip,
-         # the root scroll bar is drawn by us - same width, so nothing moves - with the frame's red edge and glow on
-         # its outer side, and the frame itself slides under it so its own right line does not show twice. A
-         # reserved gutter without a scroll bar gets overflow-y:scroll (a scroll bar exactly where the gutter is),
-         # unless the body's overflow would then stop locking the page. Overlay scroll bars: no strip, nothing done.
-         # No pulse any more: a scroll bar cannot pulse along with the frame.
-         b'<script>(function(){var b=document.getElementById("local-badge");if(!b||!window.ResizeObserver)return;'
-         b'var de=document.documentElement,st=document.createElement("style"),gx=0,gy=0,gut=false,th,tr,'
-         # the frame's own profile, measured off its box-shadow: 2 px line, then the glow fading out over ~24 px
-         b'R="rgb(176,36,24)",P=",rgba(176,36,24,.31) 2px,rgba(176,36,24,.17) 8px,rgba(176,36,24,.06) 14px,rgba(176,36,24,0) 24px)";'
-         b'function L(d){return "linear-gradient(to "+d+","+R+" 2px"+P}'
-         b'st.id="local-badge-bar";b.parentNode.insertBefore(st,b.nextSibling);'
-         # hidden (focus / beamer modes) or removed (recordings, tours): the red scroll bar goes with the frame
-         b'function fit(){if(!b.isConnected||getComputedStyle(b).display==="none"){if(gx||gy){gx=gy=0;st.textContent=""}return}'
-         b'var r=b.getBoundingClientRect(),'
-         # the strip the frame misses on the right / at the bottom (the frame is already pushed out by gx / gy)
-         b'x=Math.round(innerWidth-r.right)+gx,y=Math.round(innerHeight-r.bottom)+gy;x=x>1?x:0;y=y>1?y:0;'
-         b'if(x===gx&&y===gy)return;if(!gx&&!gy){var h=getComputedStyle(de);gut=/stable/.test(h.scrollbarGutter)'
-         b'&&/visible|auto/.test(h.overflowY)&&getComputedStyle(document.body).overflowY==="visible";'
-         # the page's own scrollbar-color (svp: thumb + trough) stays, only the red edge is added on top
-         b'var c=h.scrollbarColor&&h.scrollbarColor!=="auto"?h.scrollbarColor.match(/rgba?\\([^)]*\\)|#\\w+|[a-z]+/gi):0;'
-         b'th=c&&c[0]||"rgba(128,128,128,.55)";tr=c&&c[1]||"transparent"}'
-         b'gx=x;gy=y;var n=Math.max(x,y);st.textContent=!n?"":'
-         b'"html{scrollbar-width:auto!important;scrollbar-color:auto!important"+(gut?";overflow-y:scroll":"")+"}"'
-         b'+"html::-webkit-scrollbar{width:"+n+"px;height:"+n+"px;background:transparent}"'
-         b'+"html::-webkit-scrollbar-track:vertical{background:"+L("left")+","+L("bottom")+","+L("top")+","+tr+"}"'
-         b'+"html::-webkit-scrollbar-track:horizontal{background:"+L("top")+","+L("right")+","+L("left")+","+tr+"}"'
-         b'+"html::-webkit-scrollbar-corner{background:"+L("left")+","+L("top")+","+tr+"}"'
-         b'+"html::-webkit-scrollbar-thumb{background:"+th+";background-clip:padding-box;'
-         b'border:4px solid transparent;border-radius:99px}"'
-         b'+"html #local-badge#local-badge{right:-"+x+"px!important;bottom:-"+y+"px!important}"}'
-         b'new ResizeObserver(fit).observe(b)})()</script>\n')
+         b'<script>' + FRAME_JS.encode('utf-8') + b'</script>\n')
 
 BODY_END = re.compile(rb'</body\s*>', re.IGNORECASE)
 
