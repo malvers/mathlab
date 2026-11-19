@@ -31,6 +31,7 @@ FILES = {
     'svp/svp-tokens.css': 'svp/svp-tokens.css',      # the colours of Hell and Grau
     'js/natur-bild.js': 'js/natur-bild.js',          # svp-gate.js loads it from ../js/
     'js/solita-listen.js': 'js/solita-listen.js',    # dictation
+    'svp/qrcode.min.js': 'svp/qrcode.min.js',        # the guest's access as a QR code (sharing, settings)
     # the app's own icon (Material "event"), see kalender/icons/icon.svg
     'kalender/icons/icon.svg': 'icons/icon.svg',
     'kalender/icons/apple-touch-icon.png': 'icons/apple-touch-icon.png',

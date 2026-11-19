@@ -36,6 +36,7 @@
             --c-red: 176, 36, 24;
             --c-gold: 245, 194, 66;
             --c-green: 121, 158, 49;
+            --c-pink: 240, 98, 146;   /* entries of the guest the calendar is shared with (Doc, 19.11.2026: "mach pink") */
             --ink-light: rgb(248, 251, 255);
             --ink-navy: rgb(14, 36, 78);
             --btn-a: .75;
@@ -61,8 +62,10 @@
         body[data-view="week"] .wrap, body[data-view="month"] .wrap { max-width: none; }
         /* the header: one slim bar over the whole width of the page (Doc, 07.11.2026: "Der Header ist viel zu groß ...
            Mach den ruhig über die ganze Breite der Seite"); wide screens one row, the phone two (three in week/month) */
-        :root { --ctl: 38px; }
-        @media (min-width: 900px) { :root { --ctl: 36px; } }
+        /* one height for every control of the calendar - entry field, buttons, selects, inputs, switches, dialog buttons
+           (Doc, 19.11.2026: "Mach mal bitte die Bedienelemente im Kalender gleich hoch"; before 36-38px in the header,
+           44px in settings and editor, 50px in dialogs) */
+        :root { --ctl: 40px; }
         .top {
             position: sticky; top: 0; z-index: 4; background: var(--card); border-bottom: 1px solid var(--line);
             padding: max(8px, env(safe-area-inset-top)) 16px 8px;
@@ -105,6 +108,7 @@
         .c1 { --c: var(--c-red); --on: var(--ink-light); }
         .c2 { --c: var(--c-gold); --on: var(--ink-navy); }
         .c3 { --c: var(--c-green); --on: var(--ink-navy); }
+        .cs { --c: var(--c-pink); --on: var(--ink-navy); }   /* the guest's own entries (calendar_event.shared_by) */
 
         /* ---------- entry: mic, field, gear (like the To-do app) ---------- */
         .row { display: flex; gap: 8px; }
@@ -132,6 +136,9 @@
             position: absolute; top: calc(100% + 6px); right: 16px; z-index: 5; width: min(360px, calc(100% - 32px));
             padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line);
             box-shadow: 0 12px 40px var(--shadow);
+            /* never taller than the window below the header (100% = the header, its containing block): the sharing
+               switches made it long enough to leave the screen on a phone - it scrolls inside instead */
+            max-height: calc(100dvh - 100% - 18px); overflow-y: auto; overscroll-behavior: contain;
         }
         .set-title { margin: 0 0 12px; font: 700 12px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
         .set-label { display: block; margin: 0 0 8px; font: 15px Raleway, sans-serif; color: var(--text); }
@@ -140,7 +147,7 @@
         .set-sep { border: 0; border-top: 1px solid var(--line); margin: 16px 0 14px; }
         .seg { display: flex; gap: 8px; }
         .seg button, button.today-btn {
-            flex: 1 1 0; min-width: 0; height: 44px; border-radius: 10px; cursor: pointer; padding: 0;
+            flex: 1 1 0; min-width: 0; height: var(--ctl); border-radius: 10px; cursor: pointer; padding: 0;
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             background: transparent; color: var(--text); border: 1px solid var(--line);
             font: 700 clamp(11px, 3.2vw, 13px) Orbitron, sans-serif; letter-spacing: .04em;
@@ -151,7 +158,7 @@
         html.svp-light .seg button[aria-checked="true"], html.svp-light .seg button[aria-selected="true"] { color: var(--text); }
         .seg i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(var(--tint), .6); flex: 0 0 auto; }
         button.wide {
-            width: 100%; height: 44px; border-radius: 10px; cursor: pointer; padding: 0 12px;
+            width: 100%; height: var(--ctl); border-radius: 10px; cursor: pointer; padding: 0 12px;
             background: transparent; color: var(--text); border: 1px solid var(--line);
             font: 700 13px Orbitron, sans-serif; letter-spacing: .04em;
         }
@@ -163,6 +170,19 @@
         /* Heute: the view buttons' look (.seg button), as wide as its word */
         button.today-btn { flex: 0 0 auto; height: var(--ctl); padding: 0 14px; }
         @media (max-width: 599px) { button.today-btn { padding: 0 10px; } }
+        /* Heute, Tag, Woche, Monat all equally wide - as wide as the widest word needs, never stretched (Doc, 19.11.2026:
+           "die Tasten Tag, Woche, Heute ... alle gleich breit machen. Und nicht breiter als sie müssen"). WOCHE in
+           Orbitron 700 with its letter spacing is 4.05em, so each gets 4.1em of its own font plus the padding (em: it
+           follows the font size of each width); on the phone (letter spacing .02em: 3.95em) 4em and 3px each side - at
+           360px the period beside them needs every pixel ("16.–22. Nov", "November" must not be cut) */
+        :root { --tb-word: 4.1em; --tb-pad: 14px; }
+        .bar #todayBtn, .row2 .views button { flex: 0 0 auto; width: calc(var(--tb-word) + 2 * var(--tb-pad)); padding: 0; }
+        .row2 .views { flex: 0 0 auto; }
+        @media (max-width: 599px) {
+            :root { --tb-word: 4em; --tb-pad: 3px; }
+            .bar #todayBtn { font-size: 11px; letter-spacing: .02em; min-width: max-content; }
+        }
+        @media (min-width: 900px) { .bar .row2 { flex-basis: 580px; } }   /* 650 before: the views gave up 70px, the period keeps its room */
         /* back, the period, forward */
         .nav { display: flex; align-items: center; gap: 8px; }
         .nav .period {
@@ -401,7 +421,7 @@
         .gate { text-align: center; padding: 30px 16px; }
         .gate p { font: 15px/1.5 Raleway, sans-serif; color: var(--muted); margin: 0 0 18px; }
         .gate button {
-            width: 100%; max-width: 260px; height: 58px; border: 0; border-radius: 12px; cursor: pointer;
+            width: 100%; max-width: 260px; height: var(--ctl); border: 0; border-radius: 10px; cursor: pointer;
             background: var(--lambda); color: var(--bg); font: 700 15px Orbitron, sans-serif; letter-spacing: .04em;
         }
         .dlg-back {
@@ -415,7 +435,7 @@
         .dlg p.msg { margin: 0 0 18px; font: 17px/1.45 Raleway, sans-serif; color: var(--text); white-space: pre-line; }
         .dlg-btns { display: flex; gap: 10px; flex-wrap: wrap; }
         .dlg-btns button, .dlg-btns a {
-            flex: 1 1 0; min-width: 96px; height: 50px; border-radius: 10px; cursor: pointer; padding: 0 10px;
+            flex: 1 1 0; min-width: 96px; height: var(--ctl); border-radius: 10px; cursor: pointer; padding: 0 10px;
             font: 700 13px Orbitron, sans-serif; letter-spacing: .04em;
             background: transparent; color: var(--text); border: 1px solid var(--line);
         }
@@ -436,7 +456,7 @@
         .fld { display: block; margin: 0 0 12px; min-width: 0; }
         .fld > span, .fld-label { display: block; margin: 0 0 6px; font: 700 11px Orbitron, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
         .fld input, .fld select, .fld textarea {
-            width: 100%; height: 44px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
+            width: 100%; height: var(--ctl); background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
             padding: 0 12px; font: 17px Raleway, sans-serif; font-variant-numeric: lining-nums;
         }
         .fld textarea { height: auto; min-height: 66px; padding: 10px 12px; resize: vertical; line-height: 1.4; }
@@ -446,7 +466,7 @@
         .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .ed-title { margin: 0 0 14px; font: 700 14px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase; }
         /* switch for "ganztägig" */
-        .switch { display: flex; align-items: center; gap: 10px; height: 44px; cursor: pointer; font: 16px Raleway, sans-serif; }
+        .switch { display: flex; align-items: center; gap: 10px; height: var(--ctl); cursor: pointer; font: 16px Raleway, sans-serif; }
         .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
         .switch i { position: relative; width: 46px; height: 26px; border-radius: 13px; background: rgba(var(--tint), .3); transition: background .2s; flex: 0 0 auto; }
         .switch i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink-light); transition: transform .2s; }
@@ -456,14 +476,14 @@
         /* reminder chips: several may be on */
         .chips { display: flex; flex-wrap: wrap; gap: 8px; }
         .chips button {
-            height: 40px; padding: 0 12px; border-radius: 10px; cursor: pointer; background: transparent; color: var(--text);
+            height: var(--ctl); padding: 0 12px; border-radius: 10px; cursor: pointer; background: transparent; color: var(--text);
             border: 1px solid var(--line); font: 700 12px Orbitron, sans-serif; letter-spacing: .04em;
         }
         .chips button[aria-pressed="true"] { background: rgba(var(--c-gold), var(--btn-a)); border-color: rgba(var(--c-gold), var(--btn-rim-a)); color: var(--ink-navy); }
         html.svp-light .chips button[aria-pressed="true"] { color: var(--text); }
         .colors { display: flex; gap: 12px; }
         .colors button {
-            width: 44px; height: 44px; border-radius: 50%; cursor: pointer; padding: 0; border: 3px solid transparent;
+            width: var(--ctl); height: var(--ctl); border-radius: 50%; cursor: pointer; padding: 0; border: 3px solid transparent;
             background: rgb(var(--c)) content-box;
         }
         .colors button[aria-checked="true"] { border-color: rgb(var(--c)); padding: 3px; }
@@ -493,9 +513,34 @@
             border-color: rgba(var(--c-green), .55);
         }
         .day.holiday .day-head .pill { --c: var(--c-green); --on: var(--ink-navy); }
-        /* the call switches in the settings */
-        .settings .switch { height: 40px; }
         .ed-note:empty { display: none; }
+        /* sharing with one guest (20261119_calendar_share.sql): the section under the gear and the one-time QR code */
+        .share-btns { display: flex; gap: 8px; }
+        .share-btns button.wide { flex: 1 1 0; min-width: 0; padding: 0 8px; }
+        .share-new { display: flex; gap: 8px; }
+        .share-new button.wide { flex: 0 0 auto; width: auto; }
+        .qr-dlg { max-width: 360px; text-align: center; }
+        .qr { width: min(280px, 100%); aspect-ratio: 1; margin: 0 auto 14px; padding: 12px; border-radius: 12px; background: rgb(255, 255, 255); }
+        .qr svg { display: block; width: 100%; height: 100%; }
+        .qr-dlg .set-text { text-align: left; }
+
+        /* guest mode, S4: the week on one sheet - only in the guest's view, Doc's own printing stays as it was */
+        #printWeek { display: none; }
+        @media print {
+            @page { margin: 12mm; }
+            body.guest { padding: 0; background: rgb(255, 255, 255) !important; color: rgb(0, 0, 0) !important; }
+            html:has(body.guest) { background: rgb(255, 255, 255) !important; }
+            body.guest > :not(#printWeek) { display: none !important; }
+            body.guest #printWeek { display: block; color: rgb(0, 0, 0); font: 11pt/1.35 Raleway, sans-serif; }
+            #printWeek h1 { margin: 0 0 8pt; font: 700 13pt Orbitron, sans-serif; letter-spacing: .04em; }
+            #printWeek section { padding: 5pt 0; border-top: .5pt solid rgb(150, 150, 150); break-inside: avoid; }
+            #printWeek h2 { margin: 0 0 3pt; font: 700 9pt Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+            #printWeek ul { margin: 0; padding: 0; list-style: none; }
+            #printWeek li { margin: 1pt 0; padding: 0 0 0 6pt; border-left: 2.5pt solid rgb(190, 190, 190); }
+            #printWeek li.own { border-left-color: rgb(240, 98, 146); }
+            #printWeek li b { display: inline-block; min-width: 7em; font-variant-numeric: tabular-nums; }
+            #printWeek p { margin: 0; color: rgb(110, 110, 110); }
+        }
 
         [hidden] { display: none !important; }
     </style>
@@ -531,10 +576,42 @@
         </div>
         <div class="settings" id="settings" role="dialog" aria-label="Einstellungen" hidden>
             <p class="set-title">Einstellungen</p>
-            <span class="set-label">Solita ruft an</span>
-            <label class="switch"><input id="callEvents" type="checkbox"><i></i>vor Terminen</label>
-            <label class="switch"><input id="callLessons" type="checkbox"><i></i><span id="callLessonsText">5 Min. vor jeder Stunde</span></label>
-            <p class="set-text" id="callNote">Ausgefallene Stunden ruft sie nicht. Gilt ab der nächsten Minute, auch am Phone.</p>
+            <!-- guest mode only: never the guest's name (the share's label) - the page is "Kalender von Doc" -->
+            <div id="guestSec" hidden>
+                <span class="set-label">Kalender von Doc</span>
+                <p class="set-text" id="guestText"></p>
+                <button class="wide" id="printBtn" type="button">Woche drucken</button>
+            </div>
+            <div id="callSec">
+                <span class="set-label">Solita ruft an</span>
+                <label class="switch"><input id="callEvents" type="checkbox"><i></i>vor Terminen</label>
+                <label class="switch"><input id="callLessons" type="checkbox"><i></i><span id="callLessonsText">5 Min. vor jeder Stunde</span></label>
+                <p class="set-text" id="callNote">Ausgefallene Stunden ruft sie nicht. Gilt ab der nächsten Minute, auch am Phone.</p>
+            </div>
+            <!-- sharing with one guest: only once the database has calendar_share (20261119_calendar_share.sql) -->
+            <div id="shareSec" hidden>
+                <hr class="set-sep">
+                <span class="set-label" id="shareTitle">Teilen</span>
+                <div id="shareNew" hidden>
+                    <p class="set-text">Noch mit niemandem geteilt. Ein Name zum Erkennen – er steht nur in der Datenbank.</p>
+                    <div class="share-new">
+                        <input class="new" id="shareLabel" type="text" maxlength="40" autocomplete="off" enterkeyhint="done" placeholder="Name" aria-label="Mit wem teilen">
+                        <button class="wide" id="shareCreate" type="button">Anlegen</button>
+                    </div>
+                </div>
+                <div id="shareOn" hidden>
+                    <label class="switch"><input type="checkbox" data-share="show_lessons"><i></i>Schule – nur „Schule“</label>
+                    <label class="switch"><input type="checkbox" data-share="show_work"><i></i>IBB-Dienst – nur „IBB“</label>
+                    <label class="switch"><input type="checkbox" data-share="show_events"><i></i>Termine – ohne Notizen</label>
+                    <label class="switch"><input type="checkbox" data-share="show_yearly"><i></i>Geburtstage &amp; Jährliches</label>
+                    <label class="switch"><input type="checkbox" data-share="can_write"><i></i>darf eintragen</label>
+                    <p class="set-text" id="shareState"></p>
+                    <div class="share-btns">
+                        <button class="wide" id="shareQr" type="button">QR-Code</button>
+                        <button class="wide" id="shareLock" type="button">Zugang sperren</button>
+                    </div>
+                </div>
+            </div>
             <hr class="set-sep">
             <span class="set-label" id="themeLabel">Farbschema</span>
             <div class="seg" id="themeSeg" role="radiogroup" aria-labelledby="themeLabel">
@@ -542,11 +619,17 @@
                 <button type="button" role="radio" data-theme="grey" aria-checked="false"><i style="background: rgb(26, 26, 28)"></i>Grau</button>
                 <button type="button" role="radio" data-theme="light" aria-checked="false"><i style="background: rgb(246, 248, 252)"></i>Hell</button>
             </div>
-            <hr class="set-sep">
-            <span class="set-label">Termine aus Google übernehmen</span>
-            <p class="set-text">Bei Google <a href="https://calendar.google.com/calendar/u/0/r/settings/export" target="_blank" rel="noopener">„Exportieren“</a> drücken, dann die heruntergeladene Datei (.zip oder .ics) hier wählen. Doppelte kommen nicht zweimal rein.</p>
-            <button class="wide" id="importBtn" type="button">Datei wählen</button>
-            <input type="file" id="importFile" accept=".ics,.zip,text/calendar,application/zip" hidden>
+            <div id="importSec">
+                <hr class="set-sep">
+                <span class="set-label">Termine aus Google übernehmen</span>
+                <p class="set-text">Bei Google <a href="https://calendar.google.com/calendar/u/0/r/settings/export" target="_blank" rel="noopener">„Exportieren“</a> drücken, dann die heruntergeladene Datei (.zip oder .ics) hier wählen. Doppelte kommen nicht zweimal rein.</p>
+                <button class="wide" id="importBtn" type="button">Datei wählen</button>
+                <input type="file" id="importFile" accept=".ics,.zip,text/calendar,application/zip" hidden>
+            </div>
+            <div id="guestEnd" hidden>
+                <hr class="set-sep">
+                <button class="wide" id="guestForget" type="button">Zugang hier entfernen</button>
+            </div>
         </div>
         <div class="status" id="status" role="status"></div>
     </header>
@@ -555,6 +638,9 @@
         <div class="card gate" id="gate" hidden>
             <p>Bitte einmal anmelden, danach merkt sich das Gerät die Anmeldung.</p>
             <button id="loginBtn" type="button">Anmelden</button>
+        </div>
+        <div class="card gate" id="guestGate" hidden>
+            <p>Dieser Link gilt nicht mehr.<br>Bitte Doc um einen neuen QR-Code.</p>
         </div>
 
         <main id="main" hidden>
@@ -607,8 +693,12 @@
                 <label class="switch"><input id="fGoogle" type="checkbox"><i></i>auch in Google eintragen</label>
                 <input id="fPass" type="password" autocomplete="current-password" placeholder="Solitas Passwort (nur einmal)" aria-label="Solitas Passwort" hidden>
             </div>
-            <div class="fld"><span class="fld-label" id="remLabel">Solita erinnert</span><div class="chips" id="fRemind" role="group" aria-labelledby="remLabel"></div></div>
-            <div class="fld"><span class="fld-label" id="colLabel">Farbe</span>
+            <!-- "privat": never shown to the guest the calendar is shared with (only once the column exists) -->
+            <div class="fld" id="privRow" hidden>
+                <label class="switch"><input id="fPrivate" type="checkbox"><i></i><span id="privText">privat – wird nie geteilt</span></label>
+            </div>
+            <div class="fld" id="remindRow"><span class="fld-label" id="remLabel">Solita erinnert</span><div class="chips" id="fRemind" role="group" aria-labelledby="remLabel"></div></div>
+            <div class="fld" id="colorRow"><span class="fld-label" id="colLabel">Farbe</span>
                 <div class="colors" id="fColor" role="radiogroup" aria-labelledby="colLabel">
                     <button type="button" class="c2" role="radio" data-color="2" aria-label="Gold"></button>
                     <button type="button" class="c1" role="radio" data-color="1" aria-label="Rot"></button>
@@ -632,6 +722,19 @@
         </div>
     </div>
 
+    <!-- the guest's access as a QR code: shown once, the token lives only in it (closing empties the box) -->
+    <div class="dlg-back" id="qrDlg" hidden>
+        <div class="dlg qr-dlg" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+            <p class="ed-title" id="qrTitle">QR-Code</p>
+            <div class="qr" id="qrBox"></div>
+            <p class="set-text">Einmal scannen lassen, persönlich. Danach ist der Code weg; ein neuer sperrt diesen.</p>
+            <div class="dlg-btns"><button type="button" class="yes" id="qrOk">Fertig</button></div>
+        </div>
+    </div>
+
+    <!-- S4: filled right before printing in the guest's view (Woche drucken) -->
+    <div id="printWeek"></div>
+
     <script>
         (() => {
             const K = window.KalenderCore;
@@ -644,6 +747,42 @@
             const LESSON_COLS = 'id,day,starts_at,ends_at,subject,classes,rooms,code,note';
             const VIEW_KEY = 'kalender-view';
             const COLS = 'id,title,starts_at,ends_at,all_day,location,notes,rrule,exdates,remind,color,source_uid';
+            /* sharing with one guest (supabase/migrations/20261119_calendar_share.sql): the two columns are asked for only
+               once a probe has shown they exist - before that SQL a select naming them answers 400 and load() must not fail */
+            const SHARE_EV_COLS = ',private,shared_by';
+            const SHARE_COLS = 'id,label,token_sha256,show_lessons,show_events,show_work,show_yearly,can_write';
+            const SHARE_KEY = 'kalender-share';
+            const SHARE_URL = 'https://doc-kalender.pages.dev/';   // the guest's link: SHARE_URL#k=<token> - never logged
+
+            /* ---------- guest mode (S3): the calendar seen through the link Doc shows as a QR code ----------
+               SHARE_URL#k=<token>: the token moves into this browser's storage at once and leaves the address bar
+               (history.replaceState) - so it is not in the history, a bookmark or a copied address; it is never logged.
+               With a token the page needs no login: it reads through calendar_shared_rows and writes only the guest's own
+               entries (calendar_shared_save / _remove); what Doc's appointments show is decided in the database. The
+               share's label - the guest's name, maybe a pet name - is never shown here: the page is "Kalender von Doc". */
+            const GUEST_TOKEN_KEY = 'kalender-share-token';
+            const GUEST_CACHE_KEY = 'kalender-share-cache';
+            const GUEST_GONE_KEY = 'kalender-share-gone';
+            const guestToken = (() => {
+                const m = /^#k=([A-Za-z0-9_-]{43})$/.exec(location.hash);
+                if (/^#k=/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
+                if (m) {
+                    try {
+                        if (localStorage.getItem(GUEST_TOKEN_KEY) !== m[1]) localStorage.removeItem(GUEST_CACHE_KEY);   // a new link: nothing of an old one
+                        localStorage.setItem(GUEST_TOKEN_KEY, m[1]);
+                        localStorage.removeItem(GUEST_GONE_KEY);
+                    } catch (e) { }
+                    return m[1];
+                }
+                try { return localStorage.getItem(GUEST_TOKEN_KEY) || ''; } catch (e) { return ''; }
+            })();
+            const GUEST = !!guestToken;
+            const GUEST_COLOR = { own: 's', event: 2, work: 1, yearly: 3 };   // the guest's own pink, Doc's gold, IBB red, yearly green
+            const LESSON_WORD = GUEST ? 'Schule' : 'Unterricht';              // the month's quiet mark for the lessons
+            let guestShare = null;     // { show_*, can_write } from calendar_shared_rows - the label is left out on purpose
+            let guestGone = false;     // the link no longer works (locked, or replaced by a newer QR code)
+            const guestCanWrite = () => !!(guestShare && guestShare.can_write);
+            const canLoad = () => (GUEST ? !guestGone : auth.hasSession());
             const AGENDA_DAYS = 60;   // the agenda shows this many days, "Weitere Termine" the next ones
 
             // reminder choices: minutes before the start (all-day: before 00:00 of the day)
@@ -667,19 +806,29 @@
             let items = [];            // rows of calendar_event
             let lessons = [];          // rows of calendar_lesson: the timetable, mirrored from Untis by the watcher on the Mac
             let setting = null;        // Doc's row of calendar_setting: does Solita call before appointments / lessons
-            let busy = 0;              // writes in flight - a reload now could bring back the old state
+            let shareTable = false;    // calendar_share exists (the SQL ran) - only then the gear shows the sharing section
+            let share = null;          // the first row of calendar_share, without the hash: { id, label, show_*, can_write, active }
+            let shareCols = null;      // calendar_event has private / shared_by: null = not probed yet
+            let busy = 0;             // writes in flight - a reload now could bring back the old state
             let view = 'agenda';       // 'agenda' | 'week' | 'month'
             let anchor = K.startOfDay(new Date());   // the day the week or month view shows
             let selDay = K.startOfDay(new Date());   // the chosen day in the month view
             let agendaDays = AGENDA_DAYS;
 
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : [1, 2, 3].includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch
+            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : [1, 2, 3].includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 's' -> cs (the guest's pink)
+            // the guest's name lives only in the database (calendar_share.label); one share for now, so its label names
+            // every shared_by row
+            const guestName = () => (share && share.label) || 'Gast';
             const isOff = occ => !!(occ.ev.lesson && occ.ev.lesson.code === 'cancelled');
             // appointments mirrored from Google / Outlook (tools/kalender/feeds.mjs): read-only here, marked G / O
             const FEED_NAMES = { google: 'Google', outlook: 'Outlook' };
             const feedOf = ev => { const m = /^(google|outlook):/.exec((ev && ev.source_uid) || ''); return m ? m[1] : null; };
             const srcMark = ev => {
+                if (ev && ev.shared_by) {   // entered by the guest: the first letter of the label, like G / O
+                    const n = guestName();
+                    return `<span class="src" title="von ${esc(n)}" aria-label=", von ${esc(n)}">${esc(n.trim().charAt(0).toUpperCase() || 'G')}</span>`;
+                }
                 const f = feedOf(ev);
                 return f ? `<span class="src" title="aus ${FEED_NAMES[f]}" aria-label=", aus ${FEED_NAMES[f]}">${f === 'google' ? 'G' : 'O'}</span>` : '';
             };
@@ -691,10 +840,15 @@
                 el.className = 'status' + (cls ? ' ' + cls : '');
             }
             function cache() {
+                if (GUEST) {   // the guest's copy for offline use - never Doc's keys, and nothing once the link is gone
+                    if (!guestGone) try { localStorage.setItem(GUEST_CACHE_KEY, JSON.stringify({ items, lessons, share: guestShare })); } catch (e) { }
+                    return;
+                }
                 try {
                     localStorage.setItem(CACHE_KEY, JSON.stringify(items));
                     localStorage.setItem(LESSON_KEY, JSON.stringify(lessons));
                     localStorage.setItem(SETTING_KEY, JSON.stringify(setting));
+                    localStorage.setItem(SHARE_KEY, JSON.stringify({ table: shareTable, row: share }));
                 } catch (e) { }
             }
             function saveDraft() { try { localStorage.setItem(DRAFT_KEY, $('text').value); } catch (e) { } }
@@ -709,16 +863,89 @@
                 return res.json();
             }
 
+            /* the appointments - with private / shared_by only where the probe found them; a 400 for them (never expected
+               after a good probe) falls back to the plain columns, so the list always loads */
+            async function loadEvents() {
+                const q = cols => send(`calendar_event?select=${cols}&order=starts_at.asc&limit=5000`);
+                if (shareCols === null) {
+                    shareCols = await send('calendar_event?select=private,shared_by&limit=1')
+                        .then(() => true, e => (e.message === 'HTTP 400' ? false : null));   // no answer: ask again next time
+                }
+                if (shareCols) {
+                    try { return await q(COLS + SHARE_EV_COLS); } catch (e) { if (e.message !== 'HTTP 400') throw e; shareCols = false; }
+                }
+                return q(COLS);
+            }
+            const shareFrom = r => ({ id: r.id, label: r.label, show_lessons: r.show_lessons, show_events: r.show_events,
+                show_work: r.show_work, show_yearly: r.show_yearly, can_write: r.can_write, active: !!r.token_sha256 });
+
+            /* ---------- guest mode: the three functions of 20261119_calendar_share.sql, with the publishable key ---------- */
+            async function guestRpc(name, body) {
+                let res;
+                try {
+                    res = await fetch(auth.DB_URL + '/rest/v1/rpc/' + name, {
+                        method: 'POST', body: JSON.stringify(Object.assign({ p_token: guestToken }, body)),
+                        headers: { apikey: auth.DB_KEY, Authorization: 'Bearer ' + auth.DB_KEY, 'Content-Type': 'application/json' }
+                    });
+                } catch (e) { throw new Error('keine Verbindung'); }
+                if (res.ok) return res.json();
+                const d = await res.json().catch(() => ({}));
+                if (d.code === '42501' && d.message === 'link no longer valid') {
+                    guestLost();
+                    const e = new Error('Link gilt nicht mehr');
+                    e.gone = true;
+                    throw e;
+                }
+                throw new Error({ 'read only': 'Eintragen ist gerade aus', 'too many new entries today': 'heute schon zu viele neue Termine',
+                    'not an entry of this share': 'das ist kein Termin von dir' }[d.message] || 'HTTP ' + res.status);
+            }
+            // a row of calendar_shared_rows / _save as the page's appointment: no reminders, the colour comes from its kind
+            const guestRow = e => ({ id: e.id, kind: e.kind, title: e.title, starts_at: e.starts_at, ends_at: e.ends_at, all_day: !!e.all_day,
+                location: e.location || null, notes: e.notes || null, rrule: e.rrule || null, exdates: e.exdates || [], remind: [], color: 2, source_uid: null });
+            // one of the guest's entries as calendar_shared_save takes it (no id = a new one)
+            const guestEvent = (ev, more) => Object.assign({ id: ev.id, title: ev.title, starts_at: ev.starts_at, ends_at: ev.ends_at || null,
+                all_day: !!ev.all_day, location: ev.location || null, notes: ev.notes || null, rrule: ev.rrule || null, exdates: ev.exdates || [] }, more);
+            async function guestLoad() {
+                const now = new Date();
+                const d = await guestRpc('calendar_shared_rows', { p_from: K.addDays(now, -42).toISOString(), p_to: K.addDays(now, 400).toISOString() });
+                const sh = d.share || {};
+                guestShare = { show_lessons: !!sh.show_lessons, show_events: !!sh.show_events, show_work: !!sh.show_work,
+                    show_yearly: !!sh.show_yearly, can_write: !!sh.can_write };
+                items = (d.events || []).map(guestRow);
+                // the lessons come merged and anonymised ("Schule" blocks): rows like calendar_lesson's without class, room or note
+                lessons = (d.lessons || []).map((l, i) => ({ id: 'g' + i, day: K.ymd(new Date(l.starts_at)), starts_at: l.starts_at, ends_at: l.ends_at,
+                    subject: 'Schule', classes: [], rooms: [], code: null, note: null }));
+                cache();
+            }
+            /* the link no longer works (Doc locked it or showed a newer QR code): nothing of his calendar stays on this device */
+            function guestLost() {
+                guestGone = true;
+                items = []; lessons = []; guestShare = null;
+                try { localStorage.removeItem(GUEST_CACHE_KEY); localStorage.setItem(GUEST_GONE_KEY, '1'); } catch (e) { }
+                closeEditor();
+                $('dlg').hidden = $('qrDlg').hidden = $('settings').hidden = true;
+                $('entry').hidden = $('main').hidden = true;
+                $('guestGate').hidden = false;
+            }
+
             async function load() {
-                // the timetable and the switches are part 2 (20261107_calendar_lessons.sql): missing, they just stay away
-                const [ev, ls, se] = await Promise.all([
-                    send(`calendar_event?select=${COLS}&order=starts_at.asc&limit=5000`),
+                if (GUEST) return guestLoad();
+                // the timetable and the switches are part 2 (20261107_calendar_lessons.sql), sharing part 5
+                // (20261119_calendar_share.sql): missing, they just stay away
+                const [ev, ls, se, sh] = await Promise.all([
+                    loadEvents(),
                     send(`calendar_lesson?select=${LESSON_COLS}&order=starts_at.asc&limit=5000`).catch(() => null),
-                    send('calendar_setting?select=call_events,call_lessons,lesson_lead').catch(() => null)
+                    send('calendar_setting?select=call_events,call_lessons,lesson_lead').catch(() => null),
+                    send(`calendar_share?select=${SHARE_COLS}&order=id.asc&limit=1`).catch(() => null)
                 ]);
                 items = ev;
                 if (ls) lessons = ls;
                 if (se) setting = se[0] || null;
+                if (sh) {
+                    shareTable = true;
+                    share = sh[0] ? shareFrom(sh[0]) : null;
+                    if (shareCols === false) shareCols = null;   // the SQL ran while the page was open: probe again next time
+                }
                 cache();
             }
 
@@ -1010,11 +1237,11 @@
                     const school = lessonOccs(d, K.addDays(d, 1)).some(o => !isOff(o));   // one quiet mark for the lessons
                     const cls = (d.getMonth() !== first.getMonth() ? ' out' : '') + (K.sameDay(d, now) ? ' today' : '') + (K.sameDay(d, selDay) ? ' sel' : '') + (isHoliday(d) ? ' holiday' : '');
                     const nApp = here.filter(o => !o.ev.holiday).length;   // the holiday is named, not counted as an appointment
-                    html += `<button type="button" class="mo-cell${cls}" data-day="${K.ymd(d)}" aria-label="${esc(longDay(d))}${isHoliday(d) ? ', ' + esc(K.holidayOf(d)) : ''}${nApp ? ', ' + nApp + ' Termin' + (nApp > 1 ? 'e' : '') : ''}${school ? ', Unterricht' : ''}">` +
+                    html += `<button type="button" class="mo-cell${cls}" data-day="${K.ymd(d)}" aria-label="${esc(longDay(d))}${isHoliday(d) ? ', ' + esc(K.holidayOf(d)) : ''}${nApp ? ', ' + nApp + ' Termin' + (nApp > 1 ? 'e' : '') : ''}${school ? ', ' + LESSON_WORD : ''}">` +
                         `<span class="n">${d.getDate()}</span><span class="evs">` +
                         here.slice(0, 3).map(o => `<span class="chip c${colorOf(o.ev)}">${esc((o.ev.all_day ? '' : K.hhmm(o.start) + ' ') + o.ev.title)}</span>`).join('') +
                         (here.length > 3 ? `<span class="plus">+${here.length - 3}</span>` : '') +
-                        (school ? '<span class="chip cl">Unterricht</span>' : '') + '</span></button>';
+                        (school ? `<span class="chip cl">${LESSON_WORD}</span>` : '') + '</span></button>';
                 }
                 $('mo').innerHTML = html + '</div>';
                 // the chosen day's appointments below the month
@@ -1034,6 +1261,15 @@
                 else if (view === 'week') renderWeek(now);
                 else renderMonth(now);
                 renderSetting();
+                renderShare();
+                renderGuest();
+            }
+            /* guest mode: the entry field only while the guest may write; the words in the settings */
+            function renderGuest() {
+                if (!GUEST) return;
+                $('text').hidden = $('micBtn').hidden = !guestCanWrite();
+                $('guestText').textContent = 'Du siehst, wann Doc beschäftigt ist. ' + (guestCanWrite()
+                    ? 'Deine Termine sind pink – antippen zum Ändern, oben eintippen für einen neuen.' : 'Eintragen ist gerade aus.');
             }
 
             /* ---------- the call switches (calendar_setting; the watcher on the Mac reads them every minute) ---------- */
@@ -1067,13 +1303,158 @@
                 }
             }
 
+            /* ---------- sharing with one guest (calendar_share; the guest's page reads it through calendar_shared_rows) ----------
+               What the guest sees is decided in the database: lessons only as "Schule", IBB only as "IBB", appointments
+               without notes, birthdays only when switched on, "privat" never. The token exists only in the QR code: here
+               just its SHA-256 is written, a new code replaces the old one, "Zugang sperren" removes it. */
+            function renderShare() {
+                $('shareSec').hidden = !shareTable;
+                $('shareNew').hidden = !shareTable || !!share;
+                $('shareOn').hidden = !shareTable || !share;
+                $('shareTitle').textContent = share ? 'Geteilt mit ' + share.label : 'Teilen';
+                if (!share) return;
+                for (const b of $('shareOn').querySelectorAll('[data-share]')) b.checked = !!share[b.dataset.share];
+                $('shareState').textContent = share.active
+                    ? 'Zugang offen. Privat markierte Termine bleiben verborgen; ein neuer QR-Code sperrt den alten.'
+                    : 'Zugang gesperrt – ein neuer QR-Code öffnet ihn wieder.';
+                $('shareLock').disabled = !share.active;
+            }
+            async function shareWrite(patch, okMsg) {
+                const prev = share;
+                share = shareFrom(Object.assign({}, prev, { token_sha256: prev.active || null }, patch));   // shown at once
+                renderShare();
+                busy++;
+                try {
+                    const rows = await send(`calendar_share?id=eq.${prev.id}`, 'PATCH', patch);
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    share = shareFrom(rows[0]);
+                    status(okMsg);
+                    return true;
+                } catch (e) {
+                    share = prev;
+                    status('Nicht gespeichert (' + e.message + ') – bitte nochmal.', 'err');
+                    return false;
+                } finally {
+                    busy--;
+                    cache();
+                    renderShare();
+                }
+            }
+            const SHARE_SAID = {
+                show_lessons: ['Schule', 'sichtbar', 'verborgen'], show_work: ['IBB-Dienst', 'sichtbar', 'verborgen'],
+                show_events: ['Termine', 'sichtbar', 'verborgen'], show_yearly: ['Geburtstage & Jährliches', 'sichtbar', 'verborgen'],
+                can_write: ['Eintragen', 'erlaubt', 'aus']
+            };
+            function toggleShare(field, on) {
+                if (!share || !SHARE_SAID[field]) return;
+                const [what, yes, no] = SHARE_SAID[field];
+                shareWrite({ [field]: on }, what + ' für ' + share.label + ': ' + (on ? yes : no) + '.');
+            }
+            async function createShare() {
+                const label = $('shareLabel').value.replace(/\s+/g, ' ').trim();
+                if (!label) { status('Bitte einen Namen eintragen.', 'err'); $('shareLabel').focus(); return; }
+                $('shareCreate').disabled = true;
+                busy++;
+                try {
+                    const rows = await send('calendar_share', 'POST', [{ label }]);
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    share = shareFrom(rows[0]);
+                    $('shareLabel').value = '';
+                    status('Angelegt. Mit „QR-Code“ bekommt ' + share.label + ' den Zugang.');
+                } catch (e) {
+                    status('Nicht angelegt (' + e.message + ') – bitte nochmal.', 'err');
+                } finally {
+                    busy--;
+                    $('shareCreate').disabled = false;
+                    cache();
+                    renderShare();
+                }
+            }
+            // the QR library (svp/qrcode.min.js, as js/buzzer.js) comes along only when a code is made
+            let qrLib = null;
+            const loadQr = () => qrLib || (qrLib = typeof window.qrcode === 'function' ? Promise.resolve() : new Promise((ok, fail) => {
+                const s = document.createElement('script');
+                s.src = '../svp/qrcode.min.js';
+                s.onload = () => (typeof window.qrcode === 'function' ? ok() : fail(new Error('QR-Baustein fehlt')));
+                s.onerror = () => { qrLib = null; fail(new Error('QR-Baustein fehlt')); };
+                document.head.appendChild(s);
+            }));
+            const b64url = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            async function sha256Hex(text) {
+                const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+                return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+            async function shareCode() {
+                if (!share) return;
+                if (share.active) {
+                    const v = await ask('Neuer QR-Code für ' + share.label + '?\nDer bisherige Link gilt dann nicht mehr.',
+                        [{ label: 'Abbrechen', value: null }, { label: 'Neuer Code', value: 'yes', cls: 'yes' }]);
+                    if (!v) return;
+                }
+                if (!window.crypto || !crypto.subtle) { status('Ein QR-Code geht nur über https oder localhost.', 'err'); return; }
+                $('shareQr').disabled = true;
+                busy++;
+                try {
+                    await loadQr();   // first the library: if it is missing, the old code keeps working
+                    const token = b64url(crypto.getRandomValues(new Uint8Array(32)));
+                    const rows = await send(`calendar_share?id=eq.${share.id}`, 'PATCH', { token_sha256: await sha256Hex(token) });
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    share = shareFrom(rows[0]);
+                    cache();
+                    renderShare();
+                    showQr(SHARE_URL + '#k=' + token);
+                } catch (e) {
+                    status('Kein neuer QR-Code (' + e.message + ') – bitte nochmal.', 'err');
+                } finally {
+                    busy--;
+                    $('shareQr').disabled = false;
+                }
+            }
+            function showQr(link) {
+                showSettings(false);
+                const q = window.qrcode(0, 'M');
+                q.addData(link);
+                q.make();
+                $('qrBox').innerHTML = q.createSvgTag({ scalable: true, margin: 0 });
+                $('qrTitle').textContent = 'Zugang für ' + share.label;
+                $('qrDlg').hidden = false;
+                $('qrOk').focus();
+            }
+            function closeQr() {
+                $('qrDlg').hidden = true;
+                $('qrBox').innerHTML = '';   // the token goes with it
+            }
+            async function lockShare() {
+                if (!share || !share.active) return;
+                const v = await ask('Zugang für ' + share.label + ' sperren?\nDer Link auf dem Phone geht dann nicht mehr; ein neuer QR-Code öffnet ihn wieder.',
+                    [{ label: 'Abbrechen', value: null }, { label: 'Sperren', value: 'yes', cls: 'danger' }]);
+                if (v) shareWrite({ token_sha256: null }, 'Zugang für ' + share.label + ' gesperrt.');
+            }
+
             /* a tapped occurrence: an appointment opens the editor; a lesson or a mirrored Google / Outlook appointment
                only says what it is - Untis, Google or Outlook owns it, and the next mirror would undo a change here */
+            /* guest mode: the guest's own entries open the editor (while writing is on); Doc's appointments and the "Schule"
+               blocks only say what and when - the database already left out what is not to be seen */
+            function guestOcc(occ) {
+                const ev = occ.ev;
+                if (ev.kind === 'own' && guestCanWrite()) { openEditor({ occ }); return; }
+                const last = K.addDays(occ.end, -1);
+                const when = !ev.all_day ? longDay(occ.start) + ', ' + K.hhmm(occ.start) + '–' + K.hhmm(occ.end)
+                    : K.sameDay(occ.start, last) ? longDay(occ.start) + ', ganztägig' : longDay(occ.start) + ' bis ' + longDay(last);
+                const lines = [ev.lesson ? 'Schule' : ev.title, when];
+                if (ev.location) lines.push(ev.location);
+                if (ev.kind === 'own' && ev.notes) lines.push('', ev.notes);
+                lines.push('', ev.lesson ? 'Doc ist in der Schule.' : ev.kind === 'own' ? 'Dein Termin – Eintragen ist gerade aus.'
+                    : ev.kind === 'work' ? 'Dienstlich (IBB).' : 'Aus Docs Kalender.');
+                ask(lines.join('\n'), [{ label: 'OK', value: null, cls: 'yes' }]);
+            }
+
             function openOcc(occ) {
                 if (occ.ev.holiday) {
                     ask([occ.ev.title, longDay(occ.start), '', 'Gesetzlicher Feiertag in Sachsen.'].join('\n'), [{ label: 'OK', value: null, cls: 'yes' }]);
                     return;
                 }
+                if (GUEST) { guestOcc(occ); return; }
                 const feed = feedOf(occ.ev);
                 if (feed) {
                     const ev = occ.ev, last = K.addDays(occ.end, -1);
@@ -1230,14 +1611,22 @@
 
             /* open for a new appointment ({ draft: parseQuick result } or { day }) or for an existing one ({ occ }) */
             function openEditor(o) {
+                if (GUEST && !guestCanWrite()) { status('Eintragen ist gerade aus.', 'err'); return; }
                 $('settings').hidden = true;
                 const occ = o.occ || null;
                 const ev = occ ? occ.ev : null;
-                edState = { ev, occ, remind: new Set(), color: ev ? colorOf(ev) : 2, extra: { allDay: !!(ev && ev.all_day), mins: ev ? K.remindOf(ev) : [] },
-                    googleOk: !ev || !feedOf(ev) };
+                const guest = !!(ev && ev.shared_by);   // entered by the guest: Doc may change it, it stays theirs (pink)
+                edState = { ev, occ, remind: new Set(), color: ev && [1, 2, 3].includes(ev.color) ? ev.color : 2, extra: { allDay: !!(ev && ev.all_day), mins: ev ? K.remindOf(ev) : [] },
+                    googleOk: !GUEST && (!ev || (!feedOf(ev) && !guest)) };
                 $('fGoogle').checked = false;
                 $('fPass').value = '';
-                $('edTitle').textContent = ev ? 'Termin' : 'Neuer Termin';
+                // "privat" only where the column exists, and not on the guest's own entries; no colour choice for those
+                $('privRow').hidden = !shareCols || guest;
+                $('fPrivate').checked = !!(ev && ev.private);
+                $('privText').textContent = share ? 'privat – ' + share.label + ' sieht ihn nicht' : 'privat – wird nie geteilt';
+                $('colorRow').hidden = guest || GUEST;
+                $('remindRow').hidden = GUEST;   // no Solita for the guest's entries (Doc, 19.11.2026)
+                $('edTitle').textContent = ev ? (GUEST ? 'Dein Termin' : guest ? 'Termin von ' + guestName() : 'Termin') : 'Neuer Termin';
                 $('edDel').hidden = !ev;
                 let start, end, allDay;
                 if (ev) {
@@ -1281,7 +1670,8 @@
                     sel.add(opt);
                 }
                 sel.value = rule;
-                $('edNote').textContent = ev && ev.rrule ? 'Wiederholt sich – Änderungen gelten für alle Termine der Reihe.' : '';
+                $('edNote').textContent = [guest ? 'Eingetragen von ' + guestName() + '.' : '',
+                    ev && ev.rrule ? 'Wiederholt sich – Änderungen gelten für alle Termine der Reihe.' : ''].filter(Boolean).join(' ');
                 syncAllDay();
                 syncGoogle();
                 renderRemind();
@@ -1311,14 +1701,14 @@
                 }
                 const choices = remindChoices(allDay);
                 const rmin = [...edState.remind].filter(m => choices.some(([x]) => x === m)).sort((a, b) => b - a);
-                return {
-                    row: {
-                        title, all_day: allDay, starts_at: s.toISOString(),
-                        ends_at: allDay ? (Math.round((e - s) / K.DAY) > 1 ? e.toISOString() : null) : e.toISOString(),
-                        location: $('fLoc').value.trim() || null, notes: $('fNotes').value.trim() || null,
-                        rrule: $('fRepeat').value || null, remind: rmin, color: edState.color
-                    }, s, e
+                const row = {
+                    title, all_day: allDay, starts_at: s.toISOString(),
+                    ends_at: allDay ? (Math.round((e - s) / K.DAY) > 1 ? e.toISOString() : null) : e.toISOString(),
+                    location: $('fLoc').value.trim() || null, notes: $('fNotes').value.trim() || null,
+                    rrule: $('fRepeat').value || null, remind: rmin, color: edState.color
                 };
+                if (shareCols && !$('privRow').hidden) row.private = $('fPrivate').checked;   // only once the column exists
+                return { row, s, e };
             }
 
             async function save() {
@@ -1346,6 +1736,7 @@
                     row.starts_at = first.toISOString();
                     row.ends_at = row.ends_at ? (row.all_day ? K.addDays(first, Math.round((f.e - f.s) / K.DAY)) : new Date(+first + (f.e - f.s))).toISOString() : null;
                 }
+                if (GUEST) { await guestSave(st, row); return; }
                 if (st.ev) {
                     closeEditor();
                     const ev = byId(st.ev.id) || st.ev, prev = Object.assign({}, ev);   // the list may have been reloaded meanwhile
@@ -1377,6 +1768,32 @@
                 }
             }
 
+            /* guest mode: one of the guest's entries through calendar_shared_save - the editor stays open until the server
+               has it, so nothing typed is lost */
+            async function guestSave(st, row) {
+                const old = st.ev ? (byId(st.ev.id) || st.ev) : null;
+                $('edSave').disabled = true;
+                busy++;
+                try {
+                    const saved = guestRow(await guestRpc('calendar_shared_save', { p_event: guestEvent(Object.assign({}, old || {}, row)) }));
+                    items = items.filter(x => x.id !== saved.id).concat(saved);
+                    closeEditor();
+                    if (!old) {
+                        $('text').value = '';
+                        saveDraft();
+                        if (view !== 'agenda') { anchor = K.startOfDay(new Date(saved.starts_at)); selDay = anchor; }
+                    }
+                    status('');
+                    render();
+                    cache();
+                } catch (e) {
+                    if (!e.gone) $('edNote').textContent = 'Nicht gespeichert (' + e.message + ') – bitte nochmal.';
+                } finally {
+                    busy--;
+                    $('edSave').disabled = false;
+                }
+            }
+
             async function removeIt() {
                 const st = edState;
                 if (!st || !st.ev) return;
@@ -1390,7 +1807,8 @@
                         const prev = (ev.exdates || []).slice();
                         const next = prev.concat(st.occ.start.toISOString());
                         await write(() => { ev.exdates = next; }, () => { ev.exdates = prev; },
-                            () => send(`calendar_event?id=eq.${ev.id}`, 'PATCH', { exdates: next }));
+                            GUEST ? () => guestRpc('calendar_shared_save', { p_event: guestEvent(ev, { exdates: next }) }).then(r => [r])
+                                : () => send(`calendar_event?id=eq.${ev.id}`, 'PATCH', { exdates: next }));
                         return;
                     }
                 } else {
@@ -1399,7 +1817,8 @@
                     closeEditor();
                 }
                 await write(() => { items = items.filter(x => x.id !== ev.id); }, () => { items.push(ev); },
-                    () => send(`calendar_event?id=eq.${ev.id}`, 'DELETE'));
+                    GUEST ? () => guestRpc('calendar_shared_remove', { p_id: ev.id }).then(ok => (ok ? [ok] : []))
+                        : () => send(`calendar_event?id=eq.${ev.id}`, 'DELETE'));
             }
 
             /* ---------- quick entry and dictation ---------- */
@@ -1507,20 +1926,61 @@
 
             function showApp() {
                 $('gate').hidden = true;
+                if (GUEST) {
+                    try { guestGone = localStorage.getItem(GUEST_GONE_KEY) === '1'; } catch (e) { }
+                    if (guestGone) { guestLost(); return; }
+                    try { const c = JSON.parse(localStorage.getItem(GUEST_CACHE_KEY)); if (c) { items = c.items || []; lessons = c.lessons || []; guestShare = c.share || null; } } catch (e) { }
+                }
                 $('entry').hidden = false;
                 $('main').hidden = false;
-                try { items = JSON.parse(localStorage.getItem(CACHE_KEY)) || []; } catch (e) { items = []; }
-                try { lessons = JSON.parse(localStorage.getItem(LESSON_KEY)) || []; } catch (e) { lessons = []; }
-                try { setting = JSON.parse(localStorage.getItem(SETTING_KEY)) || null; } catch (e) { setting = null; }
-                try { svpMap = JSON.parse(localStorage.getItem(SVP_MAP_KEY)) || null; } catch (e) { svpMap = null; }
-                loadSvpMap();   // once per visit - the map changes with the school year, not by the minute
+                if (!GUEST) {
+                    try { items = JSON.parse(localStorage.getItem(CACHE_KEY)) || []; } catch (e) { items = []; }
+                    try { lessons = JSON.parse(localStorage.getItem(LESSON_KEY)) || []; } catch (e) { lessons = []; }
+                    try { setting = JSON.parse(localStorage.getItem(SETTING_KEY)) || null; } catch (e) { setting = null; }
+                    try { const c = JSON.parse(localStorage.getItem(SHARE_KEY)); if (c) { shareTable = !!c.table; share = c.row || null; } } catch (e) { }
+                    try { svpMap = JSON.parse(localStorage.getItem(SVP_MAP_KEY)) || null; } catch (e) { svpMap = null; }
+                    loadSvpMap();   // once per visit - the map changes with the school year, not by the minute
+                }
                 try { $('text').value = localStorage.getItem(DRAFT_KEY) || ''; } catch (e) { }
                 try { view = localStorage.getItem(VIEW_KEY) || 'agenda'; } catch (e) { }
                 setView(view);
                 refresh();
             }
 
+            /* S4: the week on one sheet for the guest - Monday to Sunday as a list (the week shown in Woche, else this one) */
+            function fillPrintWeek() {
+                const mon = mondayOf(view === 'week' ? anchor : new Date());
+                const days = [...Array(7)].map((_, i) => K.addDays(mon, i));
+                const sun = days[6];
+                const occs = occsIn(mon, K.addDays(mon, 7)).filter(o => !o.ev.holiday && !isOff(o));
+                let html = `<h1>Kalender von Doc · KW ${K.isoWeek(mon)} · ${mon.getDate()}. ${K.MONTH_LONG[mon.getMonth()]} – ${sun.getDate()}. ${K.MONTH_LONG[sun.getMonth()]} ${sun.getFullYear()}</h1>`;
+                for (const d of days) {
+                    const here = occs.filter(o => o.start < K.addDays(d, 1) && o.end > d);
+                    const hol = K.holidayOf(d);
+                    html += `<section><h2>${esc(longDay(d))}${hol ? ' · ' + esc(hol) : ''}</h2>` + (here.length
+                        ? '<ul>' + here.map(o => `<li${o.ev.kind === 'own' ? ' class="own"' : ''}><b>${o.ev.all_day ? 'ganztägig' : K.hhmm(o.start) + '–' + K.hhmm(o.end)}</b>` +
+                            `${esc(o.ev.title)}${o.ev.location ? ' · ' + esc(o.ev.location) : ''}</li>`).join('') + '</ul>'
+                        : '<p>frei</p>') + '</section>';
+                }
+                $('printWeek').innerHTML = html;
+            }
+            async function forgetGuest() {
+                const v = await ask('Den Zugang zu Docs Kalender von diesem Gerät entfernen?\nZurück geht es nur mit einem neuen QR-Code von Doc.',
+                    [{ label: 'Abbrechen', value: null }, { label: 'Entfernen', value: 'yes', cls: 'danger' }]);
+                if (!v) return;
+                try { [GUEST_TOKEN_KEY, GUEST_CACHE_KEY, GUEST_GONE_KEY].forEach(k => localStorage.removeItem(k)); } catch (e) { }
+                location.reload();
+            }
+
             function init() {
+                if (GUEST) {   // no Solita, no Google import, no sharing of its own - print and leave instead
+                    document.body.classList.add('guest');
+                    $('callSec').hidden = $('importSec').hidden = true;
+                    $('guestSec').hidden = $('guestEnd').hidden = false;
+                    $('printBtn').onclick = () => { showSettings(false); window.print(); };
+                    $('guestForget').onclick = forgetGuest;
+                    window.addEventListener('beforeprint', fillPrintWeek);   // the button and Cmd-P alike
+                }
                 try { applyTheme(localStorage.getItem('svp-theme')); } catch (e) { applyTheme('dark'); }
                 $('themeSeg').onclick = e => { const b = e.target.closest('button'); if (b) applyTheme(b.dataset.theme); };
                 $('gearBtn').onclick = () => showSettings($('settings').hidden);
@@ -1530,6 +1990,13 @@
                 $('importBtn').onclick = () => $('importFile').click();
                 $('callEvents').onchange = e => toggleSetting('call_events', e.target.checked);
                 $('callLessons').onchange = e => toggleSetting('call_lessons', e.target.checked);
+                $('shareOn').addEventListener('change', e => { const b = e.target.closest('[data-share]'); if (b) toggleShare(b.dataset.share, b.checked); });
+                $('shareCreate').onclick = createShare;
+                $('shareLabel').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); createShare(); } });
+                $('shareQr').onclick = shareCode;
+                $('shareLock').onclick = lockShare;
+                $('qrOk').onclick = closeQr;
+                $('qrDlg').addEventListener('pointerdown', e => { if (e.target === $('qrDlg')) closeQr(); });
                 $('importFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; importFile(f); };
 
                 $('text').addEventListener('input', saveDraft);
@@ -1612,7 +2079,8 @@
 
                 document.addEventListener('keydown', e => {
                     if (e.key !== 'Escape') return;
-                    if (!$('ed').hidden) closeEditor();
+                    if (!$('qrDlg').hidden) closeQr();
+                    else if (!$('ed').hidden) closeEditor();
                     else if (!$('settings').hidden) showSettings(false);
                 });
                 // the arrow keys page the week and the month (Doc, 07.11.2026: "die Pfeiltasten blättern bitte") - not while
@@ -1620,7 +2088,7 @@
                 document.addEventListener('keydown', e => {
                     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
                     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.defaultPrevented) return;
-                    if (view === 'agenda' || $('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('settings').hidden) return;
+                    if (view === 'agenda' || $('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('settings').hidden || !$('qrDlg').hidden) return;
                     const t = e.target;
                     if (t && (t.isContentEditable || /^(TEXTAREA|SELECT)$/.test(t.tagName) || (t.tagName === 'INPUT' && !(t.id === 'text' && !t.value)))) return;
                     e.preventDefault();
@@ -1631,7 +2099,7 @@
                 document.addEventListener('keydown', e => {
                     const v = { t: 'agenda', w: 'week', m: 'month' }[(e.key || '').toLowerCase()];
                     if (!v || e.altKey || e.ctrlKey || e.metaKey || e.repeat || e.defaultPrevented) return;
-                    if ($('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('settings').hidden) return;
+                    if ($('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('settings').hidden || !$('qrDlg').hidden) return;
                     const t = e.target;
                     if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
                     e.preventDefault();
@@ -1650,20 +2118,20 @@
                 if (document.fonts) document.fonts.ready.then(() => { if (view === 'week' && !$('main').hidden) render(); });
                 // back in the foreground (phone) or focused again (Mac): fetch what the other device changed
                 document.addEventListener('visibilitychange', () => {
-                    if (!document.hidden && auth.hasSession() && !$('main').hidden && $('ed').hidden && !busy) refresh();
+                    if (!document.hidden && canLoad() && !$('main').hidden && $('ed').hidden && !busy) refresh();
                 });
                 // the countdown and the now line move on every 30 s; every minute a visible page also fetches what changed
                 // elsewhere (the phone, Solita, the timetable mirror) - quietly, a failure keeps the last list
                 let ticks = 0;
                 setInterval(() => {
                     if ($('main').hidden || !$('ed').hidden || !$('dlg').hidden) return;
-                    if (++ticks % 2 === 0 && !document.hidden && !busy && auth.hasSession()) {
+                    if (++ticks % 2 === 0 && !document.hidden && !busy && canLoad()) {
                         load().then(() => { if (!busy && $('ed').hidden) render(); }, () => render());
                     } else render();
                 }, 30000);
                 $('loginBtn').onclick = () => auth.loginDialog(showApp, 'Anmelden für deinen Kalender');
 
-                if (auth.hasSession()) showApp(); else $('gate').hidden = false;
+                if (GUEST || auth.hasSession()) showApp(); else $('gate').hidden = false;
             }
 
             init();
