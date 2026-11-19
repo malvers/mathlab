@@ -87,27 +87,37 @@
            on wide screens directly left of the views, on the phone at the end of the first row: the entry field gives up the room */
         .bar #todayBtn { order: 3; }
         .bar #gearBtn { order: 4; }
-        /* views and back/period/forward share one line: on the phone the second row, on wide screens inside the one row */
-        .bar .row2 { order: 5; flex: 1 1 100%; display: flex; align-items: center; gap: 8px; min-width: 0; }
+        /* the views and back/period/forward: on the phone the views are the second row and the period, boxed between its
+           arrows, a row of its own in the middle under them (Doc, 19.11.2026: "hinter die Eingabezeile, dass das schön oben
+           in der Mitte steht und nicht so weit rechts"); wide screens below at 900px and 1260px */
+        .bar .row2 { order: 5; flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
         .row2 .views { flex: 1 1 0; min-width: 0; }
-        .row2 .nav { flex: 0 1 auto; min-width: 0; }
+        .row2 .nav { flex: 1 1 100%; justify-content: center; min-width: 0; }
         .row2 .nav .period { cursor: pointer; min-width: 84px; }
         @media (max-width: 599px) {
-            /* the view names never squeezed below their text: the period takes its short form instead */
+            /* the view names never squeezed below their text (the period has a row of its own, arrows and box at full size) */
             .row2 .views button { font-size: 11px; letter-spacing: .02em; gap: 0; padding: 0 4px; min-width: max-content; }
             .row2 .views { gap: 4px; min-width: max-content; }
-            .row2 .nav { gap: 4px; }
-            .row2 .nav button.icon { flex-basis: 32px; width: 32px; }
-            .row2 .nav .period { font-size: 12px; }
-            .row2 .nav .period small { font-size: 10px; }
         }
         @media (min-width: 900px) {
-            .bar { flex-wrap: nowrap; }
+            /* the views and the period join the bar itself: one row with the views before the gear, the period under it in
+               the middle of a row of its own - beside the entry field it only fits from 1260px */
+            .bar { flex-wrap: wrap; }
             .bar #text { flex: 1 1 200px; }
-            .bar .row2 { order: 4; flex: 0 1 650px; }
-            .row2 .views { flex: 0 0 330px; }
-            .row2 .nav { flex: 1 1 auto; }
+            .bar .row2 { display: contents; }
+            .row2 .views { flex: 0 0 330px; order: 4; }
+            .row2 .nav { order: 6; }
             .bar #gearBtn { order: 5; }
+        }
+        @media (min-width: 1260px) {
+            /* wide: all in one row, the period right behind the entry field and in the middle of the page - the field ends
+               half the group before the middle (50% of the bar less mic, two gaps and half the group); the buttons after it
+               keep to the right. From about 1290px it is exactly in the middle, at 1260px 14px left of it (measured head-less).
+               A guest who may only read has no field: there the margin alone puts the period in the middle */
+            .bar { flex-wrap: nowrap; }
+            .row2 .nav { order: 2; flex: 0 0 var(--nav-w); margin-right: auto; }
+            .bar:has(> .row2 > .nav:not([hidden])) #text { flex: 0 1 calc(50% - var(--nav-w) / 2 - var(--ctl) - 16px); }
+            .bar:has(> #text[hidden]) .row2 .nav { margin-left: calc(50% - var(--nav-w) / 2); }
         }
         .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -203,10 +213,17 @@
             .bar #todayBtn { font-size: 11px; letter-spacing: .02em; min-width: max-content; }
         }
         @media (min-width: 900px) { .bar .row2 { flex-basis: 580px; } }   /* 650 before: the views gave up 70px, the period keeps its room */
-        /* back, the period, forward */
-        .nav { display: flex; align-items: center; gap: 8px; }
+        /* back, the period, forward - the period in a box like the arrows, the three close together (Doc, 19.11.2026: "auch
+           in eine Box rein, die zwischen den beiden Pfeilen ist. Kann ruhig ein bisschen enger sein"). The box keeps one
+           width, so the arrows stay put while Doc steps through the weeks: 200px of text hold every week inside one month
+           with its month in full ("20.–26. September" is 196px at 15px), a week across two months takes the short form
+           where the full one does not fit (renderWeek: "30. Nov –6. Dez") */
+        :root { --nav-box: 222px; --nav-gap: 4px; --nav-w: calc(2 * var(--ctl) + 2 * var(--nav-gap) + var(--nav-box)); }
+        .nav { display: flex; align-items: center; gap: var(--nav-gap); }
         .nav .period {
-            flex: 1 1 auto; min-width: 0; text-align: center; font: 700 clamp(13px, 3.8vw, 15px)/1.2 Orbitron, sans-serif;
+            flex: 0 1 var(--nav-box); min-width: 0; height: var(--ctl); padding: 0 10px; border: 1px solid var(--line); border-radius: 10px;
+            display: flex; flex-direction: column; justify-content: center;   /* the two lines in the middle of the box */
+            text-align: center; font: 700 clamp(13px, 3.8vw, 15px)/1.2 Orbitron, sans-serif;
             letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .nav .period small { display: block; font: 500 11px/1.4 Orbitron, sans-serif; letter-spacing: .08em; color: var(--muted); }
