@@ -1,0 +1,33 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'de.docalvers.docfit'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'de.docalvers.docfit'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+        // only the Pixel's ABI: Vosk's native library is ~9 MB per ABI
+        ndk { abiFilters 'arm64-v8a' }
+    }
+    // the "Fasting" tab: the page in ../../web/fasting goes into the assets as fasting/ - its data file
+    // (web/fasting/private/) is health data, gitignored, written by ../../tools/fasting_from_excel.py
+    sourceSets {
+        main { assets.srcDirs += ['../../web'] }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // offline speech recognition (Kaldi), with a closed grammar it is a keyword spotter: "DocFit" and "Stopp"
+    implementation 'com.alphacephei:vosk-android:0.3.47@aar'
+    implementation 'net.java.dev.jna:jna:5.13.0@aar'
+    // the list of times with swipe to delete
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    testImplementation 'junit:junit:4.13.2'
+}

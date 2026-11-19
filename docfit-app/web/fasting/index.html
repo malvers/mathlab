@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>DocFit Fasting</title>
+<!-- DocFit's "Fasting" tab (Doc, 19.11.2026): every fast from Doc's workbook as a chart grid like his Excel dashboard,
+     plus all fasts on top of each other from day 1. Runs offline: in the app's WebView (file:///android_asset/fasting/),
+     from file:// or a local server. The data file is private (gitignored) and written by tools/fasting_from_excel.py. -->
+<link rel="stylesheet" href="fasting.css">
+<script>
+  // the colour scheme before the first paint, with Doc's names and keys from DocDo / the Stoffverteilungsplan
+  // (dark = Blau, grey = Grau, light = Hell; html.svp-grey / html.svp-light): inside DocFit the app's choice
+  // (DocFitApp.theme()), in the browser the one stored under svp-theme
+  (function () {
+    var t = null;
+    try { if (window.DocFitApp && DocFitApp.theme) t = DocFitApp.theme(); } catch (e) { /* no app bridge */ }
+    if (!t) try { t = localStorage.getItem('svp-theme'); } catch (e) { /* storage blocked */ }
+    document.documentElement.classList.toggle('svp-grey', t === 'grey');
+    document.documentElement.classList.toggle('svp-light', t === 'light');
+  })();
+</script>
+</head>
+<body>
+<header class="top" id="top">
+  <div class="brand">DocFit</div>
+  <div class="sub">Fasting</div>
+  <!-- gear: Material Icons "settings" (Apache 2.0), as in DocDo; only in the browser - in the app DocFit's own gear -->
+  <button class="gear" id="gearBtn" type="button" aria-label="Einstellungen" aria-expanded="false" aria-controls="settings">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+  </button>
+  <div class="settings" id="settings" role="dialog" aria-label="Einstellungen" hidden>
+    <p class="set-title">Einstellungen</p>
+    <span class="set-label" id="themeLabel">Farbschema</span>
+    <div class="themes" id="themeSeg" role="radiogroup" aria-labelledby="themeLabel">
+      <button type="button" role="radio" data-theme="dark" aria-checked="false"><i style="background: rgb(10, 20, 40)"></i>Blau</button>
+      <button type="button" role="radio" data-theme="grey" aria-checked="false"><i style="background: rgb(26, 26, 28)"></i>Grau</button>
+      <button type="button" role="radio" data-theme="light" aria-checked="false"><i style="background: rgb(246, 248, 252)"></i>Hell</button>
+    </div>
+  </div>
+</header>
+<nav class="nav" id="nav" aria-label="Fastenzeiten"></nav>
+<main class="wrap" id="view"></main>
+<script src="lib/chart.umd.min.js"></script>
+<script src="private/fasting-data.js"></script>
+<script src="fasting.js"></script>
+</body>
+</html>

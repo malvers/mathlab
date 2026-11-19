@@ -1,0 +1,290 @@
+/* DocFit "Fasting" - the app's look: dark navy, cards, Orbitron, Doc's palette (lambda / upsilon / phi). */
+@font-face {
+  font-family: "Orbitron";
+  src: url("fonts/orbitron.ttf") format("truetype");
+  font-weight: 400 900;
+  font-display: block;
+}
+
+:root {
+  /* Blau = DocFit's navy (the app's values); Grau and Hell below, with the values of DocDo and the
+     Stoffverteilungsplan (HTML/svp/svp-tokens.css: html.svp-grey / html.svp-light) */
+  color-scheme: dark;
+  --bg: #0a1428;
+  --card: #0e244e;
+  --card-2: #12305f;
+  --text: #eeeeee;
+  --muted: #8a93a6;
+  --lambda: #f5c242;
+  --upsilon: #b02418;
+  --phi: #799e31;
+  --line: rgba(238, 238, 238, 0.08);
+  --accent: var(--lambda);              /* lambda as text (title, links) */
+  --warn: var(--lambda);                /* "Ende nicht eingetragen" */
+  --chip-on: var(--lambda);             /* the chosen chip / tab */
+  --chip-on-ink: var(--bg);
+  /* the charts (fasting.js reads these at every render) */
+  --c-line: #f5c242;
+  --c-line2: #799e31;
+  --c-grid: rgba(238, 238, 238, 0.07);
+  --c-band: rgba(245, 194, 66, 0.08);
+  --c-end: #d8412f;
+  --c-event: #9aa6c4;
+  --c-tip: rgba(10, 20, 40, 0.96);
+  --c-tip-rim: rgba(238, 238, 238, 0.18);
+  --c-label-bg: rgba(10, 20, 40, 0.85);
+  --zoom-backdrop: rgba(4, 10, 22, 0.74);   /* behind the big view of a chart */
+  --orb: "Orbitron", system-ui, sans-serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+/* Grau: neutral grey grounds, the accents as in Blau */
+html.svp-grey {
+  --bg: rgb(26, 26, 28);
+  --card: rgb(37, 37, 40);
+  --card-2: rgb(50, 50, 54);
+  --text: rgb(212, 212, 216);
+  --muted: rgba(212, 212, 216, 0.62);
+  --line: rgba(205, 210, 220, 0.18);
+  --c-grid: rgba(212, 212, 216, 0.08);
+  --c-band: rgba(245, 194, 66, 0.07);
+  --c-event: rgb(170, 170, 176);
+  --c-tip: rgba(26, 26, 28, 0.96);
+  --c-tip-rim: rgba(212, 212, 216, 0.2);
+  --c-label-bg: rgba(26, 26, 28, 0.85);
+  --zoom-backdrop: rgba(8, 8, 10, 0.74);
+}
+/* Hell: white cards, dark text; orange text and lines would vanish on white, so lambda as text and the chart lines
+   take the svp blue (as in DocDo), the chosen chip a soft orange with dark ink (DocDo's pill strength .38) */
+html.svp-light {
+  color-scheme: light;
+  --bg: rgb(246, 248, 252);
+  --card: rgb(255, 255, 255);
+  --card-2: rgb(232, 238, 248);
+  --text: rgb(24, 34, 52);
+  --muted: rgb(96, 112, 140);
+  --phi: rgb(92, 122, 32);
+  --line: rgba(40, 70, 120, 0.22);
+  --accent: rgb(30, 60, 120);
+  --warn: rgb(125, 88, 0);
+  --chip-on: rgba(245, 194, 66, 0.38);
+  --chip-on-ink: var(--text);
+  --c-line: rgb(30, 60, 120);
+  --c-line2: rgb(92, 122, 32);
+  --c-grid: rgba(40, 70, 120, 0.1);
+  --c-band: rgba(30, 60, 120, 0.06);
+  --c-end: rgb(176, 36, 24);
+  --c-event: rgb(96, 112, 140);
+  --c-tip: rgba(255, 255, 255, 0.98);
+  --c-tip-rim: rgba(40, 70, 120, 0.3);
+  --c-label-bg: rgba(255, 255, 255, 0.9);
+  --zoom-backdrop: rgba(24, 34, 52, 0.45);
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.4;
+  overflow-x: hidden;
+}
+button { font: inherit; color: inherit; }
+
+/* header - only in the browser; inside the app DocFit's own title and tabs stand above */
+.top { text-align: center; padding: 18px 16px 4px; }
+.brand { font-family: var(--orb); color: var(--accent); font-size: 22px; font-weight: 700; letter-spacing: 0.04em; }
+.sub { font-family: var(--orb); color: var(--muted); font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; margin-top: 2px; }
+body.app .top { display: none; }
+
+/* the row of fasts: like DocFit's tab bar, scrolls sideways on a phone */
+.nav {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 12px auto 0;
+  max-width: 1200px;
+  padding: 4px;
+  background: var(--card);
+  border-radius: 14px;
+  width: calc(100% - 32px);
+}
+.nav::-webkit-scrollbar { display: none; }
+body.app .nav { margin-top: 4px; width: calc(100% - 8px); }
+.chip {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--orb);
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.chip[aria-pressed="true"], .chip[aria-current="page"] { background: var(--chip-on); color: var(--chip-on-ink); }
+.chip .key { width: 14px; height: 3px; border-radius: 2px; flex: 0 0 auto; }
+.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 4px 16px 32px; }
+body.app .wrap { padding: 0 4px 24px; }
+
+.head {
+  font-family: var(--orb);
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  margin: 22px 2px 8px;
+  text-transform: uppercase;
+}
+.card { background: var(--card); border-radius: 16px; padding: 14px; min-width: 0; }
+.hint { color: var(--muted); font-size: 13px; }
+.warn { color: var(--warn); font-size: 13px; margin-top: 6px; }
+
+/* small segmented controls inside a card */
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.seg .chip { background: var(--bg); padding: 8px 10px; font-size: 12px; }
+.seg .chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-ink); }
+.seg.onpage .chip { background: var(--card); }
+.seg.onpage .chip[aria-pressed="true"] { background: var(--chip-on); }
+.seg.toggles .chip[aria-pressed="false"] { opacity: 0.45; }
+/* phone: the measures in one row that scrolls sideways instead of five rows of buttons */
+@media (max-width: 699px) {
+  .seg.scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-left: -14px; margin-right: -14px; padding: 0 14px; }
+  .seg.scroll::-webkit-scrollbar { display: none; }
+}
+.seg.toggles .chip[aria-pressed="true"] { background: var(--card-2); color: var(--text); }
+.row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+
+.plot { position: relative; height: 300px; }
+.plot.small { height: 220px; }
+@media (min-width: 700px) { .plot { height: 380px; } .plot.small { height: 240px; } }
+
+/* summary cards of all fasts */
+.cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
+.fast {
+  position: relative;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+  width: 100%;
+  overflow: hidden;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.fast::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--c, var(--accent)); }
+.fast:hover { background: var(--card-2); }
+.fast:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.t1 { font-family: var(--orb); font-size: 16px; color: var(--text); }
+.t2 { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.hero { font-family: var(--orb); font-size: 34px; font-weight: 700; margin-top: 10px; font-variant-numeric: tabular-nums; }
+.hero small { font-size: 15px; font-weight: 400; color: var(--muted); margin-left: 4px; }
+.mini { display: grid; grid-template-columns: auto 1fr auto; gap: 3px 10px; margin-top: 10px; font-size: 13px; }
+.mini .k { color: var(--muted); }
+.mini .v, .mini .d { font-family: var(--orb); font-size: 12px; font-variant-numeric: tabular-nums; }
+.mini .d { text-align: right; }
+
+/* the table start -> end of one fast */
+.sumtable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+.sumtable th { font-family: var(--orb); font-weight: 400; color: var(--muted); font-size: 11px; letter-spacing: 0.08em; text-align: right; padding: 6px 4px; }
+.sumtable th:first-child, .sumtable td:first-child { text-align: left; }
+.sumtable td { padding: 7px 4px; border-top: 1px solid var(--line); text-align: right; font-family: var(--orb); font-size: 12px; font-variant-numeric: tabular-nums; }
+.sumtable td:first-child { font-family: var(--sans); font-size: 13px; color: var(--muted); }
+.sumtable td small { display: block; color: var(--muted); font-family: var(--sans); font-size: 11px; }
+.sumtable td.delta { color: var(--text); font-weight: 700; }
+
+.quote { margin-top: 10px; color: var(--text); font-style: italic; font-size: 14px; }
+details.src { margin-top: 10px; color: var(--muted); font-size: 12px; }
+details.src summary { cursor: pointer; font-family: var(--orb); font-size: 11px; letter-spacing: 0.08em; }
+details.src p { margin: 6px 0 0; overflow-wrap: anywhere; }
+
+/* chart grid of one fast */
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.ctitle { font-family: var(--orb); font-size: 13px; color: var(--text); margin: 0 0 8px; display: flex; justify-content: space-between; gap: 8px; }
+.ctitle span { color: var(--muted); font-size: 11px; }
+.legend { display: flex; gap: 12px; font-size: 12px; color: var(--muted); margin: -2px 0 6px; }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+
+.empty { text-align: center; padding: 40px 16px; }
+.empty .t1 { margin-bottom: 8px; }
+code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--accent); overflow-wrap: anywhere; }
+
+/* the gear and the settings card (browser only), like DocDo's */
+.top { position: relative; max-width: 1200px; margin: 0 auto; }
+.gear {
+  position: absolute; right: 16px; top: 16px; width: 40px; height: 40px; border-radius: 10px; padding: 0;
+  display: grid; place-items: center; cursor: pointer; background: transparent; color: var(--text); border: 1px solid var(--line);
+}
+.gear svg { width: 22px; height: 22px; fill: currentColor; }
+.gear[aria-expanded="true"] { background: var(--card); }
+.settings {
+  position: absolute; right: 16px; top: 64px; z-index: 5; width: min(340px, calc(100% - 32px)); text-align: left;
+  padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+.set-title { margin: 0 0 12px; font: 700 12px var(--orb); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.set-label { display: block; margin: 0 0 8px; font-size: 15px; color: var(--text); }
+.themes { display: flex; gap: 8px; }
+.themes button {
+  flex: 1 1 0; min-width: 0; height: 44px; border-radius: 10px; cursor: pointer; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: transparent; color: var(--text); border: 1px solid var(--line); font: 700 13px var(--orb); letter-spacing: 0.04em;
+}
+.themes button[aria-checked="true"] { background: var(--chip-on); color: var(--chip-on-ink); border-color: transparent; }
+.themes i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--line); flex: 0 0 auto; }
+
+/* wide screens: the fasts wrap instead of scrolling, the start -> end table keeps a readable width */
+@media (min-width: 700px) {
+  .nav { flex-wrap: wrap; overflow-x: visible; }
+  .sumtable { max-width: 760px; }
+}
+
+/* tap on a chart -> the same chart big (fasting.js: zoomable / openZoom): the tiles say so with a small icon */
+.zoomable { cursor: pointer; }
+.card.zoomable:hover { box-shadow: inset 0 0 0 1px var(--line); }
+.zoomable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.zoom-hint { width: 12px; height: 12px; fill: currentColor; vertical-align: -1px; margin-left: 6px; }
+html.zoomed, html.zoomed body { overflow: hidden; }
+.zoom {
+  position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: var(--zoom-backdrop);
+}
+.zoom-box {
+  position: relative; display: flex; flex-direction: column; width: min(1500px, 100%); height: min(900px, 100%);
+  background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--c, var(--line));
+  border-radius: 16px; padding: 14px 16px 12px 18px; box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+}
+.zoom-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.zoom-titles { flex: 1 1 auto; min-width: 0; }
+.zoom .ctitle { font-size: 18px; margin: 0; justify-content: flex-start; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+.zoom .ctitle span { font-size: 13px; }
+.zoom .t2 { font-size: 14px; }
+.zoom .legend { flex-wrap: wrap; gap: 6px 16px; font-size: 14px; margin: 0 0 8px; }
+.zoom .legend i { width: 18px; height: 4px; }
+.zoom-x {
+  flex: 0 0 auto; width: 44px; height: 44px; border-radius: 10px; padding: 0; display: grid; place-items: center;
+  cursor: pointer; background: transparent; color: var(--text); border: 1px solid var(--line);
+}
+.zoom-x svg { width: 24px; height: 24px; fill: currentColor; }
+.zoom-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.zoom-plot { position: relative; flex: 1 1 auto; min-height: 0; }
+/* phone, upright or on its side: the whole screen, every pixel for the chart */
+@media (max-width: 699px), (max-height: 520px) {
+  .zoom { padding: 0; }
+  .zoom-box { width: 100%; height: 100%; border: 0; border-left: 4px solid var(--c, var(--line)); border-radius: 0; padding: 10px 8px 8px 12px; }
+}
+@media (max-height: 520px) {
+  .zoom-head { margin-bottom: 4px; }
+  .zoom .ctitle { font-size: 16px; }
+  .zoom .t2 { font-size: 12px; margin-top: 0; }
+  .zoom-x { width: 40px; height: 40px; }
+}
