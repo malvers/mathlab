@@ -700,9 +700,10 @@
         </div>
         <div class="settings" id="settings" role="dialog" aria-label="Einstellungen" hidden>
             <p class="set-title">Einstellungen</p>
-            <!-- guest mode only: never the guest's name (the share's label) - the page is "Kalender von Doc" -->
+            <!-- guest mode only: never the guest's name (the share's label) - the page is "Kalender von Michi" (OWNER_LABEL,
+                 set by init) -->
             <div id="guestSec" hidden>
-                <span class="set-label">Kalender von Doc</span>
+                <span class="set-label" id="guestTitle"></span>
                 <p class="set-text" id="guestText"></p>
                 <button class="wide" id="printBtn" type="button">Woche drucken</button>
             </div>
@@ -764,7 +765,7 @@
             <button id="loginBtn" type="button">Anmelden</button>
         </div>
         <div class="card gate" id="guestGate" hidden>
-            <p>Dieser Link gilt nicht mehr.<br>Bitte Doc um einen neuen QR-Code.</p>
+            <p>Dieser Link gilt nicht mehr.<br><span id="guestGoneWho"></span></p>   <!-- "Bitte Michi um ...": set by init -->
         </div>
 
         <main id="main" hidden>
@@ -904,7 +905,8 @@
                With a token the page needs no login: it reads through calendar_shared_rows and writes only the guest's own
                entries (calendar_shared_save / _remove); what Doc's appointments show is decided in the database. The
                share's label - the guest's name, maybe a pet name - names only the guest's own check (filter, "Wessen
-               Termin?"; Doc, 19.11.2026: "Schreib da mal bitte Cutie und Michi"): the page is "Kalender von Doc". */
+               Termin?"; Doc, 19.11.2026: "Schreib da mal bitte Cutie und Michi"): the page is "Kalender von Michi"
+               (OWNER_LABEL - every word about Doc here uses that name). */
             const GUEST_TOKEN_KEY = 'kalender-share-token';
             const GUEST_CACHE_KEY = 'kalender-share-cache';
             const GUEST_GONE_KEY = 'kalender-share-gone';
@@ -972,7 +974,10 @@
             // the two people by name in both views (Doc, 19.11.2026: "Da gibt's ‚Ich' und ‚Doc'. Schreib da mal bitte Cutie
             // und Michi. Michi natürlich für mich."): Doc is always OWNER_LABEL, the guest always the share's label (in the
             // guest's view from calendar_shared_rows); "me" is whoever is looking, so each one sees themself first
-            const OWNER_LABEL = 'Michi';   // Doc's side of the filter, "Wessen Termin?" and the joint wording - only here
+            // (Doc, 19.11.2026: "Ja, bei Ute soll überall Michi stehen.") - also every word about Doc in the guest's view
+            const OWNER_LABEL = 'Michi';   // Doc's name in the checks and wherever the guest's page speaks of him - only here
+            const genitive = n => n + (/[sßxz]$/i.test(n) ? '’' : 's');   // German: "Michis Kalender", "Max’ Kalender"
+            const OWNER_OF = genitive(OWNER_LABEL);
             const meName = () => (GUEST ? (guestShare && guestShare.label) || 'Ich' : OWNER_LABEL);
             const otherName = () => (GUEST ? OWNER_LABEL : guestName());
             const isOff = occ => !!(occ.ev.lesson && occ.ev.lesson.code === 'cancelled');
@@ -1461,7 +1466,7 @@
                 $('fltOtherRow').className = 'check ' + (GUEST ? 'ck-doc' : 'ck-guest');
                 const all = filter.me && filter.other;
                 $('filterBtn').classList.toggle('on', !all);   // something is hidden: the button says so
-                $('filterBtn').setAttribute('aria-label', 'Wessen Termine' + (all ? '' : filter.me ? ' – nur meine' : ' – nur ' + (GUEST ? OWNER_LABEL + 's' : 'die von ' + guestName())));
+                $('filterBtn').setAttribute('aria-label', 'Wessen Termine' + (all ? '' : filter.me ? ' – nur meine' : ' – nur ' + (GUEST ? OWNER_OF : 'die von ' + guestName())));
             }
             function showFilter(on) {
                 $('filterPop').hidden = !on;
@@ -1478,7 +1483,7 @@
             function renderGuest() {
                 if (!GUEST) return;
                 $('text').hidden = $('micBtn').hidden = !guestCanWrite();
-                $('guestText').textContent = 'Du siehst, wann Doc beschäftigt ist. ' + (guestCanWrite()
+                $('guestText').textContent = 'Du siehst, wann ' + OWNER_LABEL + ' beschäftigt ist. ' + (guestCanWrite()
                     ? 'Deine Termine sind türkis' + (guestShare && guestShare.can_together ? ', gemeinsame mit ' + OWNER_LABEL + ' gold-türkis' : '') +
                       ' – antippen zum Ändern, oben eintippen für einen neuen.' : 'Eintragen ist gerade aus.');
             }
@@ -1657,7 +1662,8 @@
             async function shareQrLink() {
                 const link = $('qrLink').textContent;
                 if (!link || !navigator.share) return;
-                try { await navigator.share({ title: 'Kalender von Doc', text: 'Kalender von Doc', url: link }); }
+                // the message the guest gets: Doc by the name they know him by on their page
+                try { await navigator.share({ title: 'Kalender von ' + OWNER_LABEL, text: 'Kalender von ' + OWNER_LABEL, url: link }); }
                 catch (e) { if (e && e.name !== 'AbortError') copyQrLink(); }   // no share sheet after all: copy instead
             }
             async function lockShare() {
@@ -1680,8 +1686,8 @@
                 const lines = [ev.lesson ? 'Schule' : ev.title, when];
                 if (ev.location) lines.push(ev.location);
                 if (ev.kind === 'own' && ev.notes) lines.push('', ev.notes);
-                lines.push('', ev.lesson ? 'Doc ist in der Schule.' : ev.kind === 'own' ? 'Dein Termin – Eintragen ist gerade aus.'
-                    : ev.kind === 'work' ? 'Dienstlich (IBB).' : 'Aus Docs Kalender.');
+                lines.push('', ev.lesson ? OWNER_LABEL + ' ist in der Schule.' : ev.kind === 'own' ? 'Dein Termin – Eintragen ist gerade aus.'
+                    : ev.kind === 'work' ? 'Dienstlich (IBB).' : 'Aus ' + OWNER_OF + ' Kalender.');
                 ask(lines.join('\n'), [{ label: 'OK', value: null, cls: 'yes' }]);
             }
 
@@ -2226,7 +2232,7 @@
                 const days = [...Array(7)].map((_, i) => K.addDays(mon, i));
                 const sun = days[6];
                 const occs = occsIn(mon, K.addDays(mon, 7)).filter(o => !o.ev.holiday && !isOff(o));
-                let html = `<h1>Kalender von Doc · KW ${K.isoWeek(mon)} · ${mon.getDate()}. ${K.MONTH_LONG[mon.getMonth()]} – ${sun.getDate()}. ${K.MONTH_LONG[sun.getMonth()]} ${sun.getFullYear()}</h1>`;
+                let html = `<h1>Kalender von ${esc(OWNER_LABEL)} · KW ${K.isoWeek(mon)} · ${mon.getDate()}. ${K.MONTH_LONG[mon.getMonth()]} – ${sun.getDate()}. ${K.MONTH_LONG[sun.getMonth()]} ${sun.getFullYear()}</h1>`;
                 for (const d of days) {
                     const here = occs.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                     const hol = K.holidayOf(d);
@@ -2238,7 +2244,7 @@
                 $('printWeek').innerHTML = html;
             }
             async function forgetGuest() {
-                const v = await ask('Den Zugang zu Docs Kalender von diesem Gerät entfernen?\nZurück geht es nur mit einem neuen QR-Code von Doc.',
+                const v = await ask('Den Zugang zu ' + OWNER_OF + ' Kalender von diesem Gerät entfernen?\nZurück geht es nur mit einem neuen QR-Code von ' + OWNER_LABEL + '.',
                     [{ label: 'Abbrechen', value: null }, { label: 'Entfernen', value: 'yes', cls: 'danger' }]);
                 if (!v) return;
                 try { [GUEST_TOKEN_KEY, GUEST_CACHE_KEY, GUEST_GONE_KEY].forEach(k => localStorage.removeItem(k)); } catch (e) { }
@@ -2250,6 +2256,8 @@
                     document.body.classList.add('guest');
                     $('callSec').hidden = $('importSec').hidden = true;
                     $('guestSec').hidden = $('guestEnd').hidden = false;
+                    $('guestTitle').textContent = 'Kalender von ' + OWNER_LABEL;
+                    $('guestGoneWho').textContent = 'Bitte ' + OWNER_LABEL + ' um einen neuen QR-Code.';
                     $('printBtn').onclick = () => { showSettings(false); window.print(); };
                     $('guestForget').onclick = forgetGuest;
                     window.addEventListener('beforeprint', fillPrintWeek);   // the button and Cmd-P alike
