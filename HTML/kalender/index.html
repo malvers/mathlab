@@ -679,7 +679,7 @@
                 </button>
                 <div class="filter-pop" id="filterPop" role="group" aria-labelledby="filterTitle" hidden>
                     <p class="set-title" id="filterTitle">Zeigen</p>
-                    <label class="check ck-doc" id="fltMeRow"><input type="checkbox" id="fltMe" checked><i></i><span>Ich</span></label>
+                    <label class="check ck-doc" id="fltMeRow"><input type="checkbox" id="fltMe" checked><i></i><span id="fltMeText"></span></label>
                     <label class="check ck-guest" id="fltOtherRow"><input type="checkbox" id="fltOther" checked><i></i><span id="fltOtherText">Gast</span></label>
                 </div>
             </div>
@@ -817,12 +817,13 @@
                 <label class="switch"><input id="fGoogle" type="checkbox"><i></i>auch in Google eintragen</label>
                 <input id="fPass" type="password" autocomplete="current-password" placeholder="Solitas Passwort (nur einmal)" aria-label="Solitas Passwort" hidden>
             </div>
-            <!-- whose appointment: Doc's ("Ich"), the guest's (shared_by, turquoise, never a reminder) or both (together, gold
-                 and turquoise) - only once a share exists; in the guest's view "Ich" is the guest and the other check is Doc -->
+            <!-- whose appointment: Doc's ("Michi"), the guest's (shared_by, turquoise, never a reminder) or both (together, gold
+                 and turquoise) - only once a share exists; in the guest's view the first check is the guest (their label) and
+                 the other one Doc ("Michi"); the names are set by openEditor -->
             <div class="fld" id="forGuestRow" hidden>
                 <span class="fld-label" id="whoLabel">Wessen Termin?</span>
                 <div class="checks" role="group" aria-labelledby="whoLabel">
-                    <label class="check ck-doc"><input id="fWhoMe" type="checkbox"><i></i><span id="whoMeText">Ich</span></label>
+                    <label class="check ck-doc"><input id="fWhoMe" type="checkbox"><i></i><span id="whoMeText"></span></label>
                     <label class="check ck-guest"><input id="fWhoOther" type="checkbox"><i></i><span id="whoOtherText">Gast</span></label>
                 </div>
             </div>
@@ -902,7 +903,8 @@
                (history.replaceState) - so it is not in the history, a bookmark or a copied address; it is never logged.
                With a token the page needs no login: it reads through calendar_shared_rows and writes only the guest's own
                entries (calendar_shared_save / _remove); what Doc's appointments show is decided in the database. The
-               share's label - the guest's name, maybe a pet name - is never shown here: the page is "Kalender von Doc". */
+               share's label - the guest's name, maybe a pet name - names only the guest's own check (filter, "Wessen
+               Termin?"; Doc, 19.11.2026: "Schreib da mal bitte Cutie und Michi"): the page is "Kalender von Doc". */
             const GUEST_TOKEN_KEY = 'kalender-share-token';
             const GUEST_CACHE_KEY = 'kalender-share-cache';
             const GUEST_GONE_KEY = 'kalender-share-gone';
@@ -922,7 +924,7 @@
             const GUEST = !!guestToken;
             const GUEST_COLOR = { own: 's', event: 2, work: 1, yearly: 3 };   // the guest's own turquoise, Doc's gold, IBB red, yearly green
             const LESSON_WORD = GUEST ? 'Schule' : 'Unterricht';              // the month's quiet mark for the lessons
-            let guestShare = null;     // { show_*, can_write } from calendar_shared_rows - the label is left out on purpose
+            let guestShare = null;     // { label, show_*, can_write, can_together } from calendar_shared_rows - the label only names the guest's own check
             let guestGone = false;     // the link no longer works (locked, or replaced by a newer QR code)
             const guestCanWrite = () => !!(guestShare && guestShare.can_write);
             const canLoad = () => (GUEST ? !guestGone : auth.hasSession());
@@ -967,6 +969,12 @@
             // the guest's name lives only in the database (calendar_share.label); one share for now, so its label names
             // every shared_by row
             const guestName = () => (share && share.label) || 'Gast';
+            // the two people by name in both views (Doc, 19.11.2026: "Da gibt's ‚Ich' und ‚Doc'. Schreib da mal bitte Cutie
+            // und Michi. Michi natürlich für mich."): Doc is always OWNER_LABEL, the guest always the share's label (in the
+            // guest's view from calendar_shared_rows); "me" is whoever is looking, so each one sees themself first
+            const OWNER_LABEL = 'Michi';   // Doc's side of the filter, "Wessen Termin?" and the joint wording - only here
+            const meName = () => (GUEST ? (guestShare && guestShare.label) || 'Ich' : OWNER_LABEL);
+            const otherName = () => (GUEST ? OWNER_LABEL : guestName());
             const isOff = occ => !!(occ.ev.lesson && occ.ev.lesson.code === 'cancelled');
             // appointments mirrored from Google / Outlook (tools/kalender/feeds.mjs): read-only here, marked G / O
             const FEED_NAMES = { google: 'Google', outlook: 'Outlook' };
@@ -982,8 +990,9 @@
             const byId = id => items.find(x => x.id === id);
 
             /* whose appointments show - the people button in the header (Doc, 19.11.2026: "macht da ein drop mit checks",
-               "[Gast] und ich checks"): "Ich" = Doc's own (with the lessons), the other = the guest's; a joint one shows while
-               either is on, holidays always. In the guest's view "Ich" is the guest and the other one Doc. Remembered per
+               "[Gast] und ich checks"): "me" = Doc's own ("Michi", with the lessons), the other = the guest's (their label); a
+               joint one shows while either is on, holidays always. In the guest's view "me" is the guest and the other one Doc;
+               each sees their own name first (meName / otherName). Remembered per
                device; never both off. Only where there are two people: once the calendar is shared, and in the guest's view. */
             const FILTER_KEY = GUEST ? 'kalender-share-filter' : 'kalender-filter';
             let filter = { me: true, other: true };
@@ -1082,7 +1091,7 @@
                 const now = new Date();
                 const d = await guestRpc('calendar_shared_rows', { p_from: K.addDays(now, -42).toISOString(), p_to: K.addDays(now, 400).toISOString() });
                 const sh = d.share || {};
-                guestShare = { show_lessons: !!sh.show_lessons, show_events: !!sh.show_events, show_work: !!sh.show_work,
+                guestShare = { label: sh.label || null, show_lessons: !!sh.show_lessons, show_events: !!sh.show_events, show_work: !!sh.show_work,
                     show_yearly: !!sh.show_yearly, can_write: !!sh.can_write, can_together: !!sh.can_together };
                 items = (d.events || []).map(guestRow);
                 // the lessons come merged and anonymised ("Schule" blocks): rows like calendar_lesson's without class, room or note
@@ -1446,12 +1455,13 @@
                 if (!on) { showFilter(false); return; }
                 $('fltMe').checked = filter.me;
                 $('fltOther').checked = filter.other;
-                $('fltOtherText').textContent = GUEST ? 'Doc' : guestName();
+                $('fltMeText').textContent = meName();
+                $('fltOtherText').textContent = otherName();
                 $('fltMeRow').className = 'check ' + (GUEST ? 'ck-guest' : 'ck-doc');     // the box in the owner's colour
                 $('fltOtherRow').className = 'check ' + (GUEST ? 'ck-doc' : 'ck-guest');
                 const all = filter.me && filter.other;
                 $('filterBtn').classList.toggle('on', !all);   // something is hidden: the button says so
-                $('filterBtn').setAttribute('aria-label', 'Wessen Termine' + (all ? '' : filter.me ? ' – nur meine' : ' – nur ' + (GUEST ? 'Docs' : 'die von ' + guestName())));
+                $('filterBtn').setAttribute('aria-label', 'Wessen Termine' + (all ? '' : filter.me ? ' – nur meine' : ' – nur ' + (GUEST ? OWNER_LABEL + 's' : 'die von ' + guestName())));
             }
             function showFilter(on) {
                 $('filterPop').hidden = !on;
@@ -1469,7 +1479,7 @@
                 if (!GUEST) return;
                 $('text').hidden = $('micBtn').hidden = !guestCanWrite();
                 $('guestText').textContent = 'Du siehst, wann Doc beschäftigt ist. ' + (guestCanWrite()
-                    ? 'Deine Termine sind türkis' + (guestShare && guestShare.can_together ? ', gemeinsame mit Doc gold-türkis' : '') +
+                    ? 'Deine Termine sind türkis' + (guestShare && guestShare.can_together ? ', gemeinsame mit ' + OWNER_LABEL + ' gold-türkis' : '') +
                       ' – antippen zum Ändern, oben eintippen für einen neuen.' : 'Eintragen ist gerade aus.');
             }
 
@@ -1848,11 +1858,13 @@
                 $('fPass').value = '';
                 // "Wessen Termin?" Ich / <label>: Doc's, the guest's (shared_by) or both (together) - only once a share and the
                 // columns exist, never for a mirrored one (Doc, 19.11.2026: "[Gast] und ich checks"). Before 20261119d the two
-                // checks act like a switch. In the guest's view: "Ich" (always theirs) and "Doc" (joint) - once the database knows it.
+                // checks act like a switch. In the guest's view: their label (always theirs) and Michi (joint) - once the database
+                // knows it. Labels: meName() / otherName().
                 const joint = isJoint(ev);
                 edState.canJoint = GUEST ? !!(guestShare && guestShare.can_together) : !!togetherCol;
                 $('forGuestRow').hidden = GUEST ? !edState.canJoint : (!shareCols || !share || !!(ev && feedOf(ev)));
-                $('whoOtherText').textContent = GUEST ? 'Doc' : guestName();
+                $('whoMeText').textContent = meName();
+                $('whoOtherText').textContent = otherName();
                 $('fWhoMe').parentElement.className = 'check ' + (GUEST ? 'ck-guest' : 'ck-doc');
                 $('fWhoOther').parentElement.className = 'check ' + (GUEST ? 'ck-doc' : 'ck-guest');
                 $('fWhoMe').disabled = GUEST;
