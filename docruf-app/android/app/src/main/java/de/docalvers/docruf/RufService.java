@@ -83,7 +83,7 @@ public class RufService extends Service {
         Notification n = new Notification.Builder(this, CH_LINE)
                 .setSmallIcon(R.drawable.ic_ruf)
                 .setColor(NOTE_COLOR)
-                .setContentTitle("DocCall hört zu")
+                .setContentTitle("DocSol hört zu")
                 .setContentText("Solita kann Dich hier rufen.")
                 .setOngoing(true)
                 .setContentIntent(openApp(this))

@@ -1,6 +1,6 @@
-# DocCall
+# DocSol
 
-Shown on the phone as "DocCall" since 07.11.2026; folder, package (`de.docalvers.docruf`) and
+Shown on the phone as "DocSol" since 20.11.2026 (before that "DocCall", from 07.11.2026); folder, package (`de.docalvers.docruf`) and
 Keychain entry keep the old name DocRuf, so the update keeps data and permissions.
 
 Solita calls Doc on his Pixel instead of over the Mac's speakers, which do not reach the
