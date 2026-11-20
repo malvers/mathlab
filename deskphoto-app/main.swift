@@ -7,6 +7,7 @@
 // is copied into ~/Library/Application Support/DeskPhoto/images when it is added.
 // The photos show only on Doc's LG monitor (found by maker and model, any port) and only while DocHere sees him there;
 // without the LG - laptop alone, beamer, board - none shows anywhere and the camera is not asked for (15.11.2026).
+// Since 20.11.2026 only while he sits close, too: DocHere's "near" (its threshold is DocHere's user default nearCm).
 
 import Cocoa
 import ServiceManagement
@@ -672,7 +673,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// start, on lock, screen saver and sleep, and for every other answer (away, other, unknown, no answer): rather
     /// hidden once too often than shown once too many. "Fotos zeigen" stays the master switch; off, no camera at all.
     private var present = false
-    private var misses = 0                       // answers in a row that were not "doc"
+    private var misses = 0                       // answers in a row that were not "doc" and near
+    private var missSince: Date?                 // the first of them
+    /// Seconds of "not doc or not near" before the photos go, 0 = at once (Doc, 20.11.2026: 10 s was "sehr
+    /// irritierend", he wants to see it react). DocHere steadies its answers itself. Read on every answer:
+    ///     defaults write de.docalvers.deskphoto hideDelay -float 2
+    private var hideDelay: Double { max(0, UserDefaults.standard.double(forKey: "hideDelay")) }
     private var lastAnswer = Date.distantPast    // DocHere's heartbeat: no answer for 15 s counts as not Doc
     private var visible: Bool { shown && present && home != nil }
 
@@ -735,14 +741,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: Doc at the Mac? (DocHere)
 
     /// DocHere keeps its camera on for us while we ask for it (one steady green light, one look per second on mains,
-    /// every 5 s on battery) and sends each answer. One "doc" shows the photos; two other answers in a row hide them,
-    /// so a single unclear frame does not make them flicker. Lock, screen saver and sleep hide them at once; DocHere
+    /// every 5 s on battery) and sends each answer. One "doc" that is also near shows the photos; two other answers in a
+    /// row hide them, so a single unclear frame does not make them flicker. Since 20.11.2026 DocHere's answers are steady
+    /// themselves (sticky Doc, near with hysteresis), so any other answer hides them at once - or after `hideDelay`
+    /// seconds if set; an empty chair ("away") always at once. One "doc" that is near shows them again at once. "near" is DocHere's own steadied closeness
+    /// (20.11.2026, Doc: "nur, wenn ich gefühlt wirklich davor sitze" - a metre away still showed them); a DocHere
+    /// without it sends no "near", which counts as near. Lock, screen saver and sleep hide them at once; DocHere
     /// stops its camera there by itself. Doc, 13.11.2026: "Aber eben durchgehend laufen lassen. Was blöde wäre, wenn
     /// das immer grün blinkt."
     private func watchPresence() {
         let dnc = DistributedNotificationCenter.default()
         dnc.addObserver(forName: Notification.Name("de.docalvers.dochere.who"), object: nil, queue: .main) { [weak self] n in
-            self?.answered((n.userInfo?["answer"] as? String) ?? "")
+            let info = n.userInfo
+            self?.answered((info?["answer"] as? String) ?? "", near: (info?["near"] as? String).map { $0 == "1" } ?? true)
         }
         for name in ["com.apple.screenIsLocked", "com.apple.screensaver.didstart"] {
             dnc.addObserver(forName: Notification.Name(name), object: nil, queue: .main) { [weak self] _ in self?.absent() }
@@ -775,11 +786,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if present && Date().timeIntervalSince(lastAnswer) > 15 { absent() }   // DocHere silent: hide
     }
 
-    private func answered(_ answer: String) {
+    private func answered(_ answer: String, near: Bool) {
         lastAnswer = Date()
         guard shown, home != nil else { return }        // without the LG nothing shows, whatever the camera says
-        if answer == "doc" { misses = 0 } else { misses += 1 }
-        let now = answer == "doc" ? true : (misses >= 2 ? false : present)
+        let here = answer == "doc" && near
+        if here { misses = 0; missSince = nil } else { misses += 1; if missSince == nil { missSince = Date() } }
+        let gone = answer == "away" || (missSince.map { Date().timeIntervalSince($0) >= hideDelay } ?? false)
+        let now = here ? true : (gone ? false : present)
         if now != present { present = now; applyVisibility() }
     }
 

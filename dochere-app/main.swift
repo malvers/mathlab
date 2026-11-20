@@ -24,6 +24,11 @@
 // judgeable weak faces before "other" (Steady.confirm). While a stranger is suspected or shown, DocHere looks
 // again after a few seconds even while Doc types (Timing.recheck, at most Timing.rechecks quick looks in a row),
 // and while "!" stays it keeps the usual 30 s pace despite keyboard and mouse.
+//
+// Closeness (20.11.2026, Doc: the photos also showed while he stood a metre away): the watching estimates how far the
+// face is from its face box (closeness.swift) and sends "near" and "cm" along with each answer. DocPhoto shows its
+// photos only for "doc" and near; the answer itself, DocBar's D and "!" and --ask for Solita's calls are unchanged.
+// --distance <seconds> prints the numbers per frame for the experiment. The threshold is the user default nearCm.
 
 import AVFoundation
 import Cocoa
@@ -72,10 +77,12 @@ func log(_ text: String) {
 
 struct Seen {
     var face: Float = 0
+    var faces = 0                   // faces found with at least Threshold.face (two or more: Steady's crowd)
     var body: Float = 0
     var figure: Float = 0
 
     var light: Float = 0            // mean brightness of the whole frame, 0…1
+    var lens: Double = 0            // tan of half the vertical field of view of this frame (Closeness), 0 if unknown
 
     var picture: CGImage? = nil     // the frame that showed the person, in memory only, for "who"
 
@@ -128,6 +135,7 @@ enum Detector {
 
         var seen = Seen()
         seen.face = face.results?.map(\.confidence).max() ?? 0
+        seen.faces = face.results?.filter { $0.confidence >= Threshold.face }.count ?? 0
         seen.body = body.results?.map(\.confidence).max() ?? 0
         if let mask = figure.results?.first?.pixelBuffer { seen.figure = coverage(mask) }
         return seen
@@ -231,6 +239,9 @@ final class Watcher: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     private var firstFrame: Date?
     private var next = Date.distantPast
     private var interval = 1.0              // only touched on `queue`
+    private var camera: AVCaptureDevice?
+    private var field = (width: 0, height: 0)   // the camera's active format, the full picture (only on `queue`)
+    private(set) var format = ""            // the camera format the session picked and the frame size, for --distance
 
     init(report: @escaping (Seen) -> Void) { self.report = report }
 
@@ -243,6 +254,7 @@ final class Watcher: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
         output.alwaysDiscardsLateVideoFrames = true
         output.setSampleBufferDelegate(self, queue: queue)
         session.addOutput(output)
+        self.camera = camera
         // as few frames as the camera allows - one per second is all that is looked at
         if (try? camera.lockForConfiguration()) != nil {
             if let slow = camera.activeFormat.videoSupportedFrameRateRanges.map({ $0.minFrameRate }).min() {
@@ -263,72 +275,29 @@ final class Watcher: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
 
     func captureOutput(_ output: AVCaptureOutput, didOutput buffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         let now = Date()
-        if firstFrame == nil { firstFrame = now }
+        if firstFrame == nil {
+            firstFrame = now
+            if let camera = camera, let frame = CMSampleBufferGetImageBuffer(buffer) {
+                let dims = CMVideoFormatDescriptionGetDimensions(camera.activeFormat.formatDescription)
+                field = (Int(dims.width), Int(dims.height))
+                let text = "\(camera.localizedName), format \(dims.width) x \(dims.height), frames "
+                    + "\(CVPixelBufferGetWidth(frame)) x \(CVPixelBufferGetHeight(frame))"
+                DispatchQueue.main.async { [weak self] in self?.format = text }
+            }
+        }
         guard let start = firstFrame, now.timeIntervalSince(start) >= Timing.warmUp, now >= next,
               let frame = CMSampleBufferGetImageBuffer(buffer) else { return }
         next = now.addingTimeInterval(interval)
         var seen = Detector.measure(frame)
         seen.light = brightness(frame)
+        seen.lens = Closeness.tanHalfVertical(width: CVPixelBufferGetWidth(frame), height: CVPixelBufferGetHeight(frame),
+                                              fieldWidth: field.width, fieldHeight: field.height)
         if seen.person { seen.picture = picture(frame) }
         DispatchQueue.main.async { [report] in report(seen) }
     }
 }
 
 // MARK: - steady answers
-
-/// Steadies the watching camera's answers (13.11.2026, Doc in a dark room: "die Bilder gehen weg, kommen wieder,
-/// kommen weg"). One frame is noisy in poor light, so the answer that goes out only changes when the frames agree.
-/// The threshold stays 0.45 for every frame - nobody is taken for Doc more easily than before:
-/// - "doc" comes at once: one frame at or above the threshold.
-/// - Leaving "doc" for "other" takes `notDoc` faces below the threshold without a Doc frame in between; a person
-///   without a clear face (turned away, too dark for the landmarks), or a face turned too far to be judged (Pose),
-///   counts for neither and keeps "doc".
-/// - "away" takes `leave` frames in a row without a person.
-/// - Otherwise a stranger is "other" at once, a person without a clear face "unknown".
-/// Measured 13.11.2026 in Doc's dark room (with the dark prints): 1 of 117 frames below 0.45, never 3 in a row.
-/// 15.11.2026 (Doc: "wenn ich mich zur Seite drehe, erkennt er mich nicht mehr. Und dann gehen die Bilder weg, kommen die
-/// Bilder wieder"): a head held turned for a few seconds gave 3 weak frames in a row - now 5, and only judgeable ones.
-struct Steady {
-    static let leave = 3
-    static let notDoc = 5
-
-    enum Frame { case nobody, unclear, face(Float) }
-
-    /// Judgeable weak faces it takes to call a person "other" when the answer is not "doc": 1 for the watching (a
-    /// frame every second), 2 for the background looks (16.11.2026) - there one bad frame showed DocBar's "!".
-    let confirm: Int
-
-    init(confirm: Int = 1) { self.confirm = confirm }
-
-    private(set) var answer = "away"
-    private var low = 0         // faces below the threshold since the last Doc frame
-    private var nobody = 0      // frames in a row without a person
-
-    /// A weak face was seen but does not make "other" yet (only with confirm > 1).
-    var pending: Bool { answer != "doc" && answer != "other" && low > 0 }
-
-    mutating func add(_ frame: Frame, threshold: Float) -> String {
-        switch frame {
-        case .nobody:
-            nobody += 1
-            if answer != "doc" && answer != "other" || nobody >= Self.leave { answer = "away"; low = 0 }
-        case .unclear:
-            nobody = 0
-            if answer == "away" { answer = "unknown" }
-        case .face(let score):
-            nobody = 0
-            if score >= threshold {
-                answer = "doc"
-                low = 0
-            } else if answer != "other" {
-                low += 1
-                if low >= (answer == "doc" ? Self.notDoc : confirm) { answer = "other"; low = 0 }
-                else if answer == "away" { answer = "unknown" }
-            }
-        }
-        return answer
-    }
-}
 
 /// Whether a face is turned so that its score can say "not Doc" (15.11.2026). The camera sits on the MacBook to Doc's
 /// side, so his usual pose is already turned: looking at the big screen yaw 35..60 degrees, scores 0.68 on average;
@@ -366,9 +335,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var lastWatch = ""                   // the last answer, logged only when it changes
     private var steady = Steady()                // the watching's answer, changed only when frames agree
     private var held = 0                         // frames since the last change that Steady held back
-    private var seenSteady = Steady(confirm: 2)  // the background looks' answer, steadied like the watching
+    private var seenSteady = Steady(confirm: 2, sticky: false)  // the background looks' answer, steadied like the watching
     private var rechecks = Timing.rechecks       // quick looks left while a stranger is suspected
     private var recheckAt: Date?                 // a quick look is due then, even while Doc types
+    private var near = Near()                    // the watching's closeness, steadied (closeness.swift)
+    private var lastNear: Bool?                  // logged only when it changes
+    private var minute = (start: Date(), cm: [Double](), frames: 0)   // the watching's distances, one log line a minute
     static let whoNote = Notification.Name("de.docalvers.dochere.who")
     static let watchNote = Notification.Name("de.docalvers.dochere.watch")
 
@@ -409,6 +381,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             test(seconds)
         } else if let at = args.firstIndex(of: "--measure"), at + 1 < args.count, let seconds = Double(args[at + 1]) {
             measure(seconds, keep: args.contains("--keep"))
+        } else if let at = args.firstIndex(of: "--distance"), at + 1 < args.count, let seconds = Double(args[at + 1]) {
+            distanceRun(seconds)
         } else if let at = args.firstIndex(of: "--snap"), at + 1 < args.count {
             snap(URL(fileURLWithPath: args[at + 1]))
         } else if args.contains("--enroll") {
@@ -493,12 +467,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 let t = Date().timeIntervalSince(start)
                 var line = String(format: "%5.1f s  frame %.2f  %@", t, seen.light, seen.text)
                 var frame = Steady.Frame.nobody
+                var turned = false
                 if let image = seen.picture {
                     if let found = self.identity.look(image) {
                         let c = found.cut
                         frame = Pose.frame(c, score: found.score, threshold: threshold)
-                        line += String(format: " | crop %.2f contrast %.2f quality %.2f share %.2f yaw %.0f pitch %.0f | score %.3f",
-                                        c.light, c.contrast, c.quality, c.share, c.yaw, c.pitch, found.score)
+                        turned = Self.turned(c)
+                        let d = self.distance(c, lens: seen.lens)
+                        line += String(format: " | crop %.2f contrast %.2f quality %.2f share %.2f yaw %.0f pitch %.0f | %@ cm | score %.3f",
+                                        c.light, c.contrast, c.quality, c.share, c.yaw, c.pitch, Self.cm(d.box), found.score)
                     } else {
                         frame = .unclear
                         line += " | no clear face"
@@ -511,10 +488,107 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 } else {
                     line += " | nobody"
                 }
-                line += " -> " + steady.add(frame, threshold: threshold)
+                line += " -> " + steady.add(frame, threshold: threshold, turned: turned, crowd: seen.faces >= 2)
                 print(line)
                 fflush(stdout)
                 if t >= seconds { self.finish("unknown", "measure ended") }
+            }
+            if w.start() { self.watcher = w } else { self.finish("unknown", "no camera") }
+        }
+    }
+
+    /// The face's distance in cm, from the face box and from the pupils (nil without an answer). See Closeness.
+    private func distance(_ cut: FaceCut, lens: Double) -> (box: Double?, eyes: Double?) {
+        let scale = NearSettings.scale
+        return (Closeness.fromBox(Double(cut.box), tanHalfV: lens, scale: scale),
+                Closeness.fromEyes(Double(cut.eyes), yaw: Double(cut.yaw), tanHalfV: lens, scale: scale))
+    }
+
+    /// A face turned beyond Steady.turnedYaw counts less for leaving "doc".
+    private static func turned(_ cut: FaceCut) -> Bool { !cut.yaw.isNaN && abs(cut.yaw) > Steady.turnedYaw }
+
+    private static func cm(_ value: Double?) -> String { value.map { String(format: "%3.0f", $0) } ?? "  -" }
+
+    /// --distance <seconds>: the experiment for the closeness (20.11.2026). The watching camera at its pace on mains,
+    /// one line per frame: clock time, seconds, the distance from the face box and from the pupils, head turn,
+    /// likeness, recognised yes/no, the steady answer and near/far - the same steps DocPhoto gets, with the current
+    /// settings (NearSettings). Printed and appended to ~/Library/Logs/DocHere-distance.log, at the end a summary in
+    /// 5 s steps. Numbers only, no picture is kept.
+    private func distanceRun(_ seconds: Double) {
+        let url = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Logs/DocHere-distance.log")
+        func out(_ text: String) {
+            print(text)
+            fflush(stdout)
+            let data = Data((text + "\n").utf8)
+            if let handle = try? FileHandle(forWritingTo: url) {
+                handle.seekToEndOfFile(); handle.write(data); try? handle.close()
+            } else { try? data.write(to: url) }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds + Timing.prompt) { [weak self] in
+            out("# no camera frames in time")     // the camera never answered: do not hang
+            self?.finish("unknown", "distance: no frames")
+        }
+        withCamera { [weak self] allowed in
+            guard let self = self else { return }
+            guard allowed else { self.finish("unknown", "camera not allowed"); return }
+            let start = Date()
+            let threshold = self.identity.engine.threshold
+            let nearCm = NearSettings.threshold, margin = NearSettings.margin
+            var steady = Steady()
+            var near = Near()
+            var bins: [Int: (cm: [Double], doc: Int, near: Int, frames: Int)] = [:]
+            var told = false
+            let clock = DateFormatter()
+            clock.dateFormat = "HH:mm:ss"
+            out(String(format: "# DocHere distance %@, %.0f s: near at <= %.0f cm, far beyond %.0f cm, scale %.2f "
+                        + "(field of view %.0f deg, face box %.1f cm), likeness threshold %.2f",
+                       ISO8601DateFormatter().string(from: start), seconds, nearCm, nearCm + margin, NearSettings.scale,
+                       Closeness.fieldOfView, Closeness.faceBox, threshold))
+            out("# time        t   box cm  eyes cm  yaw  score  doc  faces  -> steady, near")
+            let w = Watcher { [weak self] seen in
+                guard let self = self else { return }
+                if !told, let format = self.watcher?.format, !format.isEmpty { out("# " + format); told = true }
+                let t = Date().timeIntervalSince(start)
+                var frame = Steady.Frame.nobody
+                var d: (box: Double?, eyes: Double?) = (nil, nil)
+                var yaw = "   -", score = "    -", recognised = " -"
+                var turned = false
+                if let image = seen.picture {
+                    if let found = self.identity.look(image) {
+                        frame = Pose.frame(found.cut, score: found.score, threshold: threshold)
+                        turned = Self.turned(found.cut)
+                        d = self.distance(found.cut, lens: seen.lens)
+                        yaw = found.cut.yaw.isNaN ? "   -" : String(format: "%4.0f", found.cut.yaw)
+                        score = String(format: "%.3f", found.score)
+                        recognised = found.score >= threshold ? "yes" : " no"
+                    } else {
+                        frame = .unclear
+                        recognised = " ?"         // a person without a clear face
+                    }
+                }
+                let answer = steady.add(frame, threshold: threshold, turned: turned, crowd: seen.faces >= 2)
+                if answer == "away" { near.reset() }
+                let isNear = near.add(d.box.map { Near.Frame.distance($0) } ?? .unclear, threshold: nearCm, margin: margin)
+                out(String(format: "%@ %5.1f s  %@     %@     %@  %@  %@  %d  -> %@, %@", clock.string(from: Date()), t,
+                           Self.cm(d.box), Self.cm(d.eyes), yaw, score, recognised, seen.faces, answer, isNear ? "near" : "far"))
+                var bin = bins[Int(t / 5)] ?? ([], 0, 0, 0)
+                if let cm = d.box { bin.cm.append(cm) }
+                if recognised == "yes" { bin.doc += 1 }
+                if isNear { bin.near += 1 }
+                bin.frames += 1
+                bins[Int(t / 5)] = bin
+                guard t >= seconds else { return }
+                out("# summary in 5 s steps: median distance (face box), recognised as Doc, near")
+                for key in bins.keys.sorted() {
+                    let b = bins[key]!
+                    let sorted = b.cm.sorted()
+                    let median = sorted.isEmpty ? "  -" : String(format: "%3.0f", sorted[sorted.count / 2])
+                    let range = sorted.isEmpty ? "" : String(format: " (%.0f..%.0f)", sorted.first!, sorted.last!)
+                    out(String(format: "# %3d-%3d s: %@ cm%@, doc %d/%d, near %d/%d", key * 5, key * 5 + 5, median, range,
+                               b.doc, b.frames, b.near, b.frames))
+                }
+                self.finish("done", "distance ended")
             }
             if w.start() { self.watcher = w } else { self.finish("unknown", "no camera") }
         }
@@ -591,13 +665,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             withCamera { [weak self] allowed in
                 guard let self = self, allowed, self.watcher == nil else { return }
                 let w = Watcher { [weak self] seen in self?.watched(seen) }
-                if w.start() { self.watcher = w; self.steady = Steady(); self.held = 0; log("watching for DocPhoto") }
+                if w.start() {
+                    self.watcher = w; self.steady = Steady(); self.held = 0
+                    self.near.reset(); self.lastNear = nil; self.minute = (Date(), [], 0)
+                    log("watching for DocPhoto")
+                }
             }
         } else if !wanted, let w = watcher {
             w.stop()
             watcher = nil
             lastWatch = ""
             steady = Steady()
+            logMinute()
+            near.reset()
+            lastNear = nil
             log("watching stopped")
             tellWho("away")       // DocPhoto hides at once
         }
@@ -611,15 +692,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         var frame = Steady.Frame.nobody
         var score: Float?
         var yaw = Float.nan
+        var cm: Double?
+        var turned = false
         if seen.person {
             if let image = seen.picture, let found = identity.look(image) {
                 frame = Pose.frame(found.cut, score: found.score, threshold: identity.engine.threshold)
                 score = found.score
                 yaw = found.cut.yaw
+                turned = Self.turned(found.cut)
+                cm = distance(found.cut, lens: seen.lens).box
             }
             else { frame = .unclear }
         }
-        let answer = steady.add(frame, threshold: identity.engine.threshold)
+        let answer = steady.add(frame, threshold: identity.engine.threshold, turned: turned, crowd: seen.faces >= 2)
+        // closeness, a signal of its own next to the answer: DocPhoto wants "doc" and near, everything else keeps
+        // the answer's meaning (closeness.swift)
+        if answer == "away" { near.reset() }
+        let threshold = NearSettings.threshold
+        let isNear = near.add(cm.map { Near.Frame.distance($0) } ?? .unclear, threshold: threshold, margin: NearSettings.margin)
+        if isNear != lastNear {
+            if lastNear != nil || isNear {
+                log(String(format: "near: %@ (%@threshold %.0f cm)", isNear ? "yes" : "no",
+                           cm.map { String(format: "%.0f cm, ", $0) } ?? "no clear face, ", threshold))
+            }
+            lastNear = isNear
+        }
+        minute.frames += 1
+        if let cm = cm { minute.cm.append(cm) }
+        if Date().timeIntervalSince(minute.start) >= 60 { logMinute() }
         let raw: String
         switch frame {
         case .nobody: raw = "away"
@@ -630,18 +730,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         update(answer != "away", "watching")
         who = answer == "doc" || answer == "other" ? answer : ""
         if answer != lastWatch {
-            log(String(format: "watch: %@ (%@light %.2f, %d frames held before)", answer,
-                       score.map { String(format: "score %.3f, yaw %.0f, ", $0, yaw) } ?? "", seen.light, held))
+            log(String(format: "watch: %@ (%@%@light %.2f, %d frames held before)", answer,
+                       score.map { String(format: "score %.3f, yaw %.0f, ", $0, yaw) } ?? "",
+                       cm.map { String(format: "%.0f cm, ", $0) } ?? "", seen.light, held))
             lastWatch = answer
             held = 0
         }
-        tellWho(answer)
+        tellWho(answer, near: isNear, cm: cm)
         publish()
     }
 
-    private func tellWho(_ answer: String) {
-        DistributedNotificationCenter.default().postNotificationName(AppDelegate.whoNote, object: "de.docalvers.dochere",
-                                                                     userInfo: ["answer": answer], deliverImmediately: true)
+    /// One line a minute while watching: how far the face was (numbers only), to see Doc's usual distances.
+    private func logMinute() {
+        defer { minute = (Date(), [], 0) }
+        guard minute.frames > 0 else { return }
+        let sorted = minute.cm.sorted()
+        if sorted.isEmpty {
+            log("distance: no clear face in \(minute.frames) frames, near \(near.near ? "yes" : "no")")
+        } else {
+            log(String(format: "distance: median %.0f cm (%.0f..%.0f, %d of %d frames with a face), near %@, threshold %.0f cm",
+                       sorted[sorted.count / 2], sorted.first!, sorted.last!, sorted.count, minute.frames,
+                       near.near ? "yes" : "no", NearSettings.threshold))
+        }
+    }
+
+    /// The watching's answer for DocPhoto. "near" (1/0) and "cm" (the face box's distance, empty without a clear face)
+    /// ride along as a signal of their own, so "answer" keeps its meaning for everybody else.
+    private func tellWho(_ answer: String, near: Bool = false, cm: Double? = nil) {
+        DistributedNotificationCenter.default().postNotificationName(
+            AppDelegate.whoNote, object: "de.docalvers.dochere",
+            userInfo: ["answer": answer, "near": near ? "1" : "0", "cm": cm.map { String(format: "%.0f", $0) } ?? ""],
+            deliverImmediately: true)
     }
 
     /// When the next look is due although Doc types: soon after a suspected stranger (Timing.recheck), and at the
@@ -691,7 +810,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// as before: the background's "away" needs no steadying, and Doc coming back must not inherit an old "!".
     private func judge(_ seen: Seen?) {
         guard let seen = seen, seen.person else {
-            seenSteady = Steady(confirm: 2)
+            seenSteady = Steady(confirm: 2, sticky: false)
             rechecks = Timing.rechecks
             recheckAt = nil
             who = ""

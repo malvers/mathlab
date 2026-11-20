@@ -53,6 +53,8 @@ struct FaceCut {
     let contrast: Float     // spread (standard deviation) of the crop's brightness, 0…1
     let yaw: Float          // the head turned left/right in degrees (Vision; 0 = looking into the camera), nan if unknown
     let pitch: Float        // the head up/down in degrees, nan if unknown
+    let box: Float          // height of Vision's face box as a share of the picture height (for the distance)
+    let eyes: Float         // distance between the pupils as a share of the picture height
 }
 
 enum Tone {
@@ -107,8 +109,10 @@ enum FaceCutter {
 
         guard let crop = warp(image, from: points) else { return nil }
         let tone = Tone.of(crop)
+        let eyes = Float(hypot(points[1].x - points[0].x, points[1].y - points[0].y) / CGFloat(max(image.height, 1)))
         return FaceCut(crop: crop, quality: score, share: Float(face.boundingBox.width), light: tone.light,
-                       contrast: tone.contrast, yaw: degrees(turned?.yaw), pitch: degrees(turned?.pitch))
+                       contrast: tone.contrast, yaw: degrees(turned?.yaw), pitch: degrees(turned?.pitch),
+                       box: Float(face.boundingBox.height), eyes: eyes)
     }
 
     /// Eyes and mouth corners in picture pixels, top-left origin, ordered like the template.

@@ -26,7 +26,8 @@ Everything personal stays outside the repo, in `~/Library/Application Support/Do
     --evaluate          each doc photo against the others, other-*.jpg against all
     --crops             the aligned 112 x 112 crops into faces/crops/, to check the alignment
     --ask-who           one look: doc, other, away or unknown
-    --measure <s>       the watching camera, one line per frame: brightness, face, quality, score, steady answer
+    --measure <s>       the watching camera, one line per frame: brightness, face, quality, cm, score, steady answer
+    --distance <s>      the watching camera, one line per frame: distance in cm, recognised, steady answer, near
                         (--keep also writes the frames with a person to faces/dark/, to tune on them)
     --score <dir>       how a folder of Doc's frames scores (--prefix <name> picks some)
     --strangers <dir>   LFW-style folder of folders: one picture per person against Doc's prints
@@ -65,6 +66,49 @@ one). While a stranger is suspected or shown, DocHere looks again after 5 s even
 looks in a row, `Timing.recheck`/`rechecks`), and while "!" stays it keeps the 30 s pace despite keyboard and mouse.
 A look without a person still ends it at once. The log line carries the head pose and the steady answer, e.g.
 `who: doc (model 0.709, yaw -5, pitch 24) -> doc` (a weak face outside the pose range adds `, turned too far`).
+
+## Near enough (20.11.2026, experiment)
+
+Doc: the photos also showed while he stood a metre away. The watching now estimates how far the face is from the face
+box the landmarks give anyway (`closeness.swift`): a 13 cm box (2.07 x the pupil distance on Doc's pictures, 6.3 cm
+pupils) at a horizontal field of view of 65 degrees over the camera's full picture (square, 1552 x 1552 on this
+MacBook Air, the 480 x 480 frames are all of it). The field of view is a guess; one measurement at a known distance
+corrects it. Sitting normally measured 48..62 cm, the pupils agree.
+
+"near" comes after two frames at or below `nearCm`, "far" after two frames beyond `nearCm + nearMarginCm`; in between,
+and for frames without a clear face, the answer stays (30 such frames in a row end "near"). Each `who` notification
+carries `near` (1/0) and `cm` next to `answer`; only DocPhoto uses it ("doc" and near). The answer itself, DocBar's D
+and "!" and `--ask` for Solita are unchanged. The log gets each change (`near: yes (57 cm, threshold 75 cm)`) and one
+line a minute (`distance: median 55 cm (48..62, ...)`).
+
+    defaults write de.docalvers.dochere nearCm -float 75          # the threshold (0 = off, as before)
+    defaults write de.docalvers.dochere nearMarginCm -float 15    # hysteresis
+    defaults write de.docalvers.dochere distanceScale -float 1.0  # real cm / shown cm, after calibrating
+
+Read on every frame, no restart. The experiment, one line per frame (time, cm from the box and from the pupils, yaw,
+score, recognised, steady answer, near), also appended to `~/Library/Logs/DocHere-distance.log`, with a 5 s summary:
+
+    open -g -n -a /Applications/DocHere.app --args --distance 120
+    tail -f ~/Library/Logs/DocHere-distance.log
+
+Tests: `swiftc -parse-as-library -o /tmp/closeness-test closeness.swift steady.swift tests/closeness_test.swift && /tmp/closeness-test`
+
+## Sticky Doc (20.11.2026)
+
+Doc works facing the LG, the MacBook to his right: yaw 40..60 degrees is his normal pose, not an exception. There his
+scores hovered around 0.45 (0.10..0.55), five weak frames came every 20..60 s, and each made "other" for 2 s - DocPhoto
+hid the photos every time ("Jetzt geht es ständig weg und kommt"). Two changes:
+
+- `Steady` (now `steady.swift`): once "doc", only a run of faces all below 0.30 for 12 s (20 s when a face in it was
+  turned beyond 35 degrees, at least 3 frames) makes "other"; a face between 0.30 and 0.45 ends the run, and so
+  does a frame without a clear face or without a person. With two or
+  more faces in the frame the old rule holds (5 weak faces). Entering "doc" still needs 0.45, a stranger after "away"
+  is still "other" at once, and the background looks keep the old rule (`sticky: false`).
+- Eight frames of his working pose (yaw 41..59, 20.11.2026 daylight, from `--measure --keep`) are enrolled as
+  `doc-12-lg-1..8.jpg`: 23 prints. The old ones are kept as `doc-prints-vor-lg-2011.json`.
+
+DocPhoto hides only after 10 s of "not doc or not near" (an empty chair: two answers, as before) and shows again at the
+first "doc" that is near.
 
 ## Watching for DocPhoto
 
