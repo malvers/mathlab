@@ -64,7 +64,7 @@ public class Antwort extends BroadcastReceiver {
         // the answer to a silent call is reported on the silent channel: no sound even if the call's banner is gone
         Notification.Builder b = new Notification.Builder(c, Rufe.still(c, id) ? RufService.CH_STILL : RufService.CH_CALL)
                 .setSmallIcon(R.drawable.ic_ruf)
-                .setColor(0xFFF5C242)
+                .setColor(RufService.NOTE_COLOR)
                 .setContentTitle(ok ? "Antwort ist unterwegs ✓" : "Antwort ging nicht raus")
                 .setContentText(text)
                 .setStyle(new Notification.BigTextStyle().bigText(text))

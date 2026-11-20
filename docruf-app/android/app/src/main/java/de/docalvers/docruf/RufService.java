@@ -53,6 +53,9 @@ public class RufService extends Service {
     static final String TAG_STILL = "still";   // the ntfy.sh tag of a silent call (docruf-send.mjs --still)
     static final int NOTE_LINE = 1;
     static final long STALE_S = 600;            // a call found after a long gap is only listed, not rung
+    // the colour of every notification DocCall posts, and so of the launcher's dot on its icon:
+    // phi-green of Doc's palette, rgb(121, 158, 49), like MainActivity.PHI (Doc, 19.11.2026: green instead of gold)
+    static final int NOTE_COLOR = 0xFF799E31;
 
     // read by the screen once a second
     static volatile String state = "aus";        // aus | verbinde | verbunden | getrennt | kein Kanal
@@ -79,6 +82,7 @@ public class RufService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Notification n = new Notification.Builder(this, CH_LINE)
                 .setSmallIcon(R.drawable.ic_ruf)
+                .setColor(NOTE_COLOR)
                 .setContentTitle("DocCall hört zu")
                 .setContentText("Solita kann Dich hier rufen.")
                 .setOngoing(true)
@@ -237,7 +241,7 @@ public class RufService extends Service {
     private Notification callNote(String id, long time, String title, String text, boolean still) {
         Notification.Builder b = new Notification.Builder(this, still ? CH_STILL : CH_CALL)
                 .setSmallIcon(R.drawable.ic_ruf)
-                .setColor(0xFFF5C242)
+                .setColor(NOTE_COLOR)
                 .setCategory(Notification.CATEGORY_MESSAGE)
                 .setWhen(time * 1000)
                 .setShowWhen(true)
