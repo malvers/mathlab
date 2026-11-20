@@ -1,4 +1,4 @@
-/* DocFit "Fasting" - the app's look: dark navy, cards, Orbitron, Doc's palette (lambda / upsilon / phi). */
+/* DocFit "Fasten" - the app's look: dark navy, cards, Orbitron, Doc's palette (lambda / upsilon / phi). */
 @font-face {
   font-family: "Orbitron";
   src: url("fonts/orbitron.ttf") format("truetype");
@@ -37,20 +37,22 @@
   --orb: "Orbitron", system-ui, sans-serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
-/* Grau: neutral grey grounds, the accents as in Blau */
+/* Grau: neutral grey grounds, the accents as in Blau; page and cards a step further apart than in the svp, as in the
+   app's Palette (Doc, 20.11.2026: "Im Graumodus müsste sich der Hintergrund und die Cards noch ein bisschen mehr
+   absetzen") */
 html.svp-grey {
-  --bg: rgb(26, 26, 28);
-  --card: rgb(37, 37, 40);
-  --card-2: rgb(50, 50, 54);
+  --bg: rgb(19, 19, 21);
+  --card: rgb(44, 44, 48);
+  --card-2: rgb(58, 58, 63);
   --text: rgb(212, 212, 216);
   --muted: rgba(212, 212, 216, 0.62);
   --line: rgba(205, 210, 220, 0.18);
   --c-grid: rgba(212, 212, 216, 0.08);
   --c-band: rgba(245, 194, 66, 0.07);
   --c-event: rgb(170, 170, 176);
-  --c-tip: rgba(26, 26, 28, 0.96);
+  --c-tip: rgba(19, 19, 21, 0.96);
   --c-tip-rim: rgba(212, 212, 216, 0.2);
-  --c-label-bg: rgba(26, 26, 28, 0.85);
+  --c-label-bg: rgba(19, 19, 21, 0.85);
   --zoom-backdrop: rgba(8, 8, 10, 0.74);
 }
 /* Hell: white cards, dark text; orange text and lines would vanish on white, so lambda as text and the chart lines
@@ -113,7 +115,7 @@ body.app .top { display: none; }
   width: calc(100% - 32px);
 }
 .nav::-webkit-scrollbar { display: none; }
-body.app .nav { margin-top: 4px; width: calc(100% - 8px); }
+body.app .nav { margin-top: 4px; width: 100%; }
 .chip {
   flex: 0 0 auto;
   border: 0;
@@ -134,7 +136,8 @@ body.app .nav { margin-top: 4px; width: calc(100% - 8px); }
 .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .wrap { max-width: 1200px; margin: 0 auto; padding: 4px 16px 32px; }
-body.app .wrap { padding: 0 4px 24px; }
+/* in the app DocFit's page margin is the only one at the sides (Doc, 20.11.2026: "da ist mehr Platz zur Seite") */
+body.app .wrap { padding: 0 0 24px; }
 
 .head {
   font-family: var(--orb);
@@ -148,19 +151,24 @@ body.app .wrap { padding: 0 4px 24px; }
 .hint { color: var(--muted); font-size: 13px; }
 .warn { color: var(--warn); font-size: 13px; margin-top: 6px; }
 
-/* small segmented controls inside a card */
-.seg { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.seg .chip { background: var(--bg); padding: 8px 10px; font-size: 12px; }
+/* small segmented controls inside a card: they wrap, so every button is in sight - no row to scroll sideways (Doc,
+   20.11.2026: "ein bisschen schmaler, sodass die Tasten auch hinpassen"); still 32 px high to tap */
+.seg { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.seg .chip { background: var(--bg); padding: 6px 9px; font-size: 11px; min-height: 32px; }
 .seg .chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-ink); }
 .seg.onpage .chip { background: var(--card); }
 .seg.onpage .chip[aria-pressed="true"] { background: var(--chip-on); }
 .seg.toggles .chip[aria-pressed="false"] { opacity: 0.45; }
-/* phone: the measures in one row that scrolls sideways instead of five rows of buttons */
-@media (max-width: 699px) {
-  .seg.scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-left: -14px; margin-right: -14px; padding: 0 14px; }
-  .seg.scroll::-webkit-scrollbar { display: none; }
-}
 .seg.toggles .chip[aria-pressed="true"] { background: var(--card-2); color: var(--text); }
+/* the legend under the comparison chart: "Jan 21" with a dot in the fast's colour, several to a line */
+.seg.legendchips { gap: 4px; margin: 8px 0 6px; }
+.seg.legendchips .chip { padding: 4px 9px 4px 8px; gap: 6px; }
+.seg.legendchips .chip .key { width: 9px; height: 9px; border-radius: 50%; }
+/* phone: the cards give their padding to the charts */
+@media (max-width: 699px) {
+  .card { padding: 10px; }
+  .fast { padding-left: 14px; }
+}
 .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
 
 .plot { position: relative; height: 300px; }

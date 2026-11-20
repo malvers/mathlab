@@ -27,6 +27,17 @@ public class PaletteTest {
     }
 
     @Test
+    public void greyCardsStandOutFromThePage() {
+        // Doc, 20.11.2026: "Im Graumodus müsste sich der Hintergrund und die Cards noch ein bisschen mehr absetzen"
+        Palette g = Palette.of("grey");
+        assertEquals(0xFF131315, g.bg);
+        assertEquals(0xFF2C2C30, g.card);
+        assertTrue(contrast(g.card, g.bg) >= 1.3);                            // was 1.14 (#252528 on #1A1A1C)
+        assertTrue(contrast(g.card, g.bg) > contrast(Palette.of("dark").card, Palette.of("dark").bg));
+        assertEquals(g.bg, Palette.DOTS[Palette.index("grey")]);
+    }
+
+    @Test
     public void overMixesTowardsTheGround() {
         assertEquals(0xFFFFFFFF, Palette.over(0xFF000000, 0f, 0xFFFFFFFF));
         assertEquals(0xFF000000, Palette.over(0xFF000000, 1f, 0xFFFFFFFF));
@@ -40,9 +51,17 @@ public class PaletteTest {
             assertTrue(k + " text", contrast(p.text, p.card) >= 7);
             assertTrue(k + " muted", contrast(p.muted, p.card) >= 3);
             assertTrue(k + " accent", contrast(p.accent, p.card) >= 4.5);
-            assertTrue(k + " pill label", contrast(p.muted, p.bg) >= 3);   // the labels of all pills (date, KÖRPERFETT ...)
-            assertTrue(k + " pill value", contrast(p.text, p.bg) >= 7);    // the tiles' values
-            assertTrue(k + " weight", contrast(p.accent, p.bg) >= 4.5);    // the weight in its pill
+            // the pills stand on the page in the card colour (since 20.11.2026): label, values, weight on the card
+            assertTrue(k + " pill label", contrast(p.muted, p.card) >= 3);   // date, KÖRPERFETT, WHtR · GUT ...
+            assertTrue(k + " pill value", contrast(p.text, p.card) >= 7);    // the tiles' values
+            assertTrue(k + " weight", contrast(p.accent, p.card) >= 4.5);    // the weight in its pill, "+" for a girth
+            // WHtR / WHR in the colour of their reading, 20sp Orbitron in a pill: good, increased, high
+            assertTrue(k + " good", contrast(p.phi, p.card) >= 3);
+            assertTrue(k + " increased", contrast(p.scoreMid, p.card) >= 3);
+            assertTrue(k + " high", contrast(p.alarm, p.card) >= 3);
+            // the stopwatch digits while ready are green (Doc, 20.11.2026), and "DocFit Start" above them
+            assertTrue(k + " ready", contrast(p.phi, p.bg) >= 4.5);
+            assertTrue(k + " running", contrast(p.alarm, p.bg) >= 4.5);   // the digits while the stopwatch runs
             assertTrue(k + " tab", contrast(p.chipOnInk, p.chipOn) >= 4.5);
             assertTrue(k + " stopp", contrast(p.onUpsilon, p.upsilon) >= 3);
             assertTrue(k + " start", contrast(p.onPhi, p.phi) >= 3);

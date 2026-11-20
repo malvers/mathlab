@@ -4,7 +4,9 @@ package de.docalvers.docfit;
  * Doc's three colour schemes, "wie immer" (Doc, 19.11.2026: "ein Gray-Design ... und auch ein helles"): the names,
  * keys and values of DocDo and the Stoffverteilungsplan (HTML/svp/svp-tokens.css, HTML/todo/index.html):
  * - "Blau" (key dark): DocFit's own navy, unchanged;
- * - "Grau" (key grey, html.svp-grey): neutral grey grounds, the accents as in Blau;
+ * - "Grau" (key grey, html.svp-grey): neutral grey grounds, the accents as in Blau; page and cards one step further
+ *   apart than in the svp (Doc, 20.11.2026: "Im Graumodus müsste sich der Hintergrund und die Cards noch ein bisschen
+ *   mehr absetzen"): page #131315 instead of #1A1A1C, cards #2C2C30 instead of #252528 - contrast 1.33 instead of 1.14;
  * - "Hell" (key light, html.svp-light): white cards and dark text; orange as text would vanish on white, so lambda as
  *   text takes the svp blue (as in DocDo), the fills keep Doc's orange, softened like DocDo's pills (38 %).
  * The one place for DocFit's colours - the screen (MainActivity) takes every colour from here; the fasting page has
@@ -14,7 +16,7 @@ final class Palette {
     static final String[] KEYS = {"dark", "grey", "light"};
     static final String[] NAMES = {"Blau", "Grau", "Hell"};
     /** the page colour of each scheme, for the dot next to its name */
-    static final int[] DOTS = {0xFF0A1428, 0xFF1A1A1C, 0xFFF6F8FC};
+    static final int[] DOTS = {0xFF0A1428, 0xFF131315, 0xFFF6F8FC};
 
     private static final int ORANGE = 0xFFF5C242, RED = 0xFFB02418, GREEN = 0xFF799E31;
 
@@ -30,6 +32,12 @@ final class Palette {
     final int chipOn, chipOnInk;
     /** the fitness bar from 1 to 10 (red, orange, green); Hell one step darker so the number stays readable on white */
     final int scoreLow, scoreMid, scoreHigh;
+    /**
+     * upsilon red as ink - a value in the "high" zone, the running stopwatch (Doc, 20.11.2026: "wir machen die rot, wenn
+     * sie läuft"): Doc's red is too dark on the navy and grey grounds, so there a brighter red (#E5533F, contrast >= 4.5
+     * on the page); Hell keeps Doc's red
+     */
+    final int alarm;
 
     private Palette(String key, boolean light, int bg, int card, int text, int muted, int accent, int phi,
                     int onPhi, int onUpsilon, int chipOn, int chipOnInk) {
@@ -49,6 +57,7 @@ final class Palette {
         this.scoreLow = RED;
         this.scoreMid = light ? 0xFFB07A00 : ORANGE;
         this.scoreHigh = light ? 0xFF5C7A20 : GREEN;
+        this.alarm = light ? RED : 0xFFE5533F;
     }
 
     static Palette of(String key) {
@@ -58,8 +67,8 @@ final class Palette {
         }
         if ("grey".equals(key)) {
             // muted = rgba(212, 212, 216, .62) of svp-grey on its ground
-            return new Palette("grey", false, 0xFF1A1A1C, 0xFF252528, 0xFFD4D4D8, 0xFF8D8D90, ORANGE, GREEN,
-                    0xFF1A1A1C, 0xFFD4D4D8, ORANGE, 0xFF1A1A1C);
+            return new Palette("grey", false, 0xFF131315, 0xFF2C2C30, 0xFFD4D4D8, 0xFF8D8D90, ORANGE, GREEN,
+                    0xFF131315, 0xFFD4D4D8, ORANGE, 0xFF131315);
         }
         return new Palette("dark", false, 0xFF0A1428, 0xFF0E244E, 0xFFEEEEEE, 0xFF8A93A6, ORANGE, GREEN,
                 0xFF0A1428, 0xFFEEEEEE, ORANGE, 0xFF0A1428);

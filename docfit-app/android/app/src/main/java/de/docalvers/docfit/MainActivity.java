@@ -8,6 +8,7 @@ import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -15,6 +16,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
@@ -27,6 +29,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -43,6 +46,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -67,8 +71,9 @@ import java.util.function.IntConsumer;
  * ein").
  *
  * Three tabs under the title:
- * - "Stoppuhr": the state in words (BEREIT / LÄUFT / GESTOPPT) with a line saying whether the phone is listening, the
- *   big stopwatch, Start and Stopp as a fallback for the voice, "Zurücksetzen" to clear the stopped time, and the list
+ * - "Stoppuhr": the command to say next ("DocFit Start", while running "DocFit Stopp" - Doc, 20.11.2026: "‚bereit'
+ *   und ‚gestoppt' bitte weg, nimmt Platz weg") with a line saying whether the phone is listening, the big stopwatch
+ *   (green while ready), Start, Stopp and Reset as three equal buttons (Reset clears the stopped time), and the list
  *   of times - newest first, swipe a row away to delete it (with "Rückgängig"; deleting the time on the display clears
  *   the display too, LastRun). While DocFit is open the screen stays on. The microphone listens (KeywordListener) for
  *   "DocFit Start" / "DocFit Stopp" only while this tab is shown - on "Waage" and in the background voice control is
@@ -76,12 +81,16 @@ import java.util.function.IntConsumer;
  *   Start and stop confirm with a short buzz and a beep.
  * - "Waage": while it is open the phone looks for the scale (ScaleLink). A state line says what happens ("Stell dich
  *   auf die Waage …", connecting, measuring, done), the last weigh-in stands big with fat, water, muscle and BMI
- *   (BodyComposition, from the profile Doc enters under "Profil"), a fitness score 1-10 with what the values mean
- *   (FitnessScore, ScoreBar), and the list of weigh-ins below, swipe to delete.
- * - "Fasting" (Doc, 19.11.2026: "DocFit ... eine extra Rubrik ... Fasting"): Doc's fasts from his workbook, a chart
+ *   (BodyComposition, from the profile Doc enters under "Profil"), waist and hip typed in by hand with their ratios
+ *   (Girths), a fitness score 1-10 with what the values mean (FitnessScore, ScoreBar), and the list of weigh-ins
+ *   below, swipe to delete, tap to enter waist and hip. Scrolling the list up pushes the big card away until a compact
+ *   bar is left (CollapsingHeader: date and weight, fat, fitness - or the state of a running weigh-in).
+ * - "Fasten" (Doc, 19.11.2026: "DocFit ... eine extra Rubrik ... Fasting", 20.11.: "schreibt bitte Fasten, wir haben es
+ *   ja nun mal Deutsch"): Doc's fasts from his workbook, a chart
  *   grid per fast like his Excel dashboard and all fasts on top of each other from day 1 - the page web/fasting/
  *   (Chart.js, offline) shown in a WebView from the APK's assets; its data file is private and never in git.
- * The gear next to the title chooses the colour scheme, as in Doc's other apps: Blau, Grau, Hell (Palette).
+ * The gear next to the title opens the settings: the colour scheme as in Doc's other apps - Blau, Grau, Hell (Palette)
+ * - and "Messmethode", where the scale's values come from. All tabs share one page margin (PAGE_SIDE).
  * Everything stays on the phone (Entries, Weighings, Profile in the app's preferences; no internet permission).
  */
 public class MainActivity extends Activity implements KeywordListener.Callback, ScaleLink.Callback {
@@ -94,6 +103,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private static final String FASTING_PAGE = "file:///android_asset/fasting/index.html";
     private static final long DEBOUNCE_MS = 1500;   // one word must not start and at once stop again
     private static final long UNDO_MS = 5000;
+    // the page margin left and right, the same on every tab (Doc, 20.11.2026: "Links und rechts geht das breiter")
+    private static final int PAGE_SIDE = 12;
 
     private final Handler ui = new Handler(Looper.getMainLooper());
     private SharedPreferences prefs;
@@ -121,7 +132,15 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private int tab;
     private String doneText;
     private TextView tabWatch, tabScale, tabFast, scaleState, resWhen, resNote, scaleEmpty;
-    private DigitsView resWeight, resFat, resWater, resMuscle, resBmi;
+    private DigitsView resWeight;
+    // the tiles under the weight: value, range bar and reference line (Ranges)
+    private Tile tFat, tWater, tMuscle, tBmi, tWaist, tWhtr, tHip, tWhr;
+    // the big card gives way to the list; collapsed, the compact bar shows the newest weigh-in or a running one
+    private CollapsingHeader scaleHead;
+    private View compactPills;
+    private TextView compactWhen, compactState;
+    private DigitsView compactWeight, compactFat, compactFit;
+    private boolean scaleWasBusy;
     private RecyclerView scaleList;
     private ScaleAdapter scaleAdapter;
     private View fitBox, fitHead;
@@ -188,6 +207,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         StorageService.unpack(this, "model-de", "model", m -> {
             model = m;
             listener = new KeywordListener(m, this);
+            listener.setWatchRunning(runStart != 0);
             listenIfAllowed();
             refresh();
         }, e -> {
@@ -242,14 +262,32 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     /**
-     * "Farbschema" behind the gear: Blau / Grau / Hell like in DocDo, each with a dot of its page colour. The choice is
-     * kept in the app's preferences ("theme", DocDo's keys) and the screen is built again in it.
+     * The settings behind the gear. "Farbschema": Blau / Grau / Hell like in DocDo, each with a dot of its page colour;
+     * the choice is kept in the app's preferences ("theme", DocDo's keys) and the screen is built again in it.
+     * "Messmethode": the newest resistance and where the scale tab's values come from (Doc, 20.11.2026: "tu ihn unter
+     * Einstellungen irgendwohin, damit wir da nicht den Platz verschwenden").
      */
-    private void chooseTheme() {
+    private void openSettings() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(20), 0, dp(20), dp(8));
+        box.addView(smallLabel("FARBSCHEMA"));
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(dp(20), dp(12), dp(20), dp(4));
-        AlertDialog d = dialog("Farbschema").setView(row).setNegativeButton("Schließen", null).create();
+        LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        rp.topMargin = dp(8);
+        box.addView(row, rp);
+        TextView methodLabel = smallLabel("MESSMETHODE");
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(22);
+        box.addView(methodLabel, lp);
+        TextView method = text(ScaleTexts.method(weighings.newestMeasured()), 13, TEXT, false);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(6);
+        box.addView(method, lp);
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(box);
+        AlertDialog d = dialog("Einstellungen").setView(scroll).setNegativeButton("Schließen", null).create();
         int current = Palette.index(pal.key);
         for (int i = 0; i < Palette.KEYS.length; i++) {
             boolean on = i == current;
@@ -274,9 +312,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                 prefs.edit().putString("theme", key).apply();
                 recreate();
             });
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(44), 1f);
-            lp.setMargins(dp(4), 0, dp(4), 0);
-            row.addView(b, lp);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(44), 1f);
+            cp.setMargins(i == 0 ? 0 : dp(4), 0, i == Palette.KEYS.length - 1 ? 0 : dp(4), 0);
+            row.addView(b, cp);
         }
         show(d);
     }
@@ -284,7 +322,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     /**
      * Turning the phone (Doc, 19.11.2026: "ja, drehen lassen" - the big fasting charts on their side): the manifest keeps
      * the activity on a turn (configChanges), so the stopwatch, the voice listener, a weigh-in and the page with an open
-     * big chart simply go on. Only the "Fasting" tab may turn; Stoppuhr and Waage stay upright - their buttons and the
+     * big chart simply go on. Only the "Fasten" tab may turn; Stoppuhr and Waage stay upright - their buttons and the
      * scale card do not fit into a phone's height on its side.
      */
     private void allowTurn() {
@@ -311,7 +349,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                 && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         head.setVisibility(full ? View.GONE : View.VISIBLE);
         tabBar.setVisibility(full ? View.GONE : View.VISIBLE);
-        frame.setPadding(full ? 0 : dp(20), full ? 0 : dp(16), full ? 0 : dp(20), full ? 0 : dp(12));
+        frame.setPadding(full ? 0 : dp(PAGE_SIDE), full ? 0 : dp(12), full ? 0 : dp(PAGE_SIDE), full ? 0 : dp(12));
         if (full) getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
@@ -373,6 +411,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         runStart = at;
         lastChange = System.currentTimeMillis();
         prefs.edit().putLong("runStart", runStart).apply();
+        if (listener != null) listener.setWatchRunning(true);
         confirm(true);
         ui.removeCallbacks(tick);
         ui.post(tick);
@@ -388,13 +427,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         runStart = 0;
         lastChange = System.currentTimeMillis();
         prefs.edit().putLong("runStart", 0).apply();
+        if (listener != null) listener.setWatchRunning(false);
         saveLast();
         ui.removeCallbacks(tick);
         confirm(false);
         refresh();
     }
 
-    /** "Zurücksetzen": the display back to 00:00 (BEREIT); the time stays in the list. */
+    /** "Reset": the display back to 00:00 (ready, green); the time stays in the list. */
     private void reset() {
         if (!LastRun.canReset(runStart != 0, last)) return;
         last = LastRun.NONE;
@@ -418,10 +458,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     private void refresh() {
         boolean running = runStart != 0;
-        state.setText(running ? "LÄUFT" : last.shown() ? "GESTOPPT" : "BEREIT");
-        state.setTextColor(running ? LAMBDA : last.shown() ? UPSILON : PHI);
+        // the command to say next instead of a state word (Doc, 20.11.2026: "schreiben nur hin, ohne
+        // Anführungszeichen, DocFit Start. Und wenn es läuft, DocFit Stopp") - exactly the words Commands listens for
+        state.setText(running ? "DocFit Stopp" : "DocFit Start");
+        state.setTextColor(running ? LAMBDA : PHI);
         if (!running) timer.setText(Times.duration(last.shown() ? last.duration : 0));
-        timer.setTextColor(running ? TEXT : last.shown() ? LAMBDA : MUTED);
+        // ready green, running red, stopped orange - never grey (Doc, 20.11.2026: "wenn das Ding bereit ist, machen wir
+        // die Zahlen ... grün", "Wenn die Stoppuhr läuft, ist die grau ... wir machen die rot")
+        timer.setTextColor(running ? pal.alarm : last.shown() ? LAMBDA : PHI);
         boolean canReset = LastRun.canReset(running, last);
         startBtn.setEnabled(!running);
         stopBtn.setEnabled(running);
@@ -429,19 +473,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         startBtn.setAlpha(running ? 0.35f : 1f);
         stopBtn.setAlpha(running ? 1f : 0.35f);
         resetBtn.setAlpha(canReset ? 1f : 0.35f);
-        if (earProblem != null) {
-            ear.setText(earProblem);
-            ear.setTextColor(UPSILON);
-        } else if (listener == null) {
-            ear.setText("Lade Spracherkennung …");
-            ear.setTextColor(MUTED);
-        } else if (listener.isRunning()) {
-            ear.setText(running ? "● hört zu – sag „DocFit Stopp“" : "● hört zu – sag „DocFit Start“");
-            ear.setTextColor(PHI);
-        } else {
-            ear.setText("○ hört gerade nicht zu");
-            ear.setTextColor(MUTED);
-        }
+        // no word and no sign for listening (Doc, 20.11.2026: "‚hört zu' braucht man nicht", then "den Kreis bitte
+        // wegmachen"); only a problem says what it is
+        ear.setText(earProblem == null ? "" : earProblem);
+        ear.setVisibility(earProblem == null ? View.GONE : View.VISIBLE);
         empty.setVisibility(entries.size() == 0 ? View.VISIBLE : View.GONE);
     }
 
@@ -529,7 +564,25 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     @Override
     public void onScaleStatus(ScaleLink.Status status, int centiKg) {
+        boolean busy = scaleBusy();
+        // somebody steps on the scale: the big card comes back, whatever the list was scrolled to
+        if (busy && !scaleWasBusy && scaleHead != null) scaleHead.setOpen(true, true);
+        scaleWasBusy = busy;
         refreshScale();
+    }
+
+    /** A weigh-in is under way: the scale is connecting, waiting for a foot, weighing or measuring the resistance. */
+    private boolean scaleBusy() {
+        if (!scale.isActive()) return false;
+        switch (scale.status()) {
+            case CONNECTING:
+            case WAITING:
+            case SETTLING:
+            case IMPEDANCE:
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -539,10 +592,12 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             case NEW:
                 scaleAdapter.notifyItemInserted(0);
                 scaleList.scrollToPosition(0);
+                scaleHead.setOpen(true, true);
                 confirm(true);
                 break;
             case COMPLETED:
                 scaleAdapter.notifyItemChanged(0);
+                scaleHead.setOpen(true, true);
                 confirm(true);
                 break;
             default:
@@ -557,9 +612,11 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         String s;
         int color;
         int w = scale.statusWeight();
+        boolean problem = false;   // something to fix: the compact bar shows it instead of the values, like a weigh-in
         if (!hasBluetoothPermission() || scale.status() == ScaleLink.Status.NO_PERMISSION && scale.isActive()) {
             s = "Bluetooth nicht erlaubt – hier tippen";
             color = UPSILON;
+            problem = true;
         } else if (!scale.isActive()) {
             s = "Stell dich auf die Waage …";
             color = MUTED;
@@ -568,6 +625,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                 case BLUETOOTH_OFF:
                     s = "Bluetooth ist aus – hier tippen zum Einschalten";
                     color = UPSILON;
+                    problem = true;
                     break;
                 case CONNECTING:
                     s = "Waage gefunden – verbinde …";
@@ -596,32 +654,142 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
         scaleState.setText(s);
         scaleState.setTextColor(color);
+        boolean live = problem || scaleBusy();
+        compactState.setText(s);
+        compactState.setTextColor(color);
+        compactState.setVisibility(live ? View.VISIBLE : View.INVISIBLE);
+        compactPills.setVisibility(live ? View.INVISIBLE : View.VISIBLE);
 
-        DigitsView[] tiles = {resFat, resWater, resMuscle, resBmi};
         if (weighings.size() == 0) {
             resWeight.setText("–");
             resWeight.setTextColor(MUTED);
             resWhen.setText(ScaleTexts.when(null));
-            for (DigitsView t : tiles) t.setText("–");
-            resNote.setText(ScaleTexts.note(null, profile));
-            resNote.setTextColor(MUTED);
+            for (Tile t : new Tile[]{tFat, tWater, tMuscle, tBmi, tWaist, tWhtr, tHip, tWhr}) t.show("–", null);
+            showNote(ScaleTexts.note(null, profile), MUTED);
             fitBox.setVisibility(View.GONE);
+            compactWhen.setText("");
+            compactWeight.setText("–");
+            compactFat.setText("–");
+            compactFit.setText("–");
+            compactFit.setTextColor(MUTED);
         } else {
             Weighings.Weighing last = weighings.get(0);
             BodyComposition bc = BodyComposition.of(last, profile);
+            FitnessScore fit = FitnessScore.of(last, profile);
             resWeight.setText(Times.kg(last.kg()));
             resWeight.setTextColor(LAMBDA);
             resWhen.setText(ScaleTexts.when(last));
-            resFat.setText(Times.one(bc.fatPercent, "%"));
-            resWater.setText(Times.one(bc.waterPercent, "%"));
-            resMuscle.setText(Times.one(bc.muscleKg, "kg"));
-            resBmi.setText(Times.one(bc.bmi, ""));
+            Calendar when = Calendar.getInstance();
+            when.setTimeInMillis(last.time);
+            int age = profile.ageIn(when.get(Calendar.YEAR));
+            tFat.show(Times.one(bc.fatPercent, "%"), Ranges.fat(bc.fatPercent, profile.sex, age));
+            tWater.show(Times.one(bc.waterPercent, "%"), Ranges.water(bc.waterPercent, profile.sex));
+            tMuscle.show(Times.one(bc.muscleKg, "kg"), Ranges.muscle(bc.muscleKg, profile.heightCm, profile.sex));
+            tBmi.show(Times.one(bc.bmi, ""), Double.isNaN(bc.bmi) ? null : Ranges.bmi(bc.bmi));
+            showGirths(last);
             // a weight without a usable resistance says so plainly instead of four silent dashes
-            resNote.setText(ScaleTexts.note(last, profile));
-            resNote.setTextColor(ScaleTexts.fatMissing(last, profile) ? LAMBDA : MUTED);
-            showFitness(FitnessScore.of(last, profile));
+            showNote(ScaleTexts.note(last, profile), ScaleTexts.fatMissing(last, profile) ? LAMBDA : MUTED);
+            showFitness(fit);
+            compactWhen.setText(ScaleTexts.whenShort(last));
+            compactWeight.setText(Times.kg(last.kg()));
+            compactFat.setText(Times.one(bc.fatPercent, "%"));
+            compactFit.setText(fit.score > 0 ? String.valueOf(fit.score) : "–");
+            compactFit.setTextColor(fit.score > 0
+                    ? ScoreBar.colorFor(fit.score, pal.scoreLow, pal.scoreMid, pal.scoreHigh) : MUTED);
         }
         scaleEmpty.setVisibility(weighings.size() == 0 ? View.VISIBLE : View.GONE);
+    }
+
+    /** The note under the score; gone when there is nothing to say. */
+    private void showNote(String note, int color) {
+        resNote.setText(note);
+        resNote.setTextColor(color);
+        resNote.setVisibility(note.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    /**
+     * BAUCH and HÜFTE of the newest weigh-in ("+" = tap to enter them), BAUCH/GRÖSSE and BAUCH/HÜFTE made of them,
+     * each with its range bar (Ranges: WHO 2008, Ashwell 2016).
+     */
+    private void showGirths(Weighings.Weighing last) {
+        if (last.hasWaist()) {
+            tWaist.show(Girths.cm(last.waistMm), Ranges.waist(last.waistMm, profile.sex));
+        } else {
+            tWaist.offer("+ Bauch eintragen");
+        }
+        if (last.hasHip()) {
+            tHip.show(Girths.cm(last.hipMm), null);
+            tHip.note.setText("für Bauch/Hüfte");   // no reading of its own
+        } else {
+            tHip.offer("+ Hüfte eintragen");
+        }
+        int whtr = Girths.waistToHeight(last.waistMm, profile.heightCm);
+        if (whtr > 0) tWhtr.show(Girths.ratio(whtr), Ranges.waistToHeight(whtr));
+        else tWhtr.offer(last.hasWaist() ? "Größe im Profil fehlt" : "+ Bauch eintragen");
+        int whr = Girths.waistToHip(last.waistMm, last.hipMm);
+        if (whr > 0) tWhr.show(Girths.ratio(whr), Ranges.waistToHip(whr, profile.sex));
+        else tWhr.offer(last.hasWaist() ? "+ Hüfte eintragen" : "+ Bauch eintragen");
+    }
+
+    /** The ink of a value in the colour of its zone: green good, orange borderline, red high; plain without one. */
+    private int zoneColor(Ranges.Scale s) {
+        Ranges.Zone z = s == null ? null : s.zone();
+        if (z == null) return TEXT;
+        return z == Ranges.Zone.GOOD ? PHI : z == Ranges.Zone.BORDER ? pal.scoreMid : pal.alarm;
+    }
+
+    /**
+     * One tile under the weight (Doc, 20.11.2026: "Wir müssen die Informationen immer in die jeweilige Kachel bringen
+     * ... Und in jede Kachel so einen kleinen Slider"): label, value in the colour of its zone, the range bar and the
+     * reference line - all in the shared pill.
+     */
+    private final class Tile {
+        final TileInfo.Key key;
+        final DigitsView value;
+        final RangeBar bar;
+        final TextView note;
+        boolean offering;   // empty, showing "+ … eintragen"
+
+        Tile(TileInfo.Key key, DigitsView value, RangeBar bar, TextView note) {
+            this.key = key;
+            this.value = value;
+            this.bar = bar;
+            this.note = note;
+        }
+
+        /**
+         * A tap: the detail sheet with explanation and course (Doc, 20.11.2026); an empty Bauch / Hüfte tile goes
+         * straight to the entry, the filled ones have "Ändern" in their sheet.
+         */
+        void tapped() {
+            if (weighings.size() == 0) return;
+            if (offering && TileInfo.typedIn(key)) editGirths(0);
+            else openInfo(key);
+        }
+
+        /** A value with its reading; without a value ("–") no bar and no line - nothing to read yet. */
+        void show(String text, Ranges.Scale s) {
+            offering = false;
+            boolean has = s != null && s.hasValue();
+            value.setText(text);
+            value.setTextColor(has ? zoneColor(s) : TEXT);
+            bar.setScale(has ? s : null);
+            note.setText(has ? s.note : "");
+            note.setTextColor(MUTED);
+        }
+
+        /**
+         * Nothing typed in yet: "–" and, where the bar would be, what to tap in λ (Doc, 20.11.2026, looking for where
+         * to enter the hip: it must be obvious). The whole tile opens the dialog.
+         */
+        void offer(String what) {
+            offering = true;
+            value.setText("–");
+            value.setTextColor(MUTED);
+            bar.setScale(null);
+            note.setText(what);
+            note.setTextColor(what.startsWith("+") ? LAMBDA : MUTED);
+        }
     }
 
     /** The score block under the tiles; without a score only the short hint why. */
@@ -631,8 +799,11 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         fitHead.setVisibility(has ? View.VISIBLE : View.GONE);
         fitBar.setVisibility(has ? View.VISIBLE : View.GONE);
         fitNote.setVisibility(has ? View.VISIBLE : View.GONE);
+        // with a score only the bar, its word and the disclaimer - what the values mean stands in their tiles (Doc,
+        // 20.11.2026: "Den Text unter ‚8 fit' weg ... das steht ja schon oben"); without one the hint why
         fitText.setText(f.text);
-        fitText.setTextColor(has ? TEXT : MUTED);
+        fitText.setTextColor(MUTED);
+        fitText.setVisibility(has ? View.GONE : View.VISIBLE);
         if (!has) return;
         int color = ScoreBar.colorFor(f.score, pal.scoreLow, pal.scoreMid, pal.scoreHigh);
         fitNumber.setText(String.valueOf(f.score));
@@ -647,12 +818,12 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(24), dp(4), dp(24), 0);
-        box.addView(text("Für Körperfett, Wasser, Muskel und BMI. Bleibt nur auf diesem Smartphone.", 14, MUTED, false));
+        box.addView(text("Für Körperfett, Wasser, Muskel, BMI und Bauch/Größe. Bleibt nur auf diesem Smartphone.", 14,
+                MUTED, false));
         EditText height = numberField(box, "GRÖSSE IN CM", profile.hasHeight() ? String.valueOf(profile.heightCm) : "", 3);
         EditText year = numberField(box, "GEBURTSJAHR", profile.birthYear >= Profile.MIN_YEAR
                 ? String.valueOf(profile.birthYear) : "", 4);
-        TextView label = text("GESCHLECHT", 12, MUTED, true);
-        label.setLetterSpacing(0.1f);
+        TextView label = smallLabel("GESCHLECHT");
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(16);
         box.addView(label, lp);
@@ -706,6 +877,67 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             scaleAdapter.notifyDataSetChanged();
             refreshScale();
         });
+    }
+
+    /**
+     * Waist and hip for one weigh-in (Doc, 20.11.2026: "Zum Eingeben brauchen wir noch irgendwo ein Feld für
+     * Bauchumfang", "ja, bitte auch ein Feld für Hüftumfang"): cm with one decimal, either field may stay empty. Opened
+     * by a tap on a row of MESSUNGEN, or on BAUCH / HÜFTE for the newest weigh-in. Stored with that weigh-in only.
+     */
+    private void editGirths(int pos) {
+        if (pos < 0 || pos >= weighings.size()) return;
+        Weighings.Weighing w = weighings.get(pos);
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(24), dp(4), dp(24), dp(8));
+        box.addView(text("Messung vom " + Times.day(w.time) + ", " + Times.clock(w.time) + " Uhr. In cm, z. B. 94,5 – "
+                + "leer lassen, was nicht gemessen ist.", 14, MUTED, false));
+        EditText waist = cmField(box, "BAUCHUMFANG IN CM", w.waistMm);
+        box.addView(text("in der Mitte zwischen unterster Rippe und Beckenkamm, nach dem Ausatmen", 12, MUTED, false));
+        EditText hip = cmField(box, "HÜFTUMFANG IN CM", w.hipMm);
+        box.addView(text("an der breitesten Stelle des Gesäßes", 12, MUTED, false));
+        // and the same as a sketch (Doc, 20.11.2026: "mach bitte ein Bild drunter, so eine Art Skizze")
+        GirthSketch sketch = new GirthSketch(this, orbitron, MUTED, LAMBDA, PHI, "Bauch", "Hüfte");
+        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(150));
+        sp.topMargin = dp(10);
+        box.addView(sketch, sp);
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(box);
+        AlertDialog d = dialog("Bauch und Hüfte")
+                .setView(scroll)
+                .setPositiveButton("Speichern", null)   // set below, so a wrong entry keeps the dialog open
+                .setNegativeButton("Abbrechen", null)
+                .create();
+        waist.requestFocus();
+        Window win = d.getWindow();
+        if (win != null) win.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        show(d);
+        d.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String range = "zwischen " + Girths.MIN_MM / 10 + " und " + Girths.MAX_MM / 10 + " cm, z. B. 94,5";
+            int a = Girths.parseMm(waist.getText().toString()), b = Girths.parseMm(hip.getText().toString());
+            if (a < 0) {
+                waist.setError(range);
+                return;
+            }
+            if (b < 0) {
+                hip.setError(range);
+                return;
+            }
+            int row = weighings.setGirths(w.time, a, b);
+            d.dismiss();
+            if (row >= 0) scaleAdapter.notifyItemChanged(row);
+            refreshScale();
+        });
+    }
+
+    /** A field for a circumference: digits with a decimal comma (or point), on the phone's number pad. */
+    private EditText cmField(LinearLayout box, String label, int mm) {
+        EditText e = numberField(box, label, Girths.field(mm), 6);
+        e.setKeyListener(DigitsKeyListener.getInstance("0123456789,."));
+        e.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);   // number pad, with ","
+        e.setHint("z. B. 94,5");
+        e.setHintTextColor(MUTED);
+        return e;
     }
 
     /** The number in a field: 0 when empty, -1 when it is no number. */
@@ -764,40 +996,52 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         t.setTextColor(on ? pal.chipOnInk : MUTED);
     }
 
-    // DocFit's pills: the dark rounded boxes behind the values of the result card (KÖRPERFETT, WASSER, ...) with their
-    // small label above the value - one style for the weight and the four tiles (Doc, 19.11.2026: "Der Einzige, der
-    // keine Pille hat, ist Gewicht"; the weight's label is the date and time of the weigh-in, not "Gewicht")
+    // DocFit's pills: rounded boxes in the card colour with a small label above the value - one style for the weight,
+    // the tiles (KÖRPERFETT, WASSER, ... BAUCH/GRÖSSE) and the compact bar (Doc, 19.11.2026: "Der Einzige, der keine
+    // Pille hat, ist Gewicht"; the weight's label is the date and time of the weigh-in, not "Gewicht"). They stand
+    // right on the page, no card around them (Doc, 20.11.2026: "erst die große Kachel, wo alles drin ist, dann noch
+    // kleine Kacheln darin").
     private static final float PILL_RADIUS = 12, PILL_LABEL_SP = 11, PILL_SPACING = 0.08f;
+    private static final int PILL_GAP = 6;
 
     private TextView pillLabel(String s) {
         TextView l = text(s, PILL_LABEL_SP, MUTED, true);
         l.setLetterSpacing(PILL_SPACING);
         l.setMaxLines(1);
+        l.setGravity(Gravity.CENTER_HORIZONTAL);
+        // a long label ("BAUCH/GRÖSSE" with a big system font) gets a little smaller instead of being cut
+        l.setAutoSizeTextTypeUniformWithConfiguration(8, (int) PILL_LABEL_SP, 1, TypedValue.COMPLEX_UNIT_SP);
         return l;
     }
 
-    /** A value in its pill: the page colour as a rounded box on the card, the small label above, the value below. */
+    /** A value in its pill: a rounded box in the card colour on the page, the small label above, the value below. */
     private LinearLayout pill(TextView label, DigitsView value, int valueHeightDp) {
         LinearLayout t = new LinearLayout(this);
         t.setOrientation(LinearLayout.VERTICAL);
         t.setGravity(Gravity.CENTER_HORIZONTAL);
-        t.setBackground(round(BG, PILL_RADIUS));
-        t.setPadding(dp(6), dp(8), dp(6), dp(8));
-        t.addView(label);
+        t.setBackground(round(CARD, PILL_RADIUS));
+        t.setPadding(dp(6), dp(6), dp(6), dp(6));
+        t.addView(label, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         t.addView(value, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(valueHeightDp)));
         return t;
     }
 
-    /** The pills of the result card stand a little apart from each other and from the card's edge. */
-    private LinearLayout.LayoutParams pillParams(int width, float weight) {
+    /** Pills keep a small gap above and to their left neighbour; the outer ones line up with the page margin. */
+    private LinearLayout.LayoutParams pillParams(int width, float weight, boolean first) {
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT, weight);
-        lp.setMargins(dp(4), dp(4), dp(4), dp(4));
+        lp.setMargins(first ? 0 : dp(PILL_GAP), dp(PILL_GAP), 0, 0);
         return lp;
     }
 
-    private EditText numberField(LinearLayout box, String label, String value, int maxLen) {
-        TextView l = text(label, 12, MUTED, true);
+    /** The small Orbitron label above a field or a section of a dialog. */
+    private TextView smallLabel(String s) {
+        TextView l = text(s, 12, MUTED, true);
         l.setLetterSpacing(0.1f);
+        return l;
+    }
+
+    private EditText numberField(LinearLayout box, String label, String value, int maxLen) {
+        TextView l = smallLabel(label);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(16);
         box.addView(l, lp);
@@ -867,7 +1111,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         LinearLayout col = new LinearLayout(this);
         frame = col;
         col.setOrientation(LinearLayout.VERTICAL);
-        col.setPadding(dp(20), dp(16), dp(20), dp(12));
+        col.setPadding(dp(PAGE_SIDE), dp(12), dp(PAGE_SIDE), dp(12));
         root.addView(col, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         // the title, and on the right the gear for the colour scheme (as in DocDo)
@@ -880,8 +1124,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         gear.setImageResource(R.drawable.ic_gear);
         gear.setColorFilter(MUTED);
         gear.setPadding(dp(8), dp(8), dp(8), dp(8));
-        gear.setContentDescription("Farbschema");
-        gear.setOnClickListener(v -> chooseTheme());
+        gear.setContentDescription("Einstellungen");
+        gear.setOnClickListener(v -> openSettings());
         head.addView(gear, new FrameLayout.LayoutParams(dp(40), dp(40), Gravity.END | Gravity.CENTER_VERTICAL));
         col.addView(head, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
@@ -892,7 +1136,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         tabs.setPadding(dp(4), dp(4), dp(4), dp(4));
         tabWatch = tabButton("Stoppuhr", TAB_WATCH);
         tabScale = tabButton("Waage", TAB_SCALE);
-        tabFast = tabButton("Fasting", TAB_FAST);
+        tabFast = tabButton("Fasten", TAB_FAST);
         tabs.addView(tabWatch, new LinearLayout.LayoutParams(0, dp(40), 1f));
         tabs.addView(tabScale, new LinearLayout.LayoutParams(0, dp(40), 1f));
         tabs.addView(tabFast, new LinearLayout.LayoutParams(0, dp(40), 1f));
@@ -961,57 +1205,58 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         LinearLayout page = new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
 
-        state = text("BEREIT", 26, PHI, true);
+        state = text("DocFit Start", 26, PHI, true);
         state.setGravity(Gravity.CENTER);
         state.setLetterSpacing(0.12f);
+        // more air between the parts (Doc, 20.11.2026: "in Y auseinanderziehen, damit es gefälliger aussieht")
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(16);
+        lp.topMargin = dp(28);
         page.addView(state, lp);
 
-        ear = text("Lade Spracherkennung …", 14, MUTED, false);
+        // only when the microphone is missing or the recognizer failed
+        ear = text("", 14, UPSILON, false);
         ear.setGravity(Gravity.CENTER);
+        ear.setVisibility(View.GONE);
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(4);
         page.addView(ear, lp);
 
-        // the big stopwatch: digits in fixed cells so the running time does not wobble, smaller only if it does not fit
+        // the big stopwatch: digits in fixed cells so the running time does not wobble, as wide as the buttons below
+        // (Doc, 20.11.2026: "Die Stoppuhr kann so breit wie die Buttons – dann wird sie insgesamt größer")
         timer = new DigitsView(this, orbitron, 96, MUTED);
+        timer.setFitWidth(Times.duration(0));
         timer.setText(Times.duration(0));
-        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(118));
-        lp.topMargin = dp(10);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(28);
         page.addView(timer, lp);
 
-        TextView hint = text("Sag „DocFit Start“ zum Starten und „DocFit Stopp“ zum Anhalten.", 13, MUTED, false);
-        hint.setGravity(Gravity.CENTER);
-        page.addView(hint, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
+        // no hint line under the stopwatch: the command stands above it (Doc, 20.11.2026: "das ist doppelt")
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setBaselineAligned(false);   // the smaller "Zurücksetzen" text must not push its button down
+        row.setBaselineAligned(false);
         startBtn = button("Start", PHI);
         stopBtn = button("Stopp", UPSILON);
         stopBtn.setTextColor(pal.onUpsilon);
         startBtn.setOnClickListener(v -> { if (runStart == 0) start(System.currentTimeMillis()); });
         stopBtn.setOnClickListener(v -> { if (runStart != 0) stop(System.currentTimeMillis()); });
-        // the quiet third button: clears the stopped time from the display, the list keeps it
-        resetBtn = button("Zurücksetzen", CARD);
+        // the quiet third button: clears the stopped time from the display, the list keeps it (Doc, 20.11.2026:
+        // "das Zurücksetzen nennen wir Reset, und versucht die bitte gleich breit zu machen")
+        resetBtn = button("Reset", CARD);
         resetBtn.setTextColor(LAMBDA);
-        resetBtn.setMaxLines(1);
-        resetBtn.setPadding(dp(8), 0, dp(8), 0);
-        resetBtn.setAutoSizeTextTypeUniformWithConfiguration(10, 17, 1, TypedValue.COMPLEX_UNIT_SP);
         resetBtn.setOnClickListener(v -> reset());
-        LinearLayout.LayoutParams b1 = new LinearLayout.LayoutParams(0, dp(56), 1f);
-        b1.rightMargin = dp(6);
-        LinearLayout.LayoutParams b2 = new LinearLayout.LayoutParams(0, dp(56), 1f);
-        b2.leftMargin = dp(6);
-        b2.rightMargin = dp(6);
-        LinearLayout.LayoutParams b3 = new LinearLayout.LayoutParams(0, dp(56), 1.6f);   // the longest word
-        b3.leftMargin = dp(6);
-        row.addView(startBtn, b1);
-        row.addView(stopBtn, b2);
-        row.addView(resetBtn, b3);
+        Button[] buttons = {startBtn, stopBtn, resetBtn};
+        for (int i = 0; i < buttons.length; i++) {
+            Button b = buttons[i];
+            b.setMaxLines(1);
+            b.setPadding(dp(6), 0, dp(6), 0);
+            b.setAutoSizeTextTypeUniformWithConfiguration(10, 17, 1, TypedValue.COMPLEX_UNIT_SP);
+            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(0, dp(56), 1f);   // three equal widths
+            bp.leftMargin = i == 0 ? 0 : dp(5);
+            bp.rightMargin = i == buttons.length - 1 ? 0 : dp(5);
+            row.addView(b, bp);
+        }
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(18);
+        lp.topMargin = dp(32);
         page.addView(row, lp);
 
         page.addView(sectionHead("ZEITEN", null, null), headParams());
@@ -1037,49 +1282,55 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         return page;
     }
 
+    /**
+     * The scale tab: the big card (state line, the newest weigh-in in pills, the fitness score) over the list of
+     * weigh-ins. Scrolling the list up pushes the card away until the compact bar is left (CollapsingHeader); back at
+     * the list's top the card comes down again (Doc, 20.11.2026: "Wenn ich nach oben scrolle, müssen wir das
+     * intelligenter machen, so dass ich unten die einzelnen Daten sehen kann").
+     */
     private View buildScalePage() {
-        LinearLayout page = new LinearLayout(this);
-        page.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout head = new LinearLayout(this);
+        head.setOrientation(LinearLayout.VERTICAL);
 
         // what is happening, two lines high so the page does not jump; a tap fixes permission or Bluetooth
         scaleState = text("Stell dich auf die Waage …", 16, TEXT, true);
         scaleState.setGravity(Gravity.CENTER);
         scaleState.setMinLines(2);
-        scaleState.setPadding(0, dp(6), 0, dp(6));
+        scaleState.setPadding(0, dp(6), 0, dp(4));
         scaleState.setOnClickListener(v -> onScaleStateTapped());
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(10);
-        page.addView(scaleState, lp);
+        head.addView(scaleState, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        // the last weigh-in, big
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackground(round(CARD, 16));
-        card.setPadding(dp(14), dp(12), dp(14), dp(12));
         // the weight in a pill like the tiles below, its label the moment of the weigh-in (Doc, 19.11.2026: "Gewicht
         // braucht man da nicht schreiben ... in die Pille rein, das Datum und die Uhrzeit")
         resWhen = pillLabel("");
-        resWeight = new DigitsView(this, orbitron, 52, MUTED);
+        resWeight = new DigitsView(this, orbitron, 48, MUTED);
         resWeight.setText("–");
-        card.addView(pill(resWhen, resWeight, 76), pillParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
-        LinearLayout r1 = new LinearLayout(this), r2 = new LinearLayout(this);
-        resFat = tile(r1, "KÖRPERFETT");
-        resWater = tile(r1, "WASSER");
-        resMuscle = tile(r2, "MUSKEL");
-        resBmi = tile(r2, "BMI");
-        card.addView(r1);
-        card.addView(r2);
-        card.addView(buildFitness());
+        LinearLayout weightPill = pill(resWhen, resWeight, 66);
+        weightPill.setOnClickListener(v -> { if (weighings.size() > 0) openInfo(TileInfo.Key.WEIGHT); });
+        head.addView(weightPill, pillParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, true));
+        LinearLayout r1 = new LinearLayout(this), r2 = new LinearLayout(this), r3 = new LinearLayout(this),
+                r4 = new LinearLayout(this);
+        tFat = tile(r1, "KÖRPERFETT", TileInfo.Key.FAT);
+        tWater = tile(r1, "WASSER", TileInfo.Key.WATER);
+        tMuscle = tile(r2, "MUSKEL", TileInfo.Key.MUSCLE);
+        tBmi = tile(r2, "BMI", TileInfo.Key.BMI);
+        tWaist = tile(r3, "BAUCH", TileInfo.Key.WAIST);
+        tWhtr = tile(r3, "BAUCH/GRÖSSE", TileInfo.Key.WHTR);
+        tHip = tile(r4, "HÜFTE", TileInfo.Key.HIP);
+        tWhr = tile(r4, "BAUCH/HÜFTE", TileInfo.Key.WHR);
+        head.addView(r1);
+        head.addView(r2);
+        head.addView(r3);
+        head.addView(r4);
+        head.addView(buildFitness());
         resNote = text("", 12, MUTED, false);
         resNote.setGravity(Gravity.CENTER);
-        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(8);
-        card.addView(resNote, lp);
-        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(6);
-        page.addView(card, lp);
+        head.addView(resNote, lp);
 
-        page.addView(sectionHead("MESSUNGEN", "Profil", v -> editProfile()), headParams());
+        View tail = sectionHead("MESSUNGEN", "Profil", v -> editProfile());
+        tail.setPadding(0, dp(6), 0, 0);
 
         scaleAdapter = new ScaleAdapter();
         scaleList = listView(scaleAdapter, pos -> {
@@ -1093,19 +1344,53 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             refreshScale();
         });
         scaleEmpty = emptyText("Noch keine Messungen.");
-        page.addView(listBox(scaleList, scaleEmpty), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        return page;
+        scaleHead = new CollapsingHeader(this, head, tail, listBox(scaleList, scaleEmpty), scaleList, buildCompact());
+        return scaleHead;
     }
 
     /**
-     * The fitness score under the four tiles (Doc, 19.11.2026: "Ein Indikator von grottenschlecht bis 10 Top-Athlet"):
+     * The compact bar of the collapsed scale card: date and weight, fat and fitness of the newest weigh-in in pills -
+     * or, while a weigh-in runs or something needs fixing, the state line in their place. A tap opens the card again.
+     */
+    private View buildCompact() {
+        FrameLayout bar = new FrameLayout(this);
+        bar.setBackgroundColor(BG);   // covers the strip of the card left under it
+        bar.setPadding(0, 0, 0, dp(2));
+        LinearLayout pills = new LinearLayout(this);
+        pills.setOrientation(LinearLayout.HORIZONTAL);
+        pills.setBaselineAligned(false);
+        compactWhen = pillLabel("");
+        compactWeight = new DigitsView(this, orbitron, 18, LAMBDA);
+        pills.addView(pill(compactWhen, compactWeight, 24), pillParams(0, 1.4f, true));
+        compactFat = new DigitsView(this, orbitron, 18, TEXT);
+        pills.addView(pill(pillLabel("FETT"), compactFat, 24), pillParams(0, 1f, false));
+        compactFit = new DigitsView(this, orbitron, 18, MUTED);
+        pills.addView(pill(pillLabel("FITNESS"), compactFit, 24), pillParams(0, 1f, false));
+        bar.addView(pills, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        compactPills = pills;
+        compactState = text("", 14, TEXT, true);
+        compactState.setGravity(Gravity.CENTER);
+        compactState.setMaxLines(2);
+        compactState.setPadding(0, dp(PILL_GAP), 0, 0);
+        compactState.setVisibility(View.INVISIBLE);
+        bar.addView(compactState, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        bar.setOnClickListener(v -> {
+            scaleList.scrollToPosition(0);
+            scaleHead.setOpen(true, true);
+        });
+        return bar;
+    }
+
+    /**
+     * The fitness score under the tiles (Doc, 19.11.2026: "Ein Indikator von grottenschlecht bis 10 Top-Athlet"):
      * the number and its word in the colour of the bar, the bar, one or two sentences on the values, the disclaimer.
+     * A box in the card colour on the page, like the pills.
      */
     private View buildFitness() {
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
-        box.setBackground(round(BG, 12));
-        box.setPadding(dp(12), dp(6), dp(12), dp(10));
+        box.setBackground(round(CARD, PILL_RADIUS));
+        box.setPadding(dp(12), dp(4), dp(12), dp(8));
         LinearLayout head = new LinearLayout(this);
         head.setOrientation(LinearLayout.HORIZONTAL);
         head.setGravity(Gravity.CENTER_VERTICAL);
@@ -1131,21 +1416,129 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(4);
         box.addView(fitNote, lp);
-        LinearLayout.LayoutParams outer = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        outer.setMargins(dp(4), dp(4), dp(4), dp(4));
-        box.setLayoutParams(outer);
+        box.setLayoutParams(pillParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, true));
         fitBox = box;
         fitHead = head;
         box.setVisibility(View.GONE);
         return box;
     }
 
-    /** One of the four small values in the result card: label above, value below. */
-    private DigitsView tile(LinearLayout row, String label) {
+    /**
+     * One tile under the weight, two to a row: the shared pill with the value, and under it the range bar and the
+     * reference line. Both tiles of a row are as high as the higher one.
+     */
+    private Tile tile(LinearLayout row, String label, TileInfo.Key key) {
         DigitsView v = new DigitsView(this, orbitron, 20, TEXT);
         v.setText("–");
-        row.addView(pill(pillLabel(label), v, 28), pillParams(0, 1f));
-        return v;
+        RangeBar bar = new RangeBar(this, pal.scoreHigh, pal.scoreMid, pal.scoreLow, TEXT, CARD);
+        bar.setScale(null);
+        TextView note = text("", 10, MUTED, false);
+        note.setGravity(Gravity.CENTER_HORIZONTAL);
+        // always one line (Doc, 20.11.2026: "dass da immer nur eine Zeile steht"): a little smaller rather than wrapped
+        note.setMaxLines(1);
+        note.setAutoSizeTextTypeUniformWithConfiguration(7, 10, 1, TypedValue.COMPLEX_UNIT_SP);
+        LinearLayout p = pill(pillLabel(label), v, 28);
+        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(12));
+        bp.topMargin = dp(4);
+        p.addView(bar, bp);
+        LinearLayout.LayoutParams np = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        np.topMargin = dp(3);
+        p.addView(note, np);
+        row.setBaselineAligned(false);
+        LinearLayout.LayoutParams lp = pillParams(0, 1f, row.getChildCount() == 0);
+        lp.height = ViewGroup.LayoutParams.MATCH_PARENT;   // as high as its neighbour
+        row.addView(p, lp);
+        Tile t = new Tile(key, v, bar, note);
+        p.setOnClickListener(x -> t.tapped());
+        return t;
+    }
+
+    /**
+     * The detail sheet of a value (Doc, 20.11.2026: "dass man dort genauere Informationen findet, warum das schlecht,
+     * gut oder whatsoever ist", then "natürlich der Verlauf"): the newest value with its word, the course over all
+     * weigh-ins with the zones behind it (and the goal lines for the waist), every zone with its numbers, then what it
+     * is, how it is measured, what moves it, why it matters, the source and the disclaimer (TileInfo, History).
+     */
+    private void openInfo(TileInfo.Key key) {
+        if (weighings.size() == 0) return;
+        TileInfo info = TileInfo.of(key);
+        Weighings.Weighing newest = weighings.get(0);
+        Ranges.Scale scale = History.scale(newest, key, profile);
+        List<Weighings.Weighing> all = new ArrayList<>();
+        for (int i = 0; i < weighings.size(); i++) all.add(weighings.get(i));
+        List<History.Point> points = History.series(all, key, profile);
+        int dec = History.decimals(key);
+        String unit = History.unit(key);
+
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(20), 0, dp(20), dp(8));
+        double now = History.value(newest, key, profile);
+        String shown = Double.isNaN(now) ? "–"
+                : String.format(java.util.Locale.GERMANY, "%." + dec + "f", now) + (unit.isEmpty() ? "" : " " + unit);
+        String word = scale == null ? null : scale.word();
+        TextView value = text(shown + (word == null ? "" : "  ·  " + word), 20, scale == null ? TEXT : zoneColor(scale), true);
+        box.addView(value);
+
+        // the course
+        box.addView(smallLabel("VERLAUF"), sectionParams(16));
+        if (points.isEmpty()) {
+            box.addView(text("Noch kein Wert eingetragen.", 13, MUTED, false), sectionParams(4));
+        } else {
+            HistoryChart chart = new HistoryChart(this, orbitron, LAMBDA, TEXT, MUTED, CARD,
+                    pal.scoreHigh, pal.scoreMid, pal.scoreLow);
+            chart.setData(points, scale, History.goals(key, profile), dec);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(170));
+            cp.topMargin = dp(6);
+            box.addView(chart, cp);
+            if (points.size() == 1) box.addView(text(TileInfo.FEW, 12, MUTED, false), sectionParams(2));
+        }
+
+        // the zones with their numbers, the value's own marked
+        if (scale != null) {
+            box.addView(smallLabel("BEREICHE"), sectionParams(16));
+            Ranges.Band current = scale.band();
+            for (int i = 0; i < scale.bands.length; i++) {
+                Ranges.Band b = scale.bands[i];
+                LinearLayout row = new LinearLayout(this);
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                row.setGravity(Gravity.CENTER_VERTICAL);
+                GradientDrawable dot = new GradientDrawable();
+                dot.setShape(GradientDrawable.OVAL);
+                dot.setColor(b.zone == Ranges.Zone.GOOD ? pal.scoreHigh : b.zone == Ranges.Zone.BORDER ? pal.scoreMid : pal.scoreLow);
+                dot.setSize(dp(10), dp(10));
+                boolean here = b == current;
+                TextView w = text(b.word + (here ? "  ← jetzt" : ""), 14, here ? TEXT : MUTED, here);
+                w.setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null);
+                w.setCompoundDrawablePadding(dp(8));
+                row.addView(w, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+                row.addView(text(scale.span(i), 14, here ? TEXT : MUTED, false));
+                box.addView(row, sectionParams(4));
+            }
+        }
+
+        String[][] parts = {{"WAS ES IST", info.what}, {"WIE GEMESSEN", info.how}, {"WAS ES VERÄNDERT", info.moves},
+                {"WARUM ES ZÄHLT", info.why}, {"QUELLE", info.source}};
+        for (String[] part : parts) {
+            box.addView(smallLabel(part[0]), sectionParams(16));
+            box.addView(text(part[1], 14, TEXT, false), sectionParams(4));
+        }
+        box.addView(text(TileInfo.LEGEND, 12, MUTED, false), sectionParams(16));
+        box.addView(text(FitnessScore.DISCLAIMER, 12, MUTED, false), sectionParams(4));
+
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(box);
+        AlertDialog.Builder b = dialog(info.title).setView(scroll).setNegativeButton("Schließen", null);
+        if (TileInfo.typedIn(key)) {
+            b.setPositiveButton(newest.hasWaist() || newest.hasHip() ? "Ändern" : "Eintragen", (x, which) -> editGirths(0));
+        }
+        show(b.create());
+    }
+
+    private LinearLayout.LayoutParams sectionParams(int topDp) {
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(topDp);
+        return lp;
     }
 
     private View sectionHead(String title, String action, View.OnClickListener onAction) {
@@ -1168,7 +1561,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     private LinearLayout.LayoutParams headParams() {
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(14);
+        lp.topMargin = dp(28);
         return lp;
     }
 
@@ -1222,7 +1615,6 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         ui.postDelayed(hideUndo, UNDO_MS);
     }
 
-    /** One row of either list: day and time (and the body values) on the left, the big value on the right. */
     /** What the fasting page may ask the app: only the key of the colour scheme (dark / grey / light). */
     private static final class FastingBridge {
         private final String theme;
@@ -1250,12 +1642,15 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
     }
 
+    /** One row of either list: day and time (and the body values) on the left, the big value on the right. */
     private Row newRow() {
         LinearLayout v = new LinearLayout(this);
         v.setOrientation(LinearLayout.HORIZONTAL);
         v.setGravity(Gravity.CENTER_VERTICAL);
         v.setBackground(round(CARD, 12));
-        v.setPadding(dp(16), dp(12), dp(16), dp(12));
+        // the rows use the width: date flush left, value flush right (Doc, 20.11.2026: "Das kann durchaus noch ein
+        // bisschen nach links und rechts")
+        v.setPadding(dp(12), dp(10), dp(12), dp(10));
         RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(8);
         v.setLayoutParams(lp);
@@ -1303,6 +1698,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         public Row onCreateViewHolder(@NonNull ViewGroup parent, int type) {
             Row r = newRow();
             r.value.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+            // a tap enters waist and hip for this weigh-in: the row answers with a ripple
+            int ink = (MUTED & 0x00FFFFFF) | 0x40000000;
+            r.itemView.setBackground(new RippleDrawable(ColorStateList.valueOf(ink), round(CARD, 12), null));
+            r.itemView.setOnClickListener(v -> editGirths(r.getBindingAdapterPosition()));
             return r;
         }
 
@@ -1316,7 +1715,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             if (!Double.isNaN(bc.fatPercent)) parts.add("Fett " + Times.one(bc.fatPercent, "%"));
             if (!Double.isNaN(bc.waterPercent)) parts.add("Wasser " + Times.one(bc.waterPercent, "%"));
             if (!Double.isNaN(bc.muscleKg)) parts.add("Muskel " + Times.one(bc.muscleKg, "kg"));
-            String extra = parts.isEmpty() ? (w.hasResistance() ? "" : "nur Gewicht") : String.join(" · ", parts);
+            if (parts.isEmpty() && !w.hasResistance()) parts.add("nur Gewicht");
+            if (w.hasWaist()) parts.add("Bauch " + Girths.cm(w.waistMm));
+            if (w.hasHip()) parts.add("Hüfte " + Girths.cm(w.hipMm));
+            String extra = String.join(" · ", parts);
             r.extra.setText(extra);
             r.extra.setVisibility(extra.isEmpty() ? View.GONE : View.VISIBLE);
             r.value.setText(Times.kg(w.kg()));

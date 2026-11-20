@@ -6,31 +6,51 @@ eingetragen werden mit Datum und Uhrzeit").
 
 - While the "Stoppuhr" tab is open it listens all the time: **"DocFit Start"** starts, **"DocFit Stopp"** stops
   (Doc, 19.11.2026 - plain "DocFit" / "Stopp" fired far too often from talk nearby: "Ständig geht das Ding an neben
-  mir"). Plain "DocFit", "Stopp" or "Start" do nothing. On the "Waage" tab and in the background voice control is off.
+  mir"). Plain "DocFit" or "Start" do nothing. A plain **"Stopp"** stops too, but only while the stopwatch runs (Doc,
+  20.11.2026: "dass wenn ich nur ‚Stopp' sage, das in dem Modus dann auch stoppt") - same rules as the phrase (conf,
+  only noise around it, said on its own); standing still it does nothing. On the "Waage" tab and in the background
+  voice control is off.
   Start and Stopp buttons as a fallback. Short buzz + beep on start, two on stop. The screen stays on.
 - The moment comes from the word times: the stopwatch starts at the end of "DocFit Start" and stops at the beginning
   of "DocFit Stopp", not when the recognizer is sure.
+- Above the stopwatch stands only the command to say next: **DocFit Start**, while it runs **DocFit Stopp** - no
+  "bereit" / "gestoppt", no hint line below it (Doc, 20.11.2026: "nimmt Platz weg", "das ist doppelt"), no word or
+  sign for listening ("‚hört zu' braucht man nicht", "den Kreis bitte wegmachen") - only a problem (no microphone,
+  recognizer failed) is written out. The drawn digits are exactly as wide as the button row, Start's left edge to
+  Reset's right edge ("so breit wie die Buttons"; `DigitsView.setFitWidth` measures the glyphs' ink, not their cells -
+  on the Pixel 32.0..1046.8 px against buttons 32..1048 px): sized on the shape "00:00", so nothing jumps; from an hour
+  on ("0:00:00") once a little smaller. Green while ready, red while running (`Palette.alarm`, "wir machen die rot,
+  wenn sie läuft"), orange after a stop. More air between the parts ("in Y auseinanderziehen").
 - After a stop the time goes into the list (day, start time, duration), newest first, kept on the phone, and stays big
-  on the display. "Zurücksetzen" (next to Start/Stopp, only after a stop) sets the display back to 00:00; swiping that
-  run out of the list clears the display too, "Rückgängig" brings both back (Doc, 19.11.2026). Nothing leaves the
-  phone, there is no export (a private web view may come later).
+  on the display. **Reset** (until 20.11.2026 "Zurücksetzen"; Start, Stopp and Reset are three equally wide buttons)
+  sets the display back to 00:00 after a stop; swiping that run out of the list clears the display too, "Rückgängig"
+  brings both back (Doc, 19.11.2026). Nothing leaves the phone, there is no export (a private web view may come later).
 - Times show minutes and seconds ("07:42", "1:02:03" from an hour on), no tenths (Doc, 19.11.2026); the list keeps
   the milliseconds. Every number (stopwatch, list, scale values) is drawn by `DigitsView`, the app's counterpart of the
   web's `CyberClock.digits`: each digit centred in a cell as wide as the widest Orbitron digit, so nothing wobbles.
 - Second tab **"Waage"**: the Vitafit body-fat scale (below).
-
-- Third tab **"Fasting"**: Doc's fasts from his health workbook (below).
-- **Farbschema** (Doc, 19.11.2026: "ein Gray-Design ... und auch ein helles, wie immer"): the gear right of the title
-  chooses Blau / Grau / Hell like in DocDo - the same keys (dark / grey / light) and the values of
-  `HTML/svp/svp-tokens.css`; Blau stays DocFit's navy. All colours come from `Palette.java` (tested in `PaletteTest`:
+- Third tab **"Fasten"** (until 20.11.2026 "Fasting" - Doc: "wir haben es ja nun mal Deutsch"): Doc's fasts from his
+  health workbook (below).
+- One page margin for all tabs, 12 dp left and right (`MainActivity.PAGE_SIDE`; Doc, 20.11.2026: "Links und rechts geht
+  das breiter").
+- **Einstellungen** (the gear right of the title): **Farbschema** (Doc, 19.11.2026: "ein Gray-Design ... und auch ein
+  helles, wie immer") chooses Blau / Grau / Hell like in DocDo - the same keys (dark / grey / light) and the values of
+  `HTML/svp/svp-tokens.css`; Blau stays DocFit's navy. In Grau page and cards stand further apart than in the svp
+  (Doc, 20.11.2026: "Im Graumodus müsste sich der Hintergrund und die Cards noch ein bisschen mehr absetzen"): page
+  #131315, cards #2C2C30 (were #1A1A1C / #252528, contrast 1.33 instead of 1.14), the fasting page alike. All colours come from `Palette.java` (tested in `PaletteTest`:
   every text readable on its ground); the choice is kept in the app's preferences ("theme"), the screen is built again.
   The fasting page has the same three in its CSS and asks the app for the key (`DocFitApp.theme()`); in a browser it
   has its own gear and keeps the choice under `svp-theme` like DocDo.
-- The weight on the scale card stands in a **pill** like the tiles below it (Doc, 19.11.2026: "Der Einzige, der
+  Below it **Messmethode**: the newest measured resistance and where every value of the scale tab comes from (Doc,
+  20.11.2026: "Nimm den Text ‚Geschätzt aus … Ω Widerstand' raus und tu ihn unter Einstellungen irgendwohin";
+  `ScaleTexts.method`).
+- The weight on the scale tab stands in a **pill** like the tiles below it (Doc, 19.11.2026: "Der Einzige, der
   keine Pille hat, ist Gewicht", then "Gewicht braucht man da nicht schreiben ... in die Pille rein, das Datum und die
-  Uhrzeit"): the page colour as a rounded box, the small Orbitron label above the value - for the weight the moment of
-  the weigh-in ("DO 19.11.2026 · 07:12 UHR", `ScaleTexts.when`), for the tiles KÖRPERFETT, WASSER, ... One code path
-  for all five (`MainActivity.pill` / `pillLabel` / `pillParams`).
+  Uhrzeit"): a rounded box in the card colour right on the page - no big card around the pills any more (Doc,
+  20.11.2026: "erst die große Kachel, wo alles drin ist, dann noch kleine Kacheln darin") - the small Orbitron label
+  above the value: for the weight the moment of the weigh-in ("DO 19.11.2026 · 07:12 UHR", `ScaleTexts.when`), for the
+  tiles KÖRPERFETT, WASSER, ... One code path for all pills, the compact bar's too (`MainActivity.pill` / `pillLabel` /
+  `pillParams`); a label too long for its pill (big system font) gets a little smaller instead of being cut.
 
 ## Why Vosk
 
@@ -49,7 +69,9 @@ Every command, and every phrase turned down, is logged with the words and confid
 
 Measured on silent samples (`test/`, six German macOS voices, 186 samples incl. single words, "Stopp mal", "Ich bin
 heute fit" and radio-like talk): "DocFit Start" 24/24, "DocFit Stopp" 22/24, false commands 0 of 138. The rule before
-(plain "DocFit"/"Stopp", 19.11.2026 morning): 29 false starts in 132.
+(plain "DocFit"/"Stopp", 19.11.2026 morning): 29 false starts in 132. While the stopwatch runs (20.11.2026, plain
+"Stopp" added - only the word on its own, conf >= 0.7, quiet around it): plain "Stopp" / "Stop" 12/12, false stops 0
+of 150 (`test_app_rule.py` checks both modes).
 
 ## Waage: Vitafit VT701
 
@@ -59,9 +81,35 @@ Doc, 19.11.2026: "ja, bau das in DocFit ein". The scale: "Vitafit Smart Body Fat
 - While the "Waage" tab is open, DocFit looks for a device whose name starts with "Vitafit", connects and reads the
   weight and the resistance between the feet (`ScaleLink` = Bluetooth, `ScaleSession` = one weigh-in, `Vt701` = the
   frames). The state line says "Stell dich auf die Waage …", "verbinde …", "Misst … 85,15 kg", "Fertig – gespeichert".
-- The last weigh-in stands big (Gewicht, Körperfett, Wasser, Muskel, BMI), the list below has date and time; swipe to
-  delete, "Rückgängig". Stored on the phone like the stopwatch times (`Weighings`). Only weight, resistance and moment
-  are stored; the body values are computed when shown, so a profile entered later also fixes older weigh-ins.
+- The last weigh-in stands big (Gewicht, Körperfett, Wasser, Muskel, BMI, Bauch, Bauch/Größe, Hüfte, Bauch/Hüfte), the list below has
+  date and time; swipe to delete, "Rückgängig". Stored on the phone like the stopwatch times (`Weighings`). Only
+  weight, resistance, moment and the girths typed in are stored; the body values are computed when shown, so a profile
+  entered later also fixes older weigh-ins.
+- **Scrolling the list up** pushes the big card away until a compact bar is left: date and weight, fat, fitness of
+  the newest weigh-in - or, while a weigh-in runs or Bluetooth needs a tap, the state line. Back at the list's top the
+  card comes down again; a drag on the card itself scrolls too (with fling) and goes on into the list - the card with
+  all tiles is taller than the screen ("Auf Waage kann ich jetzt überhaupt nicht mehr scrollen", fixed the same day);
+  no snapping, the card stays where the finger leaves it; a tap on the bar opens it; stepping on the scale and every
+  new result open it too (Doc, 20.11.2026: "Wenn ich nach oben scrolle, müssen wir das intelligenter machen,
+  so dass ich unten die einzelnen Daten sehen kann"). `CollapsingHeader` on RecyclerView's nested scrolling
+  (androidx.core) - the rule of Material's AppBarLayout "scroll|exitUntilCollapsed" without the Material library
+  or an AppCompat theme; the arithmetic is `HeaderOffset`, tested in `HeaderOffsetTest`.
+- **Bauch und Hüfte** (Doc, 20.11.2026: "Zum Eingeben brauchen wir noch irgendwo ein Feld für Bauchumfang", "ja, bitte
+  auch ein Feld für Hüftumfang"): a tap on a row of MESSUNGEN - or on BAUCH / HÜFTE ("+" while empty) for the newest
+  weigh-in - opens a dialog with two fields, cm with one decimal (comma or point, 50-200 cm), either may stay empty.
+  Stored with that weigh-in as `waistMm` / `hipMm` (mm), only in rows that have them: rows saved before read as they
+  are, rows without girths are written exactly as before. A row that cannot be read is skipped, never the list, and a
+  list that could not be read completely is kept once under `weighingsUnread` before anything is written over it
+  (`WeighingsTest`). From them (`Girths`, tested in `GirthsTest`):
+  - **BAUCH/GRÖSSE** (waist-to-height, WHtR) - the main waist value. Ashwell M, Gibson S, BMJ Open 2016;6:e010159
+    (doi:10.1136/bmjopen-2015-010159): below 0.5 gut, 0.5 to below 0.6 erhöht, from 0.6 hoch;
+  - **BAUCH/HÜFTE** (waist-to-hip, WHR). WHO, Waist circumference and waist-hip ratio, expert consultation Geneva 2008 (2011):
+    erhöht from 0.90 (men) / 0.85 (women), sex from the profile.
+  Both cut (not rounded) to two decimals, so the number shown and its reading match the exact cut-offs; the reading
+  is the tile's range bar and the colour of the value (`Palette.alarm` is a brighter red on the dark cards). Labels
+  in German without abbreviations (BAUCH/GRÖSSE, BAUCH/HÜFTE). BMI stays for now. Under the two fields a small line
+  sketch shows where to measure (`GirthSketch`: a tailor's dummy from the front, the tape for Bauch through the navel
+  in λ, for Hüfte at the widest part in φ - drawn in code, no picture from elsewhere).
 - One weigh-in gives one row: a session ends with its first result, and a result with the same weight within three
   minutes of the newest row is a repeat (a reconnect while the scale still shows it) - it only fills in a missing
   resistance.
@@ -71,9 +119,31 @@ Doc, 19.11.2026: "ja, bau das in DocFit ein". The scale: "Vitafit Smart Body Fat
   (`ScaleTexts`). Old rows that still hold 65535 count as not measured too.
 - Under the tiles a **fitness score 1-10** (Doc, 19.11.2026: "Ein Indikator von grottenschlecht bis 10
   Top-Athlet"): ten segments from Υ red to φ green, the number and its word (1-2 „grottenschlecht“, 3-4 „ausbaufähig“,
-  5-6 „solide“, 7-8 „fit“, 9-10 „Top-Athlet“), one or two sentences on the values and „Orientierung, keine ärztliche
-  Bewertung“. No score without a measured resistance or a complete profile - a short hint instead
-  (`FitnessScore`, `ScoreBar`, see below).
+  5-6 „solide“, 7-8 „fit“, 9-10 „Top-Athlet“) and „Orientierung, keine ärztliche Bewertung“ - no sentences any more,
+  what each value means stands in its tile (Doc, 20.11.2026: "Den Text unter ‚8 fit' weg ... das steht ja schon
+  oben"). No score without a measured resistance or a complete profile - a short hint instead (`FitnessScore`,
+  `ScoreBar`, see below).
+- **A tap on a tile or on the weight opens its sheet** (Doc, 20.11.2026: "dass man dort genauere Informationen findet,
+  warum das schlecht, gut oder whatsoever ist", "natürlich der Verlauf ... so wie beim Fasten"): the newest value with
+  its word, the course over all weigh-ins (`HistoryChart`, drawn on a Canvas: line and points over time, the zones as
+  faint bands, for Bauch the goal lines "< 102 WHO rot", "< 94 WHO grün" and "< half the height Bauch/Größe 0,5" from
+  the profile; one point and "Verlauf erscheint ab der zweiten Messung" until there are two), every zone with its
+  numbers, what it is, how it is measured, what moves it, why it matters, the source and the disclaimer (`TileInfo`,
+  `History`, tested in `TileInfoTest`, `HistoryTest`). The weight gets the WHO BMI ranges in kg for the height. Empty
+  Bauch / Hüfte tiles show "–" and "+ Bauch eintragen" / "+ Hüfte eintragen" and go straight to the entry; filled
+  ones open the sheet with "Ändern". A value without a threshold of its own (Hüfte) stands without colour - its sheet
+  says why.
+- **Every tile reads itself** (Doc, 20.11.2026: "Wir müssen die Informationen immer in die jeweilige Kachel bringen
+  ... Und in jede Kachel so einen kleinen Slider, wie der Wert zu interpretieren ist"): the value in the colour of
+  its zone, a small range bar with the zones (φ green good, λ orange borderline, Υ red high) and a marker at the value,
+  and one line with the reference. One table for all of them, `Ranges` (tested in `RangesTest`), from the references
+  already used: Körperfett after ACE/Gallagher for sex and age ("gesund unter 25 % für Männer ab 60"), Wasser the
+  commonly quoted typical range (men 50-65 %, women 45-60 % - no clinical cut-off), Muskel against Janssen 2004 in kg
+  for the height (high risk at or below 8.50, normal from 10.76 kg/m² for men; 5.75 / 6.76 for women), BMI after the
+  WHO, Bauch after the WHO 2008 (men 94 / 102 cm, women 80 / 88 cm), BAUCH/GRÖSSE after Ashwell, BAUCH/HÜFTE after
+  the WHO. Values are placed as shown (one decimal, ratios cut). The tiles of a row are equally high; the reference is
+  one line ("dass da immer nur eine Zeile steht"); a tile without a value shows no bar. Under it a note only when something is missing (no profile, no fat
+  measured, an implausible resistance) - the method is under Einstellungen › Messmethode.
 - "Profil" (next to MESSUNGEN): height, birth year, sex. Empty until Doc types them, stored only in the app's
   preferences - no personal value in this repository. Without a profile the app shows the weight alone.
 - Android 12+: "Geräte in der Nähe" (`BLUETOOTH_SCAN` with `neverForLocation`, `BLUETOOTH_CONNECT`), asked with a German
@@ -115,7 +185,7 @@ trend counts - weigh in under the same conditions (morning, barefoot, not right 
 Not yet checked on the real scale: that it really advertises as "Vitafit…", that the greeting and the confirmations
 are enough for it to send the resistance, and how plausible the values are for Doc.
 
-## Fasting
+## Fasten (Fasting)
 
 Doc, 19.11.2026: "Ich habe ja mehrere Male gefastet und dort eingetragen" - a page with the data and charts of every
 fast, "eine extra Rubrik ... Fasting" in DocFit. The page's code is public, its data is not.
@@ -124,14 +194,17 @@ fast, "eine extra Rubrik ... Fasting" in DocFit. The page's code is public, its 
   npm, MIT, vendored in `lib/`). The app shows it in a WebView from the APK's assets (`app/build.gradle` adds `../../web`
   as an assets folder); the app still has no internet permission. Back inside the tab goes back in the page.
 - "Vergleich": all fasts on top of each other from day 1, one measure at a time, change since day 1 or absolute; the
-  fasts are toggles in the legend (colour follows the fast). Below, a card per fast. One fast: start -> end of every
+  fasts are toggles in the legend (colour follows the fast) - small chips with a colour dot and "Jan 21", several to a
+  line (Doc, 20.11.2026: "die Legende darunter nimmt verdächtig viel Platz weg"). The measure buttons carry short names
+  (Bauch, Fett, Puls, ...) and wrap, so all of them are in sight on a phone ("ein bisschen schmaler, sodass die Tasten
+  auch hinpassen"); in the app the cards use the full width inside DocFit's page margin. Below, a card per fast. One fast: start -> end of every
   measure (day 1 morning -> morning of the last fasting day; ketones: the highest value), a chart per measure like
   Doc's Excel dashboard with the fast shaded and a red line on its last day (dashed when the end is not written down),
   "Fastenzeit" / "+4 Wochen" / "+3 Monate" afterwards, the day's comment in the weight chart's tooltip.
 - Every row of fasts (tabs, legend, cards, lines) runs in time order, oldest left, newest right (Doc, 19.11.2026). A tap on a chart tile or on the comparison chart opens it big (Doc: "ganz groß ..., dass man die
   richtig gut lesen kann"): the same chart drawn again over the whole screen with larger text, tooltips work; closed by
   the X, a tap beside it, Esc or Back (one history step, so Android's back closes it too).
-- **Turning the phone** (Doc, 19.11.2026: "ja, drehen lassen"): only the "Fasting" tab may turn (`allowTurn`:
+- **Turning the phone** (Doc, 19.11.2026: "ja, drehen lassen"): only the "Fasten" tab may turn (`allowTurn`:
   fullUser there, portrait on Stoppuhr and Waage - their buttons and the scale card do not fit a phone's height on its
   side). The manifest's `configChanges` keeps the activity on a turn: stopwatch, voice listener, a weigh-in and the page
   (an open big chart) go on, nothing reloads. On its side the fasting tab shows only the page (Doc: "da will man
@@ -159,7 +232,9 @@ fast, "eine extra Rubrik ... Fasting" in DocFit. The page's code is public, its 
     ./build.sh            # fetch the model once (cache ~/Library/Caches/docfit), unit tests, APK, install on the Pixel
                           # unit tests: CommandsTest (voice, loudness), LastRunTest (display, reset, delete/undo),
                           # ScaleTest (frames, weigh-in, repeats, scale-tab lines), BodyCompositionTest, FitnessScoreTest
-                          # PaletteTest (colour schemes)
+                          # PaletteTest (colour schemes), GirthsTest (waist, hip, WHtR, WHR), RangesTest (tile
+                          # zones and lines), HistoryTest, TileInfoTest (detail sheets), HeaderOffsetTest
+                          # (collapsing scale card), WeighingsTest (storage, girths, old rows, broken rows)
     ./build.sh --bauen    # build only
 
 The model (~45 MB) is never committed (`android/.gitignore`); the APK is ~56 MB (arm64 only).

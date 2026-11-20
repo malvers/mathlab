@@ -11,9 +11,9 @@ import java.util.List;
 
 /**
  * The command rule against what the small German model really returned for silently generated samples (six macOS
- * German voices, see docfit-app/test/): "DocFit Start" starts, "DocFit Stopp" stops, plain "DocFit", "Stopp", "Start"
- * and the look-alikes do nothing, and a phrase inside talk does nothing either (LoudnessMeter). Plus the stopwatch
- * format.
+ * German voices, see docfit-app/test/): "DocFit Start" starts, "DocFit Stopp" stops, plain "Stopp" only while the
+ * stopwatch runs; plain "DocFit", "Start" (and "Stopp" when it stands still) and the look-alikes do nothing, and a
+ * phrase inside talk does nothing either (LoudnessMeter). Plus the stopwatch format.
  */
 public class CommandsTest {
     private static Commands.Word w(String t, double conf, double s, double e) {
@@ -120,6 +120,50 @@ public class CommandsTest {
         LoudnessMeter later = audio(5, new double[]{0.51, 1.50}, new double[]{3.0, 3.3});
         assertEquals(Commands.Kind.START, kind(later, w("dock", 1, 0.51, 0.75), w("fit", 1, 0.75, 1.08),
                 w("start", 1, 1.08, 1.50), w("[unk]", 0.8, 3.0, 3.3)));
+    }
+
+    @Test
+    public void plainStoppStopsOnlyWhileRunning() {
+        // "Stopp" said on its own between 0.48 s and 0.87 s (Doc, 20.11.2026: "wenn ich nur ‚Stopp' sage")
+        LoudnessMeter alone = audio(3, new double[]{0.48, 0.87});
+        List<Commands.Word> stopp = Arrays.asList(w("stopp", 1, 0.48, 0.87));
+        Commands.Command c = Commands.decide(stopp, alone, true);
+        assertEquals(Commands.Kind.STOP, c.kind);
+        assertEquals(0.48, c.at, 1e-9);                                   // the beginning of the word
+        assertTrue(c.heard, c.heard.contains("plain Stopp"));
+        assertEquals(Commands.Kind.NONE, Commands.decide(stopp, alone, false).kind);   // standing still: nothing
+        assertEquals(Commands.Kind.NONE, Commands.decide(stopp, alone).kind);
+        // with noise around it in the same result it still counts
+        assertEquals(Commands.Kind.STOP, Commands.decide(Arrays.asList(w("[unk]", 0.4, 0.1, 0.2),
+                w("stopp", 0.95, 0.48, 0.87)), alone, true).kind);
+        // "DocFit Stopp" goes on working while running
+        assertEquals(Commands.Kind.STOP, Commands.decide(Arrays.asList(w("dock", 1, 0.51, 0.78), w("fit", 1, 0.78, 1.02),
+                w("stopp", 1, 1.02, 1.44)), audio(3, new double[]{0.51, 1.44}), true).kind);
+    }
+
+    @Test
+    public void plainStoppNeedsTheSameCare() {
+        LoudnessMeter alone = audio(3, new double[]{0.48, 0.87});
+        // unsure
+        assertEquals(Commands.Kind.NONE, Commands.decide(Arrays.asList(w("stopp", 0.6, 0.48, 0.87)), alone, true).kind);
+        // "Stopp mal": the next word follows at once - not on its own
+        LoudnessMeter mal = audio(3, new double[]{0.48, 1.25});
+        Commands.Command c = Commands.decide(Arrays.asList(w("stopp", 1, 0.48, 0.87), w("[unk]", 0.9, 0.9, 1.2)), mal, true);
+        assertEquals(Commands.Kind.NONE, c.kind);
+        assertTrue(c.heard, c.heard.startsWith("not alone"));
+        // inside talk: loud before and after
+        assertEquals(Commands.Kind.NONE, Commands.decide(Arrays.asList(w("stopp", 1, 1.0, 1.4)),
+                audio(3, new double[]{0.2, 2.4}), true).kind);
+        // another word of the grammar with it, or two of them: no plain Stopp
+        assertEquals(Commands.Kind.NONE, Commands.decide(Arrays.asList(w("topf", 1, 0.2, 0.4), w("stopp", 1, 0.48, 0.87)),
+                alone, true).kind);
+        assertEquals(Commands.Kind.NONE, Commands.decide(Arrays.asList(w("dock", 1, 0.1, 0.3), w("stopp", 1, 0.48, 0.87)),
+                alone, true).kind);
+        assertEquals(Commands.Kind.NONE, Commands.decide(Arrays.asList(w("stopp", 1, 0.48, 0.87), w("stopp", 1, 1.0, 1.3)),
+                alone, true).kind);
+        // a plain "Start" never starts, running or not
+        assertEquals(Commands.Kind.NONE, Commands.decide(Arrays.asList(w("start", 1, 0.48, 0.87)), alone, true).kind);
+        assertEquals(Commands.Kind.NONE, Commands.decide(Arrays.asList(w("start", 1, 0.48, 0.87)), alone, false).kind);
     }
 
     @Test

@@ -4,7 +4,7 @@ import java.util.Locale;
 
 /**
  * The German lines of the "Waage" tab that depend on the weigh-ins: the state line after a result and the note under
- * the four tiles. Pure Java, so the choice is unit-tested (ScaleTest); MainActivity only puts the text on screen.
+ * the tiles. Pure Java, so the choice is unit-tested (ScaleTest); MainActivity only puts the text on screen.
  *
  * A weigh-in with a weight but no usable resistance (the scale sent 0xFFFF or nothing - no skin contact) must say so
  * plainly instead of four silent "–" (real test on Doc's scale, 19.11.2026).
@@ -58,7 +58,18 @@ final class ScaleTexts {
         return profile.complete() && weightOnly(last);
     }
 
-    /** The note under the tiles for the newest weigh-in ({@code last} null = no weigh-ins yet). */
+    /** The short form of {@link #when} for the compact bar: "DO 19.11."; empty before the first weigh-in. */
+    static String whenShort(Weighings.Weighing w) {
+        if (w == null) return "";
+        String day = Times.day(w.time);   // "Do 19.11.2026"
+        return day.substring(0, day.length() - 4).toUpperCase(Locale.GERMAN);
+    }
+
+    /**
+     * The note under the tiles for the newest weigh-in ({@code last} null = no weigh-ins yet); "" when all is well - the
+     * method and the resistance are under "Messmethode" in the settings (Doc, 20.11.2026: "Nimm den Text ‚Geschätzt aus
+     * … Ω Widerstand' raus und tu ihn unter Einstellungen irgendwohin, damit wir da nicht den Platz verschwenden").
+     */
     static String note(Weighings.Weighing last, Profile profile) {
         if (last == null) return NOTE_EMPTY;
         if (!profile.complete()) return NOTE_PROFILE;
@@ -66,6 +77,28 @@ final class ScaleTexts {
         if (Double.isNaN(BodyComposition.of(last, profile).fatPercent)) {
             return "Widerstand " + last.ohm + " Ω unplausibel – barfuß, Füße auf die Elektroden?";
         }
-        return "Geschätzt aus " + last.ohm + " Ω Widerstand (Sun 2003, Janssen 2000)";
+        return "";
+    }
+
+    /**
+     * "Messmethode" in the settings: the newest measured resistance ({@code measured} null = none yet) and where every
+     * value on the scale tab comes from.
+     */
+    static String method(Weighings.Weighing measured) {
+        String last = measured == null ? "Noch keine Messung mit Widerstand."
+                : "Letzter Widerstand: " + measured.ohm + " Ω (" + Times.day(measured.time) + ", "
+                + Times.clock(measured.time) + " Uhr).";
+        return last + "\n\n"
+                + "Die Waage misst Gewicht und den Widerstand zwischen den Füßen. Daraus geschätzt: Körperfett und "
+                + "Wasser nach Sun 2003, Muskel nach Janssen 2000, Fitness nach Gallagher 2000 und ACE.\n\n"
+                + "Die Balken in den Kacheln: Körperfett nach ACE und Gallagher 2000 für Geschlecht und Alter, Wasser "
+                + "die übliche Spanne (kein ärztlicher Grenzwert), Muskel je Größe² nach Janssen 2004, BMI nach WHO, "
+                + "Bauch nach WHO 2008 (erhöht ab 94 cm, deutlich ab 102 cm bei Männern; 80 / 88 cm bei Frauen).\n\n"
+                + "Bauch/Größe (WHtR) nach Ashwell 2016: unter 0,5 gut, 0,5 bis 0,6 erhöht, ab 0,6 hoch. "
+                + "Bauch/Hüfte (WHR) nach WHO 2008: erhöht ab 0,90 (Männer) bzw. 0,85 (Frauen). "
+                + "Bauch in der Mitte zwischen unterster Rippe und Beckenkamm messen, Hüfte an der breitesten Stelle, "
+                + "im Stehen, nach dem Ausatmen.\n\n"
+                + "Schätzwerte, kein Labor: die Formeln stammen aus Messungen von Hand zu Fuß, die Waage misst von Fuß "
+                + "zu Fuß. Es zählt der Verlauf – immer gleich messen (morgens, barfuß, nicht direkt nach dem Training).";
     }
 }

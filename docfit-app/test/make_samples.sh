@@ -5,7 +5,8 @@
 # Then:  python3 -m venv venv && ./venv/bin/pip install vosk && ./venv/bin/python test_app_rule.py
 # (the model is the one ../build.sh fetched into ~/Library/Caches/docfit/).
 # 16.11.2026 (plain "DocFit" / "Stopp"): 70 of 78 right, "Ich bin heute fit" started. 19.11.2026 (two-part commands,
-# loudness check): "DocFit Start" 24/24, "DocFit Stopp" 22/24, false commands 0 of 138.
+# loudness check): "DocFit Start" 24/24, "DocFit Stopp" 22/24, false commands 0 of 138. 20.11.2026 (plain "Stopp"
+# while running): plain "Stopp"/"Stop" 12/12, false stops 0 of 150; standing still unchanged.
 cd "$(dirname "$0")"
 mkdir -p samples
 : > samples/index.txt

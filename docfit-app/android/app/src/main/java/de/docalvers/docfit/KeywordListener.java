@@ -45,11 +45,17 @@ final class KeywordListener {
     private final Callback callback;
     private final Handler main = new Handler(Looper.getMainLooper());
     private volatile boolean running;
+    private volatile boolean watchRunning;   // the stopwatch runs: a plain "Stopp" counts too (Commands)
     private Thread thread;
 
     KeywordListener(Model model, Callback callback) {
         this.model = model;
         this.callback = callback;
+    }
+
+    /** Tells the listener whether the stopwatch runs - only then a plain "Stopp" is a command. */
+    void setWatchRunning(boolean on) {
+        watchRunning = on;
     }
 
     boolean isRunning() {
@@ -101,7 +107,7 @@ final class KeywordListener {
                 samples += n;
                 loudness.add(buf, n);
                 if (recognizer.acceptWaveForm(buf, n)) {
-                    Commands.Command c = Commands.decide(words(recognizer.getResult()), loudness);
+                    Commands.Command c = Commands.decide(words(recognizer.getResult()), loudness, watchRunning);
                     if (!c.heard.isEmpty()) Log.i(TAG, c.kind + ": " + c.heard);   // START / STOP / NONE: not alone
                     if (c.kind != Commands.Kind.NONE) {
                         long streamMs = samples * 1000 / RATE;

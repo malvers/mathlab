@@ -3,8 +3,8 @@ package de.docalvers.docfit;
 /**
  * The run the big stopwatch shows while it stands still: the last stopped one, or none - then it reads 00:00 (Doc,
  * 19.11.2026: "wenn ich stoppe, sollte es dann auch noch eine Taste geben ... wenn ich das unten lösche ... dann sollte
- * die Zahl oben auch verschwinden"). "Zurücksetzen" clears it, so does deleting that run from the list ("ZEITEN");
- * "Rückgängig" brings it back. Start and duration together name the run, so a deleted entry is recognised even when
+ * die Zahl oben auch verschwinden"). "Reset" (until 20.11.2026 "Zurücksetzen") clears it, so does deleting that run
+ * from the list ("ZEITEN"); "Rückgängig" brings it back. Start and duration together name the run, so a deleted entry is recognised even when
  * another run happens to have the same duration. Pure Java, tested in LastRunTest.
  */
 final class LastRun {
@@ -30,7 +30,7 @@ final class LastRun {
         return shown() && e.start == start && e.duration == duration;
     }
 
-    /** "Zurücksetzen" works only while the stopwatch stands still and shows a run. */
+    /** "Reset" works only while the stopwatch stands still and shows a run. */
     static boolean canReset(boolean running, LastRun last) {
         return !running && last.shown();
     }

@@ -321,7 +321,12 @@ public class ScaleTest {
         Weighings.Weighing good = new Weighings.Weighing(NOV_2026, 8500, 512);
         assertFalse(ScaleTexts.weightOnly(good));
         assertFalse(ScaleTexts.fatMissing(good, COMPLETE));
-        assertEquals("Geschätzt aus 512 Ω Widerstand (Sun 2003, Janssen 2000)", ScaleTexts.note(good, COMPLETE));
+        // all well: no note under the tiles - the method and the resistance are under "Messmethode" in the settings
+        assertEquals("", ScaleTexts.note(good, COMPLETE));
+        assertTrue(ScaleTexts.method(good).startsWith("Letzter Widerstand: 512 Ω ("));
+        assertTrue(ScaleTexts.method(good).contains("Sun 2003"));
+        assertTrue(ScaleTexts.method(good).contains("Ashwell 2016"));
+        assertTrue(ScaleTexts.method(null).startsWith("Noch keine Messung mit Widerstand."));
         assertEquals("Fertig – gespeichert ✓", ScaleTexts.done(Weighings.Added.NEW, good));
         assertEquals("Fertig – Körperfett ergänzt ✓", ScaleTexts.done(Weighings.Added.COMPLETED, good));
         assertEquals("Fertig – war schon gespeichert", ScaleTexts.done(Weighings.Added.REPEAT, good));
@@ -338,5 +343,8 @@ public class ScaleTest {
         c.set(2026, Calendar.NOVEMBER, 19, 7, 5);   // a Thursday morning
         assertEquals("DO 19.11.2026 · 07:05 UHR", ScaleTexts.when(new Weighings.Weighing(c.getTimeInMillis(), 8000, 0)));
         assertEquals("", ScaleTexts.when(null));
+        // the compact bar: day and date only
+        assertEquals("DO 19.11.", ScaleTexts.whenShort(new Weighings.Weighing(c.getTimeInMillis(), 8000, 0)));
+        assertEquals("", ScaleTexts.whenShort(null));
     }
 }

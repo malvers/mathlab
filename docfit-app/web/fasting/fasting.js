@@ -1,5 +1,5 @@
 /*
- * DocFit "Fasting" (Doc, 19.11.2026: "Ich habe ja mehrere Male gefastet und dort eingetragen" - "DocFit ... eine extra
+ * DocFit "Fasten" (Doc, 19.11.2026: "Ich habe ja mehrere Male gefastet und dort eingetragen" - "DocFit ... eine extra
  * Rubrik ... Fasting"). Two views, chosen in the row on top (and in the URL hash, so Back works in the app too):
  * - "Vergleich": all fasts on top of each other from day 1 (one measure at a time, change since day 1 or absolute),
  *   and a summary card per fast.
@@ -33,18 +33,20 @@
   }
   // dec: decimals shown; 'auto' = whole numbers without decimals (belly 97 / 97,5)
   const M = {
-    weight: { label: 'Gewicht', unit: 'kg', dec: 1 },
-    belly: { label: 'Bauchumfang', unit: 'cm', dec: 'auto' },
-    bodyAge: { label: 'Körperalter', unit: 'Jahre', dec: 0, hint: 'Tanita' },
-    fat: { label: 'Körperfett', unit: '%', dec: 1 },
-    water: { label: 'Körperwasser', unit: '%', dec: 1 },
-    organFat: { label: 'Organfett', unit: 'Stufe', dec: 0, hint: 'Tanita 1–12' },
-    sys: { label: 'Blutdruck SYS', unit: 'mmHg', dec: 0 },
-    dia: { label: 'Blutdruck DIA', unit: 'mmHg', dec: 0 },
-    pulse: { label: 'Ruhepuls', unit: '/min', dec: 0 },
-    sugar: { label: 'Blutzucker', unit: 'mg/dl', dec: 0 },
-    ketones: { label: 'Ketone', unit: 'mmol/l', dec: 1 },
-    kcal: { label: 'Nahrung', unit: 'kcal', dec: 0 }
+    // chip: the short name on the buttons above the comparison chart, so all of them fit on a phone (Doc, 20.11.2026:
+    // "Gewicht, Bauchumfang, Körperfett … ein bisschen schmaler, sodass die Tasten auch hinpassen")
+    weight: { label: 'Gewicht', chip: 'Gewicht', unit: 'kg', dec: 1 },
+    belly: { label: 'Bauchumfang', chip: 'Bauch', unit: 'cm', dec: 'auto' },
+    bodyAge: { label: 'Körperalter', chip: 'Körperalter', unit: 'Jahre', dec: 0, hint: 'Tanita' },
+    fat: { label: 'Körperfett', chip: 'Fett', unit: '%', dec: 1 },
+    water: { label: 'Körperwasser', chip: 'Wasser', unit: '%', dec: 1 },
+    organFat: { label: 'Organfett', chip: 'Organfett', unit: 'Stufe', dec: 0, hint: 'Tanita 1–12' },
+    sys: { label: 'Blutdruck SYS', chip: 'SYS', unit: 'mmHg', dec: 0 },
+    dia: { label: 'Blutdruck DIA', chip: 'DIA', unit: 'mmHg', dec: 0 },
+    pulse: { label: 'Ruhepuls', chip: 'Puls', unit: '/min', dec: 0 },
+    sugar: { label: 'Blutzucker', chip: 'Zucker', unit: 'mg/dl', dec: 0 },
+    ketones: { label: 'Ketone', chip: 'Ketone', unit: 'mmol/l', dec: 1 },
+    kcal: { label: 'Nahrung', chip: 'Nahrung', unit: 'kcal', dec: 0 }
   };
   // the chart grid of one fast, in the order of Doc's Excel dashboard; 'bp' = SYS and DIA in one chart
   const GRID = ['weight', 'belly', 'bodyAge', 'fat', 'bp', 'water', 'organFat', 'pulse', 'sugar', 'ketones', 'kcal'];
@@ -110,6 +112,11 @@
     return (a.getUTCFullYear() === b.getUTCFullYear() ? dm(a) : dmy(a)) + '–' + dmy(b);
   }
   function short(f) { return f.label.replace(/^(\S{3})\S*/, '$1') + ' · ' + f.days + ' T' + (f.endSure ? '' : '?'); }
+  /** the fast in the legend chips: "Jan 21" ("Januar 2021"); the length stands at the end of its line in the chart */
+  function tiny(f) {
+    const m = /^(\S{3})\S*\s+\d{2}(\d{2})$/.exec(f.label.trim());
+    return m ? m[1] + ' ' + m[2] : short(f);
+  }
   function dayWord(f, n) {
     if (n < 1) return (1 - n) + (n === 0 ? ' Tag' : ' Tage') + ' vorher';
     if (n > f.days) return (n - f.days) + (n - f.days === 1 ? ' Tag' : ' Tage') + ' danach';
@@ -304,8 +311,13 @@
 
     const metrics = COMPARE.filter(m => D.fasts.filter(f => f.coverage[m] && f.coverage[m].days >= 2).length >= 2);
     if (!metrics.includes(state.metric)) state.metric = 'weight';
-    const segM = el('div', 'seg scroll');
-    metrics.forEach(m => segM.appendChild(toggle(M[m].label, state.metric === m, () => { state.metric = m; save(); route(); })));
+    const segM = el('div', 'seg');
+    metrics.forEach(m => {
+      const b = toggle(M[m].chip || M[m].label, state.metric === m, () => { state.metric = m; save(); route(); });
+      b.title = M[m].label;
+      b.setAttribute('aria-label', M[m].label);
+      segM.appendChild(b);
+    });
     card.appendChild(segM);
 
     const row = el('div', 'row');
@@ -348,15 +360,17 @@
       make: cv => make(cv, true)
     });
 
-    // the fasts as toggles = the legend (colour follows the fast, never its position)
-    const segF = el('div', 'seg toggles');
-    segF.style.marginTop = '10px';
+    // the fasts as toggles = the legend (colour follows the fast, never its position): small chips with a colour dot
+    // and "Jan 21", a few to a line (Doc, 20.11.2026: "die Legende darunter nimmt verdächtig viel Platz weg")
+    const segF = el('div', 'seg toggles legendchips');
     chrono().forEach(f => {
       const has = sets.some(s => s.fastId === f.id);
-      const b = toggle(short(f), has && !state.hidden.has(f.id), () => {
+      const b = toggle(tiny(f), has && !state.hidden.has(f.id), () => {
         if (state.hidden.has(f.id)) state.hidden.delete(f.id); else state.hidden.add(f.id);
         route();
       }, colorOf(f));
+      b.setAttribute('aria-label', short(f));
+      b.title = short(f);
       if (!has) { b.disabled = true; b.title = 'Keine Werte für ' + M[m].label; }
       segF.appendChild(b);
     });

@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * What the big stopwatch shows after a stop (LastRun): "Zurücksetzen", deleting the shown run from the list, undoing
+ * What the big stopwatch shows after a stop (LastRun): "Reset", deleting the shown run from the list, undoing
  * that delete, and the upgrade from the old preferences that held only the duration.
  */
 public class LastRunTest {
@@ -21,7 +21,7 @@ public class LastRunTest {
         assertFalse(LastRun.NONE.shown());
         assertFalse(new LastRun(0, -1).shown());
         assertTrue(LastRun.of(RUN).shown());
-        assertTrue(new LastRun(5, 0).shown());   // a run under a second still is a run (shows 00:00, GESTOPPT)
+        assertTrue(new LastRun(5, 0).shown());   // a run under a second still is a run (shows 00:00 in orange)
     }
 
     @Test
