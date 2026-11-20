@@ -54,18 +54,24 @@
         label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px; letter-spacing: .03em; }
 
         /* arrows left and right of the day strip: one day back / forward, the strip follows */
-        .strip { display: grid; grid-template-columns: 30px 1fr 30px; gap: clamp(4px, 1.5vw, 8px); margin-bottom: 16px; }
-        .days { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(4px, 1.5vw, 8px); }
+        .strip { --gap: clamp(4px, 1.5vw, 8px); display: grid; grid-template-columns: 30px 1fr 30px; gap: var(--gap); margin-bottom: 16px; }
+        /* the window onto the days: 4px padding leave room for the yellow frame, everything beyond is clipped (no page scroll) */
+        .days { min-width: 0; padding: 4px; margin: -4px; overflow: hidden; overflow: clip; }
+        /* the row that slides (transform only): five tiles fill the window, extra tiles wait outside during a slide */
+        .track { display: flex; gap: var(--gap); }
         button.step {
             height: 58px; padding: 0; border: 0; border-radius: 10px; background: transparent;
             color: var(--text); cursor: pointer; display: grid; place-items: center;
         }
         button.step svg { width: 30px; height: 30px; fill: currentColor; }
         button.step:disabled { opacity: .25; }
+        /* exactly a fifth of the window each (so the middle is the middle); the date shrinks on narrow phones so
+           the widest one ("06.06." = 3.03 em) still fits: 360px -> 12px, 390px -> 13.7px, 412px and up -> 15px */
         .day {
+            flex: 0 0 calc((100% - 4 * var(--gap)) / 5); min-width: 0;
             height: 58px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg);
             padding: 0; cursor: pointer; color: var(--muted); line-height: 1.2;
-            font: 600 clamp(13px, 3.9vw, 15px) Raleway, sans-serif; font-variant-numeric: lining-nums;
+            font: 600 clamp(12px, calc(6vw - 9.7px), 15px) Raleway, sans-serif; font-variant-numeric: lining-nums;
         }
         .day small { display: block; font-size: 11px; font-weight: 400; }
         .day.has { background: var(--phi); border-color: var(--phi); color: var(--bg); }
@@ -78,12 +84,17 @@
         }
         textarea:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
 
-        .row { display: flex; gap: 10px; margin-top: 14px; }
-        button.main, button.ghost {
-            flex: 1; height: 58px; border-radius: 12px; cursor: pointer;
+        /* below the text: the small autosave note on the left, the mic on the right */
+        .row { display: flex; align-items: center; gap: 10px; margin-top: 14px; min-height: 58px; }
+        .note { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font: 14px/1.4 Raleway, sans-serif; color: var(--muted); }
+        button.main {
+            flex: 1; height: 58px; border-radius: 12px; cursor: pointer; background: var(--lambda); color: var(--bg); border: 0;
             font: 700 15px Orbitron, sans-serif; letter-spacing: .04em;
         }
-        button.main { background: var(--lambda); color: var(--bg); border: 0; }
+        button.del {
+            height: 32px; padding: 0 12px; border-radius: 8px; cursor: pointer;
+            background: transparent; color: var(--text); border: 1px solid var(--line); font: 600 12px Orbitron, sans-serif;
+        }
         button.mic {
             flex: 0 0 58px; height: 58px; border-radius: 12px; cursor: pointer; display: grid; place-items: center;
             background: transparent; color: var(--text); border: 1px solid var(--line);
@@ -91,10 +102,9 @@
         button.mic svg { width: 26px; height: 26px; fill: currentColor; }
         button.mic.on { background: var(--upsilon); border-color: var(--upsilon); animation: pulse 1.2s ease-in-out infinite; }
         @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(176, 36, 24, .35); } }
-        button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
         button:disabled { opacity: .5; cursor: default; }
-        .status { min-height: 1.4em; margin-top: 10px; font: 14px Raleway, sans-serif; color: var(--muted); }
-        .status:empty { min-height: 0; margin-top: 0; }   /* no gap while there is nothing to say - the text field gets it */
+        .status { transition: opacity .6s; }
+        .status.gone { opacity: 0; }   /* "gespeichert ✓" fades out */
         .status.ok { color: var(--phi); }
         .status.err { color: var(--lambda); }
 
@@ -133,21 +143,20 @@
                 <!-- chevrons: Material Icons "chevron_left" / "chevron_right" (Apache 2.0) -->
                 <div class="strip">
                     <button class="step" id="prevBtn" type="button" aria-label="Einen Tag zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
-                    <div class="days" id="days" role="group" aria-label="Tage"></div>
+                    <div class="days" id="days" role="group" aria-label="Tage"><div class="track" id="track"></div></div>
                     <button class="step" id="nextBtn" type="button" aria-label="Einen Tag vor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
                 </div>
 
                 <textarea id="text" placeholder="Dass …" aria-label="Wofür bist du dankbar?"></textarea>
 
+                <!-- no save button: the text is stored by itself; the note says so quietly (or offers to delete an emptied entry) -->
                 <div class="row">
-                    <button class="ghost" id="cancelBtn" type="button" hidden>Abbrechen</button>
-                    <button class="main" id="saveBtn" type="button">Speichern</button>
+                    <div class="note"><span class="status" id="status" role="status"></span><button class="del" id="delBtn" type="button" hidden>Löschen</button></div>
                     <!-- mic: Material Icons "mic" (Apache 2.0) -->
                     <button class="mic" id="micBtn" type="button" aria-label="Diktieren">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
                     </button>
                 </div>
-                <div class="status" id="status" role="status"></div>
             </div>
 
             <!-- the latest entries; tap one to edit it (also older than the strip) -->
@@ -161,14 +170,17 @@
             const $ = id => document.getElementById(id);
             const DRAFT_KEY = 'grateful-draft';
             const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-            const DAYS = 5;          // length of the day strip, today included
+            const DAYS = 5;          // length of the day strip
+            const MID = (DAYS - 1) / 2;   // the selected day's slot: the middle one
+            const QUIET_MS = 1500;   // autosave this long after the last keystroke
 
             let entries = [];        // newest first: { id, day, text }
             let selectedDay = null;  // YYYY-MM-DD the form is for - yellow frame in the strip, its year in the head
             let editing = null;      // id of the selected day's entry, null while the day is still empty
             let newTexts = {};       // day -> text typed for a day without entry, kept while other days are looked at
-            let stripEnd = null;     // last day of the strip: today, or earlier once the arrows went further back
+            let stripEnd = null;     // last day of the strip: two days after the selected one, but never after today
             let loadedSince = null;  // entries are loaded from this day on - going further back loads more
+            let older = null;        // a running load of older days, if any
 
             /* local calendar date as YYYY-MM-DD (sv-SE formats exactly like that) */
             const iso = d => d.toLocaleDateString('sv-SE');
@@ -177,6 +189,12 @@
             const shortDate = s => `${WD[new Date(s + 'T12:00:00').getDay()]} ${s.slice(8, 10)}.${s.slice(5, 7)}.`;
             const byId = id => entries.find(x => x.id === id);
             const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            /* days as whole numbers (UTC, no DST), for counting tiles */
+            const dn = s => Math.round(Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) / 864e5);
+            const ds = n => new Date(n * 864e5).toISOString().slice(0, 10);
+            const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => ds(a + i));
+            const loaded = d => !!loadedSince && d >= loadedSince;
+
             /* remember what is typed for an empty day (per day) */
             function keepNew() {
                 if (editing) return;
@@ -184,119 +202,284 @@
                 if (t.trim()) newTexts[selectedDay] = t; else delete newTexts[selectedDay];
             }
 
+            /* the small note below the text: autosave news - or, while a stored entry is emptied, the offer to delete it */
+            let news = { msg: '', cls: '' }, fadeT = null;
             function status(msg, cls) {
+                clearTimeout(fadeT);
+                news = { msg: msg || '', cls: cls || '' };
+                paintNote();
+            }
+            function done(msg) {             // "gespeichert ✓" stays a moment, then fades away
+                status(msg, 'ok');
+                fadeT = setTimeout(() => {
+                    $('status').classList.add('gone');
+                    fadeT = setTimeout(() => status(''), 600);
+                }, 1800);
+            }
+            function paintNote() {
+                const emptied = !!editing && !$('text').value.trim();
                 const el = $('status');
-                el.textContent = msg || '';
-                el.className = 'status' + (cls ? ' ' + cls : '');
+                el.textContent = emptied ? 'Leer lassen = Eintrag behalten.' : news.msg;
+                el.className = 'status' + (!emptied && news.cls ? ' ' + news.cls : '');
+                $('delBtn').hidden = !emptied;
+                $('delBtn').disabled = emptied && !!queued('del:' + editing);
             }
 
-            /* the draft survives a failed save, a closed tab or a dead network */
+            /* the draft survives a failed save, a closed tab or a dead network - with every text still on its way */
             function saveDraft() {
+                const waiting = (inflight ? [[inflight.key, inflight.job]] : []).concat([...pending]);
                 try {
-                    localStorage.setItem(DRAFT_KEY, JSON.stringify({ day: selectedDay, editing, text: $('text').value, newTexts }));
+                    localStorage.setItem(DRAFT_KEY, JSON.stringify({ day: selectedDay, editing, text: $('text').value, newTexts, pending: waiting }));
                 } catch (e) { }
             }
             function loadDraft() {
                 try { return JSON.parse(localStorage.getItem(DRAFT_KEY)) || {}; } catch (e) { return {}; }
             }
 
-            async function load() {
-                const res = await auth.api(`grateful?select=id,day,text&day=gte.${loadedSince}&order=day.desc,id.desc`);
-                if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'Kein Zugriff mit diesem Konto' : 'HTTP ' + res.status);
-                entries = await res.json();
+            /* entries from `since` on (never fewer days than already there); one request at a time, the last answer is the newest */
+            let loadChain = Promise.resolve();
+            function load(since) {
+                const job = loadChain.then(async () => {
+                    const from = !loadedSince || since < loadedSince ? since : loadedSince;
+                    const res = await auth.api(`grateful?select=id,day,text&day=gte.${from}&order=day.desc,id.desc`);
+                    if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'Kein Zugriff mit diesem Konto' : 'HTTP ' + res.status);
+                    entries = await res.json();
+                    loadedSince = from;
+                });
+                loadChain = job.catch(() => { });
+                return job;
             }
 
-            /* Save button names what happens; "Abbrechen" only while a stored entry has unsaved changes (it reverts) */
-            function buttons() {
+            /* the strip's days are always loaded, with a week to spare, so neighbours slide in already green */
+            function ensureLoaded() {
+                const first = addDays(stripEnd, 1 - DAYS);
+                if (older || (loadedSince && addDays(first, -7) >= loadedSince)) return;
+                older = load(addDays(first, -60))
+                    .then(render, e => status(e.message, 'err'))
+                    .finally(() => { older = null; });
+            }
+
+            /* --- autosave: what is in the field gets stored, no button. One request at a time; per entry (or per
+               empty day) only the newest text waits, and it stays in the draft until the server has it --- */
+            const pending = new Map();   // 'id:<id>' | 'day:<day>' | 'del:<id>' -> { day, id, text } or { del, id, day }
+            let inflight = null;         // { key, job } on its way right now
+            let busy = false, quietT = null, retryT = null, retryMs = 5000;
+            const queued = key => pending.get(key) || (inflight && inflight.key === key ? inflight.job : null);
+            const later = () => { clearTimeout(quietT); quietT = setTimeout(flush, QUIET_MS); };
+
+            /* queue what the form holds now. Whitespace never creates an entry; an emptied entry is kept (see paintNote) */
+            function flush() {
+                clearTimeout(quietT);
+                if (!selectedDay) return;
+                const text = $('text').value.trim();
+                if (!text) {
+                    if (!editing) { pending.delete('day:' + selectedDay); saveDraft(); }
+                    return;
+                }
+                const key = editing ? 'id:' + editing : 'day:' + selectedDay;
                 const e = editing && byId(editing);
-                $('saveBtn').textContent = editing ? 'Ändern' : 'Speichern';
-                $('cancelBtn').hidden = !(e && $('text').value !== e.text);
+                if (e && e.text === text) { pending.delete(key); saveDraft(); return; }   // unchanged
+                pending.set(key, { day: selectedDay, id: editing, text });
+                saveDraft();
+                run();
             }
 
-            /* The form always shows the selected day: its stored entry, or the text typed for a new one */
+            async function run() {
+                if (busy) return;
+                busy = true;
+                clearTimeout(retryT);
+                try {
+                    while (pending.size) {
+                        const [key, job] = pending.entries().next().value;
+                        pending.delete(key);
+                        inflight = { key, job };
+                        status(job.del ? 'löscht …' : 'speichert …');
+                        try {
+                            await store(job);
+                        } catch (err) {
+                            if (!pending.has(key)) pending.set(key, job);   // a newer text for it wins
+                            inflight = null;
+                            saveDraft();
+                            const offline = navigator.onLine === false || err instanceof TypeError;   // fetch failed: no network
+                            status(offline ? 'offline – wird nachgeholt' : `nicht gespeichert (${err.message}) – wird nachgeholt`, 'err');
+                            retryT = setTimeout(run, retryMs);
+                            retryMs = Math.min(retryMs * 2, 60000);
+                            return;
+                        }
+                        inflight = null;
+                        retryMs = 5000;
+                        saveDraft();
+                        if (!pending.size) done(job.del ? 'gelöscht ✓' : 'gespeichert ✓');
+                    }
+                } finally {
+                    busy = false;
+                }
+            }
+
+            /* one request; updates go through PATCH (the history trigger keeps every former version) */
+            async function store(job, fresh) {
+                if (job.del) {
+                    const res = await auth.api(`grateful?id=eq.${job.id}`, { method: 'DELETE' });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    entries = entries.filter(x => x.id !== job.id);
+                    if (editing === job.id) { editing = null; keepNew(); }
+                    render();
+                    saveDraft();
+                    if (selectedDay === job.day) flush();          // typed something new meanwhile: that becomes a new entry
+                    return;
+                }
+                // a day that got its entry by an earlier save meanwhile: change that one instead of making a second
+                const id = job.id || (fresh ? null : (entries.find(x => x.day === job.day) || {}).id);
+                const e = id && byId(id);
+                if (e && e.text === job.text) return;              // already stored
+                const res = id
+                    ? await auth.api(`grateful?id=eq.${id}`, {
+                        method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ text: job.text })
+                    })
+                    : await auth.api('grateful', {
+                        method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify([{ day: job.day, text: job.text }])
+                    });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const rows = await res.json();
+                if (!rows.length) {
+                    if (!id) throw new Error('nichts gespeichert');
+                    // the entry is gone (deleted elsewhere): the text becomes a new entry for its day
+                    entries = entries.filter(x => x.id !== id);
+                    if (editing === id) editing = null;
+                    return store({ day: job.day, id: null, text: job.text }, true);
+                }
+                const row = rows[0], old = byId(row.id);
+                if (old) old.text = row.text;
+                else {
+                    entries.push({ id: row.id, day: row.day, text: row.text });
+                    entries.sort((a, b) => b.day.localeCompare(a.day) || b.id - a.id);
+                }
+                if (!id) {
+                    delete newTexts[row.day];
+                    if (selectedDay === row.day && !editing) editing = row.id;   // from now on this day is changed, not created
+                }
+                render();                                          // green tile, list - the text field is left alone
+                if (selectedDay === row.day) flush();              // typed on while it was saving: that goes next
+            }
+
+            /* The form always shows the selected day: its stored entry (or the newer text on its way), or the text typed for a new one */
             function fill(day, entry) {
+                if (selectedDay) flush();                // what was typed for the day we leave is stored first
                 if (ear && ear.active) ear.stop();       // a running dictation belongs to the day it started on
                 selectedDay = day;
                 $('year').textContent = day.slice(0, 4);
                 editing = entry ? entry.id : null;
-                $('text').value = entry ? entry.text : (newTexts[day] || '');
-                buttons();
+                const q = queued(entry ? 'id:' + entry.id : 'day:' + day);
+                $('text').value = entry ? (q ? q.text : entry.text) : (newTexts[day] || (q ? q.text : ''));
                 render();
                 saveDraft();
             }
             const showDay = d => fill(d, entries.find(x => x.day === d));   // newest entry of that day
             const showEntry = id => { const e = byId(id); if (e) fill(e.day, e); };
 
-            /* one day back (-1) or forward (+1); older than what is loaded -> load 60 more days first */
-            async function step(n) {
-                const d = addDays(selectedDay, n);
-                if (d > todayIso()) return;
-                if (d < loadedSince) {
-                    loadedSince = addDays(d, -60);
-                    try { await load(); } catch (e) { status(e.message, 'err'); return; }
+            /* pick a day (tile or arrow); one tapped faster than the network waits for its data */
+            async function pick(d) {
+                if (!d || d > todayIso()) return;
+                if (!loaded(d) && older) await older;
+                if (!loaded(d)) {
+                    try { await load(addDays(d, -60)); } catch (e) { status(e.message, 'err'); return; }
                 }
-                status('');
                 showDay(d);
             }
 
-            function render() {
-                const byDay = new Set(entries.map(e => e.day));
-                const today = todayIso();
-                // the strip keeps its place while the selected day is in it, otherwise it moves just far enough
-                if (!stripEnd || stripEnd > today) stripEnd = today;
-                if (selectedDay > stripEnd) stripEnd = selectedDay;
-                if (selectedDay < addDays(stripEnd, 1 - DAYS)) stripEnd = addDays(selectedDay, DAYS - 1);
-                $('nextBtn').disabled = selectedDay >= today;
-                const days = $('days');
-                days.innerHTML = '';
-                for (let i = DAYS - 1; i >= 0; i--) {
-                    const d = addDays(stripEnd, -i);
-                    const b = document.createElement('button');
-                    b.type = 'button';
-                    b.className = 'day' + (byDay.has(d) ? ' has' : '') + (d === selectedDay ? ' on' : '');
-                    b.innerHTML = `<small>${WD[new Date(d + 'T12:00:00').getDay()]}</small>${d.slice(8, 10)}.${d.slice(5, 7)}.`;
-                    b.setAttribute('aria-label', shortDate(d) + (byDay.has(d) ? ' – eingetragen' : ' – noch leer'));
-                    b.onclick = () => { status(''); showDay(d); };
-                    days.appendChild(b);
+            /* --- the strip: day tiles on a track behind a five-tile window; it slides so the selected day sits in the middle --- */
+            const SLIDE = 'cubic-bezier(.22, .61, .36, 1)';   // gentle ease-out, stays smooth when a slide is redirected midway
+            const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+            let slideGen = 0, settle = null;
+
+            function dayTile(d) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'day';
+                b.dataset.day = d;
+                b.innerHTML = `<small>${WD[new Date(d + 'T12:00:00').getDay()]}</small>${d.slice(8, 10)}.${d.slice(5, 7)}.`;
+                return b;
+            }
+
+            /* exactly these days (ascending) in the track; tiles that stay are not touched, so a tapped tile keeps its focus */
+            function setTiles(list) {
+                const track = $('track'), keep = new Set(list);
+                for (const b of [...track.children]) if (!keep.has(b.dataset.day)) b.remove();
+                let next = track.firstElementChild;
+                for (const d of list) {
+                    if (next && next.dataset.day === d) next = next.nextElementSibling;
+                    else track.insertBefore(dayTile(d), next);
                 }
+            }
+
+            function paintTiles() {
+                const byDay = new Set(entries.map(e => e.day));
+                for (const b of $('track').children) {
+                    const d = b.dataset.day, has = byDay.has(d);
+                    b.className = 'day' + (has ? ' has' : '') + (d === selectedDay ? ' on' : '');
+                    b.setAttribute('aria-label', shortDate(d) + (has ? ' – eingetragen' : ' – noch leer'));
+                }
+            }
+
+            /* slide so that the window ends on `end` - from wherever the strip is right now, also halfway through a slide */
+            function moveStrip(end) {
+                const track = $('track'), tiles = track.children, gen = ++slideGen;
+                const first = dn(end) - (DAYS - 1);
+                const rest = () => {     // just the five days, no offset: looks exactly like the end of the slide
+                    if (gen !== slideGen) return;
+                    settle = null;
+                    setTiles(range(first, first + DAYS - 1));
+                    paintTiles();
+                    track.style.transition = 'none';
+                    track.style.transform = '';
+                };
+                const pitch = tiles.length > 1 ? tiles[1].getBoundingClientRect().left - tiles[0].getBoundingClientRect().left : 0;
+                if (!pitch || calm.matches) { rest(); return; }
+                const t = getComputedStyle(track).transform;
+                const pos = t === 'none' ? 0 : -new DOMMatrixReadOnly(t).m41 / pitch;   // leftmost visible slot (fractional mid-slide)
+                const i = Math.min(tiles.length - 1, Math.max(0, Math.floor(pos)));
+                let cur = dn(tiles[i].dataset.day) + (pos - i);
+                if (Math.abs(cur - Math.round(cur)) < 0.01) cur = Math.round(cur);
+                const a = Math.floor(cur), b = Math.ceil(cur) + DAYS - 1;             // the days in view right now
+                const lo = Math.min(a, first), hi = Math.max(b, first + DAYS - 1);
+                let list, from, to;
+                if (hi - lo < 3 * DAYS) {                    // near: every day in between slides past
+                    list = range(lo, hi); from = cur - lo; to = first - lo;
+                } else if (first < a) {                      // far back (from the list): the new days dock on the left
+                    list = range(first, first + DAYS - 1).concat(range(a, b)); from = DAYS + cur - a; to = 0;
+                } else {                                     // far forward: they dock on the right
+                    list = range(a, b).concat(range(first, first + DAYS - 1)); from = cur - a; to = b - a + 1;
+                }
+                setTiles(list);
+                paintTiles();
+                track.style.transition = 'none';
+                track.style.transform = `translateX(${-from * pitch}px)`;
+                if (Math.abs(to - from) < 0.01) { rest(); return; }
+                void track.offsetWidth;                      // the start position first, then the slide
+                const ms = Math.round(Math.min(600, 280 + 40 * Math.abs(to - from)));
+                track.style.transition = `transform ${ms}ms ${SLIDE}`;
+                track.style.transform = `translateX(${-to * pitch}px)`;
+                settle = rest;
+                setTimeout(rest, ms + 200);                  // in case transitionend never comes (hidden tab)
+            }
+
+            function render() {
+                const today = todayIso();
+                // the selected day slides into the middle; today and yesterday stay right of it - the strip never shows tomorrow
+                const mid = addDays(selectedDay, MID);
+                const end = mid > today ? today : mid;
+                $('nextBtn').disabled = selectedDay >= today;
+                if (end !== stripEnd || !$('track').children.length) { stripEnd = end; moveStrip(end); }
+                else paintTiles();
                 $('list').innerHTML = entries.slice(0, 30).map(e =>
                     `<li data-id="${e.id}"><time datetime="${e.day}">${shortDate(e.day)}</time><span>${esc(e.text)}</span></li>`
                 ).join('');
+                paintNote();
+                ensureLoaded();
             }
 
-            async function save() {
-                // still dictating: end it first, the final text is saved right after (onFinal)
-                if (ear && ear.active) { saveAfterDictation = true; ear.stop(); return; }
-                const day = selectedDay, text = $('text').value.trim();
-                if (!text) { status('Bitte erst etwas schreiben.', 'err'); return; }
-                saveDraft();
-                $('saveBtn').disabled = true;
-                status('Speichere …');
-                try {
-                    const wasEdit = !!editing;
-                    const res = wasEdit
-                        ? await auth.api(`grateful?id=eq.${editing}`, {
-                            method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ text })
-                        })
-                        : await auth.api('grateful', {
-                            method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify([{ day, text }])
-                        });
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    const rows = await res.json();
-                    if (!rows.length) throw new Error('nichts gespeichert');
-                    if (!wasEdit) delete newTexts[day];
-                    await load();
-                    showEntry(rows[0].id);
-                    status(wasEdit ? 'Geändert.' : 'Gespeichert. Schön!', 'ok');
-                } catch (e) {
-                    status('Nicht gespeichert (' + e.message + ') – der Text bleibt hier stehen.', 'err');
-                } finally {
-                    $('saveBtn').disabled = false;
-                }
-            }
-
-            /* Dictation: the spoken text lands behind what is already typed, live while speaking */
-            let ear = null, dictBase = '', dictDay = null, saveAfterDictation = false;
+            /* Dictation: the spoken text lands behind what is already typed, live while speaking; stored when it ends */
+            let ear = null, dictBase = '', dictDay = null;
             const join = (a, b) => (a && b ? a + ' ' + b : a || b);
             const capital = t => t.charAt(0).toUpperCase() + t.slice(1);
             function setMic(on) {
@@ -307,7 +490,7 @@
                 if (selectedDay !== dictDay) return;    // the day was switched meanwhile
                 $('text').value = join(dictBase, dictBase ? t : capital(t));
                 keepNew();
-                buttons();
+                paintNote();
             }
             function dictate() {
                 if (ear && ear.active) { ear.stop(); return; }
@@ -323,13 +506,12 @@
                         dictated(t);
                         setMic(false);
                         saveDraft();
-                        if (saveAfterDictation) { saveAfterDictation = false; save(); }
+                        flush();
                     },
                     log: m => console.log('[grateful]', m)
                 });
                 dictBase = $('text').value.trim();
                 dictDay = selectedDay;
-                status('');
                 ear.start();
             }
 
@@ -338,40 +520,55 @@
                 $('app').hidden = false;
                 // back to where the last visit stopped, unsaved text included (its day is loaded too)
                 const d = loadDraft();
-                loadedSince = addDays(todayIso(), -60);
-                if (d.day && d.day < loadedSince) loadedSince = d.day;
-                try { await load(); } catch (e) { status(e.message, 'err'); }
+                let since = addDays(todayIso(), -60);
+                if (d.day && d.day < since) since = d.day;
+                try { await load(since); } catch (e) { status(e.message, 'err'); }
                 newTexts = d.newTexts || {};
+                for (const [k, job] of d.pending || []) if (!pending.has(k)) pending.set(k, job);
                 if (d.editing && byId(d.editing)) showEntry(d.editing);
                 else showDay(d.day && !d.editing ? d.day : todayIso());
                 if (typeof d.text === 'string' && d.day === selectedDay && d.text !== $('text').value) {
                     $('text').value = d.text;
                     keepNew();
-                    buttons();
+                    paintNote();
                 }
+                flush();    // a text left unsaved last time goes now ...
+                run();      // ... and whatever else still waited
             }
 
             function init() {
                 $('year').textContent = todayIso().slice(0, 4);
                 $('text').addEventListener('input', () => {
                     keepNew();
-                    buttons();
+                    paintNote();
                     saveDraft();
+                    later();
                 });
-                $('text').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) save(); });
-                $('saveBtn').onclick = save;
+                $('text').addEventListener('blur', flush);
+                $('text').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) flush(); });
+                // leaving the page (app switched, tab closed): store right away; the draft keeps it if that fails
+                document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
+                window.addEventListener('pagehide', flush);
+                window.addEventListener('online', run);
                 $('micBtn').onclick = dictate;
-                $('prevBtn').onclick = () => step(-1);
-                $('nextBtn').onclick = () => step(1);
-                $('cancelBtn').onclick = () => {   // revert the stored entry
-                    const e = editing && byId(editing);
-                    if (e) { $('text').value = e.text; buttons(); saveDraft(); }
-                    status('');
+                $('delBtn').onclick = () => {   // the emptied entry really goes (its former versions stay in the history)
+                    if (!editing || $('text').value.trim()) return;
+                    pending.delete('id:' + editing);
+                    pending.set('del:' + editing, { del: true, id: editing, day: selectedDay });
+                    saveDraft();
+                    paintNote();
+                    run();
                 };
+                $('days').addEventListener('click', e => {
+                    const b = e.target.closest('button[data-day]');
+                    if (b) pick(b.dataset.day);
+                });
+                $('track').addEventListener('transitionend', e => { if (e.target === e.currentTarget && settle) settle(); });
+                $('prevBtn').onclick = () => pick(addDays(selectedDay, -1));
+                $('nextBtn').onclick = () => pick(addDays(selectedDay, 1));
                 $('list').addEventListener('click', e => {
                     const li = e.target.closest('li[data-id]');
                     if (!li) return;
-                    status('');
                     showEntry(Number(li.dataset.id));
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });

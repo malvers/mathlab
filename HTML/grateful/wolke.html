@@ -174,35 +174,44 @@
                 the and for my a an of to that is it i was with in on at be have had this so me very de co
             `).split(/\s+/).filter(Boolean));
 
+            // Words that mean the same person or thing: they count as ONE word, shown under the name on the left.
+            // Dictation spellings belong here too; extend freely (lower case, the forms below are added by themselves)
+            const SYNONYMS = {
+                'Ute': ['ute', 'cutie', 'qutie', 'cuti', 'hasi', 'hase', 'babe']
+            };
+            // every variant also with -s ("Utes", "Cuties", "Hasis") and, ending in -e, with -n ("Hasen") -> one key
+            const SYN = new Map(), SYN_NAME = new Map();
+            for (const [name, list] of Object.entries(SYNONYMS)) {
+                const key = name.toLowerCase();
+                SYN_NAME.set(key, name);
+                for (const v of list) for (const f of [v, v + 's', ...(v.endsWith('e') ? [v + 'n'] : [])]) SYN.set(f, key);
+            }
+            // The counting key of a word as written: lower case, synonyms folded into one
+            const norm = raw => { const k = raw.toLowerCase(); return SYN.get(k) || k; };
+
             const COL = {
                 new: 'rgb(245, 194, 66)',   // λ
                 up: 'rgb(121, 158, 49)',    // φ
                 down: 'rgb(110, 128, 160)',
                 plain: 'rgb(214, 226, 245)'
             };
-            // Frequency mode: continuous ramp from rare to frequent (project cyan → text white → λ → φ);
-            // white in between avoids mint tones, green only for the top quarter
-            const RAMP = [
-                [0, [0, 210, 255]],
-                [0.4, [214, 226, 245]],
-                [0.75, [245, 194, 66]],
-                [1, [121, 158, 49]]
-            ];
-            const rgb = c => `rgb(${c.map(Math.round).join(', ')})`;
-            const RAMP_CSS = `linear-gradient(90deg, ${RAMP.map(([p, c]) => `${rgb(c)} ${p * 100}%`).join(', ')})`;
-            function rampColor(t) {
-                const i = Math.max(1, RAMP.findIndex(([p]) => p >= t));
-                const [p0, c0] = RAMP[i - 1], [p1, c1] = RAMP[i];
-                const f = (t - p0) / (p1 - p0);
-                return rgb(c0.map((v, j) => v + (c1[j] - v) * f));
+            // Frequency mode: a smooth rainbow, t = 0 (rarest) ... 1 (most frequent): violet-blue -> cyan -> green ->
+            // yellow -> orange -> red. Blue looks darker than yellow at the same HSL lightness, so the blue end gets
+            // more of it (72 % instead of 62 %) - every word stays readable on the navy background
+            function rainbow(t) {
+                const h = 255 * (1 - t);
+                const b = Math.min(1, Math.max(0, (h - 170) / 80));      // 0 from cyan down to red, 1 at the blue end
+                const l = 62 + 10 * b * b * (3 - 2 * b);                 // smooth step 62 % -> 72 %
+                return `hsl(${h.toFixed(1)}, 85%, ${l.toFixed(1)}%)`;
             }
+            // the legend bar: the same scale, finely sampled
+            const RAINBOW_CSS = `linear-gradient(90deg, ${Array.from({ length: 13 }, (_, i) => `${rainbow(i / 12)} ${(i / 12 * 100).toFixed(1)}%`).join(', ')})`;
             const MODE_KEY = 'grateful-wolke-farbe';
             let mode = 'trend';
             try { if (localStorage.getItem(MODE_KEY) === 'freq') mode = 'freq'; } catch (e) { }
             const WORD_RE = /[\p{L}]+/gu;
             const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
             const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-            const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
             let DATA = {}, YEARS = [], STATS = {}, current = null, selected = null;
             let words = [], colors = new Map();
@@ -226,7 +235,7 @@
                 for (const e of entries) {
                     const seen = new Set();
                     for (const raw of e.text.match(WORD_RE) || []) {
-                        const k = raw.toLowerCase();
+                        const k = norm(raw);
                         if (k.length < 2 || STOP.has(k) || seen.has(k)) continue;
                         seen.add(k);
                         counts.set(k, (counts.get(k) || 0) + 1);
@@ -236,7 +245,7 @@
                     }
                 }
                 const display = new Map();
-                for (const [k, f] of forms) display.set(k, [...f].sort((a, b) => b[1] - a[1])[0][0]);
+                for (const [k, f] of forms) display.set(k, SYN_NAME.get(k) || [...f].sort((a, b) => b[1] - a[1])[0][0]);
                 return { counts, display, n: entries.length };
             }
 
@@ -270,21 +279,11 @@
                     .sort((a, b) => b[1] - a[1]).slice(0, limit);
             }
 
-            // Ramp position by rank (list is sorted most frequent first): the rarest count sits at 0,
-            // the most frequent at 1, words with the same count share one colour
+            // Rainbow position from the count on a log scale (list is sorted most frequent first): the rarest count
+            // sits at 0, the most frequent at 1, and the many mid-frequency words spread out instead of bunching up
             function freqColors(list) {
-                const n = list.length, out = new Map();
-                let topBelow = null;
-                for (let i = 0; i < n;) {
-                    let j = i;
-                    while (j + 1 < n && list[j + 1][1] === list[i][1]) j++;
-                    const below = n - 1 - j;             // words with a smaller count
-                    if (topBelow === null) topBelow = below;
-                    const col = rampColor(topBelow ? below / topBelow : 1);
-                    for (let k = i; k <= j; k++) out.set(list[k][0], col);
-                    i = j + 1;
-                }
-                return out;
+                const lo = Math.log(list[list.length - 1][1]), hi = Math.log(list[0][1]);
+                return new Map(list.map(([k, c]) => [k, rainbow(hi > lo ? (Math.log(c) - lo) / (hi - lo) : 1)]));
             }
 
             // Colour of every cloud word for the current year and mode
@@ -424,7 +423,7 @@
             function renderLegend() {
                 if (mode === 'freq') {
                     $('legend').innerHTML = words.length
-                        ? `<span class="ramp">${words[words.length - 1][1]}×<i style="background:${RAMP_CSS}"></i>${words[0][1]}× genannt</span>`
+                        ? `<span class="ramp">${words[words.length - 1][1]}×<i style="background:${RAINBOW_CSS}"></i>${words[0][1]}× genannt</span>`
                         : '';
                     return;
                 }
@@ -437,12 +436,12 @@
                     : `<span><i style="background:${COL.new}"></i>die acht häufigsten</span>`;
             }
 
-            /* tap a word: every sentence with it, the word marked */
+            /* tap a word: every sentence with it (or any of its synonyms, same rule as the counting), those words marked */
             function pick(k) {
                 selected = k;
                 const years = current === ALL ? YEARS : [current];
-                const re = new RegExp(`(^|[^\\p{L}])(${reEsc(k)})(?=[^\\p{L}]|$)`, 'giu');
-                const hits = years.flatMap(y => DATA[y]).filter(e => { re.lastIndex = 0; return re.test(e.text); }).reverse();
+                const hits = years.flatMap(y => DATA[y]).filter(e => (e.text.match(WORD_RE) || []).some(w => norm(w) === k)).reverse();
+                const marked = t => t.split(/(\p{L}+)/u).map((p, i) => i % 2 && norm(p) === k ? `<mark>${esc(p)}</mark>` : esc(p)).join('');
                 const label = STATS[current].display.get(k) || k;
                 const box = $('entries');
                 box.hidden = false;
@@ -450,7 +449,7 @@
                     <ol>${hits.map(e => {
                         const d = new Date(e.day + 'T12:00:00');
                         const date = `${WD[d.getDay()]} ${e.day.slice(8, 10)}.${e.day.slice(5, 7)}.${e.day.slice(0, 4)}`;
-                        return `<li><time datetime="${e.day}">${date}</time><span>${esc(e.text).replace(re, '$1<mark>$2</mark>')}</span></li>`;
+                        return `<li><time datetime="${e.day}">${date}</time><span>${marked(e.text)}</span></li>`;
                     }).join('')}</ol>`;
                 box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
