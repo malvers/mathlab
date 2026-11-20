@@ -10,9 +10,9 @@ import java.util.Locale;
  * Basis: the body-fat share (BodyComposition), placed in published ranges for the sex and age group:
  * - Gallagher D, Heymsfield SB, Heo M, Jebb SA, Murgatroyd PR, Sakamoto Y. Healthy percentage body fat ranges: an
  *   approach for developing guidelines based on body mass index. Am J Clin Nutr 2000;72:694-701,
- *   doi:10.1093/ajcn/72.3.694 - the body fat that goes with the BMI limits 25 and 30, as commonly tabulated (white
- *   adults): men 20-39 / 40-59 / 60-79 years "healthy" below 20 / 22 / 25 %, "obese" from 25 / 28 / 30 %; women below
- *   33 / 34 / 36 %, from 39 / 40 / 42 %.
+ *   doi:10.1093/ajcn/72.3.694 - the body fat that goes with the BMI limits 18.5, 25 and 30, as commonly tabulated
+ *   (white adults): men 20-39 / 40-59 / 60-79 years "healthy" from 8 / 11 / 13 % and below 20 / 22 / 25 %, "obese"
+ *   from 25 / 28 / 30 %; women from 21 / 23 / 24 %, below 33 / 34 / 36 %, from 39 / 40 / 42 %.
  * - American Council on Exercise (ACE) body-fat categories: essential fat men 2-5 % / women 10-13 %, athletes 6-13 /
  *   14-20 %, fitness 14-17 / 21-24 %, average 18-24 / 25-31 %, obese from 25 / 32 %. ACE gives no age groups; the
  *   athletes' and fitness limits are moved up by as much as Gallagher's healthy limit rises with age (men +2 / +5,
@@ -56,12 +56,18 @@ final class FitnessScore {
         return score < 1 || score > 10 ? "" : WORDS[(score - 1) / 2];
     }
 
-    /** Where the bands start for one sex and age group, in % body fat. */
+    /**
+     * Where the bands start for one sex and age group, in % body fat. {@code lean} is Gallagher's lower healthy limit
+     * (the body fat that goes with BMI 18.5): men 20-39 / 40-59 / 60-79 from 8 / 11 / 13 %, women 21 / 23 / 24 % - the
+     * start of the green band in the tile (Ranges.fat); the score itself keeps ACE's athletes' limit.
+     */
     static final class Limits {
-        final double athletes, fitness, average, overweight, obese;
+        final double lean, athletes, fitness, average, overweight, obese;
         final String group;   // "für Männer ab 60"
 
-        Limits(double athletes, double fitness, double average, double overweight, double obese, String group) {
+        Limits(double lean, double athletes, double fitness, double average, double overweight, double obese,
+               String group) {
+            this.lean = lean;
             this.athletes = athletes;
             this.fitness = fitness;
             this.average = average;
@@ -75,14 +81,15 @@ final class FitnessScore {
     static Limits limits(char sex, int age) {
         int g = age < 40 ? 0 : age < 60 ? 1 : 2;
         boolean male = sex == Profile.MALE;
+        double[] lean = male ? new double[]{8, 11, 13} : new double[]{21, 23, 24};       // Gallagher, BMI 18.5
         double[] healthy = male ? new double[]{20, 22, 25} : new double[]{33, 34, 36};   // Gallagher, BMI 25
         double[] obese = male ? new double[]{25, 28, 30} : new double[]{39, 40, 42};     // Gallagher, BMI 30
         double shift = healthy[g] - healthy[0];
         String who = male ? "Männer" : "Frauen";
         String[] ages = {"bis 39", "von 40 bis 59", "ab 60"};
         return male
-                ? new Limits(6, 14 + shift, 18 + shift, healthy[g], obese[g], "für " + who + " " + ages[g])
-                : new Limits(14, 21 + shift, 25 + shift, healthy[g], obese[g], "für " + who + " " + ages[g]);
+                ? new Limits(lean[g], 6, 14 + shift, 18 + shift, healthy[g], obese[g], "für " + who + " " + ages[g])
+                : new Limits(lean[g], 14, 21 + shift, 25 + shift, healthy[g], obese[g], "für " + who + " " + ages[g]);
     }
 
     /** The score from body fat alone (before the corrections). */

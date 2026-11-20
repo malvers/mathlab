@@ -10,9 +10,10 @@ import java.util.Locale;
  *
  * The references are those the app already uses (FitnessScore, BodyComposition, Girths), plus the neighbouring cut-offs
  * of the same papers:
- * - Körperfett: FitnessScore.limits - ACE (athletes' lower limit) and Gallagher 2000 (healthy / obese limit) for the
- *   sex and age group: below the athletes' range borderline (only essential fat), up to Gallagher's healthy limit good,
- *   up to his obese limit borderline, above high.
+ * - Körperfett: FitnessScore.limits - Gallagher 2000 for the sex and age group: below his lower healthy limit (BMI
+ *   18.5; men 8 / 11 / 13 %, women 21 / 23 / 24 % by age group) borderline, up to his healthy limit good, up to his
+ *   obese limit borderline, above high. Until 20.11.2026 the green band began at ACE's athletes' limit (men 6 %);
+ *   Gallagher's age-based start replaced it (Doc, 20.11.2026: "entscheide du") - ACE stays in the fitness score only.
  * - Wasser: no clinical cut-off exists; the commonly quoted adult ranges (men 50-65 %, women 45-60 %) - "typisch", an
  *   orientation like the estimate itself (Sun 2003).
  * - Muskel: Janssen I et al., Am J Epidemiol 2004;159:413-421 (doi:10.1093/aje/kwh058), skeletal muscle per height²:
@@ -77,7 +78,7 @@ final class Ranges {
             return b == null ? null : b.word;
         }
 
-        /** A band as the detail sheet lists it: "unter 6 %", "6–20 %", "ab 25 %". */
+        /** A band as the detail sheet lists it: "unter 8 %", "8–20 %", "ab 25 %". */
         String span(int i) {
             Band b = bands[i];
             String u = unit.isEmpty() ? "" : " " + unit;
@@ -124,9 +125,10 @@ final class Ranges {
         FitnessScore.Limits l = FitnessScore.limits(sex, age);
         double min = sex == Profile.MALE ? 0 : 10, max = min + 40;
         String ages = age < 40 ? "bis 39" : age < 60 ? "40–59" : "ab 60";
-        return new Scale(min, max, tenth(percent), "gesund unter " + whole(l.overweight) + " % (" + ages + ")", "%", 0,
-                new Band(min, l.athletes, Zone.BORDER, "sehr wenig"),
-                new Band(l.athletes, l.overweight, Zone.GOOD, "gesund"),
+        return new Scale(min, max, tenth(percent),
+                "gesund " + whole(l.lean) + "–" + whole(l.overweight) + " % (" + ages + ")", "%", 0,
+                new Band(min, l.lean, Zone.BORDER, "sehr wenig"),
+                new Band(l.lean, l.overweight, Zone.GOOD, "gesund"),
                 new Band(l.overweight, l.obese, Zone.BORDER, "etwas viel"),
                 new Band(l.obese, max, Zone.HIGH, "zu viel"));
     }

@@ -91,7 +91,7 @@ final class ScaleTexts {
         return last + "\n\n"
                 + "Die Waage misst Gewicht und den Widerstand zwischen den Füßen. Daraus geschätzt: Körperfett und "
                 + "Wasser nach Sun 2003, Muskel nach Janssen 2000, Fitness nach Gallagher 2000 und ACE.\n\n"
-                + "Die Balken in den Kacheln: Körperfett nach ACE und Gallagher 2000 für Geschlecht und Alter, Wasser "
+                + "Die Balken in den Kacheln: Körperfett nach Gallagher 2000 für Geschlecht und Alter, Wasser "
                 + "die übliche Spanne (kein ärztlicher Grenzwert), Muskel je Größe² nach Janssen 2004, BMI nach WHO, "
                 + "Bauch nach WHO 2008 (erhöht ab 94 cm, deutlich ab 102 cm bei Männern; 80 / 88 cm bei Frauen).\n\n"
                 + "Bauch/Größe (WHtR) nach Ashwell 2016: unter 0,5 gut, 0,5 bis 0,6 erhöht, ab 0,6 hoch. "

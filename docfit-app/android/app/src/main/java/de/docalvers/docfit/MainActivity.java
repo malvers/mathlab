@@ -461,7 +461,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         // the command to say next instead of a state word (Doc, 20.11.2026: "schreiben nur hin, ohne
         // Anführungszeichen, DocFit Start. Und wenn es läuft, DocFit Stopp") - exactly the words Commands listens for
         state.setText(running ? "DocFit Stopp" : "DocFit Start");
-        state.setTextColor(running ? LAMBDA : PHI);
+        // "DocFit Stopp" in the red of the running stopwatch, not orange (Doc, 20.11.2026: "entscheide du")
+        state.setTextColor(running ? pal.alarm : PHI);
         if (!running) timer.setText(Times.duration(last.shown() ? last.duration : 0));
         // ready green, running red, stopped orange - never grey (Doc, 20.11.2026: "wenn das Ding bereit ist, machen wir
         // die Zahlen ... grün", "Wenn die Stoppuhr läuft, ist die grau ... wir machen die rot")
