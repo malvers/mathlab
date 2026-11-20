@@ -6,8 +6,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * The fitness score (FitnessScore) at the borders of its bands: ACE categories, Gallagher's age groups, the WHO BMI
- * limits and the Janssen 2004 muscle limit. All values are made up for the test - no one's real data.
+ * The fitness score (FitnessScore) at the borders of its bands: Gallagher's age groups (lower healthy limit = start of
+ * the top band, as in the body-fat tile), ACE categories, the WHO BMI limits and the Janssen 2004 muscle limit. All
+ * values are made up for the test - no one's real data.
  */
 public class FitnessScoreTest {
     private static final char M = Profile.MALE, W = Profile.FEMALE;
@@ -36,9 +37,11 @@ public class FitnessScoreTest {
     @Test
     public void youngMenAtTheBorders() {
         assertEquals(7, score(5.9, 30, M));     // essential fat only
-        assertEquals(10, score(6.0, 30, M));    // ACE athletes from 6 %
-        assertEquals(10, score(9.9, 30, M));
-        assertEquals(9, score(10.0, 30, M));
+        assertEquals(7, score(6.0, 30, M));     // ACE athletes, but below Gallagher's healthy range
+        assertEquals(7, score(7.9, 30, M));
+        assertEquals(10, score(8.0, 30, M));    // Gallagher 20-39: healthy from 8 %
+        assertEquals(10, score(10.9, 30, M));
+        assertEquals(9, score(11.0, 30, M));
         assertEquals(9, score(13.9, 30, M));
         assertEquals(8, score(14.0, 30, M));    // ACE fitness from 14 %
         assertEquals(7, score(17.9, 30, M));
@@ -53,7 +56,9 @@ public class FitnessScoreTest {
 
     @Test
     public void menFortyToFiftyNine() {
-        assertEquals(9, score(15.9, 45, M));    // athletes moved up by 2
+        assertEquals(7, score(10.9, 45, M));
+        assertEquals(10, score(11.0, 45, M));   // Gallagher 40-59: healthy from 11 %
+        assertEquals(9, score(15.9, 45, M));
         assertEquals(8, score(16.0, 45, M));
         assertEquals(6, score(20.0, 45, M));    // average moved up by 2
         assertEquals(5, score(21.9, 45, M));
@@ -63,7 +68,12 @@ public class FitnessScoreTest {
 
     @Test
     public void menSixtyAndOlder() {
-        assertEquals(9, score(18.9, 65, M));    // athletes moved up by 5
+        assertEquals(7, score(6.0, 65, M));     // no "Top-Athlet" where the tile says "sehr wenig"
+        assertEquals(7, score(12.9, 65, M));
+        assertEquals(10, score(13.0, 65, M));   // Gallagher 60-79: healthy from 13 %
+        assertEquals(10, score(15.9, 65, M));
+        assertEquals(9, score(16.0, 65, M));
+        assertEquals(9, score(18.9, 65, M));
         assertEquals(8, score(19.0, 65, M));
         assertEquals(6, score(23.0, 65, M));
         assertEquals(5, score(24.9, 65, M));
@@ -75,9 +85,11 @@ public class FitnessScoreTest {
     @Test
     public void youngWomenAtTheBorders() {
         assertEquals(7, score(13.9, 30, W));
-        assertEquals(10, score(14.0, 30, W));   // ACE athletes from 14 %
-        assertEquals(9, score(20.9, 30, W));
-        assertEquals(8, score(21.0, 30, W));    // ACE fitness from 21 %
+        assertEquals(7, score(14.0, 30, W));    // ACE athletes, but below Gallagher's healthy range
+        assertEquals(7, score(20.9, 30, W));
+        assertEquals(10, score(21.0, 30, W));   // Gallagher 20-39: healthy from 21 %
+        assertEquals(9, score(22.0, 30, W));
+        assertEquals(8, score(23.0, 30, W));    // fitness: middle of 21 and ACE average 25
         assertEquals(6, score(25.0, 30, W));    // ACE average from 25 %
         assertEquals(5, score(32.9, 30, W));
         assertEquals(4, score(33.0, 30, W));    // Gallagher 20-39: healthy below 33 %
@@ -87,9 +99,17 @@ public class FitnessScoreTest {
 
     @Test
     public void olderWomen() {
+        assertEquals(7, score(22.9, 50, W));
+        assertEquals(10, score(23.0, 50, W));   // Gallagher 40-59: healthy from 23 %
+        assertEquals(9, score(23.5, 50, W));
+        assertEquals(8, score(24.0, 50, W));    // fitness: middle of 23 and ACE average 26, whole
+        assertEquals(6, score(26.0, 50, W));
         assertEquals(4, score(34.0, 50, W));    // Gallagher 40-59
         assertEquals(2, score(40.0, 50, W));
-        assertEquals(8, score(24.0, 70, W));    // fitness moved up by 3
+        assertEquals(7, score(23.9, 70, W));
+        assertEquals(10, score(24.0, 70, W));   // Gallagher 60-79: healthy from 24 %
+        assertEquals(8, score(26.0, 70, W));    // fitness: middle of 24 and ACE average 28
+        assertEquals(6, score(28.0, 70, W));    // ACE average moved up by 3
         assertEquals(4, score(36.0, 70, W));    // Gallagher 60-79
         assertEquals(2, score(42.0, 70, W));
     }
@@ -114,8 +134,8 @@ public class FitnessScoreTest {
         assertEquals(7, FitnessScore.of(14.0, BMI_OK, 27.5, 180, 30, M).score);
         assertEquals(8, FitnessScore.of(14.0, BMI_OK, 27.6, 180, 30, M).score);
         // 1.60 m: 5.75 kg/m² = 14.72 kg
-        assertEquals(7, FitnessScore.of(21.0, BMI_OK, 14.7, 160, 30, W).score);
-        assertEquals(8, FitnessScore.of(21.0, BMI_OK, 14.8, 160, 30, W).score);
+        assertEquals(7, FitnessScore.of(23.0, BMI_OK, 14.7, 160, 30, W).score);
+        assertEquals(8, FitnessScore.of(23.0, BMI_OK, 14.8, 160, 30, W).score);
         // both corrections
         FitnessScore both = FitnessScore.of(14.0, 31.0, 27.0, 180, 30, M);
         assertEquals(6, both.score);
@@ -151,5 +171,27 @@ public class FitnessScoreTest {
         assertEquals("Körperfett 36,0 %: für Frauen von 40 bis 59 etwas viel – gesund ist unter 34 %. "
                 + "Ein Punkt Abzug: BMI 30,5 (WHO: Adipositas).", FitnessScore.of(36.0, 30.5, NAN, 165, 50, W).text);
         assertTrue(FitnessScore.of(4.0, BMI_OK, NAN, 180, 30, M).text.contains("auf Dauer zu wenig"));
+        assertEquals("Körperfett 10,0 %: sehr wenig – unter dem gesunden Bereich (ab 13 %), auf Dauer zu wenig. "
+                + "BMI 22,0 – laut WHO Normalgewicht.", FitnessScore.of(10.0, BMI_OK, NAN, 180, 65, M).text);
+    }
+
+    /** The score and the body-fat tile (Ranges.fat) read the same: "Top-Athlet" only inside the green band. */
+    @Test
+    public void topAthleteOnlyWhereTheTileIsGreen() {
+        for (char sex : new char[]{M, W}) {
+            for (int age : new int[]{25, 45, 65, 85}) {
+                boolean top = false;
+                for (int tenth = 0; tenth <= 600; tenth++) {
+                    double fat = tenth / 10.0;
+                    int s = score(fat, age, sex);
+                    Ranges.Zone z = Ranges.fat(fat, sex, age).zone();
+                    if (s >= 9) {
+                        assertEquals(sex + " " + age + " " + fat, Ranges.Zone.GOOD, z);
+                        top = true;
+                    }
+                }
+                assertTrue("no top band for " + sex + " " + age, top);   // 9-10 reachable for everyone
+            }
+        }
     }
 }

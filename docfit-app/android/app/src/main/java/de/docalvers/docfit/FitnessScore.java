@@ -15,11 +15,17 @@ import java.util.Locale;
  *   from 25 / 28 / 30 %; women from 21 / 23 / 24 %, below 33 / 34 / 36 %, from 39 / 40 / 42 %.
  * - American Council on Exercise (ACE) body-fat categories: essential fat men 2-5 % / women 10-13 %, athletes 6-13 /
  *   14-20 %, fitness 14-17 / 21-24 %, average 18-24 / 25-31 %, obese from 25 / 32 %. ACE gives no age groups; the
- *   athletes' and fitness limits are moved up by as much as Gallagher's healthy limit rises with age (men +2 / +5,
+ *   fitness and average limits are moved up by as much as Gallagher's healthy limit rises with age (men +2 / +5,
  *   women +1 / +3) - our own combination, so a fit 65-year-old is compared with fit 65-year-olds.
+ * The top band starts at Gallagher's lower healthy limit, the same age-based limit where the body-fat tile turns green
+ * (Ranges.fat), not at ACE's athletes' limit (men 6 %, women 14 %) - so the score and the tile always agree: no
+ * "Top-Athlet" for a value the tile calls "sehr wenig" (20.11.2026). For women Gallagher's healthy range begins above
+ * ACE's athletes and even at or above ACE's fitness limit (21 / 23 / 24 % against 21 / 22 / 24 %); so that the top band
+ * never vanishes, the fitness limit is at least the middle between the lower healthy limit and ACE average, as a whole
+ * number (women 23 / 24 / 26 %; for men ACE's limit is always higher and stays) - our own combination as well.
  *
  * Bands (each two points; the lower half of a band gets the higher point):
- *   9-10 "Top-Athlet"   ACE athletes          (below it, essential fat only: 7, too little in the long run)
+ *   9-10 "Top-Athlet"   from Gallagher's lower healthy limit (below it too little in the long run: 7)
  *   7-8  "fit"          ACE fitness
  *   5-6  "solide"       from ACE average up to Gallagher's healthy limit
  *   3-4  "ausbaufähig"  Gallagher overweight (healthy limit up to the obese limit)
@@ -59,16 +65,14 @@ final class FitnessScore {
     /**
      * Where the bands start for one sex and age group, in % body fat. {@code lean} is Gallagher's lower healthy limit
      * (the body fat that goes with BMI 18.5): men 20-39 / 40-59 / 60-79 from 8 / 11 / 13 %, women 21 / 23 / 24 % - the
-     * start of the green band in the tile (Ranges.fat); the score itself keeps ACE's athletes' limit.
+     * start of the green band in the tile (Ranges.fat) and of the score's top band.
      */
     static final class Limits {
-        final double lean, athletes, fitness, average, overweight, obese;
+        final double lean, fitness, average, overweight, obese;
         final String group;   // "für Männer ab 60"
 
-        Limits(double lean, double athletes, double fitness, double average, double overweight, double obese,
-               String group) {
+        Limits(double lean, double fitness, double average, double overweight, double obese, String group) {
             this.lean = lean;
-            this.athletes = athletes;
             this.fitness = fitness;
             this.average = average;
             this.overweight = overweight;
@@ -87,15 +91,16 @@ final class FitnessScore {
         double shift = healthy[g] - healthy[0];
         String who = male ? "Männer" : "Frauen";
         String[] ages = {"bis 39", "von 40 bis 59", "ab 60"};
-        return male
-                ? new Limits(lean[g], 6, 14 + shift, 18 + shift, healthy[g], obese[g], "für " + who + " " + ages[g])
-                : new Limits(lean[g], 14, 21 + shift, 25 + shift, healthy[g], obese[g], "für " + who + " " + ages[g]);
+        double average = (male ? 18 : 25) + shift;                                       // ACE average
+        // ACE fitness, but never so low that the top band from lean vanishes (only women; see the class comment)
+        double fitness = Math.max((male ? 14 : 21) + shift, Math.floor((lean[g] + average) / 2));
+        return new Limits(lean[g], fitness, average, healthy[g], obese[g], "für " + who + " " + ages[g]);
     }
 
     /** The score from body fat alone (before the corrections). */
     static int fatScore(double fat, Limits l) {
-        if (fat < l.athletes) return 7;
-        if (fat < l.fitness) return halves(fat, l.athletes, l.fitness, 10);
+        if (fat < l.lean) return 7;
+        if (fat < l.fitness) return halves(fat, l.lean, l.fitness, 10);
         if (fat < l.average) return halves(fat, l.fitness, l.average, 8);
         if (fat < l.overweight) return halves(fat, l.average, l.overweight, 6);
         if (fat < l.obese) return halves(fat, l.overweight, l.obese, 4);
@@ -163,8 +168,8 @@ final class FitnessScore {
     }
 
     private static String fatWords(double fat, Limits l) {
-        if (fat < l.athletes) {
-            return "sehr wenig – unter dem Bereich von Sportlern (ab " + pct(l.athletes) + "), auf Dauer zu wenig";
+        if (fat < l.lean) {
+            return "sehr wenig – unter dem gesunden Bereich (ab " + pct(l.lean) + "), auf Dauer zu wenig";
         }
         if (fat < l.fitness) return l.group + " im Bereich von Leistungssportlern";
         if (fat < l.average) return l.group + " fit – Leistungssportler liegen unter " + pct(l.fitness);

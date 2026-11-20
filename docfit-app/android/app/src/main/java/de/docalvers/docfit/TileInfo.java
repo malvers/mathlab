@@ -57,8 +57,9 @@ final class TileInfo {
                         "Sagt mehr als das Gewicht allein: Bei gleichem Gewicht kann mehr Muskel und weniger Fett "
                                 + "dahinterstehen.",
                         "Bereiche nach Alter und Geschlecht: Gallagher D et al., Am J Clin Nutr 2000 (gesund = Fett "
-                                + "bei BMI 18,5 bis 25). Die Fitness-Note nutzt zusätzlich die Sportlerbereiche des "
-                                + "American Council on Exercise (ACE). Schätzformel: Sun SS et al., Am J Clin Nutr 2003.");
+                                + "bei BMI 18,5 bis 25). Die Fitness-Note stuft den gesunden Bereich zusätzlich nach den "
+                                + "Kategorien des American Council on Exercise (ACE) ab. Schätzformel: Sun SS et al., Am J "
+                                + "Clin Nutr 2003.");
             case WATER:
                 return new TileInfo("Wasser",
                         "Der Anteil des Körperwassers am Gewicht. Muskeln bestehen zu rund drei Vierteln aus Wasser, "
