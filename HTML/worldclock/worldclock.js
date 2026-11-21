@@ -71,6 +71,21 @@
             return changed;
         }
 
+        // --- Dial geometry: every radius of the ring in units of r (the dial radius, 0.4 × the smaller canvas side), in
+        // one place, so the ring keeps its proportions at every size. From the centre outwards:
+        //   plaques (centres on 0.878, radius 0.105, outer edge 0.983) - each with its own white triangle straight
+        //   outside its centre, from under the plaque to the SCALE circle at 1.015, where the ticks start - ticks -
+        //   hour numbers - rim of the disc at 1.25 (the widget's round edge). A plaque that would touch its neighbour
+        //   (Karachi 5:00 / Bombay 5:30) moves inwards on its own radial line (layoutPlaques).
+        const DIAL = {
+            plaqueR: 0.878, diskR: 0.105,     // = (0.9 - 0.022) and the plaque radius, as before
+            plaqueAir: 0.012,                 // least gap between two plaques
+            scale: 1.015,
+            hourTick: 0.046, halfTick: 0.023,
+            label: 1.132,                     // centre of the hour numbers (1.128 before 21.11.2026)
+            ptrHalf: 0.013,                   // half the triangle's width where it leaves the plaque (at 0.983)
+        };
+
         // --- WORLD CLOCK LOGIC ---
         const mapImg = new Image();
         mapImg.src = '../resources/worldmap_polar_north.png';
@@ -187,12 +202,14 @@
         if (localCity) localCity.highlight = true;
 
         // --- Each city's real local time, from its IANA zone (Intl), so summer/winter time is right on both hemispheres.
-        // The dial reads  utc + zoneLon/15  for a city whose pointer stands at zoneLon (its UTC offset now × 15°): the map
-        // turns with the real UTC (no fixed +1 h any more - that made Dresden read CEST all year, 21.11.2026), and every
-        // pointer sits on the meridian of the time its city really shows. city.dialLon is where its plaque is drawn:
-        // zoneLon, nudged apart where two cities show (nearly) the same time - Azoren/Kapverden, Santa Fé/Dawson,
-        // Samoa/Wellington across the date line, Karachi/Bombay - so no plaque covers another; the pointer keeps the
-        // exact time. The hand-set city.lon slots are no longer used for the time.
+        // The dial reads  utc + zoneLon/15  for a city at zoneLon (its UTC offset now × 15°): the map turns with the real
+        // UTC (no fixed +1 h any more - that made Dresden read CEST all year, 21.11.2026).
+        // Doc's rule for the ring (21.11.2026: "Die Dreiecke sind an der falschen Stelle von den Kreisen. Es fehlen
+        // Dreiecke."): EVERY plaque stands exactly on its local time and has its OWN triangle straight outside its centre,
+        // pointing at its hour - no plaque is pushed sideways, no leader runs along the ring. Cities that show the same
+        // local time share one plaque with both names (Sydney / Port Vila, Samoa / Wellington across the date line); a
+        // plaque that would touch its neighbour (Karachi 5:00 / Bombay 5:30) moves inwards on its own radial line, a
+        // short radial stroke joins it to its triangle.
         const _tzFormats = new Map();
         function tzOffsetMinutes(tz, date) {                     // UTC offset of `tz` at `date`, in minutes (CET → 60)
             let f = _tzFormats.get(tz);
@@ -206,47 +223,50 @@
             const wall = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
             return Math.round((wall - Math.floor(date.getTime() / 1000) * 1000) / 60000);
         }
-        const PLAQUE_GAP = 14;       // degrees between two plaque centres: a plaque spans about 13.7°, so none overlaps
         let dateLineLon = -172.5;    // where the date line is drawn: between the latest and the earliest city
         let _zonesAt = NaN;          // display time the zones were last worked out for
-        // Positions at least `g` apart that move the plaques as little as possible (least squares): the circle is cut
-        // at its widest gap, then isotonic regression (pool adjacent violators) on a[i] − i·g. `a` ascending, one turn.
-        function spreadPlaques(a, g) {
-            const n = a.length;
-            let k = n - 1, widest = a[0] + 360 - a[n - 1];
-            for (let i = 0; i < n - 1; i++) if (a[i + 1] - a[i] > widest) { widest = a[i + 1] - a[i]; k = i; }
-            const order = [], blocks = [];
-            for (let m = 1; m <= n; m++) {
-                const i = (k + m) % n, v = a[i] + (k + m >= n ? 360 : 0);
-                order.push(i);
-                blocks.push({ s: v - (m - 1) * g, c: 1 });
-                while (blocks.length > 1) {
-                    const B = blocks[blocks.length - 1], A = blocks[blocks.length - 2];
-                    if (A.s / A.c <= B.s / B.c) break;
-                    A.s += B.s; A.c += B.c; blocks.pop();
-                }
+        let dialPlaques = [];        // [{ lon: degrees on the dial (= offset × 15), orbit: centre radius in r, cities: [] }]
+        // Plaques on their exact angles; one too close to its neighbour goes inwards: the one off the full hour, else the
+        // later one, as far out as it can without touching any plaque (all plaques keep one size).
+        function layoutPlaques(list) {
+            const P = DIAL.plaqueR, minD = 2 * DIAL.diskR + DIAL.plaqueAir;
+            const need = 2 * Math.asin(minD / (2 * P)) * 180 / Math.PI;            // least angle between two outer plaques
+            const sep = (g, h, rg, rh) => Math.sqrt(rg * rg + rh * rh - 2 * rg * rh * Math.cos((g.lon - h.lon) * Math.PI / 180));
+            list.forEach(g => { g.orbit = P; });
+            const n = list.length;
+            for (let i = 0; i < n && n > 1; i++) {
+                const a = list[i], b = list[(i + 1) % n];
+                if (a.orbit !== P || b.orbit !== P) continue;
+                if ((((b.lon - a.lon) % 360) + 360) % 360 >= need) continue;
+                const inner = (b.lon % 15 !== 0 || a.lon % 15 === 0) ? b : a;
+                inner.orbit = 0;                                                    // placed below
             }
-            const out = new Array(n);
-            let m = 0;
-            blocks.forEach(B => { for (let t = 0; t < B.c; t++, m++) out[order[m]] = B.s / B.c + m * g; });
-            return out.map((d, i) => d - 360 * Math.round((d - a[i]) / 360));   // back next to the city's own angle
+            list.filter(g => g.orbit === 0).forEach(g => {
+                let rho = P;
+                while (rho > 0.3 && list.some(h => h !== g && h.orbit > 0 && sep(g, h, rho, h.orbit) < minD)) rho -= 0.001;
+                g.orbit = rho;
+            });
+            return list;
         }
         function updateCityZones(time) {
             const t = time.getTime();
             if (Math.abs(t - _zonesAt) < 60000) return;       // offsets change only at a DST switch: once a minute is plenty
             _zonesAt = t;
+            const byClock = new Map();                         // same local clock time → one plaque (also across the date line)
             cities.forEach(c => {
                 try { c.zoneLon = tzOffsetMinutes(c.tz, time) / 4; } catch (_) { c.zoneLon = c.lon; }   // min/60·15 = min/4
                 c.dst = getDSTLabel(c.tz, time);                 // ☀/❄ on the plaque for the dial's date, cached instead of per frame
+                const key = ((Math.round(c.zoneLon * 4) % 1440) + 1440) % 1440;
+                if (!byClock.has(key)) byClock.set(key, { lon: c.zoneLon, cities: [] });
+                byClock.get(key).cities.push(c);
             });
-            const list = cities.slice().sort((a, b) => a.zoneLon - b.zoneLon);   // UTC−12 … UTC+14
-            const d = spreadPlaques(list.map(c => c.zoneLon), PLAQUE_GAP);
-            list.forEach((c, i) => { c.dialLon = d[i]; });
-            const late = d[d.length - 1], early = d[0];        // the date line runs between them
+            const list = [...byClock.values()].sort((a, b) => ((a.lon % 360) + 360) % 360 - ((b.lon % 360) + 360) % 360);
+            dialPlaques = layoutPlaques(list);
+            const zones = cities.map(c => c.zoneLon).sort((a, b) => a - b);
+            const late = zones[zones.length - 1], early = zones[0];   // the date line runs between them
             dateLineLon = late + (((early - late) % 360) + 360) % 360 / 2;
         }
-        const cityDialLon = c => (c.dialLon ?? c.lon);     // plaque
-        const cityZoneLon = c => (c.zoneLon ?? c.lon);     // pointer = the city's real local time
+        const plaqueOf = c => dialPlaques.find(g => g.cities.includes(c));
         updateCityZones(new Date());
 
         let manualOffset = 0; // in minutes
@@ -520,16 +540,9 @@
             let hit = false;
             const size = Math.min(rect.width, rect.height) * 0.8;
             const r = size / 2;
-            const time = getDisplayTime();
-            const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
-            const mapRotation = dirSign * (12 - utcHours) * 15 + autoRotation;   // real UTC, see updateCityZones
-
-            cities.forEach(city => {
-                const cityAngle = (dirSign * (-cityDialLon(city)) + mapRotation - 90);
-                let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
-
-                // If distance is near the plaques and angle is close
-                if (dist > r * (DIAL.plaqueR - DIAL.diskR) && dist < r * 1.1 && Math.abs(diff) < 7) {   // the whole plaque, out to the pointers
+            {
+                const city = plaqueAt(mx, my, r);     // the plaque (or the name on a shared plaque) as drawn
+                if (city) {
                     selectedCity = city;
                     ensureNeighborsForTZ(city.tz, city.globeLat ?? city.lat, city.globeLon ?? city.lon, city.name);
                     showCityInfo(city.name);
@@ -552,7 +565,7 @@
                     }
                     hit = true;
                 }
-            });
+            }
 
             if (!hit) {
                 selectedCity = null;
@@ -604,22 +617,9 @@
                 hoveredCity = null;        // no city hover in planetarium
             } else {
                 // Hover hit-test
-                const dist = Math.sqrt(mx*mx + my*my);
-                const mouseAngle = Math.atan2(my, mx) * 180 / Math.PI;
                 const size = Math.min(rect.width, rect.height) * 0.8;
                 const r = size / 2;
-                const time = getDisplayTime();
-                const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
-                const mapRotation = dirSign * (12 - utcHours) * 15 + autoRotation;   // as drawn, also in the south view
-
-                let found = null;
-                cities.forEach(city => {
-                    const cityAngle = (dirSign * (-cityDialLon(city)) + mapRotation - 90);
-                    let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
-                    if (dist > r * (DIAL.plaqueR - DIAL.diskR) && dist < r * 1.1 && Math.abs(diff) < 7) {   // the whole plaque, out to the pointers
-                        found = city;
-                    }
-                });
+                const found = plaqueAt(mx, my, r);    // the plaque (or the name on a shared plaque) as drawn
                 hoveredCity = found;
 
                 const mxC = e.clientX - rect.left;
@@ -800,21 +800,6 @@
 
         // --- Sky interaction (hover/tooltips, zoom, pointer handlers) → worldclock-sky.js (Phase 4).
 
-        // --- Dial geometry: every radius of the ring in units of r (the dial radius, 0.4 × the smaller canvas side), in
-        // one place, so the ring keeps its proportions at every size. From the centre outwards:
-        //   plaques (centres on 0.878, radius 0.105, outer edge 0.983) · 0.012 air · RAIL: the pointers' bases and the
-        //   leaders · pointer, 0.026 high · SCALE circle: the pointer tips touch it, the ticks start on it · ticks ·
-        //   hour numbers · rim of the disc at 1.25 (the widget's round edge).
-        // A pointer therefore never runs into a tick or a number, a leader never runs along the scale circle, and a
-        // plaque never touches either (21.11.2026, Doc: "viele Fehler bei diesen weißen Zeilen außenrum").
-        const DIAL = {
-            plaqueR: 0.878, diskR: 0.105,     // = (0.9 - 0.022) and the plaque radius, as before
-            rail: 0.995,
-            scale: 1.021,
-            hourTick: 0.046, halfTick: 0.023,
-            label: 1.138,                     // centre of the hour numbers (was 1.128: room for the pointers)
-            ptrHalf: 0.0135,                  // half the base of a pointer; height = scale - rail
-        };
         // Crisp lines at every size and pixel ratio: a stroke is a whole number of device pixels, at least one, and its
         // alpha shrinks by what the rounding added, so a thin line keeps the same weight on the LG (1 px per point) and
         // on Retina (2) instead of turning into a grey two-pixel smear. Returns { w, a } for lineWidth / alpha.
@@ -1309,9 +1294,11 @@
 
             // Connecting Line (only in normal mode)
             if (!window.useGlobe) {
-                const cityAngle = (dirSign * (-cityDialLon(targetCity)) + mapRotation - 90) * Math.PI / 180;
-                const startX = Math.cos(cityAngle) * (r * 0.78);
-                const startY = Math.sin(cityAngle) * (r * 0.78);
+                const g = plaqueOf(targetCity) || { lon: targetCity.zoneLon, orbit: DIAL.plaqueR };
+                const cityAngle = (dirSign * (-g.lon) + mapRotation - 90) * Math.PI / 180;
+                const startR = r * (g.orbit - DIAL.diskR + 0.007);     // from just inside the plaque's inner rim
+                const startX = Math.cos(cityAngle) * startR;
+                const startY = Math.sin(cityAngle) * startR;
 
                 ctx.beginPath();
                 ctx.strokeStyle = "#aaaaaa"; // Solid Gray
@@ -1534,8 +1521,11 @@
             ctx.restore();
         }
 
-        // City markers (plaques) glued to the rotating Earth — triangle pointer, coloured disc, name + season icon.
-        // Inputs: r, mapRotation. Reads top-level cities / ctx / dirSign / wkoeLogoImg / getDSTLabel.
+        // City markers (plaques) glued to the rotating Earth: one per distinct local time (dialPlaques), each with its
+        // own triangle straight outside its centre - coloured disc, name(s) + season icon(s).
+        // Inputs: r, mapRotation. Reads dialPlaques / ctx / dirSign / wkoeLogoImg. Writes dialDrawn (what was drawn, for
+        // the hit tests and the self-check).
+        let dialDrawn = [];
         function drawCityMarkers(r, mapRotation) {
             // All sizes relative to r (clock radius) for responsive scaling
             const diskR = r * DIAL.diskR;
@@ -1544,13 +1534,46 @@
             const cityLineHeight = r * 0.038;
             const cityShadowBlur = r * 0.031;
             const isWkoeMode = document.documentElement.dataset.school === 'wkoe';
-            cities.forEach(city => {
-                const cityAngle = dirSign * (-cityDialLon(city)) * Math.PI / 180 - Math.PI / 2;   // the plaque
-                const markerR = r * DIAL.plaqueR;
+            const top = r * (DIAL.plaqueR + DIAL.diskR);       // where an outer plaque ends and its triangle comes out
+            const tipR = r * DIAL.scale;
+            const half = r * DIAL.ptrHalf;
+            const stroke = hairline(r * 0.0035, 0.55);
+            const drawn = [];
+            dialPlaques.forEach(g => {
+                const cityAngle = dirSign * (-g.lon) * Math.PI / 180 - Math.PI / 2;   // = the plaque's local time
+                const markerR = r * g.orbit;
                 const circleRadius = diskR;
                 const mx = Math.cos(cityAngle) * markerR;
                 const my = Math.sin(cityAngle) * markerR;
-                const isWkoeDresden = isWkoeMode && city.name === 'Dresden';
+                const members = g.cities;
+                const single = members.length === 1 ? members[0] : null;
+                const highlight = members.some(c => c.highlight), red = members.some(c => c.red);
+                const isWkoeDresden = isWkoeMode && single && single.name === 'Dresden';
+
+                // Its triangle, on the same angle as the plaque: drawn first, so its base hides under the plaque and the
+                // tip touches the scale circle - every triangle is the same where it shows. A plaque moved inwards gets
+                // a short radial stroke up to its triangle.
+                ctx.save();
+                ctx.rotate(cityAngle);
+                const inner = g.orbit < DIAL.plaqueR - 1e-6;
+                const baseR = inner ? top : top - r * 0.015;
+                const halfB = half * (tipR - baseR) / (tipR - top);
+                if (inner) {
+                    ctx.strokeStyle = `rgba(255,255,255,${stroke.a.toFixed(3)})`;
+                    ctx.lineWidth = stroke.w;
+                    ctx.beginPath();
+                    ctx.moveTo(markerR + circleRadius * 0.9, 0);
+                    ctx.lineTo(top, 0);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.moveTo(tipR, 0);
+                ctx.lineTo(baseR, -halfB);
+                ctx.lineTo(baseR, halfB);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
 
                 if (isWkoeDresden) {
                     // Light gray disc for Dresden in WKOE mode
@@ -1562,36 +1585,32 @@
                     ctx.restore();
                 } else {
                     const grad = ctx.createRadialGradient(mx, my, 0, mx, my, circleRadius);
-                    if (city.red) {
+                    ctx.save();
+                    if (red) {
                         grad.addColorStop(0, 'rgb(176, 36, 24)');   // CLAUDE.md base red (Υ)
                         grad.addColorStop(1, 'rgb(40, 9, 6)');
-                    } else if (city.highlight) {
-                        {
-                            grad.addColorStop(0, '#ffaa00');
-                            grad.addColorStop(0.2, '#ffaa00');
-                            grad.addColorStop(1, '#a05000');
-
-                            ctx.save();
-                            ctx.shadowBlur = cityShadowBlur;
-                            ctx.shadowColor = '#e68a00';
-                        }
+                    } else if (highlight) {
+                        grad.addColorStop(0, '#ffaa00');
+                        grad.addColorStop(0.2, '#ffaa00');
+                        grad.addColorStop(1, '#a05000');
+                        ctx.shadowBlur = cityShadowBlur;
+                        ctx.shadowColor = '#e68a00';
                     } else {
                         grad.addColorStop(0, '#0033aa');
                         grad.addColorStop(1, '#000811');
                     }
-
                     ctx.fillStyle = grad;
                     ctx.beginPath();
                     ctx.arc(mx, my, circleRadius, 0, Math.PI * 2);
                     ctx.fill();
-                    if (city.highlight && !city.red) ctx.restore();
+                    ctx.restore();
                 }
 
                 ctx.save();
                 ctx.translate(mx, my);
                 // Inverse the map rotation to keep text/logo level
                 ctx.rotate(-mapRotation * Math.PI / 180);
-
+                let blocks;                                         // [{ city, y0, y1 }] - which name is where (click)
                 if (isWkoeDresden) {
                     if (wkoeLogoImg.complete && wkoeLogoImg.naturalWidth) {
                         // Fit logo inside the disc (diameter = 2*circleRadius), with margin.
@@ -1607,7 +1626,9 @@
                         const shadowShiftY = dh * 0.04; // shift down to counter shadow on top
                         ctx.drawImage(wkoeLogoImg, -dw / 2 + shadowShiftX, -dh / 2 + shadowShiftY, dw, dh);
                     }
-                } else {
+                    blocks = [{ city: single, y0: -circleRadius, y1: circleRadius }];
+                } else if (single) {
+                    const city = single;
                     let lines = city.name.split('\n');
 
                     const dst = city.dst ?? getDSTLabel(city.tz);
@@ -1641,69 +1662,117 @@
                         ? -(_em.actualBoundingBoxRight - _em.actualBoundingBoxLeft) / 2
                         : 0;
                     ctx.fillText(seasonEmoji, _epen, _ey);  // textAlign stays "center" → glyph box centered at 0
+                    blocks = [{ city, y0: -circleRadius, y1: circleRadius }];
+                } else {
+                    blocks = drawSharedLabel(members, r, circleRadius, highlight);
                 }
                 ctx.restore();
+                // Screen angles (degrees, as the hour ring counts them) of what was just drawn: plaque centre and triangle
+                // share cityAngle by construction; kept for the hit tests and the self-check (dialSelfCheck)
+                const screenA = cityAngle * 180 / Math.PI + mapRotation;
+                drawn.push({ g, angle: screenA, triangle: screenA, orbit: g.orbit, blocks });
             });
-            drawPointers(r);           // after every plaque, so no plaque and no glow covers a pointer or a leader
+            dialDrawn = drawn;
         }
 
-        // Pointers, as in the lab before the time-zone fix a small white triangle that points straight out and touches
-        // the scale circle with its tip - now on the city's exact local time (IANA zone, summer/winter time included).
-        // All pointers are the same shape, drawn rotated, on the rail between the plaques and the scale (DIAL), so none
-        // runs into a tick, a number or a plaque. A pointer that stands over the middle of its own plaque needs nothing
-        // more; a plaque that had to make room for a neighbour with (nearly) the same time is joined to its pointer by a
-        // thin leader (below). Cities with the same time share one pointer, drawn once (drawn twice it looked bolder than
-        // the others). (21.11.2026, Doc: "viele Fehler bei diesen weißen Zeilen außenrum".)
-        function drawPointers(r) {
-            const rail = r * DIAL.rail, tipR = r * DIAL.scale, half = r * DIAL.ptrHalf;
-            // A pointer reads as its plaque's own while it stands over the plaque's middle part (2/3 of its half width)
-            const free = (2 / 3) * Math.asin(DIAL.diskR / DIAL.plaqueR);
-            const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
-            const tips = [];                     // { t, owners: [{ a: plaque angle, lean: pointer - plaque }] }
-            cities.forEach(city => {
-                const a = dirSign * (-cityDialLon(city)) * Math.PI / 180 - Math.PI / 2;   // the plaque
-                const t = dirSign * (-cityZoneLon(city)) * Math.PI / 180 - Math.PI / 2;   // the exact local time
-                let tip = tips.find(u => Math.abs(wrap(u.t - t)) < 1e-4);
-                if (!tip) tips.push(tip = { t, owners: [] });
-                tip.owners.push({ a, lean: wrap(t - a) });
+        // A plaque shared by cities with the same local time: the names one under the other (each in its own summer/
+        // winter colour), then their ☀/❄ in the same order (one icon when all are alike); the font shrinks just enough
+        // that every line fits inside the disc. Returns where each city's name is, for the click.
+        function drawSharedLabel(members, r, R, highlight) {
+            const icons = members.map(c => ((c.dst ?? getDSTLabel(c.tz)) === "SZ") ? "☀️" : "❄️");
+            const iconRow = icons.every(i => i === icons[0]) ? [icons[0]] : icons;
+            const rows = [];                                                     // { text, city }
+            members.forEach(c => c.name.split('\n').forEach(t => rows.push({ text: t, city: c })));
+            let f = Math.max(5, r * 0.028);
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            let lh, iconY, y0;
+            for (let pass = 0; pass < 3; pass++) {                               // fit: measure, shrink, measure again
+                lh = f * 1.18;
+                const iconH = f * 1.05;
+                const total = rows.length * lh + iconH;
+                y0 = -total / 2 + lh / 2 - r * 0.004;
+                iconY = y0 + rows.length * lh - lh / 2 + iconH / 2;
+                ctx.font = `${highlight ? 900 : 'bold'} ${f}px Orbitron`;
+                let k = 1;
+                rows.forEach((row, i) => {
+                    const y = y0 + i * lh, edge = Math.min(R, Math.abs(y) + f * 0.5);
+                    const room = 2 * Math.sqrt(Math.max(0, R * R - edge * edge)) * 0.9;
+                    k = Math.min(k, room / Math.max(1, ctx.measureText(row.text).width));
+                });
+                if (k >= 0.999) break;
+                f *= k;
+            }
+            const blocks = [];
+            rows.forEach((row, i) => {
+                const dst = row.city.dst ?? getDSTLabel(row.city.tz);
+                ctx.fillStyle = highlight ? "rgb(0,0,40)" : (dst === "SZ" ? "rgba(255,255,255,0.95)" : "rgba(220, 220, 220, 0.9)");
+                const y = y0 + i * lh;
+                ctx.fillText(row.text, 0, y);
+                const b = blocks[blocks.length - 1];
+                if (b && b.city === row.city) b.y1 = y + lh / 2;
+                else blocks.push({ city: row.city, y0: y - lh / 2, y1: y + lh / 2 });
             });
-            // Leaders: a plaque whose pointer has left its middle, and every plaque on a shared pointer once one of them
-            // needs a leader - so a pointer that carries one city's leader never looks like another city's alone. A leader
-            // rises from the top of its plaque to the rail and runs along it to the pointer's base: it visibly starts at
-            // its own plaque, also where two leaders come close. All leaders are one path, stroked once, so where they
-            // meet or overlap nothing is drawn twice (no brighter spots, no caps sticking out).
-            const plaqueTop = r * (DIAL.plaqueR + DIAL.diskR);
-            const lead = hairline(r * 0.0035, 0.5);
-            ctx.save();
-            ctx.beginPath();
-            tips.forEach(tip => {
-                if (!tip.owners.some(o => Math.abs(o.lean) > free)) return;
-                tip.owners.forEach(o => {
-                    if (Math.abs(o.lean) < 0.25 * Math.PI / 180) return;          // plaque right under the pointer
-                    ctx.moveTo(Math.cos(o.a) * plaqueTop, Math.sin(o.a) * plaqueTop);
-                    ctx.lineTo(Math.cos(o.a) * rail, Math.sin(o.a) * rail);
-                    ctx.arc(0, 0, rail, o.a, tip.t, o.lean < 0);
+            // icons: one row, centred by their real glyph boxes
+            ctx.font = `${f * 1.0}px sans-serif`;
+            ctx.textAlign = "left";
+            const gap = f * 0.35;
+            const widths = iconRow.map(i => { const m = ctx.measureText(i); return (m.actualBoundingBoxRight ?? m.width) + (m.actualBoundingBoxLeft ?? 0); });
+            let x = -(widths.reduce((a, w) => a + w, 0) + gap * (iconRow.length - 1)) / 2;
+            iconRow.forEach((ic, i) => {
+                const m = ctx.measureText(ic);
+                ctx.fillText(ic, x + (m.actualBoundingBoxLeft ?? 0), iconY);
+                x += widths[i] + gap;
+            });
+            blocks[0].y0 = -R;                                                   // the disc above and below counts too
+            blocks[blocks.length - 1].y1 = R;
+            return blocks;
+        }
+
+        // Which city is under a point (mx, my: CSS px from the dial centre, screen orientation)? The plaque disc, or the
+        // ring between an outer plaque and the numbers (its triangle); on a shared plaque the name under the point.
+        function plaqueAt(mx, my, r) {
+            const half = Math.asin(DIAL.diskR / DIAL.plaqueR) * 180 / Math.PI;
+            const dist = Math.hypot(mx, my), ang = Math.atan2(my, mx) * 180 / Math.PI;
+            for (const d of dialDrawn) {
+                const a = d.angle * Math.PI / 180, cx = Math.cos(a) * r * d.orbit, cy = Math.sin(a) * r * d.orbit;
+                const inDisc = Math.hypot(mx - cx, my - cy) <= r * DIAL.diskR;
+                const diff = Math.abs(((ang - d.angle) % 360 + 540) % 360 - 180);
+                const inRing = d.orbit >= DIAL.plaqueR - 1e-6 && dist >= r * d.orbit && dist <= r * 1.1 && diff <= half;
+                if (!inDisc && !inRing) continue;
+                const y = my - cy;
+                const b = d.blocks.find(b => y >= b.y0 && y <= b.y1) ||
+                    d.blocks.reduce((p, q) => Math.abs(y - (q.y0 + q.y1) / 2) < Math.abs(y - (p.y0 + p.y1) / 2) ? q : p);
+                return b.city;
+            }
+            return null;
+        }
+
+        // Doc's rule, checked on what was drawn: every plaque on the exact local time of each of its cities, its triangle
+        // on the same angle, one triangle per plaque, no two plaques touching. Returns a list of problems (empty = fine).
+        window.dialSelfCheck = function () {
+            const bad = [], r = 100, t = getDisplayTime();
+            const wrap = x => ((x % 360) + 540) % 360 - 180;
+            dialDrawn.forEach(d => {
+                if (Math.abs(wrap(d.triangle - d.angle)) > 1e-6) bad.push('triangle off its plaque: ' + d.g.cities.map(c => c.name).join('/'));
+                d.g.cities.forEach(c => {
+                    const p = {};
+                    new Intl.DateTimeFormat('en-US', { timeZone: c.tz, hourCycle: 'h23', hour: 'numeric', minute: 'numeric', second: 'numeric' })
+                        .formatToParts(t).forEach(x => { p[x.type] = +x.value; });
+                    const h = (p.hour % 24) + p.minute / 60 + p.second / 3600;
+                    const want = dirSign * (12 - h) * 15 - 90 + autoRotation;     // where the hour ring has this time
+                    if (Math.abs(wrap(want - d.angle)) > 0.01) bad.push(`${c.name} at ${d.angle.toFixed(2)}°, its time ${h.toFixed(3)} h is at ${want.toFixed(2)}°`);
                 });
             });
-            ctx.lineCap = "butt";
-            ctx.lineJoin = "round";
-            ctx.lineWidth = lead.w;
-            ctx.strokeStyle = `rgba(255,255,255,${lead.a.toFixed(3)})`;
-            ctx.stroke();
-            ctx.fillStyle = "rgba(255,255,255,0.95)";
-            tips.forEach(({ t }) => {
-                ctx.save();
-                ctx.rotate(t);
-                ctx.beginPath();
-                ctx.moveTo(tipR, 0);
-                ctx.lineTo(rail, -half);
-                ctx.lineTo(rail, half);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            });
-            ctx.restore();
-        }
+            if (dialDrawn.length !== dialPlaques.length) bad.push(`${dialDrawn.length} triangles for ${dialPlaques.length} plaques`);
+            if (dialPlaques.reduce((n, g) => n + g.cities.length, 0) !== cities.length) bad.push('a city has no plaque');
+            for (let i = 0; i < dialDrawn.length; i++) for (let j = i + 1; j < dialDrawn.length; j++) {
+                const A = dialDrawn[i], B = dialDrawn[j];
+                const dd = Math.sqrt(A.orbit ** 2 + B.orbit ** 2 - 2 * A.orbit * B.orbit * Math.cos((A.angle - B.angle) * Math.PI / 180));
+                if (dd < 2 * DIAL.diskR) bad.push('overlap: ' + A.g.cities[0].name + ' / ' + B.g.cities[0].name);
+            }
+            return bad;
+        };
 
         // Celestial backdrop. Two projections (toggle with 'v'):
         //   skyView 0 = pol-wheel  — celestial pole at centre, radius ∝ colatitude (matches the polar clock).

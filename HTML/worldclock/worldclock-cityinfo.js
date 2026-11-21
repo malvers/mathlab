@@ -262,7 +262,7 @@ function updateCityInfoBoxPosition() {
 
     // Position der "18" auf dem Stundenring (links, bei 9-Uhr-Position): centre of the hour numbers = DIAL.label · r
     // (worldclock.js), at angle -PI for i = 18
-    const labelR = (typeof DIAL !== 'undefined') ? DIAL.label : 1.138;
+    const labelR = (typeof DIAL !== 'undefined') ? DIAL.label : 1.132;
     const eighteenX = canvasRect.left + cx - r * labelR;
 
     // Box rechts-Kante 40px links der "18"
