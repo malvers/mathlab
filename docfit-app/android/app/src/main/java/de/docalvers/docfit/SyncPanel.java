@@ -110,6 +110,9 @@ final class SyncPanel {
         EditText email = field("E-Mail", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         email.setText(sync.email());
         EditText pwd = field("Passwort", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        // the phone's password manager may fill both (Doc picks his saved login; DocFit never sees it stored)
+        email.setAutofillHints(View.AUTOFILL_HINT_EMAIL_ADDRESS, View.AUTOFILL_HINT_USERNAME);
+        pwd.setAutofillHints(View.AUTOFILL_HINT_PASSWORD);
         box.addView(email, wide(8));
         box.addView(pwd, wide(8));
         TextView err = text("", 13, pal.alarm, false);
