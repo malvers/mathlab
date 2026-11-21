@@ -222,6 +222,18 @@ final class PhotoView: NSView {
     private var anchor: NSPoint = .zero           // screen coordinates of the opposite corner, fixed while scaling
 
     private var selected = false
+    var isSelected: Bool { selected }
+
+    /// Several prints can be selected and moved together (Doc, 20.11.2026: shift + click adds a print, a drag moves
+    /// every selected one by the same distance). Set at mouse down, used until mouse up.
+    private var group: [(item: PhotoItem, origin: NSPoint)] = []
+    private var wasSelected = false               // the print was selected before this mouse down
+    private var shiftClick = false                // shift was held at mouse down
+
+    /// The selection's mark: a ring in Doc's φ green (rgb 121, 158, 49) with a soft glow around the print, so a
+    /// selected print stands out among the others; the corner grips carry the same green.
+    private let ring = CALayer()
+    private static let phi = NSColor(srgbRed: 121 / 255, green: 158 / 255, blue: 49 / 255, alpha: 1)
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -238,12 +250,25 @@ final class PhotoView: NSView {
         photo.cornerCurve = .continuous     // the squircle of the system widgets
         paper.addSublayer(photo)
 
+        // The selection ring, just outside the photo, turning with it; it lies under the photo, so its glow shines
+        // outwards only and never tints the picture
+        ring.backgroundColor = nil
+        ring.borderColor = PhotoView.phi.cgColor
+        ring.borderWidth = 3
+        ring.cornerCurve = .continuous
+        ring.shadowColor = PhotoView.phi.cgColor
+        ring.shadowOpacity = 0.85
+        ring.shadowRadius = 7
+        ring.shadowOffset = .zero
+        ring.opacity = 0
+        paper.insertSublayer(ring, below: photo)
+
         // Corner grips, sitting inside the paper layer so they turn along with the photo.
         for _ in 0..<4 {
             let h = CALayer()
             h.backgroundColor = NSColor.white.cgColor
-            h.borderColor = NSColor(white: 0.25, alpha: 0.85).cgColor
-            h.borderWidth = 1
+            h.borderColor = PhotoView.phi.cgColor
+            h.borderWidth = 1.5
             h.cornerRadius = handleRadius
             h.bounds = CGRect(x: 0, y: 0, width: handleRadius * 2, height: handleRadius * 2)
             h.shadowColor = NSColor.black.cgColor
@@ -277,6 +302,8 @@ final class PhotoView: NSView {
         paper.transform = CATransform3DMakeRotation(CGFloat(angle), 0, 0, 1)
         photo.frame = paper.bounds
         photo.cornerRadius = rounded ? cornerRadius(for: paperSize) : 0
+        ring.frame = paper.bounds.insetBy(dx: -3, dy: -3)
+        ring.cornerRadius = photo.cornerRadius + 3
         for (i, h) in handles.enumerated() {
             let x: CGFloat = (i == 0 || i == 3) ? 0 : paperSize.width
             let y: CGFloat = (i < 2) ? 0 : paperSize.height
@@ -292,16 +319,16 @@ final class PhotoView: NSView {
     /// area on a desktop-level window stops firing, and the grips would never appear.
     /// Grips show on the print that was clicked, not on the one under the pointer: a
     /// desktop full of photos should stay quiet while the mouse only travels across it.
+    /// Selected: the green ring and the grips.
     func showHandles(_ on: Bool) {
         guard on != selected else { return }
         selected = on
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         for h in handles { h.opacity = on ? 1 : 0 }
+        ring.opacity = on ? 1 : 0
         CATransaction.commit()
     }
-
-    func toggleHandles() { showHandles(!selected) }
 
     /// True when the point, in screen coordinates, lies on the print.
     func covers(screenPoint p: NSPoint) -> Bool {
@@ -348,18 +375,34 @@ final class PhotoView: NSView {
 
     // MARK: mouse
 
+    /// The first click on a print whose panel does not have the keys counts as a click, not only as taking the keys:
+    /// before, the click on another print only cleared the old selection and a second click selected it (Doc,
+    /// 20.11.2026: "mit demselben Klick").
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    /// Selecting, as in PowerPoint (Doc, 20.11.2026): a click selects exactly this print, at once, and a drag moves
+    /// it; shift + click adds it to the selection or, when it was selected, takes it out again; a drag on a selected
+    /// print moves every selected print by the same distance (shift while dragging keeps the height, as before). A
+    /// click that moved nothing on the only selected print puts its grips away, as before. A click anywhere else
+    /// clears the selection (AppDelegate.clearSelection).
     override func mouseDown(with event: NSEvent) {
         if event.clickCount == 2 { item?.openOriginal(); return }
-        guard let win = window else { return }
+        guard let win = window, let item = item else { return }
 
         dragged = false
         startMouse = NSEvent.mouseLocation
         startOrigin = win.frame.origin
         startCenter = NSPoint(x: win.frame.midX, y: win.frame.midY)
+        wasSelected = selected
+        shiftClick = event.modifierFlags.contains(.shift)
+        if !wasSelected {
+            if shiftClick { showHandles(true) } else { item.owner?.selectOnly(item) }
+        }
+        group = []
 
         if isOnHandle(event) {
             mode = .transform
-            startWidth = item?.rec.width ?? 1
+            startWidth = item.rec.width
             startAngle = angle
             let dx = Double(startMouse.x - startCenter.x)
             let dy = Double(startMouse.y - startCenter.y)
@@ -372,6 +415,9 @@ final class PhotoView: NSView {
             NSCursor.crosshair.set()
         } else {
             mode = .move
+            // every selected print moves along, each from where it lies now
+            let selection = item.owner?.selectedItems() ?? []
+            group = (selection.contains { $0 === item } ? selection : [item]).map { ($0, $0.window.frame.origin) }
             NSCursor.closedHand.set()
         }
     }
@@ -384,14 +430,16 @@ final class PhotoView: NSView {
         case .move:
             // shift: only sideways, the height stays exactly (Doc, 15.11.2026: "wenn ich das Bild bewege und Shift
             // gedrückt habe, soll es bitte in Y gleich bleiben")
+            // The grabbed print snaps to the prints that stay; the others of the selection follow it by the same distance.
             guard let win = window else { break }
-            var o = NSPoint(x: startOrigin.x + (now.x - startMouse.x),
-                            y: mods.contains(.shift) ? startOrigin.y : startOrigin.y + (now.y - startMouse.y))
-            let snap = Snap.move(NSRect(origin: o, size: win.frame.size).insetBy(dx: shadowPad, dy: shadowPad),
-                                 among: item?.owner?.photoRects(except: item) ?? [], x: true, y: !mods.contains(.shift))
-            o.x += snap.dx
-            o.y += snap.dy
-            win.setFrameOrigin(o)
+            let dx = now.x - startMouse.x, dy = mods.contains(.shift) ? 0 : now.y - startMouse.y
+            let moving = group.map { $0.item }
+            let snap = Snap.move(NSRect(origin: NSPoint(x: startOrigin.x + dx, y: startOrigin.y + dy), size: win.frame.size)
+                                    .insetBy(dx: shadowPad, dy: shadowPad),
+                                 among: item?.owner?.photoRects(except: moving) ?? [], x: true, y: !mods.contains(.shift))
+            for g in group {
+                g.item.window.setFrameOrigin(NSPoint(x: g.origin.x + dx + snap.dx, y: g.origin.y + dy + snap.dy))
+            }
             Guides.shared.show(snap.guides)
         case .transform:
             // A corner scales the print from the opposite corner, which stays where it is; control scales it about its
@@ -400,7 +448,7 @@ final class PhotoView: NSView {
             // halte, dann soll es sozusagen zentral zoomen").
             let dx = Double(now.x - startCenter.x)
             let dy = Double(now.y - startCenter.y)
-            let others = item?.owner?.photoRects(except: item) ?? []
+            let others = item.map { $0.owner?.photoRects(except: [$0]) ?? [] } ?? []
             let straight = abs(startAngle) < 0.001                    // a turned photo sizes freely, without snapping
             let aspectNow = paperSize.height > 0 ? paperSize.width / paperSize.height : 1
             if mods.contains(.option) {
@@ -441,14 +489,24 @@ final class PhotoView: NSView {
     }
 
     override func mouseUp(with event: NSEvent) {
-        // A click that moved nothing toggles the grips, so the same print puts them
-        // away again — clicking the wallpaper instead would reveal the desktop.
-        if !dragged && event.clickCount == 1 { toggleHandles() }
+        // A click that moved nothing: with shift it takes a print that was selected out of the selection; without, on
+        // a selected print, it leaves only this one selected - or, when it was the only one, puts its grips away, so
+        // the same print takes them back (clicking the wallpaper instead would reveal the desktop).
+        if !dragged && event.clickCount == 1, wasSelected, let item = item {
+            if shiftClick {
+                showHandles(false)
+            } else if (item.owner?.selectedItems().count ?? 1) > 1 {
+                item.owner?.selectOnly(item)
+            } else {
+                showHandles(false)
+            }
+        }
         mode = .none
         dragged = false
         Guides.shared.hide()
         NSCursor.arrow.set()
-        item?.commit()
+        if group.isEmpty { item?.commit() } else { group.forEach { $0.item.commit() } }
+        group = []
     }
 
     /// Option + scrolling turns the print. Scrolling alone no longer zooms - the size changes only at the corners (Doc,
@@ -469,8 +527,9 @@ final class PhotoView: NSView {
     override var acceptsFirstResponder: Bool { true }
     override var needsPanelToBecomeKey: Bool { true }
 
+    /// With several prints selected, the arrow keys move all of them.
     override func keyDown(with event: NSEvent) {
-        guard selected, let win = window else { return }
+        guard selected, let item = item else { return }
         let step: CGFloat = event.modifierFlags.contains(.shift) ? 10 : 1
         var d = NSPoint.zero
         switch event.keyCode {
@@ -480,8 +539,11 @@ final class PhotoView: NSView {
         case 126: d.y = step        // up
         default: return
         }
-        win.setFrameOrigin(NSPoint(x: win.frame.origin.x + d.x, y: win.frame.origin.y + d.y))
-        item?.commit()
+        for it in item.owner?.selectedItems() ?? [item] {
+            let o = it.window.frame.origin
+            it.window.setFrameOrigin(NSPoint(x: o.x + d.x, y: o.y + d.y))
+            it.commit()
+        }
     }
 }
 
@@ -592,6 +654,8 @@ final class PhotoItem {
     }
 
     func select(_ on: Bool) { view.showHandles(on) }
+
+    var isSelected: Bool { view.isSelected }
 
     func covers(_ p: NSPoint) -> Bool { view.covers(screenPoint: p) }
 
@@ -723,13 +787,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         placeAll()   // every print to its place on the LG; without the LG they stay hidden
         publishMenu()
 
-        // One monitor for all prints; global sees the click while other apps are in front,
-        // local sees it while our own window has it. A click anywhere else clears the grips.
+        // A click anywhere but on a print clears the selection: the global monitor sees clicks that go to other apps
+        // (the wallpaper, any window), the local one those to our own windows. A click on a print is the print's own
+        // business (PhotoView.mouseDown: select it, add it with shift, move the selection).
         NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            self?.updateSelection()
+            self?.clearSelection()
         }
         NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] e in
-            self?.updateSelection()
+            if let self = self, !self.items.contains(where: { $0.window === e.window }) { self.clearSelection() }
             return e
         }
 
@@ -1014,21 +1079,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// Hides the grips everywhere but on the print that was just clicked; that one
-    /// toggles its own grips on mouse up, so a second click puts them away.
-    private func updateSelection() {
-        let p = NSEvent.mouseLocation
-        var hitTopmost = false
-        for item in items.reversed() {       // topmost print wins
-            if !hitTopmost && item.covers(p) { hitTopmost = true } else { item.select(false) }
-        }
+    // MARK: selection (see PhotoView.mouseDown)
+
+    /// Exactly this print selected, every other one not.
+    func selectOnly(_ chosen: PhotoItem) {
+        for item in items { item.select(item === chosen) }
+    }
+
+    func clearSelection() {
+        for item in items { item.select(false) }
+    }
+
+    /// The selected prints that can be seen, in their order on the desk.
+    func selectedItems() -> [PhotoItem] {
+        items.filter { $0.isSelected && $0.window.isVisible }
     }
 
     func save() { store.replace(items.map { $0.rec }) }
 
-    /// The other photos as they stand on the screen (their outline, without the window's padding), to snap to.
-    func photoRects(except me: PhotoItem?) -> [NSRect] {
-        items.filter { $0 !== me && $0.window.isVisible }.map { $0.window.frame.insetBy(dx: shadowPad, dy: shadowPad) }
+    /// The other photos as they stand on the screen (their outline, without the window's padding), to snap to - all
+    /// but the ones that are being moved.
+    func photoRects(except moving: [PhotoItem]) -> [NSRect] {
+        items.filter { item in !moving.contains { $0 === item } && item.window.isVisible }
+            .map { $0.window.frame.insetBy(dx: shadowPad, dy: shadowPad) }
     }
 }
 
