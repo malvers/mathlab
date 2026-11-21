@@ -1726,8 +1726,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp.topMargin = dp(12);
         page.addView(persons, lp);
 
-        Button add = button("+ Messung eintragen", PHI);
-        add.setTextColor(pal.onPhi);
+        // lambda orange like the shown tab, with the scheme's ink on it (Doc, 21.11.2026)
+        Button add = button("+ Messung eintragen", pal.chipOn);
+        add.setTextColor(pal.chipOnInk);
         add.setOnClickListener(v -> enterPressure());
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
         lp.topMargin = dp(16);
@@ -1893,8 +1894,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp.topMargin = dp(12);
         page.addView(persons, lp);
 
-        Button add = button("+ Messung eintragen", PHI);
-        add.setTextColor(pal.onPhi);
+        // lambda orange like the shown tab, with the scheme's ink on it (Doc, 21.11.2026)
+        Button add = button("+ Messung eintragen", pal.chipOn);
+        add.setTextColor(pal.chipOnInk);
         add.setOnClickListener(v -> enterGlucose());
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
         lp.topMargin = dp(16);
