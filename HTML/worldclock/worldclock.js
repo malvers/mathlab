@@ -188,7 +188,7 @@
             const wall = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
             return Math.round((wall - Math.floor(date.getTime() / 1000) * 1000) / 60000);
         }
-        const PLAQUE_GAP = 13;       // degrees between two plaque centres (a plaque spans about 13.7°: they may just touch)
+        const PLAQUE_GAP = 14;       // degrees between two plaque centres: a plaque spans about 13.7°, so none overlaps
         let dateLineLon = -172.5;    // where the date line is drawn: between the latest and the earliest city
         let _zonesAt = NaN;          // display time the zones were last worked out for
         // Positions at least `g` apart that move the plaques as little as possible (least squares): the circle is cut
@@ -1479,7 +1479,6 @@
             const diskR = r * 0.105;
             const markerInset = r * 0.022;
             const tipExtend = r * 0.019;
-            const baseInset = r * 0.038;
             const cityFontNormal = Math.max(5, r * 0.030);
             const cityFontHighlight = Math.max(6, r * 0.034);
             const cityLineHeight = r * 0.038;
@@ -1494,17 +1493,28 @@
                 const my = Math.sin(cityAngle) * markerR;
                 const isWkoeDresden = isWkoeMode && city.name === 'Dresden';
 
-                // Draw Precision Triangle (Pointer)
+                // Pointer (21.11.2026, Doc: "Da stimmt irgendwas nicht mit den Pfeilen"): a small white triangle just
+                // outside the ring of plaques, on the city's exact local time (tipAngle). A plaque that had to make room
+                // for a neighbour with (nearly) the same time is joined to its pointer by a thin arc along the ring, so
+                // pointer and plaque always belong together and no pointer floats alone.
+                const ringR = markerR + circleRadius;              // outer edge of every plaque
+                const baseR = ringR + r * 0.004;
+                const tipR = ringR + tipExtend * 2;                // reaches into the tick band, onto the exact time
+                const halfW = (r * 0.022) / baseR;                 // half the base, as an angle
+                const lean = Math.atan2(Math.sin(tipAngle - cityAngle), Math.cos(tipAngle - cityAngle));
                 ctx.save();
                 ctx.fillStyle = "white";
+                if (Math.abs(lean) > 0.004) {
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+                    ctx.lineWidth = Math.max(1, r * 0.006);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, baseR, cityAngle, cityAngle + lean, lean < 0);
+                    ctx.stroke();
+                }
                 ctx.beginPath();
-                const tipR = markerR + circleRadius + tipExtend;
-                const baseR = markerR + circleRadius - baseInset;
-                const spread = 0.06; // angular, no scaling needed
-
-                ctx.moveTo(Math.cos(tipAngle) * tipR, Math.sin(tipAngle) * tipR);   // leans towards the hour if the plaque was nudged
-                ctx.lineTo(Math.cos(cityAngle - spread) * baseR, Math.sin(cityAngle - spread) * baseR);
-                ctx.lineTo(Math.cos(cityAngle + spread) * baseR, Math.sin(cityAngle + spread) * baseR);
+                ctx.moveTo(Math.cos(tipAngle) * tipR, Math.sin(tipAngle) * tipR);
+                ctx.lineTo(Math.cos(tipAngle - halfW) * baseR, Math.sin(tipAngle - halfW) * baseR);
+                ctx.lineTo(Math.cos(tipAngle + halfW) * baseR, Math.sin(tipAngle + halfW) * baseR);
                 ctx.closePath();
                 ctx.fill();
                 ctx.restore();
