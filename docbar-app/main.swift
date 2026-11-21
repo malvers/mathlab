@@ -321,7 +321,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func launchCompanionTools() {
         for path in ["/Applications/WindowSets.app",
                      "/Applications/DeskPhoto.app",
-                     "/Applications/SleepSwitch.app"]
+                     "/Applications/SleepSwitch.app",
+                     "/Applications/DocClock.app"]
         where FileManager.default.fileExists(atPath: path) {
             let cfg = NSWorkspace.OpenConfiguration()
             cfg.activates = false
@@ -364,8 +365,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         launchCompanionTools()
         refreshIcon(loadApps())
         Timer.scheduledTimer(withTimeInterval: 4, repeats: true) { [weak self] _ in
-            guard let self = self, !self.popover.isShown else { return }
-            self.refreshIcon(self.loadApps())
+            guard let self = self else { return }
+            let apps = self.loadApps()
+            self.reviveCrashedTools(apps)
+            if !self.popover.isShown { self.refreshIcon(apps) }
+        }
+    }
+
+    /// A tool that asks to be kept alive (keepAlive in its menu file) but no longer runs did not quit on purpose - a
+    /// tool that quits says so in its file first - so it crashed or was killed: start it again, in the background, at
+    /// most once a minute so a tool that dies at start cannot loop (DocClock, 21.11.2026).
+    private var lastRevive: [String: Date] = [:]
+    private func reviveCrashedTools(_ apps: [DocBarMenu]) {
+        for app in apps where app.keepAlive == true && !isRunning(app) {
+            if let t = lastRevive[app.id], Date().timeIntervalSince(t) < 60 { continue }
+            guard FileManager.default.fileExists(atPath: app.launchPath) else { continue }
+            lastRevive[app.id] = Date()
+            let cfg = NSWorkspace.OpenConfiguration()
+            cfg.activates = false
+            NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: app.launchPath), configuration: cfg)
         }
     }
 

@@ -506,7 +506,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         menu.addItem(.separator())
         add("Beim Anmelden starten", #selector(menuLogin), state: startsAtLogin)
         add("Ausblenden", #selector(menuHide))
-        add("DocClock beenden", #selector(menuQuit))
+        // No "Beenden" here: it sat at the bottom of the menu and closed the clock by mistake (Doc, 21.11.2026: "Im
+        // Moment ist die irgendwie geschlossen"); quitting stays in DocBar, where it is a deliberate step.
         NSMenu.popUpContextMenu(menu, with: event, for: view)
     }
 
@@ -516,9 +517,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     @objc private func menuOpenLab() { openLab() }
     @objc private func menuLogin() { toggleLogin() }
     @objc private func menuHide() { setShown(false) }
-    @objc private func menuQuit() { NSApp.terminate(nil) }
 
     /// DocBar: the DocClock row switches the clock on and off (ON/OFF pill), the items below do the rest.
+    /// false once DocClock quits on purpose: DocBar then lists it as "nicht aktiv - klicken zum Starten" and leaves it;
+    /// while it runs, DocBar starts it again should it ever die without quitting (crash, killed).
+    private var keepAlive = true
+
     private func publishMenu() {
         let items = [
             DocBarItem("show", "Weltuhr zeigen", state: Settings.shown),
@@ -530,7 +534,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
             DocBarItem("quit", "DocClock beenden"),
         ]
         bar.publish(status: Settings.shown ? "Weltuhr auf dem Schreibtisch" : "Weltuhr ausgeblendet",
-                    items: items, primary: "show", toggle: Settings.shown)
+                    items: items, primary: "show", toggle: Settings.shown, keepAlive: keepAlive)
     }
 
     private func handle(_ item: String) {
@@ -559,8 +563,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         publishMenu()
     }
 
+    /// Quitting (DocBar's "DocClock beenden", logout) keeps the clock's row in DocBar, so one click starts it again,
+    /// and tells DocBar not to revive it.
     func applicationWillTerminate(_ note: Notification) {
-        bar.withdraw()
+        keepAlive = false
+        publishMenu()
     }
 }
 
