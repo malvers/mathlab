@@ -28,7 +28,12 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.InputFilter;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.text.InputType;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.text.method.DigitsKeyListener;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -96,18 +101,20 @@ import java.util.function.IntConsumer;
  *   Under the gear, "Personen": each one on or off ("profileOn" / "profile2On"); off = out of the switch and of the
  *   assignment, her data stays. With one on there is no switch and every result is hers - still asked when it is
  *   more than 5 kg from her newest ("Ist das …?"). At least one stays on.
- * - "Blutdruck" (Doc, 20.11.2026, where "Fasten" was): for now a placeholder in the same style - the Omron M400
- *   Intelli IT is on its way and will be read over Bluetooth (BLE blood pressure service 0x1810); no field to type
- *   values in (Doc, 19.11.2026), and an empty list until the first reading.
+ * - "Blutdruck" (Doc, 20.11.2026, where "Fasten" was): readings typed in by hand (Doc, 21.11.2026 - replacing the
+ *   rule of 19.11. "no typing", for when the Omron does not send or in Spain without it): systolic, diastolic, pulse,
+ *   date and time (now, changeable), a note; per person like the scale (the same switch). The list colours each
+ *   reading by its ESH category and says where it came from ("Hand"; later "Omron" - the M400 Intelli IT, read over
+ *   Bluetooth, BLE blood pressure service 0x1810). Swipe or long press deletes, with "Rückgängig" (Pressures).
  * - "Fasten" (Doc, 19.11.2026: "DocFit ... eine extra Rubrik ... Fasting", 20.11.: "schreibt bitte Fasten, wir haben es
  *   ja nun mal Deutsch"): Doc's fasts from his workbook, a chart
  *   grid per fast like his Excel dashboard and all fasts on top of each other from day 1 - the page web/fasting/
  *   (Chart.js, offline) shown in a WebView from the APK's assets; its data file is private and never in git. Since
  *   20.11.2026 no longer a tab but the first entry of the settings (Doc: into the menu under the gear, at the very
  *   top); while it is shown neither tab is lit, a tap on one of them or Back (at the page's start) leaves it again.
- * The title "DocFit" stands left, the gear on the right opens the settings: "Fasten", the colour scheme as in Doc's
- * other apps - Blau, Grau, Hell (Palette) - and "Messmethode", where the scale's values come from. All pages share one
- * page margin (PAGE_SIDE).
+ * No title row (since 21.11.2026): the small gear at the right end of the tab row opens the settings: "Fasten", the
+ * colour scheme as in Doc's other apps - Blau, Grau, Hell (Palette) - "Personen" and "Messmethode", where the scale's
+ * values come from. All pages share one page margin (PAGE_SIDE).
  * Everything stays on the phone (Entries, Weighings, Profile in the app's preferences; no internet permission).
  */
 public class MainActivity extends Activity implements KeywordListener.Callback, ScaleLink.Callback {
@@ -123,6 +130,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private static final long UNDO_MS = 5000;
     // the page margin left and right, the same on every tab (Doc, 20.11.2026: "Links und rechts geht das breiter")
     private static final int PAGE_SIDE = 12;
+    // the height of a tab and of a person chip (Doc, 21.11.2026: the tabs "genau so flach" as Doc | …), in dp
+    private static final int TAB_HEIGHT = 36;
 
     private final Handler ui = new Handler(Looper.getMainLooper());
     private SharedPreferences prefs;
@@ -151,6 +160,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private final String[] names = new String[2];
     private final TextView[] personChips = new TextView[2];
     private TextView listTitle;
+    // blood pressure: both people's readings, the shown person's, and the tab's own person switch
+    private final Pressures[] bpLists = new Pressures[SLOTS.length];
+    private Pressures pressures;
+    private RecyclerView bpList;
+    private BpAdapter bpAdapter;
+    private TextView bpEmpty, bpTitle;
+    private final TextView[] bpPersonChips = new TextView[SLOTS.length];
+    private View bpPersonRow;
     // who is switched on in the settings ("Personen"); off = not in the switch, not assigned, data kept
     private final boolean[] on = new boolean[SLOTS.length];
     private View personRow;
@@ -164,7 +181,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     // remembered, so the scale's repeats of it (the resistance comes a moment later) are not stored either
     private Weighings.Weighing pendingWeigh, rejectedWeigh;
     private AlertDialog askDialog;
-    private TextView tabWatch, tabScale, tabBp, scaleState, resWhen, resNote, scaleEmpty;
+    private ImageView tabWatch, tabScale, tabBp;
+    private TextView scaleState, resWhen, resNote, scaleEmpty;
     // the tab the fasting view was opened from - Back at the page's start returns there
     private int backTab = TAB_WATCH;
     // the exercise a stopped time is filed under (Entries.KINDS) and its chips on the stopwatch tab
@@ -189,10 +207,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     // the fasting page, created the first time its tab opens
     private FrameLayout fastPage;
     private WebView fastWeb;
-    // the screen's frame: title row (with the gear), tab bar and the column around the pages - they step aside when the
-    // fasting tab is shown on its side
+    // the screen's frame: the tab bar (with the gear) and the column around the pages - they step aside when the
+    // fasting view is shown on its side
     private LinearLayout frame;
-    private View head, tabBar;
+    private View tabBar;
 
     private final Runnable tick = new Runnable() {
         @Override
@@ -219,6 +237,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
         for (int i = 0; i < SLOTS.length; i++) {
             lists[i] = new Weighings(this, SLOTS[i]);
+            bpLists[i] = new Pressures(this, SLOTS[i]);
             profiles[i] = Profile.load(prefs, SLOTS[i]);
             on[i] = prefs.getBoolean("profile" + SLOTS[i] + "On", true);
         }
@@ -228,6 +247,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         person = Weighings.firstOn(on);   // DocFit opens on Doc (or the first one on)
         weighings = lists[person];
         profile = profiles[person];
+        pressures = bpLists[person];
         kind = Entries.kindOrDefault(prefs.getString("kind", null));
         scale = new ScaleLink(this, this);
         orbitron = getResources().getFont(R.font.orbitron);
@@ -358,10 +378,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             c.setGravity(Gravity.CENTER);
             c.setMaxLines(1);
             c.setPadding(dp(8), 0, dp(8), 0);
-            paintPick(c, on[i]);
+            paintGreen(c, on[i]);
             c.setOnClickListener(v -> {
                 if (togglePerson(who)) {
-                    paintPick(c, on[who]);
+                    paintGreen(c, on[who]);
                     peopleHint.setTextColor(MUTED);
                 } else {
                     peopleHint.setText("Mindestens eine Person bleibt an.");
@@ -389,7 +409,21 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         box.addView(method, lp);
         ScrollView scroll = new ScrollView(this);
         scroll.addView(box);
-        AlertDialog d = dialog("Einstellungen").setView(scroll).setNegativeButton("Schließen", null).create();
+        // no "Schließen" button at the bottom: a cross at the top right, in the title row (Doc, 21.11.2026)
+        FrameLayout titleRow = new FrameLayout(this);
+        TextView titleText = text("Einstellungen", 18, LAMBDA, true);
+        titleText.setPadding(dp(24), dp(20), dp(56), dp(4));
+        titleRow.addView(titleText, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        ImageView close = new ImageView(this);
+        close.setImageResource(R.drawable.ic_close);
+        close.setColorFilter(pal.iconIdle);
+        close.setPadding(dp(12), dp(12), dp(12), dp(12));   // a 24 dp cross in a 48 dp touch target
+        close.setContentDescription("Schließen");
+        FrameLayout.LayoutParams cl = new FrameLayout.LayoutParams(dp(48), dp(48), Gravity.END | Gravity.TOP);
+        cl.setMargins(0, dp(8), dp(8), 0);
+        titleRow.addView(close, cl);
+        AlertDialog d = dialog("Einstellungen").setCustomTitle(titleRow).setView(scroll).create();
+        close.setOnClickListener(v -> d.dismiss());
         fast.setOnClickListener(v -> {
             d.dismiss();
             if (tab != TAB_FAST) showTab(TAB_FAST);
@@ -443,7 +477,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     /**
      * The fasting tab on its side shows only the charts (Doc, 19.11.2026: "Wenn man es quer dreht, kann der Header oben
-     * mit DocFit natürlich weg ... Und selbst das Zahnrad kann dann weg"): title with the gear, tabs and status bar step
+     * mit DocFit natürlich weg ... Und selbst das Zahnrad kann dann weg"): the tabs with the gear and the status bar step
      * aside until the phone stands upright again. The way out on its side: turn it, or Back (inside the page first).
      */
     @SuppressWarnings("deprecation")
@@ -451,7 +485,6 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         if (frame == null) return;
         boolean full = tab == TAB_FAST
                 && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-        head.setVisibility(full ? View.GONE : View.VISIBLE);
         tabBar.setVisibility(full ? View.GONE : View.VISIBLE);
         frame.setPadding(full ? 0 : dp(PAGE_SIDE), full ? 0 : dp(12), full ? 0 : dp(PAGE_SIDE), full ? 0 : dp(12));
         if (full) getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -781,6 +814,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         person = who;
         weighings = lists[who];
         profile = profiles[who];
+        pressures = bpLists[who];
+        if (bpAdapter != null) bpAdapter.notifyDataSetChanged();
+        refreshBp();
         undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
         ui.removeCallbacks(hideUndo);
         paintPersons();
@@ -789,13 +825,21 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     private void paintPersons() {
-        for (int i = 0; i < personChips.length; i++) if (personChips[i] != null) paintPick(personChips[i], i == person);
+        // phi green (Doc, 21.11.2026: "probieren wir mal grün"): the shown person filled, the other outlined
+        for (int i = 0; i < personChips.length; i++) if (personChips[i] != null) paintGreen(personChips[i], i == person);
         if (listTitle != null) listTitle.setText("MESSUNGEN · " + names[person].toUpperCase(java.util.Locale.GERMAN));
         // only those on are in the switch, and with one on there is none
         for (int i = 0; i < personChips.length; i++) {
             if (personChips[i] != null) personChips[i].setVisibility(on[i] ? View.VISIBLE : View.GONE);
         }
         if (personRow != null) personRow.setVisibility(Weighings.countOn(on) > 1 ? View.VISIBLE : View.GONE);
+        for (int i = 0; i < bpPersonChips.length; i++) {
+            if (bpPersonChips[i] == null) continue;
+            paintGreen(bpPersonChips[i], i == person);
+            bpPersonChips[i].setVisibility(on[i] ? View.VISIBLE : View.GONE);
+        }
+        if (bpPersonRow != null) bpPersonRow.setVisibility(Weighings.countOn(on) > 1 ? View.VISIBLE : View.GONE);
+        if (bpTitle != null) bpTitle.setText("MESSUNGEN · " + names[person].toUpperCase(java.util.Locale.GERMAN));
     }
 
     /** "Personen" in the settings: a person on or off; the last one on stays on. Her data is never touched. */
@@ -874,7 +918,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             color = UPSILON;
             problem = true;
         } else if (!scale.isActive()) {
-            s = "Stell dich auf die Waage …";
+            s = "";   // nothing happening: no line (Doc, 21.11.2026: "Stell dich auf die Waage" weg)
             color = MUTED;
         } else {
             switch (scale.status()) {
@@ -904,12 +948,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                     color = PHI;
                     break;
                 default:
-                    s = "Stell dich auf die Waage …";
+                    s = "";
                     color = TEXT;
             }
         }
         scaleState.setText(s);
         scaleState.setTextColor(color);
+        scaleState.setVisibility(s.isEmpty() ? View.GONE : View.VISIBLE);
         boolean live = problem || scaleBusy();
         compactState.setText(s);
         compactState.setTextColor(color);
@@ -938,7 +983,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             Calendar when = Calendar.getInstance();
             when.setTimeInMillis(last.time);
             int age = profile.ageIn(when.get(Calendar.YEAR));
-            tFat.show(Times.one(bc.fatPercent, "%"), Ranges.fat(bc.fatPercent, profile.sex, age));
+            if (bc.fatImplausible) tFat.implausible(Times.one(bc.fatPercent, "%"));
+            else tFat.show(Times.one(bc.fatPercent, "%"), Ranges.fat(bc.fatPercent, profile.sex, age));
             tWater.show(Times.one(bc.waterPercent, "%"), Ranges.water(bc.waterPercent, profile.sex));
             tMuscle.show(Times.one(bc.muscleKg, "kg"), Ranges.muscle(bc.muscleKg, profile.heightCm, profile.sex));
             tBmi.show(Times.one(bc.bmi, ""), Double.isNaN(bc.bmi) ? null : Ranges.bmi(bc.bmi));
@@ -948,7 +994,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             showFitness(fit);
             compactWhen.setText(ScaleTexts.whenShort(last));
             compactWeight.setText(Times.kg(last.kg()));
-            compactFat.setText(Times.one(bc.fatPercent, "%"));
+            compactFat.setText(bc.fatImplausible ? "?" : Times.one(bc.fatPercent, "%"));
             compactFit.setText(fit.score > 0 ? String.valueOf(fit.score) : "–");
             compactFit.setTextColor(fit.score > 0
                     ? ScoreBar.colorFor(fit.score, pal.scoreLow, pal.scoreMid, pal.scoreHigh) : MUTED);
@@ -1032,6 +1078,19 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             bar.setScale(has ? s : null);
             note.setText(has ? s.note : "");
             note.setTextColor(MUTED);
+        }
+
+        /**
+         * A body fat that cannot be right (BodyComposition.fatImplausible, Doc, 21.11.2026): the number in orange, no
+         * bar, and the line says what to do.
+         */
+        void implausible(String text) {
+            offering = false;
+            value.setText(text);
+            value.setTextColor(pal.scoreMid);
+            bar.setScale(null);
+            note.setText("unplausibel – bitte wiederholen");
+            note.setTextColor(pal.scoreMid);
         }
 
         /**
@@ -1253,6 +1312,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         t.setTextColor(on ? pal.chipOnInk : MUTED);
     }
 
+    /** A person chip in phi green: filled when on (shown, or switched on in the settings), else outlined. */
+    private void paintGreen(TextView t, boolean on) {
+        GradientDrawable g = round(on ? PHI : 0x00000000, 10);
+        g.setStroke(Math.max(1, dp(1)), PHI);
+        t.setBackground(g);
+        t.setTextColor(on ? pal.onPhi : PHI);
+    }
+
     /**
      * A choice among a few, drawn apart from the tabs: outlined when off, filled when on - the colour schemes in the
      * settings and the exercise on the stopwatch tab.
@@ -1345,13 +1412,25 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
     }
 
-    private TextView tabButton(String s, int which) {
-        TextView t = text(s, 15, MUTED, true);
-        t.setGravity(Gravity.CENTER);
-        t.setMaxLines(1);   // smaller rather than cut on a narrow phone or with big system fonts
-        t.setAutoSizeTextTypeUniformWithConfiguration(10, 15, 1, TypedValue.COMPLEX_UNIT_SP);
-        t.setOnClickListener(v -> showTab(which));
+    /** One cell of the tab bar: an icon, centred, with its name for TalkBack. */
+    private ImageView tabIcon(int drawable, String name, View.OnClickListener onTap) {
+        ImageView t = new ImageView(this);
+        t.setImageResource(drawable);
+        t.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        t.setPadding(0, dp(7), 0, dp(7));   // a 22 dp icon in the 36 dp cell
+        t.setContentDescription(name);
+        t.setOnClickListener(onTap);
         return t;
+    }
+
+    /**
+     * The shown tab: the icon on lambda orange, the chosen-chip colours of the scheme (Doc, 21.11.2026: not green like
+     * Doc | …); the others a little brighter than muted (pal.iconIdle).
+     */
+    private void paintTab(ImageView t, boolean on) {
+        t.setBackground(on ? round(pal.chipOn, 11) : null);
+        t.setColorFilter(on ? pal.chipOnInk : pal.iconIdle);
+        t.setSelected(on);
     }
 
     private void showTab(int which) {
@@ -1364,9 +1443,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         fastPage.setVisibility(which == TAB_FAST ? View.VISIBLE : View.GONE);
         if (which == TAB_FAST) openFasting();
         allowTurn();
-        paintChip(tabWatch, which == TAB_WATCH);   // in the fasting view neither is lit
-        paintChip(tabScale, which == TAB_SCALE);
-        paintChip(tabBp, which == TAB_BP);
+        paintTab(tabWatch, which == TAB_WATCH);   // in the fasting view none is lit
+        paintTab(tabScale, which == TAB_SCALE);
+        paintTab(tabBp, which == TAB_BP);
         undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
         ui.removeCallbacks(hideUndo);
         if (which == TAB_WATCH) listenIfAllowed();
@@ -1384,37 +1463,24 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         col.setPadding(dp(PAGE_SIDE), dp(12), dp(PAGE_SIDE), dp(12));
         root.addView(col, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        // the title on the left, a notch larger (Doc, 20.11.2026), and on the right the gear for the settings (as in DocDo)
-        FrameLayout head = new FrameLayout(this);
-        this.head = head;
-        TextView title = text("DocFit", 24, LAMBDA, true);
-        title.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
-        title.setMaxLines(1);
-        title.setPadding(0, 0, dp(44), 0);   // never under the gear
-        head.addView(title, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
-        ImageView gear = new ImageView(this);
-        gear.setImageResource(R.drawable.ic_gear);
-        gear.setColorFilter(MUTED);
-        gear.setPadding(dp(8), dp(8), dp(8), dp(8));
-        gear.setContentDescription("Einstellungen");
-        gear.setOnClickListener(v -> openSettings());
-        head.addView(gear, new FrameLayout.LayoutParams(dp(40), dp(40), Gravity.END | Gravity.CENTER_VERTICAL));
-        col.addView(head, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
+        // no title row any more (Doc, 21.11.2026: the header with "DocFit" and the gear took far too much room), and the
+        // tabs are icons: stopwatch, scale, heart and the gear - four cells of exactly the same width, TAB_HEIGHT high
+        // ("das Zahnrad rechts sieht komisch aus"); the shown tab sits on lambda orange (paintTab)
         LinearLayout tabs = new LinearLayout(this);
         tabBar = tabs;
         tabs.setOrientation(LinearLayout.HORIZONTAL);
+        tabs.setGravity(Gravity.CENTER_VERTICAL);
         tabs.setBackground(round(CARD, 14));
-        tabs.setPadding(dp(4), dp(4), dp(4), dp(4));
-        tabWatch = tabButton("Stoppuhr", TAB_WATCH);
-        tabScale = tabButton("Waage", TAB_SCALE);
-        tabs.addView(tabWatch, new LinearLayout.LayoutParams(0, dp(40), 1f));
-        tabBp = tabButton("Blutdruck", TAB_BP);
-        tabs.addView(tabScale, new LinearLayout.LayoutParams(0, dp(40), 1f));
-        tabs.addView(tabBp, new LinearLayout.LayoutParams(0, dp(40), 1f));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(12);
-        col.addView(tabs, lp);
+        tabs.setPadding(dp(3), dp(3), dp(3), dp(3));
+        tabWatch = tabIcon(R.drawable.ic_tab_timer, "Stoppuhr", v -> showTab(TAB_WATCH));
+        tabScale = tabIcon(R.drawable.ic_tab_scale, "Waage", v -> showTab(TAB_SCALE));
+        tabBp = tabIcon(R.drawable.ic_tab_heart, "Blutdruck", v -> showTab(TAB_BP));
+        ImageView gear = tabIcon(R.drawable.ic_tab_settings, "Einstellungen", v -> openSettings());
+        paintTab(gear, false);   // the gear opens a dialog, it is never "the shown tab"
+        for (ImageView t : new ImageView[]{tabWatch, tabScale, tabBp, gear}) {
+            tabs.addView(t, new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f));
+        }
+        col.addView(tabs, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         FrameLayout pages = new FrameLayout(this);
         watchPage = buildWatchPage();
@@ -1485,7 +1551,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     private void paintKinds() {
         for (int i = 0; i < kindChips.length; i++) {
-            if (kindChips[i] != null) paintPick(kindChips[i], Entries.KINDS[i].equals(kind));
+            if (kindChips[i] == null) continue;
+            // each exercise its own colour (Doc, 21.11.2026): filled when chosen, outlined in it otherwise
+            boolean chosen = Entries.KINDS[i].equals(kind);
+            GradientDrawable g = round(chosen ? pal.kindFill[i] : 0x00000000, 10);
+            g.setStroke(Math.max(1, dp(1)), chosen ? pal.kindFill[i] : pal.kindText[i]);
+            kindChips[i].setBackground(g);
+            kindChips[i].setTextColor(chosen ? pal.kindInk[i] : pal.kindText[i]);
         }
     }
 
@@ -1600,25 +1672,163 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private View buildBpPage() {
         LinearLayout page = new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
-        TextView heading = text("Blutdruck", 26, LAMBDA, true);
-        heading.setGravity(Gravity.CENTER);
-        heading.setLetterSpacing(0.12f);
+
+        // whose readings: the same person as on the scale tab (one switch state for both)
+        LinearLayout persons = new LinearLayout(this);
+        persons.setOrientation(LinearLayout.HORIZONTAL);
+        bpPersonRow = persons;
+        for (int i = 0; i < SLOTS.length; i++) {
+            int who = i;
+            TextView c = text(names[i], 14, TEXT, true);
+            c.setGravity(Gravity.CENTER);
+            c.setMaxLines(1);
+            c.setPadding(dp(8), 0, dp(8), 0);
+            c.setOnClickListener(v -> showPerson(who));
+            bpPersonChips[i] = c;
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f);
+            cp.leftMargin = i == 0 ? 0 : dp(5);
+            cp.rightMargin = i == SLOTS.length - 1 ? 0 : dp(5);
+            persons.addView(c, cp);
+        }
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(28);
-        page.addView(heading, lp);
-        TextView coming = text("Das Omron M400 Intelli IT ist unterwegs. Sobald es da ist, liest DocFit die Messungen "
-                + "per Bluetooth.", 14, MUTED, false);
-        coming.setGravity(Gravity.CENTER);
-        coming.setLineSpacing(0, 1.2f);
-        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(12);
-        lp.leftMargin = lp.rightMargin = dp(8);
-        page.addView(coming, lp);
-        page.addView(sectionHead("MESSUNGEN", null, null), headParams());
-        FrameLayout list = new FrameLayout(this);
-        list.addView(emptyText("Noch keine Messungen."), new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        page.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        page.addView(persons, lp);
+
+        Button add = button("+ Messung eintragen", PHI);
+        add.setTextColor(pal.onPhi);
+        add.setOnClickListener(v -> enterPressure());
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
+        lp.topMargin = dp(16);
+        page.addView(add, lp);
+
+        // the Omron, small (Doc, 21.11.2026): once it is here its readings come in by themselves
+        TextView hint = text("Später kommen die Werte vom Omron M400 Intelli IT per Bluetooth von selbst.", 12, MUTED,
+                false);
+        hint.setGravity(Gravity.CENTER);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        page.addView(hint, lp);
+
+        View head = sectionHead("MESSUNGEN", null, null);
+        bpTitle = (TextView) ((ViewGroup) head).getChildAt(0);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(16);
+        page.addView(head, lp);
+
+        bpAdapter = new BpAdapter();
+        bpList = listView(bpAdapter, this::deletePressure);
+        bpEmpty = emptyText("Noch keine Messungen.");
+        page.addView(listBox(bpList, bpEmpty), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        paintPersons();
+        refreshBp();
         return page;
+    }
+
+    private void refreshBp() {
+        if (bpEmpty != null) bpEmpty.setVisibility(pressures.size() == 0 ? View.VISIBLE : View.GONE);
+    }
+
+    /** A reading gone (swipe or long press), with "Rückgängig". */
+    private void deletePressure(int pos) {
+        if (pos < 0 || pos >= pressures.size()) return;
+        Pressures list = pressures;
+        Pressures.Reading gone = list.remove(pos);
+        bpAdapter.notifyItemRemoved(pos);
+        offerUndo("Gelöscht: " + gone.sys + "/" + gone.dia, () -> {
+            list.insert(pos, gone);
+            if (list == pressures) bpAdapter.notifyItemInserted(Math.min(pos, pressures.size() - 1));
+            refreshBp();
+        });
+        refreshBp();
+    }
+
+    /** The ESH category as a colour: optimal / normal green, high-normal orange, hypertension red. */
+    private int bpColor(Pressures.Category c) {
+        switch (c) {
+            case OPTIMAL:
+            case NORMAL:
+                return PHI;
+            case HIGH_NORMAL:
+                return pal.scoreMid;
+            default:
+                return pal.alarm;
+        }
+    }
+
+    /**
+     * Typing a reading in (Doc, 21.11.2026): systolic, diastolic and pulse on the number pad, date and time (now,
+     * tap to change), an optional note. "Speichern" checks the values (Pressures.check) and keeps the dialog open with
+     * the reason when something is off.
+     */
+    private void enterPressure() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(24), dp(4), dp(24), 0);
+        if (Weighings.countOn(on) > 1) box.addView(text("Für " + names[person] + ".", 14, MUTED, false));
+        EditText sys = numberField(box, "SYSTOLISCH (mmHg)", "", 3);
+        EditText dia = numberField(box, "DIASTOLISCH (mmHg)", "", 3);
+        EditText pulse = numberField(box, "PULS (pro Minute)", "", 3);
+        Calendar when = Calendar.getInstance();
+        when.set(Calendar.SECOND, 0);
+        when.set(Calendar.MILLISECOND, 0);
+        TextView whenLabel = smallLabel("DATUM / UHRZEIT");
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(16);
+        box.addView(whenLabel, lp);
+        TextView whenText = text("", 16, LAMBDA, true);
+        whenText.setPadding(0, dp(10), 0, dp(10));
+        Runnable showWhen = () -> whenText.setText(Times.day(when.getTimeInMillis()) + " · "
+                + Times.clock(when.getTimeInMillis()) + " Uhr");
+        showWhen.run();
+        int style = pal.light ? android.R.style.Theme_DeviceDefault_Light_Dialog
+                : android.R.style.Theme_DeviceDefault_Dialog;
+        whenText.setOnClickListener(v -> new DatePickerDialog(this, style, (picker, y, m, day) -> {
+            when.set(y, m, day);
+            showWhen.run();
+            new TimePickerDialog(this, style, (clock, h, min) -> {
+                when.set(Calendar.HOUR_OF_DAY, h);
+                when.set(Calendar.MINUTE, min);
+                showWhen.run();
+            }, when.get(Calendar.HOUR_OF_DAY), when.get(Calendar.MINUTE), true).show();
+        }, when.get(Calendar.YEAR), when.get(Calendar.MONTH), when.get(Calendar.DAY_OF_MONTH)).show());
+        box.addView(whenText);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        box.addView(smallLabel("NOTIZ (OPTIONAL)"), lp);
+        EditText note = new EditText(this);
+        note.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        note.setFilters(new InputFilter[]{new InputFilter.LengthFilter(Pressures.NOTE_MAX)});
+        note.setTextColor(TEXT);
+        note.setSingleLine(true);
+        box.addView(note, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        TextView error = text("", 14, pal.alarm, false);
+        error.setVisibility(View.GONE);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(10);
+        box.addView(error, lp);
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(box);
+
+        AlertDialog d = dialog("Blutdruck eintragen").setView(scroll)
+                .setPositiveButton("Speichern", null)   // set below, so a wrong entry keeps the dialog open
+                .setNegativeButton("Abbrechen", null)
+                .create();
+        show(d);
+        d.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            int s1 = number(sys), d1 = number(dia), p1 = number(pulse);
+            String why = Pressures.check(s1, d1, p1);
+            if (why != null) {
+                error.setText(why);
+                error.setVisibility(View.VISIBLE);
+                return;
+            }
+            int at = pressures.add(new Pressures.Reading(when.getTimeInMillis(), s1, d1, p1, Pressures.HAND,
+                    note.getText().toString()));
+            bpAdapter.notifyItemInserted(at);
+            bpList.scrollToPosition(at);
+            refreshBp();
+            d.dismiss();
+        });
     }
 
     /**
@@ -1644,7 +1854,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             c.setAutoSizeTextTypeUniformWithConfiguration(10, 14, 1, TypedValue.COMPLEX_UNIT_SP);
             c.setOnClickListener(v -> showPerson(who));
             personChips[i] = c;
-            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(36), 1f);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f);
             cp.leftMargin = i == 0 ? 0 : dp(5);
             cp.rightMargin = i == SLOTS.length - 1 ? 0 : dp(5);
             persons.addView(c, cp);
@@ -1655,10 +1865,11 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         pp.bottomMargin = dp(4);
         head.addView(persons, pp);
 
-        // what is happening, two lines high so the page does not jump; a tap fixes permission or Bluetooth
-        scaleState = text("Stell dich auf die Waage …", 16, TEXT, true);
+        // what is happening, only while something does (connecting, measuring, done, a problem); a tap fixes
+        // permission or Bluetooth
+        scaleState = text("", 16, TEXT, true);
         scaleState.setGravity(Gravity.CENTER);
-        scaleState.setMinLines(2);
+        scaleState.setVisibility(View.GONE);
         scaleState.setPadding(0, dp(6), 0, dp(4));
         scaleState.setOnClickListener(v -> onScaleStateTapped());
         head.addView(scaleState, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -1675,7 +1886,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                 r4 = new LinearLayout(this);
         tFat = tile(r1, "KÖRPERFETT", TileInfo.Key.FAT);
         tWater = tile(r1, "WASSER", TileInfo.Key.WATER);
-        tMuscle = tile(r2, "MUSKEL", TileInfo.Key.MUSCLE);
+        tMuscle = tile(r2, "MUSKEL · SCHÄTZUNG", TileInfo.Key.MUSCLE);
         tBmi = tile(r2, "BMI", TileInfo.Key.BMI);
         tWaist = tile(r3, "BAUCH", TileInfo.Key.WAIST);
         tWhtr = tile(r3, "BAUCH/GRÖSSE", TileInfo.Key.WHTR);
@@ -2047,14 +2258,58 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         public void onBindViewHolder(@NonNull Row r, int i) {
             Entries.Entry e = entries.get(i);
             r.day.setText(Times.day(e.start));
-            // the exercise in front of the start time; times from before there were exercises as they were
-            r.sub.setText((e.kind.isEmpty() ? "" : e.kind + " · ") + "Start " + Times.clock(e.start) + " Uhr");
+            // the exercise in front of the start time, in its colour; times from before there were exercises as they were
+            String start = "Start " + Times.clock(e.start) + " Uhr";
+            int k = java.util.Arrays.asList(Entries.KINDS).indexOf(e.kind);
+            if (k < 0) {
+                r.sub.setText(e.kind.isEmpty() ? start : e.kind + " · " + start);
+            } else {
+                SpannableString sp = new SpannableString(e.kind + " · " + start);
+                sp.setSpan(new ForegroundColorSpan(pal.kindText[k]), 0, e.kind.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                r.sub.setText(sp);
+            }
             r.value.setText(Times.duration(e.duration));
         }
 
         @Override
         public int getItemCount() {
             return entries.size();
+        }
+    }
+
+    private final class BpAdapter extends RecyclerView.Adapter<Row> {
+        @NonNull
+        @Override
+        public Row onCreateViewHolder(@NonNull ViewGroup parent, int type) {
+            Row r = newRow();
+            r.itemView.setOnLongClickListener(v -> {   // long press deletes too, with "Rückgängig"
+                deletePressure(r.getBindingAdapterPosition());
+                return true;
+            });
+            return r;
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull Row r, int i) {
+            Pressures.Reading b = pressures.get(i);
+            Pressures.Category c = Pressures.category(b.sys, b.dia);
+            r.day.setText(Times.day(b.time));
+            // time, where it came from, and the category in its colour
+            String source = Pressures.OMRON.equals(b.source) ? "Omron" : "Hand";
+            String head = Times.clock(b.time) + " Uhr · " + source + " · ";
+            SpannableString sp = new SpannableString(head + c.word);
+            sp.setSpan(new ForegroundColorSpan(bpColor(c)), head.length(), sp.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            r.sub.setText(sp);
+            String extra = (b.pulse > 0 ? "Puls " + b.pulse : "") + (b.note.isEmpty() ? "" : (b.pulse > 0 ? " · " : "") + b.note);
+            r.extra.setText(extra);
+            r.extra.setVisibility(extra.isEmpty() ? View.GONE : View.VISIBLE);
+            r.value.setText(b.sys + "/" + b.dia);
+            r.value.setTextColor(bpColor(c));
+        }
+
+        @Override
+        public int getItemCount() {
+            return pressures.size();
         }
     }
 

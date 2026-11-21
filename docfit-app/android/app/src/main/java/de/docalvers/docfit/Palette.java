@@ -19,6 +19,8 @@ final class Palette {
     static final int[] DOTS = {0xFF0A1428, 0xFF131315, 0xFFF6F8FC};
 
     private static final int ORANGE = 0xFFF5C242, RED = 0xFFB02418, GREEN = 0xFF799E31;
+    // DocCal's turquoise of the guest's entries (HTML/kalender: --c-turquoise #9adbd4) and the navy that reads on it
+    private static final int TURQUOISE = 0xFF9ADBD4, NAVY_INK = 0xFF0E244E;
 
     final String key;
     final boolean light;
@@ -38,6 +40,17 @@ final class Palette {
      * on the page); Hell keeps Doc's red
      */
     final int alarm;
+    /**
+     * an icon that is not chosen (the tab bar): between muted and text - clearly readable, still visibly off (Doc,
+     * 21.11.2026: the inactive icons "ein bisschen heller")
+     */
+    final int iconIdle;
+    /**
+     * the exercises' own colours, in the order of Entries.KINDS (Doc, 21.11.2026): Planks lambda orange, Two Balls
+     * turquoise - the fill of a chosen chip, the ink on it, and the colour as text or outline on the page (on Hell
+     * both one step darker, so they stay readable on white)
+     */
+    final int[] kindFill, kindInk, kindText;
 
     private Palette(String key, boolean light, int bg, int card, int text, int muted, int accent, int phi,
                     int onPhi, int onUpsilon, int chipOn, int chipOnInk) {
@@ -58,6 +71,10 @@ final class Palette {
         this.scoreMid = light ? 0xFFB07A00 : ORANGE;
         this.scoreHigh = light ? 0xFF5C7A20 : GREEN;
         this.alarm = light ? RED : 0xFFE5533F;
+        this.iconIdle = over(text, 0.45f, muted);
+        this.kindFill = new int[]{chipOn, TURQUOISE};
+        this.kindInk = new int[]{chipOnInk, NAVY_INK};
+        this.kindText = new int[]{light ? 0xFFB07A00 : ORANGE, light ? 0xFF23827A : TURQUOISE};
     }
 
     static Palette of(String key) {

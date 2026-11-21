@@ -324,7 +324,8 @@ public class ScaleTest {
         // all well: no note under the tiles - the method and the resistance are under "Messmethode" in the settings
         assertEquals("", ScaleTexts.note(good, COMPLETE));
         assertTrue(ScaleTexts.method(good).startsWith("Letzter Widerstand: 512 Ω ("));
-        assertTrue(ScaleTexts.method(good).contains("Sun 2003"));
+        assertTrue(ScaleTexts.method(good).contains("Jebb 2000"));
+        assertTrue(ScaleTexts.method(good).contains("unplausibel"));
         assertTrue(ScaleTexts.method(good).contains("Ashwell 2016"));
         assertTrue(ScaleTexts.method(null).startsWith("Noch keine Messung mit Widerstand."));
         assertEquals("Fertig – gespeichert ✓", ScaleTexts.done(Weighings.Added.NEW, good));

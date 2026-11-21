@@ -127,8 +127,11 @@ final class ScaleTexts {
                 : "Letzter Widerstand: " + measured.ohm + " Ω (" + Times.day(measured.time) + ", "
                 + Times.clock(measured.time) + " Uhr).";
         return last + "\n\n"
-                + "Die Waage misst Gewicht und den Widerstand zwischen den Füßen. Daraus geschätzt: Körperfett und "
-                + "Wasser nach Sun 2003, Muskel nach Janssen 2000, Fitness nach Gallagher 2000 und ACE.\n\n"
+                + "Die Waage misst Gewicht und den Widerstand zwischen den Füßen. Daraus geschätzt: Körperfett nach "
+                + "Jebb 2000 (eine Formel für Fuß-zu-Fuß-Waagen), Wasser als 73 % der fettfreien Masse, Muskel nach "
+                + "Janssen 2000 (eine Schätzung), Fitness nach Gallagher 2000 und ACE. Zur Kontrolle rechnet DocFit "
+                + "das Körperfett auch aus BMI, Alter und Geschlecht (Gallagher 2000): liegen beide mehr als 8 Punkte "
+                + "auseinander oder unter dem lebenswichtigen Fett, steht „unplausibel – bitte wiederholen“ da.\n\n"
                 + "Die Balken in den Kacheln: Körperfett nach Gallagher 2000 für Geschlecht und Alter, Wasser "
                 + "die übliche Spanne (kein ärztlicher Grenzwert), Muskel je Größe² nach Janssen 2004, BMI nach WHO, "
                 + "Bauch nach WHO 2008 (erhöht ab 94 cm, deutlich ab 102 cm bei Männern; 80 / 88 cm bei Frauen).\n\n"
@@ -136,7 +139,7 @@ final class ScaleTexts {
                 + "Bauch/Hüfte (WHR) nach WHO 2008: erhöht ab 0,90 (Männer) bzw. 0,85 (Frauen). "
                 + "Bauch in der Mitte zwischen unterster Rippe und Beckenkamm messen, Hüfte an der breitesten Stelle, "
                 + "im Stehen, nach dem Ausatmen.\n\n"
-                + "Schätzwerte, kein Labor: die Formeln stammen aus Messungen von Hand zu Fuß, die Waage misst von Fuß "
-                + "zu Fuß. Es zählt der Verlauf – immer gleich messen (morgens, barfuß, nicht direkt nach dem Training).";
+                + "Schätzwerte, kein Labor. Es zählt der Verlauf – immer gleich messen (morgens, barfuß, nicht direkt "
+                + "nach dem Training).";
     }
 }

@@ -44,6 +44,7 @@ final class FitnessScore {
     static final String DISCLAIMER = "Orientierung, keine ärztliche Bewertung";
     static final String HINT_PROFILE = "Fitness-Einordnung erst mit vollständigem Profil.";
     static final String HINT_FAT = "Fitness-Einordnung erst, wenn die Waage Körperfett misst.";
+    static final String HINT_IMPLAUSIBLE = "Körperfett unplausibel – bitte noch einmal wiegen, barfuß und still stehen.";
     static final double BMI_UNDER = 18.5, BMI_OBESE = 30, BMI_OVER = 25;
     static final double SMI_LOW_MEN = 8.50, SMI_LOW_WOMEN = 5.75;
 
@@ -164,6 +165,7 @@ final class FitnessScore {
         java.util.Calendar c = java.util.Calendar.getInstance();
         c.setTimeInMillis(w.time);
         BodyComposition bc = BodyComposition.of(w, p);
+        if (bc.fatImplausible) return new FitnessScore(0, HINT_IMPLAUSIBLE);   // no grade from a bad contact
         return of(bc.fatPercent, bc.bmi, bc.muscleKg, p.heightCm, p.ageIn(c.get(java.util.Calendar.YEAR)), p.sex);
     }
 

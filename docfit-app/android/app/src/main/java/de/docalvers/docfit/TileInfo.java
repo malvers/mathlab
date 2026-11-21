@@ -49,34 +49,35 @@ final class TileInfo {
                 return new TileInfo("Körperfett",
                         "Der Anteil des Fetts am Körpergewicht. Etwas Fett ist lebenswichtig (Hormone, Wärme, Polster); "
                                 + "viel Fett, vor allem am Bauch, belastet Herz, Gefäße und Stoffwechsel.",
-                        ESTIMATE + "Aus Widerstand, Größe, Gewicht, Alter und Geschlecht rechnet DocFit die fettfreie "
-                                + "Masse (Sun 2003). Fuß-zu-Fuß-Messungen können einige Prozentpunkte danebenliegen – "
-                                + "der Verlauf ist verlässlicher als der einzelne Wert.",
+                        ESTIMATE + "Formel für Fuß-zu-Fuß-Waagen (Jebb 2000). Mehr als 8 Punkte weg von der "
+                                + "Schätzung aus BMI und Alter: „unplausibel“, meist schlechter Kontakt.",
                         "Kurzfristig vor allem der Wasserhaushalt: Trinken, Essen, Sport, Sauna, Tageszeit. " + SAME_WAY
                                 + " Langfristig: Ernährung, Bewegung, Krafttraining.",
                         "Sagt mehr als das Gewicht allein: Bei gleichem Gewicht kann mehr Muskel und weniger Fett "
                                 + "dahinterstehen.",
                         "Bereiche nach Alter und Geschlecht: Gallagher D et al., Am J Clin Nutr 2000 (gesund = Fett "
                                 + "bei BMI 18,5 bis 25). Die Fitness-Note stuft den gesunden Bereich zusätzlich nach den "
-                                + "Kategorien des American Council on Exercise (ACE) ab. Schätzformel: Sun SS et al., Am J "
-                                + "Clin Nutr 2003.");
+                                + "Kategorien des American Council on Exercise (ACE) ab. Schätzformel: Jebb SA et al., Br J "
+                                + "Nutr 2000 (Fuß zu Fuß).");
             case WATER:
                 return new TileInfo("Wasser",
                         "Der Anteil des Körperwassers am Gewicht. Muskeln bestehen zu rund drei Vierteln aus Wasser, "
                                 + "Fett kaum – mehr Muskel heißt meist auch mehr Wasser.",
-                        ESTIMATE + "Der Strom fließt über das Wasser im Körper; daraus schätzt DocFit das Körperwasser "
-                                + "(Sun 2003).",
+                        ESTIMATE + "DocFit nimmt rund 73 % der fettfreien Masse als Wasser – so viel enthält sie "
+                                + "üblicherweise.",
                         "Schwankt schon über den Tag: Trinken, salziges Essen, Schwitzen, Alkohol, Hitze. " + SAME_WAY,
                         "Ein niedriger Wert geht meist mit viel Körperfett oder wenig Muskel einher, selten mit zu wenig "
                                 + "Trinken. Einen ärztlichen Grenzwert gibt es nicht – die Spanne ist eine übliche "
                                 + "Orientierung.",
-                        "Schätzformel: Sun SS et al., Am J Clin Nutr 2003. Spanne: übliche Angabe für Erwachsene "
+                        "73 % der fettfreien Masse (Körperfett nach Jebb SA et al., Br J Nutr 2000). Spanne: übliche "
+                                + "Angabe für Erwachsene "
                                 + "(Männer 50–65 %, Frauen 45–60 %).");
             case MUSCLE:
-                return new TileInfo("Muskel",
+                return new TileInfo("Muskel (Schätzung)",
                         "Die Skelettmuskulatur in kg – die Muskeln, mit denen man sich bewegt. Sie halten Kraft, "
                                 + "Gleichgewicht und Stoffwechsel in Gang, gerade mit den Jahren.",
-                        ESTIMATE + "Aus Widerstand, Größe, Alter und Geschlecht (Janssen 2000). Bewertet wird die "
+                        ESTIMATE + "Eine Schätzung aus Widerstand, Größe, Alter und Geschlecht (Janssen 2000, von Hand "
+                                + "zu Fuß gemessen – die Waage misst von Fuß zu Fuß). Bewertet wird die "
                                 + "Muskelmasse je Größe², damit große und kleine Menschen vergleichbar sind; die Grenzen "
                                 + "sind für deine Größe in kg umgerechnet.",
                         "Krafttraining und genug Eiweiß bauen auf; lange Pausen, Krankheit und das Alter bauen ab. Auch "

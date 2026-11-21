@@ -15,7 +15,7 @@ import java.util.Locale;
  *   obese limit borderline, above high. Until 20.11.2026 the green band began at ACE's athletes' limit (men 6 %);
  *   Gallagher's age-based start replaced it (Doc, 20.11.2026: "entscheide du") - ACE stays in the fitness score only.
  * - Wasser: no clinical cut-off exists; the commonly quoted adult ranges (men 50-65 %, women 45-60 %) - "typisch", an
- *   orientation like the estimate itself (Sun 2003).
+ *   orientation like the estimate itself (0.73 x fat-free mass).
  * - Muskel: Janssen I et al., Am J Epidemiol 2004;159:413-421 (doi:10.1093/aje/kwh058), skeletal muscle per height²:
  *   men high risk <= 8.50, moderate 8.51-10.75, normal >= 10.76 kg/m²; women <= 5.75, 5.76-6.75, >= 6.76 - shown in
  *   kg for the profile's height.

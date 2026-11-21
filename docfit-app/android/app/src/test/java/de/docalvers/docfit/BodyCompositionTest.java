@@ -6,40 +6,51 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * The body-composition equations (Sun et al. 2003, Janssen et al. 2000, BMI) against known values.
+ * The body-composition equations (Jebb et al. 2000 for a foot-to-foot scale, water as 0.73 of the fat-free mass,
+ * Janssen et al. 2000, BMI) and the plausibility check against Gallagher et al. 2000, against values worked out by hand.
  *
- * Person A is the reference case of openScale's StandardImpedanceLibTest (man, 30 years, 80 kg, 1.80 m, 527 ohms),
- * which uses the same equations: BMI 24.691, fat 24.222 %, skeletal muscle 39.313 % of the weight (= 31.4505 kg),
- * water 53.819 % - openScale scales the litres by 0.99513, DocFit takes 1 L = 1 kg, so 53.819 / 0.99513 = 54.083 %.
- * Person B (woman, 45 years, 65 kg, 1.68 m, 560 ohms) is worked out by hand from the published equations.
- * Neither is anybody's real profile.
+ * The test man (30 years, 80 kg, 1.80 m, 500 ohms) is the check that Jebb's height belongs in metres: 19.7 % body fat.
+ * The test woman (45 years, 62 kg, 1.65 m, 520 ohms) is worked out the same way. Neither is anybody's real profile.
  */
 public class BodyCompositionTest {
     private static final double EPS = 1e-3;
 
     @Test
-    public void referenceMan() {
-        BodyComposition b = BodyComposition.of(80, 527, 180, 30, Profile.MALE);
-        assertEquals(24.691, b.bmi, EPS);
-        assertEquals(24.222, b.fatPercent, EPS);
-        assertEquals(31.4505, b.muscleKg, EPS);
-        assertEquals(39.313, b.muscleKg / 80 * 100, EPS);
-        assertEquals(54.0825, b.waterPercent, EPS);
-        assertEquals(53.819, b.waterPercent * 0.99513, EPS);   // openScale's figure with its litre factor
+    public void jebbTestManHeightInMetres() {
+        // fat = -156.1 - 89.1 ln 1.80 + 45.6 ln 80 + 0.120 * 30 + 0.0494 * 500 = 19.6486 %
+        // water = 0.73 * (100 - 19.6486) = 58.6565 %; SM = 0.401 * 180² / 500 + 3.825 - 0.071 * 30 + 5.102 = 32.7818 kg
+        BodyComposition b = BodyComposition.of(80, 500, 180, 30, Profile.MALE);
+        assertEquals(24.6914, b.bmi, EPS);
+        assertEquals(19.6486, b.fatPercent, EPS);
+        assertEquals("19,6 %", Times.one(b.fatPercent, "%"));   // 19.65 rounded once more would be 19.7
+        assertEquals(58.6565, b.waterPercent, EPS);
+        assertEquals(32.7818, b.muscleKg, EPS);
+        assertEquals(19.2055, b.gallagherPercent, EPS);
+        assertTrue(!b.fatImplausible);
     }
 
     @Test
-    public void handWorkedWoman() {
-        // H²/R = 168² / 560 = 50.4
-        // FFM = -9.53 + 0.69 * 50.4 + 0.17 * 65 + 0.02 * 560 = 47.496 kg -> fat (1 - 47.496 / 65) * 100 = 26.9292 %
-        // TBW = 3.75 + 0.45 * 50.4 + 0.11 * 65 = 33.58 L -> 51.6615 %
-        // SM  = 0.401 * 50.4 + 0 - 0.071 * 45 + 5.102 = 22.1174 kg
-        // BMI = 65 / 1.68² = 23.0300
-        BodyComposition b = BodyComposition.of(65, 560, 168, 45, Profile.FEMALE);
-        assertEquals(23.0300, b.bmi, EPS);
-        assertEquals(26.9292, b.fatPercent, EPS);
-        assertEquals(51.6615, b.waterPercent, EPS);
-        assertEquals(22.1174, b.muscleKg, EPS);
+    public void jebbTestWoman() {
+        // fat = -156.1 - 89.1 ln 1.65 + 19.6 ln 1.65 + 45.6 ln 62 + 0.120 * 45 + 0.0494 * 520 = 28.3814 %
+        BodyComposition b = BodyComposition.of(62, 520, 165, 45, Profile.FEMALE);
+        assertEquals(22.7732, b.bmi, EPS);
+        assertEquals(28.3814, b.fatPercent, EPS);
+        assertEquals(52.2815, b.waterPercent, EPS);
+        assertEquals(22.9017, b.muscleKg, EPS);
+        assertEquals(30.8182, b.gallagherPercent, EPS);
+        assertTrue(!b.fatImplausible);
+    }
+
+    @Test
+    public void implausibleWhenFarFromGallagherOrBelowEssentialFat() {
+        assertTrue(BodyComposition.of(80, 800, 180, 30, Profile.MALE).fatImplausible);    // 34.5 % vs 19.2 %
+        assertTrue(BodyComposition.of(80, 150, 180, 30, Profile.MALE).fatImplausible);    // 2.4 %: below 5 %
+        assertTrue(BodyComposition.implausible(12.0, 14.0, false));                       // a woman below 13 %
+        assertTrue(!BodyComposition.implausible(13.0, 14.0, false));
+        assertTrue(BodyComposition.implausible(20.0, 28.1, true));                        // 8.1 points apart
+        assertTrue(!BodyComposition.implausible(20.0, 28.0, true));                       // 8 points: still fine
+        assertTrue(!BodyComposition.implausible(Double.NaN, 20, true));
+        assertTrue(Double.isNaN(BodyComposition.of(80, 500, 180, 0, Profile.MALE).gallagherPercent));
     }
 
     @Test
