@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- what the lab does, read by "Frag Solita" when a deck slide embeds this lab -->
+    <meta name="solita-about" content="Raumkrümmung: Ein möbliertes Zimmer schwebt im All. Eine Kugel wählbarer Dichte (Wasser, Eisen, Osmium, Weißer Zwerg, Neutronenstern) und wählbaren Radius lässt sich mit Maus oder Finger durchs Zimmer schieben. Sie krümmt den Raum: jeder Punkt im Abstand r von der Kugelmitte rückt auf r·exp(−E·δ(r)), mit δ(r) = r_s/(2r) = −Φ/c² außen (schwaches Feld) und dem Potential der homogenen Kugel innen; r_s = 2GM/c² ist der Schwarzschild-Radius, E eine klar beschriftete Überhöhung. Weil r·exp(−E·δ(r)) streng mit r wächst, ist die Abbildung ein Diffeomorphismus: nichts reißt, nichts faltet, die Topologie bleibt. Echte Werte (Masse, Schwarzschild-Radius, Krümmung an der Oberfläche) werden ehrlich angezeigt – sie sind in einem Zimmer unsichtbar klein. Optional lenkt die Kugel das Sternenlicht ab (Einstein-Ring).">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Raumkrümmung</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <script src="morpheus/vendor/katex/katex.min.js"></script>
+    <style>
+        /* lab-specific bits only - buttons, cards, sliders and the coach box come from the central files */
+
+        /* the WebGL stage fills the whole container; the coach box floats above it */
+        #canvas-container #canvas {
+            position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+            touch-action: none; outline: none;
+        }
+
+        /* running text in Arial, Orbitron stays on titles and labels (Doc, 21.11.2026) */
+        #coach-content, .rk-info, .rk-res, #rk-status, #rk-hint {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        #coach-content { font-size: 0.95rem; }
+        #coach-content p { margin: 0 0 9px; }
+        #coach-content p:last-child { margin-bottom: 0; }
+        #coach-content b { color: #fff; }
+        .rk-coach-f { margin: 4px 0 10px; text-align: center; }
+        .rk-coach-f .katex-display { margin: 0; }
+        .rk-coach-small { font-size: 0.85rem; color: rgba(255, 255, 255, 0.65); }
+
+        /* numbers in the LaTeX face: it has the times dot and the real minus that Orbitron lacks */
+        .rk-num { font-family: KaTeX_Main, 'Times New Roman', serif; letter-spacing: 0; }
+        .val-display.rk-num { font-size: 1.05rem; }
+        .val-display sup, .rk-res sup, #rk-status sup, #rk-hint sup { font-size: 0.7em; line-height: 0; }
+
+        /* side panel */
+        .rk-btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 6px 0 8px; }
+        .rk-btn-grid.one { grid-template-columns: 1fr; }
+        .rk-info { font-size: 0.88rem; line-height: 1.5; color: rgba(255, 255, 255, 0.72); margin-top: 6px; }
+        .rk-info b { color: #fff; font-weight: 600; }
+        .rk-note { margin-top: 6px; font-size: 0.85rem; line-height: 1.45; color: rgb(245, 194, 66); font-family: Arial, Helvetica, sans-serif; }
+        .rk-note:empty { display: none; }
+        .rk-res { font-size: 0.9rem; line-height: 1.45; color: rgba(255, 255, 255, 0.85); }
+        .rk-res .rk-row { padding: 6px 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+        .rk-res .rk-row:first-child { border-top: none; padding-top: 0; }
+        .rk-res .rk-k {
+            display: block; font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.5); text-transform: uppercase; margin-bottom: 2px;
+        }
+        .rk-res .rk-v { font-size: 1.02rem; color: #fff; }
+        .rk-res .rk-small { font-size: 0.82rem; color: rgba(255, 255, 255, 0.6); }
+        .rk-res .rk-hl { color: rgb(245, 194, 66); }
+        #rk-checks .cyber-checkbox-wrapper { margin: 4px 0; }
+
+        /* stage overlay: a status line at the bottom and a hint when the curvature is too small to see */
+        #rk-overlay {
+            position: absolute; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+            z-index: 9; display: flex; flex-direction: column; align-items: center; gap: 8px;
+            width: max-content; max-width: calc(100% - 24px); pointer-events: none;
+        }
+        #rk-status, #rk-hint {
+            box-sizing: border-box; max-width: 100%; padding: 7px 12px; border-radius: 8px;
+            background: rgba(10, 20, 40, 0.72); backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 210, 255, 0.22); color: rgba(255, 255, 255, 0.88);
+            font-size: 0.88rem; line-height: 1.35; text-align: center;
+        }
+        #rk-status b { color: #fff; }
+        #rk-status .rk-sep { color: rgba(0, 210, 255, 0.6); margin: 0 6px; }
+        #rk-hint { border-color: rgba(245, 194, 66, 0.55); pointer-events: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        #rk-hint[hidden] { display: none; }
+        #rk-hint .cyber-btn { min-height: 0; height: 34px; padding: 0 12px !important; font-size: 0.62rem !important; }
+        #rk-help { color: rgba(255, 255, 255, 0.6); font-size: 0.8rem; }
+
+        @media (max-width: 700px), (max-height: 500px) {
+            #rk-status, #rk-hint { font-size: 0.8rem; padding: 6px 10px; }
+            #rk-help { display: none; }
+        }
+    </style>
+    <script src="js/farbschema.js"></script>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box" class="visible" data-scroll>
+                <div class="coach-title" id="coach-title-slot">RAUMKRÜMMUNG</div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas" role="img" aria-label="Ein möbliertes Zimmer im All, eine dichte Kugel krümmt den Raum: Möbel und Gitterlinien biegen sich zu ihr hin"></canvas>
+            <div id="rk-overlay">
+                <div id="rk-hint" hidden></div>
+                <div id="rk-status" aria-live="polite"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Debug output goes into the central DEBUG window, never into the console.
+        if (/[?&]debug=1\b/.test(location.search)) {
+            var s = document.createElement('script');
+            s.src = 'js/debug-window.js';
+            s.onload = function () { try { DebugWindow.show(); } catch (e) { } };
+            document.head.appendChild(s);
+        }
+    </script>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <script src="js/cyber-trackball.js"></script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/coach-box.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Raumkrümmung',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+        // on a narrow screen the room needs the room more than the controls do
+        if (window.innerWidth > 0 && window.innerWidth < 900) document.getElementById('side-panel').classList.add('collapsed');
+    </script>
+    <script type="module" src="js/raumkruemmung.js"></script>
+</body>
+
+</html>
