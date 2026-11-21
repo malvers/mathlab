@@ -5,6 +5,8 @@
     <!-- DocFit listens for "DocFit" and "Stopp" while it is open, on the phone itself (Vosk, no network) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- the morning reminder while a fast runs ("Wiegen + Blutzucker nüchtern", FastReminder); Android 13+ asks -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- the Vitafit VT701 scale over Bluetooth LE, only while the "Waage" tab is open. Android 12 and later: "nearby
          devices" - the scan never derives a location. -->
@@ -50,5 +52,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- rings once in the morning while a fast runs and sets the next morning (an inexact alarm) -->
+        <receiver
+            android:name=".FastReminder"
+            android:exported="false" />
     </application>
 </manifest>

@@ -11,7 +11,21 @@
 (function () {
   'use strict';
 
-  const D = window.FASTING_DATA;
+  // the workbook's fasts (private/fasting-data.js) and, in the app, the fasts recorded in DocFit (Doc, 21.11.2026:
+  // "Fastenmodus") - DocFitApp.liveFasts() gives them in the same shape, built from the live measurements; each gets a
+  // colour none of the others has, and the workbook keeps its own days where both have one
+  const D = (function () {
+    const book = window.FASTING_DATA;
+    let live = null;
+    try { if (window.DocFitApp && DocFitApp.liveFasts) live = JSON.parse(DocFitApp.liveFasts()); } catch (e) { live = null; }
+    if (!live || !live.fasts || !live.fasts.length) return book;
+    const base = book || { fasts: [], days: {}, events: [] };
+    const free = ['#9085E9', '#199E70', '#3987E5', '#D55181', '#F5C242', '#E66767', '#799E31']
+      .filter(c => !base.fasts.some(f => (f.color || '').toUpperCase() === c));
+    const fasts = base.fasts.concat(live.fasts.map((f, i) =>
+      Object.assign({}, f, { color: f.color || free[i % Math.max(1, free.length)] || '#9085E9' })));
+    return Object.assign({}, base, { fasts: fasts, days: Object.assign({}, live.days || {}, base.days || {}) });
+  })();
   // the chart colours come from the CSS of the chosen scheme (Blau / Grau / Hell), read again at every render
   let COL = {};
   function readColors() {
@@ -587,7 +601,7 @@
       mini.appendChild(el('span', 'd', signed(m, s.end.value - s.start.value)));
     });
     b.appendChild(mini);
-    if (!f.endSure) b.appendChild(el('div', 'warn', 'Ende nicht eingetragen'));
+    if (!f.endSure) b.appendChild(el('div', 'warn', f.live ? 'läuft noch' : 'Ende nicht eingetragen'));   // a running DocFit fast
     b.addEventListener('click', () => { location.hash = f.id; });
     return b;
   }

@@ -110,6 +110,12 @@ import java.util.function.IntConsumer;
  *   mmol/L, else mg/dL, a chip to override), date and time, when it was measured (nüchtern / vor dem Essen / nach dem
  *   Essen (2 h) / sonstige), a note; always shown in both units (his meter says mmol/L, he thinks in mg/dL). Fasting and
  *   two hours after a meal are coloured by their limits. Per person like the scale; long press deletes (Glucoses).
+ * - Fastenmodus (Doc, 21.11.2026): in the fasting view "Fasten starten" (planned 5 / 7 days / own, start now or
+ *   earlier), a running fast shows a slim banner on top ("Fasten · Tag 3 von 5 · 62 h", "Beenden"). A fast is a time
+ *   range (Fasts): every measurement in it belongs to it by its time, also after start or end are changed. It stands
+ *   as a card next to the workbook's fasts on the fasting page, built from the live measurements (FastLive, through
+ *   DocFitApp.liveFasts()). While it runs: a red / orange hint card when the newest systolic value or glucose is low
+ *   (a hint, not a diagnosis), and a morning reminder "Wiegen + Blutzucker nüchtern" (FastReminder, set under the gear).
  * - "Fasten" (Doc, 19.11.2026: "DocFit ... eine extra Rubrik ... Fasting", 20.11.: "schreibt bitte Fasten, wir haben es
  *   ja nun mal Deutsch"): Doc's fasts from his workbook, a chart
  *   grid per fast like his Excel dashboard and all fasts on top of each other from day 1 - the page web/fasting/
@@ -180,6 +186,22 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private TextView gluEmpty, gluTitle;
     private final TextView[] gluPersonChips = new TextView[SLOTS.length];
     private View gluPersonRow;
+    // the fasting mode: both people's fasts and the shown person's, the banner on top with its hint card, the head of
+    // the fasting view above the page, and the page's live data (DocFitApp.liveFasts, built on the main thread)
+    private final Fasts[] fastLists = new Fasts[SLOTS.length];
+    private Fasts fasts;
+    private LinearLayout fastBanner, fastHead;
+    private TextView fastBannerText, fastWarn;
+    private FrameLayout fastWebBox;
+    private volatile String liveFastsJson = "{\"fasts\":[],\"days\":{}}";
+    private static final int REQ_NOTIFY = 41;
+    private final Runnable fastTick = new Runnable() {
+        @Override
+        public void run() {
+            refreshFast();
+            ui.postDelayed(this, 60_000);
+        }
+    };
     // who is switched on in the settings ("Personen"); off = not in the switch, not assigned, data kept
     private final boolean[] on = new boolean[SLOTS.length];
     private View personRow;
@@ -251,6 +273,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             lists[i] = new Weighings(this, SLOTS[i]);
             bpLists[i] = new Pressures(this, SLOTS[i]);
             gluLists[i] = new Glucoses(this, SLOTS[i]);
+            fastLists[i] = new Fasts(this, SLOTS[i]);
             profiles[i] = Profile.load(prefs, SLOTS[i]);
             on[i] = prefs.getBoolean("profile" + SLOTS[i] + "On", true);
         }
@@ -262,6 +285,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         profile = profiles[person];
         pressures = bpLists[person];
         glucoses = gluLists[person];
+        fasts = fastLists[person];
         kind = Entries.kindOrDefault(prefs.getString("kind", null));
         scale = new ScaleLink(this, this);
         orbitron = getResources().getFont(R.font.orbitron);
@@ -308,6 +332,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         refresh();
         if (fastWeb != null) fastWeb.onResume();
         applyFastingChrome();   // the phone may have been turned while another app was in front
+        refreshFast();
+        ui.removeCallbacks(fastTick);
+        ui.postDelayed(fastTick, 60_000);
+        FastReminder.schedule(this);   // set again after a restart of the phone
     }
 
     @Override
@@ -319,6 +347,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         refresh();
         refreshScale();
         if (fastWeb != null) fastWeb.onPause();
+        ui.removeCallbacks(fastTick);
     }
 
     @Override
@@ -415,6 +444,49 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp.topMargin = dp(6);
         box.addView(peopleHint, lp);
 
+        // the morning reminder while a fast runs (FastReminder): on/off and the time
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(22);
+        box.addView(smallLabel("ERINNERUNG BEIM FASTEN"), lp);
+        LinearLayout remindRow = new LinearLayout(this);
+        remindRow.setOrientation(LinearLayout.HORIZONTAL);
+        remindRow.setGravity(Gravity.CENTER_VERTICAL);
+        TextView remindOn = text("", 14, TEXT, true);
+        remindOn.setGravity(Gravity.CENTER);
+        TextView remindAt = text("", 16, LAMBDA, true);
+        remindAt.setGravity(Gravity.CENTER);
+        Runnable paintRemind = () -> {
+            boolean onNow = FastReminder.on(this);
+            remindOn.setText(onNow ? "an" : "aus");
+            paintPick(remindOn, onNow);
+            int m = FastReminder.minute(this);
+            remindAt.setText(String.format(java.util.Locale.GERMANY, "%02d:%02d Uhr", m / 60, m % 60));
+            remindAt.setAlpha(onNow ? 1f : 0.4f);
+        };
+        remindOn.setOnClickListener(v -> {
+            prefs.edit().putBoolean("fastRemind", !FastReminder.on(this)).apply();
+            FastReminder.schedule(this);
+            paintRemind.run();
+        });
+        remindAt.setOnClickListener(v -> {
+            int m = FastReminder.minute(this);
+            new TimePickerDialog(this, pal.light ? android.R.style.Theme_DeviceDefault_Light_Dialog
+                    : android.R.style.Theme_DeviceDefault_Dialog, (clock, h, min) -> {
+                prefs.edit().putInt("fastRemindAt", h * 60 + min).apply();
+                FastReminder.schedule(this);
+                paintRemind.run();
+            }, m / 60, m % 60, true).show();
+        });
+        paintRemind.run();
+        remindRow.addView(remindOn, new LinearLayout.LayoutParams(dp(72), dp(TAB_HEIGHT)));
+        LinearLayout.LayoutParams ap = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f);
+        ap.leftMargin = dp(10);
+        remindRow.addView(remindAt, ap);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        box.addView(remindRow, lp);
+        box.addView(text("„Wiegen + Blutzucker nüchtern“ – nur solange ein Fasten läuft.", 12, MUTED, false));
+
         TextView methodLabel = smallLabel("MESSMETHODE");
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(22);
@@ -502,6 +574,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         boolean full = tab == TAB_FAST
                 && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         tabBar.setVisibility(full ? View.GONE : View.VISIBLE);
+        if (fastHead != null) fastHead.setVisibility(full ? View.GONE : View.VISIBLE);
+        refreshFast();
         frame.setPadding(full ? 0 : dp(PAGE_SIDE), full ? 0 : dp(12), full ? 0 : dp(PAGE_SIDE), full ? 0 : dp(12));
         if (full) getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -836,6 +910,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         glucoses = gluLists[who];
         if (gluAdapter != null) gluAdapter.notifyDataSetChanged();
         refreshGlu();
+        fasts = fastLists[who];
+        refreshFast();
+        if (tab == TAB_FAST) reloadFastPage();
         undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
         ui.removeCallbacks(hideUndo);
         paintPersons();
@@ -1473,7 +1550,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         bpPage.setVisibility(which == TAB_BP ? View.VISIBLE : View.GONE);
         gluPage.setVisibility(which == TAB_GLU ? View.VISIBLE : View.GONE);
         fastPage.setVisibility(which == TAB_FAST ? View.VISIBLE : View.GONE);
-        if (which == TAB_FAST) openFasting();
+        if (which == TAB_FAST) {
+            openFasting();
+            reloadFastPage();
+        }
         allowTurn();
         paintTab(tabWatch, which == TAB_WATCH);   // in the fasting view none is lit
         paintTab(tabScale, which == TAB_SCALE);
@@ -1499,6 +1579,37 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         // no title row any more (Doc, 21.11.2026: the header with "DocFit" and the gear took far too much room), and the
         // tabs are icons: stopwatch, scale, heart, drop and the gear - five cells of exactly the same width, TAB_HEIGHT high
         // ("das Zahnrad rechts sieht komisch aus"); the shown tab sits on lambda orange (paintTab)
+        // while the shown person fasts: a slim banner on top, "Fasten · Tag 3 von 5 · 62 h" and "Beenden", and under it
+        // the hint card when a value is low (refreshFast)
+        fastBanner = new LinearLayout(this);
+        fastBanner.setOrientation(LinearLayout.HORIZONTAL);
+        fastBanner.setGravity(Gravity.CENTER_VERTICAL);
+        fastBanner.setBackground(round(CARD, 12));
+        fastBanner.setPadding(dp(12), dp(4), dp(4), dp(4));
+        fastBannerText = text("", 13, TEXT, true);
+        fastBannerText.setMaxLines(1);
+        fastBannerText.setAutoSizeTextTypeUniformWithConfiguration(9, 13, 1, TypedValue.COMPLEX_UNIT_SP);
+        fastBannerText.setOnClickListener(v -> showTab(TAB_FAST));
+        fastBanner.addView(fastBannerText, new LinearLayout.LayoutParams(0, dp(32), 1f));
+        fastBannerText.setGravity(Gravity.CENTER_VERTICAL);
+        TextView endFast = text("Beenden", 13, pal.chipOnInk, true);
+        endFast.setGravity(Gravity.CENTER);
+        endFast.setPadding(dp(12), 0, dp(12), 0);
+        endFast.setBackground(round(pal.chipOn, 9));
+        endFast.setOnClickListener(v -> {
+            if (fasts.active() != null) endFast(fasts.active());
+        });
+        fastBanner.addView(endFast, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(30)));
+        fastBanner.setVisibility(View.GONE);
+        LinearLayout.LayoutParams bl = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        bl.bottomMargin = dp(6);
+        col.addView(fastBanner, bl);
+        fastWarn = text("", 13, TEXT, false);
+        fastWarn.setPadding(dp(12), dp(8), dp(12), dp(8));
+        fastWarn.setLineSpacing(0, 1.15f);
+        fastWarn.setVisibility(View.GONE);
+        col.addView(fastWarn, bl);
+
         LinearLayout tabs = new LinearLayout(this);
         tabBar = tabs;
         tabs.setOrientation(LinearLayout.HORIZONTAL);
@@ -1527,6 +1638,15 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         pages.addView(gluPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         fastPage = new FrameLayout(this);
         fastPage.setBackgroundColor(BG);
+        LinearLayout fastCol = new LinearLayout(this);
+        fastCol.setOrientation(LinearLayout.VERTICAL);
+        fastHead = new LinearLayout(this);
+        fastHead.setOrientation(LinearLayout.VERTICAL);
+        fastHead.setPadding(0, dp(10), 0, dp(6));
+        fastCol.addView(fastHead, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        fastWebBox = new FrameLayout(this);
+        fastCol.addView(fastWebBox, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        fastPage.addView(fastCol, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         pages.addView(fastPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         col.addView(pages, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
@@ -1566,14 +1686,16 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(false);    // file:///android_asset stays readable
         s.setAllowContentAccess(false);
-        fastWeb.addJavascriptInterface(new FastingBridge(pal.key), "DocFitApp");   // the page asks for the scheme
+        // the page asks for the scheme and for the fasts recorded in DocFit (FastLive)
+        fastWeb.addJavascriptInterface(new FastingBridge(pal.key, () -> liveFastsJson), "DocFitApp");
         fastWeb.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return !"file".equals(request.getUrl().getScheme());   // nothing outside the page
             }
         });
-        fastPage.addView(fastWeb, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        fastWebBox.addView(fastWeb, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        liveFastsJson = buildLiveJson();
         fastWeb.loadUrl(FASTING_PAGE);
     }
 
@@ -1759,6 +1881,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     private void refreshBp() {
         if (bpEmpty != null) bpEmpty.setVisibility(pressures.size() == 0 ? View.VISIBLE : View.GONE);
+        refreshFast();   // a low value during a fast shows the hint card at once
     }
 
     /** A reading gone (swipe or long press), with "Rückgängig". */
@@ -1919,6 +2042,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     private void refreshGlu() {
         if (gluEmpty != null) gluEmpty.setVisibility(glucoses.size() == 0 ? View.VISIBLE : View.GONE);
+        refreshFast();
     }
 
     /** A reading gone (swipe or long press), with "Rückgängig". */
@@ -2118,6 +2242,343 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(topDp);
         return lp;
+    }
+
+    // ---------- the fasting mode ----------
+
+    /** Whether the fasting view stands on its side (only the charts, nothing else on screen). */
+    private boolean fastingFull() {
+        return tab == TAB_FAST && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    /** The banner, the hint card and the head of the fasting view for the shown person's fasts. */
+    private void refreshFast() {
+        if (fastBanner == null || fasts == null) return;
+        Fasts.Fast f = fasts.active();
+        long now = System.currentTimeMillis();
+        boolean show = f != null && !fastingFull();
+        fastBanner.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (f != null) fastBannerText.setText(Fasts.banner(f, now, java.util.TimeZone.getDefault()));
+        // the newest systolic value and glucose inside the running fast
+        int sys = 0, glu = 0;
+        if (f != null) {
+            for (int i = 0; i < pressures.size(); i++) {
+                if (f.contains(pressures.get(i).time)) {
+                    sys = pressures.get(i).sys;
+                    break;
+                }
+            }
+            for (int i = 0; i < glucoses.size(); i++) {
+                if (f.contains(glucoses.get(i).time)) {
+                    glu = glucoses.get(i).mgdl;
+                    break;
+                }
+            }
+        }
+        Fasts.Level level = f == null ? Fasts.Level.NONE : Fasts.safety(sys, glu);
+        if (level == Fasts.Level.NONE || !show) {
+            fastWarn.setVisibility(View.GONE);
+        } else {
+            boolean red = level == Fasts.Level.RED;
+            int c = red ? pal.alarm : pal.scoreMid;
+            String title = red ? "Vorsicht – Werte sehr niedrig. Fasten unterbrechen und ärztlich abklären."
+                    : "Werte niedrig – achte auf Schwindel oder Schwäche; bei Beschwerden Fasten unterbrechen.";
+            String values = (sys > 0 ? "SYS " + sys : "") + (sys > 0 && glu > 0 ? " · " : "")
+                    + (glu > 0 ? "Zucker " + Glucoses.both(glu) : "");
+            SpannableString sp = new SpannableString(title + "\n" + values + " – ein Hinweis, keine Diagnose.");
+            sp.setSpan(new ForegroundColorSpan(c), 0, title.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sp.setSpan(new ForegroundColorSpan(MUTED), title.length(), sp.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            fastWarn.setText(sp);
+            GradientDrawable g = round(CARD, 12);
+            g.setStroke(Math.max(2, dp(2)), c);
+            fastWarn.setBackground(g);
+            fastWarn.setVisibility(View.VISIBLE);
+        }
+        refreshFastHead(f);
+    }
+
+    /** The head of the fasting view: start, or the running fast with "Bearbeiten" and "Fasten beenden". */
+    private void refreshFastHead(Fasts.Fast active) {
+        if (fastHead == null) return;
+        fastHead.removeAllViews();
+        if (active != null) {
+            fastHead.addView(text("Läuft seit " + Times.day(active.start) + ", " + Times.clock(active.start) + " Uhr"
+                    + (active.plannedDays > 0 ? " · geplant " + active.plannedDays + " Tage" : ""), 13, TEXT, false));
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            TextView edit = text("Bearbeiten", 14, TEXT, true);
+            edit.setGravity(Gravity.CENTER);
+            paintGreen(edit, false);
+            edit.setOnClickListener(v -> editFast(active));
+            Button end = button("Fasten beenden", pal.chipOn);
+            end.setTextColor(pal.chipOnInk);
+            end.setOnClickListener(v -> endFast(active));
+            LinearLayout.LayoutParams a = new LinearLayout.LayoutParams(0, dp(44), 1f);
+            a.rightMargin = dp(5);
+            row.addView(edit, a);
+            LinearLayout.LayoutParams b = new LinearLayout.LayoutParams(0, dp(44), 1f);
+            b.leftMargin = dp(5);
+            row.addView(end, b);
+            fastHead.addView(row, topParams(8));
+            return;
+        }
+        Button start = button("Fasten starten", pal.chipOn);
+        start.setTextColor(pal.chipOnInk);
+        start.setOnClickListener(v -> startFast());
+        fastHead.addView(start, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)));
+        Fasts.Fast last = fasts.newest();
+        if (last != null) {
+            TextView t = text("Zuletzt: " + Times.day(last.start) + " bis " + Times.day(last.end) + " · bearbeiten",
+                    13, PHI, false);
+            t.setPadding(0, dp(8), 0, 0);
+            t.setOnClickListener(v -> editFast(last));
+            fastHead.addView(t);
+        }
+    }
+
+    /** The page's live data again, and the page reloaded only when it changed. */
+    private void reloadFastPage() {
+        String j = buildLiveJson();
+        if (j.equals(liveFastsJson)) return;
+        liveFastsJson = j;
+        if (fastWeb != null) fastWeb.reload();
+    }
+
+    private String buildLiveJson() {
+        try {
+            List<Weighings.Weighing> w = new ArrayList<>();
+            for (int i = 0; i < weighings.size(); i++) w.add(weighings.get(i));
+            List<Pressures.Reading> b = new ArrayList<>();
+            for (int i = 0; i < pressures.size(); i++) b.add(pressures.get(i));
+            List<Glucoses.Reading> g = new ArrayList<>();
+            for (int i = 0; i < glucoses.size(); i++) g.add(glucoses.get(i));
+            return FastLive.build(fasts.all(), w, profile, b, g, System.currentTimeMillis(),
+                    java.util.TimeZone.getDefault()).toString();
+        } catch (org.json.JSONException e) {
+            return "{\"fasts\":[],\"days\":{}}";
+        }
+    }
+
+    /** After a change of a fast: banner, head, page, reminder. */
+    private void fastsChanged() {
+        refreshFast();
+        reloadFastPage();
+        FastReminder.schedule(this);
+    }
+
+    /** Date and time chosen in Android's pickers, then {@code after}. */
+    private void pickDateTime(Calendar when, Runnable after) {
+        int style = pal.light ? android.R.style.Theme_DeviceDefault_Light_Dialog
+                : android.R.style.Theme_DeviceDefault_Dialog;
+        new DatePickerDialog(this, style, (picker, y, m, day) -> {
+            when.set(y, m, day);
+            after.run();
+            new TimePickerDialog(this, style, (clock, h, min) -> {
+                when.set(Calendar.HOUR_OF_DAY, h);
+                when.set(Calendar.MINUTE, min);
+                after.run();
+            }, when.get(Calendar.HOUR_OF_DAY), when.get(Calendar.MINUTE), true).show();
+        }, when.get(Calendar.YEAR), when.get(Calendar.MONTH), when.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private TextView whenField(LinearLayout box, String label, Calendar when) {
+        box.addView(smallLabel(label), topParams(16));
+        TextView t = text("", 16, LAMBDA, true);
+        t.setPadding(0, dp(10), 0, dp(10));
+        Runnable show = () -> t.setText(Times.day(when.getTimeInMillis()) + " · " + Times.clock(when.getTimeInMillis())
+                + " Uhr");
+        show.run();
+        t.setOnClickListener(v -> pickDateTime(when, show));
+        box.addView(t);
+        return t;
+    }
+
+    private static Calendar nowMinute() {
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        return c;
+    }
+
+    /** The planned length: 5 days, 7 days or own (a number field), green when chosen. Returns the getter. */
+    private java.util.function.IntSupplier plannedField(LinearLayout box, int current) {
+        box.addView(smallLabel("GEPLANT"), topParams(16));
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        String[] words = {"5 Tage", "7 Tage", "eigene"};
+        TextView[] chips = new TextView[3];
+        int[] chosen = {current == 5 ? 0 : current == 7 ? 1 : current > 0 ? 2 : 0};
+        EditText own = new EditText(this);
+        own.setInputType(InputType.TYPE_CLASS_NUMBER);
+        own.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
+        own.setTextColor(TEXT);
+        own.setHint("Tage");
+        own.setText(chosen[0] == 2 ? String.valueOf(current) : "");
+        Runnable paint = () -> {
+            for (int i = 0; i < 3; i++) paintPick(chips[i], i == chosen[0]);
+            own.setVisibility(chosen[0] == 2 ? View.VISIBLE : View.GONE);
+        };
+        for (int i = 0; i < 3; i++) {
+            int k = i;
+            TextView c = text(words[i], 14, TEXT, true);
+            c.setGravity(Gravity.CENTER);
+            c.setOnClickListener(v -> {
+                chosen[0] = k;
+                paint.run();
+            });
+            chips[i] = c;
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f);
+            cp.setMargins(i == 0 ? 0 : dp(4), 0, i == 2 ? 0 : dp(4), 0);
+            row.addView(c, cp);
+        }
+        paint.run();
+        box.addView(row, topParams(8));
+        box.addView(own, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        return () -> chosen[0] == 0 ? 5 : chosen[0] == 1 ? 7 : number(own);
+    }
+
+    private EditText noteField(LinearLayout box, String value) {
+        box.addView(smallLabel("NOTIZ (OPTIONAL)"), topParams(16));
+        EditText note = new EditText(this);
+        note.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        note.setFilters(new InputFilter[]{new InputFilter.LengthFilter(Fasts.NOTE_MAX)});
+        note.setTextColor(TEXT);
+        note.setSingleLine(true);
+        note.setText(value);
+        box.addView(note, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        return note;
+    }
+
+    private LinearLayout formBox() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(24), dp(4), dp(24), dp(20));
+        if (Weighings.countOn(on) > 1) box.addView(text("Für " + names[person] + ".", 14, MUTED, false));
+        return box;
+    }
+
+    private AlertDialog formDialog(String title, LinearLayout box, String ok) {
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(box);
+        AlertDialog d = dialog(title).setView(scroll).setPositiveButton(ok, null).setNegativeButton("Abbrechen", null)
+                .create();
+        if (d.getWindow() != null) d.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        return d;
+    }
+
+    private TextView errorLine(LinearLayout box) {
+        TextView e = text("", 14, pal.alarm, false);
+        e.setVisibility(View.GONE);
+        box.addView(e, topParams(10));
+        return e;
+    }
+
+    private static void fail(TextView error, String why) {
+        error.setText(why);
+        error.setVisibility(View.VISIBLE);
+    }
+
+    /** "Fasten starten": planned length, start (now, or earlier), a note. */
+    private void startFast() {
+        if (fasts.active() != null) return;
+        LinearLayout box = formBox();
+        java.util.function.IntSupplier planned = plannedField(box, 5);
+        Calendar start = nowMinute();
+        whenField(box, "BEGINN", start);
+        EditText note = noteField(box, "");
+        TextView error = errorLine(box);
+        AlertDialog d = formDialog("Fasten starten", box, "Starten");
+        show(d);
+        d.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            int days = planned.getAsInt();
+            if (days < 1 || days > 60) {
+                fail(error, "Geplante Dauer zwischen 1 und 60 Tagen.");
+                return;
+            }
+            if (start.getTimeInMillis() > System.currentTimeMillis() + 60_000) {
+                fail(error, "Der Beginn liegt in der Zukunft.");
+                return;
+            }
+            fasts.put(new Fasts.Fast(null, start.getTimeInMillis(), 0, days, note.getText().toString()));
+            d.dismiss();
+            // the morning reminder needs the permission to show notifications (Android 13 and later)
+            if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIFY);
+            }
+            fastsChanged();
+        });
+    }
+
+    /** "Fasten beenden": the end, now or earlier. */
+    private void endFast(Fasts.Fast f) {
+        LinearLayout box = formBox();
+        Calendar end = nowMinute();
+        whenField(box, "ENDE", end);
+        TextView error = errorLine(box);
+        AlertDialog d = formDialog("Fasten beenden", box, "Beenden");
+        show(d);
+        d.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            long e = end.getTimeInMillis();
+            if (e <= f.start) {
+                fail(error, "Das Ende muss nach dem Beginn liegen.");
+                return;
+            }
+            fasts.put(f.withEnd(Math.min(e, System.currentTimeMillis() + 60_000)));
+            d.dismiss();
+            fastsChanged();
+        });
+    }
+
+    /** Start, end (once ended), plan and note changed afterwards - the measurements follow by their time; or deleted. */
+    private void editFast(Fasts.Fast f) {
+        LinearLayout box = formBox();
+        java.util.function.IntSupplier planned = plannedField(box, f.plannedDays);
+        Calendar start = Calendar.getInstance();
+        start.setTimeInMillis(f.start);
+        whenField(box, "BEGINN", start);
+        Calendar end = Calendar.getInstance();
+        if (!f.open()) {
+            end.setTimeInMillis(f.end);
+            whenField(box, "ENDE", end);
+        } else {
+            box.addView(text("Läuft noch – das Ende setzt „Fasten beenden“.", 13, MUTED, false), topParams(12));
+        }
+        EditText note = noteField(box, f.note);
+        TextView error = errorLine(box);
+        AlertDialog d = formDialog("Fasten bearbeiten", box, "Speichern");
+        d.setButton(DialogInterface.BUTTON_NEUTRAL, "Löschen", (x, y) -> { });
+        show(d);
+        Button del = d.getButton(DialogInterface.BUTTON_NEUTRAL);
+        if (del != null) {
+            del.setTypeface(orbitron);
+            del.setAllCaps(false);
+            del.setTextColor(pal.alarm);
+            del.setOnClickListener(v -> {
+                AlertDialog sure = dialog("Fasten löschen?").setMessage("Die Messungen bleiben, nur dieses Fasten verschwindet.")
+                        .setPositiveButton("Löschen", (a, b) -> {
+                            fasts.remove(f.id);
+                            d.dismiss();
+                            fastsChanged();
+                        }).setNegativeButton("Abbrechen", null).create();
+                show(sure);
+            });
+        }
+        d.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            int days = planned.getAsInt();
+            if (days < 1 || days > 60) {
+                fail(error, "Geplante Dauer zwischen 1 und 60 Tagen.");
+                return;
+            }
+            long s0 = start.getTimeInMillis(), e0 = f.open() ? 0 : end.getTimeInMillis();
+            if (!f.open() && e0 <= s0) {
+                fail(error, "Das Ende muss nach dem Beginn liegen.");
+                return;
+            }
+            fasts.put(new Fasts.Fast(f.id, s0, e0, days, note.getText().toString()));
+            d.dismiss();
+            fastsChanged();
+        });
     }
 
     /**
@@ -2483,14 +2944,22 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     /** What the fasting page may ask the app: only the key of the colour scheme (dark / grey / light). */
     private static final class FastingBridge {
         private final String theme;
+        private final java.util.function.Supplier<String> live;
 
-        FastingBridge(String theme) {
+        FastingBridge(String theme, java.util.function.Supplier<String> live) {
             this.theme = theme;
+            this.live = live;
         }
 
         @JavascriptInterface
         public String theme() {
             return theme;
+        }
+
+        /** the fasts recorded in DocFit and the days of their measurements, in the page's shape (FastLive) */
+        @JavascriptInterface
+        public String liveFasts() {
+            return live.get();
         }
     }
 
