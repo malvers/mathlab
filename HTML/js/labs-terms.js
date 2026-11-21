@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 131 labs, 2361 terms, 2026-11-15
+ * 132 labs, 2377 terms, 2026-11-21
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -33,7 +33,7 @@ const LABS_TERMS = {
     "costablanca": ["Highlights Costa Blanca", "Pool"],
     "differentiallabor": ["Cosinus-Welle", "DIFFERENTIALRECHNUNG", "Exponentialfunktion", "FUNKTIONALITÄT", "Kubische Funktion", "Logarithmus", "Normalparabel", "Punkt Reset (x₀)", "Punkt-Position (x₀)", "Sinus-Welle", "VISUALISIERUNG"],
     "dividieren": ["Dividend", "Divisor", "SCHRIFTLICHE DIVISION"],
-    "docpad": ["AES-GCM", "DocPad", "ÖFFNEN", "Passwort"],
+    "docpad": ["DocPad", "NOCHMAL"],
     "docwolken": ["Eigenrotation", "letzte", "Stadtlichter", "Tag und Nacht", "Was man sieht", "Wolken", "Wolken-Deckkraft", "Wolken-Deutlichkeit", "Zeitpunkt", "Zeitraffer"],
     "dreiecksbillard": ["armenian", "brahmic", "Breite von A", "cjk", "cyrillic", "Dreieck", "Fenster", "Fenster zeigen", "georgian", "Gleich breit", "Gleichseitig (60°, 60°, 60°)", "hangul", "Laser", "latin", "Reflexionen pro Sekunde", "Spur", "Treffer bis Stopp", "Winkel α", "Winkel β"],
     "einsundeins": ["ABSPIELEN", "add", "Befehl", "Bit-Spannung (Ebene 5)", "Hex", "KI-Prolog (Ebene 0)", "mov", "Was er tut"],
@@ -107,6 +107,7 @@ const LABS_TERMS = {
     "potenzlabor": ["EXPONENT (N)", "Potenz- & Wurzelfunktionen", "X-POSITION"],
     "pythagoras": ["ALLGEMEINER PYTHAGORAS", "ANALYSE: FLÄCHEN", "Crazy Star 🌟", "Gleichseitige Dreiecke", "GROSSE FLÄCHE [A₃]", "Halbkreise", "KONSTRUKTION", "Pac-Man Mode 🕹️", "Quadrate", "WÄHLE MODUS"],
     "pythagorasbeweis": ["AUẞERHALB DES RAHMENS", "BEWEIS RESET", "FLÄCHE CM²", "KOLLISION ERKANNT", "MISSIONS-STATUS", "Pythagoras-Beweis", "Summe Dreiecke", "SUMME Σ", "TRIANGULIERUNG AN", "TRIANGULIERUNG AUS", "TRIANGULIERUNG DEAKTIVIERT", "Zielfläche [ABCD]"],
+    "raumkruemmung": ["armenian", "brahmic", "cjk", "cyrillic", "Echte Werte", "Eisen", "georgian", "hangul", "Höhe der Mitte", "Krümmung", "Krümmung überhöht", "Kugel", "latin", "Neutronenstern", "Osmium", "Radius", "Wasser", "Weißer Zwerg"],
     "reaction-diffusion": ["Eis", "Feuer", "Graustufen", "Grün", "LEEREN", "SÄEN", "Violett"],
     "rechenrallye": ["armenian", "brahmic", "cjk", "cyrillic", "Dein Spitzname", "georgian", "hangul", "latin", "Math Rally", "Rechen-Rallye", "Your nickname"],
     "rueckmeldung": ["AUF NULL", "Code für die Klasse", "NEUER CODE", "QR-CODE AUSBLENDEN", "Rückmeldung"],

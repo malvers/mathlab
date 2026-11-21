@@ -325,6 +325,18 @@ const LABS_DATA = [
         "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 12 jahrgangsstufe 12 gymnasium gy leistungskurs lk abitur sachsen lehrplan kapitel stammfunktion unbestimmtes integral grundintegrale lineare substitution kettenregel rueckwaerts cas bestimmtes integral bestand riemann hauptsatz beweis integralfunktion physikalische groesse arbeit flaeche zwischen graphen rotationskoerper volumen kegel kugel numerische integration trapezverfahren keplersche fassregel simpsonregel normalverteilung glockenkurve gauss dichte verteilungsfunktion sigma regeln standardisieren de moivre laplace beurteilende statistik schaetzen signifikanztest zweiseitiger test skalarprodukt vektorprodukt normalenvektor hessesche normalform schnittwinkel abstand punkt gerade windschiefe geraden lotfusspunkt spiegelung extremale entfernung sehwinkel regiomontanus uneigentliches integral unbegrenzte flaeche exponentialverteilung funktionenschar ortskurve ebenenschar aufgaben loesungen selbsttest druckausgabe pdf",
         "color": "gold"
     },
+    // card under Neu and Highlights (Doc, 21.11.2026: "Klar, absolut. Und der Highlights, unter neu.")
+    {
+        "id": "raumkruemmung",
+        "href": "raumkruemmung.html",
+        "title": "Raumkrümmung",
+        "description": "Ein möbliertes Zimmer schwebt im All. Mit Maus oder Finger schiebst du eine Kugel hindurch – aus Wasser, Eisen, Osmium, der Materie eines Weißen Zwergs oder eines Neutronensterns. Sie krümmt den Raum: Möbel, Wände und Gitterlinien biegen sich zu ihr hin, doch nichts reißt und nichts klappt um, denn die Abbildung ist ein Diffeomorphismus – die Topologie bleibt. Eine Karte zeigt die echten Werte: Masse, Schwarzschild-Radius und wie viel eine Uhr an der Oberfläche pro Jahr nachgeht. In einem Zimmer ist das unsichtbar klein, darum die klar beschriftete Überhöhung. Dazu das ungekrümmte Zimmer zum Vergleich und Sternenlicht, das an der Kugel abgelenkt wird. Die Idee entstand bei „Physik am Samstag“ an der TU Dresden.",
+        "tagline": "Gravitation / Gekrümmter Raum / 3D-Zimmer",
+        "icon": LAB_ICONS["raumkruemmung"],
+        "category": "physik neu highlight hot uni grade11 grade12",
+        "keywords": "raumkruemmung raum kruemmung gekruemmter raum raumzeit gravitation schwerkraft masse dichte allgemeine relativitaetstheorie relativitaet einstein neutronenstern weisser zwerg schwarzes loch schwarzschild schwarzschild-radius osmium eisen wasser kugel zimmer moebel gitter diffeomorphismus topologie lichtablenkung gravitationslinse einstein-ring sternenlicht zeitdilatation uhr 3d physik am samstag tu dresden",
+        "color": "gold"
+    },
     {
         "id": "billardkette",
         "href": "billardkette.html",
