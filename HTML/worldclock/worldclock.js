@@ -168,6 +168,69 @@
         const localCity = cities.find(c => c.tz === localTz) || cities.find(c => c.tz === "Europe/Berlin");
         if (localCity) localCity.highlight = true;
 
+        // --- Each city's real local time, from its IANA zone (Intl), so summer/winter time is right on both hemispheres.
+        // The dial reads  utc + zoneLon/15  for a city whose pointer stands at zoneLon (its UTC offset now × 15°): the map
+        // turns with the real UTC (no fixed +1 h any more - that made Dresden read CEST all year, 21.11.2026), and every
+        // pointer sits on the meridian of the time its city really shows. city.dialLon is where its plaque is drawn:
+        // zoneLon, nudged apart where two cities show (nearly) the same time - Azoren/Kapverden, Santa Fé/Dawson,
+        // Samoa/Wellington across the date line, Karachi/Bombay - so no plaque covers another; the pointer keeps the
+        // exact time. The hand-set city.lon slots are no longer used for the time.
+        const _tzFormats = new Map();
+        function tzOffsetMinutes(tz, date) {                     // UTC offset of `tz` at `date`, in minutes (CET → 60)
+            let f = _tzFormats.get(tz);
+            if (!f) {
+                f = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric',
+                    day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+                _tzFormats.set(tz, f);
+            }
+            const p = {};
+            f.formatToParts(date).forEach(x => { p[x.type] = x.value; });
+            const wall = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
+            return Math.round((wall - Math.floor(date.getTime() / 1000) * 1000) / 60000);
+        }
+        const PLAQUE_GAP = 13;       // degrees between two plaque centres (a plaque spans about 13.7°: they may just touch)
+        let dateLineLon = -172.5;    // where the date line is drawn: between the latest and the earliest city
+        let _zonesAt = NaN;          // display time the zones were last worked out for
+        // Positions at least `g` apart that move the plaques as little as possible (least squares): the circle is cut
+        // at its widest gap, then isotonic regression (pool adjacent violators) on a[i] − i·g. `a` ascending, one turn.
+        function spreadPlaques(a, g) {
+            const n = a.length;
+            let k = n - 1, widest = a[0] + 360 - a[n - 1];
+            for (let i = 0; i < n - 1; i++) if (a[i + 1] - a[i] > widest) { widest = a[i + 1] - a[i]; k = i; }
+            const order = [], blocks = [];
+            for (let m = 1; m <= n; m++) {
+                const i = (k + m) % n, v = a[i] + (k + m >= n ? 360 : 0);
+                order.push(i);
+                blocks.push({ s: v - (m - 1) * g, c: 1 });
+                while (blocks.length > 1) {
+                    const B = blocks[blocks.length - 1], A = blocks[blocks.length - 2];
+                    if (A.s / A.c <= B.s / B.c) break;
+                    A.s += B.s; A.c += B.c; blocks.pop();
+                }
+            }
+            const out = new Array(n);
+            let m = 0;
+            blocks.forEach(B => { for (let t = 0; t < B.c; t++, m++) out[order[m]] = B.s / B.c + m * g; });
+            return out.map((d, i) => d - 360 * Math.round((d - a[i]) / 360));   // back next to the city's own angle
+        }
+        function updateCityZones(time) {
+            const t = time.getTime();
+            if (Math.abs(t - _zonesAt) < 60000) return;       // offsets change only at a DST switch: once a minute is plenty
+            _zonesAt = t;
+            cities.forEach(c => {
+                try { c.zoneLon = tzOffsetMinutes(c.tz, time) / 4; } catch (_) { c.zoneLon = c.lon; }   // min/60·15 = min/4
+                c.dst = getDSTLabel(c.tz);                       // ☀/❄ on the plaque, cached instead of per frame
+            });
+            const list = cities.slice().sort((a, b) => a.zoneLon - b.zoneLon);   // UTC−12 … UTC+14
+            const d = spreadPlaques(list.map(c => c.zoneLon), PLAQUE_GAP);
+            list.forEach((c, i) => { c.dialLon = d[i]; });
+            const late = d[d.length - 1], early = d[0];        // the date line runs between them
+            dateLineLon = late + (((early - late) % 360) + 360) % 360 / 2;
+        }
+        const cityDialLon = c => (c.dialLon ?? c.lon);     // plaque
+        const cityZoneLon = c => (c.zoneLon ?? c.lon);     // pointer = the city's real local time
+        updateCityZones(new Date());
+
         let manualOffset = 0; // in minutes
         const DAY_OFFSET_KEY = 'wc.dayOffset';
         let debugDayOffset = (() => {                                                   // DEBUG: step the displayed date (Arrow keys), in days; persisted across reloads
@@ -444,10 +507,10 @@
             const r = size / 2;
             const time = getDisplayTime();
             const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
-            const mapRotation = dirSign * (12 - (utcHours + 1)) * 15 + autoRotation;
+            const mapRotation = dirSign * (12 - utcHours) * 15 + autoRotation;   // real UTC, see updateCityZones
 
             cities.forEach(city => {
-                const cityAngle = (dirSign * (-city.lon) + mapRotation - 90);
+                const cityAngle = (dirSign * (-cityDialLon(city)) + mapRotation - 90);
                 let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
 
                 // If distance is near the plaques and angle is close
@@ -533,11 +596,11 @@
                 const r = size / 2;
                 const time = getDisplayTime();
                 const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
-                const mapRotation = (12 - (utcHours + 1)) * 15 + autoRotation;
+                const mapRotation = (12 - utcHours) * 15 + autoRotation;
 
                 let found = null;
                 cities.forEach(city => {
-                    const cityAngle = (-city.lon + mapRotation - 90);
+                    const cityAngle = (-cityDialLon(city) + mapRotation - 90);
                     let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
                     if (dist > r * 0.8 && dist < r * 1.1 && Math.abs(diff) < 7) {
                         found = city;
@@ -784,7 +847,7 @@
         }
 
         function drawDateLine(r, markerInset, mapRotation) {
-            const dlAngle = dirSign * (-(-172.5)) * Math.PI / 180 - Math.PI / 2; // angular midpoint of the two cities
+            const dlAngle = dirSign * (-dateLineLon) * Math.PI / 180 - Math.PI / 2; // between the latest and the earliest city (updateCityZones)
             const dlMarkerR = (r * 0.9) - markerInset;
             const Rt = r * 0.012;                    // circumradius of the small equilateral triangle (side = Rt·√3)
             const dlR = r * 0.773 - Rt;              // centre placed so the TIP sits on the world-disc rim (= MAP_SCALE)
@@ -1184,7 +1247,7 @@
 
             // Connecting Line (only in normal mode)
             if (!window.useGlobe) {
-                const cityAngle = (dirSign * (-targetCity.lon) + mapRotation - 90) * Math.PI / 180;
+                const cityAngle = (dirSign * (-cityDialLon(targetCity)) + mapRotation - 90) * Math.PI / 180;
                 const startX = Math.cos(cityAngle) * (r * 0.78);
                 const startY = Math.sin(cityAngle) * (r * 0.78);
 
@@ -1423,7 +1486,8 @@
             const cityShadowBlur = r * 0.031;
             const isWkoeMode = document.documentElement.dataset.school === 'wkoe';
             cities.forEach(city => {
-                const cityAngle = dirSign * (-city.lon) * Math.PI / 180 - Math.PI / 2;
+                const cityAngle = dirSign * (-cityDialLon(city)) * Math.PI / 180 - Math.PI / 2;   // the plaque
+                const tipAngle = dirSign * (-cityZoneLon(city)) * Math.PI / 180 - Math.PI / 2;    // the exact local time
                 const markerR = (r * 0.9) - markerInset;
                 const circleRadius = diskR;
                 const mx = Math.cos(cityAngle) * markerR;
@@ -1438,7 +1502,7 @@
                 const baseR = markerR + circleRadius - baseInset;
                 const spread = 0.06; // angular, no scaling needed
 
-                ctx.moveTo(Math.cos(cityAngle) * tipR, Math.sin(cityAngle) * tipR);
+                ctx.moveTo(Math.cos(tipAngle) * tipR, Math.sin(tipAngle) * tipR);   // leans towards the hour if the plaque was nudged
                 ctx.lineTo(Math.cos(cityAngle - spread) * baseR, Math.sin(cityAngle - spread) * baseR);
                 ctx.lineTo(Math.cos(cityAngle + spread) * baseR, Math.sin(cityAngle + spread) * baseR);
                 ctx.closePath();
@@ -1503,7 +1567,7 @@
                 } else {
                     let lines = city.name.split('\n');
 
-                    const dst = getDSTLabel(city.tz);
+                    const dst = city.dst ?? getDSTLabel(city.tz);
                     if (city.highlight) {
                         ctx.fillStyle = "rgb(0,0,40)";
                     } else if (dst === "SZ") {
@@ -1599,6 +1663,7 @@
 
             const time = getDisplayTime();
             const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
+            updateCityZones(time);
 
             const rect = canvas.getBoundingClientRect();
             const w = Math.max(80, rect.width || 0);
@@ -1690,8 +1755,9 @@
 
             // 1. Draw Map (Rotating)
             if (autoRotationEnabled) autoRotation -= dirSign * 0.02;
-            // Add +1 to account for Summer Time (CEST is UTC+2, Lon 15 is UTC+1)
-            const mapRotation = dirSign * (12 - (utcHours + 1)) * 15 + autoRotation;
+            // The real UTC turns the Earth; each city's pointer stands on the meridian of its real local time
+            // (updateCityZones: IANA zone via Intl, summer/winter time included - no fixed +1 h for CEST any more)
+            const mapRotation = dirSign * (12 - utcHours) * 15 + autoRotation;
             
             ctx.save();
             ctx.rotate(mapRotation * Math.PI / 180);
