@@ -159,6 +159,48 @@
         /* ---- bare: a page that is no lab (The Real Salary), its hero alone, no wordmark ---- */
         .card.full.bare .panel { display: none; }
 
+        /* ---- brandcard: the site's default card (resources/og/default.jpg) for every page without a card of its own.
+           Everything sits in the middle 630x630, so a messenger that crops the picture to a square tile (WhatsApp, the
+           small Signal layout) still shows the whole lambda with the wordmark; the sides are only background. ---- */
+        .brandcard-only { display: none; }
+        .card.brandcard { display: block; }
+        .card.brandcard .panel, .card.brandcard .shot { display: none; }
+        .card.brandcard .brandcard-only { display: flex; }
+        .card.brandcard {
+            background:
+                radial-gradient(circle at 50% 44%, rgba(245, 194, 66, .16) 0%, rgba(245, 194, 66, 0) 23%),
+                radial-gradient(70% 90% at 50% 44%, var(--deep2) 0%, var(--deep) 70%);
+        }
+        /* faint rings around the logo and a sparse star field, both fading out towards the edges */
+        .bc-rings {
+            position: absolute; inset: 0;
+            background: repeating-radial-gradient(circle at 50% 44%, rgba(0, 210, 255, 0) 0 58px, rgba(0, 210, 255, .10) 59px 60px);
+            -webkit-mask-image: radial-gradient(circle at 50% 44%, #000 18%, transparent 62%);
+            mask-image: radial-gradient(circle at 50% 44%, #000 18%, transparent 62%);
+        }
+        .bc-stars { position: absolute; inset: 0; }
+        .bc-stars i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #cfe0ff; }
+        .bc-center {
+            position: absolute; left: 50%; top: 0; width: 630px; height: 630px; transform: translateX(-50%);
+            flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        }
+        .bc-logo {
+            width: 232px; height: 232px; border-radius: 50px;
+            box-shadow: 0 0 0 1px rgba(245, 194, 66, .35), 0 18px 60px rgba(0, 0, 0, .45), 0 0 90px rgba(245, 194, 66, .28);
+        }
+        .bc-name {
+            margin-top: 40px;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 38px; line-height: 1.22;
+            letter-spacing: 0.08em; text-transform: uppercase; color: #fff;
+        }
+        .bc-url {
+            margin-top: 22px; display: flex; align-items: center; gap: 12px;
+            font-family: 'Orbitron', sans-serif; font-weight: 400; font-size: 21px; letter-spacing: 0.14em; color: var(--gold);
+        }
+        .bc-url .dot {
+            width: 9px; height: 9px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 14px rgba(245, 194, 66, .9);
+        }
+
         /* Thin accent edge along the bottom of the whole card. */
         .card::after {
             content: '';
@@ -188,13 +230,37 @@
             <div class="foot"><span class="dot"></span><span>docalvers.de</span></div>
         </div>
         <div class="shot"><img id="og-shot" alt=""></div>
+        <div class="bc-rings brandcard-only"></div>
+        <div class="bc-stars brandcard-only" id="bc-stars"></div>
+        <div class="bc-center brandcard-only">
+            <img class="bc-logo" id="bc-logo" alt="">
+            <div class="bc-name">Doc Alvers<br>Mathe-Labore</div>
+            <div class="bc-url"><span class="dot"></span><span>docalvers.de</span></div>
+        </div>
     </div>
 
     <script>
-        // Called by make-og.mjs with { title, tagline, shot, logo, full, bare } (images as data URIs).
+        // Called by make-og.mjs with { title, tagline, shot, logo, full, bare, brandcard } (images as data URIs).
         window.ogFill = function (data) {
             document.querySelector('.card').classList.toggle('full', !!data.full);
             document.querySelector('.card').classList.toggle('bare', !!data.bare);
+            document.querySelector('.card').classList.toggle('brandcard', !!data.brandcard);
+            if (data.brandcard) {
+                if (data.logo) document.getElementById('bc-logo').src = data.logo;
+                // a fixed pseudo-random star field (same picture on every run), thinner near the middle
+                const box = document.getElementById('bc-stars');
+                let seed = 7;
+                const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+                for (let i = 0; i < 170; i++) {
+                    const x = rnd() * 1200, y = rnd() * 630, d = Math.hypot((x - 600) / 1.4, y - 277);
+                    if (d < 250 && rnd() < 0.8) continue;
+                    const s = document.createElement('i');
+                    const r = rnd() < 0.12 ? 3 : 2;
+                    s.style.cssText = `left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;width:${r}px;height:${r}px;opacity:${(0.25 + rnd() * 0.6).toFixed(2)}`;
+                    box.appendChild(s);
+                }
+                return;
+            }
             document.getElementById('og-title').textContent = data.title || '';
             document.getElementById('og-tagline').textContent = data.tagline || '';
             if (data.shot) document.getElementById('og-shot').src = data.shot;

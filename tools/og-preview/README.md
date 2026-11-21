@@ -13,7 +13,26 @@ node tools/og-preview/make-og.mjs --only koerper  # nur ein Lab (nach Aenderunge
 node tools/og-preview/make-og.mjs --cards-only    # Karten neu rendern, Screenshots wiederverwenden
 node tools/og-preview/make-og.mjs --meta-only     # nur die HTML-Koepfe neu schreiben
 node tools/og-preview/make-og.mjs --dry           # nichts an den HTMLs aendern
+node tools/og-preview/make-og.mjs --fallback      # nur die Standardkarte resources/og/default.jpg
 ```
+
+## Seiten ohne eigene Karte (seit 21.11.2026)
+
+Jede Seite ohne `og:image` bekommt **beim Pages-Deploy** einen Block, der auf die Standardkarte
+`resources/og/default.jpg` zeigt (λ mittig auf vollflächigem Grund, alles Wichtige im mittleren
+630×630-Quadrat, damit auch ein quadratischer Zuschnitt in WhatsApp/Signal gut aussieht).
+Das macht `og-fallback.mjs` im Workflow-Schritt „Default link preview…“, und zwar nur in der
+Kopie `_site` — die HTMLs im Repo bleiben unverändert. Vorher zeigten Messenger das nackte
+Favicon (gelbes λ-Quadrat). Prüfen, wer betroffen ist:
+`node tools/og-preview/og-fallback.mjs HTML --dry --list`. Eine echte Karte per `make-og --only <id>`
+ersetzt die Standardkarte automatisch.
+
+## Gestellte Aufnahmen
+
+Wenn die Startansicht eines Labs ein schwaches Bild ergibt (Erklärbox über der Mitte, Objekt winzig),
+bekommt es in `make-og.mjs` einen Eintrag in `SHOT_STAGE`: Viewport, CSS zum Ausblenden, eine
+Funktion, die im Lab einen aussagekräftigen Zustand setzt, und das zu fotografierende Element.
+Erstes Beispiel: `raumkruemmung`.
 
 ## Wie es zusammenhaengt
 

@@ -60,6 +60,15 @@ jobs:
           rsync -a --delete --exclude 'resources/screenshots_original/' HTML/ _site/
           echo "Staged site size:"; du -sh _site
 
+      # Link preview for every page without a card of its own (Doc 2026-11-21: Signal showed the bare yellow lambda square
+      # for the new Raumkrümmung lab). tools/og-preview/make-og.mjs writes real cards for labs, books, decks and the hub;
+      # any other page - and a new lab nobody ran make-og for yet - gets the site's default card resources/og/default.jpg
+      # here, only in the staged copy. Deterministic: the same page gives the same bytes on every deploy, so this does
+      # not bring back the every-page-changes-on-every-deploy load of the removed build stamp (see the EXPERIMENT note
+      # below). A failure keeps the pages as they are instead of failing the deploy.
+      - name: Default link preview for pages without their own card
+        run: node tools/og-preview/og-fallback.mjs _site || echo "og-fallback failed - pages keep their heads as they are"
+
       # The tab icon in the repo is the RED lambda, so every local server shows red, whatever port or
       # worktree (Doc 2026-10-27: localhost "zwingend rot", only docalvers.de may be orange). Only here,
       # for the live site, the orange one goes over it. No `|| true`: a missing file fails the deploy

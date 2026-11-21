@@ -19,6 +19,9 @@
  *   node tools/og-preview/make-og.mjs --books         # only the textbook cards (combines with the flags above)
  *   node tools/og-preview/make-og.mjs --decks         # only the slide decks (HTML/decks/, cards on R2 as well)
  *   node tools/og-preview/make-og.mjs --dry           # show what would change
+ *   node tools/og-preview/make-og.mjs --fallback      # only the site's default card resources/og/default.jpg
+ *
+ * Pages without a card of their own get a block pointing at default.jpg during the Pages deploy (og-fallback.mjs).
  */
 
 import fs from 'node:fs';
@@ -59,6 +62,7 @@ const CARDS_ONLY = has('--cards-only');
 const META_ONLY = has('--meta-only');
 const BOOKS = has('--books');
 const DECKS = has('--decks');
+const FALLBACK = has('--fallback');
 
 // ---------------------------------------------------------------- lab registry
 function readLabs() {
@@ -310,11 +314,37 @@ async function shootHero(browser, lab, port) {
     }
 }
 
+// A lab whose start view makes a weak card gets a staged shot: the viewport, CSS that hides what covers the picture, a
+// function run in the page that sets a telling state, and the element to shoot (instead of the whole window). The
+// picture should fill the card's right part (700x630), so the viewport is about that shape.
+// raumkruemmung (21.11.2026): the coach box covered the middle and the sphere sat small in a corner - now the room alone
+// with a neutron-star sphere (radius 60 cm) in front of the table, floor and walls clearly pulled towards it, stars around.
+const SHOT_STAGE = {
+    raumkruemmung: {
+        viewport: { width: 1014, height: 880 },
+        el: '#canvas-container',
+        css: '#math-coach-box,#rk-overlay{display:none!important}',
+        ready: () => !!window.Raumkruemmung,
+        prep: () => new Promise((done) => {
+            document.getElementById('side-panel').classList.add('collapsed');
+            window.dispatchEvent(new Event('resize'));
+            window.Raumkruemmung.set({ mat: 'neutron', R: 0.6, x: 1.4, y: 1.15, z: 1.2, k: 1.0, grid: true, ghost: false, lens: true });
+            setTimeout(() => {
+                window.Raumkruemmung.fitCamera();
+                const cam = window.Raumkruemmung.camera, t = window.Raumkruemmung.controls.target;
+                cam.position.sub(t).multiplyScalar(0.9).add(t);      // a step closer than the fitted view
+                done();
+            }, 700);
+        }),
+    },
+};
+
 async function shootLab(browser, lab, port) {
     if (lab.deck) return shootDeck(browser, lab, port);
     if (lab.hero) return shootHero(browser, lab, port);
     const dest = path.join(SHOTS, lab.id + '.png');
-    const ctx = await browser.newContext({ viewport: SHOT_VIEWPORT, deviceScaleFactor: 1.5 });
+    const stage = SHOT_STAGE[lab.id];
+    const ctx = await browser.newContext({ viewport: (stage && stage.viewport) || SHOT_VIEWPORT, deviceScaleFactor: 1.5 });
     const page = await ctx.newPage();
     try {
         const url = `http://127.0.0.1:${port}/${lab.href}?lang=de`;
@@ -336,6 +366,16 @@ async function shootLab(browser, lab, port) {
             // the cover, as the first book cards did (Swahili card, 03.11.2026: the letter filled the whole picture)
             if (lab.cover) await page.addStyleTag({ content: '.b-gruss{display:none!important}' }).catch(() => {});
             await page.waitForTimeout(300);
+        }
+        if (stage) {
+            if (stage.ready) await page.waitForFunction(stage.ready, null, { timeout: 30000 });
+            if (stage.css) await page.addStyleTag({ content: stage.css });
+            if (stage.prep) await page.evaluate(stage.prep);
+            await page.waitForTimeout(2500);      // a few frames in the new state
+            if (stage.el) {
+                await (await page.$(stage.el)).screenshot({ path: dest });
+                return dest;
+            }
         }
         await page.screenshot({ path: dest });
         // a book's cover page: its cover also as a picture of its own - the book's card on the hub shows it
@@ -370,6 +410,29 @@ async function renderCard(browser, lab, shotFile) {
         await page.evaluate(() => document.fonts.ready);
         await page.waitForTimeout(400);
         const dest = path.join(onR2(lab) ? R2_DIR : OUT, lab.id + '.jpg');
+        await page.screenshot({ path: dest, type: 'jpeg', quality: 90 });
+        return dest;
+    } finally {
+        await ctx.close();
+    }
+}
+
+// The site's default card, resources/og/default.jpg: the lambda in the middle of a full-bleed background, no lab picture.
+// Every page that has no card of its own points there - the Pages deploy adds that block (og-fallback.mjs), so a new page
+// never shows the bare favicon in a messenger again (Doc, 21.11.2026: Signal showed the yellow lambda square for the new
+// Raumkrümmung lab). The logo is the live SVG, sharp at this size.
+async function renderFallback(browser) {
+    const ctx = await browser.newContext({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
+    const page = await ctx.newPage();
+    try {
+        await page.goto(pathToFileURL(path.join(HERE, 'og-card.html')).href, { waitUntil: 'load' });
+        await page.evaluate((d) => window.ogFill(d), {
+            brandcard: true,
+            logo: dataUri(path.join(HTML, 'resources', 'favicon-live.svg'), 'image/svg+xml'),
+        });
+        await page.evaluate(() => document.fonts.ready);
+        await page.waitForTimeout(400);
+        const dest = path.join(OUT, 'default.jpg');
         await page.screenshot({ path: dest, type: 'jpeg', quality: 90 });
         return dest;
     } finally {
@@ -451,6 +514,13 @@ function injectMeta(lab) {
 
 // --------------------------------------------------------------------------- run
 const main = async () => {
+    if (FALLBACK) {
+        fs.mkdirSync(OUT, { recursive: true });
+        const browser = await chromium.launch();
+        console.log('default card:', await renderFallback(browser));
+        await browser.close();
+        return;
+    }
     let labs = [...EXTRA, ...readBooks(), ...readDecks(), ...readLabs()];
     if (ONLY.length) labs = labs.filter((l) => ONLY.includes(l.id));
     if (BOOKS || DECKS) labs = labs.filter((l) => (BOOKS && l.id.startsWith('buch-')) || (DECKS && l.deck));
