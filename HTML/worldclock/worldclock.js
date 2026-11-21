@@ -40,19 +40,35 @@
         const trailCanvas = document.createElement('canvas');   // offscreen layer for star trails (fades instead of clearing)
         const trailCtx = trailCanvas.getContext('2d');
 
+        // Canvas fit. The bitmap always has exactly the device pixels of the canvas box (CSS size × devicePixelRatio,
+        // rounded the way the browser snaps the box, or the exact count from ResizeObserver where it gives one), so one
+        // canvas pixel lands on one screen pixel at every size and on every screen. (Math.floor made the browser stretch
+        // the whole dial by a fraction of a pixel whenever size × ratio was not whole: every line went soft.) The dial is
+        // laid out in the bitmap's own CSS size (canvasW × canvasH), never in a box size the bitmap was not made for.
+        let DPR = window.devicePixelRatio || 1;   // device pixels per CSS px of the current bitmap
+        let canvasW = 1, canvasH = 1;              // the bitmap's size in CSS px
+        let _devBox = null;                        // { w, h, dpr } in device pixels, from ResizeObserver
         function resizeCanvasToContainer() {
             const dpr = window.devicePixelRatio || 1;
             const rect = container.getBoundingClientRect();
-            const w = Math.max(1, rect.width);
-            const h = Math.max(1, rect.height);
-            canvas.width = Math.floor(w * dpr);
-            canvas.height = Math.floor(h * dpr);
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.scale(dpr, dpr);
-            trailCanvas.width = canvas.width;            // keep the star-trail layer pixel-aligned with the main canvas
-            trailCanvas.height = canvas.height;
-            trailCtx.setTransform(1, 0, 0, 1, 0, 0);
-            trailCtx.scale(dpr, dpr);
+            let bw = Math.max(1, Math.round(rect.width * dpr));
+            let bh = Math.max(1, Math.round(rect.height * dpr));
+            // the browser's exact device-pixel box, where it differs only by the snapping (never trust a stale one)
+            if (_devBox && _devBox.dpr === dpr && Math.abs(_devBox.w - bw) <= 1 && Math.abs(_devBox.h - bh) <= 1) {
+                bw = _devBox.w;
+                bh = _devBox.h;
+            }
+            const changed = canvas.width !== bw || canvas.height !== bh || dpr !== DPR;
+            DPR = dpr;
+            canvasW = bw / dpr;
+            canvasH = bh / dpr;
+            if (canvas.width !== bw) canvas.width = bw;        // assigning clears the bitmap: only when it really changes
+            if (canvas.height !== bh) canvas.height = bh;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            if (trailCanvas.width !== bw) trailCanvas.width = bw;    // keep the star-trail layer pixel-aligned with the main canvas
+            if (trailCanvas.height !== bh) trailCanvas.height = bh;
+            trailCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return changed;
         }
 
         // --- WORLD CLOCK LOGIC ---
@@ -76,8 +92,7 @@
         // Pole label ("NORDPOL"/"SÜDPOL") + small red dot, drawn at the centre (= the pole) in screen space.
         function drawPoleMarker(w, h, r) {
             ctx.save();
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.letterSpacing = "2px";
@@ -222,7 +237,7 @@
             _zonesAt = t;
             cities.forEach(c => {
                 try { c.zoneLon = tzOffsetMinutes(c.tz, time) / 4; } catch (_) { c.zoneLon = c.lon; }   // min/60·15 = min/4
-                c.dst = getDSTLabel(c.tz);                       // ☀/❄ on the plaque, cached instead of per frame
+                c.dst = getDSTLabel(c.tz, time);                 // ☀/❄ on the plaque for the dial's date, cached instead of per frame
             });
             const list = cities.slice().sort((a, b) => a.zoneLon - b.zoneLon);   // UTC−12 … UTC+14
             const d = spreadPlaques(list.map(c => c.zoneLon), PLAQUE_GAP);
@@ -791,20 +806,66 @@
 
         // --- Sky interaction (hover/tooltips, zoom, pointer handlers) → worldclock-sky.js (Phase 4).
 
+        // --- Dial geometry: every radius of the ring in units of r (the dial radius, 0.4 × the smaller canvas side), in
+        // one place, so the ring keeps its proportions at every size. From the centre outwards:
+        //   plaques (centres on 0.878, radius 0.105, outer edge 0.983) · 0.012 air · RAIL: the pointers' bases and the
+        //   leaders · pointer, 0.026 high · SCALE circle: the pointer tips touch it, the ticks start on it · ticks ·
+        //   hour numbers · rim of the disc at 1.25 (the widget's round edge).
+        // A pointer therefore never runs into a tick or a number, a leader never runs along the scale circle, and a
+        // plaque never touches either (21.11.2026, Doc: "viele Fehler bei diesen weißen Zeilen außenrum").
+        const DIAL = {
+            plaqueR: 0.878, diskR: 0.105,     // = (0.9 - 0.022) and the plaque radius, as before
+            rail: 0.995,
+            scale: 1.021,
+            hourTick: 0.046, halfTick: 0.023,
+            label: 1.138,                     // centre of the hour numbers (was 1.128: room for the pointers)
+            ptrHalf: 0.0135,                  // half the base of a pointer; height = scale - rail
+        };
+        // Crisp lines at every size and pixel ratio: a stroke is a whole number of device pixels, at least one, and its
+        // alpha shrinks by what the rounding added, so a thin line keeps the same weight on the LG (1 px per point) and
+        // on Retina (2) instead of turning into a grey two-pixel smear. Returns { w, a } for lineWidth / alpha.
+        function hairline(idealCssW, alpha) {
+            const dev = Math.max(1, Math.round(idealCssW * DPR));
+            return { w: dev / DPR, a: alpha * Math.min(1, (idealCssW * DPR) / dev) };
+        }
+        // A coordinate moved so that a line of width w across it covers whole device pixels (for exactly horizontal or
+        // vertical lines and the four cardinal points of a circle; the dial centre itself sits on a pixel corner).
+        function snapLine(v, w) {
+            const half = w * DPR / 2;
+            return (Math.round(v * DPR - half) + half) / DPR;
+        }
+        const snapPx = v => Math.round(v * DPR) / DPR;
+
         // --- Render helpers extracted from drawFrame (intra-file; read/write top-level state directly) ---
         function drawNumbersRing(r) {
             const hourFontSize = Math.max(12, r * 0.0875);
-            const hourLabelInset = r * 0.022;
-            const tickInset = r * 0.016;
             const hourGlow12 = r * 0.047;
             const hourGlowOther = r * 0.031;
+            const R0 = r * DIAL.scale;
+            const hourTick = hairline(r * 0.0042, 0.42);
+            const halfTick = hairline(r * 0.003, 0.24);
+            ctx.save();                     // line width, cap and colour stay in here
             ctx.font = `400 ${hourFontSize}px Orbitron`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
+            ctx.lineCap = "butt";
+            // One straight tick from R0 outwards; the exactly vertical/horizontal ones (6, 12, 18, 24) on whole pixels
+            const tick = (angle, len, s) => {
+                const c = Math.cos(angle), sn = Math.sin(angle);
+                let x0 = c * R0, y0 = sn * R0, x1 = c * (R0 + len), y1 = sn * (R0 + len);
+                if (Math.abs(c) < 1e-9) { x0 = x1 = snapLine(0, s.w); y0 = snapPx(y0); y1 = snapPx(y1); }
+                else if (Math.abs(sn) < 1e-9) { y0 = y1 = snapLine(0, s.w); x0 = snapPx(x0); x1 = snapPx(x1); }
+                ctx.strokeStyle = `rgba(255,255,255,${s.a.toFixed(3)})`;
+                ctx.lineWidth = s.w;
+                ctx.beginPath();
+                ctx.moveTo(x0, y0);
+                ctx.lineTo(x1, y1);
+                ctx.stroke();
+            };
             for (let i = 1; i <= 24; i++) {
                 const angle = dirSign * (12 - i) * (Math.PI * 2 / 24) - Math.PI / 2;
-                const tx = Math.cos(angle) * (r * 1.15 - hourLabelInset);
-                const ty = Math.sin(angle) * (r * 1.15 - hourLabelInset);
+                const tx = snapPx(Math.cos(angle) * r * DIAL.label);   // same pixel phase for every number
+                const ty = snapPx(Math.sin(angle) * r * DIAL.label);
 
                 let color = `rgb(${ringFontGray},${ringFontGray},${ringFontGray})`;
                 let glow = false;
@@ -828,25 +889,17 @@
                 ctx.fillText(i, tx, ty);
                 ctx.restore();
 
-                // Hour Ticks
-                ctx.save();
-                ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-                ctx.beginPath();
-                ctx.moveTo(Math.cos(angle) * (r * 1.02 - tickInset), Math.sin(angle) * (r * 1.02 - tickInset));
-                ctx.lineTo(Math.cos(angle) * (r * 1.08 - tickInset), Math.sin(angle) * (r * 1.08 - tickInset));
-                ctx.stroke();
-                ctx.restore();
-
-                // Half-Hour Ticks (Only Tics)
-                const halfAngle = angle - (Math.PI / 24);
-                ctx.save();
-                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-                ctx.beginPath();
-                ctx.moveTo(Math.cos(halfAngle) * (r * 1.02 - tickInset), Math.sin(halfAngle) * (r * 1.02 - tickInset));
-                ctx.lineTo(Math.cos(halfAngle) * (r * 1.05 - tickInset), Math.sin(halfAngle) * (r * 1.05 - tickInset));
-                ctx.stroke();
-                ctx.restore();
+                tick(angle, r * DIAL.hourTick, hourTick);                     // hour
+                tick(angle - Math.PI / 24, r * DIAL.halfTick, halfTick);       // half hour
             }
+            // The scale circle under the ticks: the pointer tips touch it
+            const sc = hairline(r * 0.002, 0.2);
+            ctx.strokeStyle = `rgba(255,255,255,${sc.a.toFixed(3)})`;
+            ctx.lineWidth = sc.w;
+            ctx.beginPath();
+            ctx.arc(0, 0, snapLine(R0, sc.w), 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
         }
 
         function drawDateLine(r, markerInset, mapRotation) {
@@ -879,11 +932,9 @@
             ctx.lineJoin = "round";                       // dark halo for legibility — like the NORDPOL/SÜDPOL labels
             ctx.lineWidth = Math.max(1.2, r * 0.006);
             ctx.strokeStyle = "rgba(0,0,0,0.5)";
-            if (!WC_WIDGET) {                             // the widget keeps only the small triangle at the rim
-                ctx.strokeText("DATUMSGRENZE", dlx, 0);
-                ctx.fillStyle = "rgb(128, 128, 128)";
-                ctx.fillText("DATUMSGRENZE", dlx, 0);
-            }
+            ctx.strokeText("DATUMSGRENZE", dlx, 0);
+            ctx.fillStyle = "rgb(128, 128, 128)";
+            ctx.fillText("DATUMSGRENZE", dlx, 0);
             ctx.restore();
         }
 
@@ -1299,7 +1350,7 @@
             ctx.textAlign = "center";
 
             // Status (Sommerzeit/Normalzeit) — compute first so HIGHLIGHT button can match its colors
-            const dstStatus = getDSTLabel(targetCity.tz);
+            const dstStatus = getDSTLabel(targetCity.tz, time);
             const isSZ = (dstStatus === "SZ");
             const dstColor = isSZ ? "#ffaa00" : "rgba(220, 220, 220, 0.9)";
             const dstColorDim = isSZ ? "rgba(255, 170, 0, 0.6)" : "rgba(220, 220, 220, 0.5)";
@@ -1481,8 +1532,7 @@
         // Inputs: r, mapRotation. Reads top-level cities / ctx / dirSign / wkoeLogoImg / getDSTLabel.
         function drawCityMarkers(r, mapRotation) {
             // All sizes relative to r (clock radius) for responsive scaling
-            const diskR = r * 0.105;
-            const markerInset = r * 0.022;
+            const diskR = r * DIAL.diskR;
             const cityFontNormal = Math.max(5, r * 0.030);
             const cityFontHighlight = Math.max(6, r * 0.034);
             const cityLineHeight = r * 0.038;
@@ -1490,40 +1540,11 @@
             const isWkoeMode = document.documentElement.dataset.school === 'wkoe';
             cities.forEach(city => {
                 const cityAngle = dirSign * (-cityDialLon(city)) * Math.PI / 180 - Math.PI / 2;   // the plaque
-                const tipAngle = dirSign * (-cityZoneLon(city)) * Math.PI / 180 - Math.PI / 2;    // the exact local time
-                const markerR = (r * 0.9) - markerInset;
+                const markerR = r * DIAL.plaqueR;
                 const circleRadius = diskR;
                 const mx = Math.cos(cityAngle) * markerR;
                 const my = Math.sin(cityAngle) * markerR;
                 const isWkoeDresden = isWkoeMode && city.name === 'Dresden';
-
-                // Pointer, as in the lab before the time-zone fix: a small white triangle on top of the plaque, pointing
-                // straight out at the hour scale - now always at the city's exact local time (tipAngle), all on one circle
-                // and all the same size. A plaque that had to make room for a neighbour with (nearly) the same time is
-                // joined to its pointer by a thin, quiet arc on that circle, which never touches a plaque or the scale
-                // (21.11.2026, Doc: "Da stimmt irgendwas nicht mit den Pfeilen", "Bitte Mühe geben").
-                const ringR = markerR + circleRadius;              // outer edge of every plaque
-                const baseR = ringR + r * 0.01;                    // the pointers' circle, just clear of the plaques
-                const tipR = baseR + r * 0.03;                     // the tip reaches into the tick band
-                const halfW = (r * 0.016) / baseR;                 // half the base, as an angle
-                const lean = Math.atan2(Math.sin(tipAngle - cityAngle), Math.cos(tipAngle - cityAngle));
-                ctx.save();
-                if (Math.abs(lean) > halfW * 0.5) {
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-                    ctx.lineWidth = Math.max(1, r * 0.005);
-                    ctx.lineCap = "round";
-                    ctx.beginPath();
-                    ctx.arc(0, 0, baseR, cityAngle, cityAngle + lean, lean < 0);
-                    ctx.stroke();
-                }
-                ctx.fillStyle = "white";
-                ctx.beginPath();
-                ctx.moveTo(Math.cos(tipAngle) * tipR, Math.sin(tipAngle) * tipR);
-                ctx.lineTo(Math.cos(tipAngle - halfW) * baseR, Math.sin(tipAngle - halfW) * baseR);
-                ctx.lineTo(Math.cos(tipAngle + halfW) * baseR, Math.sin(tipAngle + halfW) * baseR);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
 
                 if (isWkoeDresden) {
                     // Light gray disc for Dresden in WKOE mode
@@ -1617,6 +1638,65 @@
                 }
                 ctx.restore();
             });
+            drawPointers(r);           // after every plaque, so no plaque and no glow covers a pointer or a leader
+        }
+
+        // Pointers, as in the lab before the time-zone fix a small white triangle that points straight out and touches
+        // the scale circle with its tip - now on the city's exact local time (IANA zone, summer/winter time included).
+        // All pointers are the same shape, drawn rotated, on the rail between the plaques and the scale (DIAL), so none
+        // runs into a tick, a number or a plaque. A pointer that stands over the middle of its own plaque needs nothing
+        // more; a plaque that had to make room for a neighbour with (nearly) the same time is joined to its pointer by a
+        // thin leader (below). Cities with the same time share one pointer, drawn once (drawn twice it looked bolder than
+        // the others). (21.11.2026, Doc: "viele Fehler bei diesen weißen Zeilen außenrum".)
+        function drawPointers(r) {
+            const rail = r * DIAL.rail, tipR = r * DIAL.scale, half = r * DIAL.ptrHalf;
+            // A pointer reads as its plaque's own while it stands over the plaque's middle part (2/3 of its half width)
+            const free = (2 / 3) * Math.asin(DIAL.diskR / DIAL.plaqueR);
+            const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
+            const tips = [];                     // { t, owners: [{ a: plaque angle, lean: pointer - plaque }] }
+            cities.forEach(city => {
+                const a = dirSign * (-cityDialLon(city)) * Math.PI / 180 - Math.PI / 2;   // the plaque
+                const t = dirSign * (-cityZoneLon(city)) * Math.PI / 180 - Math.PI / 2;   // the exact local time
+                let tip = tips.find(u => Math.abs(wrap(u.t - t)) < 1e-4);
+                if (!tip) tips.push(tip = { t, owners: [] });
+                tip.owners.push({ a, lean: wrap(t - a) });
+            });
+            // Leaders: a plaque whose pointer has left its middle, and every plaque on a shared pointer once one of them
+            // needs a leader - so a pointer that carries one city's leader never looks like another city's alone. A leader
+            // rises from the top of its plaque to the rail and runs along it to the pointer's base: it visibly starts at
+            // its own plaque, also where two leaders come close. All leaders are one path, stroked once, so where they
+            // meet or overlap nothing is drawn twice (no brighter spots, no caps sticking out).
+            const plaqueTop = r * (DIAL.plaqueR + DIAL.diskR);
+            const lead = hairline(r * 0.0035, 0.5);
+            ctx.save();
+            ctx.beginPath();
+            tips.forEach(tip => {
+                if (!tip.owners.some(o => Math.abs(o.lean) > free)) return;
+                tip.owners.forEach(o => {
+                    if (Math.abs(o.lean) < 0.25 * Math.PI / 180) return;          // plaque right under the pointer
+                    ctx.moveTo(Math.cos(o.a) * plaqueTop, Math.sin(o.a) * plaqueTop);
+                    ctx.lineTo(Math.cos(o.a) * rail, Math.sin(o.a) * rail);
+                    ctx.arc(0, 0, rail, o.a, tip.t, o.lean < 0);
+                });
+            });
+            ctx.lineCap = "butt";
+            ctx.lineJoin = "round";
+            ctx.lineWidth = lead.w;
+            ctx.strokeStyle = `rgba(255,255,255,${lead.a.toFixed(3)})`;
+            ctx.stroke();
+            ctx.fillStyle = "rgba(255,255,255,0.95)";
+            tips.forEach(({ t }) => {
+                ctx.save();
+                ctx.rotate(t);
+                ctx.beginPath();
+                ctx.moveTo(tipR, 0);
+                ctx.lineTo(rail, -half);
+                ctx.lineTo(rail, half);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            });
+            ctx.restore();
         }
 
         // Celestial backdrop. Two projections (toggle with 'v'):
@@ -1628,7 +1708,6 @@
         function draw() {
             // Loop muss IMMER weiterlaufen — auch bei Fehlern, sonst friert die Uhr ein.
             try {
-                if (WC_WIDGET) widgetCheckDpr();
                 // Widget behind windows (page hidden): only the first frame and then one a minute, in case the
                 // page is never told it is in view again; visibilitychange below redraws at once when it is
                 if (!WC_WIDGET || !document.hidden || Date.now() - _widgetDrawn >= 60000) {
@@ -1652,12 +1731,6 @@
         let _widgetDrawn = 0;           // time of the widget's last frame
         let _widgetBusyUntil = 0;
         let _widgetTimeEl = null;
-        // The window may move to a screen with another pixel ratio, which fires no resize → re-fit the canvas
-        let _widgetDpr = window.devicePixelRatio || 1;
-        function widgetCheckDpr() {
-            const dpr = window.devicePixelRatio || 1;
-            if (dpr !== _widgetDpr) { _widgetDpr = dpr; resizeCanvasToContainer(); }
-        }
         function widgetBusy() {
             return Date.now() < _widgetBusyUntil || isMouseDown || isReturning || (displayAlpha > 0 && displayAlpha < 1);
         }
@@ -1763,13 +1836,15 @@
             const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
             updateCityZones(time);
 
-            const rect = canvas.getBoundingClientRect();
-            const w = Math.max(80, rect.width || 0);
-            const h = Math.max(80, rect.height || 0);
+            // Laid out in the bitmap's own size (see resizeCanvasToContainer); another screen's pixel ratio → re-fit first
+            if ((window.devicePixelRatio || 1) !== DPR) resizeCanvasToContainer();
+            const w = Math.max(80, canvasW);
+            const h = Math.max(80, canvasH);
             const size = Math.min(w, h) * 0.8;
             const r = size / 2;
-            const cx = w / 2;
-            const cy = h / 2 - (WC_WIDGET ? 0 : 15);   // nudge the whole canvas (clock + planetarium) up 15px; DOM boxes stay edge-pinned (widget: centred in its round disc)
+            // The centre on a device-pixel corner, so the ring's straight ticks and its circle can sit on whole pixels
+            const cx = snapPx(w / 2);
+            const cy = snapPx(h / 2 - (WC_WIDGET ? 0 : 15));   // nudge the whole canvas (clock + planetarium) up 15px; DOM boxes stay edge-pinned (widget: centred in its round disc)
 
             // Sicherheitsnetz: bei degenerierten Maßen Frame überspringen.
             if (!Number.isFinite(r) || r < 1) return;
@@ -1895,8 +1970,9 @@
             // 2. City markers (plaques glued to the rotating Earth) + the date line
             drawCityMarkers(r, mapRotation);
 
-            // International Date Line (red triangle + "DATUMSGRENZE" between Samoa and Wellington)
-            drawDateLine(r, r * 0.022, mapRotation);   // 2nd arg = markerInset (only feeds a dead var inside)
+            // International Date Line (red triangle + "DATUMSGRENZE" between Samoa and Wellington). Not in the widget:
+            // without its label the small triangle at the globe's rim read as a stray fragment.
+            if (!WC_WIDGET) drawDateLine(r, r * 0.022, mapRotation);   // 2nd arg = markerInset (only feeds a dead var inside)
             ctx.restore(); // End map rotation (Earth + Glued Markers)
             // 3. Draw Numbers Ring (Static) - relative sizes
             drawNumbersRing(r);
@@ -1904,7 +1980,7 @@
             // Open/Closed arc ring (?open=1 mode) — green for open hours, red for closed
             if (window.__openMode) {
                 const ranges = window.__openRanges || [];
-                const arcR = r * 1.00;
+                const arcR = r * DIAL.scale;              // on the scale circle, where the pointer tips touch
                 const lineW = Math.max(1, r * 0.010);
                 const hourToAngle = h => dirSign * (12 - h) * (Math.PI * 2 / 24) - Math.PI / 2;
                 const anticlockwise = (dirSign === 1);
@@ -1926,14 +2002,7 @@
                 ctx.restore();
             }
 
-            // Thin circle at tic base (both modes)
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            ctx.arc(0, 0, r * 1.02 - r * 0.016, 0, Math.PI * 2);   // tickInset = r*0.016 (was a numbers-ring local)
-            ctx.stroke();
-            ctx.restore();
+            // (the thin circle at the tick base is drawn with the ticks: drawNumbersRing, on whole device pixels)
 
             ctx.restore(); // Restore from main translation
             
@@ -2080,15 +2149,39 @@
             }
         }
 
-        // Debounced resize to avoid thrashing at small sizes / fast drags
+        // Re-fit and redraw in the same frame: a new bitmap starts empty, so it is drawn at once instead of showing an
+        // empty or stretched dial until the next frame (the widget's next frame can be 10 s away).
+        function refitCanvas() {
+            if (resizeCanvasToContainer() && mapLoaded && isAnimating) { try { drawFrame(); } catch (_) {} }
+            updateCityInfoBoxPosition();
+        }
+        // ResizeObserver: called after layout and before paint of the frame in which the box changed - every size
+        // change (window, sidebar, DocClock's handles) is drawn sharp in that very frame. Where the browser reports the
+        // box in device pixels (Chrome, Firefox) the bitmap takes exactly that; WebKit falls back to rounding.
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(entries => {
+                const e = entries[entries.length - 1];
+                const dp = e.devicePixelContentBoxSize && e.devicePixelContentBoxSize[0];
+                _devBox = dp ? { w: dp.inlineSize, h: dp.blockSize, dpr: window.devicePixelRatio || 1 } : null;
+                refitCanvas();
+            });
+            try { ro.observe(canvas, { box: 'device-pixel-content-box' }); }
+            catch (_) { ro.observe(canvas); }
+        }
+        // Another screen's pixel ratio (the window moved from Retina to the LG) changes no box size: watch the ratio itself
+        (function watchPixelRatio() {
+            if (!window.matchMedia) return;
+            const mq = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+            const changed = () => { mq.removeEventListener('change', changed); _devBox = null; refitCanvas(); watchPixelRatio(); };
+            if (mq.addEventListener) mq.addEventListener('change', changed);
+        })();
+        // Debounced resize to avoid thrashing at small sizes / fast drags (browsers without ResizeObserver)
         let _resizeRaf = null;
         window.addEventListener('resize', () => {
             if (_resizeRaf != null) return;
             _resizeRaf = requestAnimationFrame(() => {
                 _resizeRaf = null;
-                resizeCanvasToContainer();
-                updateCityInfoBoxPosition();
-                if (WC_WIDGET && mapLoaded) { try { drawFrame(); } catch (_) {} }   // widget: redraw now, not at the next tick
+                refitCanvas();
             });
         });
         // Search autocomplete (lokale Städte + Nominatim-Fallback)

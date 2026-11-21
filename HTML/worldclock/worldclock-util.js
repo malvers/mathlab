@@ -1,13 +1,13 @@
 // Worldclock — small pure display/lookup helpers (no DOM, no shared state).
 
 // "SZ" (summer time) / "WZ" (winter time) for a given IANA timezone, "" if unknown.
-function getDSTLabel(tz) {
+function getDSTLabel(tz, date) {          // date: the moment asked about (default now) - the dial may show another day
     if (!tz) return "";
     try {
         const parts = new Intl.DateTimeFormat('de-DE', {
             timeZone: tz,
             timeZoneName: 'long'
-        }).formatToParts(new Date());
+        }).formatToParts(date || new Date());
         const tzName = parts.find(p => p.type === 'timeZoneName').value;
         return tzName.includes('Sommerzeit') ? "SZ" : "WZ";
     } catch (e) { return ""; }

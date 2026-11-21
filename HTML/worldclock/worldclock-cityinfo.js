@@ -260,11 +260,10 @@ function updateCityInfoBoxPosition() {
         weatherEl.style.setProperty('--ciw-wind', clamp(9, imgHeight * 0.072, 13) + 'px');
     }
 
-    // Position der "18" auf dem Stundenring (links, bei 9-Uhr-Position)
-    // angle für i=18: (12-18)*(2PI/24) - PI/2 = -PI  →  cos = -1
-    // tx = cos(-PI) * (r * 1.15 - r * 0.022) = -r * 1.128
-    const hourLabelInset = r * 0.022;
-    const eighteenX = canvasRect.left + cx - (r * 1.15 - hourLabelInset);
+    // Position der "18" auf dem Stundenring (links, bei 9-Uhr-Position): centre of the hour numbers = DIAL.label · r
+    // (worldclock.js), at angle -PI for i = 18
+    const labelR = (typeof DIAL !== 'undefined') ? DIAL.label : 1.138;
+    const eighteenX = canvasRect.left + cx - r * labelR;
 
     // Box rechts-Kante 40px links der "18"
     const newLeft = eighteenX - 40 - boxWidth;
