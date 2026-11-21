@@ -18,6 +18,9 @@
 // every 5 s on battery. Each answer ("doc", "other", "unknown", "away") goes out as de.docalvers.dochere.who,
 // steadied (struct Steady) so that one bad frame in a dark room does not switch it.
 // Screen locked, display asleep, DocHere off, or no request for 30 s: the camera stops.
+// Each tool's request counts on its own (20.11.2026, the finance page asks too, as "de.docalvers.fixkosten"): the
+// notification's object names the tool, and its "off" withdraws only its own request - DocPhoto quitting no longer
+// stops the watching the finance page still asks for (which then read a false "away" and dropped its shutter).
 //
 // The background looks are steadied too (16.11.2026, one frame scored 0.104 and DocBar showed "!" for six minutes
 // while Doc typed): each look's face goes through Pose and Steady like the watching, and a stranger needs two
@@ -331,7 +334,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var who = ""                    // "doc", "other" or "" when nobody or no prints
     private lazy var identity = Identity()
     private var watcher: Watcher?
-    private var watchWanted = Date.distantPast   // a tool asked for watching until then
+    private var watchWanted: [String: Date] = [:]   // each tool (the notification's object) asked for watching until then
     private var lastWatch = ""                   // the last answer, logged only when it changes
     private var steady = Steady()                // the watching's answer, changed only when frames agree
     private var held = 0                         // frames since the last change that Steady held back
@@ -651,7 +654,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DistributedNotificationCenter.default().addObserver(forName: AppDelegate.watchNote, object: nil, queue: .main) {
             [weak self] note in
             let on = (note.userInfo?["on"] as? String) == "1"
-            self?.watchWanted = on ? Date().addingTimeInterval(30) : .distantPast
+            let tool = note.object as? String ?? ""
+            self?.watchWanted[tool] = on ? Date().addingTimeInterval(30) : nil
             self?.tick()
         }
         Timer.scheduledTimer(withTimeInterval: Timing.poll, repeats: true) { [weak self] _ in self?.tick() }
@@ -660,7 +664,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Starts or stops the steady camera for DocPhoto; on battery it looks every 5 s instead of every second.
     private func manageWatch() {
-        let wanted = enabled && Date() < watchWanted && !screenLocked && CGDisplayIsAsleep(CGMainDisplayID()) == 0
+        let now = Date()
+        watchWanted = watchWanted.filter { $0.value > now }
+        let wanted = enabled && !watchWanted.isEmpty && !screenLocked && CGDisplayIsAsleep(CGMainDisplayID()) == 0
         if wanted, watcher == nil, eye == nil {
             withCamera { [weak self] allowed in
                 guard let self = self, allowed, self.watcher == nil else { return }
