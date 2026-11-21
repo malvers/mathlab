@@ -106,6 +106,10 @@ import java.util.function.IntConsumer;
  *   date and time (now, changeable), a note; per person like the scale (the same switch). The list colours each
  *   reading by its ESH category and says where it came from ("Hand"; later "Omron" - the M400 Intelli IT, read over
  *   Bluetooth, BLE blood pressure service 0x1810). Swipe or long press deletes, with "Rückgängig" (Pressures).
+ * - "Blutzucker" (Doc, 21.11.2026, the drop): readings typed in by hand - one number, its unit found by itself (below 35
+ *   mmol/L, else mg/dL, a chip to override), date and time, when it was measured (nüchtern / vor dem Essen / nach dem
+ *   Essen (2 h) / sonstige), a note; always shown in both units (his meter says mmol/L, he thinks in mg/dL). Fasting and
+ *   two hours after a meal are coloured by their limits. Per person like the scale; long press deletes (Glucoses).
  * - "Fasten" (Doc, 19.11.2026: "DocFit ... eine extra Rubrik ... Fasting", 20.11.: "schreibt bitte Fasten, wir haben es
  *   ja nun mal Deutsch"): Doc's fasts from his workbook, a chart
  *   grid per fast like his Excel dashboard and all fasts on top of each other from day 1 - the page web/fasting/
@@ -124,7 +128,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private int LAMBDA, UPSILON, PHI, TEXT, MUTED, CARD, BG;
     private static final int ASK_MIC = 1, ASK_BT = 2;
     // TAB_FAST is the fasting view, opened from the settings (no tab of its own since 20.11.2026)
-    private static final int TAB_WATCH = 0, TAB_SCALE = 1, TAB_FAST = 2, TAB_BP = 3;
+    private static final int TAB_WATCH = 0, TAB_SCALE = 1, TAB_FAST = 2, TAB_BP = 3, TAB_GLU = 4;
     private static final String FASTING_PAGE = "file:///android_asset/fasting/index.html";
     private static final long DEBOUNCE_MS = 1500;   // one word must not start and at once stop again
     private static final long UNDO_MS = 5000;
@@ -140,7 +144,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private TextView state, ear, empty, undoText;
     private DigitsView timer;
     private Button startBtn, stopBtn, resetBtn;
-    private View undoBar, watchPage, scalePage, bpPage;
+    private View undoBar, watchPage, scalePage, bpPage, gluPage;
     private RecyclerView list;
     private WatchAdapter adapter;
     private Model model;
@@ -168,6 +172,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private TextView bpEmpty, bpTitle;
     private final TextView[] bpPersonChips = new TextView[SLOTS.length];
     private View bpPersonRow;
+    // blood glucose: both people's readings, the shown person's, and the tab's own person switch
+    private final Glucoses[] gluLists = new Glucoses[SLOTS.length];
+    private Glucoses glucoses;
+    private RecyclerView gluList;
+    private GluAdapter gluAdapter;
+    private TextView gluEmpty, gluTitle;
+    private final TextView[] gluPersonChips = new TextView[SLOTS.length];
+    private View gluPersonRow;
     // who is switched on in the settings ("Personen"); off = not in the switch, not assigned, data kept
     private final boolean[] on = new boolean[SLOTS.length];
     private View personRow;
@@ -181,7 +193,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     // remembered, so the scale's repeats of it (the resistance comes a moment later) are not stored either
     private Weighings.Weighing pendingWeigh, rejectedWeigh;
     private AlertDialog askDialog;
-    private ImageView tabWatch, tabScale, tabBp;
+    private ImageView tabWatch, tabScale, tabBp, tabGlu;
     private TextView scaleState, resWhen, resNote, scaleEmpty;
     // the tab the fasting view was opened from - Back at the page's start returns there
     private int backTab = TAB_WATCH;
@@ -238,6 +250,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         for (int i = 0; i < SLOTS.length; i++) {
             lists[i] = new Weighings(this, SLOTS[i]);
             bpLists[i] = new Pressures(this, SLOTS[i]);
+            gluLists[i] = new Glucoses(this, SLOTS[i]);
             profiles[i] = Profile.load(prefs, SLOTS[i]);
             on[i] = prefs.getBoolean("profile" + SLOTS[i] + "On", true);
         }
@@ -248,6 +261,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         weighings = lists[person];
         profile = profiles[person];
         pressures = bpLists[person];
+        glucoses = gluLists[person];
         kind = Entries.kindOrDefault(prefs.getString("kind", null));
         scale = new ScaleLink(this, this);
         orbitron = getResources().getFont(R.font.orbitron);
@@ -262,7 +276,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         paintWindow();
         setContentView(build());
         int savedTab = prefs.getInt("tab", TAB_WATCH);
-        showTab(savedTab == TAB_SCALE || savedTab == TAB_FAST || savedTab == TAB_BP ? savedTab : TAB_WATCH);
+        showTab(savedTab == TAB_SCALE || savedTab == TAB_FAST || savedTab == TAB_BP
+                || savedTab == TAB_GLU ? savedTab : TAB_WATCH);
         refresh();
         if (runStart != 0) ui.post(tick);
         try {
@@ -818,6 +833,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         pressures = bpLists[who];
         if (bpAdapter != null) bpAdapter.notifyDataSetChanged();
         refreshBp();
+        glucoses = gluLists[who];
+        if (gluAdapter != null) gluAdapter.notifyDataSetChanged();
+        refreshGlu();
         undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
         ui.removeCallbacks(hideUndo);
         paintPersons();
@@ -841,6 +859,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
         if (bpPersonRow != null) bpPersonRow.setVisibility(Weighings.countOn(on) > 1 ? View.VISIBLE : View.GONE);
         if (bpTitle != null) bpTitle.setText("MESSUNGEN · " + names[person].toUpperCase(java.util.Locale.GERMAN));
+        for (int i = 0; i < gluPersonChips.length; i++) {
+            if (gluPersonChips[i] == null) continue;
+            paintGreen(gluPersonChips[i], i == person);
+            gluPersonChips[i].setVisibility(on[i] ? View.VISIBLE : View.GONE);
+        }
+        if (gluPersonRow != null) gluPersonRow.setVisibility(Weighings.countOn(on) > 1 ? View.VISIBLE : View.GONE);
+        if (gluTitle != null) gluTitle.setText("MESSUNGEN · " + names[person].toUpperCase(java.util.Locale.GERMAN));
     }
 
     /** "Personen" in the settings: a person on or off; the last one on stays on. Her data is never touched. */
@@ -1446,12 +1471,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         watchPage.setVisibility(which == TAB_WATCH ? View.VISIBLE : View.GONE);
         scalePage.setVisibility(which == TAB_SCALE ? View.VISIBLE : View.GONE);
         bpPage.setVisibility(which == TAB_BP ? View.VISIBLE : View.GONE);
+        gluPage.setVisibility(which == TAB_GLU ? View.VISIBLE : View.GONE);
         fastPage.setVisibility(which == TAB_FAST ? View.VISIBLE : View.GONE);
         if (which == TAB_FAST) openFasting();
         allowTurn();
         paintTab(tabWatch, which == TAB_WATCH);   // in the fasting view none is lit
         paintTab(tabScale, which == TAB_SCALE);
         paintTab(tabBp, which == TAB_BP);
+        paintTab(tabGlu, which == TAB_GLU);
         undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
         ui.removeCallbacks(hideUndo);
         if (which == TAB_WATCH) listenIfAllowed();
@@ -1470,7 +1497,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         root.addView(col, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         // no title row any more (Doc, 21.11.2026: the header with "DocFit" and the gear took far too much room), and the
-        // tabs are icons: stopwatch, scale, heart and the gear - four cells of exactly the same width, TAB_HEIGHT high
+        // tabs are icons: stopwatch, scale, heart, drop and the gear - five cells of exactly the same width, TAB_HEIGHT high
         // ("das Zahnrad rechts sieht komisch aus"); the shown tab sits on lambda orange (paintTab)
         LinearLayout tabs = new LinearLayout(this);
         tabBar = tabs;
@@ -1481,9 +1508,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         tabWatch = tabIcon(R.drawable.ic_tab_timer, "Stoppuhr", v -> showTab(TAB_WATCH));
         tabScale = tabIcon(R.drawable.ic_tab_scale, "Waage", v -> showTab(TAB_SCALE));
         tabBp = tabIcon(R.drawable.ic_tab_heart, "Blutdruck", v -> showTab(TAB_BP));
+        tabGlu = tabIcon(R.drawable.ic_tab_drop, "Blutzucker", v -> showTab(TAB_GLU));
         ImageView gear = tabIcon(R.drawable.ic_tab_settings, "Einstellungen", v -> openSettings());
         paintTab(gear, false);   // the gear opens a dialog, it is never "the shown tab"
-        for (ImageView t : new ImageView[]{tabWatch, tabScale, tabBp, gear}) {
+        for (ImageView t : new ImageView[]{tabWatch, tabScale, tabBp, tabGlu, gear}) {
             tabs.addView(t, new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f));
         }
         col.addView(tabs, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -1495,6 +1523,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         pages.addView(scalePage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         bpPage = buildBpPage();
         pages.addView(bpPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        gluPage = buildGluPage();
+        pages.addView(gluPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         fastPage = new FrameLayout(this);
         fastPage.setBackgroundColor(BG);
         pages.addView(fastPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -1831,6 +1861,250 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             refreshBp();
             d.dismiss();
         });
+    }
+
+    /** A person switch for a tab of its own (blood glucose): the people in phi green, the shown one filled. */
+    private LinearLayout personSwitch(TextView[] chips) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        for (int i = 0; i < SLOTS.length; i++) {
+            int who = i;
+            TextView c = text(names[i], 14, TEXT, true);
+            c.setGravity(Gravity.CENTER);
+            c.setMaxLines(1);
+            c.setPadding(dp(8), 0, dp(8), 0);
+            c.setOnClickListener(v -> showPerson(who));
+            chips[i] = c;
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f);
+            cp.leftMargin = i == 0 ? 0 : dp(5);
+            cp.rightMargin = i == SLOTS.length - 1 ? 0 : dp(5);
+            row.addView(c, cp);
+        }
+        return row;
+    }
+
+    /** The blood glucose tab: the person switch, "+ Messung eintragen" and the list. */
+    private View buildGluPage() {
+        LinearLayout page = new LinearLayout(this);
+        page.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout persons = personSwitch(gluPersonChips);
+        gluPersonRow = persons;
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(12);
+        page.addView(persons, lp);
+
+        Button add = button("+ Messung eintragen", PHI);
+        add.setTextColor(pal.onPhi);
+        add.setOnClickListener(v -> enterGlucose());
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
+        lp.topMargin = dp(16);
+        page.addView(add, lp);
+
+        View head = sectionHead("MESSUNGEN", null, null);
+        gluTitle = (TextView) ((ViewGroup) head).getChildAt(0);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(16);
+        page.addView(head, lp);
+
+        gluAdapter = new GluAdapter();
+        gluList = listView(gluAdapter, this::deleteGlucose);
+        gluEmpty = emptyText("Noch keine Messungen.");
+        page.addView(listBox(gluList, gluEmpty), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        paintPersons();
+        refreshGlu();
+        return page;
+    }
+
+    private void refreshGlu() {
+        if (gluEmpty != null) gluEmpty.setVisibility(glucoses.size() == 0 ? View.VISIBLE : View.GONE);
+    }
+
+    /** A reading gone (swipe or long press), with "Rückgängig". */
+    private void deleteGlucose(int pos) {
+        if (pos < 0 || pos >= glucoses.size()) return;
+        Glucoses list = glucoses;
+        Glucoses.Reading gone = list.remove(pos);
+        gluAdapter.notifyItemRemoved(pos);
+        offerUndo("Gelöscht: " + gone.mgdl + " mg/dL", () -> {
+            list.insert(pos, gone);
+            if (list == glucoses) gluAdapter.notifyItemInserted(Math.min(pos, glucoses.size() - 1));
+            refreshGlu();
+        });
+        refreshGlu();
+    }
+
+    /** Fasting / after a meal: normal green, raised orange, high red; the other contexts plain. */
+    private int gluColor(Glucoses.Category c) {
+        switch (c) {
+            case NORMAL:
+                return PHI;
+            case RAISED:
+                return pal.scoreMid;
+            case HIGH:
+                return pal.alarm;
+            default:
+                return TEXT;
+        }
+    }
+
+    /**
+     * Typing a reading in (Doc, 21.11.2026): one number on the decimal pad - its unit found by itself (below 35 mmol/L,
+     * else mg/dL) and shown in both right away, a chip to override -, when it was measured, date and time (now, tap to
+     * change), a note. "Speichern" checks the value (Glucoses.check) and keeps the dialog open with the reason.
+     */
+    private void enterGlucose() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(24), dp(4), dp(24), 0);
+        if (Weighings.countOn(on) > 1) box.addView(text("Für " + names[person] + ".", 14, MUTED, false));
+        box.addView(smallLabel("WERT"), topParams(16));
+        EditText value = new EditText(this);
+        value.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        value.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
+        value.setTypeface(orbitron);
+        value.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        value.setTextColor(TEXT);
+        value.setHint("z. B. 5,6 oder 101");
+        value.setSingleLine(true);
+        box.addView(value, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        // the unit: found from the number, a tap fixes it
+        String[] unit = {Glucoses.MMOL};
+        boolean[] fixed = {false};
+        LinearLayout units = new LinearLayout(this);
+        units.setOrientation(LinearLayout.HORIZONTAL);
+        TextView mmol = text("mmol/L", 14, TEXT, true), mgdl = text("mg/dL", 14, TEXT, true);
+        TextView both = text("", 13, MUTED, false);
+        Runnable paintUnit = () -> {
+            paintPick(mmol, Glucoses.MMOL.equals(unit[0]));
+            paintPick(mgdl, Glucoses.MGDL.equals(unit[0]));
+            double v = Glucoses.parse(value.getText());
+            both.setText(Double.isNaN(v) || Glucoses.check(v, unit[0]) != null ? ""
+                    : "= " + Glucoses.both(Glucoses.toMgdl(v, unit[0])));
+        };
+        for (TextView c : new TextView[]{mmol, mgdl}) {
+            c.setGravity(Gravity.CENTER);
+            c.setOnClickListener(v -> {
+                unit[0] = c == mmol ? Glucoses.MMOL : Glucoses.MGDL;
+                fixed[0] = true;
+                paintUnit.run();
+            });
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f);
+            cp.setMargins(c == mmol ? 0 : dp(5), 0, c == mmol ? dp(5) : 0, 0);
+            units.addView(c, cp);
+        }
+        value.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence t, int a, int b, int c) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence t, int a, int b, int c) {
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable e) {
+                double v = Glucoses.parse(e);
+                if (!fixed[0] && !Double.isNaN(v)) unit[0] = Glucoses.detectUnit(v);
+                paintUnit.run();
+            }
+        });
+        paintUnit.run();
+        box.addView(units, topParams(8));
+        box.addView(both, topParams(6));
+
+        // when it was measured: four chips, two by two (the labels are long); before ten in the morning "nüchtern"
+        box.addView(smallLabel("WANN GEMESSEN"), topParams(16));
+        Calendar when = Calendar.getInstance();
+        when.set(Calendar.SECOND, 0);
+        when.set(Calendar.MILLISECOND, 0);
+        int[] context = {when.get(Calendar.HOUR_OF_DAY) < 10 ? 0 : Glucoses.CONTEXTS.length - 1};
+        TextView[] ctx = new TextView[Glucoses.CONTEXTS.length];
+        Runnable paintCtx = () -> {
+            for (int i = 0; i < ctx.length; i++) paintPick(ctx[i], i == context[0]);
+        };
+        LinearLayout grid = new LinearLayout(this);
+        grid.setOrientation(LinearLayout.VERTICAL);
+        for (int r = 0; r < 2; r++) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            for (int k = 0; k < 2; k++) {
+                int i = r * 2 + k;
+                TextView c = text(Glucoses.CONTEXT_WORDS[i], 13, TEXT, true);
+                c.setGravity(Gravity.CENTER);
+                c.setMaxLines(1);
+                c.setPadding(dp(6), 0, dp(6), 0);
+                c.setAutoSizeTextTypeUniformWithConfiguration(9, 13, 1, TypedValue.COMPLEX_UNIT_SP);
+                c.setOnClickListener(v -> {
+                    context[0] = i;
+                    paintCtx.run();
+                });
+                ctx[i] = c;
+                LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f);
+                cp.setMargins(k == 0 ? 0 : dp(5), r == 0 ? 0 : dp(6), k == 0 ? dp(5) : 0, 0);
+                row.addView(c, cp);
+            }
+            grid.addView(row);
+        }
+        paintCtx.run();
+        box.addView(grid, topParams(8));
+
+        box.addView(smallLabel("DATUM / UHRZEIT"), topParams(16));
+        TextView whenText = text("", 16, LAMBDA, true);
+        whenText.setPadding(0, dp(10), 0, dp(10));
+        Runnable showWhen = () -> whenText.setText(Times.day(when.getTimeInMillis()) + " · "
+                + Times.clock(when.getTimeInMillis()) + " Uhr");
+        showWhen.run();
+        int style = pal.light ? android.R.style.Theme_DeviceDefault_Light_Dialog
+                : android.R.style.Theme_DeviceDefault_Dialog;
+        whenText.setOnClickListener(v -> new DatePickerDialog(this, style, (picker, y, m, day) -> {
+            when.set(y, m, day);
+            showWhen.run();
+            new TimePickerDialog(this, style, (clock, h, min) -> {
+                when.set(Calendar.HOUR_OF_DAY, h);
+                when.set(Calendar.MINUTE, min);
+                showWhen.run();
+            }, when.get(Calendar.HOUR_OF_DAY), when.get(Calendar.MINUTE), true).show();
+        }, when.get(Calendar.YEAR), when.get(Calendar.MONTH), when.get(Calendar.DAY_OF_MONTH)).show());
+        box.addView(whenText);
+        box.addView(smallLabel("NOTIZ (OPTIONAL)"), topParams(8));
+        EditText note = new EditText(this);
+        note.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        note.setFilters(new InputFilter[]{new InputFilter.LengthFilter(Glucoses.NOTE_MAX)});
+        note.setTextColor(TEXT);
+        note.setSingleLine(true);
+        box.addView(note, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        TextView error = text("", 14, pal.alarm, false);
+        error.setVisibility(View.GONE);
+        box.addView(error, topParams(10));
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(box);
+
+        AlertDialog d = dialog("Blutzucker eintragen").setView(scroll)
+                .setPositiveButton("Speichern", null)   // set below, so a wrong entry keeps the dialog open
+                .setNegativeButton("Abbrechen", null)
+                .create();
+        show(d);
+        d.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            double typed = Glucoses.parse(value.getText());
+            String why = Glucoses.check(typed, unit[0]);
+            if (why != null) {
+                error.setText(why);
+                error.setVisibility(View.VISIBLE);
+                return;
+            }
+            int at = glucoses.add(new Glucoses.Reading(when.getTimeInMillis(), Glucoses.toMgdl(typed, unit[0]),
+                    Glucoses.CONTEXTS[context[0]], Glucoses.HAND, note.getText().toString()));
+            gluAdapter.notifyItemInserted(at);
+            gluList.scrollToPosition(at);
+            refreshGlu();
+            d.dismiss();
+        });
+    }
+
+    private LinearLayout.LayoutParams topParams(int topDp) {
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(topDp);
+        return lp;
     }
 
     /**
@@ -2268,6 +2542,47 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         @Override
         public int getItemCount() {
             return entries.size();
+        }
+    }
+
+    private final class GluAdapter extends RecyclerView.Adapter<Row> {
+        @NonNull
+        @Override
+        public Row onCreateViewHolder(@NonNull ViewGroup parent, int type) {
+            Row r = newRow();
+            r.itemView.setOnLongClickListener(v -> {   // long press deletes, with "Rückgängig"
+                deleteGlucose(r.getBindingAdapterPosition());
+                return true;
+            });
+            return r;
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull Row r, int i) {
+            Glucoses.Reading g = glucoses.get(i);
+            Glucoses.Category c = Glucoses.category(g.mgdl, g.context);
+            int k = Glucoses.contextIndex(g.context);
+            r.day.setText(Times.day(g.time));
+            // time, context, where it came from, and - where there are limits - the reading in its colour
+            String head = Times.clock(g.time) + " Uhr · " + (k >= 0 ? Glucoses.CONTEXT_WORDS[k] : "") + " · Hand";
+            String word = c == Glucoses.Category.NORMAL ? "normal" : c == Glucoses.Category.RAISED ? "erhöht"
+                    : c == Glucoses.Category.HIGH ? "hoch" : "";
+            SpannableString sp = new SpannableString(word.isEmpty() ? head : head + " · " + word);
+            if (!word.isEmpty()) {
+                sp.setSpan(new ForegroundColorSpan(gluColor(c)), sp.length() - word.length(), sp.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            r.sub.setText(sp);
+            // always both units (Doc: the meter says mmol/L, he thinks in mg/dL)
+            r.extra.setText(Glucoses.both(g.mgdl) + (g.note.isEmpty() ? "" : " · " + g.note));
+            r.extra.setVisibility(View.VISIBLE);
+            r.value.setText(g.mgdl + " mg/dL");
+            r.value.setTextColor(gluColor(c));
+        }
+
+        @Override
+        public int getItemCount() {
+            return glucoses.size();
         }
     }
 
