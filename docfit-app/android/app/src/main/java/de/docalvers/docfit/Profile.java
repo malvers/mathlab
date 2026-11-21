@@ -6,6 +6,10 @@ import android.content.SharedPreferences;
  * What the body-composition formulas need besides the scale: height, birth year and sex. Doc types them into the
  * profile dialog; they live only in the app's preferences on the phone. There are deliberately no defaults - until
  * Doc enters them the app shows the weight alone (the repository is public, no personal value belongs in the code).
+ *
+ * Two people use the scale (Doc, 20.11.2026: a second profile): slot "" is Doc's (the keys as they
+ * always were, profileHeight ...), slot "2" the second person's (profile2Height ..., plus profile2Name, the name shown
+ * for her - set on the phone only, so no name is in the code either).
  */
 final class Profile {
     static final int MIN_HEIGHT = 100, MAX_HEIGHT = 250, MIN_YEAR = 1900;
@@ -35,13 +39,22 @@ final class Profile {
     }
 
     static Profile load(SharedPreferences p) {
-        String sex = p.getString("profileSex", "");
-        return new Profile(p.getInt("profileHeight", 0), p.getInt("profileBirthYear", 0),
+        return load(p, "");
+    }
+
+    /** The profile in a slot: "" = Doc's, "2" = the second person's. */
+    static Profile load(SharedPreferences p, String slot) {
+        String sex = p.getString("profile" + slot + "Sex", "");
+        return new Profile(p.getInt("profile" + slot + "Height", 0), p.getInt("profile" + slot + "BirthYear", 0),
                 sex.isEmpty() ? UNSET : sex.charAt(0));
     }
 
     void save(SharedPreferences p) {
-        p.edit().putInt("profileHeight", heightCm).putInt("profileBirthYear", birthYear)
-                .putString("profileSex", sex == UNSET ? "" : String.valueOf(sex)).apply();
+        save(p, "");
+    }
+
+    void save(SharedPreferences p, String slot) {
+        p.edit().putInt("profile" + slot + "Height", heightCm).putInt("profile" + slot + "BirthYear", birthYear)
+                .putString("profile" + slot + "Sex", sex == UNSET ? "" : String.valueOf(sex)).apply();
     }
 }

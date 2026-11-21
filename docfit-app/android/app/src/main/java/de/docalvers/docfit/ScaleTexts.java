@@ -14,6 +14,9 @@ final class ScaleTexts {
     static final String SAVED_WEIGHT_ONLY = "Gewicht gespeichert – Körperfett nicht gemessen";
     static final String COMPLETED = "Fertig – Körperfett ergänzt ✓";
     static final String REPEAT = "Fertig – war schon gespeichert";
+    /** a result near neither person's newest weigh-in (Weighings.whose = ASK): the state line meanwhile, and after "Keiner" */
+    static final String ASKING = "Wessen Messung? – bitte antworten";
+    static final String DISCARDED = "Nicht gespeichert";
 
     static final String NOTE_EMPTY = "Barfuß draufstellen – dann misst sie auch den Körperfettanteil.";
     static final String NOTE_PROFILE = "Profil fehlt – unter „Profil“ Größe, Geburtsjahr und Geschlecht eintragen.";
@@ -36,6 +39,41 @@ final class ScaleTexts {
     /** A weigh-in that has a weight but nothing fat, water and muscle could be computed from. */
     static boolean weightOnly(Weighings.Weighing w) {
         return w != null && w.centiKg > 0 && !w.hasResistance();
+    }
+
+    /** The question when the weight is near neither person: "Doc oder …?" */
+    static String askTitle(String first, String second) {
+        return first + " oder " + second + "?";
+    }
+
+    /**
+     * The text under it: the weight just measured and what the answers do. The newest weights of the two are left out
+     * on purpose - each sees only their own.
+     */
+    static String ask(Weighings.Weighing w) {
+        return Times.kg(w.kg()) + " – mehr als 5 kg von beiden letzten Messungen entfernt. Wem gehört sie?\n\n"
+                + "„Keiner“ verwirft sie, dann wird nichts gespeichert.";
+    }
+
+    /** Only one person on and the weight far from hers: "Ist das Doc?" with Ja / Nein. */
+    static String askOne(String name) {
+        return "Ist das " + name + "?";
+    }
+
+    static String askOneText(Weighings.Weighing w) {
+        return Times.kg(w.kg()) + " – mehr als 5 kg anders als die letzte Messung.\n\n"
+                + "Ja: speichern. Nein: verwerfen, es wird nichts gespeichert.";
+    }
+
+    /** The state line after a result, with the person it went to: "Doc: Fertig – gespeichert ✓". */
+    static String doneFor(String name, Weighings.Added added, Weighings.Weighing result) {
+        return name + ": " + done(added, result);
+    }
+
+    /** Long press on a weigh-in in the list: move it to the other person. */
+    static String moveQuestion(Weighings.Weighing w, String to) {
+        return Times.kg(w.kg()) + " vom " + Times.day(w.time) + ", " + Times.clock(w.time) + " Uhr – zu " + to
+                + " verschieben?";
     }
 
     /** The state line once a result from the scale has been added to the list. */

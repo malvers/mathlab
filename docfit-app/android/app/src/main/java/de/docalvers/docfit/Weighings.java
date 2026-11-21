@@ -79,14 +79,25 @@ final class Weighings {
     /** the stored text of a list that could not be read completely, kept before the first save writes over it */
     static final String KEY_KEPT = "weighingsUnread";
     private final SharedPreferences prefs;
+    private final String key;
     private final List<Weighing> list = new ArrayList<>();
 
     Weighings(Context context) {
+        this(context, "");
+    }
+
+    /**
+     * The list of one person: slot "" = Doc's ("weighings", as always), "2" = the second person's ("weighings2"), the
+     * same slots as Profile.
+     */
+    Weighings(Context context, String slot) {
         prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String stored = prefs.getString(KEY, null);
+        key = KEY + slot;
+        String stored = prefs.getString(key, null);
         Parsed p = parse(stored);
         list.addAll(p.rows);
-        if (!p.complete() && !prefs.contains(KEY_KEPT)) prefs.edit().putString(KEY_KEPT, stored).apply();
+        String kept = slot.isEmpty() ? KEY_KEPT : key + "Unread";
+        if (!p.complete() && !prefs.contains(kept)) prefs.edit().putString(kept, stored).apply();
     }
 
     /** What {@link #parse} could read: the rows, and whether something in the text had to be left out. */
@@ -164,6 +175,73 @@ final class Weighings {
                 ? new Weighing(last.time, last.centiKg, next.ohm, last.waistMm, last.hipMm) : null;
     }
 
+    /**
+     * Whose a result is, by weight (Doc, 20.11.2026: two people use the scale, "automatisch nach Gewicht"): it belongs
+     * to the person whose newest weigh-in is within NEAR_CENTI_KG (5 kg); within both, to the nearer one (a tie: Doc).
+     * Near neither, DocFit asks (ASK) - but the very first weigh-in of all is Doc's without a question.
+     */
+    static final int NEAR_CENTI_KG = 500;
+    static final int DOC = 0, OTHER = 1, ASK = -1;
+
+    /** @param doc the newest weigh-in of Doc's list, null = none; {@code other} the same of the second person's */
+    static int whose(Weighing doc, Weighing other, Weighing next) {
+        return whose(new Weighing[]{doc, other}, new boolean[]{true, true}, next);
+    }
+
+    /**
+     * The same for any number of people, of whom only those switched on count (Doc, 20.11.2026: people can be switched
+     * off in the settings, their data stays): the nearest within 5 kg (a tie: the earlier one in the list); near none,
+     * ASK - also when only one is on and the weight is far from hers. Without any weigh-in of those on, the first one on
+     * gets it without a question. -1 is never returned for nobody on (then 0).
+     *
+     * @param newest the newest weigh-in of each person, null = none
+     */
+    static int whose(Weighing[] newest, boolean[] on, Weighing next) {
+        int first = -1, best = -1;
+        long bestGap = Long.MAX_VALUE;
+        boolean any = false;
+        for (int i = 0; i < newest.length; i++) {
+            if (!on[i]) continue;
+            if (first < 0) first = i;
+            if (newest[i] == null) continue;
+            any = true;
+            long gap = Math.abs((long) next.centiKg - newest[i].centiKg);
+            if (gap <= NEAR_CENTI_KG && gap < bestGap) {
+                best = i;
+                bestGap = gap;
+            }
+        }
+        if (first < 0) return DOC;
+        if (!any) return first;
+        return best >= 0 ? best : ASK;
+    }
+
+    /** How many people are on; the first one on (0 if none). */
+    static int countOn(boolean[] on) {
+        int n = 0;
+        for (boolean b : on) if (b) n++;
+        return n;
+    }
+
+    static int firstOn(boolean[] on) {
+        for (int i = 0; i < on.length; i++) if (on[i]) return i;
+        return 0;
+    }
+
+    /** Where a weigh-in moved in from the other list goes in a list kept newest first. */
+    static int indexFor(List<Weighing> newestFirst, long time) {
+        int i = 0;
+        while (i < newestFirst.size() && newestFirst.get(i).time > time) i++;
+        return i;
+    }
+
+    /** Puts a weigh-in from the other person's list in its place by time; returns that place. */
+    int insertByTime(Weighing w) {
+        int i = indexFor(list, w.time);
+        insert(i, w);
+        return i;
+    }
+
     /** What {@link #add} did with a result. */
     enum Added { NEW, COMPLETED, REPEAT }
 
@@ -230,7 +308,7 @@ final class Weighings {
 
     private void save() {
         try {
-            prefs.edit().putString(KEY, format(list)).apply();
+            prefs.edit().putString(key, format(list)).apply();
         } catch (JSONException e) {
             // cannot happen with plain numbers; the stored list then stays as it was
         }

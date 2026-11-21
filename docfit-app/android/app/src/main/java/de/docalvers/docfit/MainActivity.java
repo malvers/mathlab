@@ -70,7 +70,7 @@ import java.util.function.IntConsumer;
  * eingetragen werden mit Datum und Uhrzeit"), and the Vitafit body-fat scale (Doc, 19.11.2026: "ja, bau das in DocFit
  * ein").
  *
- * Three tabs under the title:
+ * Three tabs under the title - Stoppuhr, Waage, Blutdruck - and the fasting view behind the gear:
  * - "Stoppuhr": the command to say next ("DocFit Start", while running "DocFit Stopp" - Doc, 20.11.2026: "‚bereit'
  *   und ‚gestoppt' bitte weg, nimmt Platz weg") with a line saying whether the phone is listening, the big stopwatch
  *   (green while ready), Start, Stopp and Reset as three equal buttons (Reset clears the stopped time), and the list
@@ -78,19 +78,36 @@ import java.util.function.IntConsumer;
  *   the display too, LastRun). While DocFit is open the screen stays on. The microphone listens (KeywordListener) for
  *   "DocFit Start" / "DocFit Stopp" only while this tab is shown - on "Waage" and in the background voice control is
  *   off (Doc, 19.11.2026: the stopwatch started while he was on the scale tab); a running stopwatch keeps its start.
- *   Start and stop confirm with a short buzz and a beep.
+ *   Start and stop confirm with a short buzz and a beep. On top of the tab, under the tab bar, the exercise the time
+ *   is for (Doc, 20.11.2026: two "Rubriken", "Planks" and "Two Balls"): one of two chips, the last choice remembered
+ *   ("kind"); a stopped time takes the chip chosen at that moment (it may still be switched while the clock runs), and
+ *   the list shows it in front of the start time. Voice control is the same for both.
  * - "Waage": while it is open the phone looks for the scale (ScaleLink). A state line says what happens ("Stell dich
  *   auf die Waage …", connecting, measuring, done), the last weigh-in stands big with fat, water, muscle and BMI
  *   (BodyComposition, from the profile Doc enters under "Profil"), waist and hip typed in by hand with their ratios
  *   (Girths), a fitness score 1-10 with what the values mean (FitnessScore, ScoreBar), and the list of weigh-ins
  *   below, swipe to delete, tap to enter waist and hip. Scrolling the list up pushes the big card away until a compact
  *   bar is left (CollapsingHeader: date and weight, fat, fitness - or the state of a running weigh-in).
+ *   Two people use the scale (Doc, 20.11.2026): Doc and a second person, each with her own profile, list, tiles and
+ *   girths (Profile / Weighings slot "" and "2"; her name only in the phone's preferences). A result goes to the one
+ *   whose newest weight is within 5 kg (the nearer of both; Weighings.whose), near neither DocFit asks "Doc oder …?"
+ *   with "Keiner" to drop it. A switch on top of the tab shows the other person; DocFit opens on Doc, and the view
+ *   follows a result to its person. A long press on a weigh-in moves it to the other person, if the guess was wrong.
+ *   Under the gear, "Personen": each one on or off ("profileOn" / "profile2On"); off = out of the switch and of the
+ *   assignment, her data stays. With one on there is no switch and every result is hers - still asked when it is
+ *   more than 5 kg from her newest ("Ist das …?"). At least one stays on.
+ * - "Blutdruck" (Doc, 20.11.2026, where "Fasten" was): for now a placeholder in the same style - the Omron M400
+ *   Intelli IT is on its way and will be read over Bluetooth (BLE blood pressure service 0x1810); no field to type
+ *   values in (Doc, 19.11.2026), and an empty list until the first reading.
  * - "Fasten" (Doc, 19.11.2026: "DocFit ... eine extra Rubrik ... Fasting", 20.11.: "schreibt bitte Fasten, wir haben es
  *   ja nun mal Deutsch"): Doc's fasts from his workbook, a chart
  *   grid per fast like his Excel dashboard and all fasts on top of each other from day 1 - the page web/fasting/
- *   (Chart.js, offline) shown in a WebView from the APK's assets; its data file is private and never in git.
- * The gear next to the title opens the settings: the colour scheme as in Doc's other apps - Blau, Grau, Hell (Palette)
- * - and "Messmethode", where the scale's values come from. All tabs share one page margin (PAGE_SIDE).
+ *   (Chart.js, offline) shown in a WebView from the APK's assets; its data file is private and never in git. Since
+ *   20.11.2026 no longer a tab but the first entry of the settings (Doc: into the menu under the gear, at the very
+ *   top); while it is shown neither tab is lit, a tap on one of them or Back (at the page's start) leaves it again.
+ * The title "DocFit" stands left, the gear on the right opens the settings: "Fasten", the colour scheme as in Doc's
+ * other apps - Blau, Grau, Hell (Palette) - and "Messmethode", where the scale's values come from. All pages share one
+ * page margin (PAGE_SIDE).
  * Everything stays on the phone (Entries, Weighings, Profile in the app's preferences; no internet permission).
  */
 public class MainActivity extends Activity implements KeywordListener.Callback, ScaleLink.Callback {
@@ -99,7 +116,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private Palette pal;
     private int LAMBDA, UPSILON, PHI, TEXT, MUTED, CARD, BG;
     private static final int ASK_MIC = 1, ASK_BT = 2;
-    private static final int TAB_WATCH = 0, TAB_SCALE = 1, TAB_FAST = 2;
+    // TAB_FAST is the fasting view, opened from the settings (no tab of its own since 20.11.2026)
+    private static final int TAB_WATCH = 0, TAB_SCALE = 1, TAB_FAST = 2, TAB_BP = 3;
     private static final String FASTING_PAGE = "file:///android_asset/fasting/index.html";
     private static final long DEBOUNCE_MS = 1500;   // one word must not start and at once stop again
     private static final long UNDO_MS = 5000;
@@ -113,7 +131,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private TextView state, ear, empty, undoText;
     private DigitsView timer;
     private Button startBtn, stopBtn, resetBtn;
-    private View undoBar, watchPage, scalePage;
+    private View undoBar, watchPage, scalePage, bpPage;
     private RecyclerView list;
     private WatchAdapter adapter;
     private Model model;
@@ -125,13 +143,33 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private long lastChange;
     private ToneGenerator tone;
 
-    // the scale
+    // the scale: both people's lists and profiles (0 = Doc, 1 = the second person), and the one shown - weighings and
+    // profile always point at the shown person's, so the whole tab draws whoever is chosen
+    private static final String[] SLOTS = {"", "2"};
+    private final Weighings[] lists = new Weighings[2];
+    private final Profile[] profiles = new Profile[2];
+    private final String[] names = new String[2];
+    private final TextView[] personChips = new TextView[2];
+    private TextView listTitle;
+    // who is switched on in the settings ("Personen"); off = not in the switch, not assigned, data kept
+    private final boolean[] on = new boolean[SLOTS.length];
+    private View personRow;
+    private int person;
     private Weighings weighings;
     private Profile profile;
     private ScaleLink scale;
     private int tab;
     private String doneText;
-    private TextView tabWatch, tabScale, tabFast, scaleState, resWhen, resNote, scaleEmpty;
+    // a result near neither person waits for the answer to "Doc oder …?" (pendingWeigh); one answered "Keiner" is
+    // remembered, so the scale's repeats of it (the resistance comes a moment later) are not stored either
+    private Weighings.Weighing pendingWeigh, rejectedWeigh;
+    private AlertDialog askDialog;
+    private TextView tabWatch, tabScale, tabBp, scaleState, resWhen, resNote, scaleEmpty;
+    // the tab the fasting view was opened from - Back at the page's start returns there
+    private int backTab = TAB_WATCH;
+    // the exercise a stopped time is filed under (Entries.KINDS) and its chips on the stopwatch tab
+    private String kind;
+    private final TextView[] kindChips = new TextView[Entries.KINDS.length];
     private DigitsView resWeight;
     // the tiles under the weight: value, range bar and reference line (Ranges)
     private Tile tFat, tWater, tMuscle, tBmi, tWaist, tWhtr, tHip, tWhr;
@@ -179,8 +217,18 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             last = LastRun.upgrade(shownDuration, entries.size() > 0 ? entries.get(0) : null);
             saveLast();
         }
-        weighings = new Weighings(this);
-        profile = Profile.load(prefs);
+        for (int i = 0; i < SLOTS.length; i++) {
+            lists[i] = new Weighings(this, SLOTS[i]);
+            profiles[i] = Profile.load(prefs, SLOTS[i]);
+            on[i] = prefs.getBoolean("profile" + SLOTS[i] + "On", true);
+        }
+        if (Weighings.countOn(on) == 0) on[0] = true;   // at least one stays on
+        names[0] = "Doc";
+        names[1] = prefs.getString("profile2Name", "Gast");   // her name lives only on the phone
+        person = Weighings.firstOn(on);   // DocFit opens on Doc (or the first one on)
+        weighings = lists[person];
+        profile = profiles[person];
+        kind = Entries.kindOrDefault(prefs.getString("kind", null));
         scale = new ScaleLink(this, this);
         orbitron = getResources().getFont(R.font.orbitron);
         pal = Palette.of(prefs.getString("theme", "dark"));
@@ -194,7 +242,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         paintWindow();
         setContentView(build());
         int savedTab = prefs.getInt("tab", TAB_WATCH);
-        showTab(savedTab == TAB_SCALE || savedTab == TAB_FAST ? savedTab : TAB_WATCH);
+        showTab(savedTab == TAB_SCALE || savedTab == TAB_FAST || savedTab == TAB_BP ? savedTab : TAB_WATCH);
         refresh();
         if (runStart != 0) ui.post(tick);
         try {
@@ -247,6 +295,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         if (model != null) model.close();
         if (tone != null) tone.release();
         if (fastWeb != null) fastWeb.destroy();
+        if (askDialog != null) askDialog.dismiss();   // an unanswered question stores nothing
     }
 
     /** Page, status bar and navigation bar in the scheme's ground; dark system icons on Hell. */
@@ -262,8 +311,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     /**
-     * The settings behind the gear. "Farbschema": Blau / Grau / Hell like in DocDo, each with a dot of its page colour;
-     * the choice is kept in the app's preferences ("theme", DocDo's keys) and the screen is built again in it.
+     * The settings behind the gear. First "Fasten", the fasting view (Doc, 20.11.2026: no longer a tab, into the menu
+     * under the gear, at the very top), a row outlined like the scheme chips with a "›". "Farbschema": Blau / Grau /
+     * Hell like in DocDo, each with a dot of its page colour; the choice is kept in the app's preferences ("theme",
+     * DocDo's keys) and the screen is built again in it.
      * "Messmethode": the newest resistance and where the scale tab's values come from (Doc, 20.11.2026: "tu ihn unter
      * Einstellungen irgendwohin, damit wir da nicht den Platz verschwenden").
      */
@@ -271,14 +322,65 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(20), 0, dp(20), dp(8));
-        box.addView(smallLabel("FARBSCHEMA"));
+        LinearLayout fast = new LinearLayout(this);
+        fast.setOrientation(LinearLayout.HORIZONTAL);
+        fast.setGravity(Gravity.CENTER_VERTICAL);
+        fast.setPadding(dp(14), 0, dp(14), 0);
+        GradientDrawable fg = round(0x00000000, 10);
+        fg.setStroke(Math.max(1, dp(1)), MUTED);
+        fast.setBackground(fg);
+        fast.addView(text("Fasten", 15, TEXT, true), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        TextView chevron = text("›", 22, MUTED, false);
+        chevron.setTranslationY(-dp(3));   // the glyph sits low in its line; centred on "Fasten" by eye
+        fast.addView(chevron);
+        fast.setContentDescription("Fasten öffnen");
+        box.addView(fast, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)));
+        TextView schemeLabel = smallLabel("FARBSCHEMA");
+        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        sp.topMargin = dp(22);
+        box.addView(schemeLabel, sp);
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         rp.topMargin = dp(8);
         box.addView(row, rp);
-        TextView methodLabel = smallLabel("MESSMETHODE");
+        // "Personen": who is on - off takes her out of the switch and the assignment, her data stays (Doc, 20.11.2026)
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(22);
+        box.addView(smallLabel("PERSONEN"), lp);
+        LinearLayout people = new LinearLayout(this);
+        people.setOrientation(LinearLayout.HORIZONTAL);
+        TextView peopleHint = text("Aus: nicht im Umschalter, keine Zuordnung – die Daten bleiben gespeichert.", 12,
+                MUTED, false);
+        for (int i = 0; i < SLOTS.length; i++) {
+            int who = i;
+            TextView c = text(names[i], 14, TEXT, true);
+            c.setGravity(Gravity.CENTER);
+            c.setMaxLines(1);
+            c.setPadding(dp(8), 0, dp(8), 0);
+            paintPick(c, on[i]);
+            c.setOnClickListener(v -> {
+                if (togglePerson(who)) {
+                    paintPick(c, on[who]);
+                    peopleHint.setTextColor(MUTED);
+                } else {
+                    peopleHint.setText("Mindestens eine Person bleibt an.");
+                    peopleHint.setTextColor(UPSILON);
+                }
+            });
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(44), 1f);
+            cp.setMargins(i == 0 ? 0 : dp(4), 0, i == SLOTS.length - 1 ? 0 : dp(4), 0);
+            people.addView(c, cp);
+        }
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        box.addView(people, lp);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(6);
+        box.addView(peopleHint, lp);
+
+        TextView methodLabel = smallLabel("MESSMETHODE");
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(22);
         box.addView(methodLabel, lp);
         TextView method = text(ScaleTexts.method(weighings.newestMeasured()), 13, TEXT, false);
@@ -288,10 +390,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         ScrollView scroll = new ScrollView(this);
         scroll.addView(box);
         AlertDialog d = dialog("Einstellungen").setView(scroll).setNegativeButton("Schließen", null).create();
+        fast.setOnClickListener(v -> {
+            d.dismiss();
+            if (tab != TAB_FAST) showTab(TAB_FAST);
+        });
         int current = Palette.index(pal.key);
         for (int i = 0; i < Palette.KEYS.length; i++) {
             boolean on = i == current;
-            TextView b = text(Palette.NAMES[i], 14, on ? pal.chipOnInk : TEXT, true);
+            TextView b = text(Palette.NAMES[i], 14, TEXT, true);
             b.setGravity(Gravity.CENTER);
             b.setMaxLines(1);
             GradientDrawable dot = new GradientDrawable();
@@ -302,9 +408,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             b.setCompoundDrawablesRelativeWithIntrinsicBounds(dot, null, null, null);
             b.setCompoundDrawablePadding(dp(6));
             b.setPadding(dp(8), 0, dp(8), 0);
-            GradientDrawable g = round(on ? pal.chipOn : 0x00000000, 10);
-            g.setStroke(Math.max(1, dp(1)), on ? pal.chipOn : MUTED);
-            b.setBackground(g);
+            paintPick(b, on);
             String key = Palette.KEYS[i];
             b.setOnClickListener(v -> {
                 d.dismiss();
@@ -354,11 +458,16 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
-    /** On the fasting tab Back first goes back inside the page (a fast -> the comparison, a big chart -> closed). */
+    /**
+     * In the fasting view Back first goes back inside the page (a fast -> the comparison, a big chart -> closed), then to
+     * the tab it was opened from - it is no tab of its own any more, so Back does not close DocFit there.
+     */
     @Override
     public void onBackPressed() {
         if (tab == TAB_FAST && fastWeb != null && fastWeb.canGoBack()) {
             fastWeb.goBack();
+        } else if (tab == TAB_FAST) {
+            showTab(backTab);
         } else {
             super.onBackPressed();
         }
@@ -420,7 +529,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     private void stop(long at) {
         long duration = at - runStart;
-        entries.addNewest(new Entries.Entry(runStart, duration));
+        entries.addNewest(new Entries.Entry(runStart, duration, kind));
         adapter.notifyItemInserted(0);
         list.scrollToPosition(0);
         last = new LastRun(runStart, duration);
@@ -586,8 +695,154 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
     }
 
+    /**
+     * A result from the scale goes to the person whose newest weight is near (Weighings.whose); near neither, DocFit
+     * asks "Doc oder …?" first and stores nothing until then (Doc, 20.11.2026: another person's weigh-in had landed in
+     * his list).
+     */
     @Override
     public void onScaleResult(Weighings.Weighing w) {
+        if (rejectedWeigh != null && Weighings.isRepeat(rejectedWeigh, w)) {   // the rest of a weigh-in dropped
+            doneText = ScaleTexts.DISCARDED;
+            refreshScale();
+            return;
+        }
+        if (pendingWeigh != null && Weighings.isRepeat(pendingWeigh, w)) {     // e.g. the resistance, while asking
+            Weighings.Weighing completed = Weighings.completion(pendingWeigh, w);
+            if (completed != null) pendingWeigh = completed;
+            return;
+        }
+        Weighings.Weighing[] newest = new Weighings.Weighing[SLOTS.length];
+        for (int i = 0; i < newest.length; i++) newest[i] = newest(i);
+        int who = Weighings.whose(newest, on, w);
+        if (who == Weighings.ASK) {
+            askWhose(w);
+            return;
+        }
+        store(w, who);
+    }
+
+    private Weighings.Weighing newest(int who) {
+        return lists[who].size() == 0 ? null : lists[who].get(0);
+    }
+
+    /** "Doc oder …?" in the app's dialog: a button per person, "Keiner" drops it. No typing, no way around. */
+    private void askWhose(Weighings.Weighing w) {
+        if (askDialog != null) askDialog.dismiss();
+        pendingWeigh = w;
+        rejectedWeigh = null;
+        doneText = ScaleTexts.ASKING;
+        refreshScale();
+        if (scaleHead != null) scaleHead.setOpen(true, true);
+        boolean one = Weighings.countOn(on) == 1;
+        int only = Weighings.firstOn(on);
+        TextView msg = text(one ? ScaleTexts.askOneText(w) : ScaleTexts.ask(w), 16, TEXT, false);
+        msg.setLineSpacing(0, 1.2f);
+        msg.setPadding(dp(24), dp(10), dp(24), dp(6));
+        AlertDialog.Builder b = one
+                ? dialog(ScaleTexts.askOne(names[only])).setView(msg)
+                        .setPositiveButton("Ja", (x, y) -> answerWhose(only))
+                        .setNegativeButton("Nein", (x, y) -> answerWhose(Weighings.ASK))
+                : dialog(ScaleTexts.askTitle(names[0], names[1])).setView(msg)
+                        .setPositiveButton(names[0], (x, y) -> answerWhose(0))
+                        .setNegativeButton(names[1], (x, y) -> answerWhose(1))
+                        .setNeutralButton("Keiner", (x, y) -> answerWhose(Weighings.ASK));
+        AlertDialog d = b.setCancelable(false).create();
+        askDialog = d;
+        show(d);
+        if (one) return;
+        Button second = d.getButton(DialogInterface.BUTTON_NEGATIVE);
+        if (second != null) second.setTextColor(LAMBDA);   // both people alike; only "Keiner" stays quiet
+        Button none = d.getButton(DialogInterface.BUTTON_NEUTRAL);
+        if (none != null) {
+            none.setTypeface(orbitron);
+            none.setAllCaps(false);
+            none.setTextColor(MUTED);
+        }
+    }
+
+    private void answerWhose(int who) {
+        Weighings.Weighing w = pendingWeigh;
+        pendingWeigh = null;
+        askDialog = null;
+        if (w == null) return;
+        if (who == Weighings.ASK) {
+            rejectedWeigh = w;
+            doneText = ScaleTexts.DISCARDED;
+            refreshScale();
+        } else {
+            store(w, who);
+        }
+    }
+
+    /** The person shown on the scale tab: her list, tiles and profile; Doc on every start. */
+    private void showPerson(int who) {
+        if (who == person) return;
+        person = who;
+        weighings = lists[who];
+        profile = profiles[who];
+        undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
+        ui.removeCallbacks(hideUndo);
+        paintPersons();
+        if (scaleAdapter != null) scaleAdapter.notifyDataSetChanged();
+        refreshScale();
+    }
+
+    private void paintPersons() {
+        for (int i = 0; i < personChips.length; i++) if (personChips[i] != null) paintPick(personChips[i], i == person);
+        if (listTitle != null) listTitle.setText("MESSUNGEN · " + names[person].toUpperCase(java.util.Locale.GERMAN));
+        // only those on are in the switch, and with one on there is none
+        for (int i = 0; i < personChips.length; i++) {
+            if (personChips[i] != null) personChips[i].setVisibility(on[i] ? View.VISIBLE : View.GONE);
+        }
+        if (personRow != null) personRow.setVisibility(Weighings.countOn(on) > 1 ? View.VISIBLE : View.GONE);
+    }
+
+    /** "Personen" in the settings: a person on or off; the last one on stays on. Her data is never touched. */
+    private boolean togglePerson(int i) {
+        if (on[i] && Weighings.countOn(on) == 1) return false;
+        on[i] = !on[i];
+        prefs.edit().putBoolean("profile" + SLOTS[i] + "On", on[i]).apply();
+        if (!on[person]) {
+            showPerson(Weighings.firstOn(on));
+        } else {
+            paintPersons();
+        }
+        return true;
+    }
+
+    /** Long press on a weigh-in: move it to the other person (a wrong guess by weight), with "Rückgängig". */
+    private void moveWeighing(int pos) {
+        if (pos < 0 || pos >= weighings.size()) return;
+        int from = person, to = 1 - person;
+        if (!on[to]) return;   // the other one is switched off: nowhere to move it
+        Weighings.Weighing w = weighings.get(pos);
+        TextView msg = text(ScaleTexts.moveQuestion(w, names[to]), 16, TEXT, false);
+        msg.setLineSpacing(0, 1.2f);
+        msg.setPadding(dp(24), dp(10), dp(24), dp(6));
+        AlertDialog d = dialog("Verschieben").setView(msg)
+                .setPositiveButton("Zu " + names[to], (x, y) -> {
+                    if (pos >= lists[from].size() || lists[from].get(pos) != w) return;   // the list changed meanwhile
+                    lists[from].remove(pos);
+                    int at = lists[to].insertByTime(w);
+                    scaleAdapter.notifyItemRemoved(pos);
+                    offerUndo("Zu " + names[to] + " verschoben", () -> {
+                        if (at < lists[to].size() && lists[to].get(at) == w) lists[to].remove(at);
+                        lists[from].insert(pos, w);
+                        if (person == from) scaleAdapter.notifyItemInserted(Math.min(pos, weighings.size() - 1));
+                        else scaleAdapter.notifyDataSetChanged();
+                        refreshScale();
+                    });
+                    refreshScale();
+                })
+                .setNegativeButton("Abbrechen", null)
+                .create();
+        show(d);
+    }
+
+    /** A result into a person's list (or completing her newest weigh-in), and the tab shows that person. */
+    private void store(Weighings.Weighing w, int who) {
+        showPerson(who);
         Weighings.Added added = weighings.add(w);
         switch (added) {
             case NEW:
@@ -604,7 +859,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             default:
                 break;
         }
-        doneText = ScaleTexts.done(added, w);
+        doneText = ScaleTexts.doneFor(names[who], added, w);
         refreshScale();
     }
 
@@ -855,7 +1110,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp.topMargin = dp(6);
         box.addView(row, lp);
 
-        AlertDialog d = dialog("Profil")
+        AlertDialog d = dialog(person == 0 ? "Profil" : "Profil · " + names[person])
                 .setView(box)
                 .setPositiveButton("Speichern", null)   // set below, so a wrong entry keeps the dialog open
                 .setNegativeButton("Abbrechen", null)
@@ -873,7 +1128,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                 return;
             }
             profile = new Profile(h, y, sex[0]);
-            profile.save(prefs);
+            profiles[person] = profile;
+            profile.save(prefs, SLOTS[person]);
             d.dismiss();
             scaleAdapter.notifyDataSetChanged();
             refreshScale();
@@ -997,6 +1253,17 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         t.setTextColor(on ? pal.chipOnInk : MUTED);
     }
 
+    /**
+     * A choice among a few, drawn apart from the tabs: outlined when off, filled when on - the colour schemes in the
+     * settings and the exercise on the stopwatch tab.
+     */
+    private void paintPick(TextView t, boolean on) {
+        GradientDrawable g = round(on ? pal.chipOn : 0x00000000, 10);
+        g.setStroke(Math.max(1, dp(1)), on ? pal.chipOn : MUTED);
+        t.setBackground(g);
+        t.setTextColor(on ? pal.chipOnInk : TEXT);
+    }
+
     // DocFit's pills: rounded boxes in the card colour with a small label above the value - one style for the weight,
     // the tiles (KÖRPERFETT, WASSER, ... BAUCH/GRÖSSE) and the compact bar (Doc, 19.11.2026: "Der Einzige, der keine
     // Pille hat, ist Gewicht"; the weight's label is the date and time of the weigh-in, not "Gewicht"). They stand
@@ -1081,23 +1348,25 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private TextView tabButton(String s, int which) {
         TextView t = text(s, 15, MUTED, true);
         t.setGravity(Gravity.CENTER);
-        t.setMaxLines(1);   // three tabs: smaller rather than cut on a narrow phone or with big system fonts
+        t.setMaxLines(1);   // smaller rather than cut on a narrow phone or with big system fonts
         t.setAutoSizeTextTypeUniformWithConfiguration(10, 15, 1, TypedValue.COMPLEX_UNIT_SP);
         t.setOnClickListener(v -> showTab(which));
         return t;
     }
 
     private void showTab(int which) {
+        if (which == TAB_FAST && tab != TAB_FAST) backTab = tab;
         tab = which;
         prefs.edit().putInt("tab", which).apply();
         watchPage.setVisibility(which == TAB_WATCH ? View.VISIBLE : View.GONE);
         scalePage.setVisibility(which == TAB_SCALE ? View.VISIBLE : View.GONE);
+        bpPage.setVisibility(which == TAB_BP ? View.VISIBLE : View.GONE);
         fastPage.setVisibility(which == TAB_FAST ? View.VISIBLE : View.GONE);
         if (which == TAB_FAST) openFasting();
         allowTurn();
-        paintChip(tabWatch, which == TAB_WATCH);
+        paintChip(tabWatch, which == TAB_WATCH);   // in the fasting view neither is lit
         paintChip(tabScale, which == TAB_SCALE);
-        paintChip(tabFast, which == TAB_FAST);
+        paintChip(tabBp, which == TAB_BP);
         undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
         ui.removeCallbacks(hideUndo);
         if (which == TAB_WATCH) listenIfAllowed();
@@ -1115,11 +1384,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         col.setPadding(dp(PAGE_SIDE), dp(12), dp(PAGE_SIDE), dp(12));
         root.addView(col, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        // the title, and on the right the gear for the colour scheme (as in DocDo)
+        // the title on the left, a notch larger (Doc, 20.11.2026), and on the right the gear for the settings (as in DocDo)
         FrameLayout head = new FrameLayout(this);
         this.head = head;
-        TextView title = text("DocFit", 20, LAMBDA, true);
-        title.setGravity(Gravity.CENTER);
+        TextView title = text("DocFit", 24, LAMBDA, true);
+        title.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        title.setMaxLines(1);
+        title.setPadding(0, 0, dp(44), 0);   // never under the gear
         head.addView(title, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
         ImageView gear = new ImageView(this);
         gear.setImageResource(R.drawable.ic_gear);
@@ -1137,10 +1408,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         tabs.setPadding(dp(4), dp(4), dp(4), dp(4));
         tabWatch = tabButton("Stoppuhr", TAB_WATCH);
         tabScale = tabButton("Waage", TAB_SCALE);
-        tabFast = tabButton("Fasten", TAB_FAST);
         tabs.addView(tabWatch, new LinearLayout.LayoutParams(0, dp(40), 1f));
+        tabBp = tabButton("Blutdruck", TAB_BP);
         tabs.addView(tabScale, new LinearLayout.LayoutParams(0, dp(40), 1f));
-        tabs.addView(tabFast, new LinearLayout.LayoutParams(0, dp(40), 1f));
+        tabs.addView(tabBp, new LinearLayout.LayoutParams(0, dp(40), 1f));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(12);
         col.addView(tabs, lp);
@@ -1150,6 +1421,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         scalePage = buildScalePage();
         pages.addView(watchPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         pages.addView(scalePage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        bpPage = buildBpPage();
+        pages.addView(bpPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         fastPage = new FrameLayout(this);
         fastPage.setBackgroundColor(BG);
         pages.addView(fastPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -1202,16 +1475,52 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         fastWeb.loadUrl(FASTING_PAGE);
     }
 
+    /** The exercise chip tapped: remembered, and the time stopped next is filed under it. */
+    private void chooseKind(String k) {
+        if (k.equals(kind)) return;
+        kind = k;
+        prefs.edit().putString("kind", k).apply();
+        paintKinds();
+    }
+
+    private void paintKinds() {
+        for (int i = 0; i < kindChips.length; i++) {
+            if (kindChips[i] != null) paintPick(kindChips[i], Entries.KINDS[i].equals(kind));
+        }
+    }
+
     private View buildWatchPage() {
         LinearLayout page = new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
+
+        // the exercise the next time is for, under the tab bar and above the command (Doc, 20.11.2026)
+        LinearLayout kinds = new LinearLayout(this);
+        kinds.setOrientation(LinearLayout.HORIZONTAL);
+        for (int i = 0; i < Entries.KINDS.length; i++) {
+            String k = Entries.KINDS[i];
+            TextView c = text(k, 15, TEXT, true);
+            c.setGravity(Gravity.CENTER);
+            c.setMaxLines(1);
+            c.setPadding(dp(8), 0, dp(8), 0);
+            c.setAutoSizeTextTypeUniformWithConfiguration(10, 15, 1, TypedValue.COMPLEX_UNIT_SP);
+            c.setOnClickListener(v -> chooseKind(k));
+            kindChips[i] = c;
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(40), 1f);
+            cp.leftMargin = i == 0 ? 0 : dp(5);
+            cp.rightMargin = i == Entries.KINDS.length - 1 ? 0 : dp(5);
+            kinds.addView(c, cp);
+        }
+        paintKinds();
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(16);
+        page.addView(kinds, lp);
 
         state = text("DocFit Start", 26, PHI, true);
         state.setGravity(Gravity.CENTER);
         state.setLetterSpacing(0.12f);
         // more air between the parts (Doc, 20.11.2026: "in Y auseinanderziehen, damit es gefälliger aussieht")
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(28);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(24);
         page.addView(state, lp);
 
         // only when the microphone is missing or the recognizer failed
@@ -1284,6 +1593,35 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     /**
+     * The blood pressure tab, a placeholder until the Omron M400 Intelli IT arrives (Doc, 20.11.2026): the heading, one
+     * line on what will come, and the list's place with its empty line. Deliberately no field to type a value in (Doc,
+     * 19.11.2026: no typing in blood pressure) - the readings will come over Bluetooth only.
+     */
+    private View buildBpPage() {
+        LinearLayout page = new LinearLayout(this);
+        page.setOrientation(LinearLayout.VERTICAL);
+        TextView heading = text("Blutdruck", 26, LAMBDA, true);
+        heading.setGravity(Gravity.CENTER);
+        heading.setLetterSpacing(0.12f);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(28);
+        page.addView(heading, lp);
+        TextView coming = text("Das Omron M400 Intelli IT ist unterwegs. Sobald es da ist, liest DocFit die Messungen "
+                + "per Bluetooth.", 14, MUTED, false);
+        coming.setGravity(Gravity.CENTER);
+        coming.setLineSpacing(0, 1.2f);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(12);
+        lp.leftMargin = lp.rightMargin = dp(8);
+        page.addView(coming, lp);
+        page.addView(sectionHead("MESSUNGEN", null, null), headParams());
+        FrameLayout list = new FrameLayout(this);
+        list.addView(emptyText("Noch keine Messungen."), new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        page.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        return page;
+    }
+
+    /**
      * The scale tab: the big card (state line, the newest weigh-in in pills, the fitness score) over the list of
      * weigh-ins. Scrolling the list up pushes the card away until the compact bar is left (CollapsingHeader); back at
      * the list's top the card comes down again (Doc, 20.11.2026: "Wenn ich nach oben scrolle, müssen wir das
@@ -1292,6 +1630,30 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private View buildScalePage() {
         LinearLayout head = new LinearLayout(this);
         head.setOrientation(LinearLayout.VERTICAL);
+
+        // whose values are shown: Doc | the second person (Doc, 20.11.2026: two people use the scale)
+        LinearLayout persons = new LinearLayout(this);
+        persons.setOrientation(LinearLayout.HORIZONTAL);
+        personRow = persons;
+        for (int i = 0; i < SLOTS.length; i++) {
+            int who = i;
+            TextView c = text(names[i], 14, TEXT, true);
+            c.setGravity(Gravity.CENTER);
+            c.setMaxLines(1);
+            c.setPadding(dp(8), 0, dp(8), 0);
+            c.setAutoSizeTextTypeUniformWithConfiguration(10, 14, 1, TypedValue.COMPLEX_UNIT_SP);
+            c.setOnClickListener(v -> showPerson(who));
+            personChips[i] = c;
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(36), 1f);
+            cp.leftMargin = i == 0 ? 0 : dp(5);
+            cp.rightMargin = i == SLOTS.length - 1 ? 0 : dp(5);
+            persons.addView(c, cp);
+        }
+        paintPersons();
+        LinearLayout.LayoutParams pp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        pp.topMargin = dp(12);
+        pp.bottomMargin = dp(4);
+        head.addView(persons, pp);
 
         // what is happening, two lines high so the page does not jump; a tap fixes permission or Bluetooth
         scaleState = text("Stell dich auf die Waage …", 16, TEXT, true);
@@ -1331,6 +1693,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         head.addView(resNote, lp);
 
         View tail = sectionHead("MESSUNGEN", "Profil", v -> editProfile());
+        listTitle = (TextView) ((ViewGroup) tail).getChildAt(0);   // "MESSUNGEN · DOC": whose list this is
         tail.setPadding(0, dp(6), 0, 0);
 
         scaleAdapter = new ScaleAdapter();
@@ -1345,6 +1708,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             refreshScale();
         });
         scaleEmpty = emptyText("Noch keine Messungen.");
+        paintPersons();
         scaleHead = new CollapsingHeader(this, head, tail, listBox(scaleList, scaleEmpty), scaleList, buildCompact());
         return scaleHead;
     }
@@ -1683,7 +2047,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         public void onBindViewHolder(@NonNull Row r, int i) {
             Entries.Entry e = entries.get(i);
             r.day.setText(Times.day(e.start));
-            r.sub.setText("Start " + Times.clock(e.start) + " Uhr");
+            // the exercise in front of the start time; times from before there were exercises as they were
+            r.sub.setText((e.kind.isEmpty() ? "" : e.kind + " · ") + "Start " + Times.clock(e.start) + " Uhr");
             r.value.setText(Times.duration(e.duration));
         }
 
@@ -1703,6 +2068,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             int ink = (MUTED & 0x00FFFFFF) | 0x40000000;
             r.itemView.setBackground(new RippleDrawable(ColorStateList.valueOf(ink), round(CARD, 12), null));
             r.itemView.setOnClickListener(v -> editGirths(r.getBindingAdapterPosition()));
+            r.itemView.setOnLongClickListener(v -> {   // wrong person: move it to the other one
+                moveWeighing(r.getBindingAdapterPosition());
+                return true;
+            });
             return r;
         }
 
