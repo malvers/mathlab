@@ -2012,16 +2012,19 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         box.addView(units, topParams(8));
         box.addView(both, topParams(6));
 
-        // when it was measured: four chips, two by two (the labels are long); before ten in the morning "nüchtern"
+        // when it was measured: four chips, two by two (the labels are long); "nüchtern" first (Doc, 21.11.2026: the
+        // default is always "nüchtern", no guess by the time of day)
         box.addView(smallLabel("WANN GEMESSEN"), topParams(16));
         Calendar when = Calendar.getInstance();
         when.set(Calendar.SECOND, 0);
         when.set(Calendar.MILLISECOND, 0);
-        int[] context = {when.get(Calendar.HOUR_OF_DAY) < 10 ? 0 : Glucoses.CONTEXTS.length - 1};
+        int[] context = {0};
         TextView[] ctx = new TextView[Glucoses.CONTEXTS.length];
         Runnable paintCtx = () -> {
             for (int i = 0; i < ctx.length; i++) paintPick(ctx[i], i == context[0]);
         };
+        // two rows of two, each row as high as its chips (the gap between the rows is the row's margin, never a chip's -
+        // "nach dem Essen (2 h)" was cut at the bottom, Doc, 21.11.2026)
         LinearLayout grid = new LinearLayout(this);
         grid.setOrientation(LinearLayout.VERTICAL);
         for (int r = 0; r < 2; r++) {
@@ -2032,6 +2035,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                 TextView c = text(Glucoses.CONTEXT_WORDS[i], 13, TEXT, true);
                 c.setGravity(Gravity.CENTER);
                 c.setMaxLines(1);
+                c.setIncludeFontPadding(false);
                 c.setPadding(dp(6), 0, dp(6), 0);
                 c.setAutoSizeTextTypeUniformWithConfiguration(9, 13, 1, TypedValue.COMPLEX_UNIT_SP);
                 c.setOnClickListener(v -> {
@@ -2039,11 +2043,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                     paintCtx.run();
                 });
                 ctx[i] = c;
-                LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f);
-                cp.setMargins(k == 0 ? 0 : dp(5), r == 0 ? 0 : dp(6), k == 0 ? dp(5) : 0, 0);
+                LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
+                cp.setMargins(k == 0 ? 0 : dp(5), 0, k == 0 ? dp(5) : 0, 0);
                 row.addView(c, cp);
             }
-            grid.addView(row);
+            LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(40));
+            rp.topMargin = r == 0 ? 0 : dp(8);
+            grid.addView(row, rp);
         }
         paintCtx.run();
         box.addView(grid, topParams(8));
@@ -2076,13 +2082,18 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         TextView error = text("", 14, pal.alarm, false);
         error.setVisibility(View.GONE);
         box.addView(error, topParams(10));
+        // room under the last field, so nothing ends right at the buttons; the sheet scrolls, and with the keyboard
+        // open it shrinks instead of sliding under it (adjustResize) - everything stays reachable
+        box.setPadding(box.getPaddingLeft(), box.getPaddingTop(), box.getPaddingRight(), dp(20));
         ScrollView scroll = new ScrollView(this);
+        scroll.setFillViewport(true);
         scroll.addView(box);
 
         AlertDialog d = dialog("Blutzucker eintragen").setView(scroll)
                 .setPositiveButton("Speichern", null)   // set below, so a wrong entry keeps the dialog open
                 .setNegativeButton("Abbrechen", null)
                 .create();
+        if (d.getWindow() != null) d.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         show(d);
         d.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
             double typed = Glucoses.parse(value.getText());
