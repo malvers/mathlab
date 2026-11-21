@@ -18,9 +18,9 @@
 // every 5 s on battery. Each answer ("doc", "other", "unknown", "away") goes out as de.docalvers.dochere.who,
 // steadied (struct Steady) so that one bad frame in a dark room does not switch it.
 // Screen locked, display asleep, DocHere off, or no request for 30 s: the camera stops.
-// Each tool's request counts on its own (20.11.2026, the finance page asks too, as "de.docalvers.fixkosten"): the
-// notification's object names the tool, and its "off" withdraws only its own request - DocPhoto quitting no longer
-// stops the watching the finance page still asks for (which then read a false "away" and dropped its shutter).
+// Each tool's request counts on its own (20.11.2026, another local tool asks too): the notification's object names
+// the tool (e.g. "de.docalvers.example"), and its "off" withdraws only its own request - DocPhoto quitting no longer
+// stops the watching another tool still asks for (which then read a false "away").
 //
 // The background looks are steadied too (16.11.2026, one frame scored 0.104 and DocBar showed "!" for six minutes
 // while Doc typed): each look's face goes through Pose and Steady like the watching, and a stranger needs two

@@ -119,10 +119,9 @@ battery. Each answer (`doc`, `other`, `unknown`, `away`), steadied as described 
 `de.docalvers.dochere.who`. Lock, display
 asleep or DocHere off: the camera stops. Measured 13.11.2026 on mains: about 10 % of one core.
 
-Since 20.11.2026 the private finance page asks too (`~/IdeaProjects/fixkosten`, its roller shutter; object
-`de.docalvers.fixkosten`, only while the page is visible). Each tool's request counts on its own - the notification's
-object names the tool, and its `"on": "0"` withdraws only its own request. Before, one shared request time meant that
-DocPhoto quitting stopped the watching the finance page still wanted, which read that as `away`.
+Since 20.11.2026 another local tool asks too. Each tool's request counts on its own - the notification's object names
+the tool (e.g. `de.docalvers.example`), and its `"on": "0"` withdraws only its own request. Before, one shared request
+time meant that DocPhoto quitting stopped the watching another tool still wanted, which read that as `away`.
 
 On/off and the login item live in DocBar. Off means no looks in the background and a plain
 D, a Solita call still looks once.
