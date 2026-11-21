@@ -346,11 +346,12 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         fast.setOrientation(LinearLayout.HORIZONTAL);
         fast.setGravity(Gravity.CENTER_VERTICAL);
         fast.setPadding(dp(14), 0, dp(14), 0);
+        // phi green like everything below the tabs (Doc, 21.11.2026: top row orange, the rest green)
         GradientDrawable fg = round(0x00000000, 10);
-        fg.setStroke(Math.max(1, dp(1)), MUTED);
+        fg.setStroke(Math.max(1, dp(1)), PHI);
         fast.setBackground(fg);
-        fast.addView(text("Fasten", 15, TEXT, true), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView chevron = text("›", 22, MUTED, false);
+        fast.addView(text("Fasten", 15, PHI, true), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        TextView chevron = text("›", 22, PHI, false);
         chevron.setTranslationY(-dp(3));   // the glyph sits low in its line; centred on "Fasten" by eye
         fast.addView(chevron);
         fast.setContentDescription("Fasten öffnen");
@@ -1321,14 +1322,19 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     /**
-     * A choice among a few, drawn apart from the tabs: outlined when off, filled when on - the colour schemes in the
-     * settings and the exercise on the stopwatch tab.
+     * A choice among a few below the tabs - the colour schemes in the settings and the exercise on the stopwatch tab:
+     * the chosen one phi green, the others a neutral grey outline (Doc, 21.11.2026: the tab row is orange, everything
+     * below it green).
      */
     private void paintPick(TextView t, boolean on) {
-        GradientDrawable g = round(on ? pal.chipOn : 0x00000000, 10);
-        g.setStroke(Math.max(1, dp(1)), on ? pal.chipOn : MUTED);
+        if (on) {
+            paintGreen(t, true);
+            return;
+        }
+        GradientDrawable g = round(0x00000000, 10);
+        g.setStroke(Math.max(1, dp(1)), MUTED);
         t.setBackground(g);
-        t.setTextColor(on ? pal.chipOnInk : TEXT);
+        t.setTextColor(pal.iconIdle);
     }
 
     // DocFit's pills: rounded boxes in the card colour with a small label above the value - one style for the weight,
@@ -1551,13 +1557,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     private void paintKinds() {
         for (int i = 0; i < kindChips.length; i++) {
-            if (kindChips[i] == null) continue;
-            // each exercise its own colour (Doc, 21.11.2026): filled when chosen, outlined in it otherwise
-            boolean chosen = Entries.KINDS[i].equals(kind);
-            GradientDrawable g = round(chosen ? pal.kindFill[i] : 0x00000000, 10);
-            g.setStroke(Math.max(1, dp(1)), chosen ? pal.kindFill[i] : pal.kindText[i]);
-            kindChips[i].setBackground(g);
-            kindChips[i].setTextColor(chosen ? pal.kindInk[i] : pal.kindText[i]);
+            // the second row is green, the top row orange (Doc, 21.11.2026): the chosen exercise phi green, the other a
+            // neutral grey outline - both alike, no colour of their own
+            if (kindChips[i] != null) paintPick(kindChips[i], Entries.KINDS[i].equals(kind));
         }
     }
 
@@ -2258,16 +2260,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         public void onBindViewHolder(@NonNull Row r, int i) {
             Entries.Entry e = entries.get(i);
             r.day.setText(Times.day(e.start));
-            // the exercise in front of the start time, in its colour; times from before there were exercises as they were
-            String start = "Start " + Times.clock(e.start) + " Uhr";
-            int k = java.util.Arrays.asList(Entries.KINDS).indexOf(e.kind);
-            if (k < 0) {
-                r.sub.setText(e.kind.isEmpty() ? start : e.kind + " · " + start);
-            } else {
-                SpannableString sp = new SpannableString(e.kind + " · " + start);
-                sp.setSpan(new ForegroundColorSpan(pal.kindText[k]), 0, e.kind.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                r.sub.setText(sp);
-            }
+            // the exercise in front of the start time, as plain text; times from before there were exercises as they were
+            r.sub.setText((e.kind.isEmpty() ? "" : e.kind + " · ") + "Start " + Times.clock(e.start) + " Uhr");
             r.value.setText(Times.duration(e.duration));
         }
 
