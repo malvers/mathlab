@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>DocFit Web · Konzept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<!-- Central colour tokens and the Blau / Grau / Hell schemes (same values as DocFit's Palette.java) -->
+<link rel="stylesheet" href="../svp/svp-tokens.css">
+<script>
+  /* follow the scheme chosen on the other pages (key svp-theme); storage may be blocked */
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('svp-theme'); } catch (e) { }
+    document.documentElement.classList.toggle('svp-light', t === 'light');
+    document.documentElement.classList.toggle('svp-grey', t === 'grey');
+  })();
+</script>
+<style>
+/* Concept page layout - colours only from svp-tokens.css, plus the bright red DocFit uses on dark cards */
+:root { --alarm: rgb(229, 83, 63); --mono: ui-monospace, Menlo, monospace;
+        --display: 'Orbitron', sans-serif; --read: Arial, Helvetica, sans-serif; }
+html.svp-light { --alarm: var(--ypsilon); }
+html { background: var(--bg); }
+body {
+  font-family: var(--read); background: var(--bg); color: var(--text);
+  font-size: 14px; line-height: 1.55;
+  padding: 22px 16px 40px; -webkit-text-size-adjust: 100%; overflow-x: hidden;
+}
+.page { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; }
+/* Doc, 21.11.2026: running text in Arial (easier to read), Orbitron only for headings, titles, labels and digits */
+h1, h2, h3, summary, th, .fl.t, .verdict, .mbar, .tabs span, .say, .digits, .btns span, .chips span, .pill .lb, .pill .v,
+.rec li::before, .steps li::before, .ask li::before, td:first-child, .ph td:nth-child(3) { font-family: var(--display); }
+h1 { font-size: clamp(20px, 4.4vw, 30px); font-weight: 900; letter-spacing: 2px; color: var(--head); }
+h1 span { color: var(--lambda); }
+.meta { color: var(--muted); font-size: 12.5px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; min-width: 0; }
+h2 { font-size: 12px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--lambda); margin-bottom: 10px; }
+h3 { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--head); margin-bottom: 6px; }
+b { color: var(--head); font-weight: 700; }
+p + p { margin-top: 6px; }
+code { font-family: var(--mono); font-size: .92em; color: var(--text); background: var(--sunken); padding: 0 4px; border-radius: 4px; overflow-wrap: anywhere; }
+ul, ol { padding-left: 20px; }
+li { margin: 4px 0; }
+li::marker { color: var(--lambda); }
+a { color: var(--lambda); }
+.dim { color: var(--muted); }
+.small { font-size: 12px; }
+
+/* recommendation band */
+.rec ol { counter-reset: r; list-style: none; padding: 0; display: grid; gap: 8px; }
+.rec li { counter-increment: r; display: grid; grid-template-columns: 30px 1fr; gap: 10px; margin: 0; }
+.rec li::before { content: counter(r); font-weight: 900; font-size: 18px; color: var(--phi); text-align: center; }
+.why-not { margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+
+/* diagram: inline SVG + HTML labels placed in viewBox percentages (1000 x 440) */
+.dia-wrap { overflow-x: auto; }
+.dia { position: relative; width: 100%; min-width: 660px; aspect-ratio: 1000 / 440; container-type: inline-size; }
+.dia svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.dia .box { fill: var(--sunken); stroke: var(--line); stroke-width: 1.5; }
+.dia .box.db { stroke: var(--phi); stroke-width: 2; }
+.dia .box.dev { stroke: var(--lambda); stroke-dasharray: 0; }
+.dia .box.doc { stroke: var(--alarm); }
+.dia .wire { stroke: var(--phi); stroke-width: 2.2; fill: none; }
+.dia .ble { stroke: var(--lambda); stroke-width: 1.6; stroke-dasharray: 6 5; fill: none; }
+.dia .ble.try { opacity: .45; }
+.dia .ro { stroke: var(--alarm); stroke-width: 2; fill: none; stroke-dasharray: 3 4; }
+.dia .head-p { fill: var(--phi); }
+.dia .head-r { fill: var(--alarm); }
+.fl { position: absolute; transform: translate(-50%, -50%); text-align: center; white-space: nowrap;
+      font-size: clamp(9px, 1.6cqw, 15px); line-height: 1.3; color: var(--text); }
+.fl.t { font-weight: 900; letter-spacing: 1.5px; color: var(--head); font-size: clamp(9px, 1.6cqw, 15px); }
+.fl.s { font-size: clamp(8px, 1.3cqw, 13px); color: var(--muted); }
+.fl.g { color: var(--phi); }
+.fl.o { color: var(--lambda); }
+.fl.r { color: var(--alarm); }
+.fl.l { transform: translate(0, -50%); text-align: left; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+.legend i { display: inline-block; width: 22px; height: 0; border-top: 2px solid var(--phi); vertical-align: middle; margin-right: 6px; }
+.legend i.b { border-top: 2px dashed var(--lambda); }
+.legend i.r { border-top: 2px dotted var(--alarm); }
+
+/* decision cards */
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.verdict { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 1px; padding: 1px 9px;
+           border-radius: 999px; margin-bottom: 8px; border: 1px solid currentColor; }
+.verdict.yes { color: var(--phi); }
+.verdict.no { color: var(--alarm); }
+.verdict.later { color: var(--lambda); }
+.card ul { font-size: 14px; }
+
+/* sync steps */
+.steps { counter-reset: s; list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 22px; }
+.steps li { counter-increment: s; position: relative; padding-left: 34px; margin: 0; font-size: 14px; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%;
+                    background: var(--lambda); color: var(--bg); font-weight: 900; font-size: 12px; display: grid; place-items: center; }
+html.svp-light .steps li::before { color: #fff; }
+
+/* screen mock-ups (example values only) */
+.screens { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.mock { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px 12px; min-width: 0; }
+.mbar { display: flex; align-items: center; justify-content: space-between; font-weight: 900; letter-spacing: 1.5px; color: var(--head); font-size: 13px; }
+.mbar .gear { color: var(--muted); font-size: 15px; }
+.tabs { display: flex; gap: 4px; margin: 8px 0 10px; border-bottom: 1px solid var(--line); }
+.tabs span { flex: 1; text-align: center; font-size: 10.5px; font-weight: 700; color: var(--muted); padding: 5px 0; }
+.tabs span.on { color: var(--lambda); border-bottom: 2px solid var(--lambda); }
+.mcols { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; }
+.say { text-align: center; font-size: 11px; font-weight: 700; color: var(--alarm); letter-spacing: 1px; }
+.digits { text-align: center; font-weight: 900; font-size: clamp(34px, 6vw, 58px); color: var(--alarm); letter-spacing: 2px;
+          font-variant-numeric: tabular-nums; line-height: 1.1; margin: 4px 0 8px; }
+.btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.btns span { text-align: center; font-size: 10px; font-weight: 700; padding: 6px 0; border-radius: 8px; background: var(--card); border: 1px solid var(--line); }
+.chips { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; }
+.chips span { font-size: 9.5px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.chips span.on { color: var(--phi); border-color: var(--phi); }
+.rows { display: grid; gap: 4px; font-size: 12px; }
+.rows div { display: flex; justify-content: space-between; gap: 8px; padding: 4px 8px; background: var(--card); border-radius: 7px; }
+.rows .k { color: var(--muted); }
+.rows .tag { color: var(--phi); font-size: 11px; }
+.pills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.pill { background: var(--card); border-radius: 9px; padding: 5px 7px; min-width: 0; }
+.pill .lb { font-size: 8.5px; color: var(--muted); letter-spacing: .8px; }
+.pill .v { font-size: 14px; font-weight: 700; }
+.pill .bar { height: 4px; border-radius: 2px; margin-top: 3px;
+             background: linear-gradient(90deg, var(--phi) 0 45%, var(--lambda) 45% 70%, var(--ypsilon) 70%); }
+.pill.wide { grid-column: span 3; }
+.v.g { color: var(--phi); } .v.o { color: var(--lambda); } .v.r { color: var(--alarm); }
+.mnote { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+.side { display: grid; gap: 14px; align-content: start; }
+
+/* table overview + SQL */
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 0 8px 6px 0; }
+td { padding: 6px 8px 6px 0; border-top: 1px solid var(--row-line); vertical-align: top; }
+td:first-child { white-space: nowrap; color: var(--head); font-weight: 700; }
+td:last-child code { white-space: nowrap; }
+.tbl-wrap { overflow-x: auto; }
+details { margin-top: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--sunken); }
+summary { cursor: pointer; padding: 9px 14px; font-weight: 700; font-size: 12px; color: var(--head); }
+summary .dim { font-weight: 400; }
+pre { font-family: var(--mono); font-size: 11.5px; line-height: 1.5; padding: 4px 14px 14px; overflow-x: auto; color: var(--text); }
+pre .c { color: var(--muted); }
+
+/* phases */
+.ph td:first-child { color: var(--lambda); font-weight: 900; width: 34px; }
+.ph td:nth-child(3), .ph td:nth-child(4) { white-space: nowrap; }
+.ph td:nth-child(3) { color: var(--head); text-align: right; }
+.ph tr.sum td { font-weight: 700; color: var(--head); }
+.ph tr.first td:nth-child(2) b { color: var(--phi); }
+
+/* questions */
+.ask ol { counter-reset: q; list-style: none; padding: 0; display: grid; gap: 12px; }
+.ask li { counter-increment: q; display: grid; grid-template-columns: 30px 1fr; gap: 10px; margin: 0; }
+.ask li::before { content: counter(q) "."; font-weight: 900; font-size: 18px; color: var(--lambda); }
+.ask .hint { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.src { font-size: 12.5px; color: var(--muted); }
+.src li { margin: 2px 0; }
+
+@media (max-width: 920px) {
+  .grid3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .screens { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .grid3, .grid2, .steps { grid-template-columns: minmax(0, 1fr); }
+  .mcols { grid-template-columns: minmax(0, 1fr); }
+  .card { padding: 12px 14px; }
+  .ph td:nth-child(4) { white-space: normal; }
+}
+</style>
+</head>
+<body>
+<main class="page">
+
+  <header>
+    <h1>DocFit <span>·</span> im Web</h1>
+    <p class="meta">Konzept für Doc · 20.11.2026 · nichts gebaut, nichts committet, kein SQL ausgeführt</p>
+  </header>
+
+  <!-- ===== Recommendation ===== -->
+  <section class="card rec">
+    <h2>Empfehlung</h2>
+    <ol>
+      <li><span><b>Eine private Ablage für beide:</b> Supabase mit 6 DocFit-Tabellen, nur dein Konto darf lesen und schreiben (RLS), jede alte Fassung bleibt im Verlauf. Das Phone arbeitet <b>offline weiter</b> und holt das Hochladen nach (eigene kleine Warteschlange, keine Sync-Bibliothek).</span></li>
+      <li><span><b>Web = dieselbe App im Browser:</b> <code>/docfit/</code> mit deinem SVP-Login (<code>svp-auth.js</code>), dieselben Reiter, Farben und Bereiche. Die Formeln (Gallagher, ACE, WHO, Janssen) laufen als <code>docfit-core.js</code> gegen <b>dieselben Testwerte</b> wie die Java-Tests, so zeigen Mac und Phone dieselben Zahlen.</span></li>
+      <li><span><b>Sprache im Browser offline:</b> Vosk als WebAssembly mit <b>demselben Modell und derselben Grammatik</b> wie am Phone. Die Waage verbindet sich per Web Bluetooth in Chrome. Blutdruck kommt erst ans Phone, der Link für die Ärztin zuletzt.</span></li>
+    </ol>
+    <p class="why-not">Warum DocFit noch nicht auf dem Mac ist: Bisher bleiben alle Daten auf dem Phone (die App hat absichtlich kein Internet-Recht), und für die gemeinsame Ablage hast du „erst Plan/Konzept, dann bauen“ gesagt.</p>
+  </section>
+
+  <!-- ===== Architecture ===== -->
+  <section class="card">
+    <h2>Architektur</h2>
+    <div class="dia-wrap">
+      <figure class="dia" aria-label="Pixel und Mac lesen die Geräte per Bluetooth und schreiben in dieselben privaten Supabase-Tabellen; die Ärztin liest nur über einen widerrufbaren Link">
+        <svg viewBox="0 0 1000 440" aria-hidden="true">
+          <defs>
+            <marker id="ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path class="head-p" d="M0,0 L10,5 L0,10 z"/>
+            </marker>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path class="head-r" d="M0,0 L10,5 L0,10 z"/>
+            </marker>
+          </defs>
+          <!-- devices -->
+          <rect class="box dev" x="320" y="18" width="160" height="56" rx="12"/>
+          <rect class="box dev" x="520" y="18" width="160" height="56" rx="12"/>
+          <!-- phone, database, mac -->
+          <rect class="box" x="24" y="122" width="270" height="220" rx="16"/>
+          <rect class="box db" x="370" y="140" width="260" height="185" rx="16"/>
+          <rect class="box" x="706" y="122" width="270" height="220" rx="16"/>
+          <!-- doctor -->
+          <rect class="box doc" x="395" y="378" width="210" height="50" rx="12"/>
+          <!-- Bluetooth: scale and blood pressure to both sides (Mac blood pressure = trial) -->
+          <path class="ble" d="M360,74 C330,105 300,120 278,134"/>
+          <path class="ble" d="M440,74 C540,110 640,118 722,134"/>
+          <path class="ble" d="M560,74 C460,110 360,124 286,150"/>
+          <path class="ble try" d="M640,74 C670,105 700,120 714,150"/>
+          <!-- sync: push and pull on both sides -->
+          <path class="wire" d="M294,212 L368,212" marker-end="url(#ap)"/>
+          <path class="wire" d="M368,256 L296,256" marker-end="url(#ap)"/>
+          <path class="wire" d="M706,212 L632,212" marker-end="url(#ap)"/>
+          <path class="wire" d="M632,256 L704,256" marker-end="url(#ap)"/>
+          <!-- read-only link -->
+          <path class="ro" d="M500,325 L500,374" marker-end="url(#ar)"/>
+        </svg>
+        <!-- device labels -->
+        <p class="fl t" style="left:40%;top:7.6%">WAAGE</p>
+        <p class="fl s" style="left:40%;top:12.5%">VT701 · 0xFFF0</p>
+        <p class="fl t" style="left:60%;top:7.6%">BLUTDRUCK</p>
+        <p class="fl s" style="left:60%;top:12.5%">Omron M400 · 0x1810</p>
+        <p class="fl s o" style="left:24.5%;top:22%">BLE</p>
+        <p class="fl s o" style="left:75.5%;top:22%">BLE</p>
+        <!-- phone -->
+        <p class="fl t" style="left:15.9%;top:32%">PIXEL · DocFit-App</p>
+        <p class="fl" style="left:15.9%;top:40.5%">Stoppuhr · Vosk offline</p>
+        <p class="fl" style="left:15.9%;top:47.5%">Waage · Bluetooth</p>
+        <p class="fl" style="left:15.9%;top:54.5%">Blutdruck · Bluetooth</p>
+        <p class="fl" style="left:15.9%;top:61.5%">lokal: Speicher + Warteschlange</p>
+        <p class="fl s g" style="left:15.9%;top:70%">neu: Internet-Recht + Login</p>
+        <!-- database -->
+        <p class="fl t g" style="left:50%;top:36%">SUPABASE · privat</p>
+        <p class="fl" style="left:50%;top:44%">docfit_run · _weighing · _bp</p>
+        <p class="fl" style="left:50%;top:50.5%">_profile · _fast · _day</p>
+        <p class="fl s" style="left:50%;top:58%">RLS: nur Docs uid</p>
+        <p class="fl s" style="left:50%;top:64%">jede alte Fassung: docfit_history</p>
+        <p class="fl s" style="left:50%;top:70%">Löschen = Grabstein</p>
+        <!-- mac -->
+        <p class="fl t" style="left:84.1%;top:32%">MAC · Chrome</p>
+        <p class="fl" style="left:84.1%;top:40.5%">Stoppuhr · Vosk-WASM</p>
+        <p class="fl" style="left:84.1%;top:47.5%">Waage · Web Bluetooth</p>
+        <p class="fl" style="left:84.1%;top:54.5%">Blutdruck · anzeigen</p>
+        <p class="fl" style="left:84.1%;top:61.5%">lokal: Cache + Warteschlange</p>
+        <p class="fl s" style="left:84.1%;top:70%">/docfit/ · svp-auth.js</p>
+        <!-- arrows -->
+        <p class="fl s g" style="left:33.1%;top:44.3%">hoch</p>
+        <p class="fl s g" style="left:33.1%;top:62.3%">runter</p>
+        <p class="fl s g" style="left:66.9%;top:44.3%">hoch</p>
+        <p class="fl s g" style="left:66.9%;top:62.3%">runter</p>
+        <!-- doctor -->
+        <p class="fl t r" style="left:50%;top:92%">ÄRZTIN · nur lesen</p>
+        <p class="fl s l r" style="left:51.5%;top:79.5%">Link mit Token · widerrufbar · später</p>
+      </figure>
+    </div>
+    <div class="legend">
+      <span><i></i>Sync über PostgREST (eingeloggt)</span>
+      <span><i class="b"></i>Bluetooth LE (blass = Versuch)</span>
+      <span><i class="r"></i>Nur-Lese-Funktion für den Ärztin-Link</span>
+    </div>
+  </section>
+
+  <!-- ===== Decisions ===== -->
+  <section class="grid3">
+    <div class="card">
+      <h2>Health Connect</h2>
+      <span class="verdict no">NICHT ALS DREHSCHEIBE</span>
+      <ul>
+        <li>Läuft nur auf Android, ohne Web- oder REST-Zugriff: Der Mac kommt nie an die Daten.</li>
+        <li>Das SDK gibt es nur für Kotlin, DocFit ist Java: eine neue Abhängigkeit ohne Nutzen.</li>
+        <li>DocFit liest Waage und Omron ohnehin selbst.</li>
+        <li class="dim">Später möglich: DocFit schreibt Gewicht/Blutdruck <i>zusätzlich</i> hinein, falls eine andere App sie braucht.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Offline-first</h2>
+      <span class="verdict yes">JA · SELBST GEBAUT</span>
+      <ul>
+        <li>Das Phone speichert wie heute zuerst lokal, Anzeige und Stoppuhr brauchen nie Netz.</li>
+        <li>Eine Warteschlange lädt nach, sobald Netz da ist (Muster aus Grateful: „offline – wird nachgeholt“).</li>
+        <li>Wenig Daten, fast nur Anfügen: ~150 Zeilen je Seite.</li>
+        <li class="dim">Geprüft und verworfen: PowerSync (eigener Sync-Dienst im Datenweg), RxDB (nur JavaScript), ElectricSQL (eigener Server).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Sprache im Browser</h2>
+      <span class="verdict yes">VOSK · WEBASSEMBLY</span>
+      <ul>
+        <li><code>vosk-browser</code> 0.0.8 (Apache-2.0) kann <code>KaldiRecognizer(16000, grammar)</code> und Wortzeiten (<code>setWords</code>). Damit gilt dieselbe Regel wie in <code>Commands.java</code>, messbar mit denselben 186 Proben.</li>
+        <li>Läuft offline in Chrome (Web Worker), hört nur, solange der Reiter Stoppuhr sichtbar ist.</li>
+        <li class="dim">Plan B: Chromes Spracherkennung auf dem Gerät (ab Chrome 139, <code>processLocally</code>). Ob Deutsch geht, wird erst geprüft; ohne Grammatik gibt es mehr Fehlstarts. Nicht: Standard-Web-Speech (schickt Audio an Google).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Waage am Mac</h2>
+      <span class="verdict yes">WEB BLUETOOTH</span>
+      <ul>
+        <li>Chrome auf macOS: <code>requestDevice({filters:[{namePrefix:'Vitafit'}], optionalServices:[0xfff0]})</code>, Notify 0xFFF1, Write 0xFFF2; die Rahmen aus <code>Vt701.java</code> nach JS portiert, getestet mit den Bytes aus <code>ScaleTest</code>.</li>
+        <li>Chrome verlangt pro Seitenaufruf einen Klick „Waage verbinden“ und die Geräteauswahl. macOS fragt einmal nach dem Bluetooth-Recht für Chrome.</li>
+        <li class="dim">Reichweite ~10 m: Steht die Waage zu weit weg, wiegt das Phone und der Mac zeigt nur an.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Blutdruck</h2>
+      <span class="verdict later">ERST PHONE · MAC = VERSUCH</span>
+      <ul>
+        <li>M400 Intelli IT (HEM-7155T): Standarddienst 0x1810 plus Omron-eigenes Koppeln (Taste halten, „-P-“ blinkt, Schlüssel schreiben).</li>
+        <li><code>omblepy</code> zeigt, dass das Modell lesbar ist, auch auf macOS (GPL: nachbauen, nicht kopieren).</li>
+        <li>Am Phone zuerst, der Mac zeigt die Werte aus Supabase. Direkt am Mac messen wird ein Versuch, kein Versprechen. Die Omron-App dabei nicht offen haben.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Datenschutz</h2>
+      <span class="verdict yes">NIE PUBLIC</span>
+      <ul>
+        <li>Seitencode öffentlich wie bei Grateful, Daten nur nach Login. Kein Wert im Repo, keine offene Seite.</li>
+        <li>Tabellen und Regeln: SQL-Datei → <code>pbcopy</code> → SQL-Editor, <b>du</b> drückst Run. Agentinnen führen kein DDL aus.</li>
+        <li>Fasten-Import: Knopf auf der Webseite, du wählst die private Datei. Die Daten gehen nie durch eine Agentin.</li>
+        <li>Sprachmodell (45 MB, Open Source, keine Daten) nicht ins Git.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== Sync design ===== -->
+  <section class="card">
+    <h2>Sync-Design</h2>
+    <ol class="steps">
+      <li><b>Schlüssel = Zeitpunkt.</b> Eine Wiegung heißt <code>(user_id, measured_at)</code>, ein Lauf <code>(user_id, started_at)</code>, auf die Millisekunde wie heute in der App. Deshalb ist jedes Hochladen ein <b>Upsert</b> (<code>?on_conflict=…</code>, <code>Prefer: resolution=merge-duplicates</code>): Doppelt schicken schadet nie.</li>
+      <li><b>Erster Upload:</b> Beim ersten Login schickt die App alle vorhandenen Läufe, Wiegungen und Umfänge auf demselben Weg, beliebig oft wiederholbar. Alte Widerstände 65535 werden dabei zu 0 („nicht gemessen“).</li>
+      <li><b>Löschen = Grabstein.</b> Wischen setzt <code>deleted_at</code>, „Rückgängig“ nimmt es zurück. Ein echtes DELETE würde das andere Gerät die Zeile wieder hochladen lassen.</li>
+      <li><b>Runterholen:</b> je Tabelle <code>updated_at=gt.&lt;Marke − 2 min&gt;</code>. <code>updated_at</code> setzt der Trigger mit der Server-Uhr, eine falsch gehende Geräteuhr stört also nicht, und Doppelte fängt der Schlüssel ab.</li>
+      <li><b>Konflikt:</b> Pro Zeile gewinnt die letzte Schreibung (praktisch nur beim Ändern von Bauch/Hüfte). Die ältere Fassung bleibt in <code>docfit_history</code>.</li>
+      <li><b>Wann:</b> Die App lädt beim Öffnen, nach jedem Stopp, Wiegen oder Ändern und wenn das Netz zurückkommt. Bei Fehlern wartet sie erst 5 s, dann bis 60 s. Das Web holt beim Fokus und alle 60 s, solange sichtbar.</li>
+      <li><b>Login Phone:</b> Einstellungen › Konto: Du tippst E-Mail und Passwort einmal selbst. Gespeichert wird nur das Refresh-Token (App-privat, <code>allowBackup=false</code> ist schon gesetzt). Abmelden löscht es.</li>
+      <li><b>Login Web:</b> <code>svp-auth.js</code> mit der gemeinsamen Sitzung. Bist du in DocCal oder Grateful angemeldet, bist du es auch in DocFit. Kein supabase-js, also keine Falle mit fremden Sitzungen.</li>
+    </ol>
+  </section>
+
+  <!-- ===== Screens ===== -->
+  <section class="card">
+    <h2>Screens <span class="dim small">· Beispielwerte, keine echten Daten</span></h2>
+    <div class="screens">
+      <div class="mock" aria-label="Mac-Ansicht Waage">
+        <div class="mbar"><span>DocFit</span><span class="gear">⚙</span></div>
+        <div class="tabs"><span>STOPPUHR</span><span class="on">WAAGE</span><span>BLUTDRUCK</span></div>
+        <div class="mcols">
+          <div>
+            <div class="pills">
+              <div class="pill wide"><div class="lb">DO 19.11.2026 · 07:12 UHR</div><div class="v">85,15 kg</div></div>
+              <div class="pill"><div class="lb">KÖRPERFETT</div><div class="v g">18,4 %</div><div class="bar"></div></div>
+              <div class="pill"><div class="lb">WASSER</div><div class="v g">57,0 %</div><div class="bar"></div></div>
+              <div class="pill"><div class="lb">MUSKEL</div><div class="v g">33,1 kg</div><div class="bar"></div></div>
+              <div class="pill"><div class="lb">BMI</div><div class="v o">26,3</div><div class="bar"></div></div>
+              <div class="pill"><div class="lb">BAUCH/GRÖSSE</div><div class="v o">0,52</div><div class="bar"></div></div>
+              <div class="pill"><div class="lb">BAUCH/HÜFTE</div><div class="v g">0,88</div><div class="bar"></div></div>
+            </div>
+            <div class="mnote">⬡ Waage verbinden · dann draufstellen</div>
+          </div>
+          <div>
+            <h3>Messungen</h3>
+            <div class="rows">
+              <div><span>Do 19.11. 07:12</span><span>85,15 kg <span class="tag">● Phone</span></span></div>
+              <div><span>Mi 18.11. 07:05</span><span>85,40 kg <span class="tag">● Mac</span></span></div>
+              <div><span>Di 17.11. 07:20</span><span>85,55 kg</span></div>
+              <div><span class="k">offline – 1 wartet</span><span class="k">↻</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="mnote">Am Mac zwei Spalten (Karte links, Liste rechts), im schmalen Fenster untereinander wie am Phone. Kachel antippen öffnet dieselbe Detailseite mit Verlauf und Bändern.</p>
+      </div>
+
+      <div class="side">
+        <div class="mock" aria-label="Stoppuhr">
+          <div class="mbar"><span>DocFit</span><span class="gear">⚙</span></div>
+          <div class="tabs"><span class="on">STOPPUHR</span><span>WAAGE</span><span>BLUTDRUCK</span></div>
+          <div class="chips"><span class="on">Planks</span><span>Two Balls</span></div>
+          <div class="say">DOCFIT STOPP</div>
+          <div class="digits">07:42</div>
+          <div class="btns"><span>Start</span><span>Stopp</span><span>Reset</span></div>
+          <p class="mnote">Übungen wie in der App. Vosk hört nur hier und nur bei sichtbarem Tab. Ziffern in festen Plätzen (<code>CyberClock.digits</code>), rot beim Laufen.</p>
+        </div>
+        <div class="mock" aria-label="Ärztin-Ansicht">
+          <div class="mbar"><span>Geteilte Werte</span><span class="gear" style="font-size:10px">gültig bis …</span></div>
+          <div class="rows" style="margin-top:8px">
+            <div><span class="k">Blutdruck · 30 Tage</span><span>Diagramm + Tabelle</span></div>
+            <div><span class="k">Gewicht · BMI</span><span>Verlauf</span></div>
+            <div><span class="k">Drucken</span><span>PDF</span></div>
+          </div>
+          <p class="mnote"><code>/docfit/arzt.html#t=…</code>: kein Login, nichts im Browser gespeichert, noindex. Du sperrst den Link mit einem Klick.</p>
+        </div>
+      </div>
+    </div>
+    <p class="mnote">Zahnrad wie am Phone: <b>Fasten</b> (dieselbe Seite, ein Code für App und Web, Daten aus Supabase) · Farbschema Blau/Grau/Hell (<code>svp-theme</code>) · Messmethode · Profil · Konto/Sync · Teilen.</p>
+  </section>
+
+  <!-- ===== Tables ===== -->
+  <section class="card">
+    <h2>Tabellen <span class="dim small">· Entwurf, nicht ausgeführt</span></h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Tabelle</th><th>Inhalt</th><th>Schlüssel</th></tr></thead>
+        <tbody>
+          <tr><td>docfit_run</td><td>Stoppuhr-Läufe: Start, Dauer in ms, Übung genau wie in der App (<code>Planks</code>, <code>Two Balls</code>, leer = von vorher; neue Übungen ohne DDL)</td><td><code>started_at</code></td></tr>
+          <tr><td>docfit_weighing</td><td>Wiegung: Gewicht in 10 g, Widerstand Ω (0 = nicht gemessen), Bauch/Hüfte in mm. Körperwerte werden wie in der App erst bei der Anzeige berechnet.</td><td><code>measured_at</code></td></tr>
+          <tr><td>docfit_bp</td><td>Blutdruck: sys, dia, Puls, unregelmäßiger Herzschlag, Quelle (omron/excel)</td><td><code>measured_at</code></td></tr>
+          <tr><td>docfit_profile</td><td>Größe, Geburtsjahr, Geschlecht: eine Zeile (siehe Frage 2)</td><td><code>user_id</code></td></tr>
+          <tr><td>docfit_fast</td><td>Fastenzeiträume: erster und letzter Tag, Ende bekannt?, Farbe, Ereignisse</td><td><code>first_day</code></td></tr>
+          <tr><td>docfit_day</td><td>Tageswerte aus dem Gesundheits-Workbook (Gewicht … Ketone, Kommentar, Zelle)</td><td><code>day</code></td></tr>
+          <tr><td>docfit_history</td><td>jede frühere Fassung aller DocFit-Zeilen (nur lesen, schreibt nur der Trigger)</td><td>–</td></tr>
+          <tr><td class="dim">docfit_share</td><td class="dim">Phase 7: Ärztin-Link (Token-Hash, Schalter, gültig bis, zuletzt gesehen) + Funktion <code>docfit_shared(token)</code></td><td class="dim"><code>id</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <details>
+      <summary>SQL Teil 1 · Daten <span class="dim">· später supabase/migrations/2026112x_docfit.sql</span></summary>
+<pre><span class="c">-- DocFit, part 1 (DRAFT 20.11.2026 - NOT executed): Doc's training and body data, written by the Android app
+-- and the web page /docfit/. Health data: only Doc's account may read or write. Anonymous sign-in is enabled
+-- on this project, so `authenticated` alone would be everybody - pinned to Doc's uid like grateful.
+-- Clients never hard-delete: a delete sets deleted_at (so it reaches the other device); every former version
+-- of a row lands in docfit_history. updated_at is always the server's clock (pull cursor).
+-- Apply: SQL editor (Doc). Idempotent (safe to re-run). Grants written out (rule since 30.10.2026).</span>
+
+begin;
+
+create table if not exists public.docfit_run (
+  user_id     uuid        not null default auth.uid(),
+  started_at  timestamptz not null,                       <span class="c">-- the app's Entry.start (ms)</span>
+  duration_ms integer     not null check (duration_ms between 0 and 86400000),
+  kind        text        not null default ''
+              check (length(kind) &lt;= 30),               <span class="c">-- the app's Entry.kind: 'Planks', 'Two Balls'; '' = from before</span>
+  device      text        not null default 'app' check (device in ('app', 'web')),
+  deleted_at  timestamptz,
+  updated_at  timestamptz not null default now(),
+  primary key (user_id, started_at)
+);
+
+create table if not exists public.docfit_weighing (
+  user_id     uuid        not null default auth.uid(),
+  measured_at timestamptz not null,
+  centi_kg    integer     not null check (centi_kg between 2000 and 30000),     <span class="c">-- 10 g units</span>
+  ohm         integer     not null default 0
+              check (ohm = 0 or ohm between 150 and 1500),                     <span class="c">-- 0 = no fat measured</span>
+  waist_mm    integer     check (waist_mm between 500 and 2000),                <span class="c">-- typed in, null = none</span>
+  hip_mm      integer     check (hip_mm between 500 and 2000),
+  device      text        not null default 'app' check (device in ('app', 'web')),
+  deleted_at  timestamptz,
+  updated_at  timestamptz not null default now(),
+  primary key (user_id, measured_at)
+);
+
+create table if not exists public.docfit_bp (
+  user_id     uuid        not null default auth.uid(),
+  measured_at timestamptz not null,
+  sys         smallint    not null check (sys between 50 and 260),
+  dia         smallint    not null check (dia between 30 and 160),
+  pulse       smallint    check (pulse between 25 and 220),
+  irregular   boolean,                                    <span class="c">-- the monitor's irregular-heartbeat flag</span>
+  source      text        not null default 'omron' check (source in ('omron', 'excel')),
+  device      text        not null default 'app' check (device in ('app', 'web')),
+  deleted_at  timestamptz,
+  updated_at  timestamptz not null default now(),
+  primary key (user_id, measured_at)
+);
+
+create table if not exists public.docfit_profile (           <span class="c">-- only if Doc says yes (question 2)</span>
+  user_id     uuid        primary key default auth.uid(),
+  height_cm   smallint    check (height_cm between 100 and 250),
+  birth_year  smallint    check (birth_year between 1900 and 2100),
+  sex         text        check (sex in ('m', 'w')),
+  deleted_at  timestamptz,
+  updated_at  timestamptz not null default now()
+);
+
+create table if not exists public.docfit_fast (
+  user_id     uuid        not null default auth.uid(),
+  first_day   date        not null,
+  last_day    date        not null,
+  end_known   boolean     not null default true,          <span class="c">-- false: "Ende nicht eingetragen"</span>
+  color       text        check (color ~ '^#[0-9a-fA-F]{6}$'),
+  events      jsonb       not null default '[]'::jsonb,   <span class="c">-- [{day, text}]</span>
+  deleted_at  timestamptz,
+  updated_at  timestamptz not null default now(),
+  primary key (user_id, first_day),
+  check (last_day &gt;= first_day)
+);
+
+create table if not exists public.docfit_day (               <span class="c">-- the workbook's daily rows around the fasts</span>
+  user_id     uuid        not null default auth.uid(),
+  day         date        not null,
+  weight numeric(5,2), fat numeric(4,1), belly numeric(5,1), water numeric(4,1),
+  organ_fat numeric(4,1), body_age smallint, sys smallint, dia smallint, pulse smallint,
+  sugar numeric(5,1), ketones numeric(3,1), kcal smallint,
+  comment     text,
+  source_ref  jsonb,                                      <span class="c">-- sheet + cell of every value</span>
+  deleted_at  timestamptz,
+  updated_at  timestamptz not null default now(),
+  primary key (user_id, day)
+);
+
+create table if not exists public.docfit_history (
+  hist_id     bigint generated always as identity primary key,
+  tab         text        not null,
+  op          text        not null,
+  changed_at  timestamptz not null default now(),
+  row_data    jsonb       not null
+);
+alter table public.docfit_history enable row level security;
+revoke all on public.docfit_history from anon;
+grant select on public.docfit_history to authenticated;
+grant select, insert, update, delete on public.docfit_history to service_role;
+drop policy if exists docfit_history_doc_read on public.docfit_history;
+create policy docfit_history_doc_read on public.docfit_history for select to authenticated
+  using (auth.uid() = '2889073e-cbb8-4ca1-ad48-5234abe40585'::uuid);
+
+<span class="c">-- server clock on every write, former version into the history</span>
+create or replace function public.docfit_touch() returns trigger
+language plpgsql security definer set search_path = public, pg_temp as $$
+begin
+  if tg_op &lt;&gt; 'INSERT' then
+    insert into public.docfit_history (tab, op, row_data) values (tg_table_name, tg_op, to_jsonb(old));
+  end if;
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+  new.updated_at := clock_timestamp();
+  return new;
+end $$;
+revoke all on function public.docfit_touch() from public, anon, authenticated;
+
+<span class="c">-- the same rules for every data table: RLS pinned to Doc, grants, pull index, trigger</span>
+do $$
+declare
+  t   text;
+  doc constant text := '2889073e-cbb8-4ca1-ad48-5234abe40585';
+begin
+  foreach t in array array['docfit_run', 'docfit_weighing', 'docfit_bp',
+                           'docfit_profile', 'docfit_fast', 'docfit_day'] loop
+    execute format('alter table public.%I enable row level security', t);
+    execute format('revoke all on public.%I from anon', t);
+    execute format('grant select, insert, update, delete on public.%I to authenticated', t);
+    execute format('grant select, insert, update, delete on public.%I to service_role', t);
+    execute format('drop policy if exists %I on public.%I', t || '_doc_all', t);
+    execute format('create policy %I on public.%I for all to authenticated '
+                   'using (user_id = auth.uid() and auth.uid() = %L::uuid) '
+                   'with check (user_id = auth.uid() and auth.uid() = %L::uuid)',
+                   t || '_doc_all', t, doc, doc);
+    execute format('create index if not exists %I on public.%I (user_id, updated_at)', t || '_pull', t);
+    execute format('drop trigger if exists %I on public.%I', t || '_touch', t);
+    execute format('create trigger %I before insert or update or delete on public.%I '
+                   'for each row execute function public.docfit_touch()', t || '_touch', t);
+  end loop;
+end $$;
+
+commit;
+
+<span class="c">-- control: every docfit table with RLS on and its policy</span>
+select c.relname, c.relrowsecurity, p.policyname, p.cmd
+from pg_class c left join pg_policies p on p.tablename = c.relname and p.schemaname = 'public'
+where c.relnamespace = 'public'::regnamespace and c.relkind = 'r' and c.relname like 'docfit%'
+order by 1;</pre>
+    </details>
+
+    <details>
+      <summary>SQL Teil 2 · Ärztin-Link <span class="dim">· erst Phase 7, Muster wie calendar_share</span></summary>
+<pre><span class="c">-- DocFit, part 2 (DRAFT - NOT executed): a revocable read-only link for Doc's doctor. Only the token's
+-- SHA-256 is stored; the token exists only in the link (#t=..., never sent to a web server's log). Locked =
+-- token_sha256 null. The page gets only what the switches allow, assembled here in the database.</span>
+
+begin;
+
+create table if not exists public.docfit_share (
+  id            bigint generated always as identity primary key,
+  user_id       uuid        not null default auth.uid(),
+  label         text        not null check (length(btrim(label)) between 1 and 40),  <span class="c">-- only in the DB</span>
+  heading       text        check (length(heading) &lt;= 80),        <span class="c">-- title of the doctor's page, only in the DB</span>
+  token_sha256  text        unique check (token_sha256 ~ '^[0-9a-f]{64}$'),           <span class="c">-- null = locked</span>
+  show_weight   boolean     not null default true,
+  show_body     boolean     not null default true,                <span class="c">-- fat, water, muscle, waist, hip</span>
+  show_bp       boolean     not null default true,
+  show_runs     boolean     not null default false,
+  valid_until   timestamptz not null default now() + interval '90 days',
+  last_seen_at  timestamptz,
+  created_at    timestamptz not null default now()
+);
+alter table public.docfit_share enable row level security;
+revoke all on public.docfit_share from anon;
+grant select, insert, update, delete on public.docfit_share to authenticated;
+grant select, insert, update, delete on public.docfit_share to service_role;
+drop policy if exists docfit_share_doc_all on public.docfit_share;
+create policy docfit_share_doc_all on public.docfit_share for all to authenticated
+  using (user_id = auth.uid() and auth.uid() = '2889073e-cbb8-4ca1-ad48-5234abe40585'::uuid)
+  with check (user_id = auth.uid() and auth.uid() = '2889073e-cbb8-4ca1-ad48-5234abe40585'::uuid);
+
+create or replace function public.docfit_shared(p_token text) returns jsonb
+language plpgsql volatile security definer set search_path = public, pg_temp as $$
+declare
+  s   public.docfit_share;
+  doc constant uuid := '2889073e-cbb8-4ca1-ad48-5234abe40585';
+begin
+  if p_token is null or length(p_token) not between 20 and 200 then
+    raise exception 'Link ungültig' using errcode = '42501';
+  end if;
+  select * into s from public.docfit_share
+   where token_sha256 = encode(sha256(convert_to(p_token, 'UTF8')), 'hex')
+     and user_id = doc and valid_until &gt; now();
+  if not found then
+    raise exception 'Link ungültig' using errcode = '42501';
+  end if;
+  update public.docfit_share set last_seen_at = now() where id = s.id;
+  return jsonb_build_object(
+    'heading', s.heading,
+    'valid_until', s.valid_until,
+    'profile', case when s.show_body then
+      (select jsonb_build_object('height_cm', height_cm, 'birth_year', birth_year, 'sex', sex)
+         from public.docfit_profile where user_id = doc and deleted_at is null) end,
+    'weighings', case when s.show_weight or s.show_body then
+      (select coalesce(jsonb_agg(jsonb_build_object(
+                't', measured_at, 'centi_kg', centi_kg,
+                'ohm',      case when s.show_body then ohm end,
+                'waist_mm', case when s.show_body then waist_mm end,
+                'hip_mm',   case when s.show_body then hip_mm end) order by measured_at), '[]'::jsonb)
+         from public.docfit_weighing where user_id = doc and deleted_at is null) end,
+    'bp', case when s.show_bp then
+      (select coalesce(jsonb_agg(jsonb_build_object(
+                't', measured_at, 'sys', sys, 'dia', dia, 'pulse', pulse, 'irregular', irregular)
+                order by measured_at), '[]'::jsonb)
+         from public.docfit_bp where user_id = doc and deleted_at is null) end,
+    'runs', case when s.show_runs then
+      (select coalesce(jsonb_agg(jsonb_build_object(
+                't', started_at, 'ms', duration_ms, 'kind', kind) order by started_at), '[]'::jsonb)
+         from public.docfit_run where user_id = doc and deleted_at is null) end
+  );
+end $$;
+revoke all on function public.docfit_shared(text) from public;
+grant execute on function public.docfit_shared(text) to anon, authenticated;
+
+commit;</pre>
+    </details>
+  </section>
+
+  <!-- ===== Phases ===== -->
+  <section class="card">
+    <h2>Phasen</h2>
+    <div class="tbl-wrap">
+      <table class="ph">
+        <thead><tr><th>#</th><th>Was</th><th>Agentin</th><th>Dein Teil</th></tr></thead>
+        <tbody>
+          <tr class="first"><td>0</td><td><b>Fundament:</b> SQL-Datei Teil 1; <code>docfit-core.js</code> (Formeln, Bereiche, Note) mit gemeinsamen Testwerten aus den Java-Tests (Testmann, nie deine Werte); danach als anon prüfen (401 = gesperrt)</td><td>3–4 h</td><td>SQL einfügen, Run</td></tr>
+          <tr class="first"><td>1</td><td><b>Phone synct:</b> Internet-Recht, Konto-Dialog, <code>Sync.java</code> (Warteschlange, Upsert, Runterholen, Grabsteine), erster Upload, Statuszeile; Tests, installieren</td><td>5–6 h</td><td>einmal Passwort tippen</td></tr>
+          <tr class="first"><td>2</td><td><b>Web liest + schreibt:</b> <code>HTML/docfit/</code> mit Reitern, Kacheln, Detailseiten, Verlauf, Liste, Stoppuhr mit Knöpfen, Farbschema</td><td>6 h</td><td>anschauen</td></tr>
+          <tr><td>3</td><td><b>Sprache im Browser:</b> vosk-browser, Modell als tar.gz, Grammatik + Regel + Lautstärke-Prüfung portiert, dieselben 186 Proben; Chrome-Gerätespracherkennung als Plan B kurz prüfen</td><td>4–5 h</td><td>„DocFit Start“ am Mac testen</td></tr>
+          <tr><td>4</td><td><b>Waage am Mac:</b> Vt701-Rahmen + Wiegung nach JS, Web Bluetooth, Test mit den openScale-Bytes</td><td>3 h</td><td>einmal draufstellen</td></tr>
+          <tr><td>5</td><td><b>Fasten aus Supabase:</b> Import-Knopf (du wählst die private Datei), eine Fasten-Seite für App und Web (Umzug per <code>git mv</code> im eigenen Commit)</td><td>3–4 h</td><td>Datei wählen</td></tr>
+          <tr><td>6</td><td><b>Blutdruck:</b> Omron M400 am Phone (0x1810 + Omron-Koppeln), Reiter Blutdruck im Web mit Verlauf; Messen am Mac als Versuch</td><td>5–6 h</td><td>Omron koppeln (Taste halten)</td></tr>
+          <tr><td>7</td><td><b>Ärztin-Link:</b> SQL Teil 2, <code>arzt.html</code> (nur lesen, Druckansicht), Einstellungen › Teilen mit Link/QR einmalig + Sperren</td><td>3–4 h</td><td>SQL Run, Link weitergeben</td></tr>
+          <tr class="sum"><td></td><td>Gesamt · Phasen 0–2 zuerst = DocFit auf dem Mac mit allen Daten</td><td>32–38 h</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mnote">Phase 0–2 sind ungefähr 1,5 Tage Agentinnen-Arbeit. Phase 6 startet, sobald der Omron da ist, und ist unabhängig von 3–5.</p>
+  </section>
+
+  <!-- ===== Open questions ===== -->
+  <section class="card ask">
+    <h2>Offene Fragen</h2>
+    <ol>
+      <li><span>Soll DocFit-Web nur auf deinem Mac laufen (<code>localhost:8765/docfit/</code>) oder wie Grateful auch auf <b>docalvers.de/docfit</b>?
+        <span class="hint">Für die Sprachsteuerung auf docalvers.de müsste das 45-MB-Sprachmodell einmal in den R2-Speicher (Open Source, keine Daten). Für den Mac allein reicht der lokale Cache.</span></span></li>
+      <li><span>Darf dein <b>Profil</b> (Größe, Geburtsjahr, Geschlecht) mit in die private Tabelle?
+        <span class="hint">Ohne Profil rechnet der Mac kein Körperfett und keine Note, oder du tippst es am Mac ein zweites Mal ein.</span></span></li>
+      <li><span>Was soll deine <b>Ärztin</b> sehen: nur Blutdruck und Gewicht oder auch Körperfett, Bauch und Läufe? Und wie lange soll ein Link gelten?
+        <span class="hint">Vorschlag: Blutdruck + Gewicht + Körperwerte, 90 Tage, jederzeit sperrbar.</span></span></li>
+    </ol>
+  </section>
+
+  <!-- ===== Sources ===== -->
+  <section class="card">
+    <h2>Geprüft (Regel 18)</h2>
+    <ul class="src">
+      <li><a href="https://github.com/ccoreilly/vosk-browser" rel="noopener">vosk-browser</a>: Typen 0.0.8 mit <code>KaldiRecognizer(sampleRate, grammar?)</code>, <code>setWords</code>, Modell als tar.gz im Web Worker</li>
+      <li><a href="https://developer.mozilla.org/docs/Web/API/SpeechRecognition/processLocally" rel="noopener">MDN processLocally</a> · <a href="https://developer.chrome.com/release-notes/139" rel="noopener">Chrome 139</a>: Spracherkennung auf dem Gerät, Sprachpakete über <code>available()</code> / <code>install()</code></li>
+      <li><a href="https://github.com/userx14/omblepy" rel="noopener">omblepy</a>: HEM-7155T (M400) und HEM-7361T (M500) lesbar, Kopplungsschlüssel beim ersten Verbinden</li>
+      <li><a href="https://developer.android.com/health-and-fitness/health-connect/comparison-guide" rel="noopener">Health Connect</a>: nur Android, Daten auf dem Gerät, SDK nur Kotlin</li>
+      <li><a href="https://docs.powersync.com/integrations/supabase/guide" rel="noopener">PowerSync + Supabase</a> · <a href="https://rxdb.info/replication-supabase.html" rel="noopener">RxDB Supabase-Replikation</a>: geprüft, für diese Datenmenge zu schwer</li>
+      <li>Im Repo: <code>HTML/svp/svp-auth.js</code>, <code>supabase/migrations/20261004_grateful.sql</code> (RLS auf Docs uid, Verlauf), <code>20261119_calendar_share.sql</code> (Token-Link), <code>docfit-app/README.md</code></li>
+    </ul>
+  </section>
+
+</main>
+</body>
+</html>

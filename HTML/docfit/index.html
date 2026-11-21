@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0a1428">
+    <title>DocFit</title>
+    <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Doc's own Supabase account (shared SVP login): only that uid may read or write the docfit_* tables (RLS) -->
+    <script src="../svp/svp-gate.js"></script>
+    <script src="../svp/svp-auth.js"></script>
+    <!-- THE fixed-slot digits of the site (the app's DigitsView): stopwatch and weight never wobble -->
+    <link rel="stylesheet" href="../js/cyber-clock.css">
+    <script src="../js/cyber-clock.js"></script>
+    <script src="docfit-core.js"></script>
+    <script src="docfit-data.js"></script>
+    <style>
+        /* DocFit on the web looks like the app: the colours are Palette.java's (Blau / Grau / Hell, key svp-theme like
+           all of Doc's pages). Headings, labels and numbers in Orbitron, running text in Arial (Doc, 21.11.2026). */
+        :root {
+            --bg: #0a1428; --card: #0e244e; --text: #eeeeee; --muted: #8a93a6;
+            --accent: #f5c242; --phi: #799e31; --on-phi: #0a1428; --ups: #b02418; --alarm: #e5533f;
+            --s-low: #b02418; --s-mid: #f5c242; --s-high: #799e31;
+            --chip-on: #f5c242; --chip-ink: #0a1428; --tab: #f5c242;
+            --icon-idle: #bdc1ca; --line: rgba(138, 147, 166, .28);
+            --read: Arial, Helvetica, sans-serif; --display: 'Orbitron', sans-serif;
+        }
+        html.svp-grey {
+            --bg: #131315; --card: #2c2c30; --text: #d4d4d8; --muted: #8d8d90; --on-phi: #131315; --chip-ink: #131315;
+            --icon-idle: #b3b3b6; --line: rgba(141, 141, 144, .3);
+        }
+        html.svp-light {
+            --bg: #f6f8fc; --card: #ffffff; --text: #182234; --muted: #60708c; --accent: #1e3c78; --phi: #5c7a20;
+            --on-phi: #ffffff; --alarm: #b02418; --s-mid: #b07a00; --s-high: #5c7a20; --chip-on: #fbe3a7; --chip-ink: #182234;
+            --tab: #b07a00; --icon-idle: #3a4660;
+            --line: rgba(96, 112, 140, .3);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; background: var(--bg); color: var(--text); }
+        body { font-family: var(--read); font-size: 15px; line-height: 1.45; padding: 0 16px max(40px, env(safe-area-inset-bottom)); }
+        .wrap { max-width: 1100px; margin: 0 auto; }
+        h1, h2, h3, .label, .tabs, .digits, .num, button, .chip, .pill-v, .tile-v, .score-n, .say { font-family: var(--display); }
+        button { cursor: pointer; }
+        [hidden] { display: none !important; }
+
+        /* head: title left, tab icons, gear right - like the app */
+        .top { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; align-items: center; gap: 12px;
+               padding: max(12px, env(safe-area-inset-top)) 0 8px; }
+        .top h1 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 1px; }
+        .tabs { flex: 1; display: flex; justify-content: center; gap: 4px; }
+        .tabs button, .gear { background: none; border: 0; padding: 7px 14px; border-radius: 10px; color: var(--icon-idle); }
+        .tabs button svg, .gear svg { width: 26px; height: 26px; display: block; fill: currentColor; }
+        /* Doc, 21.11.2026: the top row orange, the second row green (app and web alike) */
+        .tabs button[aria-selected="true"] { color: var(--tab); background: color-mix(in srgb, var(--tab) 14%, transparent); }
+        .gear { padding: 7px; }
+        /* five tabs on a phone: closer together, so title, tabs and gear fit one row */
+        @media (max-width: 520px) {
+            .top { gap: 6px; }
+            .top h1 { font-size: 20px; }
+            .tabs { gap: 0; }
+            .tabs button { padding: 7px 6px; }
+        }
+        .state { min-height: 18px; font-size: 12px; color: var(--muted); text-align: right; }
+        .state.err { color: var(--alarm); }
+        .state.ok { color: var(--phi); }
+
+        .label { font-size: 11px; letter-spacing: .1em; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+        .card { background: var(--card); border-radius: 16px; padding: 14px; }
+        .cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+        @media (min-width: 860px) { .cols { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
+
+        /* chips: exercises and persons (the second row) in phi green - an exercise not chosen in grey; choices in the accent */
+        .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+        /* two by two (the glucose contexts): long words wrap inside their chip, never over the neighbour */
+        .chips.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .chips.grid2 .chip { white-space: normal; line-height: 1.25; text-align: center; overflow-wrap: anywhere; }
+        .chip { border: 1px solid var(--muted); background: transparent; color: var(--text); border-radius: 10px;
+                padding: 9px 14px; font-size: 13px; font-weight: 700; min-width: 0; }
+        .chip.kind { border-color: var(--muted); color: var(--muted); }
+        .chip.kind.on { background: var(--phi); color: var(--on-phi); border-color: var(--phi); }
+        .chip.person { border-color: var(--phi); color: var(--phi); flex: 1; }
+        .chip.person.on { background: var(--phi); color: var(--on-phi); }
+        .chip.pick.on { background: var(--chip-on); color: var(--chip-ink); border-color: var(--chip-on); }
+
+        /* stopwatch */
+        .watch { text-align: center; padding: 18px 14px 20px; }
+        .watch .chips { justify-content: center; }
+        .watch .chip { flex: 1; max-width: 220px; }
+        .say { margin: 18px 0 4px; font-size: 22px; font-weight: 700; color: var(--phi); min-height: 30px; }
+        .say.run { color: var(--alarm); }
+        .digits { --cc-size: clamp(64px, 17vw, 132px); --cc-dw: .74em; --cc-sw: .34em; --cc-digit: var(--phi); --cc-weight: 900;
+                  display: flex !important; justify-content: center; margin: 6px 0 18px; }
+        .digits.run { --cc-digit: var(--alarm); }
+        .digits.stopped { --cc-digit: var(--s-mid); }
+        .btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+        .btn { border: 0; border-radius: 14px; padding: 15px 6px; font-size: 17px; font-weight: 700; color: var(--on-phi); }
+        .btn.go { background: var(--phi); }
+        .btn.halt { background: var(--ups); color: #fff; }
+        .btn.reset { background: color-mix(in srgb, var(--muted) 30%, var(--card)); color: var(--text); }
+        .btn:disabled { opacity: .35; cursor: default; }
+        .hint { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+
+        /* lists */
+        .head { display: flex; align-items: center; justify-content: space-between; margin: 4px 2px 8px; gap: 8px; }
+        .head h2 { margin: 0; font-size: 13px; letter-spacing: .1em; color: var(--muted); font-weight: 700; }
+        .link { background: none; border: 1px solid var(--line); color: var(--accent); border-radius: 10px; padding: 6px 12px; font-size: 12px; }
+        ol.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+        .row { display: flex; align-items: center; gap: 10px; background: var(--card); border-radius: 12px; padding: 10px 12px; }
+        .row .when { flex: 1; min-width: 0; }
+        .row .when b { display: block; font-weight: 700; }
+        .row .when span { font-size: 13px; color: var(--muted); }
+        .row .num { font-weight: 700; font-size: 16px; white-space: nowrap; }
+        .row .x { background: none; border: 0; color: var(--muted); padding: 6px; border-radius: 8px; }
+        .row .x svg { width: 18px; height: 18px; fill: currentColor; display: block; }
+        .row.tap { cursor: pointer; }
+        .empty { color: var(--muted); font-size: 14px; padding: 10px 4px; }
+
+        /* scale */
+        .persons { display: flex; gap: 8px; margin-bottom: 12px; }
+        .pill { background: var(--card); border-radius: 14px; padding: 10px 14px; cursor: pointer; }
+        .pill .label { font-size: 10px; }
+        .pill-v { margin-top: 4px; display: flex; align-items: baseline; }
+        .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+        .tile { background: var(--card); border-radius: 14px; padding: 10px 12px 9px; cursor: pointer; min-width: 0; }
+        .tile .label { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .tile-v { font-size: 21px; font-weight: 700; margin: 3px 0 4px; white-space: nowrap; }
+        .bar { height: 12px; display: block; width: 100%; }
+        .tile .note { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 16px; }
+        .tile .note.offer { color: var(--accent); }
+        .fitness { background: var(--card); border-radius: 14px; padding: 12px 14px; margin-top: 8px; }
+        .segs { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; margin: 8px 0; }
+        .segs i { height: 10px; border-radius: 3px; opacity: .25; }
+        .segs i.on { opacity: 1; }
+        .score-n { font-size: 26px; font-weight: 900; margin-right: 8px; }
+        .score-w { font-family: var(--display); font-weight: 700; font-size: 15px; }
+        .fitness .small { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        .note-line { text-align: center; color: var(--muted); font-size: 13px; margin: 8px 4px 0; }
+        .note-line.warn { color: var(--accent); }
+
+        /* blood pressure */
+        .bp-cat { font-size: 12px; font-weight: 700; }
+        .num small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); text-align: right; }
+        /* "+ Messung eintragen" in lambda orange like the chosen tab, dark ink on it in every scheme (Doc, 21.11.2026) */
+        .add { width: 100%; border: 0; background: #f5c242; color: var(--chip-ink); border-radius: 12px;
+               padding: 12px; font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+        html.svp-light .add { color: #182234; }
+
+        /* fasting mode */
+        .fast-banner { display: flex; gap: 8px; align-items: stretch; margin: 0 0 10px; }
+        .fast-banner button { border: 0; border-radius: 12px; font-weight: 700; font-size: 14px; padding: 10px 14px; }
+        .fb-text { flex: 1; text-align: left; background: var(--phi); color: var(--on-phi); }
+        .fb-end { background: none; color: var(--phi); border: 1px solid var(--phi) !important; }
+        .fcard { background: var(--card); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+        .fcard h3 { margin: 0; font-size: 15px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+        .fcard .sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+        .fcard .acts { justify-content: flex-start; margin-top: 10px; }
+        .ftable { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        .ftable th { text-align: left; font: 700 10px var(--display); letter-spacing: .08em; color: var(--muted); padding: 4px 6px 4px 0; }
+        .ftable td { padding: 6px 6px 6px 0; border-top: 1px solid var(--line); vertical-align: top; white-space: nowrap; }
+        .ftable td small { color: var(--muted); }
+        .tbl-scroll { overflow-x: auto; }
+        @media (max-width: 520px) {   /* four columns on a phone: numbers over their small print */
+            .ftable { font-size: 12.5px; }
+            .ftable td { white-space: normal; }
+            .ftable td small { display: block; }
+            .ftable th { font-size: 9px; letter-spacing: .04em; }
+        }
+        .safety { margin-top: 10px; font-size: 13px; font-weight: 700; }
+        .lg { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+        .lg i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+        .old { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+        .old div { background: var(--card); border-radius: 12px; padding: 10px 12px; font-size: 13px; border-left: 4px solid var(--c); }
+        .old b { display: block; font-family: var(--display); font-size: 13px; }
+
+        /* dialogs */
+        dialog { border: 0; border-radius: 18px; background: var(--card); color: var(--text); padding: 0; width: min(520px, calc(100vw - 32px));
+                 max-height: calc(100vh - 40px); box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
+        dialog::backdrop { background: rgba(4, 10, 24, .6); }
+        .dlg { padding: 18px 20px 16px; }
+        .dlg h3 { margin: 0 0 12px; color: var(--accent); font-size: 18px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .dlg h3 .x { background: none; border: 0; color: var(--muted); padding: 4px; }
+        .dlg h3 .x svg { width: 22px; height: 22px; fill: currentColor; display: block; }
+        .dlg .sec { margin-top: 18px; }
+        .dlg .sec:first-of-type { margin-top: 0; }
+        .fld { display: grid; gap: 4px; margin-top: 10px; }
+        .fld input, .fld select, .fld textarea { font: 16px var(--read); color: var(--text); background: color-mix(in srgb, var(--bg) 55%, var(--card));
+                  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
+        .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+        .acts { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+        .acts button { border-radius: 12px; padding: 10px 16px; font-size: 14px; font-weight: 700; border: 1px solid var(--line);
+                       background: none; color: var(--muted); }
+        .acts button.main { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+        html.svp-light .acts button.main { color: #fff; }
+        .err { color: var(--alarm); font-size: 13px; min-height: 18px; margin-top: 8px; }
+        .menu-row { width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; color: var(--text);
+                    border: 1px solid var(--muted); border-radius: 10px; padding: 12px 14px; font-size: 15px; font-weight: 700; }
+        .menu-row:disabled { opacity: .5; cursor: default; }
+        .dlg p { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+        .bands { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 4px; font-size: 14px; }
+        .bands li { display: flex; gap: 8px; align-items: center; }
+        .bands i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+        .chart { width: 100%; height: 170px; display: block; margin-top: 12px; }
+        .chart text { font: 10px var(--read); fill: var(--muted); }
+
+        .undo { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 20;
+                background: var(--text); color: var(--bg); border-radius: 12px; padding: 10px 12px 10px 16px; display: flex; gap: 14px;
+                align-items: center; font-size: 14px; box-shadow: 0 8px 30px rgba(0, 0, 0, .4); max-width: calc(100vw - 32px); }
+        .undo button { background: none; border: 0; color: var(--accent); font-weight: 700; font-size: 13px; padding: 4px; }
+        html:not(.svp-light) .undo button { color: #8a6500; }
+
+        .gate { text-align: center; padding: 40px 16px; max-width: 420px; margin: 40px auto; }
+        .gate p { color: var(--muted); margin: 0 0 18px; }
+        .gate .btn { width: 100%; max-width: 260px; }
+        .page-tab { padding-top: 6px; }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header class="top">
+            <h1>DocFit</h1>
+            <nav class="tabs" role="tablist" id="tabs" hidden>
+                <!-- the app's tab icons: Material Symbols "timer", "monitor_weight", "monitor_heart" (Apache 2.0) -->
+                <button type="button" role="tab" data-tab="watch" aria-label="Stoppuhr" title="Stoppuhr">
+                    <svg viewBox="0 -960 960 960"><path d="M360-860v-60h240v60H360Zm90 447h60v-230h-60v230ZM340.5-109.5Q275-138 226-187t-77.5-114.5Q120-367 120-441t28.5-139.5Q177-646 226-695t114.5-77.5Q406-801 480-801q67 0 126 22.5T711-716l51-51 42 42-51 51q36 40 61.5 97T840-441q0 74-28.5 139.5T734-187q-49 49-114.5 77.5T480-81q-74 0-139.5-28.5Zm352-119Q780-316 780-441t-87.5-212.5Q605-741 480-741t-212.5 87.5Q180-566 180-441t87.5 212.5Q355-141 480-141t212.5-87.5ZM480-440Z"/></svg>
+                </button>
+                <button type="button" role="tab" data-tab="scale" aria-label="Waage" title="Waage">
+                    <svg viewBox="0 -960 960 960"><path d="M480.5-489q50.5 0 84-33.5t33.5-84q0-50.5-33.5-84.5t-84-34q-50.5 0-84.5 34t-34 84.5q0 50.5 34 84t84.5 33.5ZM403-593q-6-6-6-14t6-14q6-6 14-6t14 6q6 6 6 14t-6 14q-6 6-14 6t-14-6Zm63 0q-6-6-6-14t6-14q6-6 14-6t14 6q6 6 6 14t-6 14q-6 6-14 6t-14-6Zm63 0q-6-6-6-14t6-14q6-6 14-6t14 6q6 6 6 14t-6 14q-6 6-14 6t-14-6ZM180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H180Zm0-60h600v-600H180v600Zm0-600v600-600Z"/></svg>
+                </button>
+                <button type="button" role="tab" data-tab="bp" aria-label="Blutdruck" title="Blutdruck">
+                    <svg viewBox="0 -960 960 960"><path d="M290-840q57 0 105.5 27t84.5 78q42-54 89-79.5T670-840q89 0 149.5 60.5T880-629q0 15-1.5 29.5T873-570h-62q5-15 7-29.5t2-29.5q0-66-42-108.5T670-780q-51 0-95 31.5T504-660h-49q-26-56-70-88t-95-32q-66 0-108 42.5T140-629q0 15 2 29.5t7 29.5H87q-4-15-5.5-29.5T80-629q0-90 60.5-150.5T290-840Zm-98 450h78q38 42 89.5 91.5T480-186q69-63 120-112.5t89-91.5h79q-42 49-102 108.5T521-144l-41 37-41-37q-85-78-145-137.5T192-390Zm250 60q9 0 16-5.5t10-14.5l61-181 46 68q5 6 11 9.5t14 3.5h310v-60H617l-72-106q-5-7-12-10t-15-3q-9 0-16.5 5.5T491-609l-60 181-47-69q-5-6-10.5-9.5T360-510H50v60h292l72 107q5 7 12.5 10t15.5 3Zm38-153Z"/></svg>
+                </button>
+                <!-- the app's ic_tab_drop: Material Symbols "water_drop" (Apache 2.0) -->
+                <button type="button" role="tab" data-tab="glucose" aria-label="Blutzucker" title="Blutzucker">
+                    <svg viewBox="0 -960 960 960"><path d="M479-208q16 0 24.5-5.5T512-230q0-11-8.5-17t-25.5-6q-42 0-85.5-26.5T337-373q-2-9-9-14.5t-15-5.5q-11 0-17 8.5t-4 17.5q15 84 71 121.5T479-208Zm-227.5 34Q160-268 160-408q0-100 79.5-217.5T480-880q161 137 240.5 254.5T800-408q0 140-91.5 234T480-80q-137 0-228.5-94ZM666-216.5Q740-293 740-408q0-79-66.5-179.5T480-800Q353-688 286.5-587.5T220-408q0 115 74 191.5T480-140q112 0 186-76.5ZM480-480Z"/></svg>
+                </button>
+            </nav>
+            <button type="button" class="gear" id="gear" aria-label="Einstellungen" title="Einstellungen" hidden>
+                <svg viewBox="0 -960 960 960"><path d="m388-80-20-126q-19-7-40-19t-37-25l-118 54-93-164 108-79q-2-9-2.5-20.5T185-480q0-9 .5-20.5T188-521L80-600l93-164 118 54q16-13 37-25t40-18l20-127h184l20 126q19 7 40.5 18.5T669-710l118-54 93 164-108 77q2 10 2.5 21.5t.5 21.5q0 10-.5 21t-2.5 21l108 78-93 164-118-54q-16 13-36.5 25.5T592-206L572-80H388Zm48-60h88l14-112q33-8 62.5-25t53.5-41l106 46 40-72-94-69q4-17 6.5-33.5T715-480q0-17-2-33.5t-7-33.5l94-69-40-72-106 46q-23-26-52-43.5T538-708l-14-112h-88l-14 112q-34 7-63.5 24T306-642l-106-46-40 72 94 69q-4 17-6.5 33.5T245-480q0 17 2.5 33.5T254-413l-94 69 40 72 106-46q24 24 53.5 41t62.5 25l14 112Zm44-210q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Zm0-130Z"/></svg>
+            </button>
+        </header>
+        <div class="state" id="state" aria-live="polite"></div>
+        <!-- a running fast of the shown person, on every tab: tap = the fasting view, "Beenden" ends it -->
+        <div class="fast-banner" id="fastBanner" hidden>
+            <button type="button" class="fb-text" id="fastBannerText"></button>
+            <button type="button" class="fb-end" id="fastEndBtn">Beenden</button>
+        </div>
+
+        <div class="card gate" id="gate" hidden>
+            <p>Bitte einmal anmelden – dasselbe Konto wie für DocCal und Grateful. Deine Werte liegen privat, nur dein Konto kommt dran.</p>
+            <button class="btn go" id="loginBtn" type="button">Anmelden</button>
+        </div>
+
+        <main id="app" hidden>
+            <!-- Stoppuhr: exercise, the big digits, Start / Stopp / Reset, the times -->
+            <section class="page-tab" data-page="watch">
+                <div class="cols">
+                    <div class="card watch">
+                        <div class="chips" id="kinds"></div>
+                        <div class="say" id="say"></div>
+                        <div class="digits" id="digits"></div>
+                        <div class="btns">
+                            <button class="btn go" id="startBtn" type="button">Start</button>
+                            <button class="btn halt" id="stopBtn" type="button">Stopp</button>
+                            <button class="btn reset" id="resetBtn" type="button">Reset</button>
+                        </div>
+                        <p class="hint" id="voiceHint">Sprachsteuerung „DocFit Start“ / „DocFit Stopp“ kommt im nächsten Schritt – bis dahin die Knöpfe.</p>
+                    </div>
+                    <div>
+                        <div class="head"><h2>ZEITEN</h2></div>
+                        <ol class="list" id="runs"></ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Waage: person, the newest weigh-in with its tiles and the fitness score, the weigh-ins -->
+            <section class="page-tab" data-page="scale" hidden>
+                <div class="persons" id="scalePersons"></div>
+                <div class="cols">
+                    <div>
+                        <div class="pill" id="weightPill">
+                            <div class="label" id="whenLabel"></div>
+                            <div class="pill-v" id="weightDigits"></div>
+                        </div>
+                        <div class="tiles" id="tiles"></div>
+                        <div class="fitness" id="fitness" hidden>
+                            <div class="label">FITNESS</div>
+                            <div class="segs" id="segs"></div>
+                            <div><span class="score-n" id="scoreN"></span><span class="score-w" id="scoreW"></span></div>
+                            <div class="small">Orientierung, keine ärztliche Bewertung</div>
+                        </div>
+                        <p class="note-line" id="scaleNote"></p>
+                    </div>
+                    <div>
+                        <div class="head"><h2 id="scaleTitle">MESSUNGEN</h2><button class="link" id="profileBtn" type="button">Profil</button></div>
+                        <ol class="list" id="weighings"></ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Blutdruck: person, typing a reading in, the readings -->
+            <section class="page-tab" data-page="bp" hidden>
+                <div class="persons" id="bpPersons"></div>
+                <button class="add" id="bpAdd" type="button">+ Messung eintragen</button>
+                <div class="head"><h2 id="bpTitle">MESSUNGEN</h2></div>
+                <ol class="list" id="readings"></ol>
+            </section>
+
+            <!-- Fasten (from the gear and the banner): start / end a fast, a card per fast, the earlier fasts -->
+            <section class="page-tab" data-page="fast" hidden>
+                <div class="head"><h2>FASTEN</h2></div>
+                <div class="persons" id="fastPersons"></div>
+                <button class="add" id="fastStart" type="button">+ Fasten starten</button>
+                <div id="fastCards"></div>
+            </section>
+
+            <!-- Blutzucker: person, typing a value in (mg/dL or mmol/L, both always shown), the values -->
+            <section class="page-tab" data-page="glucose" hidden>
+                <div class="persons" id="gluPersons"></div>
+                <button class="add" id="gluAdd" type="button">+ Messung eintragen</button>
+                <div class="head"><h2 id="gluTitle">MESSUNGEN</h2></div>
+                <ol class="list" id="glucoses"></ol>
+            </section>
+        </main>
+    </div>
+
+    <dialog id="dlg"><div class="dlg" id="dlgBody"></div></dialog>
+    <div class="undo" id="undo" hidden><span id="undoText"></span><button type="button" id="undoBtn">Rückgängig</button></div>
+
+    <script src="docfit-app.js"></script>
+</body>
+
+</html>

@@ -209,6 +209,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private Weighings weighings;
     private Profile profile;
     private ScaleLink scale;
+    // the private Supabase tables, so the web page /docfit/ shows the same (Sync, SyncPanel; offline first)
+    private Sync sync;
     private int tab;
     private String doneText;
     // a result near neither person waits for the answer to "Doc oder …?" (pendingWeigh); one answered "Keiner" is
@@ -288,6 +290,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         fasts = fastLists[person];
         kind = Entries.kindOrDefault(prefs.getString("kind", null));
         scale = new ScaleLink(this, this);
+        sync = new Sync(this, changed -> {
+            if (changed) reloadFromSync();
+        });
+        sync.start();
         orbitron = getResources().getFont(R.font.orbitron);
         pal = Palette.of(prefs.getString("theme", "dark"));
         LAMBDA = pal.accent;
@@ -327,6 +333,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     protected void onResume() {
         super.onResume();
         resumed = true;
+        sync.foreground(true);
         listenIfAllowed();
         updateScale();
         refresh();
@@ -342,6 +349,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     protected void onPause() {
         super.onPause();
         resumed = false;
+        sync.foreground(false);
         if (listener != null) listener.stop();
         scale.stop();
         refresh();
@@ -360,6 +368,41 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         if (tone != null) tone.release();
         if (fastWeb != null) fastWeb.destroy();
         if (askDialog != null) askDialog.dismiss();   // an unanswered question stores nothing
+        sync.stop();
+    }
+
+    /**
+     * Sync took over changes from the server (made on the web): read the lists, readings and profiles again from the
+     * preferences - the objects held here would otherwise write their old state back.
+     */
+    private void reloadFromSync() {
+        entries = new Entries(this);
+        for (int i = 0; i < SLOTS.length; i++) {
+            lists[i] = new Weighings(this, SLOTS[i]);
+            bpLists[i] = new Pressures(this, SLOTS[i]);
+            gluLists[i] = new Glucoses(this, SLOTS[i]);
+            fastLists[i] = new Fasts(this, SLOTS[i]);
+            profiles[i] = Profile.load(prefs, SLOTS[i]);
+            on[i] = prefs.getBoolean("profile" + SLOTS[i] + "On", true);
+        }
+        if (Weighings.countOn(on) == 0) on[0] = true;
+        names[1] = prefs.getString("profile2Name", "Gast");
+        if (!on[person]) person = Weighings.firstOn(on);
+        weighings = lists[person];
+        profile = profiles[person];
+        pressures = bpLists[person];
+        glucoses = gluLists[person];
+        fasts = fastLists[person];
+        if (adapter != null) adapter.notifyDataSetChanged();
+        if (scaleAdapter != null) scaleAdapter.notifyDataSetChanged();
+        if (bpAdapter != null) bpAdapter.notifyDataSetChanged();
+        if (gluAdapter != null) gluAdapter.notifyDataSetChanged();
+        paintPersons();
+        refresh();
+        refreshScale();
+        refreshBp();
+        refreshGlu();
+        refreshFast();   // a fast started or ended on the web: banner and fasting page
     }
 
     /** Page, status bar and navigation bar in the scheme's ground; dark system icons on Hell. */
@@ -444,6 +487,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp.topMargin = dp(6);
         box.addView(peopleHint, lp);
 
+        AlertDialog[] settingsDialog = new AlertDialog[1];   // set below; the sync row closes it before its own dialog
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(22);
+        box.addView(new SyncPanel(this, sync, pal, orbitron).section(() -> {
+            if (settingsDialog[0] != null) settingsDialog[0].dismiss();
+        }), lp);
+
         // the morning reminder while a fast runs (FastReminder): on/off and the time
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(22);
@@ -511,6 +561,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         cl.setMargins(0, dp(8), dp(8), 0);
         titleRow.addView(close, cl);
         AlertDialog d = dialog("Einstellungen").setCustomTitle(titleRow).setView(scroll).create();
+        settingsDialog[0] = d;
         close.setOnClickListener(v -> d.dismiss());
         fast.setOnClickListener(v -> {
             d.dismiss();
