@@ -879,9 +879,11 @@
             ctx.lineJoin = "round";                       // dark halo for legibility — like the NORDPOL/SÜDPOL labels
             ctx.lineWidth = Math.max(1.2, r * 0.006);
             ctx.strokeStyle = "rgba(0,0,0,0.5)";
-            ctx.strokeText("DATUMSGRENZE", dlx, 0);
-            ctx.fillStyle = "rgb(128, 128, 128)";
-            ctx.fillText("DATUMSGRENZE", dlx, 0);
+            if (!WC_WIDGET) {                             // the widget keeps only the small triangle at the rim
+                ctx.strokeText("DATUMSGRENZE", dlx, 0);
+                ctx.fillStyle = "rgb(128, 128, 128)";
+                ctx.fillText("DATUMSGRENZE", dlx, 0);
+            }
             ctx.restore();
         }
 
@@ -1481,7 +1483,6 @@
             // All sizes relative to r (clock radius) for responsive scaling
             const diskR = r * 0.105;
             const markerInset = r * 0.022;
-            const tipExtend = r * 0.019;
             const cityFontNormal = Math.max(5, r * 0.030);
             const cityFontHighlight = Math.max(6, r * 0.034);
             const cityLineHeight = r * 0.038;
@@ -1496,24 +1497,26 @@
                 const my = Math.sin(cityAngle) * markerR;
                 const isWkoeDresden = isWkoeMode && city.name === 'Dresden';
 
-                // Pointer (21.11.2026, Doc: "Da stimmt irgendwas nicht mit den Pfeilen"): a small white triangle just
-                // outside the ring of plaques, on the city's exact local time (tipAngle). A plaque that had to make room
-                // for a neighbour with (nearly) the same time is joined to its pointer by a thin arc along the ring, so
-                // pointer and plaque always belong together and no pointer floats alone.
+                // Pointer, as in the lab before the time-zone fix: a small white triangle on top of the plaque, pointing
+                // straight out at the hour scale - now always at the city's exact local time (tipAngle), all on one circle
+                // and all the same size. A plaque that had to make room for a neighbour with (nearly) the same time is
+                // joined to its pointer by a thin, quiet arc on that circle, which never touches a plaque or the scale
+                // (21.11.2026, Doc: "Da stimmt irgendwas nicht mit den Pfeilen", "Bitte Mühe geben").
                 const ringR = markerR + circleRadius;              // outer edge of every plaque
-                const baseR = ringR + r * 0.004;
-                const tipR = ringR + tipExtend * 2;                // reaches into the tick band, onto the exact time
-                const halfW = (r * 0.022) / baseR;                 // half the base, as an angle
+                const baseR = ringR + r * 0.01;                    // the pointers' circle, just clear of the plaques
+                const tipR = baseR + r * 0.03;                     // the tip reaches into the tick band
+                const halfW = (r * 0.016) / baseR;                 // half the base, as an angle
                 const lean = Math.atan2(Math.sin(tipAngle - cityAngle), Math.cos(tipAngle - cityAngle));
                 ctx.save();
-                ctx.fillStyle = "white";
-                if (Math.abs(lean) > 0.004) {
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
-                    ctx.lineWidth = Math.max(1, r * 0.006);
+                if (Math.abs(lean) > halfW * 0.5) {
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+                    ctx.lineWidth = Math.max(1, r * 0.005);
+                    ctx.lineCap = "round";
                     ctx.beginPath();
                     ctx.arc(0, 0, baseR, cityAngle, cityAngle + lean, lean < 0);
                     ctx.stroke();
                 }
+                ctx.fillStyle = "white";
                 ctx.beginPath();
                 ctx.moveTo(Math.cos(tipAngle) * tipR, Math.sin(tipAngle) * tipR);
                 ctx.lineTo(Math.cos(tipAngle - halfW) * baseR, Math.sin(tipAngle - halfW) * baseR);
