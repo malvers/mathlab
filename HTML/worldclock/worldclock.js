@@ -433,9 +433,7 @@
         //     (Phase 3 refactor). Loaded after worldclock.js so they can read/write its state at IIFE time.
 
         function getMouseAngle(e) {
-            const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - (rect.left + rect.width / 2);
-            const my = e.clientY - (rect.top + rect.height / 2);
+            const { mx, my } = dialVector(canvas.getBoundingClientRect(), e.clientX, e.clientY);
             return Math.atan2(my, mx);
         }
 
@@ -443,8 +441,7 @@
             const rect = canvas.getBoundingClientRect();
             const mxCanvas = e.clientX - rect.left;
             const myCanvas = e.clientY - rect.top;
-            const mx = e.clientX - (rect.left + rect.width / 2);
-            const my = e.clientY - (rect.top + rect.height / 2);
+            const { mx, my } = dialVector(rect, e.clientX, e.clientY);
             const dist = Math.sqrt(mx*mx + my*my);
             const mouseAngle = Math.atan2(my, mx) * 180 / Math.PI;
 
@@ -532,7 +529,7 @@
                 let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
 
                 // If distance is near the plaques and angle is close
-                if (dist > r * 0.8 && dist < r * 1.1 && Math.abs(diff) < 7) {
+                if (dist > r * (DIAL.plaqueR - DIAL.diskR) && dist < r * 1.1 && Math.abs(diff) < 7) {   // the whole plaque, out to the pointers
                     selectedCity = city;
                     ensureNeighborsForTZ(city.tz, city.globeLat ?? city.lat, city.globeLon ?? city.lon, city.name);
                     showCityInfo(city.name);
@@ -588,8 +585,7 @@
             const _fkx = e.clientX - rect.left, _fky = e.clientY - rect.top;
             fkMouse = (_fkx >= 0 && _fky >= 0 && _fkx <= rect.width && _fky <= rect.height) ? { x: _fkx, y: _fky } : null;
             fkShift = e.shiftKey;                                                       // read the modifier straight from the event → no chance of getting stuck
-            const mx = e.clientX - (rect.left + rect.width / 2);
-            const my = e.clientY - (rect.top + rect.height / 2);
+            const { mx, my } = dialVector(rect, e.clientX, e.clientY);
             // Existing hover logic continues as before
 
             if (isMouseDown) {
@@ -614,13 +610,13 @@
                 const r = size / 2;
                 const time = getDisplayTime();
                 const utcHours = time.getUTCHours() + time.getUTCMinutes() / 60 + time.getUTCSeconds() / 3600;
-                const mapRotation = (12 - utcHours) * 15 + autoRotation;
+                const mapRotation = dirSign * (12 - utcHours) * 15 + autoRotation;   // as drawn, also in the south view
 
                 let found = null;
                 cities.forEach(city => {
-                    const cityAngle = (-cityDialLon(city) + mapRotation - 90);
+                    const cityAngle = (dirSign * (-cityDialLon(city)) + mapRotation - 90);
                     let diff = (mouseAngle - cityAngle + 540) % 360 - 180;
-                    if (dist > r * 0.8 && dist < r * 1.1 && Math.abs(diff) < 7) {
+                    if (dist > r * (DIAL.plaqueR - DIAL.diskR) && dist < r * 1.1 && Math.abs(diff) < 7) {   // the whole plaque, out to the pointers
                         found = city;
                     }
                 });
@@ -686,8 +682,7 @@
             const rect = canvas.getBoundingClientRect();
             const mxCanvas = touch.clientX - rect.left;
             const myCanvas = touch.clientY - rect.top;
-            const mx = touch.clientX - (rect.left + rect.width / 2);
-            const my = touch.clientY - (rect.top + rect.height / 2);
+            const { mx, my } = dialVector(rect, touch.clientX, touch.clientY);
 
             // For two-finger touch, let TrackballControls handle it (pinch/rotate)
             if (e.touches.length >= 2) return;
@@ -782,8 +777,7 @@
 
             const touch = e.touches[0];
             const rect = canvas.getBoundingClientRect();
-            const mx = touch.clientX - (rect.left + rect.width / 2);
-            const my = touch.clientY - (rect.top + rect.height / 2);
+            const { mx, my } = dialVector(rect, touch.clientX, touch.clientY);
 
             if (isMouseDown) {
                 if (!window.useGlobe) {
@@ -835,6 +829,18 @@
             return (Math.round(v * DPR - half) + half) / DPR;
         }
         const snapPx = v => Math.round(v * DPR) / DPR;
+        // The dial's centre in canvas CSS px - one place for the drawing and for every hit test (the lab lifts the whole
+        // clock 15 px above the canvas middle, the widget keeps it in the middle of its round disc). The hit tests used
+        // the canvas middle, so in the lab every plaque, hover and drag sat 15 px off the drawn dial.
+        function dialCentre() {
+            const w = Math.max(80, canvasW), h = Math.max(80, canvasH);
+            return { cx: snapPx(w / 2), cy: snapPx(h / 2 - (WC_WIDGET ? 0 : 15)) };
+        }
+        // Mouse/touch position relative to the dial's centre (CSS px)
+        function dialVector(rect, clientX, clientY) {
+            const c = dialCentre();
+            return { mx: clientX - rect.left - c.cx, my: clientY - rect.top - c.cy };
+        }
 
         // --- Render helpers extracted from drawFrame (intra-file; read/write top-level state directly) ---
         function drawNumbersRing(r) {
@@ -1842,9 +1848,9 @@
             const h = Math.max(80, canvasH);
             const size = Math.min(w, h) * 0.8;
             const r = size / 2;
-            // The centre on a device-pixel corner, so the ring's straight ticks and its circle can sit on whole pixels
-            const cx = snapPx(w / 2);
-            const cy = snapPx(h / 2 - (WC_WIDGET ? 0 : 15));   // nudge the whole canvas (clock + planetarium) up 15px; DOM boxes stay edge-pinned (widget: centred in its round disc)
+            // The centre on a device-pixel corner, so the ring's straight ticks and its circle can sit on whole pixels;
+            // lab: the whole canvas (clock + planetarium) 15 px up, DOM boxes stay edge-pinned (dialCentre)
+            const { cx, cy } = dialCentre();
 
             // Sicherheitsnetz: bei degenerierten Maßen Frame überspringen.
             if (!Number.isFinite(r) || r < 1) return;
