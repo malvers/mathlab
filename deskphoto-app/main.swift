@@ -190,6 +190,98 @@ final class Guides {
     func hide() { lines.forEach { $0.orderOut(nil) } }
 }
 
+/// The group box (Doc, 21.11.2026: several selected prints resize together, "as if grouped"): while two or more prints
+/// are selected, a dashed φ-green frame around all of them with a grip at each corner. A grip scales the whole group
+/// from the opposite corner (control: about its middle), just like a grip on one of the selected prints. Only the grips
+/// take a click; the frame's transparent inside lets every click through to the prints below.
+final class GroupFrame {
+    private let panel: NSPanel
+    private let view = GroupFrameView(frame: .zero)
+    static let margin: CGFloat = 12     // between the prints' outline and the dashed line, outside their green rings
+    static let pad: CGFloat = 10        // room for the grips around the line
+
+    init(owner: AppDelegate) {
+        panel = NSPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = false
+        panel.hidesOnDeactivate = false
+        panel.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 2)   // above the prints
+        panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenNone]
+        view.owner = owner
+        panel.contentView = view
+    }
+
+    var window: NSWindow { panel }
+
+    /// `outline`: the union of the selected prints' outlines in screen coordinates; nil hides the frame.
+    func show(_ outline: NSRect?) {
+        guard let r = outline else { if panel.isVisible { panel.orderOut(nil) }; return }
+        let line = r.insetBy(dx: -GroupFrame.margin, dy: -GroupFrame.margin)
+        let f = line.insetBy(dx: -GroupFrame.pad, dy: -GroupFrame.pad)
+        panel.setFrame(f, display: false)
+        view.frame = NSRect(origin: .zero, size: f.size)
+        view.line = NSRect(x: GroupFrame.pad, y: GroupFrame.pad, width: line.width, height: line.height)
+        view.needsDisplay = true
+        if !panel.isVisible { panel.orderFront(nil) }
+    }
+}
+
+final class GroupFrameView: NSView {
+    weak var owner: AppDelegate?
+    var line: NSRect = .zero                     // the dashed frame, in this view's coordinates
+    private let gripRadius: CGFloat = 5.5
+    private let grab: CGFloat = 14               // distance around a grip that counts as grabbing it
+    private var scaling = false
+
+    var corners: [NSPoint] {
+        [NSPoint(x: line.minX, y: line.minY), NSPoint(x: line.maxX, y: line.minY),
+         NSPoint(x: line.maxX, y: line.maxY), NSPoint(x: line.minX, y: line.maxY)]
+    }
+
+    private func corner(at p: NSPoint) -> NSPoint? { corners.first { hypot($0.x - p.x, $0.y - p.y) <= grab } }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let frame = NSBezierPath(rect: line)
+        frame.lineWidth = 1.5
+        frame.setLineDash([6, 4], count: 2, phase: 0)
+        PhotoView.phi.setStroke()
+        frame.stroke()
+        for c in corners {
+            let dot = NSBezierPath(ovalIn: NSRect(x: c.x - gripRadius, y: c.y - gripRadius, width: gripRadius * 2, height: gripRadius * 2))
+            NSColor.white.setFill()
+            dot.fill()
+            dot.lineWidth = 1.5
+            dot.stroke()
+        }
+    }
+
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        let p = superview.map { convert(point, from: $0) } ?? point
+        return corner(at: p) != nil ? self : nil
+    }
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    override func mouseDown(with event: NSEvent) {
+        guard let c = corner(at: convert(event.locationInWindow, from: nil)) else { return }
+        let towards = NSPoint(x: c.x > line.midX ? 1 : -1, y: c.y > line.midY ? 1 : -1)
+        scaling = owner?.beginGroupScale(towards: towards, mouse: NSEvent.mouseLocation) ?? false
+        if scaling { NSCursor.crosshair.set() }
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard scaling else { return }
+        owner?.groupScale(to: NSEvent.mouseLocation, aboutMiddle: event.modifierFlags.contains(.control))
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        if scaling { owner?.endGroupScale() }
+        scaling = false
+        NSCursor.arrow.set()
+    }
+}
+
 // MARK: - The view that draws one print
 
 final class PhotoView: NSView {
@@ -233,7 +325,8 @@ final class PhotoView: NSView {
     /// The selection's mark: a ring in Doc's φ green (rgb 121, 158, 49) with a soft glow around the print, so a
     /// selected print stands out among the others; the corner grips carry the same green.
     private let ring = CALayer()
-    private static let phi = NSColor(srgbRed: 121 / 255, green: 158 / 255, blue: 49 / 255, alpha: 1)
+    static let phi = NSColor(srgbRed: 121 / 255, green: 158 / 255, blue: 49 / 255, alpha: 1)
+    private var groupScaling = false              // a grip of a print in a selection of several scales the whole group
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -328,6 +421,7 @@ final class PhotoView: NSView {
         for h in handles { h.opacity = on ? 1 : 0 }
         ring.opacity = on ? 1 : 0
         CATransaction.commit()
+        item?.owner?.refreshGroupFrame()
     }
 
     /// True when the point, in screen coordinates, lies on the print.
@@ -399,6 +493,7 @@ final class PhotoView: NSView {
             if shiftClick { showHandles(true) } else { item.owner?.selectOnly(item) }
         }
         group = []
+        groupScaling = false
 
         if isOnHandle(event) {
             mode = .transform
@@ -412,6 +507,9 @@ final class PhotoView: NSView {
             corner = NSPoint(x: local.x >= 0 ? 1 : -1, y: local.y >= 0 ? 1 : -1)
             anchor = onScreen(startCenter, -Double(corner.x) * Double(paperSize.width) / 2,
                               -Double(corner.y) * Double(paperSize.height) / 2)
+            // one of several selected prints: its grip scales the whole group from the group's opposite corner
+            let towards = NSPoint(x: startMouse.x >= startCenter.x ? 1 : -1, y: startMouse.y >= startCenter.y ? 1 : -1)
+            groupScaling = item.owner?.beginGroupScale(from: item, towards: towards, mouse: startMouse) ?? false
             NSCursor.crosshair.set()
         } else {
             mode = .move
@@ -441,6 +539,11 @@ final class PhotoView: NSView {
                 g.item.window.setFrameOrigin(NSPoint(x: g.origin.x + dx + snap.dx, y: g.origin.y + dy + snap.dy))
             }
             Guides.shared.show(snap.guides)
+            item?.owner?.refreshGroupFrame()
+        case .transform where groupScaling && !mods.contains(.option):
+            // several selected: all of them scale as one group (AppDelegate.groupScale); option still turns this one
+            Guides.shared.hide()
+            item?.owner?.groupScale(to: now, aboutMiddle: mods.contains(.control))
         case .transform:
             // A corner scales the print from the opposite corner, which stays where it is; control scales it about its
             // middle instead; option turns it about its middle, the size kept. The shape always stays (Doc, 15.11.2026:
@@ -505,7 +608,14 @@ final class PhotoView: NSView {
         dragged = false
         Guides.shared.hide()
         NSCursor.arrow.set()
-        if group.isEmpty { item?.commit() } else { group.forEach { $0.item.commit() } }
+        if groupScaling {
+            groupScaling = false
+            item?.owner?.endGroupScale()
+        } else if group.isEmpty {
+            item?.commit()
+        } else {
+            group.forEach { $0.item.commit() }
+        }
         group = []
     }
 
@@ -664,6 +774,7 @@ final class PhotoItem {
     /// Writes the live window position back into the record and saves. On a stand-in place only a real move by
     /// hand counts as a new place; resizing or turning it there keeps its own place for when the monitor is back.
     func commit() {
+        owner?.refreshGroupFrame()
         let f = window.frame
         if let s = stand, abs(Double(f.midX - s.x)) < 1, abs(Double(f.midY - s.y)) < 1 {
             owner?.save()                                     // size/angle changed, the place stays its own
@@ -794,7 +905,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.clearSelection()
         }
         NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] e in
-            if let self = self, !self.items.contains(where: { $0.window === e.window }) { self.clearSelection() }
+            if let self = self, !self.items.contains(where: { $0.window === e.window }), e.window !== self.groupFrame.window {
+                self.clearSelection()
+            }
             return e
         }
 
@@ -870,6 +983,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func applyVisibility() {
         items.forEach { $0.setVisible(visible) }
+        refreshGroupFrame()
         publishMenu()
     }
 
@@ -1093,6 +1207,84 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// The selected prints that can be seen, in their order on the desk.
     func selectedItems() -> [PhotoItem] {
         items.filter { $0.isSelected && $0.window.isVisible }
+    }
+
+    // MARK: several selected prints scale as one group (Doc, 21.11.2026: "as if grouped")
+
+    private lazy var groupFrame = GroupFrame(owner: self)
+    private var groupScaling: GroupScaling?
+
+    /// What a group scaling starts from: the group's outline, both possible fixed points, where the mouse took hold, and
+    /// each print's width and middle.
+    private struct GroupScaling {
+        let outline: NSRect
+        let corner: NSPoint          // the group's corner opposite the grabbed grip: stays where it is
+        let middle: NSPoint          // with control the group scales about its middle instead
+        let start: NSPoint
+        let members: [(item: PhotoItem, width: Double, centre: NSPoint)]
+    }
+
+    /// The union of the selected prints' outlines (their turned boxes), or nil while fewer than two are selected.
+    private func groupOutline() -> NSRect? {
+        let selection = selectedItems()
+        guard selection.count >= 2 else { return nil }
+        let outlines = selection.map { $0.window.frame.insetBy(dx: shadowPad, dy: shadowPad) }
+        return outlines.dropFirst().reduce(outlines[0]) { $0.union($1) }
+    }
+
+    /// The dashed group box follows the selection: shown around two or more selected prints, hidden otherwise.
+    func refreshGroupFrame() { groupFrame.show(groupOutline()) }
+
+    /// A grip was taken - of the group box, or of a print (`from`) that is one of several selected. `towards`: the grip's
+    /// side, (±1, ±1) on the screen. False when there is no group to scale; the print then scales alone, as before.
+    func beginGroupScale(from item: PhotoItem? = nil, towards: NSPoint, mouse: NSPoint) -> Bool {
+        let selection = selectedItems()
+        guard let outline = groupOutline(), item.map({ i in selection.contains { $0 === i } }) ?? true else { return false }
+        groupScaling = GroupScaling(
+            outline: outline,
+            corner: NSPoint(x: towards.x > 0 ? outline.minX : outline.maxX, y: towards.y > 0 ? outline.minY : outline.maxY),
+            middle: NSPoint(x: outline.midX, y: outline.midY),
+            start: mouse,
+            members: selection.map { ($0, $0.rec.width, NSPoint(x: $0.window.frame.midX, y: $0.window.frame.midY)) })
+        return true
+    }
+
+    /// Scales every selected print by one factor about the fixed point: its width and its distance from that point, so
+    /// the group keeps its arrangement and each print its shape. The factor is how far the mouse has gone along the line
+    /// from the fixed point through the place it took hold. No print gets narrower than 90 or wider than 2400 points,
+    /// and a growing group stops at the edge of its screen.
+    func groupScale(to mouse: NSPoint, aboutMiddle: Bool) {
+        guard let g = groupScaling else { return }
+        let a = aboutMiddle ? g.middle : g.corner
+        let ux = Double(g.start.x - a.x), uy = Double(g.start.y - a.y)
+        let reach = ux * ux + uy * uy
+        guard reach > 4 else { return }
+        var s = (Double(mouse.x - a.x) * ux + Double(mouse.y - a.y) * uy) / reach
+        let smallest = g.members.map { 90 / $0.width }.max() ?? 0
+        var largest = g.members.map { 2400 / $0.width }.min() ?? 1
+        if let screen = (NSScreen.screens.first { $0.frame.contains(a) } ?? NSScreen.main)?.visibleFrame {
+            var fit = Double.infinity
+            for (p, lo, hi, at) in [(g.outline.minX, screen.minX, screen.maxX, a.x), (g.outline.maxX, screen.minX, screen.maxX, a.x),
+                                    (g.outline.minY, screen.minY, screen.maxY, a.y), (g.outline.maxY, screen.minY, screen.maxY, a.y)] {
+                let d = Double(p - at)
+                if d > 0.5 { fit = min(fit, Double(hi - at) / d) } else if d < -0.5 { fit = min(fit, Double(lo - at) / d) }
+            }
+            largest = min(largest, max(1, fit))      // a group already past the edge may still shrink, not grow
+        }
+        s = min(max(s, smallest), max(smallest, largest))
+        for m in g.members {
+            let c = NSPoint(x: Double(a.x) + s * Double(m.centre.x - a.x), y: Double(a.y) + s * Double(m.centre.y - a.y))
+            m.item.setTransform(width: m.width * s, angle: m.item.rec.angle, center: c)
+        }
+        refreshGroupFrame()
+    }
+
+    /// The group scaling ends: every print's new size and place is saved.
+    func endGroupScale() {
+        guard let g = groupScaling else { return }
+        groupScaling = nil
+        g.members.forEach { $0.item.commit() }
+        refreshGroupFrame()
     }
 
     func save() { store.replace(items.map { $0.rec }) }
