@@ -15,9 +15,11 @@ import ServiceManagement
 
 enum Settings {
     private static let d = UserDefaults.standard
-    static let minSize: Double = 380       // smaller, the city names run over their plaques
+    /// Smallest dial: the city names (Orbitron at 3 % of the dial's radius r = 0.4 · size) stay at 7 px and more on the
+    /// LG, which shows 1 px per point (Doc, 21.11.2026: "die minimale Größe zu klein").
+    static let minSize: Double = 600
     static let maxSize: Double = 1400
-    static let defaultSize: Double = 480
+    static let defaultSize: Double = 720
 
     /// The repo's HTML folder; the lab is loaded straight from its file, no server needed (works offline, survives a
     /// stopped serve.py). Another place: `defaults write de.docalvers.docclock htmlRoot /path/to/forloop/HTML`
