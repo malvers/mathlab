@@ -26,6 +26,8 @@ fi
 [ -f ../web/fasting/private/fasting-data.js ] || echo "Hinweis: keine Fasten-Daten - vorher: python3 tools/fasting_from_excel.py"
 JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew -q testDebugUnitTest assembleDebug
 APK=app/build/outputs/apk/debug/app-debug.apk
+# the model must be inside, at assets/model-de (the gradle check guards the sources, this the result)
+unzip -l "$APK" | grep -q " assets/model-de/uuid$" || { echo "FEHLER: im APK fehlt das Sprachmodell (assets/model-de)" >&2; exit 1; }
 echo "gebaut: $(pwd)/$APK ($(du -h "$APK" | cut -f1))"
 [ "$1" = "--bauen" ] && exit 0
 if PIXEL=$(sh ../../tools/pixel-serial.sh); then

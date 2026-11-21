@@ -33,3 +33,22 @@ dependencies {
     // Android's org.json is only a stub in local unit tests: the real one for the storage tests (WeighingsTest)
     testImplementation 'org.json:json:20240303'
 }
+
+// Every APK must carry the Vosk model at assets/model-de (MainActivity: StorageService.unpack(..., "model-de", ...)).
+// It is gitignored (~45 MB, ../build.sh fetches it); a build without it installs fine but the stopwatch only says
+// "Spracherkennung fehlt" - happened on 21.11.2026 with builds from a fresh checkout, where the model's files landed
+// in assets/ itself instead of assets/model-de/. So the build stops here, loudly, before anything is compiled.
+def voskModelId = file('src/main/assets/model-de/uuid')
+tasks.register('checkVoskModel') {
+    doLast {
+        if (!voskModelId.isFile()) {
+            throw new GradleException("Vosk model missing: ${voskModelId} not found. Run docfit-app/build.sh (it puts "
+                    + "vosk-model-small-de-0.15 into app/src/main/assets/model-de) - without it DocFit has no voice control.")
+        }
+        if (file('src/main/assets/am').exists() || file('src/main/assets/uuid').exists()) {
+            throw new GradleException("Vosk model files lie directly in app/src/main/assets/ - they belong in "
+                    + "app/src/main/assets/model-de/.")
+        }
+    }
+}
+tasks.named('preBuild') { dependsOn 'checkVoskModel' }
