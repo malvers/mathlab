@@ -52,6 +52,9 @@
         (function () {
             try {
                 const params = new URLSearchParams(window.location.search);
+                // ?widget=1 → the bare dial for the DocClock desktop widget (docclock-app): no menus, no branding,
+                // transparent page around a round dial, one frame per second (worldclock.js / worldclock.css)
+                if (params.get('widget') === '1') document.documentElement.classList.add('wc-widget');
                 const raw = params.get('orga');
                 const school = raw ? raw.toLowerCase() : null;
                 if (school) document.documentElement.dataset.school = school;

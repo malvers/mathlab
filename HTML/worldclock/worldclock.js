@@ -32,6 +32,8 @@
         }
 
         // --- SETUP ---
+        // ?widget=1 (class set in the head of worldclock.html): bare dial for the DocClock desktop widget
+        const WC_WIDGET = document.documentElement.classList.contains('wc-widget');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
@@ -106,6 +108,7 @@
         // Globe vs clock mode — precedence: URL ?globe= (wins) > localStorage > default (clock).
         const GLOBE_KEY = 'worldclock-globe';
         window.useGlobe = (function () {
+            if (document.documentElement.classList.contains('wc-widget')) return false;   // widget: flat polar map, no WebGL
             const p = new URLSearchParams(window.location.search).get('globe');
             if (p === '1') return true;
             if (p === '0') return false;
@@ -1622,11 +1625,93 @@
         function draw() {
             // Loop muss IMMER weiterlaufen — auch bei Fehlern, sonst friert die Uhr ein.
             try {
-                drawFrame();
+                if (WC_WIDGET) widgetCheckDpr();
+                // Widget behind windows (page hidden): only the first frame and then one a minute, in case the
+                // page is never told it is in view again; visibilitychange below redraws at once when it is
+                if (!WC_WIDGET || !document.hidden || Date.now() - _widgetDrawn >= 60000) {
+                    drawFrame();
+                    if (WC_WIDGET) { _widgetDrawn = Date.now(); widgetShowTime(); }
+                }
             } catch (e) {
                 console.error('draw error:', e);
             }
+            if (WC_WIDGET) { widgetSchedule(); return; }
             requestAnimationFrame(draw);
+        }
+
+        // ---- Widget (?widget=1, the DocClock desktop widget) ----
+        // The digits in the middle (CyberClock, the local time) tick every second; the dial itself is redrawn every
+        // WIDGET_TICK_MS (no seconds on it, the ring turns 0.25° a minute - a frame per second measured 4 % CPU), every
+        // second while a city's panel with its seconds is open, and at full frame rate while the mouse works on it.
+        const WIDGET_TICK_MS = 10000;   // the dial at rest
+        const WIDGET_BUSY_MS = 2500;    // full frame rate this long after the last mouse event
+        let _widgetTimer = null, _widgetRaf = null;
+        let _widgetDrawn = 0;           // time of the widget's last frame
+        let _widgetBusyUntil = 0;
+        let _widgetTimeEl = null;
+        // The window may move to a screen with another pixel ratio, which fires no resize → re-fit the canvas
+        let _widgetDpr = window.devicePixelRatio || 1;
+        function widgetCheckDpr() {
+            const dpr = window.devicePixelRatio || 1;
+            if (dpr !== _widgetDpr) { _widgetDpr = dpr; resizeCanvasToContainer(); }
+        }
+        function widgetBusy() {
+            return Date.now() < _widgetBusyUntil || isMouseDown || isReturning || (displayAlpha > 0 && displayAlpha < 1);
+        }
+        function widgetSchedule() {
+            clearTimeout(_widgetTimer);
+            cancelAnimationFrame(_widgetRaf);
+            if (widgetBusy()) { _widgetRaf = requestAnimationFrame(draw); return; }
+            _widgetTimer = setTimeout(widgetTick, 1000 - (Date.now() % 1000) + 10);
+        }
+        function widgetTick() {         // once a second, just after it turns
+            if (selectedCity || Date.now() - _widgetDrawn >= WIDGET_TICK_MS - 500) { draw(); return; }
+            widgetShowTime();
+            widgetSchedule();
+        }
+        // Dresden's time (the highlighted city) as digits in the middle, where the lab writes NORDPOL; the dial's own
+        // time, so it follows a drag of the ring. A city's panel takes the middle, so the digits fade out while it is open.
+        function widgetShowTime() {
+            if (!_widgetTimeEl) {
+                _widgetTimeEl = document.createElement('div');
+                _widgetTimeEl.id = 'wc-widget-time';
+                container.appendChild(_widgetTimeEl);
+                CyberClock.mount(_widgetTimeEl, { seconds: true });
+            }
+            const tz = (localCity && localCity.tz) || 'Europe/Berlin';      // the orange city's time (Dresden)
+            const t = getDisplayTime().toLocaleTimeString('de-DE', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            if (_widgetTimeEl.dataset.t !== t) { _widgetTimeEl.dataset.t = t; CyberClock.set(_widgetTimeEl, t); }
+            _widgetTimeEl.style.opacity = String(Math.max(0, 1 - displayAlpha * 2));
+        }
+        if (WC_WIDGET) {
+            // Back in view (the windows in front moved away) → draw at once
+            document.addEventListener('visibilitychange', () => { if (!document.hidden && isAnimating) draw(); });
+            // A font that arrives after the first frame (Orbitron) → draw again, not only at the next tick
+            if (document.fonts && document.fonts.addEventListener) {
+                document.fonts.addEventListener('loadingdone', () => { if (isAnimating) draw(); });
+            }
+            // Any mouse work on the dial → full frame rate for a moment, so dragging, hovering and the city panel
+            // feel exactly like in the lab
+            const wake = () => {
+                const idle = !widgetBusy();
+                _widgetBusyUntil = Date.now() + WIDGET_BUSY_MS;
+                if (idle && isAnimating) widgetSchedule();
+            };
+            ['mousemove', 'mousedown', 'mouseup', 'wheel', 'touchstart'].forEach(t =>
+                window.addEventListener(t, wake, { passive: true, capture: true }));
+            // DocClock hands the mouse moves over here: a desktop widget's window is never active, and WebKit sends no
+            // moves to an inactive window, so hovering (pointer on a city, the panel's tooltips) would never happen.
+            // Returns the cursor the lab wants at that spot; the app shows it.
+            window.__wcWidgetHover = (x, y) => {
+                window.dispatchEvent(new MouseEvent('mousemove', { clientX: x, clientY: y }));
+                return canvas.style.cursor || 'default';
+            };
+            window.__wcWidgetLeave = () => {
+                canvas.dispatchEvent(new MouseEvent('mouseleave'));
+                hoveredCity = null;
+                hoveredFlagIndex = null;
+                canvas.style.cursor = 'default';
+            };
         }
 
         function drawFrame() {
@@ -1681,7 +1766,7 @@
             const size = Math.min(w, h) * 0.8;
             const r = size / 2;
             const cx = w / 2;
-            const cy = h / 2 - 15;   // nudge the whole canvas (clock + planetarium) up 15px; DOM boxes stay edge-pinned
+            const cy = h / 2 - (WC_WIDGET ? 0 : 15);   // nudge the whole canvas (clock + planetarium) up 15px; DOM boxes stay edge-pinned (widget: centred in its round disc)
 
             // Sicherheitsnetz: bei degenerierten Maßen Frame überspringen.
             if (!Number.isFinite(r) || r < 1) return;
@@ -1755,7 +1840,7 @@
             }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawStarfield(w, h, cx, cy);   // celestial backdrop behind everything (pol-wheel)
+            if (!WC_WIDGET) drawStarfield(w, h, cx, cy);   // celestial backdrop behind everything (pol-wheel); the widget shows the dial only
             ctx.globalAlpha = clockAlpha;  // ← whole clock fades out in sky mode (stars set their own alpha)
 
             ctx.save();
@@ -1802,7 +1887,7 @@
                 }
                 if (!lockedCity) drawPoleMarker(w, h, r);   // pole label + red dot at centre (no city selected)
             }
-            if (!window.useGlobe) drawPoleMarker(w, h, r);  // clock mode: pole is always at the centre
+            if (!window.useGlobe && !WC_WIDGET) drawPoleMarker(w, h, r);  // clock mode: pole is always at the centre (widget: the digits sit there)
 
             // 2. City markers (plaques glued to the rotating Earth) + the date line
             drawCityMarkers(r, mapRotation);
@@ -1850,10 +1935,12 @@
             ctx.restore(); // Restore from main translation
             
             // --- Legend + mode icons (top-left); writes globeIconHitbox + dirIconHitbox ---
-            drawLegendAndIcons(r);
-
             // --- Impressum (left bottom corner) ---
-            drawImprint(r, h);
+            // (neither in the widget: no legend, no icons, no imprint around its round dial)
+            if (!WC_WIDGET) {
+                drawLegendAndIcons(r);
+                drawImprint(r, h);
+            }
             
             const activeCity = selectedCity;
             if (activeCity) {
@@ -1985,6 +2072,8 @@
             if (!isAnimating && mapLoaded) {
                 isAnimating = true;
                 draw();
+            } else if (WC_WIDGET && isAnimating) {
+                try { drawFrame(); _widgetDrawn = Date.now(); widgetShowTime(); } catch (_) {}   // widget: the re-fit above cleared the canvas
             }
         }
 
@@ -1996,6 +2085,7 @@
                 _resizeRaf = null;
                 resizeCanvasToContainer();
                 updateCityInfoBoxPosition();
+                if (WC_WIDGET && mapLoaded) { try { drawFrame(); } catch (_) {} }   // widget: redraw now, not at the next tick
             });
         });
         // Search autocomplete (lokale Städte + Nominatim-Fallback)

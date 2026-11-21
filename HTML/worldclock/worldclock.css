@@ -671,3 +671,59 @@ body.planetarium-on #wc-link-icon { display: none !important; }
     padding: 6px 14px; border-radius: 0 0 0 8px;
     z-index: 100000; pointer-events: none;
 }
+
+/* --- Widget mode: ?widget=1 (html.wc-widget, set in the head of worldclock.html) ---
+   The bare dial for the DocClock desktop widget (docclock-app): the page is transparent, only a round disc in the
+   lab's own dark blue carries the clock; menus, branding, search, legend, badges and every overlay are gone. */
+html.wc-widget,
+html.wc-widget body {
+    background: transparent !important;
+    box-shadow: none !important;              /* no red LOCAL ring (file:// counts as local) */
+    overflow: hidden !important;
+}
+html.wc-widget body { display: block !important; min-height: 0 !important; }
+html.wc-widget body > :not(#main-content),
+html.wc-widget #main-content > :not(#canvas-container),
+html.wc-widget #canvas-container > :not(canvas):not(#wc-widget-time) { display: none !important; }
+html.wc-widget #main-content {
+    position: fixed !important;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+}
+html.wc-widget body > #main-content > #canvas-container {   /* beats body.cyber-shell-grid > … (cyber-lab-overrides.css) */
+    position: relative !important;
+    inset: auto !important;
+    width: min(100vw, 100vh) !important;
+    height: min(100vw, 100vh) !important;
+    border-radius: 50%;
+    overflow: hidden;
+    background: radial-gradient(circle closest-side at 50% 50%,
+        rgba(0, 210, 255, 0.35) 0%,
+        rgba(0, 100, 180, 0.15) 50%,
+        #000616 100%), #000616 !important;   /* solid base under the glow, as body gives it in the lab */
+    box-shadow: inset 0 0 0 1px rgba(0, 210, 255, 0.22);
+}
+html.wc-widget #canvas-container canvas { cursor: default; transition: none; }
+/* Dresden's time in the middle of the dial (worldclock.js widgetShowTime), the central CyberClock digits on a dark
+   plate, so they read over the white Arctic ice. Clicks go through to the dial. */
+html.wc-widget #wc-widget-time {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    --cc-size: calc(min(100vw, 100vh) * 0.058);
+    --cc-dw: 0.86em;                /* wider than the widest Orbitron 900 digit (0.834 em), else they look squeezed */
+    --cc-sw: 0.42em;
+    padding: 0.3em 0.45em;
+    border-radius: 0.2em;           /* small radius, no pill */
+    background: rgba(0, 6, 22, 0.8);
+    box-shadow: 0 0 0 1px rgba(0, 210, 255, 0.28), 0 0 0.6em rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
