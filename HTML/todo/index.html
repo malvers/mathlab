@@ -41,10 +41,12 @@
             --prio3: 121, 158, 49;
             /* Wiedervorlage (resubmission): the violet of the shared palette (svp-tokens.css --g-violet), apart from the three */
             --wv: 155, 130, 225;
-            /* the guest the list is shared with (20261122_todo_share.sql): the soft turquoise reserved for that person in
-               DocCal (#9adbd4, Doc 19.11.2026) - her chip, her items' mark, the frame while new items go to her list */
-            --c-turquoise: 154, 219, 212;
-            --turq-mark: rgb(var(--c-turquoise));
+            /* the two people of the shared list (20261122_todo_share.sql) - their chips, the bar in front of each item, the
+               frame while new items go to the other one's list. Doc, 22.11.2026: "Macht sie durchaus grün, auch wenn das mit
+               dem Grün der Prio kollidiert, und meins orange": the guest phi green, Doc lambda gold, the exact palette in
+               every scheme like the priorities (the first try was DocCal's turquoise for her) */
+            --who-doc: var(--prio2);
+            --who-guest: var(--prio3);
             --ink-light: rgb(248, 251, 255);
             --ink-navy: rgb(14, 36, 78);
             /* how strongly the buttons and pills are tinted: Blau and Grau need nearly the full colour on the phone
@@ -54,7 +56,6 @@
             --pill-a: .75;
         }
         html.svp-light { --btn-a: .3; --btn-rim-a: .85; --pill-a: .38; }   /* Hell stays as Doc approved it */
-        html.svp-light { --turq-mark: rgb(56, 160, 150); }   /* the pale turquoise vanishes on white: marks take a deeper one */
         html.svp-light .prio button:not([aria-pressed="true"]),
         html.svp-light .prio button.pd,
         html.svp-light .pill { color: var(--text); }
@@ -126,8 +127,8 @@
         /* whose items show - me / the other one / "Beide", each by name (Doc, 22.11.2026: "Ich, ihre, beide. Mit den Checkmark ... wie
            in der DocFit-App"): DocFit's person switch - equal chips, 36px flat, an outline in their colour, the chosen one
            filled, here with a ✓ in front. Only where there are two lists: once Doc shared his list, and in the guest's view.
-           The guest's chip is her turquoise (it doubles as the legend for her marked items), the others the scheme's tint
-           (phi green, DocFit's colour, is Prio 3 right below) */
+           Each person's chip in their colour (it doubles as the legend for the bars in front of the items), "Beide" in the
+           scheme's tint. With an item selected a person's chip moves it into that person's list (moveTo) */
         .who { display: flex; gap: 8px; margin: 0 0 10px; }
         .who button {
             flex: 1 1 0; min-width: 0; height: 36px; border-radius: 10px; cursor: pointer; padding: 0 6px;
@@ -138,11 +139,12 @@
         .who button[aria-checked="true"] { background: rgb(var(--c-rgb)); border-color: rgb(var(--c-rgb)); color: var(--on); }
         .who button[aria-checked="true"]::before { content: '✓\00a0'; }
         .who .wt { --c-rgb: var(--tint); --on: var(--bg); }
-        .who .wg { --c-rgb: var(--c-turquoise); --on: var(--ink-navy); }
+        .who .wd { --c-rgb: var(--who-doc); --on: var(--ink-navy); }
+        .who .wg { --c-rgb: var(--who-guest); --on: var(--ink-navy); }
         html.svp-light .who button:not([aria-checked="true"]) { color: var(--text); }
-        html.svp-light .who .wg:not([aria-checked="true"]) { border-color: var(--turq-mark); }
-        /* new items go to the guest's list: the entry card says so with her colour */
-        #entry.to-guest { border-color: var(--turq-mark); }
+        /* new items go to the other one's list ("Aufgabe für ..."): the entry card says so with that person's colour */
+        #entry.to-doc { border-color: rgb(var(--who-doc)); }
+        #entry.to-guest { border-color: rgb(var(--who-guest)); }
 
         /* sharing with one guest (20261122_todo_share.sql): the section under the gear and the one-time QR code, as in DocCal */
         .set-sep { border: 0; border-top: 1px solid var(--line); margin: 16px 0 14px; }
@@ -224,19 +226,23 @@
             color: var(--ink-navy); font: 700 11px/18px Orbitron, sans-serif; letter-spacing: .06em; white-space: nowrap;
         }
         html.svp-light .wv-tag { color: var(--text); }
-        /* an item of Doc's list the guest added: "von <Name>" (Doc's view) / "von dir" (hers) in her turquoise */
+        /* an item of Doc's list the guest added: "von <Name>" (Doc's view) / "von dir" (hers) in her colour */
         .who-tag {
             display: inline-block; margin: -5px 0 8px 2px; padding: 0 6px; height: 20px; border-radius: 5px;
-            border: 1px solid var(--turq-mark); color: var(--turq-mark);
+            border: 1px solid rgb(var(--who-guest)); color: rgb(var(--who-guest));
             font: 700 11px/18px Orbitron, sans-serif; letter-spacing: .06em; white-space: nowrap;
         }
         .wv-tag + .who-tag { margin-left: 6px; }
         html.svp-light .who-tag { color: var(--text); }
-        /* an item of the guest's own list: a turquoise bar on its left edge and, while open, a turquoise circle - so in
-           "Beide" it is clear at a glance whose it is (checked: the bar fainter, the circle grey like all checked ones) */
-        ul.list li.guest { box-shadow: inset 4px 0 0 var(--turq-mark); }
-        ul.list li.guest.done { box-shadow: inset 4px 0 0 rgba(var(--c-turquoise), .4); }
-        ul.list li.guest:not(.done) button.chk { color: var(--turq-mark); }
+        /* whose an item is: a bar on its left edge in the owner's colour, in every view (Doc, 22.11.2026: "Bei [ihr] habt
+           ihr vorne so eine Farbbar gemacht. Das können wir bei mir bitte auch machen"); checked: the bar fainter */
+        ul.list li.who-d { --o: var(--who-doc); }
+        ul.list li.who-g { --o: var(--who-guest); }
+        ul.list li.who-d, ul.list li.who-g { box-shadow: inset 4px 0 0 rgb(var(--o)); }
+        ul.list li.who-d.done, ul.list li.who-g.done { box-shadow: inset 4px 0 0 rgba(var(--o), .4); }
+        ul.list li.who-d:not(.done) button.chk, ul.list li.who-g:not(.done) button.chk { color: rgb(var(--o)); }
+        /* on white the gold circle all but vanishes (it is a tap target): in Hell the circles stay neutral, the bar says whose */
+        html.svp-light ul.list li.who-d:not(.done) button.chk, html.svp-light ul.list li.who-g:not(.done) button.chk { color: var(--muted); }
 
         /* the date question of WV: three quick picks, a date field of its own, OK */
         .wv-what { margin: -10px 0 16px; font: 15px/1.4 Raleway, sans-serif; color: var(--muted);
@@ -531,6 +537,7 @@
 
             let items = [];          // { id, text, done, done_at, created_at, prio, pos, wv_date, shared_by, list, key } - both lists
             let editingId = null;    // key of the item whose text is being edited in place - no re-render meanwhile
+            let textSaved = Promise.resolve();   // the last text edit on its way to the database (a move waits for it)
             let dragging = false;    // an item is being dragged - no re-render meanwhile
             let busy = 0;            // writes in flight - a reload now could bring back the old state
             let filter = 0;          // the one priority shown, 'done' = only the checked items, 'wv' = only WV items, 0 = all
@@ -648,12 +655,15 @@
             const store = GUEST ? {
                 insert: (list, fresh) => guestRpc('todo_shared_save', { p_list: list, p_id: null, p_item: fresh }).then(r => (r ? [r] : [])),
                 patch: (x, next) => guestRpc('todo_shared_save', { p_list: x.list, p_id: x.id, p_item: next }).then(r => (r ? [r] : [])),
-                remove: (list, ids) => guestRpc('todo_shared_remove', { p_list: list, p_ids: ids })
+                remove: (list, ids) => guestRpc('todo_shared_remove', { p_list: list, p_ids: ids }),
+                move: (x, pos) => guestRpc('todo_shared_move', { p_from: x.list, p_id: x.id, p_pos: pos })
             } : {
                 insert: (list, fresh) => send(TABLE[list], 'POST', [list === 'own' ? Object.assign({ share_id: share.id }, fresh) : fresh]),
                 patch: (x, next) => send(`${TABLE[x.list]}?id=eq.${x.id}`, 'PATCH', next),
                 // one checked item (its bin) or all shown checked ones (the bin in the "Done" head)
-                remove: (list, ids, one) => send(one ? `${TABLE[list]}?id=eq.${ids[0]}` : `${TABLE[list]}?id=in.(${ids.join(',')})&done=is.true`, 'DELETE')
+                remove: (list, ids, one) => send(one ? `${TABLE[list]}?id=eq.${ids[0]}` : `${TABLE[list]}?id=in.(${ids.join(',')})&done=is.true`, 'DELETE'),
+                // into the other list (20261122b_todo_move.sql): the moved item in its new list, or null
+                move: (x, pos) => send('rpc/todo_move', 'POST', { p_from: x.list, p_id: x.id, p_pos: pos })
             };
 
             /* Doc's page: his items as always; todo.shared_by and the guest's list only once todo_share answered (before the
@@ -707,9 +717,9 @@
 
             /* an open WV item shows its date under the text; one still waiting has no grip (its group is ordered by date).
                The mail button only on Doc's page and Doc's items (todo-mail mails him the row of table todo with that id);
-               an item of the guest's list carries her mark (class guest), one she added to Doc's list a "von ..." tag */
+               with two lists every item carries its owner's bar (who-d / who-g), one she added to Doc's list a "von ..." tag */
             const row = (x, t) =>
-                `<li data-id="${x.key}" class="${x.done ? 'done' : ''}${x.list === 'own' ? ' guest' : ''}">` +
+                `<li data-id="${x.key}" class="${x.done ? 'done' : ''}${twoLists() ? (x.list === 'own' ? ' who-g' : ' who-d') : ''}">` +
                 `<button class="chk" type="button" aria-label="${x.done ? 'Wieder offen' : 'Abhaken'}">${x.done ? ICON_DONE : ICON_OPEN}</button>` +
                 `<div class="mid"><span class="txt">${esc(x.text)}</span>` +
                 (x.wv_date && !x.done ? `<span class="wv-tag">WV ${dayLabel(x.wv_date)}</span>` : '') +
@@ -1062,7 +1072,7 @@
                     const text = span.textContent.replace(/\s+/g, ' ').trim();
                     if (!text || text === x.text) { span.textContent = x.text; return; }
                     const old = x.text;
-                    write(() => { x.text = text; }, () => { x.text = old; },
+                    textSaved = write(() => { x.text = text; }, () => { x.text = old; },
                         () => store.patch(x, { text }));
                 };
             }
@@ -1132,23 +1142,69 @@
                The chips carry names, not "Ich" (Doc, 22.11.2026: "bei Ich schreibt nicht Ich, sondern Doc"): on Doc's page
                "Doc | <the share's label> | Beide", on the guest's page - as in DocCal - "<her label> | Michi | Beide".
                "me" is whoever looks: on Doc's page his list, on the guest's page hers. New items go into "me" - and into
-               the other one's list while that one is chosen (the entry card then says so: placeholder, and her colour while
-               it is her list). Doc may change the guest's items like his own (only the mail button stays his). */
+               the other one's list while that one is chosen (the entry card then says so: "Aufgabe für ...", framed in that
+               person's colour). Doc may change the guest's items like his own (only the mail button stays his).
+               With an item selected (its text tapped, gold frame) a person's chip moves it instead (moveTo). */
             function paintView() {
                 const two = twoLists();
                 $('who').hidden = !two;
                 const [me, other] = $('who').children;
                 me.textContent = GUEST ? (guestShare && guestShare.label) || 'Meine' : 'Doc';
                 other.textContent = GUEST ? OWNER_LABEL : guestName();
-                me.className = GUEST ? 'wg' : 'wt';          // the guest's chip is always her turquoise
-                other.className = GUEST ? 'wt' : 'wg';
+                me.className = GUEST ? 'wg' : 'wd';          // each person's chip in their colour: Doc gold, the guest green
+                other.className = GUEST ? 'wd' : 'wg';
                 for (const b of $('who').children) b.setAttribute('aria-checked', String(b.dataset.view === view));
                 const to = target();
-                $('entry').classList.toggle('to-guest', two && to === 'own');
+                $('entry').classList.toggle('to-doc', two && to !== ME && to === 'doc');
+                $('entry').classList.toggle('to-guest', two && to !== ME && to === 'own');
                 // short enough for a 360px phone ("Für Michi: was ist zu tun?" was cut off)
                 const forWhom = 'Aufgabe für ' + (GUEST ? OWNER_LABEL : guestName());
                 $('text').placeholder = to === ME ? 'Was ist zu tun?' : forWhom;
                 $('text').setAttribute('aria-label', to === ME ? 'Neue Aufgabe' : 'Neue ' + forWhom);
+            }
+            /* a tap on a chip: with an item selected it moves the item (the view stays), else it chooses the view */
+            function whoChip(v) {
+                if (editingId) moveTo(editingId, v);
+                else setView(v);
+            }
+            /* The selected item into the list of the person whose chip was tapped (Doc, 22.11.2026: "Wenn ich ein Item
+               selektiere und auf [sie] drücke, soll das Item zu [ihr] wechseln. Gleiches gilt für Doc. Aber nur wenn es
+               selektiert ist."). Text, priority, WV date and tick stay; an open item goes on top of its priority (like
+               reprio). Its own list's chip or "Beide" just ends the selection. The view never changes - an item that
+               leaves it is announced in the status line. One transaction in the database (todo_move / todo_shared_move,
+               20261122b_todo_move.sql): the old row goes to the history, the item gets a new id in the other list. */
+            async function moveTo(key, v) {
+                const span = $('lists').querySelector(`li[data-id="${key}"] .txt`);
+                if (span) span.blur();   // ends the selection; a changed text is saved first
+                const x = byId(key);
+                const to = v === 'me' ? ME : v === 'other' ? OTHER : null;
+                if (!x || !to || x.list === to) return;
+                await textSaved;         // the database copies the row: the edited text must be in it
+                if (!items.includes(x)) return;
+                const pos = x.done || x.wv_date ? null : topIn(x.prio, x, to);
+                const name = to === ME ? null : GUEST ? OWNER_LABEL : guestName();
+                busy++;
+                try {
+                    const r = await store.move(x, pos);
+                    if (!r) throw new Error('nicht mehr da');
+                    items = items.filter(y => y !== x);
+                    items.push(norm(r, to));
+                    status(name ? 'Zu ' + name + ' verschoben.' : 'In deine Liste verschoben.');
+                } catch (e) {
+                    status(e.message === 'HTTP 404'
+                        ? (GUEST ? 'Verschieben geht noch nicht – ' + OWNER_LABEL + ' muss die Datenbank erst aktualisieren.'
+                            : 'Verschieben braucht noch das SQL 20261122b_todo_move.sql.')
+                        : 'Nicht verschoben (' + e.message + ') – bitte nochmal.', 'err');
+                } finally {
+                    busy--;
+                    render();
+                    cache();
+                }
+            }
+            /* on top of priority `prio` for an item moving into list `to`: above that list's items and above all shown ones */
+            function topIn(prio, except, to) {
+                const group = items.filter(y => (shows(y) || y.list === to) && !y.done && y.prio === prio && !y.wv_date && y !== except);
+                return group.length ? Math.min(...group.map(y => y.pos)) - 1 : 0;
             }
             function setView(v) {
                 if (!['me', 'other', 'both'].includes(v) || v === view) return;
@@ -1358,7 +1414,7 @@
                 $('delAll').innerHTML = ICON_DEL;
                 $('delAll').onclick = removeDone;
                 $('who').addEventListener('pointerdown', e => e.preventDefault());   // typed text stays, the keyboard open
-                $('who').onclick = e => { const b = e.target.closest('button'); if (b) setView(b.dataset.view); };
+                $('who').onclick = e => { const b = e.target.closest('button'); if (b) whoChip(b.dataset.view); };
                 $('shareCreate').onclick = createShare;
                 $('shareLabel').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); createShare(); } });
                 $('shareQr').onclick = shareCode;
