@@ -24,6 +24,7 @@ window.BuchPT && BuchPT.add('gy12', {
         'Stichprobenumfang $n$': 'Dimensão da amostra $n$', 'Neue Stichprobe': 'Nova amostra', '+1000 Stichproben': '+1000 amostras', 'Anzahl': 'Número',
         'Füllmengen der Stichprobe als Punktdiagramm mit ihrem Mittelwert und dem Sollwert': 'Volumes da amostra num diagrama de pontos, com a sua média e o valor nominal',
         'Sollwert': 'Valor nominal',
+        // book pt-8 mathegy12-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12/*)
@@ -43,11 +44,13 @@ window.BuchPT && BuchPT.add('gy12', {
         ['$ zu tief.', '$.'], ['Die Anlage füllt im Mittel $\\mu = ', 'A máquina enche, em média, $\\mu = '],
         ['$ ml mit der Standardabweichung $\\sigma = ', '$ ml, com o desvio padrão $\\sigma = '],
         ['$ ml ab. Das weiß die Prüferin aber nicht: Sie schätzt beides aus der Stichprobe.', '$ ml. Mas a inspetora não sabe isso: estima os dois valores a partir da amostra.'],
+        // book pt-8 mathegy12-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-5 mathe13lk-pt:
         // summen: "Doppelt so viele Streifen: Der Fehler wird etwa um den Faktor $2{,}0$ kleiner."
         [/Doppelt so viele Streifen: Der Fehler wird etwa um den Faktor \$([^$]*)\$ kleiner\./g, 'Com o dobro das faixas, o erro fica cerca de $$$1$$ vezes menor.'],
+        // book pt-8 mathegy12-pt:
     ]
 });

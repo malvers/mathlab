@@ -327,3 +327,19 @@ mit Praktikum, Fachhochschulreife ≈ Zugang zu den institutos politécnicos). A
 | Gaußsche Zahlenebene · Realteil · Imaginärteil · konjugiert | plano de Argand · parte real · parte imaginária · conjugado | |
 | Schaltalgebra · Wahrheitstafel · Reihe / parallel · Öffner | álgebra de circuitos · tabela de verdade · série / paralelo · contacto normalmente fechado | Konjunktion / Disjunktion / Negation = conjunção / disjunção / negação; Halbaddierer = semissomador |
 | Wechselschaltung (Treppenhaus) | circuito de escada | Lampe an / aus = acesa / apagada |
+
+## mathefos12-pt (FOS 12, block pt-7)
+
+Terms the book adds go here.
+
+## mathegy12-pt (GY 12 Grundkurs, block pt-8)
+
+Terms the book adds go here.
+
+## mathegy11-pt (GY 11 Grundkurs, block pt-9)
+
+Terms the book adds go here (the new module `exponential.js`, its pt0 part included).
+
+## mathegy6-pt (GY 6, block pt-10)
+
+Terms the book adds go here (the new modules `geometrie.js` and `gy6.js`, their pt0 parts included).

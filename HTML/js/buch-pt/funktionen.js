@@ -102,6 +102,9 @@ window.BuchPT && BuchPT.add('funktionen', {
         'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.': 'Arrasta os zeros ao longo do eixo $Ox$. A multiplicidade 0 retira o fator linear.',
         'Ganzrationale Funktion mit verschiebbaren Nullstellen': 'Função polinomial com zeros que se podem deslocar',
         'fünffach': 'quíntuplo', 'sechsfach': 'sêxtuplo', 'siebenfach': 'sétuplo', 'achtfach': 'óctuplo', 'neunfach': 'nónuplo',
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -191,6 +194,9 @@ window.BuchPT && BuchPT.add('funktionen', {
         ['Für $x \\to +\\infty$ geht $f(x) \\to ', 'Para $x \\to +\\infty$, $f(x) \\to '],
         ['$, für $x \\to -\\infty$ geht $f(x) \\to ', '$; para $x \\to -\\infty$, $f(x) \\to '],
         ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Só decide a parcela com a potência mais alta: $'],
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -230,5 +236,8 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-6 mathefos11-pt:
         // funktion: "die Kurve <b>2-mal</b>"
         [/<b>(\d+)-mal<\/b>/g, '<b>$1 vezes</b>'],
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     ]
 });

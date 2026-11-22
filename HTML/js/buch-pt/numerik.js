@@ -23,6 +23,9 @@ window.BuchPT && BuchPT.add('numerik', {
         'Zufallspunkte im Rechteck, Treffer unter der Parabel': 'Pontos aleatórios no retângulo, acertos abaixo da parábola',
         // book pt-3 mathe13-pt:
         // book pt-5 mathe13lk-pt:
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs numerik/*)
@@ -36,6 +39,9 @@ window.BuchPT && BuchPT.add('numerik', {
         ['. Der Anteil der Treffer unter ', '. A proporção de acertos abaixo de '], [' schätzt den Anteil der Fläche.', ' estima a proporção da área.'],
         // book pt-3 mathe13-pt:
         // book pt-5 mathe13lk-pt:
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -44,5 +50,8 @@ window.BuchPT && BuchPT.add('numerik', {
         [/Von \$(\d+)\$ Punkten liegen \$/g, (m, n) => 'Dos $' + n + '$ pontos, $'],
         // book pt-3 mathe13-pt:
         // book pt-5 mathe13lk-pt:
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     ]
 });

@@ -56,6 +56,9 @@ window.BuchPT && BuchPT.add('vektoren', {
         'Spiegelpunkt P′ zeigen': 'Mostrar o simétrico P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Constante $d$ em $\\vec{n} \\cdot \\vec{x} = d$',
         'Der Normalenvektor darf nicht der Nullvektor sein.': 'O vetor normal não pode ser o vetor nulo.',
         '$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.': '$t = 0$: o ponto $P$ pertence ao plano; a sua distância é $0$.',
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs vektoren/*)
@@ -137,6 +140,9 @@ window.BuchPT && BuchPT.add('vektoren', {
         ['$ · Lotgerade $l\\colon \\vec{x} = ', '$ · reta perpendicular $l\\colon \\vec{x} = '], ['$ in $E$ einsetzen: $', '$ substituída em $E$: $'], ['$, also $t = ', '$, logo $t = '],
         ['$ · Lotfußpunkt $F(', '$ · pé da perpendicular $F('], ['Abstand: $', 'Distância: $'], ['$ · ohne Lotfußpunkt: $\\dfrac{|', '$ · sem o pé da perpendicular: $\\dfrac{|'],
         ['Spiegelpunkt: $t$ verdoppeln, $', 'Simétrico: duplicar $t$, $'], ['$, also $P\'(', '$, logo $P\'('],
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -166,5 +172,8 @@ window.BuchPT && BuchPT.add('vektoren', {
         [/(data-p="par">)(?:\u0003\d+\u0004|parallel)(?=<\/button>)/g, '$1paralelas'],
         // lot3d: the vector of two points with a prime, \vec{OP'} → \overrightarrow{OP'} (the rule of pt-2 reads two capitals only)
         [/\\vec\{([A-Z]{2}')\}/g, '\\overrightarrow{$1}'],
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     ]
 });

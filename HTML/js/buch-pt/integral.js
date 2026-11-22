@@ -48,6 +48,8 @@ window.BuchPT && BuchPT.add('integral', {
         // zwischenflaeche (lb3-3): Schnittstelle = abcissa do ponto de interseção, Differenzfunktion = função diferença
         'Parabel und Gerade': 'Parábola e reta', 'Kubik und Parabel': 'Cúbica e parábola', 'Sinus und Kosinus': 'Seno e cosseno', 'Funktionen': 'Funções',
         'Fläche zwischen zwei Graphen': 'Área entre dois gráficos', 'Zu wenige Schnittstellen im Bild.': 'Poucos pontos de interseção na figura.',
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs integral/*)
@@ -76,6 +78,8 @@ window.BuchPT && BuchPT.add('integral', {
         [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Atenção: $a > b$ troca o sinal.'],
         // zwischenflaeche
         
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -83,5 +87,7 @@ window.BuchPT && BuchPT.add('integral', {
         // zwischenflaeche: a list of intersections with a decimal comma ("0,785, 3,927") is separated by semicolons, as in A(1,5; 2)
         [/(Schnittstellen: [^<]*)/g, m => (/\{,\}/.test(m) ? m.replace(/\$, \$/g, '$; $') : m)],
         // book pt-5 mathe13lk-pt:
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
     ]
 });

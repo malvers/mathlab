@@ -27,6 +27,7 @@ window.BuchPT && BuchPT.add('gy11', {
         // drehmatrix (lb7-2): Drehmatrix = matriz de rotação
         'Eine Figur wird mit einer Drehmatrix um den Ursprung gedreht': 'Uma figura é rodada em torno da origem com uma matriz de rotação',
         'Drehwinkel $\\varphi$': 'Ângulo de rotação $\\varphi$',
+        // book pt-9 mathegy11-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11/*)
@@ -43,6 +44,7 @@ window.BuchPT && BuchPT.add('gy11', {
         ['Andersherum: ', 'Pela ordem inversa: '], [' Das Kommutativgesetz gilt für Matrizen im Allgemeinen nicht.', ' Em geral, a propriedade comutativa não vale para matrizes.'],
         // drehmatrix
         ['$ · Gedreht wird um den Ursprung gegen den Uhrzeigersinn.', '$ · A rotação é feita em torno da origem, no sentido contrário ao dos ponteiros do relógio.'],
+        // book pt-9 mathegy11-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -56,5 +58,6 @@ window.BuchPT && BuchPT.add('gy11', {
             (m, a, b, c, d, e, f) => 'Tipos: $(' + a + ' \\times ' + b + ') \\cdot (' + c + ' \\times ' + d + ') = ' + e + ' \\times ' + f + '$ · Clica num elemento do resultado.'],
         [/Zeile (\d) von \$([AB])\$ mal Spalte (\d) von \$([AB])\$: /g, 'Linha $1 de $$$2$$ vezes coluna $3 de $$$4$$: '],
         [/\$([AB]) \\cdot ([AB])\$ hat den Typ \$\((\d),(\d)\)\$, ist also etwas ganz anderes\./g, (m, a, b, c, d) => '$' + a + ' \\cdot ' + b + '$ é do tipo $' + c + ' \\times ' + d + '$: é algo completamente diferente.'],
+        // book pt-9 mathegy11-pt:
     ]
 });

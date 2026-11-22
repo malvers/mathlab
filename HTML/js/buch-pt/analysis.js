@@ -69,6 +69,9 @@ window.BuchPT && BuchPT.add('analysis', {
         'Verkaufspreis $p$ (€ pro Stück)': 'Preço de venda $p$ (€ por unidade)', 'x in Stück': 'x em unidades', 'Kosten, Erlös und Gewinn': 'Custo, receita e lucro',
         'Bei diesem Preis wird nie Gewinn gemacht.': 'A este preço nunca há lucro.', 'Kein positives Gewinnmaximum.': 'Não há lucro máximo positivo.',
         // book pt-6 mathefos11-pt:
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -165,6 +168,9 @@ window.BuchPT && BuchPT.add('analysis', {
         ['$, Gewinngrenze bei $x \\approx ', '$, limite do lucro em $x \\approx '], ['$ Stück.', '$ unidades.'],
         ['Gewinn ab $x \\approx ', 'Lucro a partir de $x \\approx '], ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Lucro máximo: $G\'(x) = 0$ em $x \\approx '], ['$ Stück, $G \\approx ', '$ unidades, $G \\approx '],
         // book pt-6 mathefos11-pt:
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -182,5 +188,8 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-4 mathe12lk-pt:
         // book pt-5 mathe13lk-pt:
         // book pt-6 mathefos11-pt:
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     ]
 });

@@ -111,6 +111,9 @@ window.BuchPT && BuchPT.add('stochastik', {
         '$n$ (Zeile)': '$n$ (linha)',
         '$k$ (Stelle)': '$k$ (posição)',
         'Pascalsches Dreieck bis zur Zeile 10': 'Triângulo de Pascal até à linha 10',
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -215,6 +218,9 @@ window.BuchPT && BuchPT.add('stochastik', {
         ['Pascalsches Dreieck bis zur Zeile ', 'Triângulo de Pascal até à linha '],
         ['Die Mitte der Zeile: $', 'O meio da linha: $'],
         ['}$ ist hier sein eigenes Spiegelbild.', '}$ é aqui a sua própria imagem simétrica.'],
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -266,5 +272,8 @@ window.BuchPT && BuchPT.add('stochastik', {
         [/(\d{1,3}(?:\.\d{3})*) Möglichkeiten sind zu viele zum Auflisten\./g, '$1 possibilidades são demasiadas para listar.'],
         // pascal: "$, denn $2$ auswählen heißt $3$ weglassen."
         [/\$, denn \$(\d+)\$ auswählen heißt \$(\d+)\$ weglassen\./g, (m, k, r) => '$, porque escolher $' + k + '$ é deixar de fora $' + r + '$.'],
+        // book pt-7 mathefos12-pt:
+        // book pt-8 mathegy12-pt:
+        // book pt-9 mathegy11-pt:
     ]
 });
