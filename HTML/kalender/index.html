@@ -110,14 +110,15 @@
             .bar #gearBtn { order: 5; }
         }
         @media (min-width: 1260px) {
-            /* wide: all in one row, the period right behind the entry field and in the middle of the page - the field ends
-               half the group before the middle (50% of the bar less mic, two gaps and half the group); the buttons after it
-               keep to the right. From about 1290px it is exactly in the middle, at 1260px 14px left of it (measured head-less).
-               A guest who may only read has no field: there the margin alone puts the period in the middle */
+            /* wide: all in one row, the period right behind the entry field and the search, in the middle of the page - the
+               field ends half the group before the middle (50% of the bar less mic, search, three gaps and half the group);
+               the buttons after it keep to the right. From about 1290px it is exactly in the middle, at 1260px 14px left of
+               it (measured head-less). A guest who may only read has no field and no mic: there the margin alone (less the
+               search) puts the period in the middle */
             .bar { flex-wrap: nowrap; }
             .row2 .nav { order: 2; flex: 0 0 var(--nav-w); margin-right: auto; }
-            .bar:has(> .row2 > .nav:not([hidden])) #text { flex: 0 1 calc(50% - var(--nav-w) / 2 - var(--ctl) - 16px); }
-            .bar:has(> #text[hidden]) .row2 .nav { margin-left: calc(50% - var(--nav-w) / 2); }
+            .bar:has(> .row2 > .nav:not([hidden])) #text { flex: 0 1 calc(50% - var(--nav-w) / 2 - 2 * var(--ctl) - 24px); }
+            .bar:has(> #text[hidden]) .row2 .nav { margin-left: calc(50% - var(--nav-w) / 2 - var(--ctl) - 8px); }
         }
         .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -547,6 +548,80 @@
         /* no entry field before it (a guest who may only read): the button is the first in the row, so the popover
            opens to the right and stays on the screen */
         .bar:has(> #text[hidden]) .filter-pop { left: 0; right: auto; }
+
+        /* ---------- search (Doc, 22.11.2026: the calendar had none) ----------
+           The magnifier opens a panel under the header like the settings: field, then the hits by month, the past folded
+           away. Body text Arial, headings and dates Orbitron (Doc, 21.11.2026: "für die Fließtexte ... Arial") */
+        /* the button: up to 899px at the end of the views row - on the phone the entry field keeps the room for its whole
+           "Neuer Termin" (at 390px it has 172px and the words need 150, a fifth icon in that row would leave 124); from
+           900px right behind the entry field (order 2 like it, later in the page), so before the people button - from
+           1260px in week and month the period follows it, and the field gives up the room (see the 1260px block): on the
+           right of the period it would have pushed the period up to 60px out of the middle */
+        .row2 .search-btn { margin-left: auto; }
+        @media (min-width: 900px) { .row2 .search-btn { order: 2; margin-left: 0; } }
+        .search-pop {
+            position: absolute; top: calc(100% + 6px); right: 16px; z-index: 5; width: min(520px, calc(100% - 32px));
+            display: flex; flex-direction: column; padding: 12px 12px 4px; border-radius: 14px;
+            background: var(--card); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
+            max-height: calc(100dvh - 100% - 18px);   /* like the settings: never below the window, the list scrolls inside */
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        @media (max-width: 599px) { .search-pop { left: 8px; right: 8px; width: auto; } }
+        .search-row { flex: none; display: flex; gap: 8px; }
+        .search-field { position: relative; flex: 1 1 auto; min-width: 0; }
+        .search-field svg { position: absolute; left: 10px; top: 50%; width: 20px; height: 20px; margin-top: -10px; fill: var(--muted); pointer-events: none; }
+        .search-field input {
+            width: 100%; height: var(--ctl); background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
+            padding: 0 12px 0 38px; font: 17px Arial, Helvetica, sans-serif; -webkit-appearance: none; appearance: none;
+        }
+        .search-field input::placeholder { color: var(--muted); }
+        .search-field input:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
+        .search-field input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }   /* ✕ beside it closes */
+        .search-sum { flex: none; margin: 8px 2px 2px; font: 14px/1.4 Arial, Helvetica, sans-serif; color: var(--muted); }
+        .search-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin: 0 -6px; padding: 0 6px 8px; }
+        .search-list:empty { display: none; }
+        .sr-month {
+            position: sticky; top: 0; z-index: 1; margin: 0; padding: 10px 4px 6px; background: var(--card);
+            font: 700 11px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+        }
+        ul.sr { list-style: none; margin: 0; padding: 0; }
+        ul.sr li + li { border-top: 1px solid var(--line); }
+        .sr-row {
+            display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 10px; align-items: start; width: 100%; margin: 0;
+            padding: 7px 6px; border: 0; border-radius: 8px; background: transparent; color: var(--text); cursor: pointer; text-align: left;
+        }
+        .sr-row:hover { background: rgba(var(--tint), .1); }
+        .sr-row:focus-visible { outline: 2px solid var(--lambda); outline-offset: -2px; }
+        /* the day like a small calendar sheet: weekday over the date, today's date in λ */
+        .sr-day { display: block; padding-top: 1px; text-align: center; font: 700 17px/1.1 Orbitron, sans-serif; font-variant-numeric: tabular-nums; }
+        .sr-day small { display: block; margin-bottom: 2px; font: 700 10px/1.2 Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+        .sr-row.today .sr-day b { color: var(--lambda); }
+        .sr-body { display: block; min-width: 0; border-left: 4px solid rgb(var(--c)); padding-left: 10px; }   /* the tile's colour */
+        .sr-title { display: block; font: 600 15px/1.35 Arial, Helvetica, sans-serif; overflow-wrap: anywhere; }
+        .sr-meta, .sr-note { display: block; margin-top: 2px; font: 13px/1.4 Arial, Helvetica, sans-serif; color: var(--muted); overflow-wrap: anywhere; }
+        .sr-meta svg { width: 13px; height: 13px; fill: currentColor; vertical-align: -2px; margin-right: 2px; }
+        .sr-note { font-style: italic; }
+        mark.sr-hl { background: rgba(var(--c-gold), .85); color: var(--ink-navy); border-radius: 3px; padding: 0 1px; }   /* a highlighter: navy on gold in every scheme */
+        .sr-row.off { opacity: .55; }
+        .sr-row.off .sr-title { text-decoration: line-through; }
+        .sr-empty { margin: 6px 4px 4px; font: 14px Arial, Helvetica, sans-serif; color: var(--muted); }
+        .sr-past { margin-top: 6px; border-top: 1px solid var(--line); }
+        .sr-past > summary {
+            list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; min-height: var(--ctl); padding: 0 4px;
+            font: 700 12px Orbitron, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--text);
+        }
+        .sr-past > summary::-webkit-details-marker { display: none; }
+        .sr-past > summary::before {
+            content: ''; border-left: 6px solid currentColor; border-top: 5px solid transparent; border-bottom: 5px solid transparent; transition: transform .15s;
+        }
+        .sr-past[open] > summary::before { transform: rotate(90deg); }
+        .sr-past > summary:focus-visible { outline: 2px solid var(--lambda); outline-offset: -2px; border-radius: 8px; }
+        /* the entry a hit jumped to: a ring in the text colour (a gold one vanished on the gold tiles) pulsing in λ for a
+           few seconds, also through the half-minute redraws */
+        .hit { outline: 3px solid var(--text); outline-offset: 2px; animation: hit-pulse 1s ease-in-out 3; }
+        .wk-ev.hit, .chip.hit { z-index: 3; outline-offset: 1px; }
+        @keyframes hit-pulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--lambda) 35%, transparent); } }
+
         /* reminder chips: several may be on */
         .chips { display: flex; flex-wrap: wrap; gap: 8px; }
         .chips button {
@@ -589,7 +664,7 @@
         @media (max-width: 560px) { #ed .ed { padding-bottom: max(14px, env(safe-area-inset-bottom)); } }
 
         .wk-ev.cw, .chip.cw { background: var(--both); }
-        .cw .ev-body { border-left-color: transparent; border-image: var(--both-v) 1; }
+        .cw .ev-body, .cw .sr-body { border-left-color: transparent; border-image: var(--both-v) 1; }
         .hero.cw::before, .hero.cw .hero-bar i { background: var(--both-v); }
         .hero.cw .hero-bar i { background: linear-gradient(90deg, rgb(var(--c-gold)) 0 50%, rgb(var(--c-turquoise)) 50% 100%); }
 
@@ -690,6 +765,11 @@
                     <button type="button" role="tab" data-view="week" aria-selected="false" title="Woche (Taste W)" aria-keyshortcuts="W">Woche</button>
                     <button type="button" role="tab" data-view="month" aria-selected="false" title="Monat (Taste M)" aria-keyshortcuts="M">Monat</button>
                 </div>
+                <!-- search: up to 899px at the end of this row, from 900px in the bar right behind the entry field (CSS order);
+                     Material Icons "search" (Apache 2.0) -->
+                <button class="icon search-btn" id="searchBtn" type="button" aria-label="Suchen" aria-expanded="false" aria-controls="searchPop" aria-keyshortcuts="/ Meta+F Control+F">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                </button>
                 <div class="nav" id="nav" hidden>
                     <!-- Material Icons "chevron_left" / "chevron_right" (Apache 2.0) -->
                     <button class="icon" id="prevBtn" type="button" aria-label="Zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
@@ -755,6 +835,19 @@
                 <hr class="set-sep">
                 <button class="wide" id="guestForget" type="button">Zugang hier entfernen</button>
             </div>
+        </div>
+        <!-- the search: live over title, place and notes; the hits by month, tap = go there (filled by runSearch) -->
+        <div class="search-pop" id="searchPop" role="dialog" aria-label="Termine suchen" hidden>
+            <div class="search-row">
+                <label class="search-field">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <input id="searchInput" type="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Titel, Ort, Notiz …" aria-label="Termine suchen" aria-controls="searchList">
+                </label>
+                <!-- Material Icons "close" (Apache 2.0) -->
+                <button class="icon" id="searchClose" type="button" aria-label="Suche schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+            </div>
+            <p class="search-sum" id="searchSum" role="status"></p>
+            <div class="search-list" id="searchList"></div>
         </div>
         <div class="status" id="status" role="status"></div>
     </header>
@@ -1427,7 +1520,8 @@
                     const nApp = here.filter(o => !o.ev.holiday).length;   // the holiday is named, not counted as an appointment
                     html += `<button type="button" class="mo-cell${cls}" data-day="${K.ymd(d)}" aria-label="${esc(longDay(d))}${isHoliday(d) ? ', ' + esc(K.holidayOf(d)) : ''}${nApp ? ', ' + nApp + ' Termin' + (nApp > 1 ? 'e' : '') : ''}${school ? ', ' + LESSON_WORD : ''}">` +
                         `<span class="n">${d.getDate()}</span><span class="evs">` +
-                        here.slice(0, 3).map(o => `<span class="chip c${colorOf(o.ev)}">${esc((o.ev.all_day ? '' : K.hhmm(o.start) + ' ') + o.ev.title)}</span>`).join('') +
+                        // data-key only for the search's outline - the chips take no taps (pointer-events: none), the cell does
+                        here.slice(0, 3).map(o => `<span class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}">${esc((o.ev.all_day ? '' : K.hhmm(o.start) + ' ') + o.ev.title)}</span>`).join('') +
                         (here.length > 3 ? `<span class="plus">+${here.length - 3}</span>` : '') +
                         (school ? `<span class="chip cl">${LESSON_WORD}</span>` : '') + '</span></button>';
                 }
@@ -1452,6 +1546,7 @@
                 renderShare();
                 renderGuest();
                 renderFilter();
+                markHit(false);
             }
             /* the people button and its two checks */
             function renderFilter() {
@@ -1744,6 +1839,195 @@
                 selDay = anchor;
                 render();
                 if (view === 'agenda') window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            /* ---------- search (Doc, 22.11.2026: the calendar had none) ----------
+               Live over title, place and notes of what the page has loaded - no query of its own: the appointments as the
+               people filter shows them (Doc's, the guest's, joint ones), the lessons and the holidays. Case and umlauts do
+               not count (ä = ae, ß = ss, é = e); with several words each has to be somewhere. A series counts with every
+               occurrence from a year back to two years ahead, a single appointment with its date, however old. Upcoming
+               first, the past folded away below; a tap goes to the day in the view at hand and outlines the entry. */
+            const SEARCH_BACK = 365, SEARCH_AHEAD = 730;   // days around today in which a series is unfolded
+            const SEARCH_MAX = 100;                        // rows per part (upcoming / past); more: "bitte genauer suchen"
+            const FOLD = { 'ä': 'ae', 'ö': 'oe', 'ü': 'ue', 'ß': 'ss', 'æ': 'ae', 'œ': 'oe' };
+            /* text -> { t: the text, s: lower case, umlauts written out, no accents; m: for each char of s its index in t } */
+            function fold(text) {
+                const t = String(text == null ? '' : text).normalize('NFC');
+                let s = '';
+                const m = [];
+                for (let i = 0; i < t.length; i++) {
+                    const c = t[i].toLowerCase();
+                    const f = FOLD[c] !== undefined ? FOLD[c] : c.normalize('NFD').replace(/[̀-ͯ]/g, '');
+                    for (let k = 0; k < f.length; k++) { s += f[k]; m.push(i); }
+                }
+                return { t, s, m };
+            }
+            // [title, place, note] -> folded, plus all three in one string to test the words against
+            const foldParts = fields => { const parts = fields.map(fold); return { parts, all: parts.map(p => p.s).join('\u0001') }; };
+            const foldMemo = new WeakMap();   // row -> its folded fields, as long as they stay the same (an edit changes them)
+            function foldedRow(row, fields) {
+                const key = fields.join('\u0001');
+                let f = foldMemo.get(row);
+                if (!f || f.key !== key) { f = Object.assign(foldParts(fields), { key }); foldMemo.set(row, f); }
+                return f;
+            }
+            /* the query's words in a folded text, as ranges [from, to) of the original text, merged */
+            function hitRanges(p, words) {
+                const r = [];
+                for (const w of words) {
+                    for (let i = p.s.indexOf(w); i >= 0; i = p.s.indexOf(w, i + 1)) r.push([p.m[i], p.m[i + w.length - 1] + 1]);
+                }
+                r.sort((a, b) => a[0] - b[0]);
+                const out = [];
+                for (const x of r) { const l = out[out.length - 1]; if (l && x[0] <= l[1]) l[1] = Math.max(l[1], x[1]); else out.push(x.slice()); }
+                return out;
+            }
+            /* the text (or its part [a, b)) escaped, the words marked */
+            function marked(p, words, a = 0, b = p.t.length) {
+                let html = '', at = a;
+                for (const [x, y] of hitRanges(p, words)) {
+                    if (y <= a || x >= b) continue;
+                    const s = Math.max(x, a), e = Math.min(y, b);
+                    html += esc(p.t.slice(at, s)) + '<mark class="sr-hl">' + esc(p.t.slice(s, e)) + '</mark>';
+                    at = e;
+                }
+                return html + esc(p.t.slice(at, b));
+            }
+            /* a hit in the notes: some words around it on one line */
+            function noteSnippet(p, words) {
+                const first = hitRanges(p, words)[0];
+                if (!first) return '';
+                const flat = Object.assign({}, p, { t: p.t.replace(/\s/g, ' ') });   // same length, so the ranges still fit
+                let a = Math.max(0, first[0] - 40), b = Math.min(flat.t.length, first[1] + 70);
+                if (a > 0) { const sp = flat.t.indexOf(' ', a); if (sp >= 0 && sp < first[0]) a = sp + 1; }
+                if (b < flat.t.length) { const sp = flat.t.lastIndexOf(' ', b); if (sp > first[1]) b = sp; }
+                return (a > 0 ? '… ' : '') + marked(flat, words, a, b).trim() + (b < flat.t.length ? ' …' : '');
+            }
+
+            function searchHits(q) {
+                const words = fold(q).s.split(/\s+/).filter(Boolean);
+                const hits = [];
+                if (!words.length) return { words, hits };
+                const has = f => words.every(w => f.all.includes(w));
+                const today = K.startOfDay(new Date());
+                const from = K.addDays(today, -SEARCH_BACK), to = K.addDays(today, SEARCH_AHEAD);
+                const ever = [new Date(-8.64e15), new Date(8.64e15)];
+                for (const ev of shownItems()) {
+                    const f = foldedRow(ev, [ev.title, ev.location, ev.notes]);
+                    if (has(f)) for (const o of (ev.rrule ? K.occurrences(ev, from, to) : K.occurrences(ev, ...ever))) hits.push({ o, f });
+                }
+                for (const o of lessonOccs(...ever)) {   // empty while the filter hides "me"
+                    const f = foldedRow(o.ev.lesson, [o.ev.title, o.ev.location, o.ev.lesson.note]);
+                    if (has(f)) hits.push({ o, f });
+                }
+                for (const o of holidayOccs(from, to)) {
+                    const f = foldParts([o.ev.title, '', '']);
+                    if (has(f)) hits.push({ o, f });
+                }
+                return { words, hits };
+            }
+
+            let searchRes = [];           // the occurrences in the list, in its order - a row's data-i points here
+            let searchPastOpen = false;   // "Vergangen" unfolded by hand: stays so while typing
+            let searchTimer = 0;
+            function runSearch() {
+                clearTimeout(searchTimer);
+                const q = $('searchInput').value.trim();
+                const list = $('searchList'), sum = $('searchSum');
+                searchRes = [];
+                if (q.length < 2) {
+                    sum.textContent = q ? 'Bitte noch ein Zeichen mehr.' : 'Sucht in Titel, Ort und Notiz – auch in Serien.';
+                    list.innerHTML = '';
+                    return;
+                }
+                const { words, hits } = searchHits(q);
+                const now = new Date();
+                const up = hits.filter(h => h.o.end > now).sort((a, b) => a.o.start - b.o.start || a.o.end - b.o.end);
+                const past = hits.filter(h => h.o.end <= now).sort((a, b) => b.o.start - a.o.start);
+                const row = h => {
+                    const o = h.o, ev = o.ev, [ft, fl, fn] = h.f.parts;
+                    const last = K.addDays(o.end, -1);
+                    const meta = [ev.all_day ? (K.sameDay(o.start, last) ? 'ganztägig' : 'bis ' + esc(dayLabel(last))) : K.hhmm(o.start) + '–' + K.hhmm(o.end)];
+                    if (ev.location) meta.push(ICON_PLACE + marked(fl, words));
+                    if (ev.rrule) meta.push(ICON_REPEAT + 'Serie');
+                    if (isOff(o)) meta.push('fällt aus');
+                    const note = fn.t && words.some(w => fn.s.includes(w)) ? noteSnippet(fn, words) : '';
+                    searchRes.push(o);
+                    return `<li><button type="button" class="sr-row c${colorOf(ev)}${isOff(o) ? ' off' : ''}${K.sameDay(o.start, now) ? ' today' : ''}" data-i="${searchRes.length - 1}">` +
+                        `<span class="sr-day"><small>${K.WEEKDAY_SHORT[o.start.getDay()]}</small><b>${o.start.getDate()}</b></span>` +
+                        `<span class="sr-body"><span class="sr-title">${marked(ft, words)}${srcMark(ev)}</span>` +
+                        `<span class="sr-meta">${meta.join(' · ')}</span>${note ? `<span class="sr-note">${note}</span>` : ''}</span></button></li>`;
+                };
+                // by month, each with its heading (it stays on top while its rows scroll by)
+                const byMonth = arr => {
+                    let html = '', cur = null;
+                    for (const h of arr.slice(0, SEARCH_MAX)) {
+                        const d = h.o.start, m = d.getFullYear() * 12 + d.getMonth();
+                        if (m !== cur) { html += (cur === null ? '' : '</ul>') + `<h3 class="sr-month">${K.MONTH_LONG[d.getMonth()]} ${d.getFullYear()}</h3><ul class="sr">`; cur = m; }
+                        html += row(h);
+                    }
+                    if (cur !== null) html += '</ul>';
+                    if (arr.length > SEARCH_MAX) html += `<p class="sr-empty">… und ${arr.length - SEARCH_MAX} weitere – bitte genauer suchen.</p>`;
+                    return html;
+                };
+                let html = up.length ? byMonth(up) : past.length ? '<p class="sr-empty">Nichts Kommendes.</p>' : '';
+                // with nothing upcoming the past opens by itself
+                if (past.length) html += `<details class="sr-past" id="searchPast"${searchPastOpen || !up.length ? ' open' : ''}><summary>Vergangen · ${past.length}</summary>${byMonth(past)}</details>`;
+                list.innerHTML = html;
+                list.scrollTop = 0;
+                const det = $('searchPast');
+                if (det) det.addEventListener('toggle', () => { if (up.length) searchPastOpen = det.open; });
+                // only one person shown: say so, a missing hit may be the other one's
+                const only = filterAll() ? '' : ' – gezeigt: nur ' + (filter.me ? meName() : otherName());
+                sum.textContent = (hits.length ? hits.length + ' Treffer' : 'keine Treffer') + only;
+            }
+            function showSearch(on, focusBack) {
+                $('searchPop').hidden = !on;
+                $('searchBtn').setAttribute('aria-expanded', String(on));
+                if (on) {
+                    showSettings(false);
+                    showFilter(false);
+                    runSearch();   // the last query again, with what is loaded now
+                    $('searchInput').focus();
+                    $('searchInput').select();   // typing replaces it
+                } else if (focusBack) $('searchBtn').focus();
+            }
+
+            /* a hit tapped: its day in the view at hand - "Tag" lists from today on, so an earlier one shows in its week
+               (only for now, the chosen view stays remembered) and a later one stretches the list to it */
+            let jumpHit = null;   // { key, until }: the entry a hit went to, outlined until then (render() marks it again)
+            let jumpTimer = 0;
+            function jumpTo(occ) {
+                showSearch(false);
+                const day = K.startOfDay(occ.start), today = K.startOfDay(new Date());
+                if (view === 'agenda') {
+                    if (occ.end <= today) view = 'week';
+                    else agendaDays = Math.max(agendaDays, Math.round((day - today) / K.DAY) + 1);
+                }
+                anchor = day;
+                selDay = day;
+                jumpHit = { key: occ.key, until: Date.now() + 4000 };
+                render();
+                markHit(true);
+            }
+            function markHit(scroll) {
+                if (!jumpHit) return;
+                if (Date.now() > jumpHit.until) { jumpHit = null; return; }
+                document.querySelectorAll('.hit').forEach(el => { if (el.dataset.key !== jumpHit.key) el.classList.remove('hit'); });   // an earlier jump's
+                const els = [...$('main').querySelectorAll('[data-key]')].filter(el => el.dataset.key === jumpHit.key);
+                els.forEach(el => el.classList.add('hit'));
+                clearTimeout(jumpTimer);
+                jumpTimer = setTimeout(() => document.querySelectorAll('.hit').forEach(el => el.classList.remove('hit')), jumpHit.until - Date.now());
+                if (!scroll || !els.length) return;
+                // the week: into the middle of the hour box (the page itself never scrolls there); else into view
+                const inBox = els.find(el => el.closest('.wk-body'));
+                if (inBox) {
+                    const box = inBox.closest('.wk-body'), r = inBox.getBoundingClientRect(), b = box.getBoundingClientRect();
+                    box.scrollTop = Math.max(0, box.scrollTop + r.top - b.top - (b.height - r.height) / 2);
+                    return;
+                }
+                const el = els.find(x => x.tagName === 'LI') || els[0];
+                el.scrollIntoView({ block: view === 'agenda' ? 'center' : 'nearest', behavior: 'smooth' });
             }
 
             /* ---------- question dialog: buttons [{ label, cls, value }] -> the value of the tapped one (Escape: null) ----------
@@ -2271,6 +2555,33 @@
                 document.addEventListener('pointerdown', e => {
                     if (!$('settings').hidden && !e.target.closest('#settings, #gearBtn')) showSettings(false);
                     if (!$('filterPop').hidden && !e.target.closest('#filterWrap')) showFilter(false);
+                    if (!$('searchPop').hidden && !e.target.closest('#searchPop, #searchBtn')) showSearch(false);
+                });
+                // the search: live while typing (a short pause first), Enter / arrow down into the hits, Esc closes
+                $('searchBtn').title = 'Suchen (Taste / oder ' + (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘F' : 'Strg+F') + ')';
+                $('searchBtn').onclick = () => showSearch($('searchPop').hidden);
+                $('searchClose').onclick = () => showSearch(false, true);
+                $('searchInput').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 120); });
+                const searchRows = () => [...$('searchList').querySelectorAll('.sr-row')].filter(b => !b.closest('details:not([open])'));   // not in a folded "Vergangen"
+                $('searchInput').addEventListener('keydown', e => {
+                    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); showSearch(false, true); return; }   // not the field's own clearing
+                    if (e.key !== 'Enter' && e.key !== 'ArrowDown') return;
+                    e.preventDefault();
+                    if (e.key === 'Enter') runSearch();   // no waiting for the pause
+                    const first = searchRows()[0];
+                    if (first) first.focus(); else $('searchInput').blur();   // on the phone either way the keyboard goes
+                });
+                $('searchList').addEventListener('keydown', e => {
+                    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+                    const rows = searchRows(), i = rows.indexOf(document.activeElement);
+                    if (i < 0) return;
+                    e.preventDefault();
+                    if (e.key === 'ArrowUp' && i === 0) $('searchInput').focus();
+                    else (rows[i + (e.key === 'ArrowDown' ? 1 : -1)] || rows[i]).focus();
+                });
+                $('searchList').addEventListener('click', e => {
+                    const b = e.target.closest('[data-i]');
+                    if (b && searchRes[+b.dataset.i]) jumpTo(searchRes[+b.dataset.i]);
                 });
                 $('importBtn').onclick = () => $('importFile').click();
                 $('callEvents').onchange = e => toggleSetting('call_events', e.target.checked);
@@ -2369,6 +2680,7 @@
                     if (e.key !== 'Escape') return;
                     if (!$('qrDlg').hidden) closeQr();
                     else if (!$('ed').hidden) closeEditor();
+                    else if (!$('searchPop').hidden) showSearch(false, true);
                     else if (!$('settings').hidden) showSettings(false);
                     else if (!$('filterPop').hidden) showFilter(false);
                 });
@@ -2377,7 +2689,7 @@
                 document.addEventListener('keydown', e => {
                     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
                     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.defaultPrevented) return;
-                    if (view === 'agenda' || $('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('settings').hidden || !$('qrDlg').hidden) return;
+                    if (view === 'agenda' || $('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('settings').hidden || !$('qrDlg').hidden || !$('searchPop').hidden) return;
                     const t = e.target;
                     if (t && (t.isContentEditable || /^(TEXTAREA|SELECT)$/.test(t.tagName) || (t.tagName === 'INPUT' && !(t.id === 'text' && !t.value)))) return;
                     e.preventDefault();
@@ -2388,11 +2700,24 @@
                 document.addEventListener('keydown', e => {
                     const v = { t: 'agenda', w: 'week', m: 'month' }[(e.key || '').toLowerCase()];
                     if (!v || e.altKey || e.ctrlKey || e.metaKey || e.repeat || e.defaultPrevented) return;
-                    if ($('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('settings').hidden || !$('qrDlg').hidden) return;
+                    if ($('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('settings').hidden || !$('qrDlg').hidden || !$('searchPop').hidden) return;
                     const t = e.target;
                     if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
                     e.preventDefault();
                     if (v !== view) setView(v);
+                });
+                // "/" and Cmd-F / Ctrl-F open the search (Doc, 22.11.2026) - "/" never while typing, a second Cmd-F in the
+                // search field is the browser's own find again
+                document.addEventListener('keydown', e => {
+                    const find = (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && (e.key || '').toLowerCase() === 'f';
+                    const slash = e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey;
+                    if ((!find && !slash) || e.defaultPrevented) return;
+                    if ($('main').hidden || !$('ed').hidden || !$('dlg').hidden || !$('qrDlg').hidden) return;
+                    const t = e.target;
+                    if (slash && t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+                    if (find && t === $('searchInput')) return;
+                    e.preventDefault();
+                    showSearch(true);
                 });
                 // another window size: the week fits its hour box and the month names again - on the phone not for the
                 // address bar sliding in and out, that would make the hours jump while scrolling
