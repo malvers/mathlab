@@ -5,6 +5,8 @@
 window.BUCH = {
     title: 'Mathematik · Berufliches Gymnasium 12',
     short: 'Mathematik 12',
+    // the dedication page at the front of the print edition (js/buch-druck.js; Doc, 22.11.2026, via Marie: "Günter" without th)
+    widmung: 'Für Eva und Günter',
     description: 'Interaktives Lehrbuch Mathematik für das Berufliche Gymnasium, Klasse 12 (Sachsen): diskrete Zufallsgrößen und Binomialverteilung, Differenzialrechnung von Grenzwerten bis Extremwertproblemen und Vektorgeometrie im Raum, mit Labs, Simulationen, 3D-Grafik und Selbsttests mit sofortiger Rückmeldung.',
     chapters: [
         { file: 'lb1-1.html', lb: 'Lernbereich 1', k: '1.1', title: 'Bedingte Wahrscheinlichkeit',

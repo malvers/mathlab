@@ -5,6 +5,8 @@
 window.BUCH = {
     title: 'Mathematik · Berufliches Gymnasium 13',
     short: 'Mathematik 13',
+    // the dedication page at the front of the print edition (js/buch-druck.js; Doc, 22.11.2026, via Marie)
+    widmung: 'Für Christian',
     description: 'Interaktives Lehrbuch Mathematik für das Berufliche Gymnasium, Klasse 13 (Sachsen): Integralrechnung, beurteilende Statistik mit Signifikanztests, analytische Geometrie der Geraden und Ebenen in 3D, weitere Anwendungen und ein Kapitel zur Abiturvorbereitung, mit Labs, Simulationen und Selbsttests mit sofortiger Rückmeldung.',
     chapters: [
         { file: 'lb3-1.html', lb: 'Lernbereich 3', k: '3.1', title: 'Stammfunktionen',

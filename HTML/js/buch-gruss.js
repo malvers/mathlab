@@ -33,9 +33,9 @@
             // the acknowledgement on the back of the dedication page, print edition only (js/buch-druck.js danksagung()).
             // Doc, 09.11.2026: "schreib mir bitte für die Bücher eine Danksagung" - "auf die Rückseite der Widmung";
             // 12.11.2026 his accepted text ("Text GO") and "dank kann in alle Bücher DE".
-            // Counts as of 15.11.2026 (recounted for the KDP manuscript of mathegy12lk), by the rules of 09.11. and 29.10.:
-            // 92 labs + 7 tours in js/labs-config.js (with Billard-Kette and DocWolken, 5d27fbc64) (an entry that is only an app - DocPad, Solita, Tracker ... - is no lab),
-            // 24 books in 130 editions (buch/ folders, 5 languages, some 9), 11,584 questions in 644 quiz pages
+            // Counts as of 22.11.2026 (recounted for the KDP manuscripts of mathe12 and mathe13), by the rules of 09.11. and 29.10.:
+            // 93 labs + 7 tours in js/labs-config.js (with Raumkrümmung, a01505ac7) (an entry that is only an app - DocPad, Solita, Tracker ... - is no lab),
+            // 24 books in 131 editions (buch/ folders, with mathefos11-pt; 5 languages, some 9), 11,604 questions in 645 quiz pages
             // (js/quiz-engine.js) + 213 text tasks in HTML/aufgaben; buch_feedback holds 3 test reports only (10.10. x2,
             // 27.10.), no real error report.
             dank: {
@@ -48,8 +48,8 @@
                     'eigentlich das absolute Nonplusultra. Ich hätte nie gedacht, dass irgendetwas sie toppt. KI ' +
                     'toppt selbst die Relativitätstheorie.',
                     'Künstliche Intelligenz hat mein Leben verändert. Durch sie konnte ich docalvers.de bauen, ' +
-                    'das Doc Alvers Mathe-Labor. Seit April 2026 sind dort (Stand November 2026) 99 Labs und ' +
-                    'Touren entstanden, 11.797 Übungsaufgaben und 24 Lehrbücher in 130 Ausgaben und 5 Sprachen, ' +
+                    'das Doc Alvers Mathe-Labor. Seit April 2026 sind dort (Stand November 2026) 100 Labs und ' +
+                    'Touren entstanden, 11.817 Übungsaufgaben und 24 Lehrbücher in 131 Ausgaben und 5 Sprachen, ' +
                     'teilweise in 9. Das erste Buch war in 1 Stunde und 28 Minuten fertig, für 0,49 € Anteil am ' +
                     'Abo. Ein Verlag hätte dafür rund 112.000 € gebraucht, eine IT-Firma für die interaktive ' +
                     'Fassung in 5 Sprachen rund 360.000 €.',
