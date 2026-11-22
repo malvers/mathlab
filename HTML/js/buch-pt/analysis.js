@@ -71,6 +71,9 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-6 mathefos11-pt:
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
+        // titelbildgy12 (start page)
+        'Titelbild: eine Fläche unter einer Kurve mit Trapezen, ein Histogramm mit rotem Ablehnungsbereich, eine Gerade durch eine Ebene mit ihrem Schnittwinkel und dem Normalenvektor':
+            'Capa: uma área sob uma curva com trapézios, um histograma com a região de rejeição a vermelho, uma reta que atravessa um plano com o seu ângulo de interseção e o vetor normal',
         // book pt-9 mathegy11-pt:
     },
     phrase: [
