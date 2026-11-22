@@ -8,19 +8,30 @@
 // The photos show only on Doc's LG monitor (found by maker and model, any port) and only while DocHere sees him there;
 // without the LG - laptop alone, beamer, board - none shows anywhere and the camera is not asked for (15.11.2026).
 // Since 20.11.2026 only while he sits close, too: DocHere's "near" (its threshold is DocHere's user default nearCm).
+// Since 22.11.2026 a photo can be cropped like in PowerPoint: right click → "Zuschneiden" shows black crop marks.
 
 import Cocoa
 import ServiceManagement
 
 // MARK: - Model
 
+/// The part of the picture that shows, in fractions of the whole picture: x from its left edge, y from its bottom edge
+/// (Doc, 22.11.2026: crop like in PowerPoint). A photo without one shows all of its picture.
+struct CropRect: Codable, Equatable {
+    var x: Double
+    var y: Double
+    var w: Double
+    var h: Double
+}
+
 struct PhotoRec: Codable {
     var id: String
     var path: String
     var centerX: Double      // screen coordinates, origin bottom-left of the primary display
     var centerY: Double
-    var width: Double        // width of the image itself
+    var width: Double        // width of the image itself (of its cropped part, when cropped)
     var angle: Double        // radians, counter-clockwise
+    var crop: CropRect? = nil   // nil: the whole picture; older photos.json files have no such key
 }
 
 final class Store {
@@ -266,6 +277,7 @@ final class GroupFrameView: NSView {
     override func mouseDown(with event: NSEvent) {
         guard let c = corner(at: convert(event.locationInWindow, from: nil)) else { return }
         let towards = NSPoint(x: c.x > line.midX ? 1 : -1, y: c.y > line.midY ? 1 : -1)
+        owner?.beginChange()
         scaling = owner?.beginGroupScale(towards: towards, mouse: NSEvent.mouseLocation) ?? false
         if scaling { NSCursor.crosshair.set() }
     }
@@ -278,6 +290,7 @@ final class GroupFrameView: NSView {
     override func mouseUp(with event: NSEvent) {
         if scaling { owner?.endGroupScale() }
         scaling = false
+        owner?.endChange()
         NSCursor.arrow.set()
     }
 }
@@ -290,8 +303,24 @@ final class PhotoView: NSView {
     private var rounded = false           // photo with widget corners; a cut-out keeps its own outline
 
     private let paper = CALayer()
-    private let photo = CALayer()
+    private let photo = CALayer()         // the visible part: clips the picture to the cut, with the widget corners
+    private let picture = CALayer()       // the whole picture inside `photo`, shifted so the cut shows
     private var handles: [CALayer] = []
+
+    /// Cropping (Doc, 22.11.2026: "dass die Bilder ... auch gekroppt werden können ... wie bei PowerPoint dann so
+    /// Crop-Ecken"). While on, the whole picture shows faded around the cut (`ghost`), black crop marks sit on the cut's
+    /// corners and edges (`cropMarks`): a mark moves its edge(s), a drag on the picture slides it under the cut, control
+    /// moves the opposite edge too. Return, Esc, a double click or a click elsewhere ends it (AppDelegate.endCrop).
+    var crop = CGRect(x: 0, y: 0, width: 1, height: 1)   // set by PhotoItem.apply, see CropRect
+    private(set) var cropping = false
+    private let ghost = CALayer()
+    private let cropMarks = CAShapeLayer()
+    private let cropGrab: Double = 16             // distance around a crop mark that counts as grabbing it
+    private let cropMin: Double = 30              // the cut never gets narrower or lower than this, in points
+    private var cropStart = CGRect.zero           // the cut at mouse down
+    private var cropFull = CGSize.zero            // the whole picture's size on the screen at mouse down
+    private var cropImageOrigin = NSPoint.zero    // its bottom-left corner on the screen at mouse down
+    private var cropEdge = (x: 0, y: 0)           // the edges a crop mark moves: -1 left/bottom, 1 right/top, 0 none
 
     weak var item: PhotoItem?
 
@@ -299,7 +328,7 @@ final class PhotoView: NSView {
     private let handleGrab: Double = 22
     private let handleRadius: CGFloat = 5.5
 
-    private enum Mode { case none, move, transform }
+    private enum Mode { case none, move, transform, cropEdge, cropPan }
     private var mode: Mode = .none
     private var dragged = false           // set as soon as the mouse really moves
 
@@ -339,9 +368,17 @@ final class PhotoView: NSView {
         paper.masksToBounds = false
 
         photo.masksToBounds = true
-        photo.contentsGravity = .resizeAspectFill
         photo.cornerCurve = .continuous     // the squircle of the system widgets
+        picture.contentsGravity = .resize   // its frame always has the picture's own shape
+        photo.addSublayer(picture)
         paper.addSublayer(photo)
+
+        // The whole picture, faded, under the cut while cropping
+        ghost.contentsGravity = .resize
+        ghost.borderColor = NSColor.white.cgColor
+        ghost.borderWidth = 1
+        ghost.opacity = 0
+        paper.insertSublayer(ghost, below: photo)
 
         // The selection ring, just outside the photo, turning with it; it lies under the photo, so its glow shines
         // outwards only and never tints the picture
@@ -373,6 +410,14 @@ final class PhotoView: NSView {
             handles.append(h)
         }
 
+        // PowerPoint's crop marks: black, with a thin white edge so they show on any picture
+        cropMarks.fillColor = NSColor.black.cgColor
+        cropMarks.strokeColor = NSColor.white.cgColor
+        cropMarks.lineWidth = 1
+        cropMarks.lineJoin = .miter
+        cropMarks.opacity = 0
+        paper.addSublayer(cropMarks)
+
         layer?.addSublayer(paper)
     }
 
@@ -382,8 +427,55 @@ final class PhotoView: NSView {
     /// corners (Doc, 10.11.2026: "nicht, dass das so einen weißen Rand kriegt ... mit so
     /// runden Ecken"). A cut-out is not clipped, it sits on the wallpaper as its own outline.
     func setImage(_ image: CGImage, borderless: Bool) {
-        photo.contents = image
+        picture.contents = image
+        ghost.contents = image
         rounded = !borderless
+    }
+
+    /// Crop mode on or off; PhotoItem.setCropping lays the window out for it afterwards.
+    func setCropping(_ on: Bool) {
+        cropping = on
+        mode = .none
+        updateMarks()
+    }
+
+    /// The whole picture in the paper's turned frame, measured from the middle of the cut.
+    private var fullRect: CGRect {
+        let fw = paperSize.width / max(crop.width, 1e-6), fh = paperSize.height / max(crop.height, 1e-6)
+        return CGRect(x: -paperSize.width / 2 - crop.minX * fw, y: -paperSize.height / 2 - crop.minY * fh,
+                      width: fw, height: fh)
+    }
+
+    /// The black marks on the cut of size `s`: an L in each corner and a bar in the middle of each edge, inside the cut.
+    private func cropMarkPath(_ s: CGSize) -> CGPath {
+        let p = CGMutablePath()
+        let len = min(18, s.width / 3, s.height / 3), t = min(4.5, len / 2)
+        let corners: [(CGFloat, CGFloat)] = [(0, 0), (s.width, 0), (s.width, s.height), (0, s.height)]
+        for (cx, cy) in corners {
+            let dx: CGFloat = cx == 0 ? 1 : -1, dy: CGFloat = cy == 0 ? 1 : -1
+            p.addLines(between: [CGPoint(x: cx, y: cy), CGPoint(x: cx + dx * len, y: cy),
+                                 CGPoint(x: cx + dx * len, y: cy + dy * t), CGPoint(x: cx + dx * t, y: cy + dy * t),
+                                 CGPoint(x: cx + dx * t, y: cy + dy * len), CGPoint(x: cx, y: cy + dy * len)])
+            p.closeSubpath()
+        }
+        p.addRect(CGRect(x: s.width / 2 - len / 2, y: 0, width: len, height: t))
+        p.addRect(CGRect(x: s.width / 2 - len / 2, y: s.height - t, width: len, height: t))
+        p.addRect(CGRect(x: 0, y: s.height / 2 - len / 2, width: t, height: len))
+        p.addRect(CGRect(x: s.width - t, y: s.height / 2 - len / 2, width: t, height: len))
+        return p
+    }
+
+    /// Ring and grips while selected, crop marks and the faded picture while cropping.
+    private func updateMarks() {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        let grips = selected && !cropping
+        for h in handles { h.opacity = grips ? 1 : 0 }
+        ring.opacity = grips ? 1 : 0
+        cropMarks.opacity = cropping ? 1 : 0
+        ghost.opacity = cropping ? 0.4 : 0
+        photo.cornerRadius = rounded && !cropping ? cornerRadius(for: paperSize) : 0
+        CATransaction.commit()
     }
 
     /// Re-lays the print for the current window size; called after every scale or rotate.
@@ -394,9 +486,15 @@ final class PhotoView: NSView {
         paper.position = CGPoint(x: bounds.midX, y: bounds.midY)
         paper.transform = CATransform3DMakeRotation(CGFloat(angle), 0, 0, 1)
         photo.frame = paper.bounds
-        photo.cornerRadius = rounded ? cornerRadius(for: paperSize) : 0
+        photo.cornerRadius = rounded && !cropping ? cornerRadius(for: paperSize) : 0   // a plain rectangle while cropping
+        // the whole picture, in the paper's (= photo's) coordinates, shifted so that the cut lies on the paper
+        let full = fullRect.offsetBy(dx: paperSize.width / 2, dy: paperSize.height / 2)
+        picture.frame = full
+        ghost.frame = full
+        cropMarks.frame = paper.bounds
+        cropMarks.path = cropMarkPath(paperSize)
         ring.frame = paper.bounds.insetBy(dx: -3, dy: -3)
-        ring.cornerRadius = photo.cornerRadius + 3
+        ring.cornerRadius = (rounded ? cornerRadius(for: paperSize) : 0) + 3
         for (i, h) in handles.enumerated() {
             let x: CGFloat = (i == 0 || i == 3) ? 0 : paperSize.width
             let y: CGFloat = (i < 2) ? 0 : paperSize.height
@@ -416,11 +514,7 @@ final class PhotoView: NSView {
     func showHandles(_ on: Bool) {
         guard on != selected else { return }
         selected = on
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        for h in handles { h.opacity = on ? 1 : 0 }
-        ring.opacity = on ? 1 : 0
-        CATransaction.commit()
+        updateMarks()
         item?.owner?.refreshGroupFrame()
     }
 
@@ -457,8 +551,81 @@ final class PhotoView: NSView {
     private func containsLocal(_ point: NSPoint) -> Bool {
         let p = paperLocal(point)
         let slack = handleGrab * 0.6
+        if cropping { return fullRect.insetBy(dx: -slack, dy: -slack).contains(p) }   // the faded part takes clicks too
         return abs(p.x) <= Double(paperSize.width) / 2 + slack
             && abs(p.y) <= Double(paperSize.height) / 2 + slack
+    }
+
+    /// The crop mark at `p` (paper frame, from the cut's middle) as the edges it moves: a corner, an edge's bar, or
+    /// anywhere along an edge. nil: no mark there.
+    private func cropHandle(at p: NSPoint) -> (x: Int, y: Int)? {
+        let hw = Double(paperSize.width) / 2, hh = Double(paperSize.height) / 2
+        let px = Double(p.x), py = Double(p.y)
+        let spots: [(x: Int, y: Int)] = [(-1, -1), (1, -1), (1, 1), (-1, 1), (0, -1), (1, 0), (0, 1), (-1, 0)]
+        for s in spots where hypot(px - Double(s.x) * hw, py - Double(s.y) * hh) <= cropGrab { return s }
+        if abs(abs(px) - hw) <= 6, abs(py) <= hh { return (px < 0 ? -1 : 1, 0) }
+        if abs(abs(py) - hh) <= 6, abs(px) <= hw { return (0, py < 0 ? -1 : 1) }
+        return nil
+    }
+
+    /// Moves one edge of the cut along one axis by `d` (fractions of the picture, + right/up): `edge` -1 is the low
+    /// edge, 1 the high one; `both` moves the opposite edge the other way. The cut stays inside the picture and at
+    /// least `m` wide.
+    private static func moveEdge(_ lo: Double, _ hi: Double, edge e: Int, by d: Double, both: Bool, min m: Double) -> (Double, Double) {
+        var inward = e < 0 ? d : -d                                   // how far the edge goes into the cut
+        let out = min(e < 0 ? lo : 1 - hi, both ? (e < 0 ? 1 - hi : lo) : .infinity)
+        let inMax = max(0, both ? (hi - lo - m) / 2 : hi - lo - m)
+        inward = min(max(inward, -out), inMax)
+        var nlo = lo, nhi = hi
+        if e < 0 || both { nlo += inward }
+        if e > 0 || both { nhi -= inward }
+        return (nlo, nhi)
+    }
+
+    private func cropMouseDown(_ event: NSEvent) {
+        guard let win = window, let item = item else { return }
+        if event.clickCount == 2 { item.owner?.endCrop(); return }
+        item.owner?.beginChange()
+        dragged = false
+        startMouse = NSEvent.mouseLocation
+        startCenter = NSPoint(x: win.frame.midX, y: win.frame.midY)
+        cropStart = crop
+        let full = fullRect
+        cropFull = full.size
+        cropImageOrigin = onScreen(startCenter, Double(full.minX), Double(full.minY))
+        let p = paperLocal(convert(event.locationInWindow, from: nil))
+        if let e = cropHandle(at: p) {
+            cropEdge = e
+            mode = .cropEdge
+            NSCursor.crosshair.set()
+        } else if full.contains(p) {
+            mode = .cropPan                 // as in PowerPoint: the picture slides under the cut, the cut stays
+            NSCursor.closedHand.set()
+        } else {
+            mode = .none
+        }
+    }
+
+    private func cropDrag(to now: NSPoint, both: Bool) {
+        guard let item = item else { return }
+        let sx = Double(now.x - startMouse.x), sy = Double(now.y - startMouse.y)
+        let ca = cos(-angle), sa = sin(-angle)
+        let fw = Double(cropFull.width), fh = Double(cropFull.height)
+        let du = (sx * ca - sy * sa) / fw, dv = (sx * sa + sy * ca) / fh   // the mouse in fractions of the picture
+        var x0 = Double(cropStart.minX), x1 = Double(cropStart.maxX)
+        var y0 = Double(cropStart.minY), y1 = Double(cropStart.maxY)
+        if mode == .cropPan {
+            let w = x1 - x0, h = y1 - y0
+            x0 = min(max(x0 - du, 0), 1 - w)
+            y0 = min(max(y0 - dv, 0), 1 - h)
+            item.setCrop(CGRect(x: x0, y: y0, width: w, height: h), width: item.rec.width, center: startCenter)
+            return
+        }
+        if cropEdge.x != 0 { (x0, x1) = PhotoView.moveEdge(x0, x1, edge: cropEdge.x, by: du, both: both, min: cropMin / fw) }
+        if cropEdge.y != 0 { (y0, y1) = PhotoView.moveEdge(y0, y1, edge: cropEdge.y, by: dv, both: both, min: cropMin / fh) }
+        // the picture stays where it lies; the cut's middle moves with its edges
+        let centre = onScreen(cropImageOrigin, (x0 + x1) / 2 * fw, (y0 + y1) / 2 * fh)
+        item.setCrop(CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0), width: (x1 - x0) * fw, center: centre)
     }
 
     /// The point `(x, y)` away from `origin` in the paper's turned frame, in screen coordinates.
@@ -480,8 +647,10 @@ final class PhotoView: NSView {
     /// click that moved nothing on the only selected print puts its grips away, as before. A click anywhere else
     /// clears the selection (AppDelegate.clearSelection).
     override func mouseDown(with event: NSEvent) {
+        if cropping { cropMouseDown(event); return }
         if event.clickCount == 2 { item?.openOriginal(); return }
         guard let win = window, let item = item else { return }
+        item.owner?.beginChange()      // whatever this drag changes, ⌘Z takes back in one step
 
         dragged = false
         startMouse = NSEvent.mouseLocation
@@ -586,12 +755,22 @@ final class PhotoView: NSView {
                                       angle: startAngle)
                 item?.setTransform(width: width, angle: startAngle, center: centre)
             }
+        case .cropEdge, .cropPan:
+            cropDrag(to: now, both: mods.contains(.control))
         case .none:
             break
         }
     }
 
     override func mouseUp(with event: NSEvent) {
+        if cropping {
+            mode = .none
+            dragged = false
+            NSCursor.arrow.set()
+            item?.commit()
+            item?.owner?.endChange()
+            return
+        }
         // A click that moved nothing: with shift it takes a print that was selected out of the selection; without, on
         // a selected print, it leaves only this one selected - or, when it was the only one, puts its grips away, so
         // the same print takes them back (clicking the wallpaper instead would reveal the desktop).
@@ -617,16 +796,28 @@ final class PhotoView: NSView {
             group.forEach { $0.item.commit() }
         }
         group = []
+        item?.owner?.endChange()
     }
 
     /// Option + scrolling turns the print. Scrolling alone no longer zooms - the size changes only at the corners (Doc,
     /// 15.11.2026: "den Zoom mit dem Wheel rausnehmen") - and goes on to whatever lies behind, unswallowed.
     override func scrollWheel(with event: NSEvent) {
         guard let item = item, event.modifierFlags.contains(.option) else { super.scrollWheel(with: event); return }
-        item.rotate(by: Double(event.scrollingDeltaY) * 0.004)
+        item.owner?.wheelTurn(item, by: Double(event.scrollingDeltaY) * 0.004)
     }
 
-    override func rightMouseDown(with event: NSEvent) { item?.showMenu(at: event) }
+    /// The menu acts on every selected print; a right click on a print that is not selected selects just that one.
+    override func rightMouseDown(with event: NSEvent) { item.map { $0.owner?.showMenu(for: $0, at: event) } }
+
+    /// ⌘Z takes back the last change - a drag, a corner, the arrow keys or a menu command (AppDelegate.undo).
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        let m = event.modifierFlags.intersection([.command, .shift, .option, .control])
+        if m == .command, event.charactersIgnoringModifiers?.lowercased() == "z", let owner = item?.owner {
+            owner.undo()
+            return true
+        }
+        return super.performKeyEquivalent(with: event)
+    }
 
     // MARK: keys
 
@@ -639,6 +830,8 @@ final class PhotoView: NSView {
 
     /// With several prints selected, the arrow keys move all of them.
     override func keyDown(with event: NSEvent) {
+        // Return, Enter or Esc ends cropping
+        if cropping, [36, 76, 53].contains(event.keyCode) { item?.owner?.endCrop(); return }
         guard selected, let item = item else { return }
         let step: CGFloat = event.modifierFlags.contains(.shift) ? 10 : 1
         var d = NSPoint.zero
@@ -649,11 +842,13 @@ final class PhotoView: NSView {
         case 126: d.y = step        // up
         default: return
         }
+        item.owner?.beginChange()
         for it in item.owner?.selectedItems() ?? [item] {
             let o = it.window.frame.origin
             it.window.setFrameOrigin(NSPoint(x: o.x + d.x, y: o.y + d.y))
             it.commit()
         }
+        item.owner?.endChange()
     }
 }
 
@@ -670,7 +865,9 @@ final class PhotoItem {
     private(set) var rec: PhotoRec
     let window: NSPanel
     private let view: PhotoView
-    private let aspect: Double            // width / height of the image
+    private let imageAspect: Double       // width / height of the whole picture
+    /// width / height of what shows: the cropped part, or the whole picture
+    private var aspect: Double { imageAspect * Double(crop.width) / Double(max(crop.height, 1e-6)) }
     let borderless: Bool                  // cut-out, drawn unclipped, see hasTransparency
     weak var owner: AppDelegate?
     /// Centre of the window while the print lies somewhere else for the moment, because its own place (rec) is on
@@ -688,7 +885,7 @@ final class PhotoItem {
 
         self.rec = rec
         self.owner = owner
-        self.aspect = Double(cg.width) / Double(cg.height)
+        self.imageAspect = Double(cg.width) / Double(cg.height)
         self.borderless = hasTransparency(cg)
 
         let panel = PhotoPanel(contentRect: NSRect(x: 0, y: 0, width: 10, height: 10),
@@ -722,8 +919,23 @@ final class PhotoItem {
         let paper = CGSize(width: w, height: w / aspect)
 
         let ca = abs(cos(rec.angle)), sa = abs(sin(rec.angle))
-        let boxW = Double(paper.width) * ca + Double(paper.height) * sa
-        let boxH = Double(paper.width) * sa + Double(paper.height) * ca
+        var boxW = Double(paper.width) * ca + Double(paper.height) * sa
+        var boxH = Double(paper.width) * sa + Double(paper.height) * ca
+        let cut = crop
+        if view.cropping {
+            // while cropping the whole picture shows around the cut: the window takes all of it in, still centred on
+            // the cut, so the cut's middle stays the window's middle as always
+            let fw = Double(paper.width) / Double(cut.width), fh = Double(paper.height) / Double(cut.height)
+            let x0 = -Double(paper.width) / 2 - Double(cut.minX) * fw, y0 = -Double(paper.height) / 2 - Double(cut.minY) * fh
+            let ct = cos(rec.angle), st = sin(rec.angle)
+            var hx = 0.0, hy = 0.0
+            for (x, y) in [(x0, y0), (x0 + fw, y0), (x0, y0 + fh), (x0 + fw, y0 + fh)] {
+                hx = max(hx, abs(x * ct - y * st))
+                hy = max(hy, abs(x * st + y * ct))
+            }
+            boxW = 2 * hx
+            boxH = 2 * hy
+        }
 
         let winW = boxW + 2 * shadowPad
         let winH = boxH + 2 * shadowPad
@@ -732,6 +944,7 @@ final class PhotoItem {
                                width: winW, height: winH), display: true)
 
         view.frame = NSRect(origin: .zero, size: CGSize(width: winW, height: winH))
+        view.crop = cut
         view.paperSize = paper
         view.angle = rec.angle
         view.relayout()
@@ -766,6 +979,49 @@ final class PhotoItem {
     func select(_ on: Bool) { view.showHandles(on) }
 
     var isSelected: Bool { view.isSelected }
+
+    // MARK: cropping (see PhotoView.cropping; AppDelegate.startCrop / endCrop)
+
+    /// The part of the picture that shows, in fractions of it (see CropRect); the whole picture when not cropped.
+    var crop: CGRect {
+        rec.crop.map { CGRect(x: $0.x, y: $0.y, width: $0.w, height: $0.h) } ?? CGRect(x: 0, y: 0, width: 1, height: 1)
+    }
+
+    var isCropped: Bool { rec.crop != nil }
+
+    /// Crop mode on or off. On, the print takes the keys, so Return or Esc can end it.
+    func setCropping(_ on: Bool) {
+        guard view.cropping != on else { return }
+        view.setCropping(on)
+        apply(at: NSPoint(x: window.frame.midX, y: window.frame.midY))
+        if on {
+            window.makeKey()
+            window.makeFirstResponder(view)
+        }
+    }
+
+    /// A new cut `r` (fractions of the picture), shown `width` points wide with its middle at `center` on the screen.
+    /// commit() saves.
+    func setCrop(_ r: CGRect, width: Double, center: NSPoint) {
+        let whole = r.minX < 1e-6 && r.minY < 1e-6 && r.maxX > 1 - 1e-6 && r.maxY > 1 - 1e-6
+        rec.crop = whole ? nil : CropRect(x: Double(r.minX), y: Double(r.minY), w: Double(r.width), h: Double(r.height))
+        rec.width = width
+        stand = nil
+        apply(at: center)
+    }
+
+    /// The whole picture again, at the size it has now and where it lies now (commit() saves).
+    func resetCrop() {
+        guard isCropped else { return }
+        let cut = crop
+        let fw = rec.width / Double(cut.width), fh = rec.width / aspect / Double(cut.height)
+        // the middle of the whole picture, seen from the cut's middle, turned onto the screen
+        let fx = Double(0.5 - cut.midX) * fw, fy = Double(0.5 - cut.midY) * fh
+        let t = rec.angle
+        let middle = NSPoint(x: Double(window.frame.midX) + fx * cos(t) - fy * sin(t),
+                             y: Double(window.frame.midY) + fx * sin(t) + fy * cos(t))
+        setCrop(CGRect(x: 0, y: 0, width: 1, height: 1), width: min(2400, fw), center: middle)
+    }
 
     func covers(_ p: NSPoint) -> Bool { view.covers(screenPoint: p) }
 
@@ -809,19 +1065,32 @@ final class PhotoItem {
         if on { window.orderFront(nil) } else { select(false); window.orderOut(nil) }
     }
 
-    func showMenu(at event: NSEvent) {
-        let menu = NSMenu()
-        menu.addItem(withTitle: "Gerade ausrichten", action: #selector(AppDelegate.menuStraighten(_:)), keyEquivalent: "")
-        menu.addItem(withTitle: "Kleiner", action: #selector(AppDelegate.menuSmaller(_:)), keyEquivalent: "")
-        menu.addItem(withTitle: "Größer", action: #selector(AppDelegate.menuBigger(_:)), keyEquivalent: "")
-        menu.addItem(.separator())
-        menu.addItem(withTitle: "Original öffnen", action: #selector(AppDelegate.menuOpen(_:)), keyEquivalent: "")
-        menu.addItem(withTitle: "Vom Schreibtisch nehmen", action: #selector(AppDelegate.menuRemove(_:)), keyEquivalent: "")
-        for it in menu.items {
-            it.target = owner
-            it.representedObject = self
-        }
-        NSMenu.popUpContextMenu(menu, with: event, for: window.contentView!)
+    // MARK: for the menu's commands and ⌘Z (AppDelegate)
+
+    /// The print's outline on the screen: its turned box, without the window's padding.
+    var outline: NSRect { window.frame.insetBy(dx: shadowPad, dy: shadowPad) }
+
+    /// The photo's own height (its width is rec.width), whatever its angle.
+    var photoHeight: Double { rec.width / aspect }
+
+    /// Same angle, this height, the middle where it is (commit() saves).
+    func setHeight(_ h: Double) { setTransform(width: h * aspect, angle: rec.angle) }
+
+    /// Moved by `d` on the screen (commit() saves).
+    func move(by d: NSPoint) {
+        let o = window.frame.origin
+        window.setFrameOrigin(NSPoint(x: o.x + d.x, y: o.y + d.y))
+    }
+
+    /// Back to an earlier size, angle and place (⌘Z); the caller saves.
+    func restore(_ old: PhotoRec) {
+        rec.centerX = old.centerX
+        rec.centerY = old.centerY
+        rec.width = old.width
+        rec.angle = old.angle
+        rec.crop = old.crop
+        stand = nil
+        apply()
     }
 }
 
@@ -908,6 +1177,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if let self = self, !self.items.contains(where: { $0.window === e.window }), e.window !== self.groupFrame.window {
                 self.clearSelection()
             }
+            if let self = self, let c = self.cropItem, e.window !== c.window { self.endCrop() }   // a click on another print
             return e
         }
 
@@ -982,6 +1252,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func applyVisibility() {
+        if !visible { endCrop() }
         items.forEach { $0.setVisible(visible) }
         refreshGroupFrame()
         publishMenu()
@@ -1070,6 +1341,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func removeAll() {
+        endCrop()
         let paths = items.map { $0.rec.path }
         items.forEach { $0.close() }
         items.removeAll()
@@ -1107,20 +1379,217 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             userInfo: ["on": "0"], deliverImmediately: true)
     }
 
-    // MARK: per-photo menu actions
+    // MARK: the right-click menu (Doc, 21.11.2026): it acts on every selected print
 
-    @objc func menuStraighten(_ sender: NSMenuItem) { (sender.representedObject as? PhotoItem)?.straighten() }
-    @objc func menuSmaller(_ sender: NSMenuItem) { (sender.representedObject as? PhotoItem)?.scale(by: 0.8) }
-    @objc func menuBigger(_ sender: NSMenuItem) { (sender.representedObject as? PhotoItem)?.scale(by: 1.25) }
-    @objc func menuOpen(_ sender: NSMenuItem) { (sender.representedObject as? PhotoItem)?.openOriginal() }
+    private var menuTargets: [PhotoItem] = []    // the prints the open menu acts on
+    private weak var menuClicked: PhotoItem?     // the one that was right-clicked
 
+    /// The menu for a right click on `item`: when it is selected, for the whole selection; when not, it alone becomes
+    /// the selection. "Größer"/"Kleiner" are gone (the corners do that); "Ausrichten" lines up two or more prints, as in
+    /// Keynote and PowerPoint. Every command can be taken back (⌘Z or "Rückgängig").
+    func showMenu(for item: PhotoItem, at event: NSEvent) {
+        if !item.isSelected { selectOnly(item) }
+        let targets = selectedItems().isEmpty ? [item] : selectedItems()
+        menuTargets = targets
+        menuClicked = item
+        let n = targets.count, several = n >= 2
+        func entry(_ title: String, _ action: Selector, tag: Int = 0, enabled: Bool = true) -> NSMenuItem {
+            let it = NSMenuItem(title: title, action: action, keyEquivalent: "")
+            it.target = self
+            it.tag = tag
+            it.isEnabled = enabled
+            return it
+        }
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+        let undoItem = entry("Rückgängig", #selector(menuUndo(_:)), enabled: !undoStack.isEmpty)
+        undoItem.keyEquivalent = "z"
+        undoItem.keyEquivalentModifierMask = .command
+        menu.addItem(undoItem)
+        menu.addItem(.separator())
+        menu.addItem(entry(several ? "Gerade ausrichten (\(n) Fotos)" : "Gerade ausrichten", #selector(menuStraighten(_:))))
+        if !several {
+            // cropping, one print at a time (Doc, 22.11.2026)
+            menu.addItem(entry(cropItem === item ? "Zuschneiden beenden" : "Zuschneiden", #selector(menuCrop(_:))))
+            if item.isCropped { menu.addItem(entry("Zuschnitt zurücksetzen", #selector(menuResetCrop(_:)))) }
+        }
+        if several {
+            let w = item.rec.width, h = item.photoHeight
+            let avgW = targets.map { $0.rec.width }.reduce(0, +) / Double(n)
+            let avgH = targets.map { $0.photoHeight }.reduce(0, +) / Double(n)
+            let align = NSMenu()
+            align.autoenablesItems = false
+            align.addItem(entry(String(format: "Gleiche Breite wie dieses Foto (%.0f pt)", w), #selector(menuSameWidth(_:)), tag: 0))
+            align.addItem(entry(String(format: "Gleiche Breite – Durchschnitt (%.0f pt)", avgW), #selector(menuSameWidth(_:)), tag: 1))
+            align.addItem(entry(String(format: "Gleiche Höhe wie dieses Foto (%.0f pt)", h), #selector(menuSameHeight(_:)), tag: 0))
+            align.addItem(entry(String(format: "Gleiche Höhe – Durchschnitt (%.0f pt)", avgH), #selector(menuSameHeight(_:)), tag: 1))
+            align.addItem(.separator())
+            align.addItem(entry("Oben bündig", #selector(menuAlign(_:)), tag: 0))
+            align.addItem(entry("Unten bündig", #selector(menuAlign(_:)), tag: 1))
+            align.addItem(entry("Links bündig", #selector(menuAlign(_:)), tag: 2))
+            align.addItem(entry("Rechts bündig", #selector(menuAlign(_:)), tag: 3))
+            align.addItem(.separator())
+            align.addItem(entry("Horizontal gleich verteilen", #selector(menuDistribute(_:)), tag: 0, enabled: n >= 3))
+            align.addItem(entry("Vertikal gleich verteilen", #selector(menuDistribute(_:)), tag: 1, enabled: n >= 3))
+            let alignItem = NSMenuItem(title: "Ausrichten", action: nil, keyEquivalent: "")
+            alignItem.submenu = align
+            menu.addItem(alignItem)
+        }
+        menu.addItem(.separator())
+        menu.addItem(entry("Original öffnen", #selector(menuOpen(_:))))
+        menu.addItem(entry(several ? "\(n) Fotos vom Schreibtisch nehmen" : "Vom Schreibtisch nehmen", #selector(menuRemove(_:))))
+        NSMenu.popUpContextMenu(menu, with: event, for: item.window.contentView!)
+    }
+
+    /// One command on the prints, as one step for ⌘Z, every place saved.
+    private func change(_ act: () -> Void) {
+        beginChange()
+        act()
+        menuTargets.forEach { $0.commit() }
+        endChange()
+    }
+
+    @objc func menuUndo(_ sender: NSMenuItem) { undo() }
+
+    @objc func menuStraighten(_ sender: NSMenuItem) { change { menuTargets.forEach { $0.straighten() } } }
+
+    @objc func menuCrop(_ sender: NSMenuItem) {
+        guard let item = menuClicked else { return }
+        if cropItem === item { endCrop() } else { startCrop(item) }
+    }
+
+    @objc func menuResetCrop(_ sender: NSMenuItem) { change { menuClicked?.resetCrop() } }
+
+    // MARK: cropping (Doc, 22.11.2026: "wie bei PowerPoint dann so Crop-Ecken"); see PhotoView.cropping
+
+    private weak var cropItem: PhotoItem?        // the print being cropped, if any - never more than one
+
+    /// Crop mode for this print alone; any other print's crop mode ends.
+    func startCrop(_ item: PhotoItem) {
+        if cropItem !== item { endCrop() }
+        selectOnly(item)
+        cropItem = item
+        item.setCropping(true)
+    }
+
+    /// Ends crop mode, the cut kept (every crop drag has saved itself already).
+    func endCrop() {
+        guard let item = cropItem else { return }
+        cropItem = nil
+        item.setCropping(false)
+    }
+
+    /// tag 0: the right-clicked photo's width, tag 1: the average; each keeps its shape and its middle
+    @objc func menuSameWidth(_ sender: NSMenuItem) {
+        let w = sender.tag == 0 ? (menuClicked?.rec.width ?? 0)
+                                : menuTargets.map { $0.rec.width }.reduce(0, +) / Double(max(1, menuTargets.count))
+        guard w > 0 else { return }
+        change { menuTargets.forEach { $0.setTransform(width: w, angle: $0.rec.angle) } }
+    }
+
+    @objc func menuSameHeight(_ sender: NSMenuItem) {
+        let h = sender.tag == 0 ? (menuClicked?.photoHeight ?? 0)
+                                : menuTargets.map { $0.photoHeight }.reduce(0, +) / Double(max(1, menuTargets.count))
+        guard h > 0 else { return }
+        change { menuTargets.forEach { $0.setHeight(h) } }
+    }
+
+    /// tag 0 top, 1 bottom, 2 left, 3 right: every outline onto the outermost edge of the selection
+    @objc func menuAlign(_ sender: NSMenuItem) {
+        let boxes = menuTargets.map { $0.outline }
+        guard !boxes.isEmpty else { return }
+        change {
+            for (it, b) in zip(menuTargets, boxes) {
+                switch sender.tag {
+                case 0: it.move(by: NSPoint(x: 0, y: boxes.map { $0.maxY }.max()! - b.maxY))
+                case 1: it.move(by: NSPoint(x: 0, y: boxes.map { $0.minY }.min()! - b.minY))
+                case 2: it.move(by: NSPoint(x: boxes.map { $0.minX }.min()! - b.minX, y: 0))
+                default: it.move(by: NSPoint(x: boxes.map { $0.maxX }.max()! - b.maxX, y: 0))
+                }
+            }
+        }
+    }
+
+    /// tag 0 horizontally, 1 vertically: the outer two stay, the gaps between the outlines become equal
+    @objc func menuDistribute(_ sender: NSMenuItem) {
+        let across = sender.tag == 0
+        let sorted = menuTargets.sorted { across ? $0.outline.midX < $1.outline.midX : $0.outline.midY < $1.outline.midY }
+        guard sorted.count >= 3, let first = sorted.first?.outline, let last = sorted.last?.outline else { return }
+        let span = across ? last.maxX - first.minX : last.maxY - first.minY
+        let sizes = sorted.map { across ? $0.outline.width : $0.outline.height }
+        let gap = (span - sizes.reduce(0, +)) / CGFloat(sorted.count - 1)
+        change {
+            var at = across ? first.minX : first.minY
+            for (it, size) in zip(sorted, sizes) {
+                let b = it.outline
+                it.move(by: across ? NSPoint(x: at - b.minX, y: 0) : NSPoint(x: 0, y: at - b.minY))
+                at += size + gap
+            }
+        }
+    }
+
+    @objc func menuOpen(_ sender: NSMenuItem) { menuClicked?.openOriginal() }
+
+    /// Every selected print off the desk (their copies go to the Trash); this one cannot be taken back with ⌘Z.
     @objc func menuRemove(_ sender: NSMenuItem) {
-        guard let item = sender.representedObject as? PhotoItem else { return }
-        item.close()
-        items.removeAll { $0 === item }
+        let gone = menuTargets
+        if gone.contains(where: { $0 === cropItem }) { endCrop() }
+        for item in gone {
+            item.close()
+            items.removeAll { $0 === item }
+        }
         save()
-        trashOwnCopy(item.rec.path)
+        gone.forEach { trashOwnCopy($0.rec.path) }
+        refreshGroupFrame()
         publishMenu()
+    }
+
+    // MARK: ⌘Z (Doc, 21.11.2026: every change undoable)
+
+    private var undoStack: [[PhotoRec]] = []     // the desk before each change, newest last
+    private var changeStart: [PhotoRec]?
+    private var lastWheel = Date.distantPast
+
+    /// A change begins (mouse down on a print or a grip, a key, a menu command): the desk as it is now.
+    func beginChange() {
+        if changeStart == nil { changeStart = items.map { $0.rec } }
+    }
+
+    /// The change is over: when it moved, sized or turned anything, the desk before it goes on the undo stack.
+    func endChange() {
+        guard let before = changeStart else { return }
+        changeStart = nil
+        let now = Dictionary(items.map { ($0.rec.id, $0.rec) }, uniquingKeysWith: { a, _ in a })
+        let moved = before.contains { b in
+            guard let n = now[b.id] else { return false }
+            return abs(n.centerX - b.centerX) > 0.01 || abs(n.centerY - b.centerY) > 0.01
+                || abs(n.width - b.width) > 0.01 || abs(n.angle - b.angle) > 0.0001 || n.crop != b.crop
+        }
+        guard moved else { return }
+        undoStack.append(before)
+        if undoStack.count > 50 { undoStack.removeFirst() }
+    }
+
+    /// Option + wheel turns a print; one turning, until the wheel rests for 1.5 s, is one step for ⌘Z.
+    func wheelTurn(_ item: PhotoItem, by delta: Double) {
+        if Date().timeIntervalSince(lastWheel) > 1.5 {
+            beginChange()
+            item.rotate(by: delta)
+            endChange()
+        } else {
+            item.rotate(by: delta)
+        }
+        lastWheel = Date()
+    }
+
+    /// Takes back the last change: every print back to its size, angle and place before it (a removed print stays gone).
+    func undo() {
+        guard let before = undoStack.popLast() else { NSSound.beep(); return }
+        for item in items {
+            if let old = before.first(where: { $0.id == item.rec.id }) { item.restore(old) }
+        }
+        save()
+        refreshGroupFrame()
     }
 
     // MARK: own copies
@@ -1197,10 +1666,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Exactly this print selected, every other one not.
     func selectOnly(_ chosen: PhotoItem) {
+        if cropItem !== chosen { endCrop() }
         for item in items { item.select(item === chosen) }
     }
 
     func clearSelection() {
+        endCrop()
         for item in items { item.select(false) }
     }
 
