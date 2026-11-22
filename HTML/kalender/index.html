@@ -724,6 +724,66 @@
             border-color: rgba(var(--c-green), .55);
         }
         .day.holiday .day-head .pill { --c: var(--c-green); --on: var(--ink-navy); }
+
+        /* ---------- reminders (calendar_event.reminder, 20261122_calendar_reminder.sql) ----------
+           A nudge, not busy time (Doc, 22.11.2026: "da müssten wir irgendwie ein extra Item haben für Erinnerung"; then
+           "rot mit weißer Schrift"): Υ red with white text in every scheme (6.5:1), a bell and the word "Erinnerung", only
+           the start time - and its own round shape, so it never reads as a red appointment (colour 1, square corners).
+           colorOf() gives 'r' for every reminder, whatever colour the row carries. */
+        .cr { --c: var(--c-red); --on: var(--ink-light); }
+        .rem-tag {
+            display: inline-flex; align-items: center; gap: 4px; font: 700 10px/1.2 Orbitron, sans-serif; letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+        .rem-tag svg { width: 12px; height: 12px; fill: currentColor; flex: none; }
+        /* the day list: the time and a bell on the left, the body a red card */
+        ul.evs li.cr .t small svg { width: 14px; height: 14px; fill: rgb(var(--c-red)); vertical-align: -2px; }
+        ul.evs li.cr .ev-body { background: rgb(var(--c-red)); color: var(--ink-light); border-left: 0; border-radius: 10px; padding: 6px 12px 7px; min-height: 0; }
+        ul.evs li.cr .ev-body .rem-tag { opacity: .9; margin-bottom: 2px; }
+        ul.evs li.cr .ev-meta, ul.evs li.cr .ev-meta .note { color: var(--ink-light); opacity: .88; }
+        /* "Als Nächstes": the pill says "Erinnerung" with its bell, solid red in every scheme */
+        .hero .pill.rem-pill { display: inline-flex; align-items: center; gap: 6px; background: rgb(var(--c-red)); border-color: rgb(var(--c-red)); color: var(--ink-light); }
+        .hero .pill.rem-pill svg { width: 14px; height: 14px; fill: currentColor; }
+        /* the week: a round red marker at its time (a fixed small height, never a block of time) */
+        .wk-ev.cr { border-radius: 999px; padding-left: 7px; padding-right: 8px; display: flex; align-items: center; gap: 3px; }
+        .wk-ev.cr svg { width: 11px; height: 11px; fill: currentColor; flex: none; }
+        .wk-ev.cr .rem-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .wk-ev.cr small { display: inline; margin-right: 3px; }
+        /* the month: a round red chip with the bell; on the phone a red diamond instead of a dot */
+        .chip.cr { border-radius: 999px; }
+        .chip.cr svg { width: 10px; height: 10px; fill: currentColor; vertical-align: -1px; margin-right: 3px; }
+        @media (max-width: 640px) {
+            .mo-cell .chip.cr { border-radius: 1px; transform: rotate(45deg) scale(.9); }
+            .mo-cell .chip svg { display: none; }
+        }
+        /* search hits: the red bar, and the word as a small red badge */
+        .sr-meta .rem-tag { padding: 1px 6px; border-radius: 999px; background: rgb(var(--c-red)); color: var(--ink-light); vertical-align: 1px; }
+        .sr-meta .rem-tag svg { width: 10px; height: 10px; }
+        /* the editor's switch */
+        .rem-switch { display: inline-flex; align-items: center; gap: 6px; }
+        .rem-switch svg { width: 18px; height: 18px; fill: rgb(var(--c-red)); flex: none; }
+
+        /* ---------- hover preview (Doc, 22.11.2026): with a real pointer an entry shows time, title, place and the start
+           of its notes after a short pause, without a click; touch devices never see it (no hover there) ---------- */
+        .pv {
+            position: fixed; z-index: 30; left: 0; top: 0; width: max-content; max-width: min(340px, calc(100vw - 16px));
+            padding: 10px 12px 11px; border-radius: 10px; background: var(--card); color: var(--text);
+            border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow); pointer-events: none;
+            font: 13px/1.4 Arial, Helvetica, sans-serif; opacity: 0; transition: opacity .12s ease;
+        }
+        .pv.on { opacity: 1; }
+        .pv-when { display: flex; align-items: center; gap: 6px; margin: 0 0 4px; font: 700 11px/1.3 Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+        .pv-when i { width: 10px; height: 10px; border-radius: 3px; background: rgb(var(--c)); flex: none; }
+        .pv.cw .pv-when i { background: var(--both); }
+        .pv-title { margin: 0; font: 600 15px/1.35 Arial, Helvetica, sans-serif; overflow-wrap: anywhere; }
+        .pv-meta { margin: 3px 0 0; color: var(--muted); overflow-wrap: anywhere; }
+        .pv-meta svg { width: 13px; height: 13px; fill: currentColor; vertical-align: -2px; margin-right: 2px; }
+        .pv-note {
+            margin: 6px 0 0; padding-top: 6px; border-top: 1px solid var(--line); white-space: pre-line; overflow-wrap: anywhere;
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden;
+        }
+        .pv .rem-tag { padding: 2px 7px; border-radius: 999px; background: rgb(var(--c-red)); color: var(--ink-light); }
+        @media (hover: none) { .pv { display: none !important; } }
         .ed-note:empty { display: none; }
         /* sharing with one guest (20261119_calendar_share.sql): the section under the gear and the one-time QR code */
         .share-btns { display: flex; gap: 8px; }
@@ -914,6 +974,11 @@
         <form class="dlg ed" id="edForm" role="dialog" aria-modal="true" aria-labelledby="edTitle" novalidate>
             <p class="ed-title" id="edTitle">Neuer Termin</p>
             <label class="fld"><span>Was</span><input id="fTitle" type="text" autocomplete="off" enterkeyhint="done"></label>
+            <!-- a reminder instead of an appointment: a point in time, red with a bell (calendar_event.reminder - only once
+                 the column exists, Doc's own entries only). Material Icons "notifications" (Apache 2.0) -->
+            <div class="fld" id="remRow" hidden>
+                <label class="switch"><input id="fReminder" type="checkbox"><i></i><span class="rem-switch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>Erinnerung – kein Termin, nur ein Zeitpunkt</span></label>
+            </div>
             <div class="two">
                 <label class="fld"><span>Tag</span><input id="fDate" type="date"></label>
                 <div class="fld"><span class="fld-label">&nbsp;</span>
@@ -1004,6 +1069,8 @@
 
     <!-- S4: filled right before printing in the guest's view (Woche drucken) -->
     <div id="printWeek"></div>
+    <!-- the hover preview of an entry (filled and placed by showPreview; only with a real pointer) -->
+    <div class="pv" id="preview" role="tooltip" hidden></div>
 
     <script>
         (() => {
@@ -1065,6 +1132,16 @@
             const ICON_PLACE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
             const ICON_REPEAT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>';
             const ICON_ADD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+            // Material Icons (Apache 2.0): "notifications" - a reminder
+            const ICON_BELL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>';
+            /* reminders (calendar_event.reminder, 20261122_calendar_reminder.sql): a point in time, not busy time - drawn red
+               with a bell and the word "Erinnerung", with its start time only. ends_at keeps a short slot (REM_SLOT) just
+               for the reminder watcher's dialog; the week draws it REM_H minutes high whatever it says */
+            const REM_SLOT = 15 * 60000, REM_H = 24;
+            const isRem = ev => !!(ev && ev.reminder && !ev.lesson && !ev.holiday);
+            const REM_TAG = `<span class="rem-tag">${ICON_BELL}Erinnerung</span>`;
+            // "Erinnerung: Bögen drucken" under the word "Erinnerung" reads twice - the display drops the prefix
+            const remTitle = t => String(t || '').replace(/^\s*Erinnerung\s*[:–-]\s*/i, '') || String(t || '');
             // Material Icons (Apache 2.0): "menu_book" - the lesson's Stoffverteilungsplan
             const ICON_PLAN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg>';
 
@@ -1082,6 +1159,7 @@
             let share = null;          // the first row of calendar_share, without the hash: { id, label, show_*, can_write, active }
             let shareCols = null;      // calendar_event has private / shared_by: null = not probed yet
             let togetherCol = null;    // calendar_event has together (20261119d_calendar_together.sql): null = not probed yet
+            let reminderCol = null;    // calendar_event has reminder (20261122_calendar_reminder.sql): null = not probed yet
             let busy = 0;             // writes in flight - a reload now could bring back the old state
             let view = 'agenda';       // 'agenda' | 'week' | 'month'
             let anchor = K.startOfDay(new Date());   // the day the week or month view shows
@@ -1092,7 +1170,7 @@
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             // a joint appointment (Doc's and the guest's): a guest row with together - in the guest's view one of their own
             const isJoint = ev => !!(ev && ev.together && (GUEST ? ev.kind === 'own' : ev.shared_by));
-            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : isJoint(ev) ? 'w' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : COLORS.includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 's' -> cs (the guest's turquoise), 'w' -> cw (joint: gold and turquoise)
+            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : isRem(ev) ? 'r' : isJoint(ev) ? 'w' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : COLORS.includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 'r' -> cr (a reminder: red, whatever its colour), 's' -> cs (the guest's turquoise), 'w' -> cw (joint: gold and turquoise)
             // the guest's name lives only in the database (calendar_share.label); one share for now, so its label names
             // every shared_by row
             const guestName = () => (share && share.label) || 'Gast';
@@ -1168,7 +1246,22 @@
             /* the appointments - with private / shared_by only where the probe found them; a 400 for them (never expected
                after a good probe) falls back to the plain columns, so the list always loads */
             async function loadEvents() {
-                const q = cols => send(`calendar_event?select=${cols}&order=starts_at.asc&limit=5000`);
+                // reminders: only once 20261122 ran (probed on its own, it needs none of the others); a 400 for the column
+                // (never expected after a good probe) drops it, so the list always loads
+                if (reminderCol === null) {
+                    reminderCol = await send('calendar_event?select=reminder&limit=1')
+                        .then(() => true, e => (e.message === 'HTTP 400' ? false : null));
+                }
+                const get = cols => send(`calendar_event?select=${cols}&order=starts_at.asc&limit=5000`);
+                const q = async cols => {
+                    if (!reminderCol) return get(cols);
+                    try { return await get(cols + ',reminder'); } catch (e) {
+                        if (e.message !== 'HTTP 400') throw e;
+                        const rows = await get(cols);   // still 400: another column is at fault, the cascade below handles it
+                        reminderCol = false;
+                        return rows;
+                    }
+                };
                 if (shareCols === null) {
                     shareCols = await send('calendar_event?select=private,shared_by&limit=1')
                         .then(() => true, e => (e.message === 'HTTP 400' ? false : null));   // no answer: ask again next time
@@ -1341,6 +1434,7 @@
             }
             /* "in 14 Min", "in 2 Std 10 Min", "morgen", "in 5 Tagen" */
             function countdown(occ, now) {
+                if (occ.start <= now && isRem(occ.ev)) return 'jetzt';   // a reminder has no running time
                 if (occ.start <= now) {
                     const left = Math.max(1, Math.round((occ.end - now) / 60000));
                     return 'läuft · noch ' + (left < 60 ? left + ' Min' : Math.floor(left / 60) + ' Std' + (left % 60 ? ' ' + (left % 60) + ' Min' : ''));
@@ -1360,7 +1454,7 @@
                     const last = K.addDays(occ.end, -1);
                     return K.sameDay(occ.start, last) ? 'ganztägig' : 'bis ' + dayLabel(last);
                 }
-                return K.hhmm(occ.start) + '–' + K.hhmm(occ.end);
+                return isRem(occ.ev) ? K.hhmm(occ.start) : K.hhmm(occ.start) + '–' + K.hhmm(occ.end);   // a reminder: its moment only
             }
 
             /* ---------- Agenda ---------- */
@@ -1377,15 +1471,16 @@
                     return;
                 }
                 hero.classList.add('c' + colorOf(next.ev));
+                const rem = isRem(next.ev);
                 const running = next.start <= now;
                 // the bar fills over the last 3 hours before the start, and while it runs over its length
                 const pct = running ? (now - next.start) / (next.end - next.start) : 1 - Math.min(1, (next.start - now) / (3 * 3600000));
                 const rel = relDay(next.start);
                 const meta = [rel || longDay(next.start), timeText(next)];
                 hero.innerHTML =
-                    `<div class="hero-top"><span class="pill">${running ? 'Läuft gerade' : 'Als Nächstes'}</span></div>` +
+                    `<div class="hero-top">${rem ? `<span class="pill rem-pill">${ICON_BELL}Erinnerung</span>` : `<span class="pill">${running ? 'Läuft gerade' : 'Als Nächstes'}</span>`}</div>` +
                     `<p class="hero-count">${esc(countdown(next, now))}</p>` +
-                    `<div class="hero-title">${esc(next.ev.title)}</div>` +
+                    `<div class="hero-title">${esc(rem ? remTitle(next.ev.title) : next.ev.title)}</div>` +
                     `<div class="hero-meta">${esc(meta.join(' · '))}</div>` +
                     (next.ev.location ? `<div class="hero-meta">${ICON_PLACE.replace('<svg', '<svg style="width:14px;height:14px;fill:currentColor;vertical-align:-2px"')} ${esc(next.ev.location)}</div>` : '') +
                     `<div class="hero-bar"><i style="width:${Math.round(Math.max(0, Math.min(1, pct)) * 100)}%"></i></div>`;
@@ -1393,10 +1488,12 @@
             }
 
             const evRow = (occ, now) => {
-                const past = occ.end <= now, cur = occ.start <= now && occ.end > now;
+                const rem = isRem(occ.ev);
+                const past = occ.end <= now, cur = !rem && occ.start <= now && occ.end > now;
                 const last = K.addDays(occ.end, -1);
                 const t = occ.ev.all_day
                     ? `<div class="t"><span class="allday">${K.sameDay(occ.start, last) ? 'ganz-<br>tägig' : 'bis<br>' + last.getDate() + '.' + (last.getMonth() + 1) + '.'}</span></div>`
+                    : rem ? `<div class="t"><b>${K.hhmm(occ.start)}</b><small>${ICON_BELL}</small></div>`   // a moment: no end time
                     : `<div class="t"><b>${K.hhmm(occ.start)}</b><small>${K.hhmm(occ.end)}</small></div>`;
                 const meta = [];
                 if (occ.ev.location) meta.push(ICON_PLACE + esc(occ.ev.location));
@@ -1406,7 +1503,7 @@
                 if (l && l.code === 'cancelled') meta.push(`<span class="note">${esc('fällt aus' + (l.note ? ' – ' + l.note : ''))}</span>`);
                 else if (l && l.note) meta.push(/^coaching/i.test(l.subject) ? esc(l.note) : `<span class="note">${esc(l.note)}</span>`);
                 return `<li class="c${colorOf(occ.ev)}${past ? ' past' : ''}${cur ? ' now' : ''}${isOff(occ) ? ' off' : ''}" data-key="${esc(occ.key)}">${t}` +
-                    `<div class="ev-body"><div class="ev-title">${esc(occ.ev.title)}${srcMark(occ.ev)}</div>${meta.length ? `<div class="ev-meta">${meta.join(' · ')}</div>` : ''}</div></li>`;
+                    `<div class="ev-body">${rem ? REM_TAG : ''}<div class="ev-title">${esc(rem ? remTitle(occ.ev.title) : occ.ev.title)}${srcMark(occ.ev)}</div>${meta.length ? `<div class="ev-meta">${meta.join(' · ')}</div>` : ''}</div></li>`;
             };
 
             let shownOcc = new Map();   // key -> occurrence, for taps on rows
@@ -1464,7 +1561,7 @@
                     html += WK_SEP + '<div class="wk-allday"><div></div>' + days.map(d => {
                         const here = allday.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                         here.forEach(o => shownOcc.set(o.key, o));
-                        return (isHoliday(d) ? '<div class="holiday">' : '<div>') + here.map(o => `<button type="button" class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}" title="${esc(o.ev.title)}">${esc(o.ev.title)}</button>`).join('') + '</div>';
+                        return (isHoliday(d) ? '<div class="holiday">' : '<div>') + here.map(o => `<button type="button" class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}">${esc(o.ev.title)}</button>`).join('') + '</div>';
                     }).join('') + '</div>';
                 }
                 html += WK_SEP + '<div class="wk-frame"><div class="wk-lines" aria-hidden="true"><div></div>' +
@@ -1476,7 +1573,7 @@
                         const s = Math.max(+o.start, +d), e = Math.min(+o.end, +dEnd);
                         const sm = (new Date(s).getHours() - h0) * 60 + new Date(s).getMinutes();
                         const em = e === +dEnd ? (24 - h0) * 60 : (new Date(e).getHours() - h0) * 60 + new Date(e).getMinutes();
-                        return { o, sm, em: Math.max(em, sm + 20) };
+                        return { o, sm, em: isRem(o.ev) ? sm + REM_H : Math.max(em, sm + 20) };   // a reminder: a small marker, not a span of time
                     }).sort((a, b) => a.sm - b.sm || b.em - a.em);
                     // side by side when they overlap: each one gets the first free lane of its cluster
                     const lanesEnd = [];
@@ -1497,8 +1594,11 @@
                         shownOcc.set(x.o.key, x.o);
                         const top = `calc(var(--hour) * ${x.sm / 60})`, height = `calc(var(--hour) * ${(x.em - x.sm) / 60} - 2px)`;
                         const left = (x.lane / x.lanes * 100).toFixed(2), width = (100 / x.lanes).toFixed(2);
-                        col += `<div class="wk-ev c${colorOf(x.o.ev)}${x.o.end <= now ? ' past' : ''}${isOff(x.o) ? ' off' : ''}${x.em - x.sm <= 30 ? ' short' : ''}" data-key="${esc(x.o.key)}" style="top:${top};height:${height};left:calc(${left}% + 1px);width:calc(${width}% - 2px)" title="${esc(K.hhmm(x.o.start) + '–' + K.hhmm(x.o.end) + ' ' + x.o.ev.title)}">` +
-                            `<small>${K.hhmm(x.o.start)}–${K.hhmm(x.o.end)}${srcMark(x.o.ev)}</small>${esc(x.o.ev.title)}</div>`;
+                        // no title tooltip: with a real pointer the hover preview shows all of it (showPreview)
+                        const rem = isRem(x.o.ev);
+                        col += `<div class="wk-ev c${colorOf(x.o.ev)}${x.o.end <= now ? ' past' : ''}${isOff(x.o) ? ' off' : ''}${x.em - x.sm <= 30 ? ' short' : ''}" data-key="${esc(x.o.key)}" style="top:${top};height:${height};left:calc(${left}% + 1px);width:calc(${width}% - 2px)"${rem ? ' aria-label="Erinnerung ' + esc(K.hhmm(x.o.start) + ' ' + x.o.ev.title) + '"' : ''}>` +
+                            (rem ? `${ICON_BELL}<span class="rem-txt"><small>${K.hhmm(x.o.start)}</small>${esc(remTitle(x.o.ev.title))}</span></div>`
+                                : `<small>${K.hhmm(x.o.start)}–${K.hhmm(x.o.end)}${srcMark(x.o.ev)}</small>${esc(x.o.ev.title)}</div>`);
                     }
                     if (K.sameDay(d, now)) {
                         const nm = (now.getHours() - h0) * 60 + now.getMinutes();
@@ -1550,10 +1650,13 @@
                     const school = lessonOccs(d, K.addDays(d, 1)).some(o => !isOff(o));   // one quiet mark for the lessons
                     const cls = (d.getMonth() !== first.getMonth() ? ' out' : '') + (K.sameDay(d, now) ? ' today' : '') + (K.sameDay(d, selDay) ? ' sel' : '') + (isHoliday(d) ? ' holiday' : '');
                     const nApp = here.filter(o => !o.ev.holiday).length;   // the holiday is named, not counted as an appointment
+                    here.slice(0, 3).forEach(o => shownOcc.set(o.key, o));   // for the hover preview (the chips take no taps)
                     html += `<button type="button" class="mo-cell${cls}" data-day="${K.ymd(d)}" aria-label="${esc(longDay(d))}${isHoliday(d) ? ', ' + esc(K.holidayOf(d)) : ''}${nApp ? ', ' + nApp + ' Termin' + (nApp > 1 ? 'e' : '') : ''}${school ? ', ' + LESSON_WORD : ''}">` +
                         `<span class="n">${d.getDate()}</span><span class="evs">` +
                         // data-key only for the search's outline - the chips take no taps (pointer-events: none), the cell does
-                        here.slice(0, 3).map(o => `<span class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}">${esc((o.ev.all_day ? '' : K.hhmm(o.start) + ' ') + o.ev.title)}</span>`).join('') +
+                        here.slice(0, 3).map(o => isRem(o.ev)
+                            ? `<span class="chip cr" data-key="${esc(o.key)}">${ICON_BELL}${esc(K.hhmm(o.start) + ' ' + remTitle(o.ev.title))}</span>`
+                            : `<span class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}">${esc((o.ev.all_day ? '' : K.hhmm(o.start) + ' ') + o.ev.title)}</span>`).join('') +
                         (here.length > 3 ? `<span class="plus">+${here.length - 3}</span>` : '') +
                         (school ? `<span class="chip cl">${LESSON_WORD}</span>` : '') + '</span></button>';
                 }
@@ -1579,6 +1682,7 @@
                 renderGuest();
                 renderFilter();
                 markHit(false);
+                refreshPreview();
             }
             /* the people button and its two checks */
             function renderFilter() {
@@ -1979,7 +2083,8 @@
                 const row = h => {
                     const o = h.o, ev = o.ev, [ft, fl, fn] = h.f.parts;
                     const last = K.addDays(o.end, -1);
-                    const meta = [ev.all_day ? (K.sameDay(o.start, last) ? 'ganztägig' : 'bis ' + esc(dayLabel(last))) : K.hhmm(o.start) + '–' + K.hhmm(o.end)];
+                    const meta = isRem(ev) ? [REM_TAG + ' ' + K.hhmm(o.start)]   // a reminder: the word and its moment
+                        : [ev.all_day ? (K.sameDay(o.start, last) ? 'ganztägig' : 'bis ' + esc(dayLabel(last))) : K.hhmm(o.start) + '–' + K.hhmm(o.end)];
                     if (ev.location) meta.push(ICON_PLACE + marked(fl, words));
                     if (ev.rrule) meta.push(ICON_REPEAT + 'Serie');
                     if (isOff(o)) meta.push('fällt aus');
@@ -2092,6 +2197,100 @@
                 el.scrollIntoView({ block: view === 'agenda' ? 'center' : 'nearest', behavior: 'smooth' });
             }
 
+            /* ---------- hover preview (Doc, 22.11.2026) ----------
+               With a real pointer an entry shows time, title, place and the first lines of its notes after PV_DELAY, without a
+               click; the next entry swaps it at once, a short grace keeps it from flickering across the gaps; a click still
+               opens the editor. Keyboard focus on an entry shows it at once. Touch devices never get it (no hover there; the
+               CSS hides it too). It never takes the pointer itself (pointer-events: none) and stays inside the window. */
+            const PV_DELAY = 300, PV_GRACE = 120, PV_GAP = 8;
+            const canHover = matchMedia('(hover: hover) and (pointer: fine)');
+            let pvKey = null, pvPending = null, pvTimer = 0, pvHideTimer = 0, pvX = -1, pvY = -1;
+            const pvKeep = () => { clearTimeout(pvHideTimer); pvHideTimer = 0; };   // a pending hide called off
+            /* the entry element under the pointer, or null - the month's chips take no pointer events (the cell takes the
+               tap), so there the chip is found by its box */
+            function entryAt(target, x, y) {
+                if (!target || !target.closest) return null;
+                const cell = target.closest('.mo-cell');
+                const el = cell ? [...cell.querySelectorAll('.chip[data-key]')].find(c => {
+                    const r = c.getBoundingClientRect();
+                    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+                }) : target.closest('[data-key]');
+                return el && shownOcc.has(el.dataset.key) ? el : null;
+            }
+            function previewHtml(occ) {
+                const ev = occ.ev, rem = isRem(ev), l = ev.lesson;
+                const when = (relDay(occ.start) || dayLabel(occ.start)) + ' · ' + timeText(occ);
+                const meta = [];
+                if (ev.location) meta.push(ICON_PLACE + esc(ev.location));
+                if (ev.rrule) meta.push(ICON_REPEAT + 'wiederholt sich');
+                if (l && l.code === 'cancelled') meta.push('fällt aus');
+                const note = String((l ? l.note : ev.notes) || '').trim();
+                return `<p class="pv-when">${rem ? REM_TAG : '<i></i>'}<span>${esc(when)}</span></p>` +
+                    `<p class="pv-title">${esc(rem ? remTitle(ev.title) : ev.title)}</p>` +
+                    (meta.length ? `<p class="pv-meta">${meta.join(' · ')}</p>` : '') +
+                    (note ? `<p class="pv-note">${esc(note.slice(0, 500))}</p>` : '');
+            }
+            /* beside the entry (right, else left); a wide one (a row of the day list) below it at the pointer, else above */
+            function placePreview(el, atPointer) {
+                const pv = $('preview'), r = el.getBoundingClientRect(), w = pv.offsetWidth, h = pv.offsetHeight;
+                const vw = document.documentElement.clientWidth, vh = innerHeight;
+                let x, y;
+                if (r.right + PV_GAP + w <= vw - PV_GAP) { x = r.right + PV_GAP; y = r.top; }
+                else if (r.left - PV_GAP - w >= PV_GAP) { x = r.left - PV_GAP - w; y = r.top; }
+                else {
+                    x = atPointer && pvX >= 0 ? pvX + 12 : r.left;
+                    y = r.bottom + PV_GAP + h <= vh - PV_GAP ? r.bottom + PV_GAP : r.top - PV_GAP - h;
+                }
+                x = Math.min(Math.max(x, PV_GAP), vw - w - PV_GAP);
+                y = Math.min(Math.max(y, PV_GAP), vh - h - PV_GAP);
+                pv.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+            }
+            function showPreview(el, atPointer) {
+                const occ = shownOcc.get(el.dataset.key);
+                if (!occ || !el.isConnected) { hidePreview(); return; }
+                clearTimeout(pvTimer);
+                pvKeep();
+                pvPending = null;
+                const pv = $('preview');
+                pv.className = 'pv c' + colorOf(occ.ev) + (pvKey ? ' on' : '');
+                pv.innerHTML = previewHtml(occ);
+                pv.hidden = false;
+                placePreview(el, atPointer);
+                pvKey = el.dataset.key;
+                requestAnimationFrame(() => { if (pvKey) pv.classList.add('on'); });
+            }
+            function hidePreview() {
+                clearTimeout(pvTimer);
+                pvKeep();
+                pvKey = pvPending = null;
+                const pv = $('preview');
+                pv.classList.remove('on');
+                pv.hidden = true;
+            }
+            function previewMove(e) {
+                if (!canHover.matches || e.pointerType === 'touch') return;
+                pvX = e.clientX; pvY = e.clientY;
+                const el = entryAt(e.target, pvX, pvY), key = el ? el.dataset.key : null;
+                if (key && key === pvKey) { pvKeep(); return; }   // still on the one shown
+                if (!key) {   // between entries: wait a moment before it goes, the next one may follow at once
+                    clearTimeout(pvTimer);
+                    pvPending = null;
+                    if (pvKey && !pvHideTimer) pvHideTimer = setTimeout(() => { pvHideTimer = 0; hidePreview(); }, PV_GRACE);
+                    return;
+                }
+                if (pvKey) { showPreview(el, true); return; }   // one is open: the next one at once
+                if (key === pvPending) return;                  // already waiting for this one
+                clearTimeout(pvTimer);
+                pvPending = key;
+                pvTimer = setTimeout(() => showPreview(el, true), PV_DELAY);
+            }
+            /* after a redraw the entries are new elements: keep the preview on the one still under the pointer */
+            function refreshPreview() {
+                if (!pvKey) return;
+                const el = pvX >= 0 ? entryAt(document.elementFromPoint(pvX, pvY), pvX, pvY) : null;
+                if (el && el.dataset.key === pvKey) placePreview(el, true); else hidePreview();
+            }
+
             /* ---------- question dialog: buttons [{ label, cls, value }] -> the value of the tapped one (Escape: null) ----------
                A button with href is a link (new tab) that also closes the dialog, its value null; icon: an svg before the label */
             function ask(text, buttons) {
@@ -2136,7 +2335,7 @@
             const CAL_FN = auth.DB_URL + '/functions/v1/calendar';
             const appPass = () => { try { return localStorage.getItem('dev_access') || ''; } catch (e) { return ''; } };
             function syncGoogle() {
-                $('googleRow').hidden = !edState || !edState.googleOk || !!$('fRepeat').value || guestOn();   // single appointments of Doc's only
+                $('googleRow').hidden = !edState || !edState.googleOk || !!$('fRepeat').value || guestOn() || remOn();   // single appointments of Doc's only, no reminders
                 $('fPass').hidden = $('googleRow').hidden || !$('fGoogle').checked || !!appPass();
             }
             async function toGoogle(row, f) {
@@ -2200,6 +2399,7 @@
             /* open for a new appointment ({ draft: parseQuick result } or { day }) or for an existing one ({ occ }) */
             function openEditor(o) {
                 if (GUEST && !guestCanWrite()) { status('Eintragen ist gerade aus.', 'err'); return; }
+                hidePreview();
                 $('settings').hidden = true;
                 const occ = o.occ || null;
                 const ev = occ ? occ.ev : null;
@@ -2224,6 +2424,11 @@
                 $('fWhoOther').checked = GUEST ? joint : guest;
                 $('fPrivate').checked = !!(ev && ev.private);
                 $('privText').textContent = share ? 'privat – ' + share.label + ' sieht ihn nicht' : 'privat – wird nie geteilt';
+                // a reminder instead of an appointment: Doc's own entries only, once the column exists, never a mirrored or a
+                // guest's one; typed as "Erinnerung …" / "erinnere mich …" a new one starts as a reminder
+                edState.whoShown = !$('forGuestRow').hidden;
+                edState.remOk = !!reminderCol && !GUEST && !(ev && (feedOf(ev) || guest));
+                $('fReminder').checked = ev ? isRem(ev) : /^\s*erinner/i.test((o.draft && o.draft.title) || '');
                 $('edDel').hidden = !ev;
                 let start, end, allDay;
                 if (ev) {
@@ -2250,6 +2455,7 @@
                     $('fLoc').value = '';
                     $('fNotes').value = '';
                     (allDay ? K.DEFAULT_REMIND_ALLDAY : K.DEFAULT_REMIND).forEach(m => edState.remind.add(m));
+                    if (edState.remOk && $('fReminder').checked) { edState.remind = new Set([0]); allDay = false; }   // rings at its moment
                 }
                 $('fAllDay').checked = allDay;
                 $('fDate').value = K.ymd(start);
@@ -2296,7 +2502,39 @@
                     : (joint ? 'Neuer gemeinsamer Termin' : 'Neuer Termin');
                 $('edNote').textContent = [on ? 'Solita erinnert nicht an ' + (joint ? 'gemeinsame Termine.' : 'Termine von ' + guestName() + '.') : '',
                     ev && ev.rrule ? 'Wiederholt sich – Änderungen gelten für alle Termine der Reihe.' : ''].filter(Boolean).join(' ');
+                applyRem();
                 syncGoogle();
+            }
+            /* the reminder switch and what it sets aside while on: all-day and the end (a reminder is a moment), the colour
+               (always red), Google and "Wessen Termin?" (Doc's own) - it shows only while the entry is not the guest's */
+            const remOn = () => !$('remRow').hidden && $('fReminder').checked;
+            function applyRem() {
+                const st = edState;
+                if (!st) return;
+                $('remRow').hidden = !st.remOk || (st.whoShown && $('fWhoOther').checked);
+                const on = remOn();
+                $('forGuestRow').hidden = !st.whoShown || on;
+                $('fAllDay').closest('.fld').hidden = on;
+                if (on && $('fAllDay').checked) { $('fAllDay').checked = false; syncAllDay(); }
+                $('fEnd').closest('.fld').hidden = on;
+                $('fStart').previousElementSibling.textContent = on ? 'Uhrzeit' : 'Beginn';
+                if (on) {
+                    $('colorRow').hidden = true;
+                    $('edTitle').textContent = st.ev ? 'Erinnerung' : 'Neue Erinnerung';
+                }
+            }
+            function reminderChanged() {
+                const st = edState;
+                if (!st) return;
+                // a new one: a reminder rings at its moment, an appointment 60 and 15 minutes before - unless Doc chose already
+                if (!st.ev) {
+                    const cur = [...st.remind].sort((a, b) => b - a).join(',');
+                    if ($('fReminder').checked && cur === K.DEFAULT_REMIND.join(',')) st.remind = new Set([0]);
+                    else if (!$('fReminder').checked && cur === '0') st.remind = new Set(K.DEFAULT_REMIND);
+                }
+                syncGuest();
+                syncAllDay();
+                renderRemind();
             }
 
             /* the form -> a row for calendar_event, or a message what is missing */
@@ -2317,6 +2555,8 @@
                     e = $('fEnd').value ? at(day, $('fEnd').value) : new Date(+s + 3600000);
                     if (e <= s) e = K.addDays(e, 1);   // over midnight
                 }
+                const rem = remOn();
+                if (rem) e = new Date(+s + REM_SLOT);   // a moment - the short slot only for the watcher's dialog
                 const choices = remindChoices(allDay);
                 const rmin = [...edState.remind].filter(m => choices.some(([x]) => x === m)).sort((a, b) => b - a);
                 const row = {
@@ -2325,6 +2565,7 @@
                     location: $('fLoc').value.trim() || null, notes: $('fNotes').value.trim() || null,
                     rrule: $('fRepeat').value || null, remind: rmin, color: edState.color
                 };
+                if (reminderCol && !GUEST) row.reminder = rem;   // only once the column exists (a guest's entry: never)
                 if (shareCols && !$('privRow').hidden) row.private = $('fPrivate').checked;   // only once the column exists
                 if (!GUEST && !$('forGuestRow').hidden) {   // given to the guest (an entry of theirs keeps its share), joint, or taken back
                     row.shared_by = $('fWhoOther').checked ? (edState.ev && edState.ev.shared_by) || share.id : null;
@@ -2674,6 +2915,19 @@
                 $('period').onclick = goToday;
                 $('moreBtn').onclick = () => { agendaDays += 120; render(); };
 
+                // the hover preview: follows the pointer over the views, goes with a press, a scroll, Escape or leaving them
+                $('main').addEventListener('pointermove', previewMove);
+                $('main').addEventListener('pointerleave', () => { if (pvKey && !pvHideTimer) pvHideTimer = setTimeout(() => { pvHideTimer = 0; hidePreview(); }, PV_GRACE); });
+                document.addEventListener('pointerdown', hidePreview, true);
+                document.addEventListener('scroll', () => { if (pvKey || pvPending) hidePreview(); }, true);
+                document.addEventListener('keydown', e => { if (e.key === 'Escape' && pvKey) hidePreview(); }, true);
+                window.addEventListener('blur', hidePreview);
+                // keyboard focus on an entry (the week's all-day chips) shows it at once
+                $('main').addEventListener('focusin', e => {
+                    const el = e.target.closest && e.target.closest('[data-key]');
+                    if (el && el.matches(':focus-visible') && shownOcc.has(el.dataset.key)) { pvX = pvY = -1; showPreview(el, false); }
+                });
+                $('main').addEventListener('focusout', () => { if (pvKey && pvX < 0) hidePreview(); });
                 // taps in the views: an appointment opens it, a "+" or an empty place in the week starts a new one there
                 $('main').addEventListener('click', e => {
                     const stp = e.target.closest('[data-step]');
@@ -2717,6 +2971,7 @@
                 $('fRepeat').addEventListener('change', syncGoogle);
                 $('fGoogle').onchange = syncGoogle;
                 $('fWhoMe').onchange = $('fWhoOther').onchange = whoChanged;
+                $('fReminder').onchange = reminderChanged;
                 $('fAllDay').onchange = () => {
                     // switching changes which reminders fit: take the defaults of the new kind
                     edState.remind = new Set($('fAllDay').checked ? K.DEFAULT_REMIND_ALLDAY : K.DEFAULT_REMIND);
