@@ -70,6 +70,9 @@ window.BuchPT && BuchPT.add('analysis', {
         'Bei diesem Preis wird nie Gewinn gemacht.': 'A este preço nunca há lucro.', 'Kein positives Gewinnmaximum.': 'Não há lucro máximo positivo.',
         // book pt-6 mathefos11-pt:
         // book pt-7 mathefos12-pt:
+        // titelbildfos12 (index): the cover of FOS 12
+        'Titelbild: Exponentialkurve mit Hochpunkt, Wendetangente und Rechtecken darunter, eine Hyperbel mit Asymptoten und ein Parallelogramm im Raum mit seinem Vektorprodukt':
+            'Capa: curva exponencial com máximo, tangente no ponto de inflexão e retângulos por baixo, uma hipérbole com assíntotas e um paralelogramo no espaço com o seu produto vetorial',
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
     },
