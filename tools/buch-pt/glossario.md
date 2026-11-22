@@ -343,3 +343,36 @@ Terms the book adds go here (the new module `exponential.js`, its pt0 part inclu
 ## mathegy6-pt (GY 6, block pt-10)
 
 Terms the book adds go here (the new modules `geometrie.js` and `gy6.js`, their pt0 parts included).
+
+Portuguese school notation of the 2.º ciclo (6.º ano), set by this book for `geometrie.js` and `gy6.js` (rules in their pt0
+parts, so every later book that loads them gets it too):
+
+- **× for the product** (rule `\cdot` → `\times` in `geometrie.js` pt0): $8 = 2 \times 2 \times 2$. A phrase key with a
+  product is therefore written with `\times`.
+- **The period in brackets**, as Portuguese schools write it: $0{,}(3)$, $0{,}1(6)$ instead of the German bar
+  (rule `\overline{digits}` → `(digits)` in `gy6.js` pt0; a segment `\overline{AB}` is never touched).
+- **ℕ starts at 1 in Portugal**: the German $\mathbb{N}$ (with 0) is written $\mathbb{N}_0$, the German $\mathbb{Q}^+$
+  (gebrochene Zahlen, with 0) is $\mathbb{Q}_0^+$, "os números racionais não negativos" (rules in `gy6.js` pt0, also for the
+  SVG labels ℕ₀, ℚ₀⁺). The text says once that the German school counts 0 as natural.
+- Letters from Portuguese words: the set of divisors $D_{12}$ (divisores; German $T_{12}$, Teiler).
+- Division stays `:` ($3 : 4$), percent `30 %`, the decimal comma as in German.
+- The calculator sign is **CALC** (as in the other pt editions), German TR.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| gebrochene Zahlen, $\mathbb{Q}^+$ | números racionais não negativos, $\mathbb{Q}_0^+$ | |
+| natürliche Zahlen (mit 0), $\mathbb{N}$ | números naturais e o zero, $\mathbb{N}_0$ | |
+| Bruch · Zähler · Nenner | fração · numerador · denominador | |
+| gekürzter Bruch · kürzen | fração irredutível · simplificar | |
+| erweitern | escrever uma fração equivalente, multiplicar os dois termos por … | "amplificar" is avoided |
+| gleichnamig machen | reduzir ao mesmo denominador | |
+| Stammbruch | fração unitária | |
+| Dezimalzahl | número decimal | |
+| endliche / periodische Dezimalzahl · Periode | dízima finita / dízima infinita periódica · período | |
+| Prozent | percentagem | |
+| Menge · Element · Teilmenge | conjunto · elemento · subconjunto | |
+| Mengendiagramm | diagrama de Venn | |
+| Zahlbereich | conjunto numérico | |
+| Teiler · Vielfache | divisores · múltiplos | |
+| Zahlenstrahl | reta numérica | |
+| Elfmeter | penálti | |

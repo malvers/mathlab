@@ -13,14 +13,63 @@
 window.BuchPT && BuchPT.add('gy6', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
+        // titelbildgy6 (the cover of GY 6)
+        'Titelbild: ein Kreis mit drei farbigen Achteln, die Primzahlen bis 30 als leuchtende Punkte, ein Dreieck mit seinen drei Winkeln und der Parallelen durch die Spitze, ein Dreiecksprisma im Schrägbild':
+            'Capa: um círculo com três oitavos coloridos, os números primos até 30 como pontos luminosos, um triângulo com os seus três ângulos e a paralela que passa pelo vértice de cima, um prisma triangular em perspetiva cavaleira',
         // book pt-10 mathegy6-pt:
+        // bruchbild6: numerador, denominador; a whole number ≥ 1 (0 has its own sentence)
+        'Zähler': 'Numerador', 'Nenner': 'Denominador', 'Kreis': 'Círculo', 'Streifen': 'Tira', 'Bild': 'Representação',
+        'Der Bruch ist eine natürliche Zahl.': 'A fração é um número natural.',
+        'Zähler kleiner': 'Diminuir o numerador', 'Zähler größer': 'Aumentar o numerador', 'Nenner kleiner': 'Diminuir o denominador', 'Nenner größer': 'Aumentar o denominador',
+        // mengen6: ℕ₀ and ℚ₀⁺ as in Portuguese schools (the rules below); the reasons of the twelve numbers
+        'Mengendiagramm: die natürlichen Zahlen liegen innerhalb der gebrochenen Zahlen': 'Diagrama de Venn: os números naturais e o zero estão dentro dos números racionais não negativos',
+        'Richtig.': 'Certo.', 'Noch nicht.': 'Ainda não.', 'Noch einmal': 'Outra vez',
+        'Rechne den Wert aus: Ist das eine ganze Zahl ohne Rest?': 'Calcula o valor: é um número inteiro, sem resto?',
+        'Liegt die Zahl vielleicht zwischen zwei natürlichen Zahlen?': 'Será que o número fica entre dois números naturais?',
+        'in $\\mathbb{N}$ (und damit auch in $\\mathbb{Q}^+$)': 'em $\\mathbb{N}_0$ (e portanto também em $\\mathbb{Q}_0^+$)',
+        'nur in $\\mathbb{Q}^+$': 'só em $\\mathbb{Q}_0^+$',
+        '5 ist eine natürliche Zahl, und jede natürliche Zahl ist auch eine gebrochene Zahl: $5 = \\tfrac51$.':
+            '5 é um número natural, e cada número natural é também um número racional não negativo: $5 = \\tfrac51$.',
+        '$\\tfrac34$ liegt zwischen 0 und 1. Das ist keine natürliche Zahl.': '$\\tfrac34$ fica entre 0 e 1. Não é um número natural.',
+        '$0{,}5 = \\tfrac12$ liegt zwischen 0 und 1.': '$0{,}5 = \\tfrac12$ fica entre 0 e 1.',
+        '$\\tfrac{12}{4} = 3$. Der Bruch sieht nur anders aus als die 3.': '$\\tfrac{12}{4} = 3$. A fração só tem um aspeto diferente do 3.',
+        'In der Schule zählt die 0 zu den natürlichen Zahlen.': 'Em Portugal, o 0 não é um número natural, mas pertence a $\\mathbb{N}_0 = \\{0, 1, 2, \\dots\\}$.',
+        '$2{,}5$ liegt zwischen 2 und 3.': '$2{,}5$ fica entre 2 e 3.',
+        '$\\tfrac{10}{5} = 2$.': '$\\tfrac{10}{5} = 2$.',
+        '$\\tfrac13 = 0{,}\\overline{3}$ liegt zwischen 0 und 1.': '$\\tfrac13 = 0{,}(3)$ fica entre 0 e 1.',
+        '$4{,}0 = 4$. Die Null nach dem Komma ändert nichts.': '$4{,}0 = 4$. O zero depois da vírgula não muda nada.',
+        '$\\tfrac92 = 4{,}5$ liegt zwischen 4 und 5.': '$\\tfrac92 = 4{,}5$ fica entre 4 e 5.',
+        '$\\mathbb{N}$: die natürlichen Zahlen $0, 1, 2, 3, \\dots$<br>$\\mathbb{Q}^+$: die gebrochenen Zahlen, also alle Zahlen, die man als Bruch $\\tfrac{p}{q}$ schreiben kann.<br>Jede natürliche Zahl ist auch eine gebrochene Zahl: $\\mathbb{N} \\subset \\mathbb{Q}^+$.':
+            '$\\mathbb{N}_0$: os números naturais e o zero, $0, 1, 2, 3, \\dots$<br>$\\mathbb{Q}_0^+$: os números racionais não negativos, ou seja, todos os números que se podem escrever como fração $\\tfrac{p}{q}$.<br>Cada número natural é também um número racional não negativo: $\\mathbb{N}_0 \\subset \\mathbb{Q}_0^+$.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
         // book pt-10 mathegy6-pt:
+        // bruchbild6 (after the rules: × for the product, the period in brackets)
+        ['Bruch: $', 'Fração: $'], ['Dezimalzahl: $', 'Número decimal: $'], ['Prozent: $', 'Percentagem: $'],
+        ['Der gekürzte Nenner ', 'O denominador da fração irredutível, '],
+        [' hat nur die Primfaktoren 2 und 5. Erweitern mit $', ', só tem os fatores primos 2 e 5. Multiplicando os dois termos por $'],
+        ['. Die Dezimalzahl <b>bricht ab</b>.', '. A dízima é <b>finita</b>.'],
+        [' enthält den Primfaktor $', ', contém o fator primo $'],
+        ['$. Auf 10, 100, 1000 … kann man nicht erweitern: Die Dezimalzahl ist <b>periodisch</b>.', '$. Não há fração equivalente com denominador 10, 100, 1000 …: a dízima é <b>infinita periódica</b>.'],
+        // mengen6: "$5 \\in \\mathbb{Q}_0^+$ und $5 \\in \\mathbb{N}_0$", "…, aber $x \\notin \\mathbb{N}_0$"
+        ['$ und $', '$ e $'], [', aber $', ', mas $'],
     ],
     rule: [
         // pt0: notation of the module, for every book
+        // Portuguese school notation (Doc, 26.10.2026: always the local conventions): the period of a repeating decimal in
+        // brackets, 0,(3) and 0,1(6) instead of the German bar (only digits under the bar, never a segment \overline{AB})
+        [/\\overline\{(\d+)\}/g, '($1)'],
+        // ℕ starts at 1 in Portugal: the German ℕ (with 0) is ℕ₀, the German ℚ⁺ (with 0) is ℚ₀⁺ (números racionais não negativos)
+        [/\\mathbb\{N\}(?!_)/g, '\\mathbb{N}_0'], [/\\mathbb\{Q\}\^\+/g, '\\mathbb{Q}_0^+'],
+        [/>ℕ<\/text>/g, '>ℕ₀</text>'], [/>ℚ⁺<\/text>/g, '>ℚ₀⁺</text>'],
         // book pt-10 mathegy6-pt:
+        // bruchbild6: the picture's name and the sentence for zero parts
+        [/Bild des Bruches (\d+) durch (\d+)/g, 'Representação da fração $1/$2'],
+        [/Null Teile von (\d+) sind nichts: \$0\$\./g, 'Zero partes em $1 não é nada: $$0$$.'],
+        // mengen6: the question and the end
+        [/Zahl (\d+) von (\d+): Wohin gehört <b>/g, 'Número $1 de $2: onde fica <b>'],
+        [/Alle Zahlen sind einsortiert, (\d+) von (\d+) gleich beim ersten Versuch richtig\./g, 'Todos os números estão arrumados, $1 de $2 certos logo à primeira.'],
+        [/Alle Zahlen sind einsortiert\./g, 'Todos os números estão arrumados.'],
     ]
 });

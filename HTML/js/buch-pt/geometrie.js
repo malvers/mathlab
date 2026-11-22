@@ -21,6 +21,10 @@ window.BuchPT && BuchPT.add('geometrie', {
     ],
     rule: [
         // pt0: notation of the module, for every book
+        // Portuguese school notation in the formulas the widgets write (Doc, 26.10.2026: always the local conventions), on every
+        // page that loads this module (the Gymnasium 5-9 and Oberschule editions): × for the product, as in the 2.º ciclo;
+        // a phrase key that contains a product must therefore be written with \times
+        [/\\cdot(?![a-zA-Z])/g, '\\times'],
         // book pt-10 mathegy6-pt:
     ]
 });
