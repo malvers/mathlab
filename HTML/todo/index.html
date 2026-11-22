@@ -41,6 +41,10 @@
             --prio3: 121, 158, 49;
             /* Wiedervorlage (resubmission): the violet of the shared palette (svp-tokens.css --g-violet), apart from the three */
             --wv: 155, 130, 225;
+            /* the guest the list is shared with (20261122_todo_share.sql): the soft turquoise reserved for that person in
+               DocCal (#9adbd4, Doc 19.11.2026) - her chip, her items' mark, the frame while new items go to her list */
+            --c-turquoise: 154, 219, 212;
+            --turq-mark: rgb(var(--c-turquoise));
             --ink-light: rgb(248, 251, 255);
             --ink-navy: rgb(14, 36, 78);
             /* how strongly the buttons and pills are tinted: Blau and Grau need nearly the full colour on the phone
@@ -50,6 +54,7 @@
             --pill-a: .75;
         }
         html.svp-light { --btn-a: .3; --btn-rim-a: .85; --pill-a: .38; }   /* Hell stays as Doc approved it */
+        html.svp-light { --turq-mark: rgb(56, 160, 150); }   /* the pale turquoise vanishes on white: marks take a deeper one */
         html.svp-light .prio button:not([aria-pressed="true"]),
         html.svp-light .prio button.pd,
         html.svp-light .pill { color: var(--text); }
@@ -118,6 +123,53 @@
         .status:empty { min-height: 0; margin-top: 0; }
         .status.err { color: var(--lambda); }
 
+        /* whose items show - me / the other one / "Beide", each by name (Doc, 22.11.2026: "Ich, ihre, beide. Mit den Checkmark ... wie
+           in der DocFit-App"): DocFit's person switch - equal chips, 36px flat, an outline in their colour, the chosen one
+           filled, here with a ✓ in front. Only where there are two lists: once Doc shared his list, and in the guest's view.
+           The guest's chip is her turquoise (it doubles as the legend for her marked items), the others the scheme's tint
+           (phi green, DocFit's colour, is Prio 3 right below) */
+        .who { display: flex; gap: 8px; margin: 0 0 10px; }
+        .who button {
+            flex: 1 1 0; min-width: 0; height: 36px; border-radius: 10px; cursor: pointer; padding: 0 6px;
+            background: transparent; border: 1px solid rgba(var(--c-rgb), var(--btn-rim-a)); color: rgb(var(--c-rgb));
+            font: 700 13px Orbitron, sans-serif; letter-spacing: .04em;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .who button[aria-checked="true"] { background: rgb(var(--c-rgb)); border-color: rgb(var(--c-rgb)); color: var(--on); }
+        .who button[aria-checked="true"]::before { content: '✓\00a0'; }
+        .who .wt { --c-rgb: var(--tint); --on: var(--bg); }
+        .who .wg { --c-rgb: var(--c-turquoise); --on: var(--ink-navy); }
+        html.svp-light .who button:not([aria-checked="true"]) { color: var(--text); }
+        html.svp-light .who .wg:not([aria-checked="true"]) { border-color: var(--turq-mark); }
+        /* new items go to the guest's list: the entry card says so with her colour */
+        #entry.to-guest { border-color: var(--turq-mark); }
+
+        /* sharing with one guest (20261122_todo_share.sql): the section under the gear and the one-time QR code, as in DocCal */
+        .set-sep { border: 0; border-top: 1px solid var(--line); margin: 16px 0 14px; }
+        .set-text { margin: 0 0 10px; font: 14px/1.45 Raleway, sans-serif; color: var(--muted); }
+        button.wide {
+            width: 100%; height: 44px; border-radius: 10px; cursor: pointer; padding: 0 12px;
+            background: transparent; color: var(--text); border: 1px solid var(--line);
+            font: 700 13px Orbitron, sans-serif; letter-spacing: .04em;
+        }
+        .share-new, .share-btns { display: flex; gap: 8px; }
+        .share-new button.wide { flex: 0 0 auto; width: auto; }
+        .share-btns button.wide { flex: 1 1 0; min-width: 0; padding: 0 8px; }
+        .qr-dlg { max-width: 360px; text-align: center; }
+        .qr { width: min(280px, 100%); aspect-ratio: 1; margin: 0 auto 14px; padding: 12px; border-radius: 12px; background: rgb(255, 255, 255); }
+        .qr svg { display: block; width: 100%; height: 100%; }
+        .dlg p.set-text { margin: 0 0 10px; font: 14px/1.45 Raleway, sans-serif; color: var(--muted); text-align: left; }
+        /* the same link as text, to send it when the guest is not there to scan - only in this one-time dialog */
+        .dlg p.qr-link {
+            margin: 0 0 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg);
+            color: var(--text); font: 13px/1.4 Raleway, sans-serif; text-align: left; word-break: break-all; user-select: all;
+        }
+        .qr-dlg .dlg-btns { flex-wrap: wrap; margin-top: 10px; gap: 8px; }
+        .qr-dlg .dlg-btns button { font-size: 12px; }
+        .qr-dlg .dlg-btns #qrOk { flex-basis: 100%; }
+        .dlg-yes.ok { background: var(--lambda); color: var(--bg); }
+        #dlgText { white-space: pre-line; }
+
         /* the three priorities: one colour each from the palette, plus a quiet one for the checked items (the
            scheme's own tint); --on = the text on the full colour */
         .p1 { --c-rgb: var(--prio1); --on: var(--ink-light); }
@@ -172,6 +224,19 @@
             color: var(--ink-navy); font: 700 11px/18px Orbitron, sans-serif; letter-spacing: .06em; white-space: nowrap;
         }
         html.svp-light .wv-tag { color: var(--text); }
+        /* an item of Doc's list the guest added: "von <Name>" (Doc's view) / "von dir" (hers) in her turquoise */
+        .who-tag {
+            display: inline-block; margin: -5px 0 8px 2px; padding: 0 6px; height: 20px; border-radius: 5px;
+            border: 1px solid var(--turq-mark); color: var(--turq-mark);
+            font: 700 11px/18px Orbitron, sans-serif; letter-spacing: .06em; white-space: nowrap;
+        }
+        .wv-tag + .who-tag { margin-left: 6px; }
+        html.svp-light .who-tag { color: var(--text); }
+        /* an item of the guest's own list: a turquoise bar on its left edge and, while open, a turquoise circle - so in
+           "Beide" it is clear at a glance whose it is (checked: the bar fainter, the circle grey like all checked ones) */
+        ul.list li.guest { box-shadow: inset 4px 0 0 var(--turq-mark); }
+        ul.list li.guest.done { box-shadow: inset 4px 0 0 rgba(var(--c-turquoise), .4); }
+        ul.list li.guest:not(.done) button.chk { color: var(--turq-mark); }
 
         /* the date question of WV: three quick picks, a date field of its own, OK */
         .wv-what { margin: -10px 0 16px; font: 15px/1.4 Raleway, sans-serif; color: var(--muted);
@@ -289,7 +354,17 @@
                 <button id="loginBtn" type="button">Anmelden</button>
             </div>
 
+            <div class="card gate" id="guestGate" hidden>
+                <p>Dieser Link gilt nicht mehr.<br><span id="guestGoneWho"></span></p>   <!-- "Bitte Michi um ...": set by init -->
+            </div>
+
             <div class="card" id="entry" hidden>
+                <!-- whose items show: only with two lists (labels set by paintView - the guest's name only from the database) -->
+                <div class="who" id="who" role="radiogroup" aria-label="Wessen Aufgaben" hidden>
+                    <button type="button" role="radio" data-view="me" aria-checked="false"></button>
+                    <button type="button" role="radio" data-view="other" aria-checked="false"></button>
+                    <button type="button" role="radio" data-view="both" aria-checked="false" class="wt">Beide</button>
+                </div>
                 <div class="row">
                     <!-- mic: Material Icons "mic" (Apache 2.0) -->
                     <button class="mic" id="micBtn" type="button" aria-label="Diktieren">
@@ -308,6 +383,32 @@
                         <button type="button" role="radio" data-theme="dark" aria-checked="false"><i style="background: rgb(8, 20, 42)"></i>Blau</button>
                         <button type="button" role="radio" data-theme="grey" aria-checked="false"><i style="background: rgb(26, 26, 28)"></i>Grau</button>
                         <button type="button" role="radio" data-theme="light" aria-checked="false"><i style="background: rgb(246, 248, 252)"></i>Hell</button>
+                    </div>
+                    <!-- sharing with one guest: only once the database has todo_share (20261122_todo_share.sql) -->
+                    <div id="shareSec" hidden>
+                        <hr class="set-sep">
+                        <span class="set-label" id="shareTitle">Teilen</span>
+                        <div id="shareNew" hidden>
+                            <p class="set-text">Noch mit niemandem geteilt. Ein Name zum Erkennen – er steht nur in der Datenbank.</p>
+                            <div class="share-new">
+                                <input class="new" id="shareLabel" type="text" maxlength="40" autocomplete="off" enterkeyhint="done" placeholder="Name" aria-label="Mit wem teilen">
+                                <button class="wide" id="shareCreate" type="button">Anlegen</button>
+                            </div>
+                        </div>
+                        <div id="shareOn" hidden>
+                            <p class="set-text" id="shareState"></p>
+                            <div class="share-btns">
+                                <button class="wide" id="shareQr" type="button">QR-Code</button>
+                                <button class="wide" id="shareLock" type="button">Zugang sperren</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- guest's view only: leave this device -->
+                    <div id="guestEnd" hidden>
+                        <hr class="set-sep">
+                        <span class="set-label" id="guestTitle"></span>
+                        <p class="set-text" id="guestText"></p>
+                        <button class="wide" id="guestForget" type="button">Zugang hier entfernen</button>
                     </div>
                 </div>
                 <!-- just the digits on the buttons (Doc 19.11.: "1, 2, 3 ... nicht Prio davor"), plus WV = Wiedervorlage -->
@@ -359,12 +460,61 @@
         </div>
     </div>
 
+    <!-- the guest's access as a QR code: shown once, the token lives only in it (closing empties the box) -->
+    <div class="dlg-back" id="qrDlg" hidden>
+        <div class="dlg qr-dlg" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+            <p id="qrTitle">QR-Code</p>
+            <div class="qr" id="qrBox"></div>
+            <p class="qr-link" id="qrLink"></p>
+            <p class="set-text">Scannen lassen oder den Link schicken – er öffnet die Liste ohne Passwort, also nur an diese eine Person. Danach ist er hier weg; ein neuer Code sperrt diesen.</p>
+            <div class="dlg-btns">
+                <button class="dlg-no" id="qrCopy" type="button">Link kopieren</button>
+                <button class="dlg-no" id="qrShare" type="button" hidden>Teilen</button>
+                <button class="dlg-yes ok" id="qrOk" type="button">Fertig</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         (() => {
             const auth = window.svpAuth;
             const $ = id => document.getElementById(id);
-            const DRAFT_KEY = 'todo-draft';   // the text typed into the entry field
-            const CACHE_KEY = 'todo-cache';   // last known list: shows at once, also without network
+
+            /* ---------- sharing with one guest (supabase/migrations/20261122_todo_share.sql), as in DocCal ----------
+               Doc (22.11.2026): the guest gets full access to his items and keeps her own list beside it, "getrennt voneinander
+               gehandelt"; both pick me / the other one / "Beide" on top. Two lists, so every item knows where it lives:
+               list 'doc' = Doc's (table todo), 'own' = the guest's own (table todo_guest) - in both views.
+               SHARE_URL#k=<token>: the token moves into this browser's storage at once and leaves the address bar
+               (history.replaceState) - not in the history, a bookmark or a copied address; it is never logged. With a token
+               the page needs no login: it reads and writes only through the three todo_shared_* functions. */
+            const SHARE_URL = 'https://doc-todo.pages.dev/';   // the guest's link: SHARE_URL#k=<token>
+            const SHARE_COLS = 'id,label,token_sha256';
+            const SHARE_KEY = 'todo-share';                    // Doc's page: { table, row } - todo_share exists, the share without its hash
+            const GUEST_TOKEN_KEY = 'todo-share-token';
+            const GUEST_CACHE_KEY = 'todo-share-cache';
+            const GUEST_GONE_KEY = 'todo-share-gone';
+            const guestToken = (() => {
+                const m = /^#k=([A-Za-z0-9_-]{43})$/.exec(location.hash);
+                if (/^#k=/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
+                if (m) {
+                    try {
+                        if (localStorage.getItem(GUEST_TOKEN_KEY) !== m[1]) localStorage.removeItem(GUEST_CACHE_KEY);   // a new link: nothing of an old one
+                        localStorage.setItem(GUEST_TOKEN_KEY, m[1]);
+                        localStorage.removeItem(GUEST_GONE_KEY);
+                    } catch (e) { }
+                    return m[1];
+                }
+                try { return localStorage.getItem(GUEST_TOKEN_KEY) || ''; } catch (e) { return ''; }
+            })();
+            const GUEST = !!guestToken;
+            // Doc's name wherever the guest's page speaks of him - as in DocCal (Doc, 19.11.2026: "bei [ihr] soll überall Michi stehen")
+            const OWNER_LABEL = 'Michi';
+            const ME = GUEST ? 'own' : 'doc', OTHER = GUEST ? 'doc' : 'own';   // whose list is "me" on this page
+            const TABLE = { doc: 'todo', own: 'todo_guest' };
+
+            const DRAFT_KEY = GUEST ? 'todo-share-draft' : 'todo-draft';   // the text typed into the entry field
+            const CACHE_KEY = 'todo-cache';   // last known list: shows at once, also without network (Doc's page)
+            const VIEW_KEY = GUEST ? 'todo-share-view' : 'todo-view';      // me / the other one / "Beide", per device
             const DONE_MAX = 100;             // checked items loaded (newest first)
             const PRIOS = [1, 2, 3];
 
@@ -379,22 +529,36 @@
             const ICON_MAIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>';
             const ICON_SENT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
 
-            let items = [];          // { id, text, done, done_at, created_at, prio, pos, wv_date }
-            let editingId = null;    // item whose text is being edited in place - no re-render meanwhile
+            let items = [];          // { id, text, done, done_at, created_at, prio, pos, wv_date, shared_by, list, key } - both lists
+            let editingId = null;    // key of the item whose text is being edited in place - no re-render meanwhile
             let dragging = false;    // an item is being dragged - no re-render meanwhile
             let busy = 0;            // writes in flight - a reload now could bring back the old state
             let filter = 0;          // the one priority shown, 'done' = only the checked items, 'wv' = only WV items, 0 = all
+            let view = 'both';       // whose items show: 'me' | 'other' | 'both' (only with two lists)
+            let shareTable = false;  // Doc's page: todo_share exists (the SQL ran) - only then the gear shows "Teilen"
+            let share = null;        // Doc's page: the share, without its hash: { id, label, active }
+            let sharedCol = false;   // Doc's page: todo.shared_by is asked for (it came with todo_share)
+            let guestShare = null;   // the guest's page: { id, label } from todo_shared_rows
+            let guestGone = false;   // the guest's page: the link no longer works (locked, or replaced by a newer QR code)
 
-            const byId = id => items.find(x => x.id === id);
+            const byId = key => items.find(x => x.key === key);
             const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             const ms = s => (s ? Date.parse(s) : 0);   // server and client write the timestamps differently (+00:00 / Z)
-            /* a cached item from before the priorities has neither: priority 2, order by age like the database did */
-            function norm(x) {
+            /* a cached item from before the priorities has neither: priority 2, order by age like the database did;
+               every item knows its list ('doc' unless told) and a key unique over both lists (their ids are not) */
+            function norm(x, list) {
                 if (!PRIOS.includes(x.prio)) x.prio = 2;
                 if (typeof x.pos !== 'number') x.pos = -ms(x.created_at) / 1000;
                 if (!x.wv_date) x.wv_date = null;
+                x.list = list || (x.list === 'own' ? 'own' : 'doc');
+                x.key = (x.list === 'own' ? 'o' : 'd') + x.id;
                 return x;
             }
+            /* the two lists: only once Doc shared his list (and always in the guest's view) there is a choice */
+            const twoLists = () => GUEST || !!share;
+            const guestName = () => (GUEST ? guestShare && guestShare.label : share && share.label) || 'Gast';
+            const shows = x => (!twoLists() ? x.list === 'doc' : view === 'both' || x.list === (view === 'me' ? ME : OTHER));
+            const target = () => (twoLists() && view === 'other' ? OTHER : ME);   // where a new item goes ("Beide": into my own)
             const byPos = (a, b) => a.pos - b.pos || ms(b.created_at) - ms(a.created_at) || b.id - a.id;
 
             /* Wiedervorlage (resubmission, Doc 19.11.): wv_date = the day an item comes back, as 'YYYY-MM-DD' in local time.
@@ -424,9 +588,10 @@
             }
             const wvPos = s => { const [y, m, d] = s.split('-').map(Number); return WV_BASE + Date.UTC(y, m - 1, d) / 864e5; };
             const waiting = (x, t) => !x.done && !!x.wv_date && x.wv_date > (t || today());
-            /* where a new item goes in priority `prio`: above all others of it, but below the WV items on top */
+            /* where a new item goes in priority `prio`: above all others of it that are shown, but below the WV items on top
+               ("Beide": above both lists' items - so it is also on top of its own list) */
             function topPos(prio, except) {
-                const group = items.filter(y => !y.done && y.prio === prio && !y.wv_date && y !== except);
+                const group = items.filter(y => shows(y) && !y.done && y.prio === prio && !y.wv_date && y !== except);
                 return group.length ? Math.min(...group.map(y => y.pos)) - 1 : 0;
             }
             let lastDay = '';   // the day of the last render: a new day moves the due WV items up
@@ -437,7 +602,16 @@
                 el.className = 'status' + (cls ? ' ' + cls : '');
             }
 
-            function cache() { try { localStorage.setItem(CACHE_KEY, JSON.stringify(items)); } catch (e) { } }
+            function cache() {
+                if (GUEST) {   // the guest's copy for offline use - never Doc's keys, and nothing once the link is gone
+                    if (!guestGone) try { localStorage.setItem(GUEST_CACHE_KEY, JSON.stringify({ items, share: guestShare })); } catch (e) { }
+                    return;
+                }
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(items));
+                    localStorage.setItem(SHARE_KEY, JSON.stringify({ table: shareTable, row: share }));
+                } catch (e) { }
+            }
             function saveDraft() { try { localStorage.setItem(DRAFT_KEY, $('text').value); } catch (e) { } }
 
             /* PostgREST call that returns the touched rows, or throws */
@@ -449,24 +623,99 @@
                 return res.json();
             }
 
-            async function load() {
-                const cols = 'select=id,text,done,done_at,created_at,prio,pos,wv_date';
-                const [open, done] = await Promise.all([
-                    send(`todo?${cols}&done=is.false&order=prio.asc,pos.asc`),
-                    send(`todo?${cols}&done=is.true&order=done_at.desc&limit=${DONE_MAX}`)
-                ]);
-                items = open.concat(done).map(norm);
-                cache();
+            /* the guest's page: one of the todo_shared_* functions with the publishable key - the token is the guard */
+            async function guestRpc(name, body) {
+                let res;
+                try {
+                    res = await fetch(auth.DB_URL + '/rest/v1/rpc/' + name, {
+                        method: 'POST', body: JSON.stringify(Object.assign({ p_token: guestToken }, body)),
+                        headers: { apikey: auth.DB_KEY, Authorization: 'Bearer ' + auth.DB_KEY, 'Content-Type': 'application/json' }
+                    });
+                } catch (e) { throw new Error('keine Verbindung'); }
+                if (res.ok) return res.json();
+                const d = await res.json().catch(() => ({}));
+                if (d.code === '42501' && d.message === 'link no longer valid') {
+                    guestLost();
+                    const e = new Error('Link gilt nicht mehr');
+                    e.gone = true;
+                    throw e;
+                }
+                throw new Error({ 'too many new items today': 'heute schon zu viele neue Aufgaben' }[d.message] || 'HTTP ' + res.status);
             }
 
-            /* an open WV item shows its date under the text; one still waiting has no grip (its group is ordered by date) */
+            /* Every write goes to the item's own list. Doc's page: PostgREST with his login (Doc's list exactly as before, the
+               guest's in todo_guest); the guest's page: todo_shared_save / _remove. Each returns the touched rows ([] = none). */
+            const store = GUEST ? {
+                insert: (list, fresh) => guestRpc('todo_shared_save', { p_list: list, p_id: null, p_item: fresh }).then(r => (r ? [r] : [])),
+                patch: (x, next) => guestRpc('todo_shared_save', { p_list: x.list, p_id: x.id, p_item: next }).then(r => (r ? [r] : [])),
+                remove: (list, ids) => guestRpc('todo_shared_remove', { p_list: list, p_ids: ids })
+            } : {
+                insert: (list, fresh) => send(TABLE[list], 'POST', [list === 'own' ? Object.assign({ share_id: share.id }, fresh) : fresh]),
+                patch: (x, next) => send(`${TABLE[x.list]}?id=eq.${x.id}`, 'PATCH', next),
+                // one checked item (its bin) or all shown checked ones (the bin in the "Done" head)
+                remove: (list, ids, one) => send(one ? `${TABLE[list]}?id=eq.${ids[0]}` : `${TABLE[list]}?id=in.(${ids.join(',')})&done=is.true`, 'DELETE')
+            };
+
+            /* Doc's page: his items as always; todo.shared_by and the guest's list only once todo_share answered (before the
+               SQL ran it is missing: the request fails quietly and nothing else changes). The guest's list loads alongside
+               when the share is known from the last visit, else right after. */
+            async function load() {
+                if (GUEST) return guestLoad();
+                const cols = 'select=id,text,done,done_at,created_at,prio,pos,wv_date';
+                const both = (table, more, where) => Promise.all([
+                    send(`${table}?${cols}${more}${where}&done=is.false&order=prio.asc,pos.asc`),
+                    send(`${table}?${cols}${more}${where}&done=is.true&order=done_at.desc&limit=${DONE_MAX}`)
+                ]).then(([open, done]) => open.concat(done));
+                const mine = () => both('todo', sharedCol ? ',shared_by' : '', '')
+                    .catch(e => { if (!sharedCol || e.message !== 'HTTP 400') throw e; sharedCol = false; return both('todo', '', ''); });
+                const theirs = sh => both('todo_guest', '', `&share_id=eq.${sh.id}`).catch(() => null);
+                const known = share;
+                const [doc, sh, own] = await Promise.all([
+                    mine(),
+                    send(`todo_share?select=${SHARE_COLS}&order=id.asc&limit=1`).catch(() => null),
+                    known ? theirs(known) : null
+                ]);
+                let guestRows = known ? own : [];
+                if (sh) {
+                    shareTable = true;
+                    sharedCol = true;   // came with the same SQL: from the next load on
+                    share = sh[0] ? shareFrom(sh[0]) : null;
+                    guestRows = !share ? [] : known && known.id === share.id ? own : await theirs(share);
+                }
+                // no answer for the guest's list: keep the items of it we had
+                const kept = items.filter(x => x.list === 'own');
+                items = doc.map(x => norm(x, 'doc')).concat(guestRows ? guestRows.map(x => norm(x, 'own')) : kept);
+                cache();
+            }
+            const shareFrom = r => ({ id: r.id, label: r.label, active: !!r.token_sha256 });
+
+            async function guestLoad() {
+                const d = await guestRpc('todo_shared_rows', {});
+                guestShare = { id: d.share && d.share.id, label: (d.share && d.share.label) || null };
+                items = (d.doc || []).map(x => norm(x, 'doc')).concat((d.own || []).map(x => norm(x, 'own')));
+                cache();
+            }
+            /* the link no longer works (Doc locked it or showed a newer QR code): nothing of his list stays on this device */
+            function guestLost() {
+                guestGone = true;
+                items = []; guestShare = null;
+                try { localStorage.removeItem(GUEST_CACHE_KEY); localStorage.setItem(GUEST_GONE_KEY, '1'); } catch (e) { }
+                $('dlg').hidden = $('wvDlg').hidden = $('settings').hidden = true;
+                $('entry').hidden = $('lists').hidden = true;
+                $('guestGate').hidden = false;
+            }
+
+            /* an open WV item shows its date under the text; one still waiting has no grip (its group is ordered by date).
+               The mail button only on Doc's page and Doc's items (todo-mail mails him the row of table todo with that id);
+               an item of the guest's list carries her mark (class guest), one she added to Doc's list a "von ..." tag */
             const row = (x, t) =>
-                `<li data-id="${x.id}" class="${x.done ? 'done' : ''}">` +
+                `<li data-id="${x.key}" class="${x.done ? 'done' : ''}${x.list === 'own' ? ' guest' : ''}">` +
                 `<button class="chk" type="button" aria-label="${x.done ? 'Wieder offen' : 'Abhaken'}">${x.done ? ICON_DONE : ICON_OPEN}</button>` +
                 `<div class="mid"><span class="txt">${esc(x.text)}</span>` +
-                (x.wv_date && !x.done ? `<span class="wv-tag">WV ${dayLabel(x.wv_date)}</span>` : '') + '</div>' +
+                (x.wv_date && !x.done ? `<span class="wv-tag">WV ${dayLabel(x.wv_date)}</span>` : '') +
+                (x.list === 'doc' && x.shared_by && twoLists() ? `<span class="who-tag">von ${GUEST ? 'dir' : esc(guestName())}</span>` : '') + '</div>' +
                 (x.done ? `<button class="del" type="button" aria-label="Löschen">${ICON_DEL}</button>`
-                    : `<span class="acts"><button class="mail" type="button" aria-label="Als Mail an mich" title="Als Mail an mich">${ICON_MAIL}</button>` +
+                    : '<span class="acts">' + (!GUEST && x.list === 'doc' ? `<button class="mail" type="button" aria-label="Als Mail an mich" title="Als Mail an mich">${ICON_MAIL}</button>` : '') +
                       (waiting(x, t) ? '<span class="grip-gap"></span>' : `<button class="grip" type="button" aria-label="Verschieben">${ICON_GRIP}</button>`) + '</span>') +
                 '</li>';
 
@@ -512,7 +761,8 @@
                 const t = today();
                 lastDay = t;
                 const shown = x => !filter || filter === 'done' || x.prio === filter;
-                const open = items.filter(x => !x.done && !waiting(x, t));
+                const vis = items.filter(shows);   // me / the other one / "Beide"
+                const open = vis.filter(x => !x.done && !waiting(x, t));
                 for (const p of PRIOS) {
                     const grp = $('p' + p).closest('.grp');
                     const list = open.filter(x => x.prio === p && (filter !== 'wv' || x.wv_date)).sort(byPos);
@@ -520,11 +770,11 @@
                     grp.querySelector('.grp-note').hidden = filter !== p;
                     $('p' + p).innerHTML = list.map(x => row(x, t)).join('');
                 }
-                const wv = items.filter(x => waiting(x, t)).sort((a, b) => a.wv_date.localeCompare(b.wv_date) || byPos(a, b));
+                const wv = vis.filter(x => waiting(x, t)).sort((a, b) => a.wv_date.localeCompare(b.wv_date) || byPos(a, b));
                 $('wvSec').hidden = !!filter && filter !== 'wv';   // always there like Prio 1-3, empty: "leer"
                 $('wvSec').querySelector('.grp-note').hidden = filter !== 'wv';
                 $('wv').innerHTML = wv.map(x => row(x, t)).join('');
-                const done = items.filter(x => x.done && shown(x)).sort((a, b) => ms(b.done_at) - ms(a.done_at) || b.id - a.id);
+                const done = vis.filter(x => x.done && shown(x)).sort((a, b) => ms(b.done_at) - ms(a.done_at) || b.id - a.id);
                 $('done').innerHTML = done.map(x => row(x, t)).join('');
                 $('doneSec').hidden = !done.length && filter !== 'done';
                 $('doneSec').querySelector('.grp-note').hidden = filter !== 'done';
@@ -576,14 +826,14 @@
                 const prev = { done: x.done, done_at: x.done_at };
                 const next = { done: !x.done, done_at: x.done ? null : new Date().toISOString() };
                 write(() => Object.assign(x, next), () => Object.assign(x, prev),
-                    () => send(`todo?id=eq.${id}`, 'PATCH', next));
+                    () => store.patch(x, next));
             }
 
             function remove(id) {
                 const x = byId(id);
                 if (!x) return;
                 write(() => { items = items.filter(y => y !== x); }, () => { items.push(x); },
-                    () => send(`todo?id=eq.${id}`, 'DELETE'));
+                    () => store.remove(x.list, [x.id], true));
             }
 
             /* Ask in the page's own dialog; Enter = yes, Escape or a tap beside it = no */
@@ -610,26 +860,27 @@
                 });
             }
 
-            /* the bin in the "Done" head: all checked items that are shown now (a Prio filter: only its own) */
+            /* the bin in the "Done" head: all checked items that are shown now (a Prio filter: only its own; "Beide": of
+               both lists, each deleted in its own) */
             async function removeDone() {
-                const gone = items.filter(x => x.done && (!filter || filter === 'done' || x.prio === filter));
+                const gone = items.filter(x => shows(x) && x.done && (!filter || filter === 'done' || x.prio === filter));
                 if (!gone.length) return;
                 const n = gone.length;
                 if (!(await confirmBox(n === 1 ? 'Die erledigte Aufgabe löschen?' : `Alle ${n} erledigten Aufgaben löschen?`, 'Löschen'))) return;
-                const ids = gone.map(x => x.id).join(',');
+                const lists = [...new Set(gone.map(x => x.list))];
                 write(() => { items = items.filter(x => !gone.includes(x)); }, () => { items.push(...gone); },
-                    () => send(`todo?id=in.(${ids})&done=is.true`, 'DELETE'));
+                    async () => (await Promise.all(lists.map(l => store.remove(l, gone.filter(x => x.list === l).map(x => x.id))))).flat());
             }
 
             /* An item was dropped: it takes the priority of the group it landed in and a pos between its
                new neighbours. If two neighbours have no room left between them, the group is numbered anew. */
             function dropped(evt) {
-                const x = byId(Number(evt.item.dataset.id));
+                const x = byId(evt.item.dataset.id);
                 // nothing moved, or the item is gone meanwhile: just show the current list
                 if (!x || (evt.from === evt.to && evt.oldIndex === evt.newIndex)) { setTimeout(render, 0); return; }
                 const prio = Number(evt.to.dataset.prio);
-                const ids = [...evt.to.children].map(li => Number(li.dataset.id));
-                const i = ids.indexOf(x.id);
+                const ids = [...evt.to.children].map(li => li.dataset.id);   // keys: in "Beide" items of both lists
+                const i = ids.indexOf(x.key);
                 const a = i > 0 ? byId(ids[i - 1]) : null;
                 const b = i < ids.length - 1 ? byId(ids[i + 1]) : null;
                 const pos = a && b ? (a.pos + b.pos) / 2 : a ? a.pos + 1 : b ? b.pos - 1 : 0;
@@ -645,7 +896,7 @@
                 setTimeout(() => write(
                     () => changes.forEach(([y, n]) => Object.assign(y, n)),
                     () => changes.forEach(([y], k) => Object.assign(y, prev[k])),
-                    async () => (await Promise.all(changes.map(([y, n]) => send(`todo?id=eq.${y.id}`, 'PATCH', n)))).flat()
+                    async () => (await Promise.all(changes.map(([y, n]) => store.patch(y, n)))).flat()
                 ), 0);
             }
 
@@ -674,12 +925,13 @@
                 const text = $('text').value.trim();
                 if (!text) { status('Erst die Aufgabe eintippen.'); $('text').focus(); return; }
                 const fresh = wv ? { text, prio: 1, pos: wvPos(wv), wv_date: wv } : { text, prio, pos: topPos(prio) };
+                const list = target();   // the list chosen now, also if the choice changes while saving
                 adding(true);
                 busy++;
                 try {
-                    const rows = await send('todo', 'POST', [fresh]);
+                    const rows = await store.insert(list, fresh);
                     if (!rows.length) throw new Error('nichts gespeichert');
-                    items.push(norm(rows[0]));
+                    items.push(norm(rows[0], list));
                     // a filter on another priority would hide the new item at once: show everything again
                     if (filter && filter !== (wv ? 'wv' : prio)) setFilter(0);
                     $('text').value = '';
@@ -709,7 +961,7 @@
                 // a filter on another priority would hide the item at once: show everything again
                 if ((PRIOS.includes(filter) && filter !== prio) || filter === 'wv') setFilter(0);
                 write(() => Object.assign(x, next), () => Object.assign(x, prev),
-                    () => send(`todo?id=eq.${id}`, 'PATCH', next));
+                    () => store.patch(x, next));
             }
 
             const wvSaid = day => `Wiedervorlage am ${dayLabel(day, true)}`;
@@ -722,7 +974,7 @@
                 const prev = { prio: x.prio, pos: x.pos, wv_date: x.wv_date, done: x.done, done_at: x.done_at };
                 if (filter && filter !== 'wv') setFilter(0);
                 if (await write(() => Object.assign(x, next), () => Object.assign(x, prev),
-                    () => send(`todo?id=eq.${id}`, 'PATCH', next))) status(wvSaid(day));
+                    () => store.patch(x, next))) status(wvSaid(day));
             }
 
             /* Ask for the WV date: a quick pick answers at once, the own date with OK (or Enter);
@@ -785,10 +1037,10 @@
 
             /* tap on a text: edit it in place; Enter or tapping elsewhere saves, Escape reverts */
             function edit(li) {
-                const x = byId(Number(li.dataset.id));
+                const x = byId(li.dataset.id);
                 const span = li.querySelector('.txt');
                 if (!x || editingId) return;
-                editingId = x.id;
+                editingId = x.key;
                 try { span.contentEditable = 'plaintext-only'; } catch (e) { span.contentEditable = 'true'; }
                 span.classList.add('editing');
                 span.focus();
@@ -811,7 +1063,7 @@
                     if (!text || text === x.text) { span.textContent = x.text; return; }
                     const old = x.text;
                     write(() => { x.text = text; }, () => { x.text = old; },
-                        () => send(`todo?id=eq.${x.id}`, 'PATCH', { text }));
+                        () => store.patch(x, { text }));
                 };
             }
 
@@ -876,22 +1128,222 @@
                 $('gearBtn').setAttribute('aria-expanded', String(on));
             }
 
+            /* ---------- whose items show: me / the other one / "Beide" ----------
+               The chips carry names, not "Ich" (Doc, 22.11.2026: "bei Ich schreibt nicht Ich, sondern Doc"): on Doc's page
+               "Doc | <the share's label> | Beide", on the guest's page - as in DocCal - "<her label> | Michi | Beide".
+               "me" is whoever looks: on Doc's page his list, on the guest's page hers. New items go into "me" - and into
+               the other one's list while that one is chosen (the entry card then says so: placeholder, and her colour while
+               it is her list). Doc may change the guest's items like his own (only the mail button stays his). */
+            function paintView() {
+                const two = twoLists();
+                $('who').hidden = !two;
+                const [me, other] = $('who').children;
+                me.textContent = GUEST ? (guestShare && guestShare.label) || 'Meine' : 'Doc';
+                other.textContent = GUEST ? OWNER_LABEL : guestName();
+                me.className = GUEST ? 'wg' : 'wt';          // the guest's chip is always her turquoise
+                other.className = GUEST ? 'wt' : 'wg';
+                for (const b of $('who').children) b.setAttribute('aria-checked', String(b.dataset.view === view));
+                const to = target();
+                $('entry').classList.toggle('to-guest', two && to === 'own');
+                // short enough for a 360px phone ("Für Michi: was ist zu tun?" was cut off)
+                const forWhom = 'Aufgabe für ' + (GUEST ? OWNER_LABEL : guestName());
+                $('text').placeholder = to === ME ? 'Was ist zu tun?' : forWhom;
+                $('text').setAttribute('aria-label', to === ME ? 'Neue Aufgabe' : 'Neue ' + forWhom);
+            }
+            function setView(v) {
+                if (!['me', 'other', 'both'].includes(v) || v === view) return;
+                // an item being edited is saved first (its blur), so the new choice can render
+                const span = editingId && $('lists').querySelector(`li[data-id="${editingId}"] .txt`);
+                if (span) span.blur();
+                view = v;
+                try { localStorage.setItem(VIEW_KEY, v); } catch (e) { }
+                paintView();
+                render(false);
+            }
+
+            /* ---------- Doc's page: sharing with one guest (todo_share; her page reads through todo_shared_rows) ----------
+               The token exists only in the QR code and the link beside it: here just its SHA-256 is written, a new code
+               replaces the old one, "Zugang sperren" removes it. */
+            function renderShare() {
+                if (GUEST) return;
+                $('shareSec').hidden = !shareTable;
+                $('shareNew').hidden = !shareTable || !!share;
+                $('shareOn').hidden = !shareTable || !share;
+                $('shareTitle').textContent = share ? 'Geteilt mit ' + share.label : 'Teilen';
+                if (!share) return;
+                $('shareState').textContent = share.active
+                    ? 'Zugang offen – ' + share.label + ' kann deine Liste bearbeiten und führt daneben eine eigene. Ein neuer QR-Code sperrt den alten.'
+                    : 'Zugang gesperrt – ein neuer QR-Code öffnet ihn wieder. Die Aufgaben von ' + share.label + ' bleiben.';
+                $('shareLock').disabled = !share.active;
+            }
+            async function createShare() {
+                const label = $('shareLabel').value.replace(/\s+/g, ' ').trim();
+                if (!label) { status('Bitte einen Namen eintragen.', 'err'); $('shareLabel').focus(); return; }
+                $('shareCreate').disabled = true;
+                busy++;
+                try {
+                    const rows = await send('todo_share', 'POST', [{ label }]);
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    share = shareFrom(rows[0]);
+                    $('shareLabel').value = '';
+                    status('Angelegt. Mit „QR-Code“ bekommt ' + share.label + ' den Zugang.');
+                } catch (e) {
+                    status('Nicht angelegt (' + e.message + ') – bitte nochmal.', 'err');
+                } finally {
+                    busy--;
+                    $('shareCreate').disabled = false;
+                    cache();
+                    renderShare();
+                    paintView();
+                    render(false);
+                }
+            }
+            // the QR library (svp/qrcode.min.js, as js/buzzer.js and DocCal) comes along only when a code is made
+            let qrLib = null;
+            const loadQr = () => qrLib || (qrLib = typeof window.qrcode === 'function' ? Promise.resolve() : new Promise((ok, fail) => {
+                const s = document.createElement('script');
+                s.src = '../svp/qrcode.min.js';
+                s.onload = () => (typeof window.qrcode === 'function' ? ok() : fail(new Error('QR-Baustein fehlt')));
+                s.onerror = () => { qrLib = null; fail(new Error('QR-Baustein fehlt')); };
+                document.head.appendChild(s);
+            }));
+            const b64url = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            async function sha256Hex(text) {
+                const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+                return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+            async function shareCode() {
+                if (!share) return;
+                if (share.active && !(await confirmBox('Neuer QR-Code für ' + share.label + '?\nDer bisherige Link gilt dann nicht mehr.', 'Neuer Code'))) return;
+                if (!window.crypto || !crypto.subtle) { status('Ein QR-Code geht nur über https oder localhost.', 'err'); return; }
+                $('shareQr').disabled = true;
+                busy++;
+                try {
+                    await loadQr();   // first the library: if it is missing, the old code keeps working
+                    const token = b64url(crypto.getRandomValues(new Uint8Array(32)));
+                    const rows = await send(`todo_share?id=eq.${share.id}`, 'PATCH', { token_sha256: await sha256Hex(token) });
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    share = shareFrom(rows[0]);
+                    cache();
+                    renderShare();
+                    showQr(SHARE_URL + '#k=' + token);
+                } catch (e) {
+                    status('Kein neuer QR-Code (' + e.message + ') – bitte nochmal.', 'err');
+                } finally {
+                    busy--;
+                    $('shareQr').disabled = false;
+                }
+            }
+            function showQr(link) {
+                showSettings(false);
+                const q = window.qrcode(0, 'M');
+                q.addData(link);
+                q.make();
+                $('qrBox').innerHTML = q.createSvgTag({ scalable: true, margin: 0 });
+                $('qrLink').textContent = link;
+                $('qrCopy').textContent = 'Link kopieren';
+                $('qrShare').hidden = !navigator.share;   // the phone's share sheet (WhatsApp ...), where the browser has one
+                $('qrTitle').textContent = 'Zugang für ' + share.label;
+                $('qrDlg').hidden = false;
+                $('qrOk').focus();
+            }
+            function closeQr() {
+                $('qrDlg').hidden = true;
+                $('qrBox').innerHTML = '';   // the token goes with it
+                $('qrLink').textContent = '';
+            }
+            /* the link from the dialog: to the clipboard, or - if the browser will not - selected for a manual copy */
+            async function copyQrLink() {
+                const link = $('qrLink').textContent;
+                if (!link) return;
+                try {
+                    await navigator.clipboard.writeText(link);
+                    $('qrCopy').textContent = 'Kopiert ✓';
+                } catch (e) {
+                    const r = document.createRange();
+                    r.selectNodeContents($('qrLink'));
+                    getSelection().removeAllRanges();
+                    getSelection().addRange(r);
+                    $('qrCopy').textContent = 'Markiert – bitte kopieren';
+                }
+            }
+            async function shareQrLink() {
+                const link = $('qrLink').textContent;
+                if (!link || !navigator.share) return;
+                // the message the guest gets: Doc by the name she knows him by on her page
+                const title = 'To-do-Liste von ' + OWNER_LABEL;
+                try { await navigator.share({ title, text: title, url: link }); }
+                catch (e) { if (e && e.name !== 'AbortError') copyQrLink(); }   // no share sheet after all: copy instead
+            }
+            async function lockShare() {
+                if (!share || !share.active) return;
+                if (!(await confirmBox('Zugang für ' + share.label + ' sperren?\nDer Link geht dann nicht mehr; ein neuer QR-Code öffnet ihn wieder.', 'Sperren'))) return;
+                const prev = share;
+                busy++;
+                try {
+                    const rows = await send(`todo_share?id=eq.${prev.id}`, 'PATCH', { token_sha256: null });
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    share = shareFrom(rows[0]);
+                    status('Zugang für ' + share.label + ' gesperrt.');
+                } catch (e) {
+                    share = prev;
+                    status('Nicht gesperrt (' + e.message + ') – bitte nochmal.', 'err');
+                } finally {
+                    busy--;
+                    cache();
+                    renderShare();
+                }
+            }
+
+            /* the guest's page: "Zugang hier entfernen" - back only with a new QR code from Doc */
+            async function forgetGuest() {
+                if (!(await confirmBox('Den Zugang zur Liste von ' + OWNER_LABEL + ' von diesem Gerät entfernen?\nZurück geht es nur mit einem neuen QR-Code von ' + OWNER_LABEL + '.', 'Entfernen'))) return;
+                try { [GUEST_TOKEN_KEY, GUEST_CACHE_KEY, GUEST_GONE_KEY, DRAFT_KEY, VIEW_KEY].forEach(k => localStorage.removeItem(k)); } catch (e) { }
+                location.reload();
+            }
+
             async function refresh() {
-                try { await load(); status(''); } catch (e) { status(e.message, 'err'); }
+                try { await load(); status(''); } catch (e) { if (!e.gone) status(e.message, 'err'); }
+                if (guestGone) return;
+                renderShare();
+                paintView();
                 render();
             }
 
             function showApp() {
                 $('gate').hidden = true;
+                if (GUEST) {
+                    try { guestGone = localStorage.getItem(GUEST_GONE_KEY) === '1'; } catch (e) { }
+                    if (guestGone) { guestLost(); return; }
+                    try {
+                        const c = JSON.parse(localStorage.getItem(GUEST_CACHE_KEY));
+                        if (c) { items = (c.items || []).map(x => norm(x)); guestShare = c.share || null; }
+                    } catch (e) { items = []; }
+                } else {
+                    try { items = (JSON.parse(localStorage.getItem(CACHE_KEY)) || []).map(x => norm(x)); } catch (e) { items = []; }
+                    try {
+                        const c = JSON.parse(localStorage.getItem(SHARE_KEY));
+                        if (c) { shareTable = !!c.table; share = c.row || null; sharedCol = shareTable; }
+                    } catch (e) { }
+                }
+                try { const v = localStorage.getItem(VIEW_KEY); if (['me', 'other', 'both'].includes(v)) view = v; } catch (e) { }
                 $('entry').hidden = false;
                 $('lists').hidden = false;
-                try { items = (JSON.parse(localStorage.getItem(CACHE_KEY)) || []).map(norm); } catch (e) { items = []; }
                 try { $('text').value = localStorage.getItem(DRAFT_KEY) || ''; } catch (e) { }
+                renderShare();
+                paintView();
                 render();
                 refresh();
             }
 
             function init() {
+                if (GUEST) {   // no login, no sharing of its own - the way out instead
+                    $('guestEnd').hidden = false;
+                    $('guestTitle').textContent = 'Liste von ' + OWNER_LABEL;
+                    $('guestText').textContent = 'Du siehst und bearbeitest die Aufgaben von ' + OWNER_LABEL + ' und führst daneben deine eigene Liste. Oben wählst du: deine, die von ' + OWNER_LABEL + ' oder beide.';
+                    $('guestGoneWho').textContent = 'Bitte ' + OWNER_LABEL + ' um einen neuen QR-Code.';
+                    $('guestForget').onclick = forgetGuest;
+                }
                 try { applyTheme(localStorage.getItem('svp-theme')); } catch (e) { applyTheme('dark'); }
                 $('themeSeg').onclick = e => { const b = e.target.closest('button'); if (b) applyTheme(b.dataset.theme); };
                 $('gearBtn').onclick = () => showSettings($('settings').hidden);
@@ -905,6 +1357,16 @@
                 $('micBtn').onclick = dictate;
                 $('delAll').innerHTML = ICON_DEL;
                 $('delAll').onclick = removeDone;
+                $('who').addEventListener('pointerdown', e => e.preventDefault());   // typed text stays, the keyboard open
+                $('who').onclick = e => { const b = e.target.closest('button'); if (b) setView(b.dataset.view); };
+                $('shareCreate').onclick = createShare;
+                $('shareLabel').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); createShare(); } });
+                $('shareQr').onclick = shareCode;
+                $('shareLock').onclick = lockShare;
+                $('qrOk').onclick = closeQr;
+                $('qrCopy').onclick = copyQrLink;
+                $('qrShare').onclick = shareQrLink;
+                $('qrDlg').addEventListener('pointerdown', e => { if (e.target === $('qrDlg')) closeQr(); });
                 $('prio').addEventListener('pointerdown', e => e.preventDefault());   // keep the keyboard open on the phone
                 $('prio').addEventListener('click', e => {
                     const b = e.target.closest('button');
@@ -921,10 +1383,10 @@
                 $('lists').addEventListener('click', e => {
                     const li = e.target.closest('li[data-id]');
                     if (!li) return;
-                    const id = Number(li.dataset.id);
+                    const id = li.dataset.id;   // the item's key (both lists)
                     if (e.target.closest('.chk')) toggle(id);
                     else if (e.target.closest('.del')) remove(id);
-                    else if (e.target.closest('.mail')) mail(id, e.target.closest('.mail'));
+                    else if (e.target.closest('.mail')) { const x = byId(id); if (x && x.list === 'doc') mail(x.id, e.target.closest('.mail')); }
                     else if (e.target.closest('.txt')) edit(li);
                 });
                 // the grip drags an item up or down, also into another priority (the checked ones stay put)
@@ -937,13 +1399,14 @@
                 });
                 // back in the foreground (phone) or focused again (Mac): fetch what the other device changed
                 document.addEventListener('visibilitychange', () => {
-                    if (!document.hidden && auth.hasSession() && !$('entry').hidden && !editingId && !dragging && !busy) refresh();
+                    const can = GUEST ? !guestGone : auth.hasSession();
+                    if (!document.hidden && can && !$('entry').hidden && !editingId && !dragging && !busy) refresh();
                 });
                 // the app left open over midnight: the WV items due today move up without a reload
                 setInterval(() => { if (!$('lists').hidden && today() !== lastDay) render(); }, 60000);
                 $('loginBtn').onclick = () => auth.loginDialog(showApp, 'Anmelden für deine To-do-Liste');
 
-                if (auth.hasSession()) showApp(); else $('gate').hidden = false;
+                if (GUEST || auth.hasSession()) showApp(); else $('gate').hidden = false;
             }
 
             init();
