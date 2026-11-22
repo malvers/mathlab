@@ -41,6 +41,22 @@ window.BuchPT && BuchPT.add('gy6', {
         '$\\tfrac92 = 4{,}5$ liegt zwischen 4 und 5.': '$\\tfrac92 = 4{,}5$ fica entre 4 e 5.',
         '$\\mathbb{N}$: die natürlichen Zahlen $0, 1, 2, 3, \\dots$<br>$\\mathbb{Q}^+$: die gebrochenen Zahlen, also alle Zahlen, die man als Bruch $\\tfrac{p}{q}$ schreiben kann.<br>Jede natürliche Zahl ist auch eine gebrochene Zahl: $\\mathbb{N} \\subset \\mathbb{Q}^+$.':
             '$\\mathbb{N}_0$: os números naturais e o zero, $0, 1, 2, 3, \\dots$<br>$\\mathbb{Q}_0^+$: os números racionais não negativos, ou seja, todos os números que se podem escrever como fração $\\tfrac{p}{q}$.<br>Cada número natural é também um número racional não negativo: $\\mathbb{N}_0 \\subset \\mathbb{Q}_0^+$.',
+        // bruchop6: the four operations ("a dividir" as Portuguese pupils read ":")
+        'plus': 'mais', 'minus': 'menos', 'mal': 'vezes', 'durch': 'a dividir', 'Rechenart': 'Operação',
+        'Zähler 1': 'Numerador 1', 'Nenner 1': 'Denominador 1', 'Zähler 2': 'Numerador 2', 'Nenner 2': 'Denominador 2',
+        'erster Zähler kleiner': 'Diminuir o primeiro numerador', 'erster Zähler größer': 'Aumentar o primeiro numerador',
+        'erster Nenner kleiner': 'Diminuir o primeiro denominador', 'erster Nenner größer': 'Aumentar o primeiro denominador',
+        'zweiter Zähler kleiner': 'Diminuir o segundo numerador', 'zweiter Zähler größer': 'Aumentar o segundo numerador',
+        'zweiter Nenner kleiner': 'Diminuir o segundo denominador', 'zweiter Nenner größer': 'Aumentar o segundo denominador',
+        'Das Ergebnis wäre kleiner als null.': 'O resultado seria menor do que zero.',
+        'Für das Bild sind die Zahlen zu groß.': 'Os números são grandes demais para a figura.',
+        'Das Bild zeigt nur Brüche bis 1.': 'A figura só mostra frações até 1.',
+        'Mal null ist null.': 'Vezes zero dá zero.', 'Durch null kann man nicht teilen.': 'Não se pode dividir por zero.',
+        '1. Bruch': '1.ª fração', '2. Bruch': '2.ª fração', 'Ergebnis': 'Resultado', 'Grün': 'Verde',
+        'Streifenbild der Rechnung': 'A conta representada em tiras', 'Rechteckbild: ein Teil von einem Teil': 'Retângulo: uma parte de uma parte',
+        'Wie oft passt der zweite Bruch in den ersten?': 'Quantas vezes cabe a segunda fração na primeira?',
+        'Zähler mal Zähler, Nenner mal Nenner. Vorher kürzen spart Arbeit.': 'Numerador vezes numerador, denominador vezes denominador. Simplificar antes poupa trabalho.',
+        'Durch einen Bruch teilt man, indem man mit seinem Kehrwert malnimmt.': 'Para dividir por uma fração, multiplica-se pelo seu inverso.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -54,6 +70,14 @@ window.BuchPT && BuchPT.add('gy6', {
         ['$. Auf 10, 100, 1000 … kann man nicht erweitern: Die Dezimalzahl ist <b>periodisch</b>.', '$. Não há fração equivalente com denominador 10, 100, 1000 …: a dízima é <b>infinita periódica</b>.'],
         // mengen6: "$5 \\in \\mathbb{Q}_0^+$ und $5 \\in \\mathbb{N}_0$", "…, aber $x \\notin \\mathbb{N}_0$"
         ['$ und $', '$ e $'], [', aber $', ', mas $'],
+        // bruchop6
+        ['$: Bei den gebrochenen Zahlen geht diese Subtraktion nicht. Negative Zahlen lernst du in Klasse 7 kennen.',
+            '$: nos números racionais não negativos esta subtração não é possível. Os números negativos vais conhecê-los no 7.º ano.'],
+        ['Hauptnenner: $', 'Menor denominador comum: $'], ['$ (das kleinste gemeinsame Vielfache von $', '$ (o mínimo múltiplo comum de $'],
+        ['$ von $', '$ de $'], ['$ Kästchen. Das ist $', '$ quadradinhos. É $'],
+        ['$: Wie oft passt nichts in etwas? Diese Frage hat keine Antwort. Durch $0$ teilt man nie.',
+            '$: quantas vezes cabe nada em alguma coisa? Esta pergunta não tem resposta. Nunca se divide por $0$.'],
+        ['$ passt $', '$ cabe $'], ['$-mal in $', '$ vezes em $'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -71,5 +95,8 @@ window.BuchPT && BuchPT.add('gy6', {
         [/Zahl (\d+) von (\d+): Wohin gehört <b>/g, 'Número $1 de $2: onde fica <b>'],
         [/Alle Zahlen sind einsortiert, (\d+) von (\d+) gleich beim ersten Versuch richtig\./g, 'Todos os números estão arrumados, $1 de $2 certos logo à primeira.'],
         [/Alle Zahlen sind einsortiert\./g, 'Todos os números estão arrumados.'],
+        // bruchop6: "Erst gleichnamig machen, dann die Zähler addieren. Der Nenner bleibt."
+        [/Erst gleichnamig machen, dann die Zähler (addieren|subtrahieren)\. Der Nenner bleibt\./g,
+            (m, v) => 'Primeiro reduzir ao mesmo denominador, depois ' + (v === 'addieren' ? 'adicionar' : 'subtrair') + ' os numeradores. O denominador fica.'],
     ]
 });
