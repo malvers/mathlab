@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática GY 11 · Capítulo 1.1 · Limites e continuidade | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Comportamento no infinito, limite num ponto, teoremas sobre limites, continuidade. Capítulo 1.1 do manual interativo Matemática · Gymnasium 11: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO 1.1 · ÁREA DE APRENDIZAGEM 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 1.1 · ÁREA DE APRENDIZAGEM 1 · AGOSTO · SETEMBRO</p>
+            <h1>Limites e continuidade</h1>
+            <p class="b-hero-lead">Um chá quente arrefece, mas nunca abaixo da temperatura ambiente. Um medicamento desaparece pouco a pouco do sangue. Uma cultura de bactérias cresce
+                até deixar de haver espaço. Processos como estes tendem para um <b>limite</b>. Vais aprender a determinar limites de funções, no infinito e num ponto,
+                e o que significa uma função ser <b>contínua</b>. É a base de todo o cálculo diferencial.</p>
+            <div class="b-chips"><span class="b-chip">8 AULAS</span><span class="b-chip">2 UNIDADES</span><span class="b-chip">1 LABORATÓRIO</span><span class="b-chip">HISTÓRIA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["20+70*exp(-0.1*x)"]' data-labels='["T(t)"]' data-lat="[6]" data-x="0,60" data-y="0,100" data-hl="20" data-pts="[[0,90]]" data-xl="t em min" data-yl="T em °C" data-h="240" data-aria="Curva de arrefecimento de um chá, que se aproxima da temperatura ambiente de 20 graus"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a determinar o <b>comportamento no infinito</b> de funções polinomiais, racionais e exponenciais</li>
+                <li>a indicar <b>assíntotas horizontais</b> e a interpretá-las no contexto</li>
+                <li>a calcular <b>limites à esquerda e à direita</b> num ponto, também onde a função não está definida</li>
+                <li>a aplicar os <b>teoremas sobre limites</b></li>
+                <li>a decidir se uma função é <b>contínua</b> num ponto e a reconhecer pontos de descontinuidade</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="0,001" data-ph="Número"><p class="b-q-text">Escreve $\dfrac{1}{1000}$ como número decimal.</p><div class="b-sol"><p>0,001</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Como se escreve $x^2 - 9$ como produto?</p><div class="b-mc"><button>$(x - 3)^2$</button><button>$(x - 3)(x + 3)$</button><button>$(x - 9)(x + 1)$</button></div><div class="b-sol"><p>Diferença de quadrados (caso notável).</p></div></div>
+            <div class="b-q" data-ans="20" data-ph="Número"><p class="b-q-text">De que número se aproxima a sucessão $a_n = 20 + \dfrac{70}{n}$ para $n$ grande?</p><div class="b-sol"><p>De 20, porque $\dfrac{70}{n}$ fica tão pequeno quanto se quiser.</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">O que acontece a $2^{-x}$ quando $x$ fica cada vez maior?</p><div class="b-mc"><button>Fica tão pequeno quanto se quiser, mas continua positivo.</button><button>Fica negativo.</button><button>Cresce sem limite.</button></div><div class="b-sol"><p>$2^{-x} = \dfrac{1}{2^x}$</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">QUANTO ARREFECE O CHÁ?</div>
+            <div class="b-text"><p>Um chá está a 90 °C, a sala a 20 °C. Um modelo para a temperatura ao fim de $t$ minutos é $T(t) = 20 + 70 \cdot e^{-0{,}1t}$.</p>
+                <ul><li>Calculem $T(10)$, $T(30)$, $T(60)$ e $T(120)$. O que notam?</li><li>O chá chegará alguma vez a ter exatamente 20 °C? Ficará mais frio?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">O BURACO NO GRÁFICO</div>
+            <div class="b-text"><p>Considera $f(x) = \dfrac{x^2 - 4}{x - 2}$.</p>
+                <ul><li>Preencham uma tabela de valores para $x = 1{,}9$; $1{,}99$; $1{,}999$ e $x = 2{,}1$; $2{,}01$; $2{,}001$.</li><li>O que acontece em $x = 2$? Desenhem o gráfico.</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">QUEM CRESCE MAIS DEPRESSA?</div>
+            <div class="b-text"><p>Comparem $x^3$, $x^{10}$ e $2^x$ para $x = 10$, $50$, $100$.</p>
+                <ul><li>Quem ganha a longo prazo? Quem vai à frente no início?</li></ul></div>
+            <a class="b-lab" data-lab="potenzlabor" href="../../potenzlabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">POTÊNCIAS</span><span class="b-lab-what">Funções potência e o seu gráfico (em alemão)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Comportamento no infinito" data-toc-k="1" data-toc-short="1 Infinito">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">1</span>Comportamento no infinito</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Ao fim de 10 minutos o chá está a $T(10) \approx 45{,}8$ °C, ao fim de 30 minutos a $23{,}5$ °C, ao fim de uma hora a $20{,}2$ °C.
+                A parcela $70 \cdot e^{-0{,}1t}$ fica cada vez mais pequena, mas continua positiva. A temperatura aproxima-se, portanto, tanto quanto se quiser de 20, sem nunca lá chegar.
+                Escreve-se $\lim\limits_{t \to +\infty} T(t) = 20$ e chama-se à reta $T = 20$ uma <b>assíntota horizontal</b>.</p></div></div>
+            <div class="b-text"><p>Para o comportamento de uma função para $x$ muito grande (ou muito pequeno) só conta o que «ganha no fim».
+                Nas funções polinomiais é a parcela com a maior potência, nas frações é a comparação dos graus do numerador e do denominador,
+                e uma função exponencial vence qualquer potência.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · LIMITES QUANDO x → ±∞</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to +\infty} f(x) = g$ significa: os valores da função ficam tão próximos do número $g$ quanto se quiser, desde que $x$ seja suficientemente grande. Então $y = g$ é uma <b>assíntota horizontal</b>.</p>
+                    <p><b>Polinomial:</b> decide a parcela com a maior potência: $f(x) \to \pm\infty$. Exemplo: $-2x^4 + x \to -\infty$ quando $x \to \pm\infty$.</p>
+                    <p><b>Racional</b> $\dfrac{a_n x^n + \ldots}{b_m x^m + \ldots}$: grau do numerador menor: limite 0 · graus iguais: limite $\dfrac{a_n}{b_m}$ · grau do numerador maior: não há limite finito.</p>
+                    <p><b>Exponencial:</b> $e^{-x} \to 0$ quando $x \to +\infty$; $e^x$ cresce mais depressa do que qualquer potência, por isso $x^n e^{-x} \to 0$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Truque de cálculo:</b> nas frações, divide o numerador e o denominador pela maior potência do denominador: $\dfrac{2x^2 - 5}{x^2 + 1} = \dfrac{2 - \frac{5}{x^2}}{1 + \frac{1}{x^2}} \to \dfrac{2}{1}$.</p>
+            <p class="b-note"><b>Sem limite:</b> $\operatorname{sen} x$ oscila sempre entre −1 e 1, não se aproxima de nenhum número fixo. Também «$\to +\infty$» não é um limite em sentido estrito, é só uma forma de dizer.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · NO RASTO DOS LIMITES</div>
+        <p class="b-help" style="margin:0 0 12px">Escolhe uma função e o sentido «$x \to +\infty$». Com o cursor avanças passo a passo para fora: a tabela mostra como os valores da função se aproximam do limite.</p>
+        <div data-widget="grenzwert"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · RACIONAL</div>
+            <div class="b-text"><p>Determina $\lim\limits_{x \to +\infty} \dfrac{6x + 1}{2x - 3}$ e a assíntota horizontal.</p></div>
+            <div class="b-sol"><p>Dividir por $x$: $\dfrac{6 + \frac{1}{x}}{2 - \frac{3}{x}} \to \dfrac{6}{2} = 3$.</p>
+                <p><span class="b-res">Limite 3, assíntota $y = 3$</span>, e o mesmo quando $x \to -\infty$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · CRESCIMENTO LIMITADO</div>
+            <div class="b-text"><p>Uma população cresce segundo $N(t) = \dfrac{500}{1 + 9e^{-0{,}5t}}$. Para que valor tende? Qual é o seu tamanho no início?</p></div>
+            <div class="b-sol"><p>$e^{-0{,}5t} \to 0$, logo o denominador tende para 1: <span class="b-res">$N(t) \to 500$</span>.</p>
+                <p>No início: $N(0) = \dfrac{500}{10} = 50$. A população cresce de 50 até quase 500; o limite 500 chama-se <b>capacidade máxima</b> (limite de saturação).</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina o limite quando $x \to +\infty$: a) $\dfrac{3x + 1}{x}$ &nbsp; b) $\dfrac{4x}{x^2 + 1}$ &nbsp; c) $\dfrac{2x^2 - 5}{x^2 + 1}$ &nbsp; d) $5 - 2e^{-x}$</p></div>
+            <div class="b-sol"><p>a) 3 &nbsp; b) 0 &nbsp; c) 2 &nbsp; d) 5</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Como se comportam as funções quando $x \to +\infty$ e quando $x \to -\infty$? a) $x^3 - 100x^2$ &nbsp; b) $-2x^4 + x$ &nbsp; c) $e^x$</p></div>
+            <div class="b-sol"><p>a) $+\infty$ e $-\infty$, respetivamente &nbsp; b) $-\infty$ nos dois casos &nbsp; c) $+\infty$ e limite 0, respetivamente</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Indica todas as assíntotas horizontais: a) $f(x) = 2 + \dfrac{1}{x^2}$ &nbsp; b) $g(x) = \dfrac{x}{x + 1}$ &nbsp; c) $h(x) = \dfrac{x^2}{x + 1}$</p></div>
+            <div class="b-hint"><p>Em c) o grau do numerador é maior do que o grau do denominador.</p></div>
+            <div class="b-sol"><p>a) $y = 2$ &nbsp; b) $y = 1$ &nbsp; c) nenhuma, $|h(x)|$ cresce sem limite</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A concentração de um medicamento no sangue é $c(t) = \dfrac{8t}{t^2 + 4}$ (em mg/l, $t$ em horas). O que acontece a longo prazo? Qual é a concentração ao fim de 2 horas?</p></div>
+            <div class="b-sol"><p>$c(t) \to 0$, o medicamento é eliminado. $c(2) = \dfrac{16}{8} = 2$ mg/l.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Indica uma função racional cujo gráfico tem a assíntota $y = -3$ quando $x \to \pm\infty$ e que toma o valor 1 em $x = 0$.</p></div>
+            <div class="b-hint"><p>Experimenta $f(x) = \dfrac{-3x^2 + b}{x^2 + 1}$.</p></div>
+            <div class="b-sol"><p>Por exemplo $f(x) = \dfrac{-3x^2 + 1}{x^2 + 1}$: coeficientes dos termos de maior grau $\dfrac{-3}{1}$, e $f(0) = 1$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="3" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to +\infty} \dfrac{6x + 1}{2x - 3}$.</p><div class="b-sol"><p>3</p></div></div>
+        <div class="b-q" data-ans="0" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to +\infty} x \cdot e^{-x}$.</p><div class="b-sol"><p>0: a função exponencial ganha.</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Que função tem limite 500 quando $x \to +\infty$?</p><div class="b-mc"><button>$500 \cdot e^{0{,}1x}$</button><button>$500x$</button><button>$\dfrac{500}{1 + 9e^{-x}}$</button></div><div class="b-sol"><p>O denominador tende para 1.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Limite num ponto, continuidade" data-toc-k="2" data-toc-short="2 Continuidade">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">2</span>Limite num ponto e continuidade</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>$f(x) = \dfrac{x^2 - 4}{x - 2}$ não está definida em $x = 2$, porque aí aparece $\dfrac{0}{0}$. Mas a tabela de valores mostra:
+                pela esquerda ($1{,}9$; $1{,}99$; $1{,}999$) e pela direita ($2{,}1$; $2{,}01$; $2{,}001$) os valores da função ficam tão próximos de 4 quanto se quiser.
+                A razão: para $x \neq 2$ tem-se $\dfrac{(x - 2)(x + 2)}{x - 2} = x + 2$. O gráfico é a reta $y = x + 2$ com um <b>buraco</b> em $(2, 4)$.</p></div></div>
+            <div class="b-text"><p>No limite num ponto $x_0$ não interessa $f(x_0)$, só os valores perto de $x_0$.
+                Aproximamo-nos pela esquerda e pela direita. Se os dois limites coincidirem e forem iguais ao valor da função, a função é aí <b>contínua</b>:
+                intuitivamente, o gráfico desenha-se nesse ponto sem levantar o lápis.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · LIMITE NUM PONTO, CONTINUIDADE</div>
+                <div class="b-text">
+                    <p>$\lim\limits_{x \to x_0} f(x) = g$ quando o limite à esquerda e o limite à direita existem e são ambos iguais a $g$.</p>
+                    <p><b>Teoremas sobre limites:</b> se existem $\lim f = a$ e $\lim g = b$, então $\lim (f \pm g) = a \pm b$, $\lim (f \cdot g) = a \cdot b$ e $\lim \dfrac{f}{g} = \dfrac{a}{b}$ para $b \neq 0$.</p>
+                    <p>$f$ diz-se <b>contínua</b> no ponto $x_0$ se $f(x_0)$ está definida e $\lim\limits_{x \to x_0} f(x) = f(x_0)$.</p>
+                    <p><b>Pontos de descontinuidade:</b> saltos (limites laterais diferentes), polos (os valores crescem sem limite), lacunas (o limite existe, mas é diferente do valor da função ou $f(x_0)$ não está definida).</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Regra prática:</b> as funções polinomiais, $e^x$, $\operatorname{sen} x$ e $\sqrt{x}$ (para $x \geq 0$) são contínuas em todo o domínio. Aí, para obter o limite, basta substituir.</p>
+            <p class="b-note"><b>Um ponto anguloso é permitido:</b> $|x|$ tem em 0 um ponto anguloso, mas é contínua. Contínua não quer dizer suave.</p>
+            <p class="b-note"><b>Com a calculadora (CAS):</b> limit(f(x), x, 2) dá o limite; com a opção «pela esquerda» ou «pela direita» também os limites laterais.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · BURACOS, POLOS E SALTOS</div>
+        <p class="b-help" style="margin:0 0 12px">Escolhe $\dfrac{x^2 - 1}{x - 1}$ ou $\dfrac{2x + 1}{x - 1}$ e aproxima-te do ponto 1. Onde existe limite e onde não existe?</p>
+        <div data-widget="grenzwert"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · SIMPLIFICAR</div>
+            <div class="b-text"><p>Determina $\lim\limits_{x \to -1} \dfrac{x^3 + 1}{x + 1}$.</p></div>
+            <div class="b-sol"><p>Substituir dá $\dfrac{0}{0}$. Fatorizar: $x^3 + 1 = (x + 1)(x^2 - x + 1)$.</p>
+                <p>Para $x \neq -1$ fica $x^2 - x + 1$, logo <span class="b-res">limite $(-1)^2 + 1 + 1 = 3$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · TORNAR CONTÍNUA</div>
+            <div class="b-text"><p>$f(x) = x + a$ para $x < 1$ e $f(x) = 2x$ para $x \geq 1$. Para que valor de $a$ é $f$ contínua no ponto 1?</p></div>
+            <div class="b-sol"><p>À direita e no ponto: $f(1) = 2$. À esquerda: $\lim\limits_{x \to 1^-} (x + a) = 1 + a$.</p>
+                <p>Contínua se $1 + a = 2$: <span class="b-res">$a = 1$</span>. Para qualquer outro $a$ o gráfico dá um salto.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina: a) $\lim\limits_{x \to 2} (x^2 + 1)$ &nbsp; b) $\lim\limits_{x \to 3} \dfrac{x^2 - 9}{x - 3}$ &nbsp; c) $\lim\limits_{x \to 0} \dfrac{x^2 + 2x}{x}$ &nbsp; d) $\lim\limits_{x \to 4} \sqrt{x}$</p></div>
+            <div class="b-sol"><p>a) 5 &nbsp; b) 6 &nbsp; c) 2 &nbsp; d) 2</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Sabe-se que $\lim\limits_{x \to x_0} f(x) = 3$ e $\lim\limits_{x \to x_0} g(x) = -2$. Determina o limite de a) $f \cdot g$ &nbsp; b) $2f - g$ &nbsp; c) $\dfrac{f}{g}$.</p></div>
+            <div class="b-sol"><p>a) −6 &nbsp; b) 8 &nbsp; c) $-\dfrac{3}{2}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Estuda $f(x) = \dfrac{1}{x}$ e $g(x) = \dfrac{1}{(x - 3)^2}$ nos pontos onde não estão definidas: como se comportam os valores à esquerda e à direita?</p></div>
+            <div class="b-sol"><p>$f$: à esquerda $\to -\infty$, à direita $\to +\infty$ (polo com mudança de sinal). $g$: dos dois lados $\to +\infty$ (polo sem mudança de sinal).</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Um parque de estacionamento custa 2 € por cada hora iniciada. Esboça a função tempo de estacionamento → preço para as primeiras quatro horas. Onde é descontínua?</p></div>
+            <div class="b-sol"><p>Função em escada: 2 € até 1 h inclusive, depois 4 € e assim por diante. Saltos em 1, 2 e 3 horas.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Determina $\lim\limits_{h \to 0} \dfrac{(2 + h)^2 - 4}{h}$. O que significa o resultado para o gráfico de $y = x^2$ no ponto 2?</p></div>
+            <div class="b-hint"><p>Desenvolve e divide por $h$.</p></div>
+            <div class="b-sol"><p>$\dfrac{4h + h^2}{h} = 4 + h \to 4$. É o declive da tangente à parábola $y = x^2$ no ponto $(2, 4)$: é exatamente disso que trata o capítulo 1.2.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="4" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to 2} \dfrac{x^2 - 4}{x - 2}$.</p><div class="b-sol"><p>4</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="a ="><p class="b-q-text">Para que valor de $a$ é contínua a função $f(x) = x + a$ ($x < 1$), $f(x) = 2x$ ($x \geq 1$)?</p><div class="b-sol"><p>$a = 1$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Que função é descontínua em $x = 0$?</p><div class="b-mc"><button>$f(x) = 1$ para $x < 0$, $f(x) = 2$ para $x \geq 0$</button><button>$f(x) = |x|$</button><button>$f(x) = e^x$</button></div><div class="b-sol"><p>A função com salto tem limites laterais diferentes.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Indica os pontos onde $f(x) = \dfrac{2x + 1}{x - 1}$ não está definida e as assíntotas verticais e horizontais do seu gráfico.</p></div>
+            <div class="b-sol"><p>Não está definida em $x = 1$, onde tem um polo; assíntota vertical $x = 1$, assíntota horizontal $y = 2$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar com o 10.º ano:</b> a sucessão $a_n = \dfrac{n + 1}{n}$ pertence à função $f(x) = \dfrac{x + 1}{x}$. Determina o limite da sucessão e justifica com a função.</p></div>
+            <div class="b-sol"><p>$a_n = 1 + \dfrac{1}{n} \to 1$; do mesmo modo $f(x) \to 1$ quando $x \to +\infty$. As sucessões são funções definidas nos números naturais.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A tabela de valores de $\dfrac{\operatorname{sen} x}{x}$ para $x = 0{,}1$; $0{,}01$; $0{,}001$ é aproximadamente $0{,}9983$; $0{,}99998$; $0{,}9999998$. O que conjeturas quando $x \to 0$? A função é contínua em 0?</p></div>
+            <div class="b-sol"><p>Limite 1. Em 0 não está definida, logo aí não é contínua; definindo $f(0) = 1$ fica contínua (descontinuidade removível).</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Um chá arrefece segundo $T(t) = 20 + 70e^{-0{,}1t}$. Ao fim de quanto tempo está só 1 °C mais quente do que a sala? Resolve com o logaritmo do 10.º ano.</p></div>
+            <div class="b-sol"><p>$70e^{-0{,}1t} = 1 \Rightarrow t = \dfrac{\ln 70}{0{,}1} \approx 42{,}5$ minutos.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: Aquiles e a tartaruga" data-toc-k="X" data-toc-short="Aquiles">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">FILOSOFIA E HISTÓRIA</span></div>
+    <h2>Aquiles e a tartaruga</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>O filósofo grego Zenão de Eleia afirmava, por volta de 450 a.C.: o veloz Aquiles nunca consegue alcançar um corredor lento que parta com vantagem.
+                Porque, quando Aquiles chega ao ponto de partida do outro, este já avançou um pouco; quando chega a esse ponto, o outro avançou de novo um pouco, e assim por diante, infinitas vezes.</p>
+            <p>Com os limites, o enigma resolve-se. Aquiles corre a 10 m/s, a tartaruga a 1 m/s, e a vantagem dela é de 100 m. Os troços são 100 m, 10 m, 1 m, 0,1 m, …
+                A sua soma é $100 + 10 + 1 + 0{,}1 + \ldots = 111{,}1\ldots = \dfrac{1000}{9}$ m, portanto finita. Ao fim de $\dfrac{100}{9} \approx 11{,}1$ segundos Aquiles alcançou a tartaruga.
+                Infinitos passos podem dar, juntos, uma distância finita e um tempo finito.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> os escritos de Zenão perderam-se. O seu argumento chegou até nós através de Aristóteles, na «Física», livro VI, capítulo 9 (239b). Aí fala-se apenas de um corredor mais lento; a tartaruga só apareceu em versões posteriores.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>NO INFINITO</h4><p>Polinomial: decide a maior potência. Fração: comparar os graus. $e^x$ vence qualquer potência.</p></div>
+        <div><p>$\dfrac{2x^2 - 5}{x^2 + 1} \to 2$ · $x e^{-x} \to 0$</p></div></div>
+    <div class="b-rueck"><div><h4>ASSÍNTOTAS</h4><p>Horizontal: $y = g$ quando o limite é $g$. Vertical: $x = x_0$ num polo.</p></div>
+        <div><p>$\dfrac{2x + 1}{x - 1}$: $y = 2$ e $x = 1$</p></div></div>
+    <div class="b-rueck"><div><h4>LIMITE NUM PONTO</h4><p>Aproximar pela esquerda e pela direita; com $\tfrac{0}{0}$, simplificar primeiro.</p></div>
+        <div><p>$\dfrac{x^2 - 9}{x - 3} = x + 3 \to 6$</p></div></div>
+    <div class="b-rueck"><div><h4>TEOREMAS SOBRE LIMITES</h4><p>Soma, produto e quociente (denominador diferente de 0) dos limites.</p></div>
+        <div><p>$f \to 3$, $g \to -2$: $f \cdot g \to -6$</p></div></div>
+    <div class="b-rueck"><div><h4>CONTINUIDADE</h4><p>$\lim\limits_{x \to x_0} f(x) = f(x_0)$. Descontínua: salto, polo, lacuna.</p></div>
+        <div><p>Tarifa do parque: saltos a cada hora completa</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SEM CALCULADORA</div>
+            <div class="b-q" data-ans="2" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to +\infty} \dfrac{4x^2 - x}{2x^2 + 3}$.</p><div class="b-sol"><p>2</p></div></div>
+            <div class="b-q" data-ans="10" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to 5} \dfrac{x^2 - 25}{x - 5}$.</p><div class="b-sol"><p>$x + 5 \to 10$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Como se comporta $f(x) = x^3$ quando $x \to -\infty$?</p><div class="b-mc"><button>$f(x) \to +\infty$</button><button>$f(x) \to -\infty$</button><button>$f(x) \to 0$</button></div><div class="b-sol"><p>Expoente ímpar: o sinal mantém-se.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · COM CALCULADORA</div>
+            <div class="b-q" data-ans="20" data-ph="°C"><p class="b-q-text">De que temperatura se aproxima $T(t) = 20 + 70e^{-0{,}1t}$?</p><div class="b-sol"><p>20 °C</p></div></div>
+            <div class="b-q" data-ans="42,5" data-tol="0.1" data-ph="Minutos"><p class="b-q-text">Quando é $T(t) = 21$? (com uma casa decimal)</p><div class="b-sol"><p>$t = 10 \ln 70 \approx 42{,}5$ min</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{x \to -1} \dfrac{x^3 + 1}{x + 1}$.</p><div class="b-sol"><p>3</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-grenzwerte-unendlich.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LIMITES NO INFINITO</span><span class="b-lab-what">Assíntotas e comportamento a longo prazo, 20 exercícios</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-grenzwert-stetigkeit.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LIMITE E CONTINUIDADE</span><span class="b-lab-what">Teoremas sobre limites, lacunas, saltos, 20 exercícios</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Gymnasium 11.º ano, Grundkurs · área de aprendizagem 1 segundo o programa de Matemática do Gymnasium da Saxónia · edição portuguesa.</p>
+    <p>Todos os textos, exercícios e figuras são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-pt/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-pt/analysis.js"></script>
+</body>
+</html>

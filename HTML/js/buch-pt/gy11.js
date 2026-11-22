@@ -28,6 +28,9 @@ window.BuchPT && BuchPT.add('gy11', {
         'Eine Figur wird mit einer Drehmatrix um den Ursprung gedreht': 'Uma figura é rodada em torno da origem com uma matriz de rotação',
         'Drehwinkel $\\varphi$': 'Ângulo de rotação $\\varphi$',
         // book pt-9 mathegy11-pt:
+        // titelbildgy11 (the cover of the start page)
+        'Titelbild: Sekanten, die sich einer Tangente nähern, Tangenten des Newton-Verfahrens auf dem Weg zu einer Nullstelle, eine Ebene, die von einer Geraden durchstoßen wird, und die Balken einer Binomialverteilung':
+            'Capa: secantes que se aproximam de uma tangente, as tangentes do método de Newton a caminho de um zero, um plano atravessado por uma reta e as barras de uma distribuição binomial',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11/*)
