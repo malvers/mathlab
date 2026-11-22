@@ -72,6 +72,11 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
+        // bruchfunktion (lb1-4): Polstelle = polo, Lücke = lacuna (Loch = buraco), Zähler / Nenner = numerador / denominador
+        'Polstelle': 'Polo', 'Lücke': 'Lacuna', 'ohne Vorzeichenwechsel': 'Sem mudança de sinal', 'schiefe Asymptote': 'Assíntota oblíqua',
+        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Gráfico de uma função racional com polos, lacunas e assíntotas',
+        'Beispiele:': 'Exemplos:', 'Zähler:': 'Numerador:', 'Nenner:': 'Denominador:', 'Grad des Zählers': 'Grau do numerador', 'Grad des Nenners': 'Grau do denominador',
+        'Grad 0': 'Grau 0', 'Grad 1': 'Grau 1', 'Grad 2': 'Grau 2', 'Faktor $k$': 'Fator $k$',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -171,6 +176,18 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
+        // bruchfunktion (lb1-4)
+        ['Nullstelle des Zählers $', 'Zero do numerador $'], ['Nullstelle des Nenners $', 'Zero do denominador $'],
+        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'Depois de simplificar, já não há $x$ no denominador: o gráfico é '],
+        ['eine waagerechte Gerade', 'uma reta horizontal'], ['eine Gerade', 'uma reta'],
+        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Grau do numerador menor do que o do denominador: assíntota horizontal $y = 0$, o eixo $Ox$.'],
+        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Graus do numerador e do denominador iguais: assíntota horizontal $y = '],
+        ['$ (Quotient der Leitkoeffizienten).', '$ (quociente dos coeficientes dos termos de maior grau).'],
+        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Grau do numerador maior uma unidade: a divisão de polinómios dá $f(x) = '],
+        ['$, schiefe Asymptote $y = ', '$, assíntota oblíqua $y = '], ['Kürzen: $f(x) = ', 'Simplificando: $f(x) = '], ['$ für $x \\neq ', '$ para $x \\neq '],
+        ['$ · hebbare Lücken', '$ · lacunas (descontinuidades removíveis)'], ['$ · hebbare Lücke', '$ · lacuna (descontinuidade removível)'],
+        ['Nullstellen: ', 'Zeros: '], [' · Polstellen: ', ' · polos: '],
+        [' mit Vorzeichenwechsel', ' com mudança de sinal'], [' ohne Vorzeichenwechsel', ' sem mudança de sinal'], [' (senkrechte Asymptote)', ' (assíntota vertical)'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -191,5 +208,10 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
+        // bruchfunktion (lb1-4): "… mit einem Loch.", "Nullstellen: keine", "Polstellen: keine"; the set of the domain "\{1; -2\}" → "\{1, -2\}"
+        // when no number in it has a decimal comma (Portuguese notation, as for points)
+        [/ mit (Löchern|einem Loch)\./g, (m, w) => w === 'Löchern' ? ' com buracos.' : ' com um buraco.'],
+        [/Nullstellen: keine(?![a-zäöüß])/g, 'Zeros: nenhum'], [/Polstellen: keine(?![a-zäöüß])/g, 'polos: nenhum'],
+        [/(\\setminus \\\{)([^}]*)(\\\})/g, (m, a, b, c) => a + (b.indexOf('{,}') >= 0 ? b : b.replace(/; /g, ', ')) + c],
     ]
 });
