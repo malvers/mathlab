@@ -82,7 +82,8 @@
         @media (max-width: 480px) { .top { padding-left: 8px; padding-right: 8px; } }
         .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
         .bar #micBtn { order: 1; }
-        .bar #text { order: 2; flex: 1 1 0; }
+        /* the search field takes the entry field's place while the search is on (same order, same flex at every width) */
+        .bar #text, .bar .search-field { order: 2; flex: 1 1 0; }
         /* "Heute" right before "Tag" (Doc, 19.11.2026: "vor 'Tag' machen, weil das Suchfeld ist ja eh ziemlich groß") -
            on wide screens directly left of the views, on the phone at the end of the first row: the entry field gives up the room */
         .bar #todayBtn { order: 3; }
@@ -103,7 +104,7 @@
             /* the views and the period join the bar itself: one row with the views before the gear, the period under it in
                the middle of a row of its own - beside the entry field it only fits from 1260px */
             .bar { flex-wrap: wrap; }
-            .bar #text { flex: 1 1 200px; }
+            .bar #text, .bar .search-field { flex: 1 1 200px; }
             .bar .row2 { display: contents; }
             .row2 .views { flex: 0 0 330px; order: 4; }
             .row2 .nav { order: 6; }
@@ -117,8 +118,12 @@
                search) puts the period in the middle */
             .bar { flex-wrap: nowrap; }
             .row2 .nav { order: 2; flex: 0 0 var(--nav-w); margin-right: auto; }
-            .bar:has(> .row2 > .nav:not([hidden])) #text { flex: 0 1 calc(50% - var(--nav-w) / 2 - 2 * var(--ctl) - 24px); }
+            .bar:has(> .row2 > .nav:not([hidden])) #text,
+            .bar:has(> .row2 > .nav:not([hidden])) .search-field { flex: 0 1 calc(50% - var(--nav-w) / 2 - 2 * var(--ctl) - 24px); }
             .bar:has(> #text[hidden]) .row2 .nav { margin-left: calc(50% - var(--nav-w) / 2 - var(--ctl) - 8px); }
+            /* that guest searching: the field fills the margin instead (no mic before it, so one control and gap less) */
+            .bar.searching:has(> #text[hidden]) .row2 .nav { margin-left: 0; }
+            .bar.searching:has(> #text[hidden]):has(> .row2 > .nav:not([hidden])) .search-field { flex: 0 1 calc(50% - var(--nav-w) / 2 - var(--ctl) - 16px); }
         }
         .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -550,8 +555,10 @@
         .bar:has(> #text[hidden]) .filter-pop { left: 0; right: auto; }
 
         /* ---------- search (Doc, 22.11.2026: the calendar had none) ----------
-           The magnifier opens a panel under the header like the settings: field, then the hits by month, the past folded
-           away. Body text Arial, headings and dates Orbitron (Doc, 21.11.2026: "für die Fließtexte ... Arial") */
+           The magnifier turns the entry row into the search field - same place, same size (Doc, 22.11.2026: "die Zeile, wo
+           drin steht 'Neuer Termin', zum Suchfeld wird und alles darunter dann erscheint"): the hits by month hang right
+           under it, the past folded away. The entry field only steps aside, so its draft is back as it was when the search
+           closes. Body text Arial, headings and dates Orbitron (Doc, 21.11.2026: "für die Fließtexte ... Arial") */
         /* the button: up to 899px at the end of the views row - on the phone the entry field keeps the room for its whole
            "Neuer Termin" (at 390px it has 172px and the words need 150, a fifth icon in that row would leave 124); from
            900px right behind the entry field (order 2 like it, later in the page), so before the people button - from
@@ -559,29 +566,54 @@
            right of the period it would have pushed the period up to 60px out of the middle */
         .row2 .search-btn { margin-left: auto; }
         @media (min-width: 900px) { .row2 .search-btn { order: 2; margin-left: 0; } }
+        /* on: pressed like the open gear, rim and glass in λ - tapped again it closes the search */
+        .search-btn[aria-expanded="true"] { border-color: var(--lambda); color: var(--lambda); }
+        /* the row while searching: the entry field steps aside (no [hidden] - that means "a guest who may only read" to the
+           layout rules above), the search field stands in its place */
+        .bar.searching > #text { display: none; }
+        .search-field { position: relative; min-width: 0; height: var(--ctl); }
+        .search-field > svg { position: absolute; left: 9px; top: 50%; width: 18px; height: 18px; margin-top: -9px; fill: var(--muted); pointer-events: none; }
+        /* the entry field's look (input.new), the room for the magnifier left and the ✕ right; Arial like all body text */
+        .search-field input.new {
+            width: 100%; height: 100%; padding: 0 36px 0 32px; font-family: Arial, Helvetica, sans-serif;
+            -webkit-appearance: none; appearance: none;
+        }
+        .search-field input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }   /* the own ✕ closes */
+        /* calm while searching, no λ ring (Doc, 22.11.2026: "Die Suchzeile ist im Suchmodus zu hart umrandet. Und wenn,
+           dann müssten beide Boxen gleich sein") - the field keeps the entry row's resting line, the hit box below has the
+           very same line, radius and background */
+        .search-field input.new:focus { outline: none; border-color: var(--line); }
+        /* ✕ inside the field: leaves the search (on the phone the hits cover the magnifier in the views row) */
+        .search-x {
+            position: absolute; right: 5px; top: 50%; width: 30px; height: 30px; margin-top: -15px; padding: 0; border: 0;
+            border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center;
+        }
+        .search-x svg { width: 20px; height: 20px; fill: currentColor; }
+        .search-x:hover { color: var(--text); background: rgba(var(--tint), .14); }
+        .search-x:focus-visible { outline: 2px solid var(--lambda); outline-offset: 0; color: var(--text); }
+        /* small phones: the field has 142px at 360px - magnifier and ✕ a little tighter, so the whole "Suchen …" fits
+           (78px of 83, measured head-less; before 72) */
+        @media (max-width: 380px) {
+            .search-field > svg { left: 7px; width: 16px; height: 16px; margin-top: -8px; }
+            .search-field input.new { padding: 0 30px 0 27px; }
+            .search-x { right: 3px; width: 26px; }
+            .search-x svg { width: 18px; height: 18px; }
+        }
+        /* the hits: right under the search field, at least 400px wide (the whole width on the phone) - left, top, width and
+           height set by placeSearch() from where the field stands. Its box is the field's (input.new): same background,
+           line and radius (Doc, 22.11.2026: "Die sieht anders aus als die Suchzeile. Rundere Ecken.") */
         .search-pop {
-            position: absolute; top: calc(100% + 6px); right: 16px; z-index: 5; width: min(520px, calc(100% - 32px));
-            display: flex; flex-direction: column; padding: 12px 12px 4px; border-radius: 14px;
-            background: var(--card); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
-            max-height: calc(100dvh - 100% - 18px);   /* like the settings: never below the window, the list scrolls inside */
+            position: absolute; top: var(--sp-top, calc(100% + 6px)); left: var(--sp-left, 16px); z-index: 5; width: var(--sp-w, min(520px, calc(100% - 32px)));
+            display: flex; flex-direction: column; padding: 4px 12px 4px; border-radius: 10px;
+            background: var(--bg); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
+            max-height: var(--sp-h, calc(100dvh - 100% - 18px));   /* never below the window, the list scrolls inside */
             font-family: Arial, Helvetica, sans-serif;
         }
-        @media (max-width: 599px) { .search-pop { left: 8px; right: 8px; width: auto; } }
-        .search-row { flex: none; display: flex; gap: 8px; }
-        .search-field { position: relative; flex: 1 1 auto; min-width: 0; }
-        .search-field svg { position: absolute; left: 10px; top: 50%; width: 20px; height: 20px; margin-top: -10px; fill: var(--muted); pointer-events: none; }
-        .search-field input {
-            width: 100%; height: var(--ctl); background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
-            padding: 0 12px 0 38px; font: 17px Arial, Helvetica, sans-serif; -webkit-appearance: none; appearance: none;
-        }
-        .search-field input::placeholder { color: var(--muted); }
-        .search-field input:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
-        .search-field input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }   /* ✕ beside it closes */
-        .search-sum { flex: none; margin: 8px 2px 2px; font: 14px/1.4 Arial, Helvetica, sans-serif; color: var(--muted); }
+        .search-sum { flex: none; margin: 6px 2px 2px; font: 14px/1.4 Arial, Helvetica, sans-serif; color: var(--muted); }
         .search-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin: 0 -6px; padding: 0 6px 8px; }
         .search-list:empty { display: none; }
         .sr-month {
-            position: sticky; top: 0; z-index: 1; margin: 0; padding: 10px 4px 6px; background: var(--card);
+            position: sticky; top: 0; z-index: 1; margin: 0; padding: 10px 4px 6px; background: var(--bg);   /* the box's */
             font: 700 11px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
         }
         ul.sr { list-style: none; margin: 0; padding: 0; }
@@ -742,6 +774,13 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
             </button>
             <input class="new" id="text" type="text" enterkeyhint="go" autocomplete="off" placeholder="Neuer Termin …" aria-label="Neuer Termin, zum Beispiel morgen 18 Uhr Essen">
+            <!-- the search field: in the entry field's place while the search is on (showSearch); the hits under it in
+                 #searchPop. Material Icons "search" and "close" (Apache 2.0) -->
+            <div class="search-field" id="searchField" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                <input class="new" id="searchInput" type="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Suchen …" aria-label="Termine suchen: Titel, Ort, Notiz" aria-controls="searchList">
+                <button class="search-x" id="searchClose" type="button" aria-label="Suche schließen" title="Suche schließen (Esc)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+            </div>
             <!-- gear: Material Icons "settings" (Apache 2.0) -->
             <button class="icon gear" id="gearBtn" type="button" aria-label="Einstellungen" aria-expanded="false" aria-controls="settings">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
@@ -767,7 +806,7 @@
                 </div>
                 <!-- search: up to 899px at the end of this row, from 900px in the bar right behind the entry field (CSS order);
                      Material Icons "search" (Apache 2.0) -->
-                <button class="icon search-btn" id="searchBtn" type="button" aria-label="Suchen" aria-expanded="false" aria-controls="searchPop" aria-keyshortcuts="/ Meta+F Control+F">
+                <button class="icon search-btn" id="searchBtn" type="button" aria-label="Suchen" aria-expanded="false" aria-controls="searchField searchPop" aria-keyshortcuts="/ Meta+F Control+F">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                 </button>
                 <div class="nav" id="nav" hidden>
@@ -836,16 +875,9 @@
                 <button class="wide" id="guestForget" type="button">Zugang hier entfernen</button>
             </div>
         </div>
-        <!-- the search: live over title, place and notes; the hits by month, tap = go there (filled by runSearch) -->
-        <div class="search-pop" id="searchPop" role="dialog" aria-label="Termine suchen" hidden>
-            <div class="search-row">
-                <label class="search-field">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                    <input id="searchInput" type="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Titel, Ort, Notiz …" aria-label="Termine suchen" aria-controls="searchList">
-                </label>
-                <!-- Material Icons "close" (Apache 2.0) -->
-                <button class="icon" id="searchClose" type="button" aria-label="Suche schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
-            </div>
+        <!-- the search's hits, right under the search field in the bar: live over title, place and notes, by month, tap =
+             go there (filled by runSearch, placed by placeSearch) -->
+        <div class="search-pop" id="searchPop" role="region" aria-label="Suchergebnisse" hidden>
             <p class="search-sum" id="searchSum" role="status"></p>
             <div class="search-list" id="searchList"></div>
         </div>
@@ -1981,16 +2013,46 @@
                 const only = filterAll() ? '' : ' – gezeigt: nur ' + (filter.me ? meName() : otherName());
                 sum.textContent = (hits.length ? hits.length + ' Treffer' : 'keine Treffer') + only;
             }
+            /* on: the entry row becomes the search field, the hits open under it; off: "Neuer Termin" is back with its draft
+               (the entry field was only set aside). focusBack (Esc, ✕): with a mouse into the entry field again, else to
+               the magnifier - on the phone nothing gets the focus, so the keyboard goes */
             function showSearch(on, focusBack) {
-                $('searchPop').hidden = !on;
+                const was = !$('searchPop').hidden;
+                $('searchPop').hidden = $('searchField').hidden = !on;
+                $('entry').querySelector('.bar').classList.toggle('searching', on);
                 $('searchBtn').setAttribute('aria-expanded', String(on));
+                $('searchBtn').setAttribute('aria-label', on ? 'Suche schließen' : 'Suchen');
                 if (on) {
                     showSettings(false);
                     showFilter(false);
                     runSearch();   // the last query again, with what is loaded now
+                    placeSearch();
                     $('searchInput').focus();
                     $('searchInput').select();   // typing replaces it
-                } else if (focusBack) $('searchBtn').focus();
+                    return;
+                }
+                if (!was || !focusBack) return;
+                if (!$('text').hidden && matchMedia('(pointer: fine)').matches) {
+                    const t = $('text');
+                    t.focus();
+                    t.setSelectionRange(t.value.length, t.value.length);
+                } else if (!matchMedia('(pointer: coarse)').matches) $('searchBtn').focus();
+            }
+            /* the hits right under the search field: as far left as it, as wide as it but at least 400px (on the phone
+               the whole width), as high as the window - or the part the on-screen keyboard leaves - allows */
+            function placeSearch() {
+                const pop = $('searchPop');
+                if (pop.hidden) return;
+                const head = $('entry'), hr = head.getBoundingClientRect(), fr = $('searchField').getBoundingClientRect();
+                const gut = parseFloat(getComputedStyle(head).paddingLeft) || 8;
+                const room = hr.width - 2 * gut;
+                const w = hr.width < 600 ? room : Math.min(room, Math.max(fr.width, 400));
+                const left = Math.min(Math.max(fr.left - hr.left, gut), hr.width - gut - w);
+                const vv = window.visualViewport, bottom = vv ? vv.offsetTop + vv.height : innerHeight;
+                pop.style.setProperty('--sp-left', left + 'px');
+                pop.style.setProperty('--sp-w', w + 'px');
+                pop.style.setProperty('--sp-top', (fr.bottom - hr.top + 6) + 'px');
+                pop.style.setProperty('--sp-h', Math.max(160, bottom - fr.bottom - 6 - 12) + 'px');
             }
 
             /* a hit tapped: its day in the view at hand - "Tag" lists from today on, so an earlier one shows in its week
@@ -2555,10 +2617,15 @@
                 document.addEventListener('pointerdown', e => {
                     if (!$('settings').hidden && !e.target.closest('#settings, #gearBtn')) showSettings(false);
                     if (!$('filterPop').hidden && !e.target.closest('#filterWrap')) showFilter(false);
-                    if (!$('searchPop').hidden && !e.target.closest('#searchPop, #searchBtn')) showSearch(false);
+                    // a tap beside field and hits closes the search - also the mic's, which then dictates a new appointment
+                    if (!$('searchPop').hidden && !e.target.closest('#searchPop, #searchField, #searchBtn')) showSearch(false);
                 });
                 // the search: live while typing (a short pause first), Enter / arrow down into the hits, Esc closes
                 $('searchBtn').title = 'Suchen (Taste / oder ' + (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘F' : 'Strg+F') + ')';
+                // the hits follow the field: another window size, the field's width (period shown or not), the keyboard
+                if (window.ResizeObserver) new ResizeObserver(placeSearch).observe($('searchField'));
+                addEventListener('resize', placeSearch);
+                if (window.visualViewport) visualViewport.addEventListener('resize', placeSearch);
                 $('searchBtn').onclick = () => showSearch($('searchPop').hidden);
                 $('searchClose').onclick = () => showSearch(false, true);
                 $('searchInput').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 120); });
