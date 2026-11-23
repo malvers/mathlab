@@ -758,6 +758,23 @@ html.deck-edit .flug-kopie{display:none}
   html:not(.deck-edit) :not(.ov-thumb) > .slide .dtable tr.step.now > :first-child::after{content:"";position:absolute;
     left:-20px;top:calc(50% - 7px);width:11px;height:14px;background:var(--tri) no-repeat;pointer-events:none;
     animation:step-now .25s ease-out}
+  /* OFF everywhere (Doc, 23.11.2026: "lass die einzelnen Schritte bitte generell erscheinen ohne rote Box und Dreieck"):
+     a step simply appears - no triangle, no red box, no outline round a card or a table row; a bullet line keeps its
+     bullet, as on an "ohne-dreieck" slide. A key point keeps its light green ground, only its frame goes. The rules above
+     stay as they were, so the marks come back by deleting this block */
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .step.now::after,
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.now::after,
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.col.l1.step.now::after,
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .dtable tr.step.now > :first-child::before,
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .dtable tr.step.now > :first-child::after{display:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.key-point.now::after{display:block;border-color:transparent}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.now:not(.l1):not(.l2)::before{position:static;width:7px;height:7px;margin:0 13px 0 -20px;
+    background:var(--ink);animation:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.l1.step.now::before{position:static;width:6px;height:6px;margin:0 14px 0 -20px;background:var(--green);animation:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.l2.step.now::before{position:static;width:6px;height:6px;margin:0 14px 0 -20px;background:#4A79C9;animation:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.col.l1.step.now::before{left:0;top:.55em;width:7px;height:7px;background:var(--ink);animation:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .card.right p.col.l1.step.now::before{background:var(--green)}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .card.now{outline:none;animation:none}
 }
 
 /* --- HUD ---------------------------------------------------------------- */
