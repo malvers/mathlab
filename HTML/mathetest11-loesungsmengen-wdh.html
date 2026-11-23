@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lösungsmengen · Wiederholung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathe11-w13-loesungsmengen-wdh',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lösungsmengen · Wiederholung',
+  subtitle: 'Berufliches Gymnasium · Klasse 11 · Woche 13, KW 48 · 20 Aufgaben zur Lösungsmenge: keine, eine, unendlich viele Lösungen — lineare und quadratische Gleichungen, Bruch- und Wurzelgleichungen, LGS, Sachaufgaben · genau eine Antwort pro Aufgabe',
+  dashSub: 'BGY · Klasse 11 · KW 48 · Lösungsmengen · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe11.html', /* opened from the plan */
+  /* AFB I 1-10 (linear, Schreibweise, quadratisch), AFB II 11-16 (Diskriminante, Bruchgleichungen mit D, LGS mit Sachbezug), AFB III 17-20 (Wurzelgleichung mit Probe, Rechteck, Parameter c, Parameter a im LGS). */
+  questions: [
+    {
+      q: 'Gib die Lösungsmenge an: $5x - 4 = 2x + 11$',
+      opts: ['$L = \\{5\\}$', '$L = \\{-5\\}$', '$L = \\{\\dfrac{7}{3}\\}$', '$L = \\{15\\}$'],
+      steps: [
+        '$5x - 4 = 2x + 11 \\quad | -2x$',
+        '$3x - 4 = 11 \\quad | +4$',
+        '$3x = 15 \\quad | :3$',
+        '$x = 5$, also $L = \\{5\\}$',
+        'Falle: $\\dfrac{7}{3}$ entsteht, wenn die $-4$ ohne Vorzeichenwechsel nach rechts wandert ($3x = 11 - 4$).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $4(x - 1) = 4x + 3$',
+      opts: ['$L = \\{-1\\}$', '$L = \\{\\}$', '$L = \\{0\\}$', '$L = \\mathbb{R}$'],
+      steps: [
+        'Ausmultiplizieren: $4x - 4 = 4x + 3 \\quad | -4x$',
+        '$-4 = 3$ — eine falsche Aussage, ganz egal, welches $x$ man einsetzt.',
+        'Keine Zahl erfüllt die Gleichung: $L = \\{\\}$',
+        'Falle: $L = \\{0\\}$ ist die Menge mit der Zahl $0$ — und die ist keine Lösung: $4 \\cdot (0 - 1) = -4 \\neq 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $2(x + 3) - x = x + 6$',
+      opts: ['$L = \\{0\\}$', '$L = \\{6\\}$', '$L = \\mathbb{R}$', '$L = \\{\\}$'],
+      steps: [
+        'Ausmultiplizieren: $2x + 6 - x = x + 6$',
+        'Zusammenfassen: $x + 6 = x + 6 \\quad | -x$',
+        '$6 = 6$ — eine wahre Aussage für jedes $x$: $L = \\mathbb{R}$',
+        'Probe mit irgendeiner Zahl, etwa $x = 5$: $2 \\cdot 8 - 5 = 11$ und $5 + 6 = 11$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Gleichung hat die Lösungen $x_1 = 2$ und $x_2 = -3$. Welche Schreibweise der Lösungsmenge ist richtig?',
+      opts: ['$L = \\{(-3 \\mid 2)\\}$', '$L = \\{-3;\\ 2\\}$', '$L = (-3;\\ 2)$', '$L = \\{-3{,}2\\}$'],
+      steps: [
+        'Eine Menge steht in geschweiften Klammern, die Elemente der Größe nach, getrennt durch ein Semikolon: $L = \\{-3;\\ 2\\}$',
+        'Das Komma ist das Dezimalzeichen: $\\{-3{,}2\\}$ enthält nur die eine Zahl $-3{,}2$.',
+        '$(-3 \\mid 2)$ ist ein Zahlenpaar — so schreibt man die Lösung eines LGS mit zwei Variablen. Runde Klammern allein sind keine Menge.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $2x^2 - 72 = 0$',
+      opts: ['$L = \\{6\\}$', '$L = \\{-6;\\ 6\\}$', '$L = \\{-36;\\ 36\\}$', '$L = \\{\\}$'],
+      steps: [
+        '$2x^2 - 72 = 0 \\quad | +72$',
+        '$2x^2 = 72 \\quad | :2$',
+        '$x^2 = 36$, die Wurzel hat zwei Vorzeichen: $x = -6$ oder $x = 6$',
+        '$L = \\{-6;\\ 6\\}$. Falle: das Minus vergessen oder die Wurzel nicht gezogen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $3x^2 + 12 = 0$',
+      opts: ['$L = \\{-2\\}$', '$L = \\{0\\}$', '$L = \\{\\}$', '$L = \\{-2;\\ 2\\}$'],
+      steps: [
+        '$3x^2 + 12 = 0 \\quad | -12$',
+        '$3x^2 = -12 \\quad | :3$',
+        '$x^2 = -4$ — ein Quadrat ist nie negativ, es gibt keine reelle Lösung: $L = \\{\\}$',
+        'Falle: $\\{-2;\\ 2\\}$. Die Probe zeigt es: $3 \\cdot 4 + 12 = 24 \\neq 0$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $x^2 + 6x = 0$',
+      opts: ['$L = \\{-6\\}$', '$L = \\{6\\}$', '$L = \\{0;\\ 6\\}$', '$L = \\{-6;\\ 0\\}$'],
+      steps: [
+        'Kein absolutes Glied, also $x$ ausklammern: $x(x + 6) = 0$',
+        'Ein Produkt ist null, wenn ein Faktor null ist: $x = 0$ oder $x + 6 = 0$, also $x = -6$',
+        'Der Größe nach: $L = \\{-6;\\ 0\\}$',
+        'Falle: durch $x$ teilen. Dann geht die Lösung $x = 0$ verloren und es bleibt nur $\\{-6\\}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $(x + 4)(2x - 6) = 0$',
+      opts: ['$L = \\{-4;\\ 3\\}$', '$L = \\{-3;\\ 4\\}$', '$L = \\{3\\}$', '$L = \\{-4;\\ 6\\}$'],
+      steps: [
+        'Satz vom Nullprodukt, nicht ausmultiplizieren: $x + 4 = 0$ oder $2x - 6 = 0$',
+        '$x = -4$ oder $2x = 6$, also $x = 3$',
+        '$L = \\{-4;\\ 3\\}$',
+        'Falle: $\\{-4;\\ 6\\}$ — bei $2x - 6 = 0$ nicht durch $2$ geteilt. $\\{-3;\\ 4\\}$ — die Vorzeichen gedreht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $x^2 - 2x - 15 = 0$',
+      opts: ['$L = \\{-5;\\ 3\\}$', '$L = \\{\\}$', '$L = \\{5\\}$', '$L = \\{-3;\\ 5\\}$'],
+      steps: [
+        'Normalform mit $p = -2$ und $q = -15$',
+        '$x_{1,2} = 1 \\pm \\sqrt{1 + 15} = 1 \\pm 4$',
+        '$x_1 = 5$ und $x_2 = -3$, also $L = \\{-3;\\ 5\\}$',
+        'Probe mit Vieta: $5 + (-3) = 2 = -p$ und $5 \\cdot (-3) = -15 = q$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $x^2 + 10x + 25 = 0$',
+      opts: ['$L = \\{-5\\}$', '$L = \\{\\}$', '$L = \\{5\\}$', '$L = \\{-5;\\ 5\\}$'],
+      steps: [
+        'pq-Formel: $x_{1,2} = -5 \\pm \\sqrt{25 - 25} = -5 \\pm 0$',
+        'Unter der Wurzel steht null: es gibt genau eine Lösung, $x = -5$',
+        'Schneller mit der binomischen Formel: $x^2 + 10x + 25 = (x + 5)^2$',
+        '$L = \\{-5\\}$ — die doppelte Lösung steht nur einmal in der Menge.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Lösungen hat $2x^2 - 8x + 14 = 0$, und wie lautet die Lösungsmenge?',
+      opts: ['unendlich viele: $L = \\mathbb{R}$', 'keine: $L = \\{\\}$', 'eine: $L = \\{2\\}$', 'zwei: $L = \\{4 - \\sqrt{2};\\ 4 + \\sqrt{2}\\}$'],
+      steps: [
+        'Erst durch $2$ teilen: $x^2 - 4x + 7 = 0$',
+        'Diskriminante: $D = \\left(\\dfrac{p}{2}\\right)^2 - q = 4 - 7 = -3$',
+        '$D < 0$: keine reelle Lösung, $L = \\{\\}$',
+        'Falle: ohne Teilen setzt man $p = -8$ und $q = 14$ ein und erhält $4 \\pm \\sqrt{2}$. Die pq-Formel gilt nur für die Normalform.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gib den Definitionsbereich und die Lösungsmenge an: $\\dfrac{x + 3}{x - 2} = 2$',
+      opts: ['$D = \\mathbb{R} \\setminus \\{-3\\},\\ L = \\{7\\}$', '$D = \\mathbb{R},\\ L = \\{7\\}$', '$D = \\mathbb{R} \\setminus \\{2\\},\\ L = \\{5\\}$', '$D = \\mathbb{R} \\setminus \\{2\\},\\ L = \\{7\\}$'],
+      steps: [
+        'Der Nenner darf nicht null werden: $x - 2 \\neq 0$, also $D = \\mathbb{R} \\setminus \\{2\\}$',
+        '$\\dfrac{x + 3}{x - 2} = 2 \\quad | \\cdot (x - 2)$',
+        '$x + 3 = 2x - 4 \\quad | -x + 4$',
+        '$7 = x$, und $7 \\in D$. Probe: $\\dfrac{10}{5} = 2$. Also $L = \\{7\\}$',
+        'Falle: $2(x - 2) = 2x - 2$ gerechnet, das führt auf $x = 5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $\\dfrac{2x}{x + 1} = \\dfrac{x - 1}{x + 1}$',
+      opts: ['$L = \\mathbb{R} \\setminus \\{-1\\}$', '$L = \\{1\\}$', '$L = \\{-1\\}$', '$L = \\{\\}$'],
+      steps: [
+        'Zuerst der Definitionsbereich: $x + 1 \\neq 0$, also $D = \\mathbb{R} \\setminus \\{-1\\}$',
+        '$\\dfrac{2x}{x + 1} = \\dfrac{x - 1}{x + 1} \\quad | \\cdot (x + 1)$',
+        '$2x = x - 1 \\quad | -x$',
+        '$x = -1$ — aber $-1 \\notin D$, dort wäre der Nenner null. Der einzige Kandidat fällt weg: $L = \\{\\}$',
+        'Falle: $L = \\{-1\\}$ ohne Blick auf $D$. Die Probe scheitert: $\\dfrac{-2}{0}$ ist nicht definiert.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Im Kino zahlen 2 Erwachsene und 1 Kind zusammen 31 €, 1 Erwachsener und 1 Kind zusammen 19 €. Mit $x$ für den Preis einer Erwachsenenkarte und $y$ für eine Kinderkarte (in €) entsteht ein LGS. Welche Lösungsmenge hat es?',
+      opts: ['$L = \\{(10 \\mid 9)\\}$', '$L = \\{(7 \\mid 12)\\}$', '$L = \\{7;\\ 12\\}$', '$L = \\{(12 \\mid 7)\\}$'],
+      steps: [
+        '$\\text{I}: 2x + y = 31$ und $\\text{II}: x + y = 19$',
+        '$\\text{I} - \\text{II}$: $x = 12$',
+        'In II einsetzen: $12 + y = 19$, also $y = 7$',
+        '$L = \\{(12 \\mid 7)\\}$: die Erwachsenenkarte kostet 12 €, die Kinderkarte 7 €. Probe: $2 \\cdot 12 + 7 = 31$',
+        'Falle: $\\{7;\\ 12\\}$ sind zwei einzelne Zahlen — die Lösung eines LGS ist ein Zahlenpaar $(x \\mid y)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Tarif A kostet 5 € Grundgebühr und 2 € pro Stunde, Tarif B 8 € Grundgebühr und ebenfalls 2 € pro Stunde. Für $x$ Stunden gilt also $y = 2x + 5$ (A) und $y = 2x + 8$ (B). Welche Lösungsmenge hat das LGS aus beiden Gleichungen?',
+      opts: ['$L = \\{(1{,}5 \\mid 8)\\}$', '$L = \\{(t \\mid 2t + 5)\\},\\ t \\in \\mathbb{R}$', '$L = \\{\\}$', '$L = \\{(0 \\mid 5)\\}$'],
+      steps: [
+        'Gleichsetzen: $2x + 5 = 2x + 8 \\quad | -2x$',
+        '$5 = 8$ — eine falsche Aussage: $L = \\{\\}$',
+        'Die beiden Geraden haben dieselbe Steigung $2$, aber verschiedene Achsenabschnitte: sie sind parallel und schneiden sich nie.',
+        'Im Sachzusammenhang: die beiden Tarife kosten nie gleich viel, B ist immer genau 3 € teurer.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $\\begin{cases} x + 3y = 4 \\\\ 2x + 6y = 8 \\end{cases}$',
+      opts: ['$L = \\{(4 - 3t \\mid t)\\},\\ t \\in \\mathbb{R}$', '$L = \\mathbb{R}$', '$L = \\{\\}$', '$L = \\{(1 \\mid 1)\\}$'],
+      steps: [
+        '$\\text{II} - 2 \\cdot \\text{I}$: $0 = 0$ — eine wahre Aussage, II ist nur das Doppelte von I.',
+        'Es bleibt eine Gleichung für zwei Unbekannte: $y = t$ frei wählen, aus I folgt $x = 4 - 3t$',
+        '$L = \\{(4 - 3t \\mid t)\\},\\ t \\in \\mathbb{R}$ — unendlich viele Lösungen.',
+        'Falle: $(1 \\mid 1)$ ist zwar eine Lösung (für $t = 1$), aber nicht alle. $L = \\mathbb{R}$ passt nicht, die Lösungen sind Zahlenpaare.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $\\sqrt{x + 7} = x + 1$',
+      opts: ['$L = \\{-3;\\ 2\\}$', '$L = \\{\\}$', '$L = \\{2\\}$', '$L = \\{-3\\}$'],
+      steps: [
+        '$\\sqrt{x + 7} = x + 1 \\quad | (\\ )^2$',
+        '$x + 7 = x^2 + 2x + 1 \\quad | -x - 7$',
+        '$0 = x^2 + x - 6$, pq-Formel: $x_{1,2} = -\\dfrac{1}{2} \\pm \\sqrt{\\dfrac{1}{4} + 6} = -\\dfrac{1}{2} \\pm \\dfrac{5}{2}$, also $x_1 = 2$ und $x_2 = -3$',
+        'Probe: $x = 2$ gibt $\\sqrt{9} = 3$ und $2 + 1 = 3$, stimmt. $x = -3$ gibt $\\sqrt{4} = 2$, aber $-3 + 1 = -2$, falsch.',
+        'Quadrieren ist keine Äquivalenzumformung — nur die Probe zeigt, was bleibt: $L = \\{2\\}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Rechteck ist 3 cm länger als breit und hat den Flächeninhalt 40 cm². Stelle eine Gleichung für die Breite $b$ (in cm) auf. Welche Lösungsmenge hat sie in $\\mathbb{R}$, und wie breit ist das Rechteck?',
+      opts: ['$L = \\{5\\}$, Breite 5 cm', '$L = \\{-8;\\ 5\\}$, Breite 5 cm', '$L = \\{-8;\\ 5\\}$, Breite −8 cm oder 5 cm', '$L = \\{-5;\\ 8\\}$, Breite 8 cm'],
+      steps: [
+        'Die Länge ist $b + 3$, die Fläche: $b(b + 3) = 40$, also $b^2 + 3b - 40 = 0$',
+        'pq-Formel: $b_{1,2} = -\\dfrac{3}{2} \\pm \\sqrt{\\dfrac{9}{4} + 40} = -\\dfrac{3}{2} \\pm \\dfrac{13}{2}$, also $b_1 = 5$ und $b_2 = -8$',
+        'In $\\mathbb{R}$ hat die Gleichung beide Lösungen: $L = \\{-8;\\ 5\\}$',
+        'Eine Breite ist aber positiv: das Rechteck ist 5 cm breit und 8 cm lang. Probe: $5 \\cdot 8 = 40$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welchen Wert von $c$ hat $x^2 + 8x + c = 0$ genau eine Lösung, und wie lautet dann die Lösungsmenge?',
+      opts: ['$c = 0,\\ L = \\{-8;\\ 0\\}$', '$c = 16,\\ L = \\{4\\}$', '$c = 16,\\ L = \\{-4\\}$', '$c = 64,\\ L = \\{-8\\}$'],
+      steps: [
+        'Genau eine Lösung gibt es, wenn die Diskriminante null ist: $D = \\left(\\dfrac{8}{2}\\right)^2 - c = 16 - c$',
+        '$16 - c = 0$, also $c = 16$',
+        'Dann ist $x^2 + 8x + 16 = (x + 4)^2 = 0$, also $L = \\{-4\\}$',
+        'Für $c < 16$ gibt es zwei Lösungen (etwa $c = 0$: $L = \\{-8;\\ 0\\}$), für $c > 16$ keine. Falle: $c = 64$ mit $p^2$ statt $\\left(\\dfrac{p}{2}\\right)^2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welchen Wert von $a$ hat das LGS $\\begin{cases} x - 3y = 2 \\\\ 2x + ay = 4 \\end{cases}$ unendlich viele Lösungen, und wie lautet dann die Lösungsmenge?',
+      opts: ['$a = -6,\\ L = \\{(2 + 3t \\mid t)\\},\\ t \\in \\mathbb{R}$', '$a = -6,\\ L = \\{\\}$', '$a = 6,\\ L = \\{(2 + 3t \\mid t)\\},\\ t \\in \\mathbb{R}$', '$a = -3,\\ L = \\{(2 \\mid 0)\\}$'],
+      steps: [
+        'Unendlich viele Lösungen gibt es, wenn II ein Vielfaches von I ist.',
+        '$2 \\cdot \\text{I}$: $2x - 6y = 4$ — das ist genau II, wenn $a = -6$',
+        'Dann gibt $\\text{II} - 2 \\cdot \\text{I}$: $0 = 0$. Mit $y = t$ folgt $x = 2 + 3t$: $L = \\{(2 + 3t \\mid t)\\},\\ t \\in \\mathbb{R}$',
+        'Für jedes andere $a$ gibt $\\text{II} - 2 \\cdot \\text{I}$: $(a + 6)y = 0$, also $y = 0$ und $x = 2$ — genau eine Lösung, $L = \\{(2 \\mid 0)\\}$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
