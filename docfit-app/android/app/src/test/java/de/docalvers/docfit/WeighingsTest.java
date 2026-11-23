@@ -117,4 +117,65 @@ public class WeighingsTest {
         assertEquals(1000, c.hipMm);
         assertNull(Weighings.completion(c, new Weighings.Weighing(T1 + 90_000, 8500, 500)));
     }
+
+    @Test
+    public void theLastHipIsTheNewestOneEntered() {
+        // Doc, 23.11.2026: the hip field starts with the last hip - taken from the list, nothing hardcoded
+        assertEquals(0, Weighings.lastHipMm(new ArrayList<>()));
+        assertEquals(0, Weighings.lastHipMm(Weighings.parse(OLD).rows));   // no hip anywhere yet
+        List<Weighings.Weighing> rows = new ArrayList<>(Weighings.parse(OLD).rows);
+        rows.set(2, rows.get(2).withGirths(915, 1010));      // the oldest one has a hip
+        assertEquals(1010, Weighings.lastHipMm(rows));
+        rows.set(1, rows.get(1).withGirths(910, 1005));      // a newer one too: it wins
+        assertEquals(1005, Weighings.lastHipMm(rows));
+        rows.set(0, rows.get(0).withGirths(905, 0));         // the newest has a waist only: the hip before it counts
+        assertEquals(1005, Weighings.lastHipMm(rows));
+    }
+
+    @Test
+    public void theHipFieldStartsWithItsOwnHipElseTheLastOne() {
+        List<Weighings.Weighing> rows = new ArrayList<>(Weighings.parse(OLD).rows);
+        rows.set(1, rows.get(1).withGirths(910, 1005));
+        Weighings.Weighing newest = rows.get(0), withHip = rows.get(1), oldest = rows.get(2);
+        assertEquals(1005, Weighings.hipForField(newest, rows));   // a new weigh-in: the last hip offered
+        assertEquals(1005, Weighings.hipForField(oldest, rows));   // also for an older one without a hip
+        Weighings.Weighing own = withHip.withGirths(910, 998);
+        rows.set(1, own);
+        assertEquals(998, Weighings.hipForField(own, rows));       // a hip of its own is never replaced
+        // each person has her own list: nothing entered in it yet means an empty field
+        List<Weighings.Weighing> other = new ArrayList<>();
+        other.add(new Weighings.Weighing(T3, 6200, 540));
+        assertEquals(0, Weighings.hipForField(other.get(0), other));
+        assertEquals("", Girths.field(Weighings.hipForField(other.get(0), other)));
+        assertEquals("99,8", Girths.field(Weighings.hipForField(newest, rows)));   // as it stands in the field
+    }
+
+    @Test
+    public void aTapPicksTheWeighInTheCardShows() {
+        // Doc, 23.11.2026: a short tap on a weigh-in shows its values on top; long press enters waist and hip
+        List<Weighings.Weighing> rows = new ArrayList<>(Weighings.parse(OLD).rows);   // T3, T2, T1
+        assertEquals(0, Weighings.shownIndex(rows, 0));                  // nothing picked: the newest
+        long picked = Weighings.pickAfterTap(rows, 0, 2);                // tap on the oldest
+        assertEquals(T1, picked);
+        assertEquals(2, Weighings.shownIndex(rows, picked));
+        picked = Weighings.pickAfterTap(rows, picked, 1);                // another row: that one
+        assertEquals(T2, picked);
+        assertEquals(1, Weighings.shownIndex(rows, picked));
+        assertEquals(0, Weighings.pickAfterTap(rows, picked, 1));        // the picked one again: back to the newest
+        assertEquals(0, Weighings.pickAfterTap(rows, picked, 0));        // the newest: back to the newest
+        assertEquals(0, Weighings.pickAfterTap(rows, picked, 3));        // no such row
+        assertEquals(0, Weighings.pickAfterTap(rows, picked, -1));       // a row already gone (NO_POSITION)
+        assertEquals(0, Weighings.pickAfterTap(new ArrayList<>(), 0, 0));
+    }
+
+    @Test
+    public void thePickFollowsItsWeighInNotItsRow() {
+        List<Weighings.Weighing> rows = new ArrayList<>(Weighings.parse(OLD).rows);
+        long picked = Weighings.pickAfterTap(rows, 0, 1);                // T2, second row
+        rows.add(0, new Weighings.Weighing(T3 + 3_600_000L, 8490, 505));  // a new weigh-in arrives on top
+        assertEquals(2, Weighings.shownIndex(rows, picked));             // still T2, now one row further down
+        rows.remove(2);                                                  // T2 deleted (or moved to the other person)
+        assertEquals(0, Weighings.shownIndex(rows, picked));             // the card falls back to the newest
+        assertEquals(0, Weighings.shownIndex(new ArrayList<>(), picked));
+    }
 }

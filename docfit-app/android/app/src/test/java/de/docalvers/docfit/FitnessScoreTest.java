@@ -35,6 +35,16 @@ public class FitnessScoreTest {
     }
 
     @Test
+    public void theLabelBehindTheDateOfAWeighIn() {
+        // Doc, 23.11.2026: "hinter das Datum die jeweilige Note, also '7 fit'"
+        assertEquals("7 fit", FitnessScore.label(7));
+        assertEquals("1 grottenschlecht", FitnessScore.label(1));
+        assertEquals("10 Top-Athlet", FitnessScore.label(10));
+        assertEquals("", FitnessScore.label(0));    // no score: nothing behind the date
+        assertEquals("", FitnessScore.label(11));
+    }
+
+    @Test
     public void youngMenAtTheBorders() {
         assertEquals(7, score(5.9, 30, M));     // essential fat only
         assertEquals(7, score(6.0, 30, M));     // ACE athletes, but below Gallagher's healthy range

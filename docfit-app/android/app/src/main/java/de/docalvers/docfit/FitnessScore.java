@@ -64,6 +64,14 @@ final class FitnessScore {
     }
 
     /**
+     * The score as a weigh-in row shows it behind its date: "7 fit" (Doc, 23.11.2026: "hinter das Datum die jeweilige
+     * Note, also '7 fit', in der entsprechenden Farbe"), "" without a score.
+     */
+    static String label(int score) {
+        return score < 1 || score > 10 ? "" : score + " " + word(score);
+    }
+
+    /**
      * Where the bands start for one sex and age group, in % body fat. {@code lean} is Gallagher's lower healthy limit
      * (the body fat that goes with BMI 18.5): men 20-39 / 40-59 / 60-79 from 8 / 11 / 13 %, women 21 / 23 / 24 % - the
      * start of the green band in the tile (Ranges.fat) and of the score's top band.

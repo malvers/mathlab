@@ -33,6 +33,7 @@ import android.app.TimePickerDialog;
 import android.text.InputType;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.method.DigitsKeyListener;
 import android.util.TypedValue;
@@ -91,13 +92,15 @@ import java.util.function.IntConsumer;
  *   auf die Waage …", connecting, measuring, done), the last weigh-in stands big with fat, water, muscle and BMI
  *   (BodyComposition, from the profile Doc enters under "Profil"), waist and hip typed in by hand with their ratios
  *   (Girths), a fitness score 1-10 with what the values mean (FitnessScore, ScoreBar), and the list of weigh-ins
- *   below, swipe to delete, tap to enter waist and hip. Scrolling the list up pushes the big card away until a compact
+ *   below, swipe to delete; a tap shows that weigh-in in the card (again, or on the newest: back to the newest), a long
+ *   press enters waist and hip (Doc, 23.11.2026). Scrolling the list up pushes the big card away until a compact
  *   bar is left (CollapsingHeader: date and weight, fat, fitness - or the state of a running weigh-in).
  *   Two people use the scale (Doc, 20.11.2026): Doc and a second person, each with her own profile, list, tiles and
  *   girths (Profile / Weighings slot "" and "2"; her name only in the phone's preferences). A result goes to the one
  *   whose newest weight is within 5 kg (the nearer of both; Weighings.whose), near neither DocFit asks "Doc oder …?"
  *   with "Keiner" to drop it. A switch on top of the tab shows the other person; DocFit opens on Doc, and the view
- *   follows a result to its person. A long press on a weigh-in moves it to the other person, if the guess was wrong.
+ *   follows a result to its person. "Zu …" in a weigh-in's waist and hip dialog moves it to the other person, if the
+ *   guess was wrong (until 23.11.2026 the long press did).
  *   Under the gear, "Personen": each one on or off ("profileOn" / "profile2On"); off = out of the switch and of the
  *   assignment, her data stays. With one on there is no switch and every result is hers - still asked when it is
  *   more than 5 kg from her newest ("Ist das …?"). At least one stays on.
@@ -207,6 +210,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private View personRow;
     private int person;
     private Weighings weighings;
+    /** the weigh-in the scale card shows, by its moment (Weighings.shownIndex); 0 = the newest */
+    private long pickedWeighing;
     private Profile profile;
     private ScaleLink scale;
     // the private Supabase tables, so the web page /docfit/ shows the same (Sync, SyncPanel; offline first)
@@ -744,12 +749,15 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         // the command to say next instead of a state word (Doc, 20.11.2026: "schreiben nur hin, ohne
         // Anführungszeichen, DocFit Start. Und wenn es läuft, DocFit Stopp") - exactly the words Commands listens for
         state.setText(running ? "DocFit Stopp" : "DocFit Start");
-        // "DocFit Stopp" in the red of the running stopwatch, not orange (Doc, 20.11.2026: "entscheide du")
-        state.setTextColor(running ? pal.alarm : PHI);
-        if (!running) timer.setText(Times.duration(last.shown() ? last.duration : 0));
-        // ready green, running red, stopped orange - never grey (Doc, 20.11.2026: "wenn das Ding bereit ist, machen wir
-        // die Zahlen ... grün", "Wenn die Stoppuhr läuft, ist die grau ... wir machen die rot")
-        timer.setTextColor(running ? pal.alarm : last.shown() ? LAMBDA : PHI);
+        // "DocFit Stopp" in the colour of the running stopwatch, not orange (Doc, 20.11.2026: "entscheide du")
+        state.setTextColor(running ? pal.runInk : PHI);
+        String shown = Times.duration(last.shown() ? last.duration : 0);
+        if (!running) timer.setText(shown);
+        // 00:00 pal.idleInk, running pal.runInk, a stopped time orange - never grey (Doc, 20.11.2026: "Wenn die
+        // Stoppuhr läuft, ist die grau ... wir machen die rot"; 23.11.2026 cyan as a trial: "die Stoppuhr bitte mal in
+        // Cyan probieren", and "Wenn da steht 00:00, mach das bitte fast weiß", in Hell "Anthrazit")
+        boolean zero = shown.equals(Times.duration(0));
+        timer.setTextColor(running ? pal.runInk : zero ? pal.idleInk : LAMBDA);
         boolean canReset = LastRun.canReset(running, last);
         startBtn.setEnabled(!running);
         stopBtn.setEnabled(running);
@@ -966,6 +974,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         if (tab == TAB_FAST) reloadFastPage();
         undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
         ui.removeCallbacks(hideUndo);
+        pickedWeighing = 0;                 // and so does a picked weigh-in: the other person starts at her newest
         paintPersons();
         if (scaleAdapter != null) scaleAdapter.notifyDataSetChanged();
         refreshScale();
@@ -1009,7 +1018,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         return true;
     }
 
-    /** Long press on a weigh-in: move it to the other person (a wrong guess by weight), with "Rückgängig". */
+    /**
+     * "Zu …" in a weigh-in's waist and hip dialog (the long press until 23.11.2026): move it to the other person (a wrong
+     * guess by weight), with "Rückgängig".
+     */
     private void moveWeighing(int pos) {
         if (pos < 0 || pos >= weighings.size()) return;
         int from = person, to = 1 - person;
@@ -1041,6 +1053,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     /** A result into a person's list (or completing her newest weigh-in), and the tab shows that person. */
     private void store(Weighings.Weighing w, int who) {
         showPerson(who);
+        if (pickedWeighing != 0) {   // a result from the scale always shows the newest again, no row framed
+            pickedWeighing = 0;
+            scaleAdapter.notifyDataSetChanged();
+        }
         Weighings.Added added = weighings.add(w);
         switch (added) {
             case NEW:
@@ -1128,7 +1144,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             compactFit.setText("–");
             compactFit.setTextColor(MUTED);
         } else {
-            Weighings.Weighing last = weighings.get(0);
+            // the newest - or the weigh-in tapped in the list (Doc, 23.11.2026: "wenn es nur klickt, würde ich gerne
+            // oben die Werte sehen, die zu dem Eintrag gehören"); the pill above says from when
+            Weighings.Weighing last = weighings.get(shownWeighing());
             BodyComposition bc = BodyComposition.of(last, profile);
             FitnessScore fit = FitnessScore.of(last, profile);
             resWeight.setText(Times.kg(last.kg()));
@@ -1215,11 +1233,11 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
         /**
          * A tap: the detail sheet with explanation and course (Doc, 20.11.2026); an empty Bauch / Hüfte tile goes
-         * straight to the entry, the filled ones have "Ändern" in their sheet.
+         * straight to the entry, the filled ones have "Ändern" in their sheet - always for the weigh-in on the card.
          */
         void tapped() {
             if (weighings.size() == 0) return;
-            if (offering && TileInfo.typedIn(key)) editGirths(0);
+            if (offering && TileInfo.typedIn(key)) editGirths(shownWeighing());
             else openInfo(key);
         }
 
@@ -1349,10 +1367,35 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         });
     }
 
+    /** The row of the weigh-in the scale card shows: the picked one, else the newest (0). */
+    private int shownWeighing() {
+        return weighings.shownIndex(pickedWeighing);
+    }
+
+    /**
+     * A tap on a weigh-in in MESSUNGEN: the card shows its values (Doc, 23.11.2026: "wenn es nur klickt, würde ich
+     * gerne oben die Werte sehen, die zu dem Eintrag gehören"); the picked one again, or the newest, brings the newest
+     * back. A card pushed away comes down, so the values are in sight.
+     */
+    private void pickWeighing(int pos) {
+        if (pos < 0 || pos >= weighings.size()) return;
+        int before = shownWeighing();
+        pickedWeighing = weighings.pickAfterTap(pickedWeighing, pos);
+        int after = shownWeighing();
+        scaleAdapter.notifyItemChanged(before);
+        if (after != before) scaleAdapter.notifyItemChanged(after);
+        refreshScale();
+        scaleHead.setOpen(true, true);
+    }
+
     /**
      * Waist and hip for one weigh-in (Doc, 20.11.2026: "Zum Eingeben brauchen wir noch irgendwo ein Feld für
      * Bauchumfang", "ja, bitte auch ein Feld für Hüftumfang"): cm with one decimal, either field may stay empty. Opened
-     * by a tap on a row of MESSUNGEN, or on BAUCH / HÜFTE for the newest weigh-in. Stored with that weigh-in only.
+     * by a long press on a row of MESSUNGEN (Doc, 23.11.2026: "Das müssen wir auf langes Klicken machen"), or on BAUCH /
+     * HÜFTE for the weigh-in on the card. Stored with that weigh-in only. "Zu …" moves the weigh-in to the other person
+     * (the long press did that before), if she is switched on.
+     * A weigh-in without a hip gets this person's last hip in the field (Doc, 23.11.2026: "defaultmäßig beim Hüftumfang
+     * ... einsetzen"), selected on focus so a new value simply types over it; emptied, the weigh-in keeps no hip.
      */
     private void editGirths(int pos) {
         if (pos < 0 || pos >= weighings.size()) return;
@@ -1364,7 +1407,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                 + "leer lassen, was nicht gemessen ist.", 14, MUTED, false));
         EditText waist = cmField(box, "BAUCHUMFANG IN CM", w.waistMm);
         box.addView(text("in der Mitte zwischen unterster Rippe und Beckenkamm, nach dem Ausatmen", 12, MUTED, false));
-        EditText hip = cmField(box, "HÜFTUMFANG IN CM", w.hipMm);
+        EditText hip = cmField(box, "HÜFTUMFANG IN CM", weighings.hipForField(w));
+        if (!w.hasHip()) hip.setSelectAllOnFocus(true);
         box.addView(text("an der breitesten Stelle des Gesäßes", 12, MUTED, false));
         // and the same as a sketch (Doc, 20.11.2026: "mach bitte ein Bild drunter, so eine Art Skizze")
         GirthSketch sketch = new GirthSketch(this, orbitron, MUTED, LAMBDA, PHI, "Bauch", "Hüfte");
@@ -1373,11 +1417,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         box.addView(sketch, sp);
         ScrollView scroll = new ScrollView(this);
         scroll.addView(box);
-        AlertDialog d = dialog("Bauch und Hüfte")
+        AlertDialog.Builder db = dialog("Bauch und Hüfte")
                 .setView(scroll)
                 .setPositiveButton("Speichern", null)   // set below, so a wrong entry keeps the dialog open
-                .setNegativeButton("Abbrechen", null)
-                .create();
+                .setNegativeButton("Abbrechen", null);
+        int other = 1 - person;
+        if (on[other]) db.setNeutralButton("Zu " + names[other], (x, y) -> moveWeighing(weighings.indexOf(w.time)));
+        AlertDialog d = db.create();
         waist.requestFocus();
         Window win = d.getWindow();
         if (win != null) win.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -2832,14 +2878,16 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     /**
      * The detail sheet of a value (Doc, 20.11.2026: "dass man dort genauere Informationen findet, warum das schlecht,
-     * gut oder whatsoever ist", then "natürlich der Verlauf"): the newest value with its word, the course over all
+     * gut oder whatsoever ist", then "natürlich der Verlauf"): the value of the weigh-in on the card (the newest, or the
+     * one tapped in the list) with its word, the course over all
      * weigh-ins with the zones behind it (and the goal lines for the waist), every zone with its numbers, then what it
      * is, how it is measured, what moves it, why it matters, the source and the disclaimer (TileInfo, History).
      */
     private void openInfo(TileInfo.Key key) {
         if (weighings.size() == 0) return;
         TileInfo info = TileInfo.of(key);
-        Weighings.Weighing newest = weighings.get(0);
+        int at = shownWeighing();
+        Weighings.Weighing newest = weighings.get(at);   // the one on the card
         Ranges.Scale scale = History.scale(newest, key, profile);
         List<Weighings.Weighing> all = new ArrayList<>();
         for (int i = 0; i < weighings.size(); i++) all.add(weighings.get(i));
@@ -2907,7 +2955,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         scroll.addView(box);
         AlertDialog.Builder b = dialog(info.title).setView(scroll).setNegativeButton("Schließen", null);
         if (TileInfo.typedIn(key)) {
-            b.setPositiveButton(newest.hasWaist() || newest.hasHip() ? "Ändern" : "Eintragen", (x, which) -> editGirths(0));
+            b.setPositiveButton(newest.hasWaist() || newest.hasHip() ? "Ändern" : "Eintragen", (x, which) -> editGirths(at));
         }
         show(b.create());
     }
@@ -3017,13 +3065,22 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private static final class Row extends RecyclerView.ViewHolder {
         final TextView day, sub, extra;
         final DigitsView value;
+        /** only in a weigh-in row (newScaleRow): the fitness score behind the date and the edit pencil, else null */
+        final TextView score;
+        final ImageView edit;
 
         Row(View v, TextView day, TextView sub, TextView extra, DigitsView value) {
+            this(v, day, sub, extra, value, null, null);
+        }
+
+        Row(View v, TextView day, TextView sub, TextView extra, DigitsView value, TextView score, ImageView edit) {
             super(v);
             this.day = day;
             this.sub = sub;
             this.extra = extra;
             this.value = value;
+            this.score = score;
+            this.edit = edit;
         }
     }
 
@@ -3155,28 +3212,96 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
     }
 
+    /**
+     * One weigh-in of MESSUNGEN (Doc, 23.11.2026: "oben rechts in der Zeile, wo der Tag und das Datum steht, rechts
+     * eine Taste 'Edit' ... Und hinter das Datum die jeweilige Note, also '7 fit', in der entsprechenden Farbe"): on top
+     * the day, its score and at the right end the edit pencil (24 dp in a 48 dp touch target, its right edge on the
+     * weight's); below the time and the body values on the left, the weight on the right. The same card, padding and
+     * texts as newRow.
+     */
+    private Row newScaleRow() {
+        LinearLayout v = new LinearLayout(this);
+        v.setOrientation(LinearLayout.VERTICAL);
+        v.setBackground(round(CARD, 12));
+        v.setPadding(dp(12), 0, dp(12), dp(10));   // no top padding: the 48 dp pencil row gives the air above the day
+        v.setClipToPadding(false);                 // the pencil's touch target reaches into the right padding
+        RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        v.setLayoutParams(lp);
+        LinearLayout top = new LinearLayout(this);
+        top.setOrientation(LinearLayout.HORIZONTAL);
+        top.setGravity(Gravity.CENTER_VERTICAL);
+        TextView day = text("", 15, TEXT, false);
+        TextView score = text("", 15, TEXT, false);
+        score.setTypeface(score.getTypeface(), Typeface.BOLD);
+        score.setPadding(dp(10), 0, 0, 0);
+        score.setMaxLines(1);
+        score.setEllipsize(TextUtils.TruncateAt.END);
+        top.addView(day);
+        top.addView(score, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        ImageView edit = new ImageView(this);
+        edit.setImageResource(R.drawable.ic_edit);
+        edit.setColorFilter(pal.iconIdle);
+        edit.setPadding(dp(12), dp(12), dp(12), dp(12));
+        edit.setContentDescription("Bauch und Hüfte eintragen");
+        top.addView(edit, new LinearLayout.LayoutParams(dp(48), dp(48)));
+        LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        tp.rightMargin = -dp(12);   // the 48 dp target ends at the card's edge, the 24 dp pencil above the weight's end
+        v.addView(top, tp);
+        LinearLayout body = new LinearLayout(this);
+        body.setOrientation(LinearLayout.HORIZONTAL);
+        body.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout left = new LinearLayout(this);
+        left.setOrientation(LinearLayout.VERTICAL);
+        TextView sub = text("", 13, MUTED, false);
+        TextView extra = text("", 12, MUTED, false);
+        extra.setVisibility(View.GONE);
+        left.addView(sub);
+        left.addView(extra);
+        body.addView(left, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        DigitsView value = new DigitsView(this, orbitron, 22, LAMBDA);
+        value.setGravity(Gravity.END);
+        value.setPadding(dp(10), 0, 0, 0);
+        body.addView(value);
+        v.addView(body, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        return new Row(v, day, sub, extra, value, score, edit);
+    }
+
     private final class ScaleAdapter extends RecyclerView.Adapter<Row> {
         @NonNull
         @Override
         public Row onCreateViewHolder(@NonNull ViewGroup parent, int type) {
-            Row r = newRow();
+            Row r = newScaleRow();
             r.value.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-            // a tap enters waist and hip for this weigh-in: the row answers with a ripple
-            int ink = (MUTED & 0x00FFFFFF) | 0x40000000;
-            r.itemView.setBackground(new RippleDrawable(ColorStateList.valueOf(ink), round(CARD, 12), null));
-            r.itemView.setOnClickListener(v -> editGirths(r.getBindingAdapterPosition()));
-            r.itemView.setOnLongClickListener(v -> {   // wrong person: move it to the other one
-                moveWeighing(r.getBindingAdapterPosition());
+            // a tap shows this weigh-in in the card, a long press enters its waist and hip (Doc, 23.11.2026: "Das müssen
+            // wir auf langes Klicken machen - wenn es nur klickt, würde ich gerne oben die Werte sehen"), and so does
+            // the pencil ("Long Press identisch"); the row answers with a ripple, its background is set in
+            // onBindViewHolder
+            r.itemView.setOnClickListener(v -> pickWeighing(r.getBindingAdapterPosition()));
+            View.OnLongClickListener girths = v -> {
+                editGirths(r.getBindingAdapterPosition());
                 return true;
-            });
+            };
+            r.itemView.setOnLongClickListener(girths);
+            r.edit.setOnClickListener(girths::onLongClick);
             return r;
         }
 
         @Override
         public void onBindViewHolder(@NonNull Row r, int i) {
             Weighings.Weighing w = weighings.get(i);
+            // the weigh-in on the card has a phi green frame like a chosen chip - only one picked, not the newest
+            boolean picked = pickedWeighing != 0 && w.time == pickedWeighing;
+            GradientDrawable bgRow = round(CARD, 12);
+            if (picked) bgRow.setStroke(Math.max(2, dp(2)), PHI);
+            int ink = (MUTED & 0x00FFFFFF) | 0x40000000;
+            r.itemView.setBackground(new RippleDrawable(ColorStateList.valueOf(ink), bgRow, null));
             BodyComposition bc = BodyComposition.of(w, profile);
             r.day.setText(Times.day(w.time));
+            // the score behind the date in its colour, nothing without one (no fat, implausible, profile incomplete)
+            int fit = FitnessScore.of(w, profile).score;
+            r.score.setText(FitnessScore.label(fit));
+            r.score.setTextColor(pal.scoreInk(fit));
             r.sub.setText(Times.clock(w.time) + " Uhr");
             List<String> parts = new ArrayList<>();
             if (!Double.isNaN(bc.fatPercent)) parts.add("Fett " + Times.one(bc.fatPercent, "%"));
