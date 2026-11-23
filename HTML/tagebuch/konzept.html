@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Grateful als Buch · Konzept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Orbitron = brand (cover, titles), Caveat = handwriting of the entries, Caveat Brush = painted words of the cloud,
+     Pinyon Script / Great Vibes / Petit Formal Script = the three calligraphic candidates for the printed questions (?schrift=1|2|3) -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Caveat:wght@400;500;600;700&family=Caveat+Brush&family=Pinyon+Script&family=Great+Vibes&family=Petit+Formal+Script&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<!-- Central colour tokens (navy / grey / light schemes) shared with the svp pages -->
+<link rel="stylesheet" href="../svp/svp-tokens.css">
+<script>
+  /* follow the scheme chosen on the other pages (key svp-theme); storage may be blocked */
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('svp-theme'); } catch (e) { }
+    document.documentElement.classList.toggle('svp-light', t === 'light');
+    document.documentElement.classList.toggle('svp-grey', t === 'grey');
+    /* temporary comparison switch for the question script: ?schrift=1 (default) | 2 | 3 */
+    var s = '1';
+    try { s = new URLSearchParams(location.search).get('schrift') || '1'; } catch (e) { }
+    if (!/^[123]$/.test(s)) s = '1';
+    document.documentElement.classList.add('sf-' + s);
+  })();
+</script>
+<!-- StPageFlip 2.0.7 (MIT, no dependencies) - the real page curl of the mock-up; rough.js 4.6.6 (MIT) - pencil strokes -->
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<style>
+/* ===== Concept page frame - colours from svp-tokens.css; Arial for reading, Orbitron for headings (Doc, 21.11.2026) ===== */
+:root { --display: 'Orbitron', sans-serif; --read: Arial, Helvetica, sans-serif; --mono: ui-monospace, Menlo, monospace;
+        --hand: 'Caveat', 'Comic Sans MS', cursive; --brush: 'Caveat Brush', 'Caveat', cursive;
+        /* the book's own colours: paper, ink, leather, foil (independent of the page scheme) */
+        --paper: #f4ecd8; --paper-2: #efe5cc; --ink: #233a63; --print: #2b2a28; --print-soft: #6d6250;
+        --pen: #1c3a8c; --ochre: #b07a14; --phi-ink: #55801c; --ypsi-ink: #a3301f;
+        --leather: #1a2a4b; --foil-1: #8a6a22; --foil-2: #f6dc85;
+        /* calligraphic script of the printed questions; --sk evens out the very different x-heights */
+        --script: 'Pinyon Script', 'Great Vibes', cursive; --sk: 1.42;
+        /* deeper foil for gold lettering on paper (the cover foil is too pale on cream) */
+        --foil-paper: linear-gradient(100deg, #6e4f10 0%, #b4862a 24%, #e2bd5c 40%, #a87b22 55%, #d9b04e 72%, #7a5814 100%);
+        /* calligraphic tick in green ink: thin hairline in, swelling down-stroke, long tapering up-stroke */
+        --tick: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M9.6 21.4 C12.4 20.6 14.9 23.1 17.1 26.4 C20.9 19.3 26.3 12.4 33.8 6.6 C27.6 13.2 22.1 21.3 18.6 29.6 C18.1 30.6 16.7 30.7 16.1 29.8 C14.3 26.6 12.3 23.4 9.6 21.4 Z' fill='%2355801c'/></svg>"); }
+html.sf-2 { --script: 'Great Vibes', 'Pinyon Script', cursive; --sk: 1.36; }
+html.sf-3 { --script: 'Petit Formal Script', 'Pinyon Script', cursive; --sk: 1.08; }
+html { background: var(--bg); }
+body { font-family: var(--read); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.55;
+       padding: 22px 16px 40px; -webkit-text-size-adjust: 100%; overflow-x: hidden; margin: 0; }
+*, *::before, *::after { box-sizing: border-box; }
+.page { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; }
+h1, h2, h3, th, .verdict, .rec li::before, .ask li::before, .flow .t, .flow .time, .ph td:first-child, .ph td:nth-child(3) { font-family: var(--display); }
+h1 { font-size: clamp(20px, 4.4vw, 30px); font-weight: 900; letter-spacing: 2px; color: var(--head); margin: 0; }
+h1 span { color: var(--lambda); }
+.meta { color: var(--muted); font-size: 12.5px; margin: 0; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; min-width: 0; }
+h2 { font-size: 12px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--lambda); margin: 0 0 10px; }
+h3 { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--head); margin: 14px 0 6px; }
+h3:first-child { margin-top: 0; }
+p { margin: 0; }
+p + p { margin-top: 6px; }
+b { color: var(--head); font-weight: 700; }
+code { font-family: var(--mono); font-size: .92em; color: var(--text); background: var(--sunken); padding: 0 4px; border-radius: 4px; overflow-wrap: anywhere; }
+ul, ol { padding-left: 20px; margin: 4px 0; }
+li { margin: 4px 0; }
+li::marker { color: var(--lambda); }
+a { color: var(--lambda); }
+.dim { color: var(--muted); }
+.small { font-size: 12.5px; }
+
+.rec ol { counter-reset: r; list-style: none; padding: 0; display: grid; gap: 8px; margin: 0; }
+.rec li { counter-increment: r; display: grid; grid-template-columns: 30px 1fr; gap: 10px; margin: 0; }
+.rec li::before { content: counter(r); font-weight: 900; font-size: 18px; color: var(--phi); text-align: center; }
+.note { margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.verdict { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.verdict.yes { color: var(--phi); } .verdict.no { color: var(--ypsilon); } .verdict.later { color: var(--lambda); }
+html:not(.svp-light) .verdict.no { color: rgb(229, 83, 63); }
+
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 0 10px 6px 0; vertical-align: bottom; }
+td { padding: 7px 10px 7px 0; border-top: 1px solid var(--row-line); vertical-align: top; }
+td.k { color: var(--head); font-weight: 700; white-space: nowrap; }
+.tbl-wrap { overflow-x: auto; }
+details { margin-top: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--sunken); }
+summary { cursor: pointer; padding: 9px 14px; font-weight: 700; font-size: 12.5px; color: var(--head); }
+pre { font-family: var(--mono); font-size: 11.5px; line-height: 1.5; padding: 4px 14px 14px; overflow-x: auto; color: var(--text); margin: 0; }
+pre .c { color: var(--muted); }
+
+/* daily flow */
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.flow > div { background: var(--sunken); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.flow .t { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--lambda); }
+.flow .time { font-size: 22px; font-weight: 900; color: var(--head); margin: 2px 0 6px; }
+.flow .dots { display: flex; gap: 6px; margin-bottom: 6px; }
+.flow .dots i { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--phi); display: inline-block; }
+.flow .dots i.o { border-color: var(--lambda); }
+.flow p { font-size: 13px; }
+
+/* prompt table */
+.prompts td:nth-child(2) { font-weight: 700; color: var(--head); }
+.prompts td:nth-child(3) { color: var(--text); }
+.prompts .why { font-size: 12.5px; color: var(--muted); }
+.slot { font-family: var(--display); font-size: 10px; letter-spacing: 1px; color: var(--lambda); display: block; }
+
+.ph td:first-child { color: var(--lambda); font-weight: 900; width: 30px; }
+.ph td:nth-child(3) { color: var(--head); text-align: right; white-space: nowrap; }
+.ph tr.first td:nth-child(2) b { color: var(--phi); }
+.ph tr.sum td { font-weight: 700; color: var(--head); }
+
+.ask ol { counter-reset: q; list-style: none; padding: 0; display: grid; gap: 12px; margin: 0; }
+.ask li { counter-increment: q; display: grid; grid-template-columns: 30px 1fr; gap: 10px; margin: 0; }
+.ask li::before { content: counter(q) "."; font-weight: 900; font-size: 18px; color: var(--lambda); }
+.ask .hint { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.src { font-size: 12.5px; color: var(--muted); }
+.src li { margin: 2px 0; }
+
+/* ===== The desk ===== */
+.stage { position: relative; border-radius: 14px; overflow: hidden; padding: 72px 5% 70px; isolation: isolate;
+  background-color: #3d2717;
+  background-image:
+    radial-gradient(ellipse 70% 60% at 35% 25%, rgba(255, 226, 170, .16), transparent 70%),
+    radial-gradient(ellipse 120% 90% at 50% 50%, transparent 55%, rgba(0, 0, 0, .55)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='600'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.0028 0.075' numOctaves='4' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16  0 0 0 0 0.09  0 0 0 0 0.04  0 0 0 0.75 -0.05'/></filter><rect width='100%25' height='100%25' filter='url(%23w)'/></svg>"),
+    linear-gradient(180deg, #4a301c, #33200f); }
+/* no button bar any more (Doc, 23.11.2026): the book is driven by its corners and the tabs; the settings gear sits in the contents */
+.stage { padding-bottom: 50px; }
+
+/* the old brass gear, top right in the contents sheet: opens the settings (and in the settings, turned, back to the contents) */
+.sh-gear { position: absolute; top: 18px; right: 18px; width: 47px; height: 47px; padding: 0; border: 0; background: none; cursor: pointer;
+  filter: drop-shadow(0 2px 2px rgba(60, 35, 5, .45)); transition: transform .7s cubic-bezier(.3, 1.4, .5, 1); }
+.sh-gear svg { width: 100%; height: 100%; display: block; }
+.sh-gear:hover { transform: rotate(30deg); }
+.sh-gear.on { transform: rotate(90deg); }
+.sh-gear.on:hover { transform: rotate(60deg); }
+.sh-gear:focus-visible { outline: 2px solid rgb(245, 194, 66); outline-offset: 4px; border-radius: 50%; }
+
+/* sheets (table of contents, settings): a separate leaf of the book's paper laid over the desk */
+.veil { position: absolute; inset: 0; z-index: 18; background: rgba(10, 6, 2, .45); }
+.sheet { position: absolute; z-index: 20; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(940px, calc(100% - 28px)); max-height: calc(100% - 28px);
+  overflow: auto; overscroll-behavior: contain; color: var(--print); border-radius: 6px; padding: 26px 30px 24px;
+  background-color: var(--paper);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.36  0 0 0 0 0.28  0 0 0 0 0.16  0 0 0 0.13 0'/></filter><rect width='100%25' height='100%25' filter='url(%23p)'/></svg>"),
+    linear-gradient(180deg, #f8f1e0, #f1e7cf);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .5), 0 2px 6px rgba(0, 0, 0, .35), inset 0 0 0 7px transparent, inset 0 0 0 8px rgba(176, 122, 20, .45); }
+.sheet[hidden], .veil[hidden] { display: none; }
+.sh-t { font-family: 'Great Vibes', 'Pinyon Script', cursive; font-weight: 400; font-size: 46px; line-height: 1; letter-spacing: 0; text-transform: none; color: var(--ink); margin: 0 0 6px; }
+/* closing: a word, bottom right, where a page would be turned */
+.sh-foot { display: flex; justify-content: flex-end; margin-top: 20px; }
+.sh-close { border: 1.5px solid rgba(176, 122, 20, .55); background: rgba(255, 255, 255, .35); color: var(--ink); border-radius: 999px; padding: 8px 20px; cursor: pointer;
+  font: 700 11px/1.2 var(--display); letter-spacing: .14em; text-transform: uppercase; }
+.sh-close:hover { background: linear-gradient(180deg, #f7dd8a, #e2bd5c); border-color: #a87b22; color: #2b2a28; }
+.sh-sec { font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--ochre); margin: 18px 0 8px; }
+.sh-sec span { font-family: var(--read); font-weight: 400; font-size: 12.5px; letter-spacing: 0; text-transform: none; color: var(--print-soft); }
+.sh-note { margin-top: 18px; font-size: 12px; font-style: italic; color: var(--print-soft); }
+/* the parts of the book, with dotted leaders like an old contents page */
+.toc-book { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 34px; }
+.toc-book button { display: flex; align-items: baseline; gap: 8px; width: 100%; border: 0; background: none; padding: 5px 0; cursor: pointer; text-align: left; color: var(--ink); font: 15px/1.3 var(--read); }
+.toc-book button span { white-space: nowrap; }
+.toc-book button i { flex: 1; min-width: 12px; border-bottom: 1.5px dotted rgba(109, 98, 80, .55); transform: translateY(-4px); }
+.toc-book button em { font-style: normal; font-family: var(--display); font-size: 11px; letter-spacing: .08em; color: var(--print-soft); white-space: nowrap; }
+.toc-book button:hover span { color: var(--ypsi-ink); }
+/* the year, month by month: written days in green ink, today in a gold ring */
+.toc-year { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 14px 18px; }
+.mon h4 { margin: 0 0 4px; font-family: var(--display); font-weight: 700; font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); }
+.mon .g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.mon .g b { font: 700 9px/1.6 var(--display); color: var(--print-soft); text-align: center; }
+.mon .g button { aspect-ratio: 1; border: 0; padding: 0; border-radius: 50%; background: none; cursor: pointer; font: 10px/1 var(--read); color: var(--print-soft); }
+.mon .g button.w { color: #2c4a12; background: radial-gradient(circle, rgba(121, 158, 49, .34) 0 58%, transparent 62%); }
+.mon .g button.e { color: rgba(109, 98, 80, .8); text-decoration: line-through rgba(163, 48, 31, .4); }
+.mon .g button.f { color: rgba(109, 98, 80, .35); cursor: default; }
+.mon .g button.t { color: var(--ink); font-weight: 700; box-shadow: inset 0 0 0 2px #c99a35, 0 0 0 1px rgba(201, 154, 53, .35); }
+.mon .g button:not(.f):hover { background-color: rgba(245, 194, 66, .35); }
+/* settings: segmented choices with a gold frame */
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button { border: 1.5px solid rgba(176, 122, 20, .5); background: rgba(255, 255, 255, .35); color: var(--ink); border-radius: 999px; padding: 7px 16px; cursor: pointer;
+  font: 700 11px/1.2 var(--display); letter-spacing: .1em; text-transform: uppercase; }
+.seg button.on { background: linear-gradient(180deg, #f7dd8a, #e2bd5c); border-color: #a87b22; color: #2b2a28; box-shadow: 0 1px 2px rgba(0, 0, 0, .25); }
+.seg button .sample { display: block; font-weight: 400; font-size: 21px; letter-spacing: 0; text-transform: none; line-height: 1.25; }
+.toast { position: absolute; z-index: 25; left: 50%; bottom: 22px; transform: translate(-50%, 8px); max-width: calc(100% - 120px); padding: 8px 16px; border-radius: 999px;
+  background: rgba(20, 12, 6, .82); color: #f3e6c8; font-size: 12.5px; text-align: center; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+@media (max-width: 700px) {
+  .sh-gear { width: 40px; height: 40px; top: 14px; right: 14px; }
+  .sheet { padding: 20px 16px 18px; }
+  .sh-t { font-size: 40px; }
+  .toc-book { grid-template-columns: minmax(0, 1fr); }
+  .toc-year { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .toast { max-width: calc(100% - 40px); bottom: 14px; }
+}
+
+/* ===== Schemes (settings): Klassisch = leather, wood and paper as above ===== */
+.stage.sch-modern { background: radial-gradient(ellipse 85% 75% at 50% 38%, #f7f8fa, #dde1e7); }
+.stage.sch-modern .boards, .stage.sch-modern .board-in, .stage.sch-modern .leather { background: #23262d; }
+.stage.sch-modern .boards { box-shadow: 0 1.8cqw 3.2cqw -.8cqw rgba(30, 35, 45, .4), 0 .4cqw 1cqw rgba(30, 35, 45, .22); }
+.stage.sch-modern .paper { background: #fdfdfb; }
+.stage.sch-modern .endpaper { background-color: #23262d; }
+.stage.sch-modern .reg button { background: linear-gradient(180deg, #30343c, #23262d) padding-box, linear-gradient(rgb(245, 194, 66), rgb(245, 194, 66)) border-box; }
+.stage.sch-modern .reg button::before { border-color: transparent; }
+.stage.sch-modern .toast { background: rgba(35, 38, 45, .88); }
+.stage.sch-nacht { background: radial-gradient(ellipse 80% 70% at 45% 30%, #1b2440, #070a12 75%); --leather: #0c1323; }
+.stage.sch-nacht .pg.paper::before { content: ''; position: absolute; inset: 0; z-index: 6; pointer-events: none; background: rgba(18, 26, 52, .16); }
+.stage.sch-nacht .sheet { filter: brightness(.9); }
+/* the cover's own leather has an opaque gradient: darken it underneath frame and foil (they come later and stay bright) */
+.stage.sch-nacht .leather::before { content: ''; position: absolute; inset: 0; background: rgba(4, 7, 16, .5); }
+
+/* the book: pages area, leather boards behind it, page-block edges, ribbon, headband */
+.bookwrap { position: relative; max-width: 1000px; margin: 0 auto; container-type: inline-size; }
+.boards { position: absolute; z-index: 0; top: -1.6cqw; bottom: -2.1cqw; left: -1.5cqw; right: -1.5cqw; border-radius: .9cqw;
+  background-color: var(--leather);
+  background-image:
+    linear-gradient(90deg, transparent 48.6%, rgba(0, 0, 0, .45) 50%, transparent 51.4%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"),
+    radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, .10), transparent 60%);
+  box-shadow: 0 2.8cqw 4.5cqw -.8cqw rgba(0, 0, 0, .7), 0 .8cqw 1.6cqw rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .05);
+  transition: opacity .35s; }
+/* no slide: when the book closes, the left half of the background IS the front board that starts to turn
+   (it leaves at once with the turning page), and when it opens, the board lands and becomes the background again */
+.stage.closed-front .boards { left: calc(50% - .3cqw); }
+.stage.closed-back .boards { right: calc(50% - .3cqw); }
+.stage.portrait .boards { top: -2.4cqw; bottom: -3cqw; left: -1.4cqw; right: -2.6cqw; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"); }
+/* the edges of the page block: thicker on the side that is already written - it grows with the year */
+.edge { position: absolute; z-index: 1; pointer-events: none; opacity: 1; transition: opacity .3s; }
+.edge.l { left: calc(-1 * var(--el)); width: var(--el); top: .5cqw; bottom: -.7cqw; border-radius: .5cqw 0 0 .5cqw;
+  background: repeating-linear-gradient(90deg, #f1e8d2 0 1px, #cdbf9f 1px 2px); box-shadow: -1px 1px 2px rgba(0, 0, 0, .35); }
+.edge.r { right: calc(-1 * var(--er)); width: var(--er); top: .5cqw; bottom: -.7cqw; border-radius: 0 .5cqw .5cqw 0;
+  background: repeating-linear-gradient(90deg, #cdbf9f 0 1px, #f1e8d2 1px 2px); box-shadow: 1px 1px 2px rgba(0, 0, 0, .35); }
+.edge.b { left: 0; right: 0; bottom: -.7cqw; height: .7cqw; background: repeating-linear-gradient(180deg, #efe5cd 0 1px, #c9bb9b 1px 2px); }
+.stage.closed-front .edge, .stage.closed-back .edge,
+.stage.closed-front .headband, .stage.closed-back .headband { opacity: 0; }
+.stage.portrait .edge.l, .stage.portrait .headband { display: none; }
+/* the bookmark ribbon lies IN the open spread: one smooth satin red from the very top of the spine down the gutter,
+   gently onto the right page, the tail hangs out below and is a little darker where it bends over the page edge.
+   It never fades: pages turn over the gutter, and when the book closes the board covers it the moment it passes
+   the spine (rib-under, set by script) - only the tail still hangs out below the closed book.
+   The shape is clipped on ::before, so the drop shadow on the element itself survives the clip. */
+/* the top end pokes out a little above the board, as if it came from behind the spine over the edge to the front */
+.ribbon { position: absolute; z-index: 3; left: calc(50% - .72cqw); top: -2.3cqw; width: 1.45cqw; height: calc(100% + 5.3cqw); pointer-events: none;
+  transform-origin: 50% 0; transform: rotate(-1deg); filter: drop-shadow(.12cqw .18cqw .12cqw rgba(40, 25, 10, .45)); }
+.stage.rib-under .ribbon { z-index: 1; }
+.stage.rib-hidden .ribbon { visibility: hidden; }
+.ribbon::before { content: ''; position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, transparent calc(100% - 3.5cqw), rgba(40, 6, 2, .45) calc(100% - 3cqw), rgba(40, 6, 2, .12) calc(100% - 2.4cqw), transparent calc(100% - 1.6cqw)),
+    linear-gradient(180deg, rgba(40, 6, 2, .6) 0, rgba(40, 6, 2, .32) .62cqw, rgba(255, 225, 205, .16) .82cqw, rgba(40, 6, 2, .14) 1.3cqw, transparent 3cqw),
+    linear-gradient(90deg, #7a1d11, #b0301c 30%, #d0503a 50%, #a82c19 72%, #6e1a0f);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 1cqw), 0 100%); }
+.stage.portrait .ribbon { left: 3.4%; width: 3cqw; transform: rotate(-.8deg); }
+/* the headband in the ribbon's red - no white stripes, so band and ribbon read as one colour.
+   Switched off for now: the smooth ribbon runs through to the top instead (Doc, 23.11.2026) */
+.headband { display: none; }
+.headband { position: absolute; z-index: 4; left: calc(50% - .9cqw); top: -.9cqw; width: 1.8cqw; height: 1.2cqw; border-radius: .3cqw .3cqw 0 0;
+  background: repeating-linear-gradient(90deg, #8a2414 0 .25cqw, #b8341f .25cqw .5cqw); box-shadow: 0 -1px 2px rgba(0, 0, 0, .4); transition: opacity .3s; }
+#flipHost { position: relative; z-index: 2; transition: opacity .17s; }
+/* phone: turning back is a short fade (the library cannot flip back in portrait) */
+.stage.fading #flipHost { opacity: 0; }
+/* Grateful's 5-day strip as register tabs sticking out of the page block (behind the pages):
+   navy leather like the cover, a gold-foil frame with a fine inner gold line, embossed gold lettering.
+   Written days shine, an empty day is dull, the selected day stands up a little and glows. */
+.reg { position: absolute; z-index: 1; top: -40px; right: 5%; display: flex; align-items: flex-end; gap: 6px; transition: opacity .3s; }
+.reg button { position: relative; width: clamp(50px, 7.2cqw, 72px); height: 54px; padding: 6px 0 0; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 1px; font-family: var(--display); font-size: 9.5px; font-weight: 700; letter-spacing: .6px;
+  color: #ecc969; text-shadow: 0 1px 0 rgba(0, 0, 0, .75), 0 -.5px 0 rgba(255, 240, 200, .25);
+  border: 2px solid transparent; border-bottom: 0; border-radius: 10px 10px 0 0;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>") padding-box,
+    radial-gradient(ellipse at 35% 15%, #2f4775, #16233f 75%) padding-box,
+    var(--foil-paper) border-box;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, .45); transition: transform .2s, box-shadow .2s; }
+.reg button::before { content: ''; position: absolute; inset: 3px 3px -2px; border: 1px solid rgba(226, 189, 92, .55); border-bottom: 0; border-radius: 7px 7px 0 0; pointer-events: none; }
+.reg button:not(.has) { filter: saturate(.5) brightness(.78); }
+.reg button:hover { transform: translateY(-3px); }
+.reg button.sel { transform: translateY(-7px); box-shadow: 0 -1px 3px rgba(0, 0, 0, .45), 0 -3px 12px rgba(245, 194, 66, .4); }
+.reg button.sel::before { border-color: rgba(246, 220, 133, .95); }
+.reg button span { font-family: var(--display); font-weight: 500; font-size: 8px; letter-spacing: 1.6px; text-transform: uppercase; opacity: .85; }
+.reg button i { display: flex; gap: 4px; margin-top: 3px; }
+.reg button i b { width: 6px; height: 6px; border-radius: 50%; border: 1px solid #d9b04e; background: transparent; }
+.reg button i b.on { background: radial-gradient(circle at 35% 30%, #fbe7a1, #c99a35 60%, #7a5814); border-color: #b4862a; }
+.stage.closed-front .reg, .stage.closed-back .reg, .stage.cover-shown .reg { opacity: 0; pointer-events: none; }
+.stage.portrait .reg { right: 3%; gap: 4px; }
+.stage.portrait .reg button { width: 14cqw; }
+/* the contents tab on the left of the page block, same leather and gold */
+.reg.l { right: auto; left: 5%; }
+.reg.l svg { width: 18px; height: 12px; margin-top: 4px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .7)); }
+.stage.portrait .reg.l { left: 3%; right: auto; }
+
+/* StPageFlip base styles (from the package's stPageFlip.css, MIT) */
+.stf__parent { position: relative; display: block; box-sizing: border-box; transform: translateZ(0); touch-action: pan-y; }
+.stf__wrapper { position: relative; width: 100%; box-sizing: border-box; }
+.stf__block { position: absolute; width: 100%; height: 100%; box-sizing: border-box; perspective: 2000px; }
+.stf__item { display: none; position: absolute; transform-style: preserve-3d; }
+/* the pages are also .leaf (position: relative, for the static spreads). During a flip the library writes inline styles
+   WITHOUT position, so .leaf won and the page under the turning one dropped into the flow, below the book. Keep them absolute. */
+.leaf.stf__item { position: absolute; }
+.stf__outerShadow, .stf__innerShadow, .stf__hardShadow, .stf__hardInnerShadow { position: absolute; left: 0; top: 0; }
+
+/* ===== Pages (shared by the flip book and the static spreads) ===== */
+.leaf { position: relative; overflow: hidden; }
+.pg { position: absolute; inset: 0; overflow: hidden; container-type: size; color: var(--print); font-family: var(--read); --u: 1cqw; }
+.stage.portrait .pg, .portrait-page .pg { --u: 1.22cqw; }
+.paper { background-color: var(--paper);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.36  0 0 0 0 0.28  0 0 0 0 0.16  0 0 0 0.13 0'/></filter><rect width='100%25' height='100%25' filter='url(%23p)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='700' height='700'><filter id='q'><feTurbulence type='fractalNoise' baseFrequency='0.008' numOctaves='3' seed='9' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.42  0 0 0 0 0.22  0 0 0 0.16 -0.04'/></filter><rect width='100%25' height='100%25' filter='url(%23q)'/></svg>"),
+    linear-gradient(180deg, #f7f0de, #f1e7cf); }
+/* curvature: darker towards the fold, a soft light on the outer half */
+.pg::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.stf__item.--left .pg.paper::after, .sp-l .pg.paper::after {
+  background: linear-gradient(270deg, rgba(70, 45, 15, .34) 0, rgba(70, 45, 15, .12) 3%, rgba(70, 45, 15, .03) 9%, transparent 16%, transparent 80%, rgba(255, 255, 255, .22) 96%, rgba(120, 90, 50, .12) 100%); }
+.stf__item.--right .pg.paper::after, .sp-r .pg.paper::after {
+  background: linear-gradient(90deg, rgba(70, 45, 15, .34) 0, rgba(70, 45, 15, .12) 3%, rgba(70, 45, 15, .03) 9%, transparent 16%, transparent 80%, rgba(255, 255, 255, .22) 96%, rgba(120, 90, 50, .12) 100%); }
+.stage.portrait .stf__item .pg.paper::after, .portrait-page .pg.paper::after {
+  background: linear-gradient(90deg, rgba(70, 45, 15, .26) 0, rgba(70, 45, 15, .08) 3%, transparent 10%, transparent 85%, rgba(255, 255, 255, .2) 97%, rgba(120, 90, 50, .1) 100%); }
+
+/* leather cover + back */
+.leather { background-color: var(--leather);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' seed='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.6  0 0 0 0 0.85  0 0 0 0.14 -0.03'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>"),
+    radial-gradient(ellipse at 35% 25%, #2a3f68, #16233f 70%); }
+.cover-front::after { background: linear-gradient(90deg, rgba(0, 0, 0, .55) 0, rgba(0, 0, 0, .15) 3.2%, rgba(255, 255, 255, .08) 4.2%, transparent 7%, transparent 92%, rgba(0, 0, 0, .2) 100%); }
+.cover-back::after { background: linear-gradient(270deg, rgba(0, 0, 0, .55) 0, rgba(0, 0, 0, .15) 3.2%, rgba(255, 255, 255, .08) 4.2%, transparent 7%, transparent 92%, rgba(0, 0, 0, .2) 100%); }
+.cv-frame { position: absolute; inset: 6.5cqw 6cqw 6.5cqw 9cqw; border: .45cqw solid rgba(214, 178, 90, .55); border-radius: 1.2cqw;
+  box-shadow: inset 0 0 0 1.1cqw transparent, inset 0 0 0 1.35cqw rgba(214, 178, 90, .35), 0 1px 0 rgba(255, 255, 255, .06), inset 0 1px 1px rgba(0, 0, 0, .5); }
+.cover-back .cv-frame { inset: 6.5cqw 9cqw 6.5cqw 6cqw; }
+/* the cover IS the board: as big as the leather boards behind the open book (they stick out over the page block),
+   so the closed book shows no second blue edge around the cover. Same insets as .boards (cqw of the book wrapper). */
+.leaf.p-cover, .leaf.p-back { overflow: visible; }
+.p-cover .cover-front { inset: -1.6cqw -1.5cqw -2.1cqw -.3cqw; border-radius: 0 .9cqw .9cqw 0; }
+.p-back .cover-back { inset: -1.6cqw -.3cqw -2.1cqw -1.5cqw; border-radius: .9cqw 0 0 .9cqw; }
+/* inside of the front / back board: the endpaper is glued onto the board, which sticks out around it - so these pages
+   turn with the full size of their half of the background, and the background half they leave (or land on) is the same board */
+.leaf.p-endpaper, .leaf.p-endpaper2 { overflow: visible; }
+.board-in { position: absolute; pointer-events: none; background-color: var(--leather);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"),
+    radial-gradient(ellipse at 60% 20%, rgba(255, 255, 255, .10), transparent 60%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .05); }
+.p-endpaper .board-in { inset: -1.6cqw 0 -2.1cqw -1.5cqw; border-radius: .9cqw 0 0 .9cqw; }
+.p-endpaper2 .board-in { inset: -1.6cqw -1.5cqw -2.1cqw 0; border-radius: 0 .9cqw .9cqw 0;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"); }
+.stage.portrait .p-cover .cover-front { inset: -2.4cqw -2.6cqw -3cqw -1.4cqw; }
+.stage.portrait .p-back .cover-back { inset: -2.4cqw -2.6cqw -3cqw -1.4cqw; border-radius: 0 .9cqw .9cqw 0; }
+.cv-in { position: absolute; inset: 0 0 0 3cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4cqh; }
+.foil { background: linear-gradient(100deg, var(--foil-1), var(--foil-2) 28%, #b8913a 48%, #f8e08e 68%, #93701f); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 .25cqw .1cqw rgba(0, 0, 0, .55)) drop-shadow(0 -.1cqw 0 rgba(255, 255, 255, .12)); }
+/* "Grateful" in a sweeping script (Doc, 23.11.2026) - padding, because the foil only fills the box and the swashes overshoot it */
+.cv-title { font-family: 'Great Vibes', 'Pinyon Script', cursive; font-weight: 400; font-size: 16cqw; line-height: 1.15; letter-spacing: 0; padding: .06em .3em .16em; margin: -1cqh 0 -2cqh; }
+.cv-sub { font-family: var(--display); font-weight: 500; font-size: 3cqw; letter-spacing: .3em; padding-left: .3em; }
+.cv-year { font-family: var(--display); font-weight: 700; font-size: 5.6cqw; letter-spacing: .25em; padding-left: .25em; margin-top: 4cqh; }
+.cv-icon { width: 15cqw; height: auto; filter: drop-shadow(0 .25cqw .1cqw rgba(0, 0, 0, .55)); }
+.cv-slogan { position: absolute; left: 0; right: 3cqw; bottom: 13cqh; text-align: center; font-family: var(--display); font-weight: 500; font-size: 2.6cqw; letter-spacing: .25em; }
+.cv-name { position: absolute; left: 0; right: 3cqw; bottom: 8.5cqh; text-align: center; font-family: var(--hand); font-size: 5cqw; }
+
+/* endpapers */
+.endpaper { background-color: #17284a;
+  background-image: radial-gradient(circle at 25% 25%, rgba(245, 194, 66, .2) 0 .55cqw, transparent .65cqw),
+    radial-gradient(circle at 75% 75%, rgba(245, 194, 66, .12) 0 .4cqw, transparent .5cqw),
+    linear-gradient(45deg, transparent 46%, rgba(245, 194, 66, .07) 47% 53%, transparent 54%);
+  background-size: 7cqw 7cqw, 7cqw 7cqw, 7cqw 7cqw; }
+.exlibris { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-1.5deg); width: 46cqw; padding: 5cqw 4cqw; text-align: center;
+  background: var(--paper); border-radius: .8cqw; box-shadow: 0 .6cqw 1.6cqw rgba(0, 0, 0, .45); outline: .35cqw solid rgba(176, 122, 20, .55); outline-offset: -2.2cqw; }
+.exlibris .t { display: block; font-family: var(--display); font-weight: 700; font-size: 3.2cqw; letter-spacing: .35em; color: var(--ink); }
+.exlibris .n { display: block; font-family: var(--hand); font-size: 8.5cqw; color: var(--pen); margin-top: 1cqw; line-height: 1; }
+/* a personal plate from the link (?fuer=meine%20Cutie): "für meine Cutie", written in by hand */
+.exlibris.fuer .n { font-size: 7cqw; line-height: 1.05; margin-top: 1.6cqw; overflow-wrap: anywhere; }
+
+/* page interior */
+.in { position: absolute; inset: 6.5cqh 8cqw 4.6cqh; display: flex; flex-direction: column; }
+.stf__item.--left .in, .sp-l .in { inset: 6.5cqh 9cqw 4.6cqh 7.5cqw; }
+.stf__item.--right .in, .sp-r .in { inset: 6.5cqh 7.5cqw 4.6cqh 9cqw; }
+.stage.portrait .stf__item .in, .portrait-page .in { inset: 5cqh 7cqw 3.6cqh 9cqw; }
+.hd { display: flex; flex-direction: column; gap: .4cqh; }
+.hd.r { align-items: flex-end; text-align: right; }
+.stage.portrait .hd.r, .portrait-page .hd.r { align-items: flex-start; text-align: left; }
+.hd .nm { display: flex; align-items: center; gap: 1.6cqw; font-family: var(--display); font-weight: 700; font-size: calc(var(--u) * 4.4); letter-spacing: .28em; color: var(--ink); }
+.hd .nm svg { width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); flex: none; }
+.hd .dt { font-size: calc(var(--u) * 3.3); font-style: italic; color: var(--print-soft); }
+.hd .mt { font-family: var(--display); font-size: calc(var(--u) * 2.1); letter-spacing: .18em; color: var(--ochre); text-transform: uppercase; }
+.cardgap { height: 9cqh; flex: none; }
+.stage.portrait .cardgap, .portrait-page .cardgap { height: 2.4cqh; }
+.q { display: grid; grid-template-columns: calc(var(--u) * 8.6) minmax(0, 1fr); column-gap: calc(var(--u) * 2.6); margin-top: 2.6cqh; }
+.q-t { display: flex; align-items: baseline; gap: 1.2cqw; font-size: calc(var(--u) * 3.35); font-weight: 600; color: var(--print); line-height: 1.3; }
+/* the printed question in a calligraphic script (one weight only - never faux-bold it) */
+.q-t .tx { flex: 1; min-width: 0; font-family: var(--script); font-weight: 400; font-size: calc(var(--u) * 3.35 * var(--sk)); line-height: 1.12; color: #2a2620; }
+/* "Grateful" as a small gold-foil stamp, like the lettering on the cover - no pill */
+.tag { display: inline-flex; align-items: center; gap: .55cqw; flex: none; white-space: nowrap;
+  font-family: var(--display); font-weight: 900; font-size: calc(var(--u) * 2); letter-spacing: .16em; position: relative; top: calc(var(--u) * -.3);
+  background: var(--foil-paper); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 .06cqw 0 rgba(255, 250, 235, .85)) drop-shadow(0 -.05cqw 0 rgba(90, 60, 10, .3)); }
+.tag svg { width: calc(var(--u) * 2.5); height: auto; flex: none; }
+/* field wrapper: the microphone sits at the right end of the first writing line */
+.fld { position: relative; --mic: calc(var(--u) * 4.6); }
+.mic { position: absolute; z-index: 2; right: 0; top: calc(var(--u) * 6.6 * var(--fz, 1) * .5 - var(--mic) * .5 - var(--u) * .5);
+  width: var(--mic); height: var(--mic); border: 0; padding: 0; background: none; color: var(--print-soft); cursor: pointer; opacity: .8; }
+.mic svg { width: 100%; height: 100%; display: block; }
+.mic.rec { color: var(--ypsi-ink); opacity: 1; animation: micpulse 1.2s ease-in-out infinite; }
+@keyframes micpulse { 50% { opacity: .45; } }
+textarea.hand { display: block; width: 100%; resize: none; border: 0; outline: 0; padding: 0 0 0 .4cqw; margin: 0; background-color: transparent;
+  font-family: var(--hand); font-weight: 500; font-size: calc(var(--u) * 5.5 * var(--fz, 1)); line-height: calc(var(--u) * 6.6 * var(--fz, 1)); color: var(--pen);
+  height: calc(var(--u) * 6.6 * var(--fz, 1) * var(--rows, 2) + 2px); overflow: hidden;
+  background-image: repeating-linear-gradient(180deg, transparent 0 calc(var(--u) * 6.6 * var(--fz, 1) - 1px), rgba(60, 95, 150, .26) calc(var(--u) * 6.6 * var(--fz, 1) - 1px) calc(var(--u) * 6.6 * var(--fz, 1)));
+  background-attachment: local; caret-color: var(--ypsi-ink); text-shadow: 0 0 .5px rgba(28, 58, 140, .35); }
+.fld textarea.hand { padding-right: calc(var(--mic) + var(--u) * .8); }
+/* long dictation: the text first shrinks (see fit()), then the field scrolls gently with a soft fade, no scrollbar */
+textarea.hand.scrolls { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+textarea.hand.scrolls::-webkit-scrollbar { display: none; }
+textarea.hand.more-b { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - var(--u) * 5), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - var(--u) * 5), transparent); }
+textarea.hand.more-t { -webkit-mask-image: linear-gradient(0deg, #000 calc(100% - var(--u) * 3), transparent); mask-image: linear-gradient(0deg, #000 calc(100% - var(--u) * 3), transparent); }
+textarea.hand.more-t.more-b { -webkit-mask-image: linear-gradient(180deg, transparent, #000 calc(var(--u) * 3), #000 calc(100% - var(--u) * 5), transparent); mask-image: linear-gradient(180deg, transparent, #000 calc(var(--u) * 3), #000 calc(100% - var(--u) * 5), transparent); }
+textarea.hand::placeholder { color: rgba(109, 98, 80, .55); font-family: var(--read); font-size: calc(var(--u) * 2.6); font-style: italic; }
+.stage.portrait textarea.hand::placeholder { font-size: calc(var(--u) * 2.3); }
+textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
+/* typed: Arial is already small, so the font shrinks less than the line pitch */
+.stage.typed textarea.hand, .static-typed textarea.hand { font-family: var(--read); font-size: calc(var(--u) * 3.3 * max(var(--fz, 1), .8)); color: var(--ink); text-shadow: none; }
+/* the 30-second ring */
+.ring { position: relative; width: calc(var(--u) * 8.6); height: calc(var(--u) * 8.6); border: 0; padding: 0; background: none; cursor: pointer; margin-top: .2cqh; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring .trk { fill: none; stroke: rgba(109, 98, 80, .2); stroke-width: 3.2; }
+.ring .bar { fill: none; stroke: rgb(245, 194, 66); stroke-width: 3.6; stroke-linecap: round; transition: stroke .3s, stroke-width .3s; }
+.ring .sec { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: calc(var(--u) * 2.5); color: var(--ink); }
+/* done: a fine gold seal (double ring) with a calligraphic tick in green ink that overshoots the ring */
+.ring .in2 { fill: none; stroke: none; }
+.ring.done .trk { stroke: none; }
+.ring.done .bar { stroke: url(#g-foil-ring); stroke-width: 1.5; }
+.ring.done .in2 { stroke: url(#g-foil-ring); stroke-width: .6; opacity: .85; }
+.ring.done .sec { inset: -14% -18% 4% -2%; background: var(--tick) center / contain no-repeat; font-size: 0; filter: drop-shadow(0 .4px .3px rgba(40, 60, 10, .35)); }
+.ft { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 2cqw; font-size: calc(var(--u) * 2.4); color: var(--print-soft); padding-top: 1.4cqh; }
+.ft .pn { font-family: var(--display); font-size: calc(var(--u) * 2.3); letter-spacing: .1em; color: var(--print-soft); }
+.ft.r { flex-direction: row-reverse; }
+.stage.portrait .ft.r, .portrait-page .ft.r { flex-direction: row; }
+.habits { display: flex; align-items: center; gap: 1.6cqw; flex-wrap: wrap; }
+.habits b { font-family: var(--display); font-weight: 700; font-size: calc(var(--u) * 1.9); letter-spacing: .12em; color: var(--ochre); }
+.hb { display: inline-flex; align-items: center; gap: .8cqw; border: 0; background: none; padding: 0; cursor: pointer; font-family: var(--hand); font-size: calc(var(--u) * 3.8); color: var(--pen); }
+/* habit boxes: a fine gold ring, ticked with the same calligraphic tick as the clocks */
+.hb i { position: relative; width: calc(var(--u) * 3.1); height: calc(var(--u) * 3.1); border-radius: 50%; display: inline-block; flex: none;
+  border: max(1px, calc(var(--u) * .2)) solid #b8913a; box-shadow: 0 0 0 max(.5px, calc(var(--u) * .08)) rgba(184, 145, 58, .25); }
+.hb.on i::before { content: ''; position: absolute; inset: -75% -85% -5% -20%; background: var(--tick) center / contain no-repeat; filter: drop-shadow(0 .4px .3px rgba(40, 60, 10, .35)); }
+
+/* the saying: a card taped across the fold (spread) or its own page (phone) */
+.spruch { position: absolute; z-index: 5; left: 50%; top: 3.6cqw; width: 37cqw; transform: translateX(-50%) rotate(-1.3deg); padding: 1.7cqw 2.2cqw 1.4cqw; text-align: center;
+  background: #fffaf0 linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(230, 215, 180, .25)); color: var(--print);
+  box-shadow: 0 .5cqw 1.2cqw rgba(40, 25, 10, .35), 0 .1cqw .2cqw rgba(40, 25, 10, .3); border-radius: .25cqw;
+  opacity: 0; pointer-events: none; transition: opacity .35s; }
+.stage.show-card .spruch { opacity: 1; }
+.spruch::before, .spruch::after { content: ''; position: absolute; top: -1cqw; width: 7cqw; height: 2.2cqw;
+  background: repeating-linear-gradient(90deg, rgba(245, 194, 66, .72) 0 .5cqw, rgba(250, 214, 120, .72) .5cqw 1cqw); box-shadow: 0 .1cqw .2cqw rgba(0, 0, 0, .15); }
+.spruch::before { left: -1.4cqw; transform: rotate(-24deg); }
+.spruch::after { right: -1.4cqw; transform: rotate(21deg); }
+.spruch .k { display: block; font-family: var(--display); font-weight: 700; font-size: 1cqw; letter-spacing: .3em; color: var(--ochre); margin-bottom: .6cqw; }
+.spruch .s { display: block; font-size: 1.55cqw; line-height: 1.32; font-weight: 600; color: var(--ink); }
+.spruch .s em, .spr-page .s em, .gdw em { font-style: normal; color: var(--ypsi-ink); font-weight: 700; }
+.spruch .w { display: block; margin-top: .6cqw; font-size: 1.05cqw; font-style: italic; color: var(--print-soft); }
+.spr-page { position: absolute; inset: 8cqh 9cqw 6cqh 11cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 3cqh; }
+.spr-page .k { font-family: var(--display); font-weight: 700; font-size: 3.2cqw; letter-spacing: .3em; color: var(--ochre); }
+.spr-page .s { font-size: 6.2cqw; line-height: 1.35; font-weight: 600; color: var(--ink); }
+.spr-page .w { font-size: 3.6cqw; font-style: italic; color: var(--print-soft); }
+.photo { position: relative; background: #fff; padding: 2.2cqw 2.2cqw 2.6cqw; box-shadow: 0 .6cqw 1.4cqw rgba(40, 25, 10, .35); transform: rotate(2deg); }
+.photo img { display: block; width: 100%; height: auto; }
+.photo::before, .photo::after { content: ''; position: absolute; width: 6cqw; height: 6cqw; background: linear-gradient(135deg, rgba(40, 30, 20, .75) 50%, transparent 50%); }
+.photo::before { left: -1cqw; top: -1cqw; }
+.photo::after { right: -1cqw; bottom: -1cqw; transform: rotate(180deg); }
+.spr-page .photo { width: 46cqw; }
+
+/* weekly spread */
+.wq { margin-top: 2.2cqh; }
+.wq .q-t { font-size: calc(var(--u) * 3.15); }
+.wq .q-t .tx { font-size: calc(var(--u) * 3.15 * var(--sk)); }
+.lbl { font-family: var(--display); font-weight: 700; font-size: calc(var(--u) * 2.1); letter-spacing: .2em; color: var(--ochre); text-transform: uppercase; margin: 2.6cqh 0 .8cqh; }
+.lbl:first-of-type { margin-top: 1.6cqh; }
+.svgbox { width: 100%; }
+.svgbox svg { display: block; width: 100%; height: auto; }
+/* weekly thought: the sheet as a real print glued in with four album corners (navy leather with a gold edge, like the cover),
+   the saying beside it in the book's script; the big 1200 px sheet from R2, so it stays sharp at this size */
+.gdw { display: grid; grid-template-columns: 34% 1fr; gap: 5cqw; align-items: center; margin-top: .6cqh; }
+.gdw .photo { transform: rotate(-2deg); padding: 1.3cqw 1.3cqw 1.7cqw; background: #fffdf8;
+  box-shadow: 0 .6cqw 1.3cqw rgba(40, 25, 10, .3), 0 .12cqw .3cqw rgba(40, 25, 10, .3); }
+.gdw .pc { position: absolute; inset: 0; pointer-events: none; }
+.gdw .photo::before, .gdw .photo::after, .gdw .pc::before, .gdw .pc::after { content: ''; position: absolute; z-index: 2; width: 4.6cqw; height: 4.6cqw;
+  background: linear-gradient(135deg, #2b4170 0, #16233f 44%, #e2bd5c 44%, #a87b22 49%, transparent 49%);
+  filter: drop-shadow(0 .12cqw .12cqw rgba(0, 0, 0, .35)); }
+.gdw .photo::before { left: -.7cqw; top: -.7cqw; transform: none; }
+.gdw .pc::before { right: -.7cqw; top: -.7cqw; transform: rotate(90deg); }
+.gdw .photo::after { right: -.7cqw; bottom: -.7cqw; transform: rotate(180deg); }
+.gdw .pc::after { left: -.7cqw; bottom: -.7cqw; transform: rotate(270deg); }
+.gdw p { font-family: var(--script); font-weight: 400; font-size: calc(var(--u) * 3.7 * var(--sk)); line-height: 1.12; color: #2a2620; }
+.gdw p em { font-weight: 400; }
+.gdw p .src { display: block; margin-top: 2cqh; font-family: var(--display); font-weight: 700; font-size: calc(var(--u) * 1.9); letter-spacing: .2em; text-transform: uppercase; color: var(--ochre); line-height: 1.4; }
+.gdw p .src::before { content: ''; display: block; width: 10cqw; height: 1px; margin-bottom: 1.2cqh; background: linear-gradient(90deg, var(--ochre), transparent); }
+.gdw p .nt { display: block; margin-top: .6cqh; font-family: var(--read); font-size: calc(var(--u) * 2.2); font-style: italic; color: var(--print-soft); line-height: 1.35; }
+/* the week's word cloud a little smaller, so the weekly thought gets the room */
+.svgbox.cl { width: 76%; margin: 0 auto; }
+
+/* introduction: Orbitron kicker, a script heading, Arial for the reading text, the book's script for the quote */
+.intro .ik { font-family: var(--display); font-weight: 700; font-size: calc(var(--u) * 2); letter-spacing: .3em; text-transform: uppercase; color: var(--ochre); }
+.intro .ih { margin: 1.2cqh 0 1.8cqh; font-family: 'Great Vibes', 'Pinyon Script', cursive; font-weight: 400; font-size: calc(var(--u) * 7.6); line-height: 1.05; letter-spacing: 0; text-transform: none; color: var(--ink); }
+.intro .ib { flex: 1; min-height: 0; overflow: hidden; }
+.intro .ib p, .intro .ib li { font-size: calc(var(--u) * 2.75); line-height: 1.5; color: var(--print); }
+.intro .ib p + p { margin-top: 1.2cqh; }
+.intro .ib b { color: var(--ink); }
+.intro .ib p.iq { margin-top: 2.6cqh; padding: 0 3cqw; text-align: center; font-family: var(--script); font-size: calc(var(--u) * 3.2 * var(--sk)); line-height: 1.2; color: var(--ink); }
+.intro .ib p.isrc { margin-top: 2.2cqh; font-size: calc(var(--u) * 2.05); line-height: 1.4; font-style: italic; color: var(--print-soft); }
+.intro .il, .intro .ir { margin: 1cqh 0 1.2cqh; padding-left: 1.3em; }
+.intro .il li, .intro .ir li { margin: .7cqh 0; }
+.intro .il li::marker { color: var(--ochre); }
+.intro .ir li::marker { font-family: var(--display); font-weight: 700; color: var(--ochre); }
+.intro .ip { gap: 1.3cqh; margin-bottom: 1.2cqh; }
+.intro .ip dt { font-size: calc(var(--u) * 1.85); padding-left: 0; }
+.intro .ip dd { font-size: calc(var(--u) * 2.6 * var(--sk)); line-height: 1.18; }
+@media (max-width: 700px) { .intro .ib { overflow-y: auto; scrollbar-width: none; } .intro .ib::-webkit-scrollbar { display: none; } }
+
+/* monthly check: six questions on a 1-10 scale - the circles up to your value fill in green, the value itself is a full green dot */
+.mqs { display: grid; gap: 1.2cqh; margin: 2.4cqh 0 .4cqh; }
+.mq .q-t { font-size: calc(var(--u) * 3); }
+.mq .q-t .tx { font-size: calc(var(--u) * 3 * var(--sk)); }
+.scale { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: calc(var(--u) * .9); margin-top: .4cqh; max-width: calc(var(--u) * 60); }
+.scale button { aspect-ratio: 1; border-radius: 50%; padding: 0; cursor: pointer; display: grid; place-items: center; background: transparent;
+  border: max(1px, calc(var(--u) * .2)) solid rgba(184, 145, 58, .75); font-family: var(--display); font-weight: 700; font-size: calc(var(--u) * 1.8); color: var(--print-soft); }
+.scale button.lo { background: rgba(121, 158, 49, .2); border-color: rgba(85, 128, 28, .5); color: #3d5d16; }
+.scale button.on { background: radial-gradient(circle at 38% 32%, #a9c96a, #6f9a2c 70%, #55801c); border-color: #3d5d16; color: #fff; box-shadow: 0 .1cqw .3cqw rgba(40, 60, 10, .4); }
+.scale button:hover { border-color: #b07a14; }
+.cmp { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: .2cqh 2.4cqw; align-items: baseline; margin-top: .4cqh; }
+.cmp span { font-family: var(--hand); font-size: calc(var(--u) * 3.3); line-height: 1.15; color: var(--pen); }
+.cmp em { font-style: normal; }
+.cmp .v { font-family: var(--display); font-weight: 700; font-size: calc(var(--u) * 2.2); text-align: right; color: var(--print-soft); }
+.cmp .v.now { color: var(--phi-ink); }
+.cmp .ar { font-family: var(--display); font-size: calc(var(--u) * 2.2); color: var(--phi-ink); }
+.trend-note { margin-top: 1.6cqh; font-size: calc(var(--u) * 2.3); line-height: 1.4; font-style: italic; color: var(--print-soft); }
+
+/* cloud pages: one painted SVG shared via <use> - the right page shows its right half */
+.cloud { position: absolute; inset: 0; }
+.cloud svg { display: block; width: 100%; height: 100%; mix-blend-mode: multiply; will-change: transform; }
+
+/* title page + notes */
+.tp { position: absolute; inset: 9cqh 10cqw 8cqh 12cqw; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2.2cqh; color: var(--ink); }
+.tp .t2.yr { margin-top: -1.2cqh; font-weight: 700; letter-spacing: .4em; }
+.tp .t1 { font-family: 'Great Vibes', 'Pinyon Script', cursive; font-weight: 400; font-size: 15cqw; line-height: 1.1; letter-spacing: 0; margin-top: 3cqh; }
+.tp .t2 { font-family: var(--display); font-weight: 500; font-size: 2.6cqw; letter-spacing: .32em; padding-left: .32em; color: var(--ochre); }
+.tp svg { width: 34cqw; height: auto; margin: 1.2cqh 0 1.6cqh; }
+/* the plan of the book: Orbitron for the when, the book's script for the what (no Arial on the title page - Doc, 23.11.2026) */
+.tp-plan { margin: 0; display: grid; gap: 1.5cqh; }
+.tp-plan dt { font-family: var(--display); font-weight: 700; font-size: 2cqw; letter-spacing: .3em; padding-left: .3em; text-transform: uppercase; color: var(--ochre); }
+.tp-plan dd { margin: .2cqh 0 0; font-family: var(--script); font-weight: 400; font-size: calc(3.1cqw * var(--sk)); line-height: 1.15; color: #2a2620; }
+.tp .sig { margin-top: auto; font-family: var(--hand); font-size: 6.5cqw; color: var(--pen); transform: rotate(-3deg); }
+.notes p { font-size: calc(var(--u) * 3.1); line-height: 1.45; color: var(--print); margin-top: 1.6cqh; }
+.notes p b { color: var(--ink); }
+.ruled { flex: 1; margin-top: 2cqh; background-image: repeating-linear-gradient(180deg, transparent 0 calc(var(--u) * 6.6 - 1px), rgba(60, 95, 150, .22) calc(var(--u) * 6.6 - 1px) calc(var(--u) * 6.6)); }
+
+/* static spreads (mock-up 2 and the fallback) */
+.spread { position: relative; display: grid; grid-template-columns: 1fr 1fr; aspect-ratio: 1000 / 700; }
+.spread .leaf { height: 100%; }
+.portrait-page { position: relative; aspect-ratio: 400 / 640; max-width: 440px; margin: 0 auto; }
+.only-phone { display: none; }
+.stage.static { padding-bottom: 56px; }
+.stage.static .boards { z-index: 0; }
+
+/* SVG sprite holder (filters + shared drawings): must not be display:none, or the filters vanish */
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* no slide-in of boards and card while the page loads */
+.stage:not(.ready) .boards, .stage:not(.ready) .spruch, .stage:not(.ready) .edge, .stage:not(.ready) .ribbon, .stage:not(.ready) .headband { transition: none; }
+@media (prefers-reduced-motion: reduce) { .boards, .spruch, .edge, .ribbon { transition: none; } }
+@media (max-width: 920px) { .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) {
+  .stage { padding: 64px 14px 56px; }
+  .stage.static { padding-top: 34px; }
+  .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); }
+  .only-desk { display: none; }
+  .only-phone { display: block; }
+  .card { padding: 12px 14px; }
+}
+@media (max-width: 460px) { .flow { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+
+<!-- Shared SVG filters (ink, brush, pencil, watercolour) and the painted drawings, filled by script -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- an old brass gear (settings) - drawn once, used in the sheets -->
+
+          <radialGradient id="g-brass" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#f3dc9b"/><stop offset=".35" stop-color="#c9a254"/><stop offset=".75" stop-color="#8a6526"/><stop offset="1" stop-color="#5a3f14"/></radialGradient>
+          <radialGradient id="g-patina" cx="70%" cy="75%" r="60%"><stop offset="0" stop-color="#4f6b4a" stop-opacity=".35"/><stop offset="1" stop-color="#4f6b4a" stop-opacity="0"/></radialGradient>
+    <symbol id="gear-shape" viewBox="0 0 100 100">
+        <path fill="url(#g-brass)" fill-rule="evenodd" stroke="#4a3310" stroke-width="1.2" d="M89.0 50.0 L88.9 52.4 L96.7 55.4 L95.5 61.7 L87.2 61.7 L83.8 69.5 L82.5 71.6 L87.7 78.0 L83.6 82.9 L76.4 78.7 L69.5 83.8 L67.3 84.9 L68.7 93.1 L62.6 95.3 L58.5 88.1 L50.0 89.0 L47.6 88.9 L44.6 96.7 L38.3 95.5 L38.3 87.2 L30.5 83.8 L28.4 82.5 L22.0 87.7 L17.1 83.6 L21.3 76.4 L16.2 69.5 L15.1 67.3 L6.9 68.7 L4.7 62.6 L11.9 58.5 L11.0 50.0 L11.1 47.6 L3.3 44.6 L4.5 38.3 L12.8 38.3 L16.2 30.5 L17.5 28.4 L12.3 22.0 L16.4 17.1 L23.6 21.3 L30.5 16.2 L32.7 15.1 L31.3 6.9 L37.4 4.7 L41.5 11.9 L50.0 11.0 L52.4 11.1 L55.4 3.3 L61.7 4.5 L61.7 12.8 L69.5 16.2 L71.6 17.5 L78.0 12.3 L82.9 16.4 L78.7 23.6 L83.8 30.5 L84.9 32.7 L93.1 31.3 L95.3 37.4 L88.1 41.5 Z M79.1 57.4 A30 30 0 0 1 66.0 75.4 L58.0 62.7 A15 15 0 0 0 64.5 53.7 Z M51.9 79.9 A30 30 0 0 1 30.8 73.1 L40.4 61.5 A15 15 0 0 0 51.0 65.0 Z M22.1 61.1 A30 30 0 0 1 22.1 38.9 L36.1 44.5 A15 15 0 0 0 36.1 55.5 Z M30.8 26.9 A30 30 0 0 1 51.9 20.1 L51.0 35.0 A15 15 0 0 0 40.4 38.5 Z M66.0 24.6 A30 30 0 0 1 79.1 42.6 L64.5 46.3 A15 15 0 0 0 58.0 37.3 Z"/>
+        <circle cx="50" cy="50" r="34" fill="none" stroke="#5a3f14" stroke-width="1" opacity=".55"/>
+        <circle cx="50" cy="50" r="31" fill="none" stroke="#f3dc9b" stroke-width=".6" opacity=".5"/>
+        <path fill="url(#g-patina)" d="M50 4 A46 46 0 1 1 49.9 4 Z" pointer-events="none"/>
+        <circle cx="50" cy="50" r="9" fill="url(#g-brass)" stroke="#4a3310" stroke-width="1"/>
+        <path d="M44.5 47.5 L55.5 52.5" stroke="#3a2608" stroke-width="2.2" stroke-linecap="round"/>
+    </symbol>
+    <linearGradient id="g-foil-ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7a5814"/><stop offset=".35" stop-color="#e2bd5c"/><stop offset=".6" stop-color="#a87b22"/><stop offset="1" stop-color="#d9b04e"/></linearGradient>
+    <filter id="f-ink" x="-5%" y="-10%" width="110%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feGaussianBlur in="d" stdDeviation="0.6" result="b"/>
+      <feComponentTransfer in="b" result="bl"><feFuncA type="linear" slope="0.55"/></feComponentTransfer>
+      <feMerge><feMergeNode in="bl"/><feMergeNode in="d"/></feMerge>
+    </filter>
+    <filter id="f-brush" x="-5%" y="-10%" width="110%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="8" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.6" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.85 0.06" numOctaves="2" seed="12" result="s"/>
+      <feColorMatrix in="s" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.35" result="m"/>
+      <feComposite in="d" in2="m" operator="in"/>
+    </filter>
+    <filter id="f-pencil" x="-5%" y="-10%" width="110%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="9" result="g"/>
+      <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.7" result="ga"/>
+      <feComposite in="SourceGraphic" in2="ga" operator="in" result="p"/>
+      <feDisplacementMap in="p" in2="g" scale="1.3" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="f-wc" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" seed="2" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="24" xChannelSelector="R" yChannelSelector="B" result="d"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.45" numOctaves="2" seed="11" result="g"/>
+      <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -0.9 1.12" result="ga"/>
+      <feComposite in="d" in2="ga" operator="in"/>
+    </filter>
+  </defs>
+  <g id="draw-cloud-spread"></g>
+  <g id="draw-cloud-portrait"></g>
+  <g id="draw-cloud-mini"></g>
+  <g id="draw-habits"></g>
+  <g id="draw-trend"></g>
+</svg>
+
+<main class="page">
+
+  <header class="top">
+    <h1>Grateful <span>·</span> das 3-Minuten-Tagebuch</h1>
+    <p class="meta">Konzept für Doc · 22.11.2026 · nichts gebaut, nichts committet · Vorbild „Das 6-Minuten-Tagebuch“ (Dominik Spenst), alle Fragen und Texte hier in eigenen Worten</p>
+  </header>
+
+  <!-- ===== Recommendation ===== -->
+  <section class="card rec">
+    <h2>Empfehlung</h2>
+    <ol>
+      <li><span><b>Grateful wird das Buch</b>, keine neue App: gleiche Adresse, gleicher Login, gleiche Tabelle. Dein Dank-Satz bleibt <code>grateful.text</code>, deshalb werden <b>alle bisherigen Einträge seit 2021</b> sofort zu den Dank-Zeilen der alten Buchseiten, und die Wortwolke rechnet weiter wie bisher. Neu dazu kommen nur zwei Tabellen (Tag und Woche), die Migration fügt nur hinzu.</span></li>
+      <li><span><b>Fotorealistisches Buch mit echtem Umblättern:</b> StPageFlip (MIT, 10 KB, ohne Abhängigkeiten) für die weiche Seitenwölbung, das Papier, den Ledereinband und die Schatten. Die Felder bleiben echte Textfelder auf der Seite, du schreibst also direkt ins Buch. Die Bibliothek kommt als Kopie ins Repo, weil seit 2021 keine neue Version mehr erschienen ist.</span></li>
+      <li><span><b>Von Hand gemalte Wortwolke:</b> Handschrift (Caveat, Caveat Brush), Tinte, Bleistift und Aquarell über SVG-Filter, Kringel und Pfeile mit rough.js (MIT). Am Tag: morgens 3 × 30 s, in der Mitte ein Gedanke aus deinem <b>Gedanken der Woche</b>, abends 3 × 30 s, sonntags eine Wochenseite. Zuerst kommen die Phasen 1–3 (14–18 h).</span></li>
+    </ol>
+  </section>
+
+  <!-- ===== Mock-up 1: the book ===== -->
+  <section class="card">
+    <h2>Mock-up 1 · das Buch (zum Anfassen)</h2>
+    <p class="small dim">Die Ecke ziehen oder wischen, am Rechner gehen auch die Pfeiltasten ← →. Oben links liegt der Reiter „Inhalt“ mit allen 365 Tagen, oben rechts liegen deine letzten fünf Tage. Im Inhalt sitzt oben rechts das Zahnrad für die Einstellungen. Die Felder sind echt: Schreib etwas hinein, dann startet die 30-Sekunden-Uhr. Hier liegen nur Beispieltexte, keine echten Einträge.</p>
+  </section>
+
+  <div class="stage" id="stage">
+    <div class="bookwrap" id="bookwrap" style="--el: 0.9cqw; --er: 0.35cqw;">
+      <div class="boards"></div>
+      <div class="edge l"></div><div class="edge r"></div><div class="edge b"></div>
+      <div class="headband"></div>
+      <div class="ribbon"></div>
+      <!-- the 5-day strip of today's Grateful: bright = thanks written, dull = empty, dots = morning / evening, raised = selected -->
+      <div class="reg" id="reg" aria-label="Die letzten fünf Tage">
+        <button class="has" data-day="18"><span>Mi</span>18.11.<i><b class="on"></b><b class="on"></b></i></button>
+        <button class="has" data-day="19"><span>Do</span>19.11.<i><b class="on"></b><b></b></i></button>
+        <button data-day="20"><span>Fr</span>20.11.<i><b></b><b></b></i></button>
+        <button class="has" data-day="21"><span>Sa</span>21.11.<i><b class="on"></b><b class="on"></b></i></button>
+        <button class="has sel" data-day="22"><span>So</span>22.11.<i><b class="on"></b><b class="on"></b></i></button>
+      </div>
+      <!-- the left register tab: contents - all 365 days and the parts of the book -->
+      <div class="reg l" id="regToc"><button class="has" id="tocBtn" aria-label="Inhalt öffnen"><span>Inhalt</span><svg viewBox="0 0 20 14" aria-hidden="true"><path d="M1 2h18M1 7h18M1 12h11"/></svg></button></div>
+      <div id="flipHost"></div>
+      <div class="spruch" id="spruchCard" aria-hidden="true">
+        <span class="k">GEDANKE DES TAGES</span>
+        <span class="s">Wende dein Gesicht der <em>Sonne</em> zu,<br>dann fallen die Schatten hinter dich.</span>
+        <span class="w">Sprichwort der Māori · aus deinem Gedanken der Woche, Nr. 70</span>
+      </div>
+    </div>
+    <div class="veil" id="veil" hidden></div>
+    <div class="sheet" id="tocSheet" role="dialog" aria-label="Inhalt" hidden>
+      <button class="sh-gear" id="gearBtn" aria-label="Einstellungen" title="Einstellungen"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#gear-shape"/></svg></button>
+      <h3 class="sh-t">Inhalt</h3>
+      <div class="sh-sec">Das Buch</div>
+      <div class="toc-book" id="tocBook"></div>
+      <div class="sh-sec">2026 · Tag für Tag <span id="tocStat"></span></div>
+      <div class="toc-year" id="tocYear"></div>
+      <div class="sh-foot"><button class="sh-close" data-close>Schließen</button></div>
+    </div>
+    <div class="sheet" id="setSheet" role="dialog" aria-label="Einstellungen" hidden>
+      <button class="sh-gear on" id="gearBack" aria-label="Zurück zum Inhalt" title="Zurück zum Inhalt"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#gear-shape"/></svg></button>
+      <h3 class="sh-t">Einstellungen</h3>
+      <div class="sh-sec">Deine Einträge</div>
+      <div class="seg" data-set="hand"><button data-v="hand">Handschrift</button><button data-v="typed">Druckschrift</button></div>
+      <div class="sh-sec">Schrift der Fragen</div>
+      <div class="seg" data-set="script">
+        <button data-v="1">Pinyon<span class="sample" style="font-family: 'Pinyon Script'; font-size: 24px;">Heute früh …</span></button>
+        <button data-v="2">Great Vibes<span class="sample" style="font-family: 'Great Vibes'; font-size: 23px;">Heute früh …</span></button>
+        <button data-v="3">Petit Formal<span class="sample" style="font-family: 'Petit Formal Script'; font-size: 17px;">Heute früh …</span></button>
+      </div>
+      <div class="sh-sec">Aussehen</div>
+      <div class="seg" data-set="scheme"><button data-v="klassisch">Klassisch</button><button data-v="modern">Modern</button><button data-v="nacht">Nacht</button></div>
+      <p class="sh-note">Das merkt sich nur dieser Browser. Weitere Einstellungen kommen hier dazu.</p>
+      <div class="sh-foot"><button class="sh-close" data-back>Schließen</button></div>
+    </div>
+    <div class="toast" id="toast" aria-live="polite"></div>
+  </div>
+
+  <section class="card">
+    <h2>Warum es echt aussieht</h2>
+    <div class="grid2">
+      <ul>
+        <li><b>Papier:</b> warmes Creme mit feiner Körnung und leichten Wolken. Beides ist SVG-Rauschen, also keine Bilddatei.</li>
+        <li><b>Wölbung:</b> Zum Falz hin wird die Seite dunkler, außen liegt ein weiches Licht. Im Falz selbst sitzt ein tiefer Schatten.</li>
+        <li><b>Seitenschnitt:</b> gestaffelte Kanten links, rechts und unten. Die linke Kante <b>wächst mit dem Jahr</b>, am 22.11. sind 326 von 365 Tagen beschrieben.</li>
+        <li><b>Einband:</b> navyblaues Leder mit Narbung, „Grateful“ in geschwungener Schrift als Goldprägung, dazu Vorsatzpapier und ein Ex Libris.</li>
+      </ul>
+      <ul>
+        <li><b>Blättern:</b> StPageFlip wölbt die Seite mit wanderndem Schatten. Der Einband dreht sich als harte Seite.</li>
+        <li><b>Lesebändchen</b> in Υ-Rot: Es läuft glatt vom oberen Ende des Buchrückens durch den Falz und schaut unten heraus. Beim Zuklappen legt sich der Deckel darüber, dann hängt nur noch das Ende unten heraus. Darunter liegen Schlagschatten in zwei Ebenen auf dem Holztisch.</li>
+        <li><b>Reiter:</b> Leder wie der Einband, mit Goldrahmen und Goldprägung. Ein beschriebener Tag glänzt, ein leerer bleibt matt, der gewählte steht ein Stück heraus.</li>
+        <li><b>Tinte:</b> Deine Einträge stehen in Füllerblau und Handschrift (Caveat), gedruckt ist nur das Buch selbst (Arial, Orbitron).</li>
+        <li><b>Spruchkarte:</b> Die Karte klebt mit zwei Streifen Washi-Tape über dem Falz. Auf dem Phone bekommt sie eine eigene Seite mit Foto.</li>
+      </ul>
+    </div>
+    <p class="note">Im echten Bau kann ich Papier, Leder und Holz zusätzlich mit echten Foto-Texturen machen (CC0 von ambientCG oder Poly Haven, je 30–80 KB als WebP). Das sieht noch eine Stufe echter aus und hat keine Lizenzpflichten.</p>
+  </section>
+
+  <!-- ===== Mock-up 2: the painted word cloud ===== -->
+  <section class="card">
+    <h2>Mock-up 2 · die Wortwolke, von Hand gemalt</h2>
+    <p class="small dim">Die Wolke läuft als Doppelseite über den Falz, und den Falz selbst lässt sie frei, wie bei einem echten Buch. Die großen Wörter stehen in Pinselschrift mit Aquarell dahinter, die mittleren in Tinte, die seltenen in Bleistift. Kringel, Unterstreichung, Herzen und Pfeil malt rough.js. Hier stehen <b>nur Beispielwörter</b>. Die echte Wolke liest wie heute alle Einträge und färbt nach Vorjahr oder Häufigkeit.</p>
+  </section>
+
+  <div class="stage static" id="stage2">
+    <div class="bookwrap only-desk" style="--el: 0.9cqw; --er: 0.35cqw;">
+      <div class="boards"></div>
+      <div class="edge l"></div><div class="edge r"></div><div class="edge b"></div>
+      <div class="headband"></div>
+      <div class="ribbon"></div>
+      <div class="spread" id="cloudSpread" style="position: relative; z-index: 2;"></div>
+    </div>
+    <div class="only-phone">
+      <div class="bookwrap portrait-wrap" style="max-width: 440px;">
+        <div class="boards" style="top: -2.4cqw; bottom: -3cqw; left: -1.4cqw; right: -2.6cqw;"></div>
+        <div class="edge r" style="--er: 1.4cqw;"></div><div class="edge b"></div>
+        <div class="portrait-page" id="cloudPortrait" style="position: relative; z-index: 2;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Daily flow ===== -->
+  <section class="card">
+    <h2>Der Tag in drei Minuten</h2>
+    <div class="flow">
+      <div><span class="t">MORGEN</span><div class="time">1:30</div><div class="dots"><i class="o"></i><i class="o"></i><i class="o"></i></div>
+        <p>Das Buch schlägt den heutigen Tag auf, links steht der Morgen. Es gibt drei Gedanken, jeder hat 30 Sekunden. Die Uhr startet beim ersten Buchstaben oder beim Mikrofon.</p></div>
+      <div><span class="t">MITTE</span><div class="time">0:10</div><div class="dots"><i></i></div>
+        <p>Ein Gedanke des Tages aus deinem <b>Gedanken der Woche</b>. Montags steht dort derselbe Gedanke, den deine Klassen in dieser Woche sehen.</p></div>
+      <div><span class="t">ABEND</span><div class="time">1:30</div><div class="dots"><i class="o"></i><i class="o"></i><i class="o"></i></div>
+        <p>Rechts steht der Abend mit drei Gedanken à 30 Sekunden. Darunter hakst du deine drei Gewohnheiten mit einem Tipp ab.</p></div>
+      <div><span class="t">SONNTAG</span><div class="time">3–5</div><div class="dots"><i></i><i></i></div>
+        <p>Die Wochen-Doppelseite: Rückblick, Gewohnheiten, die Woche in Worten (gemalt) und der Gedanke der nächsten Woche.</p></div>
+    </div>
+    <h3>Die 30-Sekunden-Uhr</h3>
+    <p>Der Ring füllt sich in λ-Orange, nach 30 Sekunden wird er φ-grün mit Haken, und das Phone tippt einmal kurz (Vibration). Mein Vorschlag ist eine <b>sanfte</b> Uhr: Du darfst weiterschreiben, sie soll nur den Rhythmus geben und nicht abschneiden (siehe Frage 2). Ein „Ablauf“-Knopf kann die drei Gedanken nacheinander führen, wie eine kleine Meditation.</p>
+  </section>
+
+  <!-- ===== Prompts ===== -->
+  <section class="card">
+    <h2>Unsere Fragen (eigene Worte)</h2>
+    <div class="tbl-wrap">
+      <table class="prompts">
+        <thead><tr><th>Platz</th><th>Standardfrage</th><th>Wechselfragen (rotieren wöchentlich)</th><th>Warum</th></tr></thead>
+        <tbody>
+          <tr><td class="k"><span class="slot">MORGEN 1</span>Dank</td><td>Heute früh sage ich Danke für …</td><td>Ein Mensch, über den ich mich heute freue … · Etwas Kleines, das ich sonst übersehe … · Was heute selbstverständlich ist, und es nicht immer war …</td><td class="why">Dankbarkeit konkret benennen (Emmons &amp; McCullough 2003). Wird zu <code>grateful.text</code>.</td></tr>
+          <tr><td class="k"><span class="slot">MORGEN 2</span>Vorhaben</td><td>Mein kleiner Schritt, der heute zählt:</td><td>Wenn es heute eng wird, dann … · Darauf freue ich mich heute … · Das erledige ich zuerst …</td><td class="why">Konkrete Wenn-dann-Pläne werden eher umgesetzt (Gollwitzer 1999).</td></tr>
+          <tr><td class="k"><span class="slot">MORGEN 3</span>Haltung</td><td>Mit dieser Haltung gehe ich in den Tag:</td><td>Meine Stärke für heute … · So will ich heute mit anderen umgehen … · Ein Satz, der mich heute trägt …</td><td class="why">Statt „Ich bin …“-Selbstbekräftigung, die bei wackligem Selbstwert nach hinten losgehen kann (Wood u. a. 2009).</td></tr>
+          <tr><td class="k"><span class="slot">MITTE</span>Gedanke</td><td>Gedanke des Tages</td><td>aus deinen GdW-Blättern und den „Weisheiten der Welt“ (siehe unten)</td><td class="why">ein Anker für den Tag, deine eigene Sammlung statt fremder Zitate</td></tr>
+          <tr><td class="k"><span class="slot">ABEND 1</span>Gutgetan</td><td>Wem habe ich heute den Tag ein wenig leichter gemacht?</td><td>Ein freundliches Wort heute, gesagt oder gehört … · Wo habe ich heute geholfen, auch im Kleinen?</td><td class="why">Freundlichkeit bewusst wahrnehmen hebt die Stimmung (Lyubomirsky u. a. 2005).</td></tr>
+          <tr><td class="k"><span class="slot">ABEND 2</span>Lichtblick</td><td>Mein Lichtblick des Tages:</td><td>Was hat mich heute zum Lächeln gebracht? · Ein Moment, den ich festhalten will … · Was lief heute besser als gedacht?</td><td class="why">Die Übung „drei gute Dinge“ am Abend wirkte bis zu 6 Monate (Seligman u. a. 2005).</td></tr>
+          <tr><td class="k"><span class="slot">ABEND 3</span>Mitnehmen</td><td>Was nehme ich aus heute mit, und was lasse ich hier?</td><td>Was ich heute gelernt habe … · Morgen probiere ich … · Was ich heute loslasse …</td><td class="why">Lernen statt grübeln: ein Satz, dann ist der Tag abgeschlossen.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Wechselfragen gibt es, weil man sich an dieselbe Frage gewöhnt. Die häufigste Kritik am Vorbild ist der „Autopilot“ nach ein paar Wochen. Jede Seite speichert die Frage, die an diesem Tag gestellt wurde, so lesen sich auch alte Seiten richtig.</p>
+  </section>
+
+  <!-- ===== Weekly page + saying ===== -->
+  <div class="grid2">
+    <section class="card">
+      <h2>Die Wochenseite (sonntags)</h2>
+      <ul>
+        <li>Worauf bin ich diese Woche stolz?</li>
+        <li>Wer hat meine Woche heller gemacht, und weiß er es schon?</li>
+        <li>Was hat mir Kraft gegeben, was hat Kraft gekostet?</li>
+        <li>Worauf freue ich mich nächste Woche?</li>
+        <li><b>Frage der Woche</b>, wechselnd aus 26 eigenen, z. B. „Welche kleine Gewohnheit würde mir mein Ich in einem Jahr danken?“</li>
+      </ul>
+      <p class="small" style="margin-top: 8px;">Rechts daneben liegen <b>drei Gewohnheiten</b> × 7 Tage (die Haken kommen vom Abend), die <b>Woche in Worten</b> als kleine gemalte Wolke und der <b>Gedanke der nächsten Woche</b> als eingeklebtes Foto. Später kommt ein Monatsblick dazu: Lebensbereiche von 1 bis 10 im Vergleich zum Vormonat und eine Gewohnheiten-Übersicht.</p>
+    </section>
+    <section class="card">
+      <h2>Gedanke des Tages</h2>
+      <ul>
+        <li><b>Montag</b> = der Gedanke der Woche, genau wie im SVP (<code>gdw.json</code>, Schulwoche aus dem Datum). Hat ein Blatt keinen Text, klebt das Blatt selbst als Foto im Buch (<code>svp/gdw/NN.webp</code>).</li>
+        <li><b>Dienstag bis Sonntag</b> reihum aus den 43 „Weisheiten der Welt“ (<code>tools/gdw/blaetter.json</code>: Text, Urheber, rote Schlüsselwörter) und deinen Blättern mit Text, zusammen etwa 70 Gedanken, also 10 Wochen ohne Wiederholung.</li>
+        <li>Die Auswahl hängt nur vom Datum ab: Mac und Phone zeigen denselben Gedanken. Er wird mit der Seite gespeichert, alte Seiten behalten also ihren Gedanken.</li>
+        <li>Die Schlüsselwörter stehen in Υ-Rot wie auf deinen Blättern. Ein kleines <code>gdw.py export</code> schreibt <code>grateful/sprueche.json</code>, damit bleibt <code>blaetter.json</code> die einzige Quelle.</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- ===== Grateful as the base ===== -->
+  <section class="card">
+    <h2>Grateful bleibt die Basis</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Heute in Grateful</th><th>Im Buch</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Einträge seit 2021</td><td>Alle Excel-Einträge (2021–2026) und alle App-Einträge bleiben, wie sie sind. Jeder ist die <b>Dank-Zeile seines Tages</b> auf der Morgenseite, in Handschrift. Tage vor dem Start bekommen eine kompakte Seite (Dank und Gedanke) <b>ohne leere Formularfelder</b>, so liest sich das Buch rückwärts wie ein volles Tagebuch.</td></tr>
+          <tr><td class="k">Kopf „I'm grateful for … ☁ 2026“</td><td>Wird zum Einband „GRATEFUL · 2026“: ein Jahr ist ein Band. Später können alle Bände von 2021 bis 2026 nebeneinander im Regal stehen.</td></tr>
+          <tr><td class="k">5-Tage-Leiste</td><td>Bleibt, als <b>Register-Reiter</b> am oberen Buchrand (im Mock-up schon zu sehen): Wochentag und Datum, grün heißt Dank eingetragen, zwei kleine Punkte stehen für Morgen und Abend, der goldene Rahmen ist der gewählte Tag. Antippen blättert hin.</td></tr>
+          <tr><td class="k">Eingabe + Liste der 30</td><td>Die Eingabe wird zur Tages-Doppelseite. Statt der Liste blätterst du zurück, und eine Inhaltsseite springt zu jedem Datum.</td></tr>
+          <tr><td class="k">Wortwolke (<code>wolke.html</code>)</td><td>Die Logik bleibt: Jahre, „Vorjahr | Häufigkeit“, Wort antippen zeigt alle Sätze. Neu ist die Optik: eine gemalte Doppelseite im Buch, ein anderes Jahr heißt ein anderer Band. Liest weiter <code>grateful.text</code>.</td></tr>
+          <tr><td class="k">Diktat, Autosave, Login</td><td><code>solita-listen.js</code> an jedem Feld (Sprechen startet die Uhr), 1,5 s Autosave pro Feld mit lokalem Entwurf, <code>svp-auth.js</code> und <code>sicherSpeichern</code>. Gleiche App-Adresse <code>doc-grateful.pages.dev</code>, keine Neuinstallation.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Datenmodell (nur hinzufügen)</h3>
+    <div class="grid3">
+      <div><p><b>grateful</b> <span class="verdict yes">BLEIBT</span></p><p class="small">id, day, text, source … unverändert. <code>text</code> = Morgen 1 (Dank). Wortwolke, Verlauf und Excel-Import funktionieren unverändert.</p></div>
+      <div><p><b>grateful_tag</b> <span class="verdict later">NEU</span></p><p class="small">Eine Zeile pro Tag: <code>morgen</code> und <code>abend</code> als jsonb (Frage, Antwort, Sekunden je Platz), <code>spruch</code> (z. B. <code>w70</code>), <code>gewohnheiten</code>. Verknüpft über <code>day</code>.</p></div>
+      <div><p><b>grateful_woche</b> <span class="verdict later">NEU</span></p><p class="small">Eine Zeile pro Woche (Montag): Antworten, Frage der Woche, Namen der drei Gewohnheiten.</p></div>
+    </div>
+    <details>
+      <summary>SQL-Skizze <span class="dim">(nicht ausgeführt, nur zum Ansehen)</span></summary>
+<pre><span class="c">-- Additive only: public.grateful and its rows stay untouched.</span>
+create table if not exists public.grateful_tag (
+  id         bigint generated always as identity primary key,
+  user_id    uuid        not null default auth.uid(),
+  day        date        not null,
+  morgen     jsonb       not null default '{}'::jsonb,  <span class="c">-- {"vorhaben":{"frage":"…","text":"…","sek":31},"haltung":{…}}</span>
+  abend      jsonb       not null default '{}'::jsonb,  <span class="c">-- {"gutgetan":{…},"lichtblick":{…},"mitnehmen":{…}}</span>
+  spruch     text,                                     <span class="c">-- id of the saying shown that day, e.g. 'w70'</span>
+  gewohnheiten jsonb     not null default '{}'::jsonb,  <span class="c">-- {"Bewegung":true,"Lesen":false}</span>
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, day)
+);
+create table if not exists public.grateful_woche (
+  id         bigint generated always as identity primary key,
+  user_id    uuid        not null default auth.uid(),
+  woche      date        not null,                     <span class="c">-- Monday of the ISO week</span>
+  antworten  jsonb       not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, woche)
+);
+<span class="c">-- RLS exactly like grateful: pinned to Doc's uid (see 20261004_grateful.sql), anon revoked.</span>
+<span class="c">-- History: one shared table, the new column defaults to the old rows' table.</span>
+alter table public.grateful_history add column if not exists tabelle text not null default 'grateful';
+<span class="c">-- new trigger function for both new tables: insert (tabelle, op, row_data) = (TG_TABLE_NAME, TG_OP, to_jsonb(old))</span></pre>
+    </details>
+  </section>
+
+  <!-- ===== The model book ===== -->
+  <section class="card">
+    <h2>Das Vorbild, kurz erklärt</h2>
+    <div class="grid3">
+      <div>
+        <h3>Aufbau</h3>
+        <ul class="small">
+          <li>Vorne ein Theorieteil: positive Psychologie, wie Gewohnheiten entstehen, wie man das Buch benutzt.</li>
+          <li>Pro Tag eine Seite: morgens drei Felder (Dankbarkeit, was den Tag gut macht, ein Satz über sich selbst), abends drei (Gutes für andere, was besser geht, schöne Momente), dazu ein Zitat.</li>
+          <li>Jede Woche Fragen zum Nachdenken, jeden Monat ein Rückblick: Lebensbereiche im Vergleich zum Vormonat, dazu ein Gewohnheits-Tracker über den Monat.</li>
+          <li>Gedacht für etwa 24 Wochen, danach braucht man ein neues Buch.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Die Psychologie dahinter</h3>
+        <ul class="small">
+          <li><b>Emmons &amp; McCullough 2003:</b> Wer Dankbares notierte, hatte mehr gute Stimmung und mehr Zuversicht als die Gruppen mit Ärgernissen oder neutralen Ereignissen.</li>
+          <li><b>Seligman u. a. 2005:</b> „Drei gute Dinge“ jeden Abend, eine Woche lang, machte bis zu sechs Monate glücklicher und weniger niedergeschlagen.</li>
+          <li><b>Lyubomirsky u. a. 2005:</b> Abwechslung und Dosierung zählen, sonst gewöhnt man sich.</li>
+          <li><b>Ehrlich bleiben:</b> Die Metaanalysen von Davis u. a. 2016 und Cregg &amp; Cheavens 2021 finden kleine Effekte, gegen aktive Vergleichsgruppen kaum noch welche. Es ist eine gute Gewohnheit und keine Therapie.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Was Leser lieben, was sie stört</h3>
+        <ul class="small">
+          <li><b>Gelobt:</b> kurz und klar, ein fester Morgen- und Abendanker, schön gemachtes Buch, die Gewohnheit sitzt nach ein paar Wochen.</li>
+          <li><b>Kritisiert:</b> wiederholt sich (Autopilot), Zitate wirken mal beliebig oder kitschig, Selbstbekräftigung fühlt sich gezwungen an, langer Vorspann, wenig Platz, nach 24 Wochen ist es voll. Eine Testerin schrieb, sie sei „fast gescheitert“, andere nennen es eine Hassliebe.</li>
+          <li><b>Was wir besser machen:</b> Uhr statt Grübeln, Wechselfragen, Haltung statt Selbstbekräftigung, deine eigenen Gedanken, Diktat, Rückblick über Jahre. Und es ist nie voll.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Techniques + licences ===== -->
+  <section class="card">
+    <h2>Bibliotheken, Techniken, Lizenzen (Regel 18 geprüft)</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Was</th><th>Lizenz · Größe</th><th>Wofür, Haken</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="k">StPageFlip (<code>page-flip</code> 2.0.7)</td><td>MIT · 44 KB, 10 KB gz, keine Abhängigkeiten</td><td>Echte weiche Wölbung mit Schatten, die Ecke rollt beim Darüberfahren, harte Einbände, Hochformat fürs Phone. Haken: letzte Version 04/2021, und die Bibliothek reicht Klicks nur an <code>a</code>/<code>button</code> weiter. Der Ausweg, der im Mock-up schon läuft: <code>mousedown</code>/<code>touchstart</code> auf Feldern abfangen. Kommt als Kopie mit LICENSE ins Repo.</td><td><span class="verdict yes">JA</span></td></tr>
+          <tr><td class="k">rough.js 4.6.6</td><td>MIT · 9 KB gz</td><td>Bleistift-Kringel, Unterstreichungen, Schraffur, Pfeile, die Gewohnheits-Kreise. Mit festem <code>seed</code> sieht es bei jedem Laden gleich aus.</td><td><span class="verdict yes">JA</span></td></tr>
+          <tr><td class="k">SVG-Filter</td><td>Web-Standard</td><td><code>feTurbulence</code> + <code>feDisplacementMap</code>: Tinte franst aus, Pinsel ist trocken, Bleistift körnig, Aquarell hat weiche Ränder und Granulation.</td><td><span class="verdict yes">JA</span></td></tr>
+          <tr><td class="k">Aquarell-Flecken</td><td>eigener Code, ~30 Zeilen</td><td>Nach Tyler Hobbs: Ein Vieleck wird immer wieder verformt, 12 Lagen à 5 % Deckkraft übereinander. Der Flecken liegt hinter den großen Wörtern.</td><td><span class="verdict yes">JA</span></td></tr>
+          <tr><td class="k">Wolken-Layout</td><td>eigene Spirale, ~40 Zeilen · alternativ wordcloud2.js (MIT, schon in <code>wolke.html</code>)</td><td>Die eigene Spirale, weil wir SVG statt Canvas brauchen und den Falz freihalten wollen.</td><td><span class="verdict yes">JA</span></td></tr>
+          <tr><td class="k">perfect-freehand 1.2.3</td><td>MIT</td><td>Striche mit Druckgefühl, z. B. wenn du mit dem Finger selbst ein Wort einkreist.</td><td><span class="verdict later">SPÄTER</span></td></tr>
+          <tr><td class="k">Vara.js 1.4.1</td><td>MIT</td><td>Ein Wort schreibt sich Strich für Strich selbst. Ein schöner Effekt für das neue Wort des Tages.</td><td><span class="verdict later">SPÄTER</span></td></tr>
+          <tr><td class="k">turn.js</td><td>3. Fassung „non-commercial BSD“, 4. Fassung kostenpflichtig</td><td>Klassisch schön, aber die Lizenz ist auf docalvers.de eine Grauzone, dazu kommen jQuery und ein altes Projekt.</td><td><span class="verdict no">NEIN</span></td></tr>
+          <tr><td class="k">three.js r170</td><td>MIT · ≈ 171 KB gz</td><td>Echtes 3D, aber Text gibt es nur als Textur, direkt ins Buch schreiben geht dann nicht. Außerdem frisst es Akku.</td><td><span class="verdict no">NEIN</span></td></tr>
+          <tr><td class="k">p5.brush 3.0</td><td>MIT · braucht p5.js (~1 MB)</td><td>Sehr echte Pinsel, aber zu schwer für eine Tagebuch-App.</td><td><span class="verdict no">NEIN</span></td></tr>
+          <tr><td class="k">DearFlip, 3D FlipBook</td><td>kommerziell (CodeCanyon)</td><td>Blätterkataloge für PDFs, brauchen jQuery.</td><td><span class="verdict no">NEIN</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Schriften</h3>
+    <div class="tbl-wrap">
+      <table>
+        <tbody>
+          <tr><td class="k">Orbitron</td><td>SIL OFL</td><td>Marke: Einband, Titelseite, Kapitelköpfe MORGEN / ABEND, Ziffern der Uhr</td></tr>
+          <tr><td class="k">Arial</td><td>System</td><td>die gedruckten Fragen im Buch und diese Konzeptseite, damit es gut lesbar bleibt</td></tr>
+          <tr><td class="k">Caveat</td><td>SIL OFL (Google Fonts), Umlaute und ß</td><td>deine Einträge in Füllerblau, die mittleren Wörter der Wolke</td></tr>
+          <tr><td class="k">Caveat Brush</td><td>SIL OFL</td><td>die großen, gemalten Wörter der Wolke</td></tr>
+          <tr><td class="k">Kalam, Patrick Hand</td><td>SIL OFL</td><td>Ersatz, falls dir Caveat zu schmal ist. Der Knopf „SCHRIFT“ im Mock-up schaltet zum Vergleich auf Arial um.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Phone und Tempo</h3>
+    <ul>
+      <li>Unter 700 px zeigt das Buch eine Seite im Hochformat 5:8. Der Gedanke bekommt dort eine eigene Seite zwischen Morgen und Abend. Wischen blättert, die Felder scrollen normal, und das aktive Feld rutscht über die Tastatur.</li>
+      <li>Bewegt werden nur <code>transform</code> und <code>clip-path</code>. Die Texturen sind gecachte Bilder, die Wolke liegt auf einer eigenen Ebene. Im Bau wird sie einmal als Bild gerendert, damit das Umblättern auch auf dem Pixel 8a flüssig bleibt.</li>
+      <li><code>prefers-reduced-motion</code>: Umblättern ohne Animation.</li>
+      <li>Test am Pixel per <b>USB-Debugging + chrome://inspect Port-Forwarding</b> auf <code>localhost:8765</code>, ohne Deploy.</li>
+    </ul>
+  </section>
+
+  <!-- ===== Phases ===== -->
+  <section class="card">
+    <h2>Phasen</h2>
+    <div class="tbl-wrap">
+      <table class="ph">
+        <thead><tr><th>#</th><th>Was</th><th>Agentin</th><th>Dein Teil</th></tr></thead>
+        <tbody>
+          <tr class="first"><td>1</td><td><b>Fundament:</b> SQL-Datei (zwei Tabellen, Verlaufsspalte, RLS), danach als anon prüfen (401). <code>gdw.py export</code> für die Gedanken, StPageFlip als Kopie mit LICENSE.</td><td>2–3 h</td><td>SQL einfügen, Run</td></tr>
+          <tr class="first"><td>2</td><td><b>Das Buch:</b> zentral <code>HTML/css/buch.css</code> + <code>HTML/js/buch.js</code> (Papier, Leder, Seiten, Blättern, Hochformat). Grateful-Startseite = Buch: Einband, Tag mit echten Feldern, Uhr, Diktat, Autosave, Register-Reiter, alte Einträge als Dank-Zeilen. Klicktest gegen eine Schein-DB.</td><td>7–9 h</td><td>lokal ansehen, Optik-Runden</td></tr>
+          <tr class="first"><td>3</td><td><b>Gemalte Wortwolke:</b> <code>HTML/js/buch-wolke.js</code> (Spirale, Tinte, Bleistift, Aquarell, rough.js), als Doppelseite im Buch. <code>wolke.html</code> behält Jahre, Farbmodi und Wort → Sätze. Für flüssiges Blättern einmal als Bild rendern.</td><td>5–6 h</td><td>Optik-Runden</td></tr>
+          <tr><td>4</td><td><b>Wochenseite:</b> Fragen, Gewohnheiten (Haken vom Abend), Woche in Worten, Gedanke der nächsten Woche</td><td>3–4 h</td><td>drei Gewohnheiten nennen</td></tr>
+          <tr><td>5</td><td><b>In die App:</b> Dateiliste in <code>tools/grateful_pages.py</code> erweitern, Pixel-Test per chrome://inspect, deployen, nach deinem OK pushen</td><td>1 h</td><td>in der App testen</td></tr>
+          <tr><td>6</td><td><b>Später:</b> Monatsblick, Bücherregal der Jahrgänge, Web-Push-Erinnerung statt Kalender, Vara.js schreibt das neue Wort</td><td>5–7 h</td><td>sagen, was davon</td></tr>
+          <tr class="sum"><td></td><td>Gesamt · Phasen 1–3 zuerst = Grateful als Buch mit gemalter Wolke</td><td>23–30 h</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== Questions ===== -->
+  <section class="card ask">
+    <h2>Offene Fragen</h2>
+    <ol>
+      <li><span>Sollen morgens <b>alle drei Gedanken Dankbarkeit</b> sein, also wie bisher Grateful, nur dreimal 30 Sekunden? Oder <b>Dank + Vorhaben + Haltung</b> wie im Mock-up?
+        <span class="hint">Mein Vorschlag ist die Mischung. Bei drei Dankbarkeiten landen alle drei in <code>grateful.text</code>, und die Wolke bekommt mehr Wörter.</span></span></li>
+      <li><span>Soll die 30-Sekunden-Uhr nur den Rhythmus geben (weiterschreiben geht, der Ring wird grün)? Oder soll das Feld nach 30 Sekunden schließen?
+        <span class="hint">Mein Vorschlag: sanft. Ein abgeschnittener Gedanke frustriert.</span></span></li>
+      <li><span>Soll der Gedanke des Tages aus beiden Sätzen kommen, also deinen Blättern 01–58 und den „Weisheiten der Welt“ 59–101? Oder nur aus deinen eigenen Blättern?
+        <span class="hint">Von deinen Blättern haben nur 27 einen Text in <code>gdw.json</code>. Für „nur eigene“ würde ich die übrigen von den Bildern abtippen.</span></span></li>
+    </ol>
+  </section>
+
+  <!-- ===== Sources ===== -->
+  <section class="card">
+    <h2>Quellen</h2>
+    <ul class="src">
+      <li>Aufbau des Vorbilds: <a href="https://greator.com/en/6-minute-diary" rel="noopener">Greator</a> (Morgen/Abend, Wochen- und Monatsfragen, ~24 Wochen) · <a href="https://www.galaxus.de/en/page/happiness-by-instruction-how-i-almost-failed-at-the-6-minute-diary-35649" rel="noopener">Galaxus-Test</a> (Habit-Tracker in den Monatsreflexionen, „fast gescheitert“) · <a href="https://www.lovelybooks.de/autor/Dominik-Spenst/" rel="noopener">Lovelybooks</a> · <a href="https://www.goodreads.com/book/show/56516100" rel="noopener">Goodreads</a></li>
+      <li>Forschung: Emmons &amp; McCullough 2003, <a href="https://greatergood.berkeley.edu/pdfs/GratitudePDFs/6Emmons-BlessingsBurdens.pdf" rel="noopener">Counting blessings versus burdens</a> · Seligman, Steen, Park &amp; Peterson 2005, American Psychologist 60(5) · Lyubomirsky, Sheldon &amp; Schkade 2005 · Gollwitzer 1999 · Wood, Perunovic &amp; Lee 2009 · <a href="https://link.springer.com/article/10.1007/s10902-020-00236-6" rel="noopener">Cregg &amp; Cheavens 2021</a> · Davis u. a. 2016 (J. Counseling Psychology)</li>
+      <li>Technik: <a href="https://github.com/Nodlik/StPageFlip" rel="noopener">StPageFlip</a> (MIT, npm 2.0.7 vom 18.04.2021) · <a href="https://github.com/rough-stuff/rough" rel="noopener">rough.js</a> (MIT) · <a href="https://github.com/blasten/turn.js" rel="noopener">turn.js</a> (Lizenzhinweis) · <a href="https://fonts.google.com/specimen/Caveat" rel="noopener">Caveat</a> / <a href="https://fonts.google.com/specimen/Caveat+Brush" rel="noopener">Caveat Brush</a> (OFL) · <a href="https://ambientcg.com/" rel="noopener">ambientCG</a> / <a href="https://polyhaven.com/textures" rel="noopener">Poly Haven</a> (CC0-Texturen)</li>
+      <li>Im Repo: <code>HTML/grateful/index.html</code> + <code>wolke.html</code> (wordcloud2.js 1.2.2), <code>supabase/migrations/20261004_grateful.sql</code>, <code>HTML/svp/gdw.json</code> + <code>gdw-weisheiten.json</code>, <code>tools/gdw/blaetter.json</code>, <code>tools/grateful_pages.py</code></li>
+    </ul>
+  </section>
+
+</main>
+
+<!-- ===================== Page templates (one source for the flip book and the static spreads) ===================== -->
+<template id="tpl-cover">
+  <div class="pg leather cover-front">
+    <div class="cv-frame"></div>
+    <div class="cv-in">
+      <svg class="cv-icon" viewBox="0 0 64 56" aria-hidden="true"><defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8a6a22"/><stop offset=".35" stop-color="#f6dc85"/><stop offset=".6" stop-color="#b8913a"/><stop offset="1" stop-color="#f1d27a"/></linearGradient></defs>
+        <path d="M32 52 C14 40 4 30 4 18 C4 9 11 3 19 3 C25 3 29 6 32 11 C35 6 39 3 45 3 C53 3 60 9 60 18 C60 30 50 40 32 52 Z" fill="none" stroke="url(#gold)" stroke-width="3.2"/>
+        <path d="M18 30 C22 34 26 36 32 36 C38 36 42 34 46 30" fill="none" stroke="url(#gold)" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <div class="cv-title foil">Grateful</div>
+      <div class="cv-sub foil">DAS 3-MINUTEN-TAGEBUCH</div>
+      <div class="cv-year foil">2026</div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-endpaper">
+  <div class="board-in"></div>
+  <div class="pg endpaper"><div class="exlibris"><span class="t">EX LIBRIS</span><span class="n">Doc Alvers</span></div></div>
+</template>
+<template id="tpl-endpaper2"><div class="board-in"></div><div class="pg endpaper"></div></template>
+
+<template id="tpl-title">
+  <div class="pg paper"><div class="tp">
+    <div class="t1">Grateful</div>
+    <div class="t2">DAS 3-MINUTEN-TAGEBUCH</div>
+    <div class="t2 yr">2026</div>
+    <svg viewBox="0 0 200 20" aria-hidden="true"><path d="M5 10 H80 M120 10 H195" stroke="#b07a14" stroke-width="1.2"/><path d="M100 3 L107 10 L100 17 L93 10 Z" fill="none" stroke="#b07a14" stroke-width="1.2"/><circle cx="86" cy="10" r="1.6" fill="#b07a14"/><circle cx="114" cy="10" r="1.6" fill="#b07a14"/></svg>
+    <dl class="tp-plan">
+      <div><dt>Morgens</dt><dd>drei Gedanken, je dreißig Sekunden</dd></div>
+      <div><dt>In der Mitte</dt><dd>ein Gedanke für den Tag</dd></div>
+      <div><dt>Abends</dt><dd>drei Gedanken, je dreißig Sekunden</dd></div>
+      <div><dt>Sonntags</dt><dd>deine Woche auf einer Doppelseite</dd></div>
+      <div><dt>Einmal im Monat</dt><dd>der Monatsblick</dd></div>
+      <div><dt>Hinten</dt><dd>dein Jahr in Worten</dd></div>
+    </dl>
+    <div class="sig">Doc Alvers</div>
+  </div></div>
+</template>
+
+<template id="tpl-intro1">
+  <div class="pg paper"><div class="in intro">
+    <div class="ik">Einführung · I</div>
+    <h4 class="ih">Warum dieses Buch wirkt</h4>
+    <div class="ib">
+      <p>Unser Gehirn ist ein hervorragender Alarmgeber. Was schiefgeht, bleibt hängen, was gelingt, rauscht vorbei. Die Psychologie nennt das den <b>Negativitätseffekt</b>: Schlechtes wiegt in unserer Wahrnehmung schwerer als Gutes. Für unsere Vorfahren war das überlebenswichtig. Im Alltag führt es dazu, dass ein Tag mit neun guten Momenten und einem Ärgernis abends als „anstrengend“ abgelegt wird.</p>
+      <p>Dieses Buch dreht den Spieß um. Es lenkt deine Aufmerksamkeit zweimal am Tag auf das, was da ist und was gelingt. Nicht, um Probleme schönzureden, sondern um das Bild zu vervollständigen. Wer jeden Tag nach Gutem sucht, findet mit der Zeit mehr davon. Nicht weil die Welt sich ändert, sondern weil der Blick sich schärft.</p>
+      <p class="iq">Drei Minuten am Tag reichen: anderthalb am Morgen, anderthalb am Abend. Entscheidend ist nicht die Länge, sondern dass du es tust.</p>
+    </div>
+    <div class="ft"><span class="pn">I</span><span>Einführung</span></div>
+  </div></div>
+</template>
+
+<template id="tpl-intro2">
+  <div class="pg paper"><div class="in intro">
+    <div class="ik">Einführung · II</div>
+    <h4 class="ih">Positive Verstärkung</h4>
+    <div class="ib">
+      <p>In der Lernpsychologie gehört sie zu den stärksten Prinzipien: Ein Verhalten, auf das etwas Angenehmes folgt, zeigen wir öfter. Am besten wirkt sie, wenn die Belohnung <b>klein</b> ist, <b>sofort</b> kommt und <b>zuverlässig</b>. Genau so ist dieses Buch gebaut:</p>
+      <ul class="il">
+        <li>Du bemerkst etwas Gutes und spürst es beim Aufschreiben ein zweites Mal. Das Gefühl ist die Belohnung.</li>
+        <li>Nach dreißig Sekunden schließt sich der goldene Ring mit einem Häkchen.</li>
+        <li>Deine Gewohnheiten füllen sich Kreis um Kreis, die Reiter oben glänzen, der Buchblock links wird mit jedem Tag dicker.</li>
+        <li>Einmal im Monat siehst du als Kurve, wie es dir geht.</li>
+      </ul>
+      <p>So entsteht ein Kreislauf: Aufmerksamkeit, gutes Gefühl, Wiederholung, Gewohnheit.</p>
+      <p class="iq">Du trainierst nicht, glücklich zu sein. Du trainierst, das Gute zu bemerken.</p>
+    </div>
+    <div class="ft r"><span class="pn">II</span><span>Einführung</span></div>
+  </div></div>
+</template>
+
+<template id="tpl-intro3">
+  <div class="pg paper"><div class="in intro">
+    <div class="ik">Einführung · III</div>
+    <h4 class="ih">Was die Forschung sagt</h4>
+    <div class="ib">
+      <p>Dankbarkeit aufzuschreiben gehört zu den am besten untersuchten Übungen der Positiven Psychologie.</p>
+      <p>Bei <b>Robert Emmons und Michael McCullough</b> (2003) notierten Menschen zehn Wochen lang einmal pro Woche, wofür sie dankbar waren. Verglichen mit Gruppen, die Ärgernisse oder bloße Ereignisse aufschrieben, sahen sie zuversichtlicher auf die kommende Woche, waren zufriedener mit ihrem Leben, hatten weniger körperliche Beschwerden und bewegten sich mehr.</p>
+      <p><b>Martin Seligman</b> und sein Team (2005) ließen Menschen eine Woche lang jeden Abend drei Dinge aufschreiben, die gut gelaufen waren, und warum. Sie fühlten sich glücklicher und weniger niedergeschlagen, noch sechs Monate später.</p>
+      <p>Und wie lange dauert es, bis so etwas zur Gewohnheit wird? <b>Phillippa Lally</b> und ihr Team (2010) fanden im Mittel 66 Tage, je nach Mensch und Verhalten zwischen 18 und 254. Ein ausgelassener Tag änderte daran kaum etwas.</p>
+      <p class="isrc">Emmons &amp; McCullough, J. Pers. Soc. Psychol. 84 (2003) · Seligman u. a., American Psychologist 60 (2005) · Lally u. a., Eur. J. Soc. Psychol. 40 (2010)</p>
+    </div>
+    <div class="ft"><span class="pn">III</span><span>Einführung</span></div>
+  </div></div>
+</template>
+
+<template id="tpl-intro4">
+  <div class="pg paper"><div class="in intro">
+    <div class="ik">Einführung · IV</div>
+    <h4 class="ih">So benutzt du dieses Buch</h4>
+    <div class="ib">
+      <dl class="tp-plan ip">
+        <div><dt>Morgens</dt><dd>wofür du dankbar bist, welcher kleine Schritt heute zählt, mit welcher Haltung du in den Tag gehst</dd></div>
+        <div><dt>In der Mitte</dt><dd>ein Gedanke für den Tag, montags der Gedanke der Woche</dd></div>
+        <div><dt>Abends</dt><dd>wem du den Tag leichter gemacht hast, was dein Lichtblick war, was du mitnimmst</dd></div>
+        <div><dt>Sonntags</dt><dd>deine Woche auf einer Doppelseite</dd></div>
+        <div><dt>Einmal im Monat</dt><dd>der Monatsblick: sechs Fragen von 1 bis 10, die Kurve zeigt, wohin du dich bewegst</dd></div>
+      </dl>
+      <ol class="ir">
+        <li><b>Konkret statt allgemein.</b> „Der Kaffee am Fenster“ wirkt stärker als „alles gut“.</li>
+        <li><b>Kurz statt perfekt.</b> Dreißig Sekunden, keine Schönschrift.</li>
+        <li><b>Weitermachen statt nachholen.</b> Ein leerer Tag ist kein Bruch.</li>
+      </ol>
+      <p class="isrc">Dieses Buch ersetzt keine Therapie. Wenn es dir über längere Zeit schlecht geht, sprich mit jemandem, zum Beispiel mit der TelefonSeelsorge, kostenfrei und rund um die Uhr: +49 800 111 0 111.</p>
+    </div>
+    <div class="ft r"><span class="pn">IV</span><span>Einführung</span></div>
+  </div></div>
+</template>
+
+<template id="tpl-monatL">
+  <div class="pg paper"><div class="in">
+    <div class="hd">
+      <div class="nm"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="9" width="28" height="25" rx="3" fill="none" stroke="#b07a14" stroke-width="2"/><path d="M6 16 H34" stroke="#b07a14" stroke-width="2"/><path d="M13 5 V12 M27 5 V12" stroke="rgb(245,194,66)" stroke-width="2.4" stroke-linecap="round"/><path d="M12 28 L18 23 L22 26 L29 19" fill="none" stroke="#55801c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>MONATSBLICK</div>
+      <div class="dt">November 2026</div>
+      <div class="mt">6 Fragen · je 1 bis 10 · einmal im Monat</div>
+    </div>
+    <div class="mqs">
+      <div class="mq"><p class="q-t"><span class="tx">Wie glücklich war mein Monat?</span></p><div class="scale" data-q="0"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie gelassen war ich?</span></p><div class="scale" data-q="1"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie gut habe ich für mich gesorgt?</span></p><div class="scale" data-q="2"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie nah war ich meinen Menschen?</span></p><div class="scale" data-q="3"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie oft habe ich Gutes bemerkt?</span></p><div class="scale" data-q="4"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie zufrieden bin ich mit mir?</span></p><div class="scale" data-q="5"></div></div>
+    </div>
+    <div class="q"><button class="ring" data-k="ms" aria-label="30-Sekunden-Uhr"></button><div>
+      <p class="q-t"><span class="tx">Ein Satz zu diesem Monat:</span></p>
+      <div class="fld"><textarea class="hand" data-k="ms" rows="1" placeholder="tippen oder sprechen" aria-label="Ein Satz zu diesem Monat"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+    <div class="ft"><span class="pn">329</span><span>Monatsblick · November</span></div>
+  </div></div>
+</template>
+
+<template id="tpl-monatR">
+  <div class="pg paper"><div class="in">
+    <div class="lbl">Dein Jahr in einer Kurve · 2026</div>
+    <div class="svgbox"><svg viewBox="0 0 500 300" aria-label="Verlauf der Monatswerte 2026 (Beispielwerte)"><use href="#draw-trend"/></svg></div>
+    <div class="lbl">Januar → November</div>
+    <div class="cmp" data-cmp></div>
+    <p class="trend-note">Jeder Punkt ist ein Monat. Nicht jeder Monat ist besser als der davor, aber das Jahr zeigt die Richtung. Tipp links auf die Kreise, dann wandert der November mit.</p>
+    <div class="ft r"><span class="pn">330</span><span>Monatsblick · Verlauf</span></div>
+  </div></div>
+</template>
+
+<template id="tpl-morgen">
+  <div class="pg paper"><div class="in">
+    <div class="hd">
+      <div class="nm"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="24" r="8" fill="rgb(245,194,66)"/><path d="M4 32 H36" stroke="#b07a14" stroke-width="2" stroke-linecap="round"/><g stroke="rgb(245,194,66)" stroke-width="2.2" stroke-linecap="round"><path d="M20 8 V12"/><path d="M8.5 13 L11.3 15.8"/><path d="M31.5 13 L28.7 15.8"/><path d="M4 24 H8"/><path d="M32 24 H36"/></g></svg>MORGEN</div>
+      <div class="dt">Sonntag, 22. November 2026</div>
+      <div class="mt">3 Gedanken · je 30 Sekunden</div>
+    </div>
+    <div class="cardgap"></div>
+    <div class="q"><button class="ring" data-k="m1" aria-label="30-Sekunden-Uhr"></button><div>
+      <p class="q-t"><span class="tx">Heute früh sage ich Danke für&nbsp;…</span><span class="tag"><svg viewBox="0 0 64 56" aria-hidden="true"><path d="M32 52 C14 40 4 30 4 18 C4 9 11 3 19 3 C25 3 29 6 32 11 C35 6 39 3 45 3 C53 3 60 9 60 18 C60 30 50 40 32 52 Z" fill="none" stroke="url(#g-foil-ring)" stroke-width="5"/></svg>GRATEFUL</span></p>
+      <div class="fld"><textarea class="hand" data-k="m1" rows="2" aria-label="Heute früh sage ich Danke für"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+    <div class="q"><button class="ring" data-k="m2" aria-label="30-Sekunden-Uhr"></button><div>
+      <p class="q-t"><span class="tx">Mein kleiner Schritt, der heute zählt:</span></p>
+      <div class="fld"><textarea class="hand" data-k="m2" rows="2" aria-label="Mein kleiner Schritt, der heute zählt"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+    <div class="q"><button class="ring" data-k="m3" aria-label="30-Sekunden-Uhr"></button><div>
+      <p class="q-t"><span class="tx">Mit dieser Haltung gehe ich in den Tag:</span></p>
+      <div class="fld"><textarea class="hand" data-k="m3" rows="2" placeholder="tippen oder sprechen, die Uhr startet von selbst" aria-label="Mit dieser Haltung gehe ich in den Tag"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+    <div class="ft"><span class="pn">326</span><span>Morgen · gespeichert ✎</span></div>
+  </div></div>
+</template>
+
+<template id="tpl-spruch">
+  <div class="pg paper"><div class="spr-page">
+    <span class="k">GEDANKE DES TAGES</span>
+    <div class="photo"><img src="../svp/gdw/70.webp" alt="Gedanke der Woche Nr. 70"></div>
+    <span class="s">Wende dein Gesicht der <em>Sonne</em> zu,<br>dann fallen die Schatten hinter dich.</span>
+    <span class="w">Sprichwort der Māori · Nr. 70</span>
+  </div></div>
+</template>
+
+<template id="tpl-abend">
+  <div class="pg paper"><div class="in">
+    <div class="hd r">
+      <div class="nm">ABEND<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M26 6 A14 14 0 1 0 34 28 A11 11 0 1 1 26 6 Z" fill="#2c4a86"/><circle cx="10" cy="10" r="1.4" fill="rgb(245,194,66)"/><circle cx="16" cy="5" r="1" fill="rgb(245,194,66)"/><circle cx="6" cy="19" r="1" fill="rgb(245,194,66)"/></svg></div>
+      <div class="dt">Sonntag, 22. November 2026</div>
+      <div class="mt">3 Gedanken · je 30 Sekunden</div>
+    </div>
+    <div class="cardgap"></div>
+    <div class="q"><button class="ring" data-k="e1" aria-label="30-Sekunden-Uhr"></button><div>
+      <p class="q-t"><span class="tx">Wem habe ich heute den Tag ein wenig leichter gemacht?</span></p>
+      <div class="fld"><textarea class="hand" data-k="e1" rows="2" aria-label="Wem habe ich heute den Tag leichter gemacht"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+    <div class="q"><button class="ring" data-k="e2" aria-label="30-Sekunden-Uhr"></button><div>
+      <p class="q-t"><span class="tx">Mein Lichtblick des Tages:</span></p>
+      <div class="fld"><textarea class="hand" data-k="e2" rows="2" aria-label="Mein Lichtblick des Tages"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+    <div class="q"><button class="ring" data-k="e3" aria-label="30-Sekunden-Uhr"></button><div>
+      <p class="q-t"><span class="tx">Was nehme ich aus heute mit, und was lasse ich hier?</span></p>
+      <div class="fld"><textarea class="hand" data-k="e3" rows="2" placeholder="tippen oder sprechen, die Uhr startet von selbst" aria-label="Was nehme ich aus heute mit"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+    <div class="ft r"><span class="pn">326</span><span class="habits"><b>HEUTE</b>
+      <button class="hb" data-h="0"><i></i>Bewegung</button><button class="hb on" data-h="1"><i></i>Lesen</button><button class="hb" data-h="2"><i></i>früh schlafen</button></span></div>
+  </div></div>
+</template>
+
+<template id="tpl-wocheL">
+  <div class="pg paper"><div class="in">
+    <div class="hd">
+      <div class="nm"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="9" width="28" height="25" rx="3" fill="none" stroke="#2c4a86" stroke-width="2.2"/><path d="M6 16 H34" stroke="#2c4a86" stroke-width="2.2"/><path d="M13 5 V12 M27 5 V12" stroke="rgb(245,194,66)" stroke-width="2.6" stroke-linecap="round"/><circle cx="27" cy="27" r="3" fill="rgb(121,158,49)"/></svg>WOCHE 47</div>
+      <div class="dt">16. bis 22. November 2026</div>
+      <div class="mt">Sonntag · die Woche auf einen Blick</div>
+    </div>
+    <div class="q wq"><button class="ring" data-k="w1" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Worauf bin ich diese Woche stolz?</span></p>
+      <textarea class="hand" data-k="w1" rows="2" style="--rows: 2" aria-label="Worauf bin ich stolz"></textarea></div></div>
+    <div class="q wq"><button class="ring" data-k="w2" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Wer hat meine Woche heller gemacht, und weiß er es schon?</span></p>
+      <textarea class="hand" data-k="w2" rows="1" style="--rows: 1" aria-label="Wer hat meine Woche heller gemacht"></textarea></div></div>
+    <div class="q wq"><button class="ring" data-k="w3" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Was hat mir Kraft gegeben, was hat Kraft gekostet?</span></p>
+      <textarea class="hand" data-k="w3" rows="1" style="--rows: 1" aria-label="Kraft gegeben, Kraft gekostet"></textarea></div></div>
+    <div class="q wq"><button class="ring" data-k="w4" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Worauf freue ich mich nächste Woche?</span></p>
+      <textarea class="hand" data-k="w4" rows="1" style="--rows: 1" aria-label="Worauf freue ich mich"></textarea></div></div>
+    <div class="q wq"><button class="ring" data-k="w5" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Frage der Woche: Welche kleine Gewohnheit würde mir mein Ich in einem Jahr danken?</span></p>
+      <textarea class="hand" data-k="w5" rows="1" style="--rows: 1" placeholder="tippen oder sprechen" aria-label="Frage der Woche"></textarea></div></div>
+    <div class="ft"><span class="pn">327</span><span>Woche 47 · Rückblick</span></div>
+  </div></div>
+</template>
+
+<template id="tpl-wocheR">
+  <div class="pg paper"><div class="in">
+    <div class="lbl">Gewohnheiten · Woche 47</div>
+    <div class="svgbox"><svg viewBox="0 0 500 175" aria-label="Gewohnheiten der Woche, von Hand abgehakt"><use href="#draw-habits"/></svg></div>
+    <div class="lbl">Die Woche in Worten</div>
+    <div class="svgbox cl"><svg viewBox="0 0 500 185" aria-label="Wörter der Woche, gemalt (Beispiel)"><use href="#draw-cloud-mini"/></svg></div>
+    <div class="lbl">Gedanke der Woche 48 · ab Montag</div>
+    <div class="gdw"><div class="photo"><img src="https://pub-3679488924b04b6e9118c6684b8c23e1.r2.dev/73.webp" onerror="this.onerror=null; this.src='../svp/gdw/73.webp'" alt="Gedanke der Woche Nr. 73"><span class="pc"></span></div>
+      <p>Wissen ist ein <em>Schatz</em>, der seinem Besitzer überallhin folgt.<span class="src">Sprichwort aus China</span><span class="nt">Dasselbe Blatt sehen ab Montag deine Klassen.</span></p></div>
+    <div class="ft r"><span class="pn">328</span><span>Woche 47 · Bilanz</span></div>
+  </div></div>
+</template>
+
+<template id="tpl-wolkeL"><div class="pg paper"><div class="cloud"><svg viewBox="0 0 500 700" preserveAspectRatio="xMidYMid slice" aria-label="Mein Jahr in Worten, gemalt (Beispielwörter), linke Hälfte"><use href="#draw-cloud-spread"/></svg></div></div></template>
+<template id="tpl-wolkeR"><div class="pg paper"><div class="cloud"><svg viewBox="500 0 500 700" preserveAspectRatio="xMidYMid slice" aria-label="Mein Jahr in Worten, rechte Hälfte"><use href="#draw-cloud-spread"/></svg></div></div></template>
+<template id="tpl-wolkeP"><div class="pg paper"><div class="cloud"><svg viewBox="0 0 600 960" preserveAspectRatio="xMidYMid slice" aria-label="Mein Jahr in Worten, gemalt (Beispielwörter)"><use href="#draw-cloud-portrait"/></svg></div></div></template>
+
+<template id="tpl-notes">
+  <div class="pg paper"><div class="in notes">
+    <div class="hd"><div class="nm">SO GEHT'S</div></div>
+    <p><b>Morgens</b> drei Gedanken, jeder 30 Sekunden. Die Uhr gibt nur den Takt vor, sie drängt nicht.</p>
+    <p><b>In der Mitte</b> liegt ein Gedanke für den Tag, montags der Gedanke der Woche.</p>
+    <p><b>Abends</b> drei Gedanken, dann die Haken für die Gewohnheiten.</p>
+    <p><b>Sonntags</b> die Woche auf einer Doppelseite. Hinten wächst dein Jahr in Worten.</p>
+    <div class="ruled"></div>
+    <div class="ft"><span class="pn">365</span><span>Notizen</span></div>
+  </div></div>
+</template>
+
+<template id="tpl-back">
+  <div class="pg leather cover-back"><div class="cv-frame"></div>
+    <div class="cv-slogan foil">THINK THE IMPOSSIBLE.</div>
+    <div class="cv-name foil">Doc Alvers</div>
+  </div>
+</template>
+
+<script>
+(() => {
+  'use strict';
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const SVGNS = 'http://www.w3.org/2000/svg';
+
+  /* ---------- sample entries (invented, never Doc's real data) ---------- */
+  const vals = {
+    m1: 'den stillen Morgen und den ersten Kaffee am Fenster',
+    m2: 'die Korrekturen in zwei Etappen, dazwischen raus an die Luft',
+    m3: '',
+    e1: 'einer Kollegin die Vertretung abgenommen',
+    e2: 'das Abendrot über der Elbe',
+    e3: '',
+    w1: 'Die Klausur ist fair korrigiert und pünktlich zurück.',
+    w2: 'Eine Kollegin. Ich sag es ihr morgen.',
+    w3: '+ Musik am Abend   − zu spät ins Bett',
+    w4: 'auf den ersten Adventsmarkt',
+    w5: ''
+  };
+  const done = new Set(['m1', 'm2', 'e1', 'e2', 'w1', 'w2', 'w3', 'w4']);
+
+  /* ---------- small helpers ---------- */
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const gauss = r => (r() + r() + r() + r() - 2) * 0.85;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const f1 = n => Math.round(n * 10) / 10;
+
+  /* ---------- 30-second rings ---------- */
+  const RING = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="16"/><circle class="bar" cx="20" cy="20" r="16" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/><circle class="in2" cx="20" cy="20" r="13.4"/></svg><span class="sec">30</span>';
+  const MIC = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 11 a6 6 0 0 0 12 0 M12 17 v4 M9 21 h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const timers = {};
+  let looping = false;
+  function paintRing(k, frac, left) {
+    $$('.ring[data-k="' + k + '"]').forEach(r => {
+      const bar = r.querySelector('.bar'); if (!bar) return;
+      bar.setAttribute('stroke-dashoffset', String(100 - frac * 100));
+      r.querySelector('.sec').textContent = left > 0 ? String(Math.ceil(left)) : '✓';
+      r.classList.toggle('done', left <= 0);
+    });
+  }
+  function startTimer(k, restart) {
+    if (timers[k] && !restart) return;
+    timers[k] = { t0: performance.now(), buzzed: false };
+    if (!looping) { looping = true; requestAnimationFrame(tick); }
+  }
+  function tick(now) {
+    let busy = false;
+    Object.keys(timers).forEach(k => {
+      const t = timers[k]; const el = (now - t.t0) / 1000; const left = Math.max(0, 30 - el);
+      paintRing(k, Math.min(1, el / 30), left);
+      if (left > 0) busy = true;
+      else if (!t.buzzed) { t.buzzed = true; try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) { } }
+    });
+    if (busy) requestAnimationFrame(tick); else looping = false;
+  }
+  /* ?fuer=... personalises the Ex Libris ("für meine Cutie", "für mein Schatz", "für Anna"). The name only travels in the link, never in the code. */
+  let FUER = '';
+  try { FUER = (new URLSearchParams(location.search).get('fuer') || '').trim().slice(0, 40); } catch (e) { }
+  function fillPage(root) {
+    if (FUER) root.querySelectorAll('.exlibris').forEach(el => { el.classList.add('fuer'); el.querySelector('.n').textContent = 'für ' + FUER; });
+    root.querySelectorAll('.scale').forEach(sc => {
+      if (!sc.firstChild) sc.innerHTML = Array.from({ length: 10 }, (_, i) => '<button data-v="' + (i + 1) + '" aria-label="' + (i + 1) + ' von 10">' + (i + 1) + '</button>').join('');
+      markScale(sc);
+    });
+    root.querySelectorAll('[data-cmp]').forEach(fillCmp);
+    root.querySelectorAll('.ring').forEach(r => { if (!r.firstChild) r.innerHTML = RING; });
+    root.querySelectorAll('.mic').forEach(m => { if (!m.firstChild) m.innerHTML = MIC; });
+    root.querySelectorAll('textarea[data-k]').forEach(t => { t.value = vals[t.dataset.k] || ''; });
+    root.querySelectorAll('.ring[data-k]').forEach(r => {
+      const k = r.dataset.k;
+      if (done.has(k)) { r.classList.add('done'); r.querySelector('.bar').setAttribute('stroke-dashoffset', '0'); r.querySelector('.sec').textContent = '✓'; }
+    });
+  }
+  /* typing starts the clock and keeps every copy of the field (the flip book clones pages while turning) in sync */
+  /* Long entries (30 s of dictation is 70-90 words) in three steps:
+     1. the field grows by whole ruled lines up to its fair share of the free space on the page,
+     2. then the writing gets smaller (font and line pitch together, down to FZ_MIN),
+     3. only then the field scrolls inside, with a soft fade where more text is hidden.
+     Hidden pages (display:none) are measured when they show up. */
+  const FZ_MIN = 0.6, FZ_STEP = 0.04;
+  const setFz = (t, z) => t.parentElement.style.setProperty('--fz', String(z));
+  function fades(t) {
+    const sc = t.classList.contains('scrolls');
+    t.classList.toggle('more-t', sc && t.scrollTop > 2);
+    t.classList.toggle('more-b', sc && t.scrollTop + t.clientHeight < t.scrollHeight - 2);
+  }
+  function fit(t) {
+    if (!t.offsetParent) return;
+    const base = +t.getAttribute('rows') || 2;
+    const cap = Math.max(base, t._cap || base);
+    t.classList.remove('scrolls', 'more-t', 'more-b');
+    setFz(t, 1);
+    t.style.setProperty('--rows', base);
+    const lh = parseFloat(getComputedStyle(t).lineHeight) || 30;
+    const need = Math.ceil((t.scrollHeight - 2) / lh);
+    if (need <= cap) { t.style.setProperty('--rows', Math.max(base, need)); return; }
+    /* keep the box at its cap height and write smaller until the text fits */
+    const H = cap * lh;
+    for (let z = 1 - FZ_STEP; z >= FZ_MIN - 1e-6; z -= FZ_STEP) {
+      const zz = Math.round(z * 100) / 100;
+      setFz(t, zz);
+      const l2 = lh * zz, rows = Math.max(1, Math.floor(H / l2 + 1e-3));
+      t.style.setProperty('--rows', rows);
+      if (t.scrollHeight - 2 <= rows * l2 + 1) return;
+    }
+    t.classList.add('scrolls');
+    fades(t);
+  }
+  /* the empty space below the last field is shared out in whole ruled lines, by need:
+     the field that needs most gets the next line, so a single long entry may use all of it */
+  function fitPage(pg) {
+    if (!pg) return;
+    const fields = Array.from(pg.querySelectorAll('textarea.hand'));
+    if (!fields.length || !fields[0].offsetParent) return;
+    const inner = pg.querySelector('.in'), ft = inner && inner.querySelector('.ft');
+    if (!ft) { fields.forEach(fit); return; }
+    const keep = fields.map(t => t.scrollTop);
+    const base = fields.map(t => +t.getAttribute('rows') || 2);
+    fields.forEach((t, i) => { t.classList.toggle('scrolls', false); fades(t); setFz(t, 1); t.style.setProperty('--rows', base[i]); });
+    const lh = parseFloat(getComputedStyle(fields[0]).lineHeight) || 30;
+    const qs = inner.querySelectorAll('.q'), last = qs[qs.length - 1];
+    const free = ft.getBoundingClientRect().top - last.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(ft).paddingTop) || 0);
+    let spare = Math.max(0, Math.floor(free / lh));
+    const need = fields.map((t, i) => Math.max(base[i], Math.ceil((t.scrollHeight - 2) / lh)));
+    const extra = fields.map(() => 0);
+    while (spare > 0) {
+      let best = -1, gap = 0;
+      need.forEach((n, i) => { const g = n - base[i] - extra[i]; if (g > gap) { gap = g; best = i; } });
+      if (best < 0) break;
+      extra[best]++; spare--;
+    }
+    fields.forEach((t, i) => { t._cap = base[i] + extra[i]; fit(t); if (t.classList.contains('scrolls')) { t.scrollTop = keep[i]; fades(t); } });
+  }
+  const growAll = () => $$('.pg').forEach(fitPage);
+  document.addEventListener('scroll', e => { const t = e.target; if (t.matches && t.matches('textarea.hand')) fades(t); }, true);
+  function syncField(k, from) {
+    $$('textarea[data-k="' + k + '"]').forEach(o => {
+      if (o !== from) o.value = vals[k];
+      fitPage(o.closest('.pg'));
+      /* typing at the end of a scrolling field keeps the newest line in view */
+      if (o === from && o.classList.contains('scrolls') && o.selectionEnd === o.value.length) { o.scrollTop = o.scrollHeight; fades(o); }
+    });
+  }
+  document.addEventListener('input', e => {
+    const t = e.target; if (!t.matches || !t.matches('textarea[data-k]')) return;
+    const k = t.dataset.k; vals[k] = t.value;
+    syncField(k, t);
+    if (!done.has(k)) startTimer(k);
+  });
+
+  /* ---------- dictation demo: the mic plays a realistic 30-second dictation (about 80 words) into its field ---------- */
+  const DICT = {
+    m1: 'Heute früh bin ich dankbar für den ruhigen Start in den Tag. Der Kaffee war heiß, draußen lag noch Nebel über den Dächern, und für ein paar Minuten war es einfach still. Dankbar bin ich auch für meine Gesundheit, die ich viel zu oft für selbstverständlich halte, und für die Nachricht von einer alten Freundin, die gestern Abend ganz unerwartet kam. Und ehrlich gesagt auch dafür, dass ich heute keine Aufsicht habe und in der Pause durchatmen kann.',
+    m2: 'Mein kleiner Schritt heute ist, dass ich die Korrekturen nicht wieder bis zum Abend aufschiebe, sondern gleich nach der dritten Stunde zwanzig Arbeiten schaffe. Dann gehe ich eine Runde an die Elbe, ohne Smartphone, nur zehn Minuten, und danach kommen die restlichen dran. Wenn es eng wird, schreibe ich mir die drei wichtigsten Punkte auf einen Zettel und lasse alles andere bis morgen liegen. Außerdem will ich heute endlich die Mail an die Schulleitung beantworten.',
+    m3: 'Ich gehe heute mit Geduld in den Tag, vor allem mit mir selbst. Wenn in der zehnten Klasse wieder alle durcheinander reden, atme ich einmal tief durch, bevor ich etwas sage. Ich will zuhören, statt sofort Lösungen zu verkaufen, und ich will freundlich bleiben, auch wenn ich müde bin. Mein Satz für heute lautet: Es muss nicht perfekt sein, es muss nur ehrlich sein. Und am Nachmittag gönne ich mir bewusst eine Pause, ganz ohne schlechtes Gewissen.',
+    e1: 'Heute habe ich einer Kollegin die Vertretung in der sechsten Stunde abgenommen, weil ihr Sohn krank geworden ist. Sie hat sich riesig gefreut, und für mich war es eigentlich gar nicht so schlimm. Außerdem habe ich einem Schüler nach dem Unterricht die Ableitungen noch einmal ganz in Ruhe erklärt, bis er gelächelt hat. Und an der Kasse im Supermarkt habe ich die ältere Dame vorgelassen, die nur Milch und Brot hatte. Erstaunlich, wie gut sich das anfühlt.',
+    e2: 'Mein Lichtblick war das Abendrot über der Elbe, als ich mit dem Fahrrad nach Hause gefahren bin. Der ganze Himmel war orange und violett, die Brücke stand schwarz davor, und ich bin einfach stehen geblieben und habe ein paar Minuten geschaut. Dazu kam noch, dass die Klausurergebnisse besser waren, als ich befürchtet hatte, fast alle haben bestanden. Und zu Hause hat es nach frischem Brot geduftet, weil jemand gebacken hatte. Ein richtig schöner, runder Tag.',
+    e3: 'Mitnehmen will ich aus heute, dass ein ehrliches Gespräch mehr bringt als drei lange Mails. Ich habe mich getraut, im Kollegium zu sagen, dass mir die neue Regelung zu schnell geht, und plötzlich haben viele genickt. Hierlassen möchte ich den Ärger über den kaputten Beamer und das Gefühl, dass ich nie genug schaffe. Morgen probiere ich aus, die erste Viertelstunde ganz ohne Bildschirm zu unterrichten, nur mit Kreide und Fragen. Mal sehen, wie die Klasse reagiert.'
+  };
+  const dictating = {};
+  function stopDictation(k) {
+    if (!dictating[k]) return;
+    clearInterval(dictating[k]); delete dictating[k];
+    $$('.fld textarea[data-k="' + k + '"] + .mic').forEach(m => m.classList.remove('rec'));
+  }
+  function startDictation(k) {
+    if (dictating[k]) { stopDictation(k); return; }
+    const words = (DICT[k] || '').split(' ');
+    if (!words.length) return;
+    let i = 0;
+    const lead = vals[k] ? vals[k].replace(/\s+$/, '') + ' ' : '';
+    vals[k] = lead;
+    done.delete(k); startTimer(k, true);
+    $$('.fld textarea[data-k="' + k + '"] + .mic').forEach(m => m.classList.add('rec'));
+    /* spread the words over the 30 seconds of the clock, like real speech */
+    dictating[k] = setInterval(() => {
+      vals[k] += (i ? ' ' : '') + words[i]; i++;
+      syncField(k, null);
+      $$('textarea[data-k="' + k + '"]').forEach(o => { if (o.classList.contains('scrolls')) { o.scrollTop = o.scrollHeight; fades(o); } });
+      if (i >= words.length) stopDictation(k);
+    }, 30000 / words.length);
+  }
+  /* ?diktat=voll fills every day field with a full 30-second dictation at once (to judge the long-text layout) */
+  try {
+    if (new URLSearchParams(location.search).get('diktat') === 'voll') {
+      Object.keys(DICT).forEach(k => { vals[k] = DICT[k]; done.add(k); });
+    }
+  } catch (e) { }
+
+  document.addEventListener('click', e => {
+    const m = e.target.closest && e.target.closest('.mic');
+    if (m) { const t = m.parentElement.querySelector('textarea[data-k]'); if (t) startDictation(t.dataset.k); return; }
+    const r = e.target.closest && e.target.closest('.ring[data-k]');
+    if (r) { done.delete(r.dataset.k); startTimer(r.dataset.k, true); return; }
+    const h = e.target.closest && e.target.closest('.hb');
+    if (h) { const on = !h.classList.contains('on'); $$('.hb[data-h="' + h.dataset.h + '"]').forEach(b => b.classList.toggle('on', on)); }
+  });
+  /* StPageFlip prevents mousedown on everything except a/button - let fields and controls keep their events */
+  const keepEvent = e => { if (e.target.closest && e.target.closest('textarea, .ring, .hb, .mic, input')) e.stopPropagation(); };
+  document.addEventListener('mousedown', keepEvent, true);
+  document.addEventListener('touchstart', keepEvent, { capture: true, passive: true });
+
+  /* ---------- painted word cloud ---------- */
+  const WORDS = [
+    ['Familie', 46], ['Sonne', 38], ['Gesundheit', 34], ['Kaffee', 30], ['Ruhe', 27], ['Musik', 25], ['Lachen', 23],
+    ['Freunde', 22], ['Spaziergang', 20], ['Schule', 18], ['Bücher', 17], ['Wald', 16], ['Zeit', 15], ['Licht', 14],
+    ['Wärme', 13], ['Regen', 12], ['Tee', 12], ['Garten', 11], ['Fahrrad', 11], ['Ideen', 10], ['Mathe', 10],
+    ['Abendrot', 9], ['Gespräche', 9], ['Schlaf', 8], ['Frühstück', 8], ['Humor', 7], ['Neugier', 7], ['Vertrauen', 7],
+    ['Geduld', 6], ['Hilfe', 6], ['Sterne', 6], ['Kochen', 5], ['Lernen', 5], ['Stille', 5], ['Elbe', 5], ['Klasse', 4],
+    ['Briefe', 4], ['Schnee', 4], ['Kuchen', 3], ['Erfolg', 3], ['Wolken', 3], ['Pause', 3]
+  ];
+  const MINI_H = 185;
+  const MINI = [['Musik', 9], ['Klausur', 7], ['Adventsmarkt', 6], ['Kollegin', 5], ['Sonne', 5], ['Ruhe', 4], ['Tee', 3], ['Lachen', 3], ['Spaziergang', 3], ['Schlaf', 2], ['Bücher', 2]];
+  const INK = { phi: '#55801c', ochre: '#b07a14', ink: '#1f3d7a', lead: '#555b66', red: '#a3301f' };
+  const WASH = ['245,194,66', '121,158,49', '90,150,210', '210,110,80', '245,194,66'];
+  const mctx = document.createElement('canvas').getContext('2d');
+
+  function deform(pts, depth, v, r) {
+    for (let d = 0; d < depth; d++) {
+      const o = [];
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[i], b = pts[(i + 1) % pts.length], len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        o.push(a, [(a[0] + b[0]) / 2 + gauss(r) * len * v, (a[1] + b[1]) / 2 + gauss(r) * len * v]);
+      }
+      pts = o;
+    }
+    return pts;
+  }
+  /* watercolour stain after Tyler Hobbs: one deformed polygon, many faint re-deformed layers */
+  function stain(cx, cy, rx, ry, rgb, r, layers) {
+    let base = [];
+    for (let i = 0; i < 9; i++) { const a = i / 9 * Math.PI * 2, k = 0.78 + r() * 0.44; base.push([cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]); }
+    base = deform(base, 2, 0.42, r);
+    let s = '';
+    for (let l = 0; l < layers; l++) {
+      const p = deform(base, 1, 0.32, r);
+      s += '<path d="M' + p.map(q => f1(q[0]) + ' ' + f1(q[1])).join('L') + 'Z" fill="rgb(' + rgb + ')" fill-opacity="0.055"/>';
+    }
+    for (let i = 0; i < 7; i++) {   /* a few splashes */
+      const a = r() * Math.PI * 2, d = 1 + r() * 0.5;
+      s += '<circle cx="' + f1(cx + Math.cos(a) * rx * d) + '" cy="' + f1(cy + Math.sin(a) * ry * d) + '" r="' + f1(0.8 + r() * 2.6) + '" fill="rgb(' + rgb + ')" fill-opacity="0.32"/>';
+    }
+    return s;
+  }
+  function roughPaths(drawable, extra) {
+    if (!window.rough) return '';
+    const gen = rough.generator();
+    return gen.toPaths(drawable).map(p => '<path d="' + p.d + '" fill="' + (p.fill || 'none') + '" stroke="' + p.stroke + '" stroke-width="' + p.strokeWidth + '"' + (extra || '') + '/>').join('');
+  }
+  function heart(x, y, s, seed) {
+    if (!window.rough) return '';
+    const gen = rough.generator();
+    const d = gen.path('M10 18 C3 12 0 8 0 5 C0 2 2 0 5 0 C7 0 9 1 10 3 C11 1 13 0 15 0 C18 0 20 2 20 5 C20 8 17 12 10 18 Z',
+      { fill: 'rgba(176,48,28,.75)', fillStyle: 'hachure', hachureGap: 2.4, fillWeight: 1, stroke: '#8e2a1b', strokeWidth: 1.1, roughness: 1.1, seed: seed });
+    return '<g transform="translate(' + f1(x) + ' ' + f1(y) + ') scale(' + s + ')">' + gen.toPaths(d).map(p => '<path d="' + p.d + '" fill="' + (p.fill || 'none') + '" stroke="' + p.stroke + '" stroke-width="' + p.strokeWidth + '"/>').join('') + '</g>';
+  }
+
+  function paintCloud(words, W, H, o) {
+    const r = mulberry32(o.seed);
+    const sorted = words.slice().sort((a, b) => b[1] - a[1]);
+    const max = sorted[0][1], min = sorted[sorted.length - 1][1], n = sorted.length;
+    const placed = (o.reserve || []).map(q => q.slice());
+    const items = [];
+    const gl = W / 2 - W * 0.035, gr = W / 2 + W * 0.035;
+    const hits = q => placed.some(p => q[0] < p[0] + p[2] && q[0] + q[2] > p[0] && q[1] < p[1] + p[3] && q[1] + q[3] > p[1]);
+    sorted.forEach(([w, c], i) => {
+      const t = Math.sqrt((c - min) / Math.max(1, max - min)), rank = i / n;
+      const brush = rank < 0.3, fs = o.fsMin + (o.fsMax - o.fsMin) * t;
+      const ff = brush ? '"Caveat Brush"' : 'Caveat', fw = brush ? 400 : (rank < 0.62 ? 600 : 500);
+      mctx.font = fw + ' ' + fs + 'px ' + ff;
+      mctx.textBaseline = 'middle';
+      const m = mctx.measureText(w);
+      const tw = m.width, asc = m.actualBoundingBoxAscent || fs * 0.42, desc = m.actualBoundingBoxDescent || fs * 0.3;
+      const pad = Math.max(2, fs * 0.08), phase = r() * Math.PI * 2;
+      for (let a = 0; a < 700; a += 0.11) {
+        const rr = a * o.step;
+        const x = o.cx + Math.cos(a + phase) * rr * o.ax, y = o.cy + Math.sin(a + phase) * rr;
+        const q = [x - tw / 2 - pad, y - asc - pad, tw + 2 * pad, asc + desc + 2 * pad];
+        if (q[0] < o.m || q[1] < o.top || q[0] + q[2] > W - o.m || q[1] + q[3] > H - o.bottom) continue;
+        if (o.gutter && q[0] < gr && q[0] + q[2] > gl) continue;
+        if (hits(q)) continue;
+        placed.push(q);
+        const col = rank < 0.1 ? INK.phi : rank < 0.3 ? INK.ochre : rank < 0.62 ? INK.ink : INK.lead;
+        items.push({ w, x, y, fs, ff, fw, col, rot: (r() - 0.5) * 7, tw, asc, desc, rank, kind: brush ? 'brush' : rank < 0.62 ? 'ink' : 'lead' });
+        break;
+      }
+    });
+    let wash = '', ink = '', brushS = '', lead = '', deco = '';
+    items.slice(0, o.washes).forEach((it, i) => { wash += stain(it.x, it.y, it.tw * 0.62 + 18, (it.asc + it.desc) * 0.95 + 14, WASH[i % WASH.length], r, 12); });
+    items.forEach(it => {
+      const s = '<text x="' + f1(it.x) + '" y="' + f1(it.y) + '" transform="rotate(' + f1(it.rot) + ' ' + f1(it.x) + ' ' + f1(it.y) + ')" font-family=\'' + it.ff + '\' font-weight="' + it.fw + '" font-size="' + f1(it.fs) + '" fill="' + it.col + '" text-anchor="middle" dominant-baseline="middle">' + esc(it.w) + '</text>';
+      if (it.kind === 'brush') brushS += s; else if (it.kind === 'ink') ink += s; else lead += s;
+    });
+    if (window.rough && o.deco && items.length > 3) {
+      const gen = rough.generator();
+      const a = items[0], b = items[1];
+      deco += roughPaths(gen.ellipse(a.x, a.y + 2, a.tw * 1.12 + 16, (a.asc + a.desc) * 1.45 + 4, { stroke: INK.red, strokeWidth: 1.7, roughness: 1.9, bowing: 1.6, seed: o.seed + 1 }));
+      const by = b.y + b.desc + 6;
+      deco += roughPaths(gen.curve([[b.x - b.tw / 2, by + 2], [b.x - b.tw / 6, by + 5], [b.x + b.tw / 4, by + 1], [b.x + b.tw / 2 + 4, by + 3]], { stroke: INK.ochre, strokeWidth: 2.2, roughness: 1.3, seed: o.seed + 2 }));
+      (o.hearts || []).forEach((h, i) => { deco += heart(h[0], h[1], h[2], o.seed + 10 + i); });
+      (o.stars || []).forEach((st, i) => {
+        const pts = []; for (let k = 0; k < 10; k++) { const ang = -Math.PI / 2 + k * Math.PI / 5, rad = k % 2 ? st[2] * 0.45 : st[2]; pts.push([st[0] + Math.cos(ang) * rad, st[1] + Math.sin(ang) * rad]); }
+        deco += roughPaths(gen.polygon(pts, { stroke: INK.ochre, strokeWidth: 1.3, roughness: 1.2, fill: 'rgba(245,194,66,.55)', fillStyle: 'solid', seed: o.seed + 20 + i }));
+      });
+      if (o.note) {
+        /* the margin note points at the nearest smaller word - a short arrow, never across the page */
+        const cand = items.slice(3).filter(it => it.y < o.note.y - 20);
+        const tgt = cand.sort((p, q) => Math.hypot(p.x - o.note.x - 60, p.y - o.note.y) - Math.hypot(q.x - o.note.x - 60, q.y - o.note.y))[0];
+        if (tgt) {
+          o.note.word = tgt.w;
+          const sx = o.note.x + 40, sy = o.note.y - 24, ex = tgt.x, ey = tgt.y + tgt.desc + 6;
+          const mx = (sx + ex) / 2 + 22, my = (sy + ey) / 2 + 8;
+          deco += roughPaths(gen.curve([[sx, sy], [mx, my], [ex, ey]], { stroke: INK.ink, strokeWidth: 1.5, roughness: 1.1, seed: o.seed + 30 }));
+          const ang = Math.atan2(ey - my, ex - mx);
+          [0.5, -0.5].forEach((d, i) => { deco += roughPaths(gen.line(ex, ey, ex - Math.cos(ang + d) * 12, ey - Math.sin(ang + d) * 12, { stroke: INK.ink, strokeWidth: 1.5, roughness: 0.8, seed: o.seed + 31 + i })); });
+        }
+      }
+    }
+    let title = '';
+    if (o.title) {
+      const tt = o.title;
+      title += '<text x="' + tt.x + '" y="' + tt.y + '" font-family="\'Caveat Brush\'" font-size="' + tt.fs + '" fill="' + INK.ink + '">Mein Jahr in Worten</text>';
+      title += '<text x="' + tt.x + '" y="' + (tt.y + tt.fs * 0.95) + '" font-family="Orbitron" font-weight="700" font-size="' + (tt.fs * 0.42) + '" letter-spacing="6" fill="' + INK.ochre + '">2026</text>';
+      if (window.rough) title += roughPaths(rough.generator().line(tt.x, tt.y + tt.fs * 0.28, tt.x + tt.fs * 5.6, tt.y + tt.fs * 0.22, { stroke: INK.red, strokeWidth: 1.6, roughness: 1.4, seed: o.seed + 40 }));
+    }
+    let note = '';
+    if (o.note) note = '<text x="' + o.note.x + '" y="' + o.note.y + '" font-family="Caveat" font-weight="600" font-size="' + o.note.fs + '" fill="' + INK.ink + '" transform="rotate(-4 ' + o.note.x + ' ' + o.note.y + ')">neu dabei: ' + esc(o.note.word || 'Fahrrad') + '</text>';
+    let small = '';
+    if (o.small) small = '<text x="' + o.small.x + '" y="' + o.small.y + '" font-family="Arial" font-size="' + o.small.fs + '" fill="#8a7b62" font-style="italic">Beispielwörter · die echte Wolke liest alle Einträge</text>';
+    return '<g filter="url(#f-wc)">' + wash + '</g>' +
+      '<g filter="url(#f-pencil)" opacity=".9">' + lead + '</g>' +
+      '<g filter="url(#f-ink)">' + ink + title + note + '</g>' +
+      '<g filter="url(#f-brush)">' + brushS + '</g>' +
+      '<g filter="url(#f-pencil)">' + deco + '</g>' + small;
+  }
+
+  function paintHabits() {
+    const rows = [['Bewegung', [1, 0, 1, 1, 0, 1, 0]], ['Lesen', [1, 1, 1, 0, 1, 1, 1]], ['früh schlafen', [0, 1, 0, 0, 1, 0, 0]]];
+    const D = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+    const x0 = 196, dx = 43, r = mulberry32(77);
+    let s = '<g filter="url(#f-wc)">' + stain(x0 + 6 * dx, 100, 22, 78, '245,194,66', r, 10) + '</g>';
+    s += D.map((d, i) => '<text x="' + (x0 + i * dx) + '" y="22" font-family="Arial" font-size="15" fill="#6d6250" text-anchor="middle">' + d + '</text>').join('');
+    let marks = '';
+    rows.forEach(([name, v], ri) => {
+      const y = 62 + ri * 46;
+      s += '<text x="6" y="' + (y + 8) + '" font-family="Caveat" font-weight="600" font-size="27" fill="' + INK.ink + '">' + esc(name) + '</text>';
+      if (window.rough) {
+        const gen = rough.generator();
+        v.forEach((on, i) => {
+          const cx = x0 + i * dx;
+          marks += roughPaths(gen.circle(cx, y, 27, on
+            ? { stroke: INK.ink, strokeWidth: 1.3, roughness: 1.3, fill: 'rgba(121,158,49,.85)', fillStyle: 'hachure', hachureGap: 3.2, fillWeight: 1.2, seed: 100 + ri * 10 + i }
+            : { stroke: INK.lead, strokeWidth: 1, roughness: 1.1, seed: 100 + ri * 10 + i }));
+        });
+      }
+    });
+    return s + '<g filter="url(#f-pencil)">' + marks + '</g>';
+  }
+
+  function paintAll() {
+    $('#draw-cloud-spread').innerHTML = paintCloud(WORDS, 1000, 700, {
+      seed: 7, cx: 500, cy: 395, ax: 1.5, step: 1.45, m: 62, top: 150, bottom: 92, gutter: true, fsMax: 96, fsMin: 21, washes: 5, deco: true,
+      reserve: [[60, 48, 380, 112], [640, 600, 300, 60]],
+      title: { x: 72, y: 96, fs: 50 }, note: { x: 668, y: 640, fs: 28, word: 'Fahrrad' }, small: { x: 72, y: 664, fs: 12 },
+      hearts: [[880, 92, 1.3], [118, 560, 1.1]], stars: [[930, 160, 11], [452, 92, 8]]
+    });
+    $('#draw-cloud-portrait').innerHTML = paintCloud(WORDS, 600, 960, {
+      seed: 11, cx: 300, cy: 520, ax: 0.75, step: 1.25, m: 52, top: 190, bottom: 110, gutter: false, fsMax: 76, fsMin: 17, washes: 4, deco: true,
+      reserve: [[52, 50, 360, 120], [300, 860, 280, 60]],
+      title: { x: 60, y: 104, fs: 48 }, note: { x: 316, y: 896, fs: 27, word: 'Fahrrad' }, small: { x: 60, y: 930, fs: 12 },
+      hearts: [[500, 96, 1.2]], stars: [[540, 170, 10]]
+    });
+    $('#draw-cloud-mini').innerHTML = paintCloud(MINI, 500, MINI_H, {
+      seed: 5, cx: 250, cy: 94, ax: 2.4, step: 0.8, m: 6, top: 4, bottom: 4, gutter: false, fsMax: 50, fsMin: 18, washes: 2, deco: false
+    });
+    $('#draw-habits').innerHTML = paintHabits();
+    paintTrend();
+  }
+
+  /* ---------- monthly check (Monatsblick): a sample year January-October, November is live ---------- */
+  const MQ_SHORT = ['glücklich', 'gelassen', 'gut für mich gesorgt', 'nah bei meinen Menschen', 'Gutes bemerkt', 'zufrieden mit mir'];
+  const MQ_HIST = [[5, 5, 6, 5, 6, 6, 7, 7, 7, 8], [4, 4, 5, 5, 5, 6, 5, 6, 6, 7], [5, 4, 5, 6, 6, 5, 6, 7, 6, 7],
+                   [6, 6, 6, 7, 6, 7, 7, 7, 8, 8], [4, 5, 5, 6, 6, 7, 7, 8, 8, 8], [5, 5, 5, 6, 6, 6, 7, 6, 7, 7]];
+  const mqNow = [8, 7, 6, 8, 9, 7];
+  const de1 = v => v.toFixed(1).replace('.', ',');
+  function markScale(sc) {
+    const v = mqNow[+sc.dataset.q];
+    sc.querySelectorAll('button').forEach(b => { const n = +b.dataset.v; b.classList.toggle('on', n === v); b.classList.toggle('lo', n < v); });
+  }
+  function fillCmp(el) {
+    el.innerHTML = MQ_SHORT.map((t, i) => {
+      const a = MQ_HIST[i][0], b = mqNow[i];
+      return '<span>' + t + '</span><em class="v">' + a + '</em><em class="ar">' + (b > a ? '↗' : b < a ? '↘' : '→') + '</em><em class="v now">' + b + '</em>';
+    }).join('');
+  }
+  /* the year as one hand-drawn curve: the mean of all six questions (ink, green wash) and "happy" alone (ochre); November = the live answers */
+  function paintTrend() {
+    const W = 500, H = 300, L = 40, R = 92, T = 34, B = 40, n = 11, dx = (W - L - R) / (n - 1);
+    const x = i => L + i * dx, y = v => T + (10 - v) / 9 * (H - T - B);
+    const avg = MQ_HIST[0].map((_, m) => MQ_HIST.reduce((s, h) => s + h[m], 0) / 6).concat([mqNow.reduce((a, b) => a + b, 0) / 6]);
+    const hap = MQ_HIST[0].concat([mqNow[0]]);
+    const pts = avg.map((v, i) => [x(i), y(v)]);
+    let txt = '', pen = '';
+    [2, 4, 6, 8, 10].forEach(v => { txt += '<text x="' + (L - 12) + '" y="' + f1(y(v) + 4) + '" font-family="Orbitron" font-size="11" fill="#8a7b62" text-anchor="end">' + v + '</text>'; });
+    'JFMAMJJASON'.split('').forEach((m, i) => { txt += '<text x="' + f1(x(i)) + '" y="' + (H - B + 25) + '" font-family="Caveat" font-weight="600" font-size="20" fill="' + INK.ink + '" text-anchor="middle">' + m + '</text>'; });
+    const wash = '<path d="M' + f1(x(0)) + ' ' + (H - B) + ' L' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join(' L') + ' L' + f1(x(n - 1)) + ' ' + (H - B) + ' Z" fill="rgba(121,158,49,.34)"/>';
+    if (window.rough) {
+      const g = rough.generator();
+      [2, 4, 6, 8, 10].forEach((v, k) => { pen += roughPaths(g.line(L, y(v), W - R + 8, y(v), { stroke: '#c2b69c', strokeWidth: .8, roughness: .7, seed: 300 + k })); });
+      pen += roughPaths(g.line(L - 4, H - B, W - R + 8, H - B, { stroke: INK.lead, strokeWidth: 1.2, roughness: .9, seed: 310 }));
+      pen += roughPaths(g.linearPath(hap.map((v, i) => [x(i), y(v)]), { stroke: INK.ochre, strokeWidth: 1.6, roughness: 1.1, seed: 320 }));
+      pen += roughPaths(g.linearPath(pts, { stroke: INK.ink, strokeWidth: 2.6, roughness: 1.15, seed: 330 }));
+      pts.forEach((p, i) => { pen += roughPaths(g.circle(p[0], p[1], i === n - 1 ? 16 : 9, { stroke: INK.ink, strokeWidth: 1.4, fill: i === n - 1 ? 'rgba(245,194,66,.95)' : '#fffaf0', fillStyle: 'solid', roughness: .8, seed: 340 + i })); });
+      const ex = x(n - 1), ey = y(avg[n - 1]);
+      pen += roughPaths(g.curve([[ex + 40, ey - 30], [ex + 24, ey - 24], [ex + 11, ey - 11]], { stroke: INK.phi, strokeWidth: 1.6, roughness: 1, seed: 360 }));
+    }
+    const d = avg[n - 1] - avg[0], ex = x(n - 1), ey = y(avg[n - 1]);
+    txt += '<text x="' + f1(ex + 26) + '" y="' + f1(ey - 40) + '" font-family="Caveat" font-weight="700" font-size="30" fill="' + INK.phi + '">' + (d >= 0 ? '+' : '−') + de1(Math.abs(d)) + '</text>';
+    txt += '<text x="' + f1(ex + 26) + '" y="' + f1(ey - 22) + '" font-family="Caveat" font-size="17" fill="' + INK.phi + '">seit Januar</text>';
+    txt += '<path d="M' + (L + 4) + ' 12 h22" stroke="' + INK.ink + '" stroke-width="2.6"/><text x="' + (L + 32) + '" y="17" font-family="Caveat" font-size="18" fill="' + INK.ink + '">Schnitt aller Fragen</text>';
+    txt += '<path d="M' + (L + 186) + ' 12 h22" stroke="' + INK.ochre + '" stroke-width="1.8"/><text x="' + (L + 214) + '" y="17" font-family="Caveat" font-size="18" fill="' + INK.ochre + '">glücklich</text>';
+    txt += '<text x="' + (W - 6) + '" y="16" font-family="Arial" font-size="11" font-style="italic" fill="#8a7b62" text-anchor="end">Beispielwerte</text>';
+    $('#draw-trend').innerHTML = '<g filter="url(#f-wc)">' + wash + '</g><g filter="url(#f-pencil)">' + pen + '</g><g filter="url(#f-ink)">' + txt + '</g>';
+  }
+  /* tapping a circle sets the value on every copy of the page (the flip book clones pages) and moves November on the curve */
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('.scale button'); if (!b) return;
+    const q = +b.parentElement.dataset.q;
+    mqNow[q] = +b.dataset.v;
+    $$('.scale[data-q="' + q + '"]').forEach(markScale);
+    $$('[data-cmp]').forEach(fillCmp);
+    paintTrend();
+  });
+
+  /* ---------- page factory ---------- */
+  const HARD = new Set(['cover', 'endpaper', 'endpaper2', 'back']);
+  const SEQ = {
+    desk: ['cover', 'endpaper', 'title', 'intro1', 'intro2', 'intro3', 'intro4', 'morgen', 'abend', 'wocheL', 'wocheR', 'monatL', 'monatR', 'wolkeL', 'wolkeR', 'notes', 'endpaper2', 'back'],
+    phone: ['cover', 'title', 'intro1', 'intro2', 'intro3', 'intro4', 'morgen', 'spruch', 'abend', 'wocheL', 'wocheR', 'monatL', 'monatR', 'wolkeP', 'back']
+  };
+  /* page index of a page by its name in the current layout (-1 if this layout has no such page) */
+  const at = name => SEQ[mode].indexOf(name);
+  /* ?seite= short names */
+  const SEITE = { cover: 'cover', heute: 'morgen', woche: 'wocheL', wolke: 'wolkeL' };
+  function makePage(name) {
+    const d = document.createElement('div');
+    d.className = 'leaf p-' + name;
+    if (HARD.has(name)) d.dataset.density = 'hard';
+    d.appendChild(document.getElementById('tpl-' + name).content.cloneNode(true));
+    fillPage(d);
+    return d;
+  }
+
+  /* ---------- the flip book ---------- */
+  const stage = $('#stage'), host = $('#flipHost'), PHONE = matchMedia('(max-width: 700px)');
+  let pf = null, mode = null, idx = 0, state = 'read';
+  /* where the running flip goes: known for the buttons, guessed from the grabbed half for a drag.
+     Closing the book takes the whole left (or right) stack with it, cover board included - so the bare
+     blue board must not stay behind on the empty half while the last page swings over. */
+  let target = null, chain = null, ribTimer = 0;
+  const ribbon = (under, hidden) => { stage.classList.toggle('rib-under', under); stage.classList.toggle('rib-hidden', hidden); };
+  const stepTarget = back => {
+    const last = SEQ[mode].length - 1;
+    if (mode === 'phone') return back ? Math.max(0, idx - 1) : Math.min(last, idx + 1);
+    return back ? Math.max(0, idx - (idx <= 1 ? 1 : 2)) : Math.min(last, idx + (idx === 0 ? 1 : 2));
+  };
+  /* turn to page t. The cover is a hard board: the library's direct jump from or to the closed book slides a soft page
+     over it and lays two pages on top of each other. So the board always turns on its own, the rest follows in a second step. */
+  function go(t) {
+    if (!pf || t === idx) { chain = null; return; }
+    if (mode === 'phone' && t < idx) {
+      /* StPageFlip 2.0.7 cannot turn back in portrait (flipPrev and flip() to an earlier page do nothing): a short fade instead */
+      chain = null; target = null;
+      stage.classList.add('fading');
+      setTimeout(() => { pf.turnToPage(t); idx = t; updateStage(); stage.classList.remove('fading'); setTimeout(growAll, 30); }, 170);
+      return;
+    }
+    if (idx === 0 && t > 1) { chain = t; t = stepTarget(false); }
+    else if (t === 0 && idx > 1) { chain = 0; t = 1; }
+    else chain = null;
+    target = t;
+    if (t === stepTarget(false)) pf.flipNext(); else if (t === stepTarget(true)) pf.flipPrev(); else pf.flip(t);
+  }
+  function updateStage() {
+    const last = SEQ[mode].length - 1;
+    const moving = target !== null && (state === 'flipping' || state === 'user_fold');
+    stage.classList.toggle('closed-front', mode === 'desk' && (idx === 0 || (moving && target === 0)));
+    stage.classList.toggle('closed-back', mode === 'desk' && (idx >= last || (moving && target >= last)));
+    stage.classList.toggle('show-card', mode === 'desk' && (state === 'read' || state === 'fold_corner') && (idx === at('morgen') || idx === at('abend')));
+    /* phone: the single page is the cover or the back - no tabs on the closed book */
+    stage.classList.toggle('cover-shown', mode === 'phone' && (idx === 0 || idx >= last));
+    stage.classList.toggle('flipping', state !== 'read');
+    /* the ribbon never fades. On the closed front it lies under the cover (only the tail hangs out), on the closed back it
+       is inside. A turning board switches it exactly when the board passes the spine - half way through the flip. */
+    const ribRest = () => ribbon(idx === 0 || (mode === 'phone' && idx >= last), mode === 'desk' && idx >= last);
+    if (state === 'read') { clearTimeout(ribTimer); ribTimer = 0; ribRest(); }
+    else if (state === 'flipping' && !ribTimer && target !== null) {
+      const closeF = target === 0, openF = idx === 0, closeB = mode === 'desk' && target >= last, openB = mode === 'desk' && idx >= last;
+      if (closeF || openF || closeB || openB) ribTimer = setTimeout(() => ribbon(closeF, closeB), (mode === 'desk' ? 950 : 850) * 0.5);
+    }
+  }
+  /* The library's corners were too eager - "zong, kommt die Lasche raus, zu groß" (Doc, 23.11.2026): it reacted a fifth of the
+     page diagonal (about 170 px) away from the corner and threw out a fixed 50 px flap at once. Patched on this instance
+     (StPageFlip 2.0.7, public getFlipController(); the rest are its plain fields):
+     - the corner only counts within CORNER px - for hovering and for grabbing alike,
+     - hovering lifts a small PEEK flap, which then follows the pointer at only HOVER_K of its distance from the corner,
+     - a drag (button held) is the library's own, untouched. */
+  const CORNER = 64, PEEK = 16, HOVER_K = 0.4;
+  function gentleCorners(book) {
+    const fc = book.getFlipController && book.getFlipController();
+    if (!fc || !fc.render || typeof fc.showCorner !== 'function') return;
+    fc.isPointOnCorners = function (t) {
+      const e = this.getBoundsRect(), s = Math.min(Math.hypot(e.pageWidth, e.height) / 5, CORNER), n = this.render.convertToBook(t);
+      return n.x > 0 && n.y > 0 && n.x < e.width && n.y < e.height && (n.x < s || n.x > e.width - s) && (n.y < s || n.y > e.height - s);
+    };
+    fc.showCorner = function (t) {
+      if (!this.checkState('read', 'fold_corner')) return;
+      const e = this.getBoundsRect(), w = e.pageWidth;
+      if (!this.isPointOnCorners(t)) { this.setState('read'); this.render.finishAnimation(); this.stopMove(); return; }
+      if (this.calc === null) {
+        if (!this.start(t)) return;
+        this.setState('fold_corner');
+        this.calc.calc({ x: w - 1, y: 1 });
+        const bottom = this.calc.getCorner() === 'bottom';
+        this.animateFlippingTo({ x: w - 1, y: bottom ? e.height - 1 : 1 }, { x: w - PEEK, y: bottom ? e.height - PEEK : PEEK }, false, false);
+        return;
+      }
+      const cx = e.left + (t.x - e.left > e.width / 2 ? e.width : 0), cy = e.top + (t.y - e.top > e.height / 2 ? e.height : 0);
+      this.do(this.render.convertToPage({ x: cx + (t.x - cx) * HOVER_K, y: cy + (t.y - cy) * HOVER_K }));
+    };
+  }
+  function build() {
+    mode = PHONE.matches ? 'phone' : 'desk';
+    if (pf) { try { pf.destroy(); } catch (e) { } pf = null; }
+    host.innerHTML = '';
+    stage.classList.toggle('portrait', mode === 'phone');
+    const root = document.createElement('div');
+    host.appendChild(root);
+    const pages = SEQ[mode].map(makePage);
+    if (!window.St || !St.PageFlip) { fallback(root, pages); return; }
+    /* ?seite=cover|heute|woche|wolke opens the book there (handy for a direct look) */
+    let want = 'heute';
+    try { want = new URLSearchParams(location.search).get('seite') || 'heute'; } catch (e) { }
+    let name = SEITE[want] || 'morgen';
+    if (name === 'wolkeL' && mode === 'phone') name = 'wolkeP';
+    const start = Math.max(0, at(name));
+    pf = new St.PageFlip(root, mode === 'desk'
+      ? { width: 500, height: 700, size: 'stretch', minWidth: 150, maxWidth: 1000, minHeight: 200, maxHeight: 2000, usePortrait: false,
+          showCover: true, drawShadow: true, maxShadowOpacity: 0.6, flippingTime: 950, mobileScrollSupport: true, disableFlipByClick: true, startPage: start }
+      : { width: 400, height: 640, size: 'stretch', minWidth: 5000, maxWidth: 2000, minHeight: 200, maxHeight: 3000, usePortrait: true,
+          showCover: true, drawShadow: true, maxShadowOpacity: 0.55, flippingTime: 850, mobileScrollSupport: true, disableFlipByClick: true, startPage: start });
+    pf.on('flip', e => { idx = e.data; updateStage(); setTimeout(growAll, 30); });
+    pf.on('changeState', e => {
+      state = e.data;
+      if (state === 'read') {
+        target = null;
+        /* second step of a jump across the cover (see go) */
+        if (chain !== null) setTimeout(() => { if (state === 'read' && chain !== null) go(chain); }, 40);
+      }
+      updateStage();
+    });
+    pf.loadFromHTML(pages);
+    gentleCorners(pf);   /* after loading: loadFromHTML creates the flip controller */
+    /* portrait is forced by a huge minWidth - undo the min-width the library puts on its root */
+    if (mode === 'phone') root.style.minWidth = '0px';
+    idx = start; state = 'read'; updateStage();
+    setTimeout(growAll, 60);
+    stage.classList.remove('ready');
+    requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.add('ready')));
+  }
+  function fallback(root, pages) {
+    toast('Die Blätter-Bibliothek ist nicht geladen (offline?). Hier steht die Doppelseite ohne Umblättern.');
+    const sp = document.createElement('div'); sp.className = 'spread';
+    const a = pages[SEQ[mode].indexOf('morgen')], b = pages[SEQ[mode].indexOf('abend')];
+    a.classList.add('sp-l'); b.classList.add('sp-r'); sp.append(a, b); root.appendChild(sp);
+    stage.classList.add('show-card');
+  }
+  /* a short note on the desk instead of the old hint line */
+  let toastT = 0;
+  function toast(msg) {
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3400);
+  }
+  const goPage = name => { if (pf && state === 'read' && at(name) >= 0) go(at(name)); };
+  /* The flip library listens on window for moves and releases and curls / turns a page whose corner is under the pointer -
+     even through an open sheet or while a tab near a corner is clicked. While a sheet is open, or the pointer is on a tab,
+     a sheet or the veil, those events stop at window (capture) before the library sees them. Clicks are separate events
+     and still work. */
+  const blockFlip = e => {
+    const onUi = e.target && e.target.closest && e.target.closest('.reg, .sheet, .veil');
+    if (onUi || !$('#veil').hidden) e.stopImmediatePropagation();
+  };
+  ['mousedown', 'mousemove', 'mouseup', 'touchstart', 'touchmove', 'touchend'].forEach(t => window.addEventListener(t, blockFlip, { capture: true, passive: true }));
+  const onlyToday = (d, m) => toast('Im echten Buch blättert das zum ' + d + '. ' + m + '. Hier im Muster gibt es nur den 22. November.');
+  $$('#reg button').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.day === '22') { goPage('morgen'); return; }
+    onlyToday(b.dataset.day, 'November');
+  }));
+
+  /* ---------- sheets: contents (left tab) and settings (gear) ---------- */
+  const BOOK_DAY = new Date(2026, 10, 22);   /* the mock-up's "today" */
+  const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  function closeSheets() {
+    $$('.sheet').forEach(s => { s.hidden = true; });
+    $('#veil').hidden = true;
+  }
+  function openSheet(id) {
+    closeSheets();
+    if (id === 'tocSheet') renderToc();
+    $('#' + id).hidden = false; $('#veil').hidden = false;
+    $('#' + id).scrollTop = 0;
+  }
+  function renderToc() {
+    const book = [['Einband', 'cover', ''], ['Titelseite', 'title', ''], ['Einführung', 'intro1', 'I–IV'], ['Heute', 'morgen', 'So 22.11.'], ['Woche 47 · Rückblick', 'wocheL', '16.–22.11.'],
+      ['Monatsblick', 'monatL', 'November'],
+      ['Mein Jahr in Worten', mode === 'desk' ? 'wolkeL' : 'wolkeP', '2026'], ['Notizen', 'notes', ''], ['Rückseite', 'back', '']].filter(e => at(e[1]) >= 0);
+    $('#tocBook').innerHTML = book.map(([l, p, info]) => '<button data-page="' + p + '"><span>' + l + '</span><i></i><em>' + info + '</em></button>').join('');
+    /* sample year: every day up to today written, a few gaps (fixed seed), the 20th empty like its tab */
+    const r = mulberry32(2026);
+    let html = '', written = 0, past = 0;
+    for (let m = 0; m < 12; m++) {
+      const off = (new Date(2026, m, 1).getDay() + 6) % 7, days = new Date(2026, m + 1, 0).getDate();
+      let g = ['M', 'D', 'M', 'D', 'F', 'S', 'S'].map(x => '<b>' + x + '</b>').join('') + '<span></span>'.repeat(off);
+      for (let d = 1; d <= days; d++) {
+        const dt = new Date(2026, m, d), gap = r() < 0.06, today = +dt === +BOOK_DAY, before = dt < BOOK_DAY;
+        const w = today || (before && !gap && !(m === 10 && d === 20));
+        if (before || today) past++;
+        if (w) written++;
+        const cls = today ? 't w' : !before ? 'f' : w ? 'w' : 'e';
+        g += '<button class="' + cls + '" data-m="' + m + '" data-d="' + d + '"' + (cls === 'f' ? ' disabled' : '') + ' aria-label="' + d + '. ' + MONTHS[m] + '">' + d + '</button>';
+      }
+      html += '<div class="mon"><h4>' + MONTHS[m] + '</h4><div class="g">' + g + '</div></div>';
+    }
+    $('#tocYear').innerHTML = html;
+    $('#tocStat').textContent = '· ' + written + ' von ' + past + ' Tagen geschrieben (Beispiel)';
+  }
+  $('#tocBtn').addEventListener('click', () => openSheet('tocSheet'));
+  $('#gearBtn').addEventListener('click', () => openSheet('setSheet'));
+  $('#gearBack').addEventListener('click', () => openSheet('tocSheet'));
+  /* the settings lie on top of the contents: closing them (button, veil, Escape) goes back to the contents, not out of the book */
+  const closeTop = () => { if (!$('#setSheet').hidden) openSheet('tocSheet'); else closeSheets(); };
+  $('#veil').addEventListener('click', closeTop);
+  $$('.sheet [data-close]').forEach(b => b.addEventListener('click', closeSheets));
+  $$('.sheet [data-back]').forEach(b => b.addEventListener('click', () => openSheet('tocSheet')));
+  $('#tocSheet').addEventListener('click', e => {
+    const p = e.target.closest('[data-page]'), d = e.target.closest('[data-d]');
+    if (p) { closeSheets(); setTimeout(() => goPage(p.dataset.page), 120); }
+    else if (d) {
+      if (d.classList.contains('t')) { closeSheets(); setTimeout(() => goPage('morgen'), 120); }
+      else onlyToday(d.dataset.d, MONTHS[+d.dataset.m]);
+    }
+  });
+  /* A quiet hint that the pages turn: when nobody has touched anything for a while, the top right corner lifts a little on its
+     own and settles back - the library's own corner curl, fed with a soft pointer path (synthetic events, not trusted, so
+     they never count as the reader's activity). Not on the closed book, not while a sheet is open or someone is writing. */
+  let lastReal = Date.now(), hinting = false;
+  ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(t => window.addEventListener(t, e => { if (e.isTrusted) lastReal = Date.now(); }, { capture: true, passive: true }));
+  function cornerHint() {
+    if (hinting || !pf || state !== 'read' || document.hidden || !$('#veil').hidden) return;
+    if (Date.now() - lastReal < 7000) return;
+    if (stage.classList.contains('closed-front') || stage.classList.contains('closed-back') || idx >= SEQ[mode].length - 1) return;
+    const a = document.activeElement; if (a && a.matches && a.matches('textarea, input')) return;
+    const r = host.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight || r.width < 50) return;
+    hinting = true;
+    const x0 = r.right - 1, y0 = r.top + 1, d = Math.max(24, Math.min(54, r.width * 0.055)), t0 = performance.now(), T = 1500;
+    const send = (x, y) => document.dispatchEvent(new MouseEvent('mousemove', { clientX: x, clientY: y, bubbles: true }));
+    (function step(now) {
+      const k = Math.min(1, (now - t0) / T), e = Math.sin(Math.PI * k);   /* lift and settle back */
+      send(x0 - d * e, y0 + d * e * 0.85);
+      if (k < 1 && Date.now() - lastReal > 300) requestAnimationFrame(step);
+      else { send(r.left - 500, r.top - 500); hinting = false; }
+    })(t0);
+  }
+  setInterval(cornerHint, 9000);
+
+  /* the arrows are gone: on a computer the arrow keys turn the pages, Escape closes a sheet */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeTop(); return; }
+    if (e.target.closest && e.target.closest('textarea, input, select, [contenteditable]')) return;
+    if (!$('#veil').hidden || !pf || state !== 'read') return;
+    const r = stage.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;   /* only while the book is on screen */
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(stepTarget(false)); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(stepTarget(true)); }
+  });
+
+  /* settings: kept per browser only (localStorage may be blocked - then the defaults stay) */
+  const SET_KEY = 'grateful-konzept';
+  const settings = { hand: 'hand', script: '1', scheme: 'klassisch' };
+  try { Object.assign(settings, JSON.parse(localStorage.getItem(SET_KEY) || '{}')); } catch (e) { }
+  try { const q = new URLSearchParams(location.search).get('schrift'); if (/^[123]$/.test(q || '')) settings.script = q; } catch (e) { }
+  function applySettings() {
+    stage.classList.toggle('typed', settings.hand === 'typed');
+    ['1', '2', '3'].forEach(n => document.documentElement.classList.toggle('sf-' + n, settings.script === n));
+    ['modern', 'nacht'].forEach(s => stage.classList.toggle('sch-' + s, settings.scheme === s));
+    $$('#setSheet .seg').forEach(seg => seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', settings[seg.dataset.set] === b.dataset.v)));
+  }
+  $('#setSheet').addEventListener('click', e => {
+    const b = e.target.closest('.seg button'); if (!b) return;
+    settings[b.closest('.seg').dataset.set] = b.dataset.v;
+    try { localStorage.setItem(SET_KEY, JSON.stringify(settings)); } catch (err) { }
+    applySettings();
+    setTimeout(growAll, 80);
+  });
+  applySettings();
+  /* a drag: the grabbed half tells the direction (left half = back) */
+  host.addEventListener('pointerdown', e => {
+    if (!pf || mode !== 'desk') return;
+    const r = host.getBoundingClientRect();
+    target = stepTarget(e.clientX < r.left + r.width / 2);
+  }, true);
+  if (PHONE.addEventListener) PHONE.addEventListener('change', build); else PHONE.addListener(build);
+  /* page sizes follow the width (cq units): re-measure the fields after a resize */
+  let rsz = 0;
+  window.addEventListener('resize', () => { clearTimeout(rsz); rsz = setTimeout(growAll, 150); });
+
+  /* ---------- static spread for mock-up 2 ---------- */
+  function buildStatic() {
+    const sp = $('#cloudSpread');
+    const l = makePage('wolkeL'), r = makePage('wolkeR');
+    l.classList.add('sp-l'); r.classList.add('sp-r');
+    sp.append(l, r);
+    const p = makePage('wolkeP'); p.style.position = 'absolute'; p.style.inset = '0';
+    $('#cloudPortrait').appendChild(p);
+  }
+
+  /* fonts first: the cloud layout measures the real letter widths */
+  const fontsReady = document.fonts && document.fonts.load
+    ? Promise.all(['400 40px "Caveat Brush"', '600 40px Caveat', '500 40px Caveat', '700 20px Orbitron', '900 20px Orbitron',
+        '400 40px "' + getComputedStyle(document.documentElement).getPropertyValue('--script').split(',')[0].replace(/['"\s]/g, ' ').trim() + '"'].map(f => document.fonts.load(f))).catch(() => null)
+    : Promise.resolve();
+  Promise.race([fontsReady, new Promise(res => setTimeout(res, 2500))]).then(() => {
+    paintAll();
+    buildStatic();
+    build();
+  });
+})();
+</script>
+</body>
+</html>
