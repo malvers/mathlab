@@ -345,6 +345,20 @@
         .ev-meta { font: 14px/1.4 Raleway, sans-serif; color: var(--muted); overflow-wrap: anywhere; }
         .ev-meta svg { width: 14px; height: 14px; fill: currentColor; vertical-align: -2px; margin-right: 2px; }
         .more { display: block; margin: 0 auto 12px; }
+        /* the lesson's Stoffverteilungsplan in one tap (svpPill): one control high like all the others (--ctl), the tap
+           area 48px all round (the ::after), in λ - gold, dark blue in Hell */
+        a.svp-pill {
+            position: relative; flex: none; display: inline-flex; align-items: center; gap: 6px; height: var(--ctl); padding: 0 12px;
+            border: 1px solid var(--lambda); border-radius: 10px; color: var(--text); text-decoration: none; white-space: nowrap;
+            font: 700 12px Orbitron, sans-serif; letter-spacing: .08em;
+        }
+        a.svp-pill svg { width: 18px; height: 18px; fill: var(--lambda); flex: none; }
+        a.svp-pill::after { content: ''; position: absolute; inset: -5px; }
+        a.svp-pill:hover { background: rgba(var(--tint), .12); }
+        a.svp-pill:focus-visible { outline: 2px solid var(--lambda); outline-offset: 2px; }
+        ul.evs li.has-svp { grid-template-columns: 62px minmax(0, 1fr) auto; }
+        ul.evs li.has-svp > .svp-pill { align-self: center; }
+        .hero-top .svp-pill { margin-left: auto; }
 
         /* ---------- Woche ---------- */
         .wk { padding: 8px 0 10px 0; }   /* the table a little to the left, some air on the right (Doc, 07.11.2026) */
@@ -1437,8 +1451,11 @@
                     .then(r => (r.ok ? r.json() : null))
                     .then(m => {
                         if (!m || !Array.isArray(m.pages)) return;
+                        const fresh = JSON.stringify(m), had = JSON.stringify(svpMap);
                         svpMap = m;
-                        try { localStorage.setItem(SVP_MAP_KEY, JSON.stringify(m)); } catch (e) { }
+                        try { localStorage.setItem(SVP_MAP_KEY, fresh); } catch (e) { }
+                        // a first visit (nothing kept yet) or a changed map: the SVP buttons show at once, not with the next tick
+                        if (fresh !== had && !$('main').hidden && $('ed').hidden) render();
                     })
                     .catch(() => { });
             }
@@ -1447,6 +1464,15 @@
                 const p = K.svpPlanPath(l, svpMap);
                 return p ? SVP_ORIGIN + p : null;
             }
+            /* the same link as one tap, without the info box first (Doc, 23.11.2026: "Bitte auch bauen, dass ich im
+               Phone-Kalender auf den SVP komme"): a button "SVP" on the lesson's row in the day lists (Tag, the month's
+               chosen day) and on the "Als Nächstes" card - every width, the phone's too. A link: a new tab on the Mac,
+               the browser from the phone app. The week's narrow cards keep the info box with its "Stoffverteilungsplan"
+               button. Never in the guest's view (Doc's school tool, behind his login); no plan, no button (coaching, IA) */
+            const svpPill = l => {
+                const u = !GUEST && l ? svpUrl(l) : null;
+                return u ? `<a class="svp-pill" href="${esc(u)}" target="_blank" rel="noopener" title="Stoffverteilungsplan – diese Woche" aria-label="Stoffverteilungsplan ${esc(K.lessonTitle(l))}">${ICON_PLAN}SVP</a>` : '';
+            };
 
             /* the lessons in [from, to) as occurrences like the appointments' (key "L|id"; ev.lesson = the row) */
             function lessonOccs(from, to) {
@@ -1555,13 +1581,13 @@
                 const rel = relDay(next.start);
                 const meta = [rel || longDay(next.start), timeText(next)];
                 hero.innerHTML =
-                    `<div class="hero-top">${rem ? `<span class="pill rem-pill">${ICON_BELL}Erinnerung</span>` : `<span class="pill">${running ? 'Läuft gerade' : 'Als Nächstes'}</span>`}</div>` +
+                    `<div class="hero-top">${rem ? `<span class="pill rem-pill">${ICON_BELL}Erinnerung</span>` : `<span class="pill">${running ? 'Läuft gerade' : 'Als Nächstes'}</span>`}${svpPill(next.ev.lesson)}</div>` +
                     `<p class="hero-count">${esc(countdown(next, now))}</p>` +
                     `<div class="hero-title">${esc(rem ? remTitle(next.ev.title) : next.ev.title)}</div>` +
                     `<div class="hero-meta">${esc(meta.join(' · '))}</div>` +
                     (next.ev.location ? `<div class="hero-meta">${ICON_PLACE.replace('<svg', '<svg style="width:14px;height:14px;fill:currentColor;vertical-align:-2px"')} ${esc(next.ev.location)}</div>` : '') +
                     `<div class="hero-bar"><i style="width:${Math.round(Math.max(0, Math.min(1, pct)) * 100)}%"></i></div>`;
-                hero.onclick = () => openOcc(next);
+                hero.onclick = e => { if (!e.target.closest('a.svp-pill')) openOcc(next); };   // the SVP button is a link of its own
             }
 
             const evRow = (occ, now) => {
@@ -1579,8 +1605,9 @@
                 // Untis notes stand out (cancelled, substitution, "nicht im Haus"); a coaching block's note is just its slots
                 if (l && l.code === 'cancelled') meta.push(`<span class="note">${esc('fällt aus' + (l.note ? ' – ' + l.note : ''))}</span>`);
                 else if (l && l.note) meta.push(/^coaching/i.test(l.subject) ? esc(l.note) : `<span class="note">${esc(l.note)}</span>`);
-                return `<li class="c${colorOf(occ.ev)}${past ? ' past' : ''}${cur ? ' now' : ''}${isOff(occ) ? ' off' : ''}" data-key="${esc(occ.key)}">${t}` +
-                    `<div class="ev-body">${rem ? REM_TAG : ''}<div class="ev-title">${esc(rem ? remTitle(occ.ev.title) : occ.ev.title)}${srcMark(occ.ev)}</div>${meta.length ? `<div class="ev-meta">${meta.join(' · ')}</div>` : ''}</div></li>`;
+                const svp = svpPill(l);
+                return `<li class="c${colorOf(occ.ev)}${past ? ' past' : ''}${cur ? ' now' : ''}${isOff(occ) ? ' off' : ''}${svp ? ' has-svp' : ''}" data-key="${esc(occ.key)}">${t}` +
+                    `<div class="ev-body">${rem ? REM_TAG : ''}<div class="ev-title">${esc(rem ? remTitle(occ.ev.title) : occ.ev.title)}${srcMark(occ.ev)}</div>${meta.length ? `<div class="ev-meta">${meta.join(' · ')}</div>` : ''}</div>${svp}</li>`;
             };
 
             let shownOcc = new Map();   // key -> occurrence, for taps on rows
@@ -3122,6 +3149,7 @@
                 $('main').addEventListener('focusout', () => { if (pvKey && pvX < 0) hidePreview(); });
                 // taps in the views: an appointment opens it, a "+" or an empty place in the week starts a new one there
                 $('main').addEventListener('click', e => {
+                    if (e.target.closest('a.svp-pill')) return;   // the lesson's SVP: the link opens, not the row's info box
                     const stp = e.target.closest('[data-step]');
                     if (stp) { step(Number(stp.dataset.step)); return; }
                     const add = e.target.closest('[data-add]');
