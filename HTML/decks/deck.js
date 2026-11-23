@@ -1650,12 +1650,7 @@ fullBtn.addEventListener('click', function (e) {
     ? 'Bildschirm ist erweitert – f startet Beamer und Referentenansicht'
     : 'Nur ein Bildschirm. Am Mac Cmd F1, an Windows Win P – dann f';
   if (window.DeckNote) DeckNote(say);
-  screenProbe().then(function (m) {
-    const txt = say + '\n\n' + m;
-    const done = ok => { if (window.DeckNote) DeckNote(txt + '\n' + (ok ? '(kopiert)' : '(nicht kopiert – bitte abfotografieren)'), 30000, 'probe'); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => done(true), () => done(false));
-    else done(false);
-  });
+  // the measuring box (screenProbe: "Messwerte", copied to the clipboard) is off - Doc, 23.11.2026: "Bitte wegmachen"
 }, true);
 // Measuring for a three-colour dot (Doc, 27.09.2026: red = no second screen, yellow = there but mirrored, green =
 // extended). Mirrored and alone both look like ONE screen to the browser - maybe the resolution or the screen's
