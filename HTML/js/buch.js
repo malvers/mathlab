@@ -635,11 +635,28 @@
             const L = G && G[LANG];
             if (!L) { sec.hidden = true; return; }
             sec.innerHTML = '<div class="b-band"><span class="b-band-tag">' + upper(grussTitel()) + '</span></div>' + grussHtml(L, 'b-gruss');
+            if (L.dank) sec.after(buildDank(L.dank));                             // the acknowledgement right below the letter
             // the letter pushed everything below it down: back to the section in the address, and the chapter list marks anew
             const h = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
             if (h && h !== sec) h.scrollIntoView({ block: 'start', behavior: 'instant' });
             dispatchEvent(new Event('scroll'));
         });
+    }
+    // ---------- the acknowledgement (dank in js/buch-gruss.js): on the start page, right after the foreword ----------
+    // Doc, 23.11.2026: "dass die Danksagung in der Online-Version überhaupt nicht drin ist. Bitte." The same text as on the
+    // back of the dedication in the print edition (js/buch-druck.js danksagung()), styled like the foreword, Solita's portrait
+    // and lines under the signature as in print. Online in every language that has a dank (Doc: "Ja" to translating it);
+    // dank.aktiv switches the print page only. No entry in the chapter list: the list is made before the text has loaded.
+    function buildDank(D) {
+        const root = ME.replace(/js\/buch\.js(\?.*)?$/, '');
+        const sec = document.createElement('section');
+        sec.className = 'b-sec b-gruss b-dank'; sec.id = 'dank';
+        sec.innerHTML = '<div class="b-band"><span class="b-band-tag">' + upper(D.titel) + '</span></div>' +
+            '<div class="b-text">' + D.text.map(p => '<p>' + p + '</p>').join('') + '</div>' +
+            '<p class="b-dank-sig">' + D.sig + '</p>' +
+            (D.bild ? '<div class="b-dank-bild"><img src="' + root + D.bild.src + '" alt="' + D.bild.name + '" loading="lazy" decoding="async">' +
+                '<p><b>' + D.bild.name + '</b><br>' + D.bild.rolle + '</p></div>' : '');
+        return sec;
     }
 
     // ---------- "PDF" in the header: the print edition as a finished PDF from R2 ----------
