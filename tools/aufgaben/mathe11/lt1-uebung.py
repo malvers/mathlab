@@ -382,7 +382,8 @@ tot = {k: sum(m for it, m in zip(T, MIN) if it['q'].startswith('(' + k + ' \u00b
 print('minutes', sum(MIN), tot)
 # Doc, 16.11.2026: "vor allen Dingen die Vorschau, was drankommen wird" - the line under the head says
 # when, how long, with what, what it is about and where to practise.
-INFO = ('Mo 23.11., 30\u00a0min, Formelsammlung erlaubt, kein Taschenrechner. Etwa 7 bis 8 dieser Aufgaben kommen dran. '
+# Doc, 23.11.2026: the test moved from Mon 23.11. 13:45 to Tue 24.11. 08:00 (Informatik double period, KES201).
+INFO = ('Di 24.11., 08:00 in der Informatikstunde (KES201), verschoben vom Mo 23.11.; erst auf Papier, danach Teil A online eintippen. 30\u00a0min, Formelsammlung erlaubt, kein Taschenrechner. Etwa 7 bis 8 dieser Aufgaben kommen dran. '
         'Themen: ausklammern, Wurzel ziehen, pq-Formel (erst die Normalform!), quadratische Ergänzung, Diskriminante, Vieta, '
         'Nullstellen, Sachaufgaben, immer mit Lösungsmenge $L = \\{\\dots\\}$. Bonus: Wer die pq-Formel herleiten kann, bekommt 10\u00a0%% mehr Punkte. '
         'Üben: Decks „Quadratische Gleichungen“ und „Herleitung der pq-Formel“, Vorrechnen KW 47. '
