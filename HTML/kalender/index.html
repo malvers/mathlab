@@ -117,7 +117,8 @@
                it (measured head-less). A guest who may only read has no field and no mic: there the margin alone (less the
                search) puts the period in the middle */
             .bar { flex-wrap: nowrap; }
-            .row2 .nav { order: 2; flex: 0 0 var(--nav-w); margin-right: auto; }
+            /* it grows into the room up to the people button: the thought of the week stands in the middle of it */
+            .row2 .nav { order: 2; flex: 1 0 var(--nav-w); }
             .bar:has(> .row2 > .nav:not([hidden])) #text,
             .bar:has(> .row2 > .nav:not([hidden])) .search-field { flex: 0 1 calc(50% - var(--nav-w) / 2 - 2 * var(--ctl) - 24px); }
             .bar:has(> #text[hidden]) .row2 .nav { margin-left: calc(50% - var(--nav-w) / 2 - var(--ctl) - 8px); }
@@ -225,7 +226,65 @@
            with its month in full ("20.–26. September" is 196px at 15px), a week across two months takes the short form
            where the full one does not fit (renderWeek: "30. Nov –6. Dez") */
         :root { --nav-box: 222px; --nav-gap: 4px; --nav-w: calc(2 * var(--ctl) + 2 * var(--nav-gap) + var(--nav-box)); }
-        .nav { display: flex; align-items: center; gap: var(--nav-gap); }
+        /* and the thought of the week after them (Doc, 23.11.2026: "zwischen dem Rechts-Chevron und den People, genau in der
+           Mitte, zentriert, machen wir den Gedanken der Woche hin"): a grid. Where back, period and forward have a row of
+           their own (up to 1259px) an empty column on the left, as wide as the thought's on the right, keeps them in the
+           middle as before; from 1260px the thought's column is what the bar leaves up to the people button. On the
+           phone that column is 28px at 390px - room for the round picture alone (the words go below 180px, see .gdw) */
+        :root { --gdw-min: 28px; }
+        .nav {
+            display: grid; align-items: center; gap: var(--nav-gap);
+            grid-template-columns: minmax(var(--gdw-min), 1fr) var(--ctl) var(--nav-box) var(--ctl) minmax(var(--gdw-min), 1fr);
+            grid-template-areas: "sp prev per next gdw";
+        }
+        /* below 390px the period gives up what the picture needs (192px at 360px; where a month no longer fits, renderWeek
+           writes it short) */
+        @media (max-width: 389px) { .nav { grid-template-columns: var(--gdw-min) var(--ctl) minmax(0, 1fr) var(--ctl) var(--gdw-min); } }
+        #prevBtn { grid-area: prev; }
+        #nextBtn { grid-area: next; }
+        .nav .period { grid-area: per; }
+        @media (min-width: 1260px) {
+            /* at least the picture: between 1260 and about 1320px the entry field gives up the room for it, the period
+               stands up to 16px further left of the middle there (measured head-less) */
+            .row2 .nav { grid-template-columns: var(--ctl) var(--nav-box) var(--ctl) minmax(var(--gdw-min), 1fr); grid-template-areas: "prev per next gdw"; }
+        }
+        /* back / forward are filled triangles with round corners (TRI; Doc, 23.11.2026: "schöne Dreiecke und nicht nur
+           diese Chevrons") - stroke in the fill's colour rounds the corners */
+        svg .tri { stroke: currentColor; stroke-width: 2.2px; stroke-linejoin: round; }
+        /* the thought in the header: the sheet as a round picture and its words on one line, centred in its column - a
+           size container, so where the column gets narrow (phone, a crowded bar) only the picture stays */
+        .gdw {
+            grid-area: gdw; justify-self: stretch; min-width: 0; height: var(--ctl); padding: 0; border: 0; background: transparent;
+            color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden;
+            container-type: inline-size;
+        }
+        .gdw-in { display: inline-flex; align-items: center; gap: 9px; min-width: 0; max-width: 100%; height: 100%; padding: 0 10px; border-radius: 10px; }
+        .gdw:hover .gdw-in { background: rgba(var(--tint), .1); }
+        .gdw:focus-visible { outline: none; }
+        .gdw:focus-visible .gdw-in { outline: 2px solid var(--lambda); outline-offset: -2px; }
+        .gdw-img {
+            flex: none; width: var(--gdw-min); height: var(--gdw-min); border-radius: 50%; object-fit: cover;
+            border: 1.5px solid rgba(var(--c-gold), .85); background: rgb(255, 255, 255);
+        }
+        .gdw-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 15px/1.3 Arial, Helvetica, sans-serif; }
+        @container (max-width: 180px) {
+            .gdw-txt { display: none; }
+            .gdw-in { padding: 0; }
+        }
+        /* the thought whole: the sheet, its words, back / forward through the weeks */
+        .gdw-dlg { max-width: 400px; text-align: center; }
+        .gdw-dlg .ed-title { margin-bottom: 2px; }
+        .gdw-when { margin: 0 0 12px; font: 500 11px/1.5 Orbitron, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: pre-line; }
+        .gdw-big {
+            display: block; margin: 0 auto; width: min(100%, 332px, calc((100dvh - 290px) * 200 / 289)); height: auto;
+            aspect-ratio: 200 / 289; border-radius: 6px; background: rgb(255, 255, 255);
+        }
+        .gdw-quote { margin: 12px 0 0; font: 16px/1.45 Arial, Helvetica, sans-serif; color: var(--text); overflow-wrap: anywhere; }
+        .gdw-quote:empty { display: none; }
+        .gdw-dlg .dlg-btns { margin-top: 16px; }
+        .dlg-btns button.gdw-step { flex: 0 0 var(--ctl); min-width: 0; padding: 0; display: grid; place-items: center; }
+        .gdw-step svg { width: 22px; height: 22px; fill: currentColor; }
+        .gdw-step:disabled { opacity: .35; cursor: default; }
         .nav .period {
             flex: 0 1 var(--nav-box); min-width: 0; height: var(--ctl); padding: 0 10px; border: 1px solid var(--line); border-radius: 10px;
             display: flex; flex-direction: column; justify-content: center;   /* the two lines in the middle of the box */
@@ -870,10 +929,13 @@
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                 </button>
                 <div class="nav" id="nav" hidden>
-                    <!-- Material Icons "chevron_left" / "chevron_right" (Apache 2.0) -->
-                    <button class="icon" id="prevBtn" type="button" aria-label="Zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+                    <!-- the arrows are triangles drawn by TRI (init), the same as beside the day names of week and month -->
+                    <button class="icon" id="prevBtn" type="button" aria-label="Zurück"></button>
                     <span class="period" id="period" aria-live="polite" title="Zurück zu heute"></span>
-                    <button class="icon" id="nextBtn" type="button" aria-label="Weiter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
+                    <button class="icon" id="nextBtn" type="button" aria-label="Weiter"></button>
+                    <!-- the thought of the week shown, between the forward arrow and the people button (renderGdw); a tap
+                         opens it whole in #gdwDlg -->
+                    <button class="gdw" id="gdwBtn" type="button" hidden><span class="gdw-in"><img class="gdw-img" id="gdwImg" alt=""><span class="gdw-txt" id="gdwTxt"></span></span></button>
                 </div>
             </div>
         </div>
@@ -1063,6 +1125,21 @@
                 <button type="button" id="qrCopy">Link kopieren</button>
                 <button type="button" id="qrShare" hidden>Teilen</button>
                 <button type="button" class="yes wide" id="qrOk">Fertig</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- the thought of the week, whole: the sheet, its words, and back / forward through the weeks (openGdw) -->
+    <div class="dlg-back" id="gdwDlg" hidden>
+        <div class="dlg gdw-dlg" role="dialog" aria-modal="true" aria-labelledby="gdwTitle">
+            <p class="ed-title" id="gdwTitle">Gedanke der Woche</p>
+            <p class="gdw-when" id="gdwWhen"></p>
+            <img class="gdw-big" id="gdwBig" alt="">
+            <p class="gdw-quote" id="gdwQuote"></p>
+            <div class="dlg-btns">
+                <button type="button" class="gdw-step" id="gdwPrev" aria-label="Woche davor"></button>
+                <button type="button" class="yes" id="gdwOk">Schließen</button>
+                <button type="button" class="gdw-step" id="gdwNext" aria-label="Woche danach"></button>
             </div>
         </div>
     </div>
@@ -1328,7 +1405,7 @@
                 items = []; lessons = []; guestShare = null;
                 try { localStorage.removeItem(GUEST_CACHE_KEY); localStorage.setItem(GUEST_GONE_KEY, '1'); } catch (e) { }
                 closeEditor();
-                $('dlg').hidden = $('qrDlg').hidden = $('settings').hidden = true;
+                $('dlg').hidden = $('qrDlg').hidden = $('settings').hidden = $('gdwDlg').hidden = true;
                 $('entry').hidden = $('main').hidden = true;
                 $('guestGate').hidden = false;
             }
@@ -1614,9 +1691,12 @@
                at 8:00 and then stays where Doc scrolled it, through the half-minute redraws and other weeks */
             const WK_FROM = 8, WK_TO = 21, WK_LABEL = 10;   // WK_LABEL: px kept above the top hour line for its label
             const WK_SEP = '<div class="wk-sep"><i></i></div>';
+            /* back (d < 0) / forward: a filled triangle with round corners (Doc, 23.11.2026: "schöne Dreiecke und nicht nur
+               diese Chevrons") - the one drawing for every arrow of the page: the header's, the ones beside the day names of
+               week and month, the thought of the week's. Its centre of mass sits on the middle of the box (x = 12) */
+            const TRI = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path class="tri" d="${d < 0 ? 'M15 6.2v11.6L6.4 12z' : 'M9 6.2v11.6L17.6 12z'}"/></svg>`;
             // back / forward beside the day names of the week and the month, the same as the header's
-            // (Material Icons "chevron_left" / "chevron_right")
-            const STEP_BTN = d => `<button type="button" class="icon nav-step" data-step="${d}" aria-label="${view === 'week' ? (d < 0 ? 'Vorige Woche' : 'Nächste Woche') : (d < 0 ? 'Voriger Monat' : 'Nächster Monat')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d < 0 ? 'M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z' : 'M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z'}"/></svg></button>`;
+            const STEP_BTN = d => `<button type="button" class="icon nav-step" data-step="${d}" aria-label="${view === 'week' ? (d < 0 ? 'Vorige Woche' : 'Nächste Woche') : (d < 0 ? 'Voriger Monat' : 'Nächster Monat')}">${TRI(d)}</button>`;
             let wkTop = WK_FROM;   // the hour whose line sits WK_LABEL below the top of the box
             function fitWeek() {
                 const box = $('wk').querySelector('.wk-body');
@@ -1665,6 +1745,95 @@
                 $('moDay').innerHTML = dayBox(selDay, occsIn(selDay, K.addDays(selDay, 1)), now, true);
             }
 
+            /* ---------- the thought of the week (Doc, 23.11.2026: "Die Gedanken der Woche aus dem Stoffverteilungsplan möchte
+               ich gerne auch im Kalender haben - in meinem Kalender, dem Kalender für uns beide") ----------
+               The school weeks' thoughts are the Stoffverteilungsplan's own: svp/gdw.json, keyed by school week, each with
+               the Monday it starts on - read only, the set the plan pages show. kalender/gdw-kalender.json adds one for each
+               holiday week (sheets from the reserve; Doc: "wenn Gedanken der Woche fehlen, wie in den Ferien, müssen wir die
+               irgendwie kreativ ergänzen") and the words of the sheets whose school-week entry has none or only their
+               beginning. Keyed by the Monday, not the calendar week: KW 48 comes again next year with another thought.
+               Both files are public (the guest's page reads them too); the last good map stays for offline use. The small
+               picture comes from svp/gdw/, the whole page from R2 (tools/gdw_publish.mjs), as in svp-plan-gdw.js */
+            const GDW_KEY = 'kalender-gdw';
+            const GDW_BIG = 'https://pub-3679488924b04b6e9118c6684b8c23e1.r2.dev/';
+            let gdw = null;          // Monday (yyyy-mm-dd) -> { bild, titel, gross, sw } or, for a holiday week, { bild, titel, ferien }
+            let gdwOpen = null;      // the Monday whose thought the dialog shows
+            function loadGdw() {
+                const get = p => fetch(SVP_ORIGIN + p, { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null));
+                return Promise.all([get('/svp/gdw.json'), get('/kalender/gdw-kalender.json').catch(() => null)])
+                    .then(([school, extra]) => {
+                        if (!school) return;
+                        const words = (extra && extra.texte) || {};
+                        const map = {};
+                        for (const sw of Object.keys(school)) {
+                            const e = school[sw], m = /^(\d\d)\.(\d\d)\.(\d\d)$/.exec(e.ab || '');   // "23.11.26"
+                            if (m) map[`20${m[3]}-${m[2]}-${m[1]}`] = { bild: e.bild, titel: words[e.bild] || e.titel || '', gross: e.gross || '', sw: +sw };
+                        }
+                        for (const [mon, e] of Object.entries((extra && extra.ferien) || {})) {
+                            if (!map[mon] && e && e.bild) map[mon] = { bild: e.bild, titel: e.titel || words[e.bild] || '', ferien: e.anlass || 'Ferien' };
+                        }
+                        gdw = map;
+                        try { localStorage.setItem(GDW_KEY, JSON.stringify(map)); } catch (e) { }
+                        renderGdw();
+                    })
+                    .catch(() => { });   // offline: the kept map, or no thought
+            }
+            // the week whose thought the header shows: the week on screen, in the month the chosen day's week
+            const gdwMonday = () => mondayOf(view === 'month' ? selDay : view === 'week' ? anchor : new Date());
+            const gdwThumb = e => SVP_ORIGIN + '/svp/gdw/' + e.bild + '.webp';
+            const gdwHead = e => (e.gross ? 'Große Weisheit vor den ' + e.gross : 'Gedanke der Woche');   // gross is the whole word ("Weihnachtsferien")
+            const gdwQuote = e => (e.titel ? '„' + e.titel + '“' : '');
+            function renderGdw() {
+                const key = K.ymd(gdwMonday()), e = gdw && gdw[key], b = $('gdwBtn');
+                b.hidden = !e;
+                if (!e) { b.dataset.sig = ''; return; }
+                const sig = key + '|' + e.bild + '|' + e.titel;
+                if (b.dataset.sig === sig) return;   // the half-minute redraws leave it alone
+                b.dataset.sig = sig;
+                $('gdwImg').src = gdwThumb(e);
+                $('gdwTxt').textContent = gdwQuote(e) || gdwHead(e);
+                const say = gdwHead(e) + (e.ferien ? ' · ' + e.ferien : '') + (e.titel ? ': ' + e.titel : '');
+                b.title = say + ' (antippen)';
+                b.setAttribute('aria-label', say);
+            }
+            function openGdw(key) {
+                const e = gdw && gdw[key];
+                if (!e) return;
+                gdwOpen = key;
+                const [y, m, d] = key.split('-').map(Number), mon = new Date(y, m - 1, d), sun = K.addDays(mon, 6);
+                const span = mon.getDate() + '.' + (mon.getMonth() !== sun.getMonth() ? ' ' + K.MONTH_LONG[mon.getMonth()] + ' ' : '') + '–' +
+                    sun.getDate() + '. ' + K.MONTH_LONG[sun.getMonth()] + ' ' + sun.getFullYear();
+                $('gdwTitle').textContent = gdwHead(e);
+                $('gdwWhen').textContent = 'KW ' + K.isoWeek(mon) + ' · ' + span + '\n' + (e.ferien || e.sw + '. Schulwoche');
+                // the small picture at once, the whole page as soon as it is there
+                const img = $('gdwBig'), big = GDW_BIG + e.bild + '.webp';
+                img.src = gdwThumb(e);
+                img.alt = e.titel || gdwHead(e);
+                const pre = new Image();
+                pre.onload = () => { if (gdwOpen === key) img.src = big; };
+                pre.src = big;
+                $('gdwQuote').textContent = gdwQuote(e);
+                $('gdwPrev').disabled = !gdwNear(key, -1);
+                $('gdwNext').disabled = !gdwNear(key, 1);
+                if ($('gdwDlg').hidden) { $('gdwDlg').hidden = false; $('gdwOk').focus(); }
+            }
+            // the week before / after that has a thought (every week of the school year has one, so it is the next week)
+            function gdwNear(key, dir) {
+                const keys = Object.keys(gdw || {}).sort(), i = keys.indexOf(key);
+                return i < 0 ? null : keys[i + dir] || null;
+            }
+            function stepGdw(dir) {
+                const k = gdwOpen && gdwNear(gdwOpen, dir);
+                if (k) openGdw(k);
+            }
+            function closeGdw() {
+                if ($('gdwDlg').hidden) return;
+                $('gdwDlg').hidden = true;
+                $('gdwBig').src = '';        // the full page need not stay in memory
+                gdwOpen = null;
+                if (!$('gdwBtn').hidden && !$('nav').hidden) $('gdwBtn').focus({ preventScroll: true });
+            }
+
             function render() {
                 const now = new Date();
                 shownOcc = new Map();
@@ -1677,6 +1846,7 @@
                 if (view === 'agenda') renderAgenda(now);
                 else if (view === 'week') renderWeek(now);
                 else renderMonth(now);
+                renderGdw();
                 renderSetting();
                 renderShare();
                 renderGuest();
@@ -2807,6 +2977,9 @@
                     try { svpMap = JSON.parse(localStorage.getItem(SVP_MAP_KEY)) || null; } catch (e) { svpMap = null; }
                     loadSvpMap();   // once per visit - the map changes with the school year, not by the minute
                 }
+                // the thoughts of the week: Doc's view and the guest's alike, the kept map first, then the fresh one
+                try { gdw = JSON.parse(localStorage.getItem(GDW_KEY)) || null; } catch (e) { gdw = null; }
+                loadGdw();
                 try { $('text').value = localStorage.getItem(DRAFT_KEY) || ''; } catch (e) { }
                 try { view = localStorage.getItem(VIEW_KEY) || 'agenda'; } catch (e) { }
                 setView(view);
@@ -2909,8 +3082,27 @@
                 $('text').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); quick(); } });
                 $('micBtn').onclick = dictate;
                 $('views').onclick = e => { const b = e.target.closest('button'); if (b) setView(b.dataset.view); };
+                $('prevBtn').innerHTML = $('gdwPrev').innerHTML = TRI(-1);
+                $('nextBtn').innerHTML = $('gdwNext').innerHTML = TRI(1);
                 $('prevBtn').onclick = () => step(-1);
                 $('nextBtn').onclick = () => step(1);
+                // the thought of the week: a tap opens it whole; in the dialog the arrows (buttons and keys) go through the
+                // weeks without moving the calendar, Escape or a tap beside it closes. While it is open the keys are its
+                // own - taken in the capture phase, before the calendar's arrows, T / W / M and "/" see them
+                $('gdwBtn').onclick = () => openGdw(K.ymd(gdwMonday()));
+                $('gdwOk').onclick = closeGdw;
+                $('gdwPrev').onclick = () => stepGdw(-1);
+                $('gdwNext').onclick = () => stepGdw(1);
+                $('gdwDlg').addEventListener('pointerdown', e => { if (e.target === $('gdwDlg')) closeGdw(); });
+                document.addEventListener('keydown', e => {
+                    if ($('gdwDlg').hidden) return;
+                    e.stopPropagation();
+                    if (e.key === 'Escape') { e.preventDefault(); closeGdw(); }
+                    else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey && !e.ctrlKey && !e.metaKey) {
+                        e.preventDefault();
+                        stepGdw(e.key === 'ArrowRight' ? 1 : -1);
+                    }
+                }, true);
                 $('todayBtn').onclick = goToday;
                 $('period').onclick = goToday;
                 $('moreBtn').onclick = () => { agendaDays += 120; render(); };
