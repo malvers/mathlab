@@ -207,6 +207,20 @@ if (PRESENTER) document.documentElement.classList.add('presenter');
 // how the help and the titles write Cmd+O, the class's overview: Cmd on a Mac, Ctrl elsewhere (both work everywhere)
 const MAC_KEYS = /Mac|iPhone|iPad/.test(navigator.platform);
 const AUD_KEY = MAC_KEYS ? '⌘O' : 'Strg+O';
+// "Beamer eingefroren" (link below): one key in both windows of a show. B for Beamer - E is the editor's on Doc's Mac
+// (deck-edit.js) and opens the local copy on docalvers.de, so it was not free in the beamer window
+const FREEZE_KEY = 'B';
+const freezeKey = e => !e.metaKey && !e.ctrlKey && !e.altKey && String(e.key).toUpperCase() === FREEZE_KEY;
+// While the beamer window is frozen its own keys change its picture no more than the presenter's messages do. Window
+// capture, registered before every other key listener of the deck, so none of them sees the key; the arrows go on to
+// the presenter view, where Doc works meanwhile. B itself, Esc (the end of the show), Cmd/Ctrl/Alt (a reload) and a
+// text being typed pass.
+addEventListener('keydown', function (e) {
+  if (!window.DeckLink || !DeckLink.held() || freezeKey(e) || e.key === 'Escape' || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if (/^(Arrow|Page)/.test(e.key)) DeckLink.nav(e.key, e.shiftKey);
+}, true);
 // the title slide's night runs live in the beamer window only (deck-flow.js, Doc 18.09.2026) - the presenter keeps
 // the still picture from deck.css: one WebGL scene is enough. Offline or without WebGL the picture simply stays.
 if (!PRESENTER && document.querySelector('.slide.title'))
@@ -1310,6 +1324,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
         'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt'],
         ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
       [K(['L']), 'Laserpointer an / aus – auch der Knopf rechts neben H'],
+      [K([FREEZE_KEY]) + hint('Beamer'), 'Beamer einfrieren: das Bild an der Wand bleibt stehen, du blätterst in der Referentenansicht weiter – noch einmal ' + FREEZE_KEY + ': der Beamer springt dorthin, wo du bist'],
       [K(['T']) + hint('Tafel'), 'Rückspiegel: die Tafel live in der Referentenansicht statt der übernächsten Folie – Chrome fragt beim Start'],
       [K(['N']) + hint('Natur'), 'Naturbild hinter den Folien wechseln – nach dem letzten wieder ohne'],
       null,
@@ -1571,8 +1586,9 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
     if (!ov.hidden) {                                  // nothing underneath moves meanwhile
       if (e.key === 'Escape') close();
       // E is the one key that still gets through: edit mode switches on with the overview open, which is
-      // exactly where slides are moved and hidden (Doc, 21.09.2026: "kann ich E auch im OV drücken?")
-      if (e.key === 'e' || e.key === 'E') return;
+      // exactly where slides are moved and hidden (Doc, 21.09.2026: "kann ich E auch im OV drücken?").
+      // B too: freezing the beamer is what one wants before looking for a slide here
+      if (e.key === 'e' || e.key === 'E' || freezeKey(e)) return;
       e.preventDefault(); e.stopImmediatePropagation();
     }
   }, true);
@@ -2742,6 +2758,7 @@ const link = (function () {
   let presFull = false;                              // presenter: has been fullscreen in this show
   let best = -1;                                     // presenter: rank of the best answer to its hello
   let audOn = false, audWait = 0;                    // presenter: the beamer shows the overview (Cmd+O), waiting for its answer
+  let frozen = false;                                // B: the beamer keeps its picture, the presenter goes on alone
   try { chan = new BroadcastChannel('deck:' + location.pathname); } catch (e) { }
 
   function send(m) {
@@ -2752,10 +2769,10 @@ const link = (function () {
       if (w && w !== window && !w.closed) try { w.postMessage({ deckLink: m }, to); } catch (e) { }
     });
   }
-  function apply(m) {
+  function apply(m, force) {                         // force: paint even where it stands (ink held back while frozen)
     const n = Math.max(0, Math.min(slides.length - 1, m.si | 0));
     const st = Math.max(0, Math.min(groups(slides[n]), m.step | 0));
-    if (n === si && st === step) return;
+    if (n === si && st === step && !force) return;
     if (!PRESENTER) narr.stop();                     // turned on the laptop = turned by hand
     applying = true; sentSi = n; sentStep = st;
     si = n; step = st; paint();
@@ -2775,7 +2792,17 @@ const link = (function () {
       if (m.t === 'ask-out') { if (window.DeckAsk) DeckAsk.shown(m); return; }   // the beamer's answer box, mirrored
       if (m.t === 'ani') { aniApply(m); return; }    // Start / Pause / Stop pressed on the board
       if (m.t === 'ov-on') { audShow(!!m.on); return; }   // the beamer's overview opened or closed
-      if (m.t === 'here') send({ t: 'go', si: si, step: step, to: m.from });   // the beamer window reloaded
+      // B pressed on the beamer: the badge here follows; let go there, it asks where we stand
+      if (m.t === 'freeze') { freezeSet(!!m.on); if (!m.on) send(thaw()); return; }
+      if (m.t === 'nav') {                           // an arrow on the frozen beamer: it turns here
+        const d = /Right|Down/.test(m.key) ? 1 : -1;
+        if (m.sh && /^Arrow(Left|Right)$/.test(m.key)) jump(d); else if (d > 0) next(); else prev();
+        return;
+      }
+      if (m.t === 'here') {                          // the beamer window reloaded: its new page follows again
+        if (frozen) freezeToggle();
+        send({ t: 'go', si: si, step: step, to: m.from });
+      }
       else if (m.t === 'go') {
         // answers to our hello: the window that opened us beats a fullscreen one beats any other tab
         if (m.rank !== undefined) { if (m.rank < best) return; best = m.rank; }
@@ -2787,6 +2814,7 @@ const link = (function () {
     if (m.t === 'hello') {                           // a presenter (re)opened: tell it where we stand
       if (!mine && document.visibilityState !== 'visible') return;   // a tab in the background stays out
       linked = true;
+      freezeSet(false);                              // a new presenter view knows nothing of a freeze: it starts here
       send({ t: 'go', si: si, step: step, rank: (mine ? 2 : 0) + (fsOn() ? 1 : 0) });
       if (window.DeckAsk) DeckAsk.sync();            // and the answer box as it stands
       if (window.DeckOverview && DeckOverview.isOpen()) send({ t: 'ov-on', on: true });   // and an overview the class sees
@@ -2795,8 +2823,14 @@ const link = (function () {
     if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }   // hidden in the presenter
     if (m.t === 'go' && m.to === me) linked = true;  // the presenter answered our 'here'
     if (!linked) return;
-    if (m.t === 'bye') { if (!mine) linked = false; laser.show(m); }
+    if (m.t === 'freeze') { freezeSet(!!m.on); if (!m.on && m.si !== undefined) catchUp(m); return; }
+    // The freeze gate: while frozen nothing the presenter sends reaches the picture - no turn, no click, no laser, no
+    // box, no lab, no music, no Solita. Only the presenter leaving (bye: closed or reloaded) and the end of the show
+    // still count; both let go of the freeze.
+    if (frozen && m.t !== 'bye' && m.t !== 'end') return;
+    if (m.t === 'bye') { freezeSet(false); if (!mine) linked = false; laser.show(m); }
     else if (m.t === 'end') {                        // Esc in the presenter window ended the show
+      freezeSet(false);
       showing = false; linked = false; mine = false; laser.show(m);
       if (fsOn()) fsExit();
     }
@@ -2844,6 +2878,8 @@ const link = (function () {
   function audToggle() {
     const O = window.DeckOverview;
     if (!O) return;
+    // the frozen beamer shows nothing new, the class's overview neither - said here, the wall stays clean
+    if (frozen) { if (PRESENTER) toast('Beamer eingefroren – erst ' + FREEZE_KEY + ' gibt ihn frei'); return; }
     if (!PRESENTER) { if (O.isOpen()) O.close(); else O.open(); return; }
     const want = !audOn;
     send({ t: 'aud-ov', on: want });
@@ -2886,6 +2922,48 @@ const link = (function () {
   }
   document.addEventListener('load', function (e) { if (e.target.tagName === 'IFRAME') audFrame(e.target); }, true);
   document.querySelectorAll('iframe').forEach(audFrame);
+
+  // "Beamer eingefroren" (Doc, 23.11.2026, at the Epson: its Freeze holds the wall, but the Mac goes on sending, so
+  // "Tafel live" showed what the wall did not): B in either window of a show. The beamer window keeps its picture - the
+  // freeze gate in receive() drops what the presenter sends, the key gate at the top of this file its own keys - while
+  // Doc goes on in the presenter view, whose bar says so in λ orange (the beamer itself shows nothing). B again: the
+  // beamer jumps to where the presenter stands, as if it had followed all along. The real picture now freezes, so the
+  // mirror (deck-spiegel.js) shows what the wall shows.
+  function freezeSet(on) {
+    frozen = on;
+    if (PRESENTER) {
+      const r = document.getElementById('pres'), b = r && r.querySelector('.p-freeze');
+      if (r) r.classList.toggle('frozen', on);
+      if (b) b.hidden = !on;
+    } else if (on && narr.playing) narr.stop();     // her voice turns the slides on: it pauses with the picture
+  }
+  function freezeToggle() {
+    // a deck window without a presenter view has nobody to go on in
+    if (!PRESENTER && !frozen && (!linked || (mine && (!peer || peer.closed)))) {
+      toast('Einfrieren (' + FREEZE_KEY + ') gibt es nur mit Referentenansicht');
+      return;
+    }
+    freezeSet(!frozen);
+    // let go in the presenter: where it stands goes along; on the beamer the presenter answers with it (receive)
+    send(frozen || !PRESENTER ? { t: 'freeze', on: frozen } : thaw());
+  }
+  function thaw() {                                  // presenter: what the beamer needs to catch up
+    const box = document.querySelector('#pres .p-cur .pop:not([hidden])'), lz = laser.state();
+    return { t: 'freeze', on: false, si: si, step: step, box: box ? box.dataset.popId || '' : '', lz: lz.on, at: lz.at };
+  }
+  function catchUp(m) {                              // beamer: as if it had followed all along
+    hoverZoom.apply({});                             // what the presenter's mouse showed back then is long gone
+    hoverTail.apply({ si: si, f: null });
+    apply(m, true);                                  // painted even on the same slide: the ink written meanwhile shows
+    popApply(m);
+    if (m.at) laser.show({ x: +m.at.x, y: +m.at.y });
+    laser.mirrorOn(!!m.lz);
+  }
+  addEventListener('keydown', function (e) {
+    if (!freezeKey(e) || e.repeat) return;
+    if (e.target && e.target.closest && e.target.closest('#ask, #linkgo, input, textarea, select, [contenteditable]')) return;
+    e.preventDefault(); freezeToggle();
+  });
 
   // Labs and 3D dice mirrored (Doc, 16.09.2026: "ideal wäre ich bediene die und LG auch ... same for Lab").
   // The same lab runs in both windows; everything done in the presenter's live slide - pointer, mouse, wheel,
@@ -3274,7 +3352,8 @@ const link = (function () {
     });
     cursor();                                        // no dot yet: the arrow stays
     window.DeckLaser = function () { return { on: on, want: want, sent: sent, raf: raf, dot: !!dot }; };   // debug
-    return { move: move, show: show, toggle: toggle, mirrorOn: mirrorOn };
+    return { move: move, show: show, toggle: toggle, mirrorOn: mirrorOn,
+             state: function () { return { on: on, at: at }; } };   // for a beamer that was frozen (thaw)
   })();
 
   window.DeckNote = toast;                            // the deck's one message box, also for the screen badge
@@ -3355,6 +3434,7 @@ const link = (function () {
   painted.push(function () {
     if (view) view.render();
     if (applying || !linked || (si === sentSi && step === sentStep)) return;
+    if (frozen && !PRESENTER) return;                // a frozen beamer pulls nobody along
     sentSi = si; sentStep = step;
     send({ t: 'go', si: si, step: step });
   });
@@ -3382,6 +3462,7 @@ const link = (function () {
     if (window.DeckSpiegel && DeckSpiegel.dropped()) return;
     if (Date.now() - showAt < 1500) return;
     showing = false;
+    freezeSet(false);
     send({ t: 'end' });
     linked = false; mine = false; peer = null;
   });
@@ -3636,6 +3717,10 @@ const link = (function () {
       // Cmd+O: the overview stands on the beamer - this says so, a click closes it there (audToggle)
       + '<button type="button" class="p-aud" hidden title="Übersicht beim Publikum schließen (' + AUD_KEY + ' / Esc)">'
       + '<span class="p-aud-ico"></span><span class="p-aud-txt">Übersicht beim Publikum</span></button>'
+      // B: the beamer is frozen - never forgotten, a click gives it free (freezeToggle)
+      + '<button type="button" class="p-freeze" hidden title="Beamer eingefroren – Klick oder ' + FREEZE_KEY + ' gibt ihn frei">'
+      + svg('<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="m9.5 3.5 2.5 2.5 2.5-2.5M9.5 20.5l2.5-2.5 2.5 2.5"/>')
+      + '<span class="p-freeze-txt">Beamer eingefroren</span></button>'
       + '<span class="p-buzz" hidden></span>'       // the class's buzzer feedback (presBuzzer)
       + '<span class="p-clock" title="Uhrzeit"></span>'
       + '<button type="button" class="p-end-btn" title="Präsentation beenden (Esc)" aria-label="Präsentation beenden">'
@@ -3865,6 +3950,7 @@ const link = (function () {
     if (ovBtn) q('.p-aud-ico').innerHTML = ovBtn.innerHTML;   // the same grid icon in the pill
     q('.p-aud').onclick = function () { audToggle(); };
     if (audOn) q('.p-aud').hidden = false;
+    q('.p-freeze').onclick = function () { freezeToggle(); };
     q('.p-prev').onclick = function () { prev(); };
     q('.p-next').onclick = function () { next(); };
     // a click on the slide no longer goes on, as on the beamer (Doc, 30.10.2026) - the buttons and arrow keys do
@@ -3914,6 +4000,8 @@ const link = (function () {
   }
   soloBuzzer();                                      // the class's taps in the plain deck window (no presenter view)
   return { present: present, send: send,
+           held: function () { return frozen && !PRESENTER; },   // this is the beamer window and it is frozen (B)
+           nav: function (key, sh) { send({ t: 'nav', key: key, sh: !!sh }); },   // its arrows, for the presenter
            music: function (on) { if (linked) send({ t: 'jeopardy-on', on: !!on }); },   // the beamer's J music, for the presenter
            // the overview opened or closed in this window: the presenter view hears it if this is its beamer
            ov: function (on) { if (!PRESENTER && linked) send({ t: 'ov-on', on: !!on }); },

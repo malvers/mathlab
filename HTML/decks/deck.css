@@ -996,6 +996,18 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #pres .p-aud .p-aud-ico{display:grid}
 #pres .p-aud svg{width:1.35em;height:1.35em}
 @media (max-width:700px){#pres .p-aud .p-aud-txt{display:none}#pres .p-aud{padding:4px 9px}}   /* narrow: the icon alone */
+/* B: the beamer is frozen (deck.js freezeToggle) - the wall keeps its picture while this view goes on. λ orange like the
+   pill beside it, but pulsing, and the current slide framed in it: what Doc sees here is not on the wall */
+#pres .p-freeze{display:flex;align-items:center;gap:7px;padding:4px 14px 4px 9px;border-radius:999px;font:inherit;
+  font-size:.6em;font-weight:700;letter-spacing:.06em;white-space:nowrap;background:rgb(245,194,66);color:#0b1a33;opacity:1;
+  animation:p-freeze 1.6s ease-in-out infinite}
+#pres .p-freeze[hidden]{display:none}
+#pres .p-freeze:hover{color:#0b1a33;filter:brightness(1.08)}
+#pres .p-freeze svg{width:1.35em;height:1.35em}
+#pres.frozen .p-cur .p-frame{outline:3px solid rgb(245,194,66);outline-offset:3px}
+@keyframes p-freeze{0%,100%{box-shadow:0 0 0 0 rgba(245,194,66,.75)}50%{box-shadow:0 0 0 8px rgba(245,194,66,0)}}
+@media (prefers-reduced-motion:reduce){#pres .p-freeze{animation:none}}
+@media (max-width:700px){#pres .p-freeze .p-freeze-txt{display:none}#pres .p-freeze{padding:4px 9px}}   /* narrow: the icon alone */
 /* the class's buzzer feedback between running time and clock (Doc, 10.11.2026, deck.js presBuzzer): pills in the
    colours of the teacher's side - "nicht verstanden" and "zu langsam" orange, "zu schnell" red - only while > 0;
    all quiet: just the code, dim */
