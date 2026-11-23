@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: LGS · Lösungsverfahren — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathe11-w13-lgs-verfahren',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · LGS · Lösungsverfahren',
+  subtitle: 'Berufliches Gymnasium · Klasse 11 · Woche 13, KW 48 · 20 Aufgaben zu linearen Gleichungssystemen: Gleichsetzungs-, Einsetzungs- und Additionsverfahren, keine, eine oder unendlich viele Lösungen, Sachaufgaben · genau eine Antwort pro Aufgabe',
+  dashSub: 'BGY · Klasse 11 · KW 48 · LGS-Lösungsverfahren · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathe11.html', /* opened from the plan */
+  /* AFB I 1-10 (Probe, je ein Verfahren, Verfahren wählen, keine und unendlich viele Lösungen, Schreibweise), AFB II 11-16 (nach x gleichsetzen, beide Gleichungen multiplizieren, Klammer mit Minus, leere Menge und Parameterform per Addition, Sachaufgabe), AFB III 17-20 (Brüche, Rechteck, Preise nicht eindeutig, Parameter b). */
+  questions: [
+    {
+      q: 'Welches Zahlenpaar ist die Lösung des LGS $\\begin{cases} x + y = 7 & \\text{I} \\\\ x - y = 1 & \\text{II} \\end{cases}$?',
+      opts: ['$(4 \\mid 3)$', '$(3 \\mid 4)$', '$(6 \\mid 5)$', '$(5 \\mid 2)$'],
+      steps: [
+        'Die Lösung muss beide Gleichungen erfüllen, also jedes Paar in I und in II einsetzen.',
+        '$(4 \\mid 3)$: $4 + 3 = 7$ ✓ und $4 - 3 = 1$ ✓, also $L = \\{(4 \\mid 3)\\}$',
+        '$(3 \\mid 4)$: $3 + 4 = 7$ ✓, aber $3 - 4 = -1 \\neq 1$ ✗ — die Reihenfolge im Paar zählt: erst $x$, dann $y$.',
+        '$(5 \\mid 2)$ passt nur in I, $(6 \\mid 5)$ nur in II ($6 + 5 = 11 \\neq 7$).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse mit dem Gleichsetzungsverfahren: $\\begin{cases} y = 3x - 5 & \\text{I} \\\\ y = x + 3 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(2 \\mid 5)\\}$', '$L = \\{(7 \\mid 4)\\}$', '$L = \\{(4 \\mid 7)\\}$', '$L = \\{(-1 \\mid 2)\\}$'],
+      steps: [
+        'Beide Gleichungen beginnen mit $y = \\ldots$, also gleichsetzen: $3x - 5 = x + 3 \\quad | -x + 5$',
+        '$2x = 8 \\quad | :2$, also $x = 4$',
+        '$x = 4$ in II: $y = 4 + 3 = 7$',
+        'Probe: $3 \\cdot 4 - 5 = 7$ ✓ und $4 + 3 = 7$ ✓, also $L = \\{(4 \\mid 7)\\}$',
+        'Falle: $(-1 \\mid 2)$ entsteht, wenn die $-5$ ohne Vorzeichenwechsel nach rechts wandert ($2x = 3 - 5$).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse mit dem Einsetzungsverfahren: $\\begin{cases} y = 2x & \\text{I} \\\\ 3x + y = 20 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(2 \\mid 14)\\}$', '$L = \\{(8 \\mid 4)\\}$', '$L = \\{(5 \\mid 10)\\}$', '$L = \\{(4 \\mid 8)\\}$'],
+      steps: [
+        'In I steht $y$ schon allein: $2x$ für $y$ in II einsetzen',
+        '$3x + 2x = 20$, also $5x = 20 \\quad | :5$, also $x = 4$',
+        '$x = 4$ in I: $y = 2 \\cdot 4 = 8$',
+        'Probe: $8 = 2 \\cdot 4$ ✓ und $12 + 8 = 20$ ✓, also $L = \\{(4 \\mid 8)\\}$',
+        '$(2 \\mid 14)$ erfüllt nur II, $(5 \\mid 10)$ nur I ($15 + 10 = 25 \\neq 20$).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse mit dem Additionsverfahren: $\\begin{cases} x + y = 12 & \\text{I} \\\\ x - y = 2 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(5 \\mid 7)\\}$', '$L = \\{(6 \\mid 6)\\}$', '$L = \\{(14 \\mid -2)\\}$', '$L = \\{(7 \\mid 5)\\}$'],
+      steps: [
+        'Vor $y$ stehen $+1$ und $-1$: $\\text{I} + \\text{II}$ ergibt $2x = 14$, das $y$ fällt weg',
+        '$2x = 14 \\quad | :2$, also $x = 7$',
+        '$x = 7$ in I: $7 + y = 12 \\quad | -7$, also $y = 5$',
+        'Probe: $7 + 5 = 12$ ✓ und $7 - 5 = 2$ ✓, also $L = \\{(7 \\mid 5)\\}$',
+        'Falle: $(14 \\mid -2)$ — das Teilen durch $2$ vergessen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welches Verfahren spart bei $\\begin{cases} 3x + 4y = 20 & \\text{I} \\\\ 5x - 4y = 12 & \\text{II} \\end{cases}$ am meisten Rechnung, und warum?',
+      opts: ['Gleichsetzungsverfahren: beide Gleichungen beginnen mit $y = \\ldots$', 'zeichnerisch: der Schnittpunkt lässt sich immer genau ablesen', 'Additionsverfahren: vor $y$ stehen $+4$ und $-4$', 'Einsetzungsverfahren: $x$ steht schon allein'],
+      steps: [
+        'Weder $x$ noch $y$ steht allein, keine Gleichung beginnt mit $y = \\ldots$ — aber vor $y$ stehen Gegenzahlen.',
+        '$\\text{I} + \\text{II}$: $8x = 32 \\quad | :8$, also $x = 4$',
+        '$x = 4$ in I: $12 + 4y = 20 \\quad | -12$, also $4y = 8$ und $y = 2$',
+        'Probe in II: $20 - 8 = 12$ ✓, also $L = \\{(4 \\mid 2)\\}$',
+        'Ablesen ist nur genau, wenn der Schnittpunkt auf dem Gitter liegt — das weiß man vorher nicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse mit dem Einsetzungsverfahren: $\\begin{cases} x = 3y - 2 & \\text{I} \\\\ 2x + y = 17 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(4 \\mid 2)\\}$', '$L = \\{(7 \\mid 3)\\}$', '$L = \\{(5 \\mid 7)\\}$', '$L = \\{(3 \\mid 7)\\}$'],
+      steps: [
+        'I in II einsetzen, mit Klammer: $2(3y - 2) + y = 17$',
+        '$6y - 4 + y = 17$, also $7y - 4 = 17 \\quad | +4$',
+        '$7y = 21 \\quad | :7$, also $y = 3$',
+        '$y = 3$ in I: $x = 3 \\cdot 3 - 2 = 7$. Probe: $7 = 9 - 2$ ✓ und $14 + 3 = 17$ ✓, also $L = \\{(7 \\mid 3)\\}$',
+        'Falle: $(3 \\mid 7)$ — erst $y$ ausgerechnet, aber im Paar steht trotzdem $x$ vorn.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $\\begin{cases} y = -x + 4 & \\text{I} \\\\ y = -x + 1 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(t \\mid -t + 4)\\},\\ t \\in \\mathbb{R}$', '$L = \\mathbb{R}$', '$L = \\{\\}$', '$L = \\{(0 \\mid 4)\\}$'],
+      steps: [
+        'Gleichsetzen: $-x + 4 = -x + 1 \\quad | +x$',
+        '$4 = 1$ — eine falsche Aussage, ganz egal, welches $x$ man nimmt.',
+        'Kein Paar erfüllt beide Gleichungen: $L = \\{\\}$, die leere Menge (auch $\\emptyset$ geschrieben).',
+        'Im Bild: beide Geraden haben die Steigung $-1$, aber verschiedene Achsenabschnitte $4$ und $1$ — sie sind parallel.',
+        'Falle: $(0 \\mid 4)$ liegt nur auf Gerade I, denn $-0 + 1 = 1 \\neq 4$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $\\begin{cases} y = 3x - 2 & \\text{I} \\\\ 2y = 6x - 4 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(0 \\mid -2)\\}$', '$L = \\mathbb{R}$', '$L = \\{\\}$', '$L = \\{(t \\mid 3t - 2)\\},\\ t \\in \\mathbb{R}$'],
+      steps: [
+        'I in II einsetzen: $2(3x - 2) = 6x - 4$, also $6x - 4 = 6x - 4 \\quad | -6x + 4$',
+        '$0 = 0$ — eine wahre Aussage für jedes $x$: II ist nur das Doppelte von I, dieselbe Gerade.',
+        '$x = t$ frei wählen, aus I folgt $y = 3t - 2$: $L = \\{(t \\mid 3t - 2)\\},\\ t \\in \\mathbb{R}$',
+        'Falle: $(0 \\mid -2)$ ist eine Lösung (für $t = 0$), aber nicht alle. $L = \\mathbb{R}$ passt nicht, die Lösungen sind Zahlenpaare.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die beiden Geraden eines LGS schneiden sich im Punkt $S(-2 \\mid 5)$. Wie lautet die Lösungsmenge?',
+      opts: ['$L = \\{(5 \\mid -2)\\}$', '$L = (-2 \\mid 5)$', '$L = \\{(-2 \\mid 5)\\}$', '$L = \\{-2;\\ 5\\}$'],
+      steps: [
+        'Der Schnittpunkt liegt auf beiden Geraden: sein Zahlenpaar erfüllt beide Gleichungen.',
+        'Die Lösung ist ein einziges Zahlenpaar, erst $x$, dann $y$, in der Mengenklammer: $L = \\{(-2 \\mid 5)\\}$',
+        'Falle: $\\{-2;\\ 5\\}$ wären zwei einzelne Zahlen, $(-2 \\mid 5)$ ohne geschweifte Klammern ist keine Menge.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beim Additionsverfahren bleibt am Ende die Zeile $0 = 0$ stehen. Was bedeutet das?',
+      opts: ['ein Rechenfehler: so eine Zeile darf nicht entstehen', 'genau eine Lösung: $L = \\{(0 \\mid 0)\\}$', 'unendlich viele Lösungen: beide Gleichungen beschreiben dieselbe Gerade', 'keine Lösung: die beiden Geraden sind parallel'],
+      steps: [
+        '$0 = 0$ ist immer wahr — die zweite Gleichung stellt keine neue Bedingung, es bleibt nur die erste.',
+        'Die beiden Gleichungen sagen dasselbe: die Geraden liegen aufeinander, es gibt unendlich viele Lösungen.',
+        'Zum Vergleich: eine falsche Aussage wie $0 = 7$ heißt keine Lösung, $L = \\{\\}$ — dann sind die Geraden parallel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse mit dem Gleichsetzungsverfahren: $\\begin{cases} x = 2y + 7 & \\text{I} \\\\ x = -3y + 2 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(-1 \\mid 5)\\}$', '$L = \\{(5 \\mid -1)\\}$', '$L = \\{(9 \\mid 1)\\}$', '$L = \\{(17 \\mid 5)\\}$'],
+      steps: [
+        'Diesmal beginnen beide mit $x = \\ldots$, also gleichsetzen: $2y + 7 = -3y + 2 \\quad | +3y - 7$',
+        '$5y = -5 \\quad | :5$, also $y = -1$',
+        '$y = -1$ in I: $x = 2 \\cdot (-1) + 7 = 5$',
+        'Probe: $5 = -2 + 7$ ✓ und $5 = 3 + 2$ ✓. Im Paar steht $x$ vorn: $L = \\{(5 \\mid -1)\\}$',
+        'Falle: $(17 \\mid 5)$ — die $-3y$ ohne Vorzeichenwechsel nach links gebracht ($2y - 3y = 2 - 7$).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse mit dem Additionsverfahren: $\\begin{cases} 3x + 2y = 4 & \\text{I} \\\\ 2x - 3y = 7 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(2 \\mid 1)\\}$', '$L = \\{(2 \\mid -1)\\}$', '$L = \\{(-1 \\mid 2)\\}$', '$L = \\{(4 \\mid -4)\\}$'],
+      steps: [
+        'Vor $y$ stehen $2$ und $-3$: beide auf $6$ bringen, $3 \\cdot \\text{I}$ und $2 \\cdot \\text{II}$',
+        '$9x + 6y = 12$ und $4x - 6y = 14$',
+        'Addieren: $13x = 26 \\quad | :13$, also $x = 2$',
+        '$x = 2$ in I: $6 + 2y = 4 \\quad | -6$, also $2y = -2$ und $y = -1$',
+        'Probe in II: $4 - 3 \\cdot (-1) = 4 + 3 = 7$ ✓, also $L = \\{(2 \\mid -1)\\}$',
+        'Falle: $(4 \\mid -4)$ erfüllt nur I: $8 + 12 = 20 \\neq 7$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse mit dem Einsetzungsverfahren: $\\begin{cases} y = 5 - 2x & \\text{I} \\\\ 3x - 2y = 18 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(4 \\mid -3)\\}$', '$L = \\{(4 \\mid 3)\\}$', '$L = \\{(-3 \\mid 4)\\}$', '$L = \\{(-28 \\mid 61)\\}$'],
+      steps: [
+        'I in II einsetzen, mit Klammer: $3x - 2(5 - 2x) = 18$',
+        'Minus vor der Klammer dreht beide Vorzeichen: $3x - 10 + 4x = 18$',
+        '$7x - 10 = 18 \\quad | +10$, also $7x = 28$ und $x = 4$',
+        '$x = 4$ in I: $y = 5 - 8 = -3$. Probe: $12 - 2 \\cdot (-3) = 12 + 6 = 18$ ✓, also $L = \\{(4 \\mid -3)\\}$',
+        'Falle: $(-28 \\mid 61)$ — nur das erste Vorzeichen gedreht ($3x - 10 - 4x = 18$).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $\\begin{cases} x - 2y = 4 & \\text{I} \\\\ -3x + 6y = 5 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{\\}$', '$L = \\{(4 \\mid 0)\\}$', '$L = \\mathbb{R}$', '$L = \\{(4 + 2t \\mid t)\\},\\ t \\in \\mathbb{R}$'],
+      steps: [
+        'Vor $x$ stehen $1$ und $-3$: $3 \\cdot \\text{I}$ ergibt $3x - 6y = 12$',
+        '$3 \\cdot \\text{I} + \\text{II}$: links heben sich $x$ und $y$ auf, rechts steht $12 + 5$, also $0 = 17$ — falsch.',
+        'Kein Paar erfüllt beide Gleichungen: $L = \\{\\}$',
+        'Im Bild: zwei parallele Geraden. Falle: $(4 \\mid 0)$ liegt nur auf I, denn $-12 + 0 \\neq 5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gib die Lösungsmenge an: $\\begin{cases} 3x - 6y = 9 & \\text{I} \\\\ -x + 2y = -3 & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(3 + 2t \\mid t)\\},\\ t \\in \\mathbb{R}$', '$L = \\{\\}$', '$L = \\{(t \\mid 3 + 2t)\\},\\ t \\in \\mathbb{R}$', '$L = \\{(3 \\mid 0)\\}$'],
+      steps: [
+        '$3 \\cdot \\text{II}$ ergibt $-3x + 6y = -9$',
+        '$\\text{I} + 3 \\cdot \\text{II}$: $0 = 0$ — wahr, I ist das $(-3)$-Fache von II: unendlich viele Lösungen.',
+        '$y = t$ frei wählen, aus II: $-x + 2t = -3$, also $x = 3 + 2t$',
+        '$L = \\{(3 + 2t \\mid t)\\},\\ t \\in \\mathbb{R}$. Probe in I: $3(3 + 2t) - 6t = 9$ ✓',
+        'Falle: $(3 \\mid 0)$ ist nur eine der Lösungen ($t = 0$). Bei $(t \\mid 3 + 2t)$ sind $x$ und $y$ vertauscht: $(0 \\mid 3)$ passt nicht in I.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Hofladen verkauft Eier in Sechser- und in Zehnerkartons. Frau Kühn kauft 5 Kartons mit zusammen 38 Eiern. Mit $x$ für die Zahl der Sechser- und $y$ für die Zahl der Zehnerkartons entsteht ein LGS. Was gilt?',
+      opts: ['$L = \\{(1 \\mid 4)\\}$: 1 Sechser- und 4 Zehnerkartons', '$L = \\{(3 \\mid 2)\\}$: 3 Sechser- und 2 Zehnerkartons', '$L = \\{(2 \\mid 3)\\}$: 2 Sechser- und 3 Zehnerkartons', '$L = \\{(3 \\mid 2)\\}$: 2 Sechser- und 3 Zehnerkartons'],
+      steps: [
+        '$\\text{I}: x + y = 5$ (Kartons) und $\\text{II}: 6x + 10y = 38$ (Eier)',
+        'Aus I: $x = 5 - y$, in II einsetzen: $6(5 - y) + 10y = 38$',
+        '$30 - 6y + 10y = 38$, also $4y = 8$ und $y = 2$; dann $x = 5 - 2 = 3$',
+        'Probe: $3 + 2 = 5$ ✓ und $18 + 20 = 38$ ✓, also $L = \\{(3 \\mid 2)\\}$: 3 Sechser- und 2 Zehnerkartons.',
+        'Falle: $(2 \\mid 3)$ ergibt $12 + 30 = 42$ Eier, $(1 \\mid 4)$ sogar $46$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse das LGS: $\\begin{cases} \\dfrac{x}{2} + \\dfrac{y}{3} = 3 & \\text{I} \\\\ \\dfrac{x}{4} - \\dfrac{y}{6} = \\dfrac{1}{2} & \\text{II} \\end{cases}$',
+      opts: ['$L = \\{(3 \\mid 4)\\}$', '$L = \\{(4 \\mid -3)\\}$', '$L = \\{(2 \\mid 6)\\}$', '$L = \\{(4 \\mid 3)\\}$'],
+      steps: [
+        'Erst die Brüche loswerden: $6 \\cdot \\text{I}$ ergibt $3x + 2y = 18$, $12 \\cdot \\text{II}$ ergibt $3x - 2y = 6$',
+        'Jetzt stehen vor $y$ die Gegenzahlen $+2$ und $-2$: addieren, $6x = 24$, also $x = 4$',
+        '$x = 4$ in $3x + 2y = 18$: $12 + 2y = 18$, also $y = 3$',
+        'Probe im Original: $2 + 1 = 3$ ✓ und $1 - \\dfrac{1}{2} = \\dfrac{1}{2}$ ✓, also $L = \\{(4 \\mid 3)\\}$',
+        'Falle: $(2 \\mid 6)$ erfüllt nur I: $\\dfrac{2}{4} - 1 = -\\dfrac{1}{2} \\neq \\dfrac{1}{2}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Rechteck hat den Umfang 30 cm. Seine Länge ist um 3 cm größer als das Doppelte seiner Breite. Mit $x$ für die Länge und $y$ für die Breite (in cm): Welche Lösungsmenge hat das LGS?',
+      opts: ['$L = \\{(12 \\mid 3)\\}$', '$L = \\{(11 \\mid 4)\\}$', '$L = \\{(4 \\mid 11)\\}$', '$L = \\{(21 \\mid 9)\\}$'],
+      steps: [
+        '$\\text{I}: 2x + 2y = 30$ (Umfang) und $\\text{II}: x = 2y + 3$ (Länge)',
+        'II in I einsetzen: $2(2y + 3) + 2y = 30$, also $6y + 6 = 30$ und $y = 4$',
+        '$y = 4$ in II: $x = 2 \\cdot 4 + 3 = 11$. Probe: $22 + 8 = 30$ ✓, also $L = \\{(11 \\mid 4)\\}$: 11 cm lang, 4 cm breit.',
+        'Falle: $(21 \\mid 9)$ mit $x + y = 30$ als Umfang, $(12 \\mid 3)$ mit $x = 2(y + 3)$ — „um 3 größer als das Doppelte“ heißt $2y + 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Am Kiosk kosten 2 Brezeln und 1 Saft zusammen 4 €, 4 Brezeln und 2 Säfte zusammen 8 €. Lassen sich daraus der Preis einer Brezel und der eines Safts berechnen?',
+      opts: ['Nein: das LGS hat keine Lösung', 'Ja: eine Brezel kostet 1,50 €, ein Saft 1 €', 'Ja: eine Brezel kostet 1 €, ein Saft 2 €', 'Nein: die zweite Angabe ist das Doppelte der ersten, es gibt unendlich viele Preispaare'],
+      steps: [
+        '$x$: Preis einer Brezel, $y$: Preis eines Safts (in €). $\\text{I}: 2x + y = 4$ und $\\text{II}: 4x + 2y = 8$',
+        '$\\text{II} - 2 \\cdot \\text{I}$: $0 = 0$ — die zweite Angabe sagt nichts Neues.',
+        '$x = t$, aus I: $y = 4 - 2t$, also $L = \\{(t \\mid 4 - 2t)\\},\\ t \\in \\mathbb{R}$, mit $0 < t < 2$ für echte Preise.',
+        'Beide „Ja“-Paare erfüllen I und II — aber $(1{,}2 \\mid 1{,}6)$ genauso. Eindeutig berechnen lässt sich nichts.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welche Werte von $b$ hat das LGS $\\begin{cases} 2x - y = 1 & \\text{I} \\\\ -6x + 3y = b & \\text{II} \\end{cases}$ keine Lösung?',
+      opts: ['für jedes $b \\neq -3$', 'nur für $b = -3$', 'nur für $b = 3$', 'für kein $b$: es gibt immer genau eine Lösung'],
+      steps: [
+        '$3 \\cdot \\text{I}$ ergibt $6x - 3y = 3$',
+        '$3 \\cdot \\text{I} + \\text{II}$: $0 = 3 + b$ — beide Variablen fallen weg, egal welches $b$.',
+        'Für $b = -3$ steht $0 = 0$ da: unendlich viele Lösungen, $L = \\{(t \\mid 2t - 1)\\},\\ t \\in \\mathbb{R}$',
+        'Für jedes andere $b$ ist $0 = 3 + b$ falsch: keine Lösung, $L = \\{\\}$. Genau eine Lösung gibt es hier nie — die Geraden haben beide die Steigung $2$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
