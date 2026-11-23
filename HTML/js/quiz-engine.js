@@ -217,6 +217,10 @@
      the grade of A + B comes from svp/leistungstest.html once Teil B is entered
      there, so no pupil sees a grade that is not the final one. */
   const PART_B = Number(CFG.partB) > 0 ? Number(CFG.partB) : 0;
+  /* QUIZ.partBBonus: Teil B is a bonus on top of A (Doc, 23.11.2026, LT 1 BGY26: "doch bitte bei Bonus immer
+     ausrechnen") - the dashboard grades Teil A at once on its own scale (base = the questions of A); the
+     pupil's result screen still keeps the grade back until Teil B is in */
+  const PART_B_BONUS = PART_B > 0 && CFG.partBBonus === true;
   /* QUIZ.noGrades: a quiz without grades, e.g. for colleagues (Doc, 12.11.2026: "nimm HIER Noten -> Fux raus") - points
      and percent only, no Note after submitting, no Notenspiegel in the dashboard; Mission Control reads it too */
   const NO_GRADES = CFG.noGrades === true;
@@ -862,7 +866,7 @@
      still earns the mark - so a chip and its column match. With Teil B on paper
      there is no mark yet: plain percent. */
   function chipColor(score, total) {
-    if (PART_B || !total) return barColor(total ? score / total * 100 : 0);
+    if ((PART_B && !PART_B_BONUS) || !total) return barColor(total ? score / total * 100 : 0);
     const m = String(markOf(score, total));
     let p = score;
     while (p > 0 && String(markOf(p - 1, total)) === m) p--;
@@ -887,7 +891,8 @@
      Notenspiegel sieht"): how many got which mark, best mark first, every mark
      from markOf() - the very rule of the result screen, never a second scale.
      Under each mark the points it takes, worked out with the same rule. With
-     Teil B on paper there is no mark here yet. Notenpunkte pages also show the
+     Teil B on paper there is no mark here yet - unless Teil B is a bonus
+     (PART_B_BONUS): then the marks of Teil A alone, with a note that B is missing. Notenpunkte pages also show the
      Zensur under each value and the average Note next to the average NP - the
      mean of the pupils' whole Noten from NP_ZENSUR (Doc, 06.11.2026: "hinter
      den Notenpunkten noch Gedankenstrich, Note ... die Durchschnittsnote"). */
@@ -895,13 +900,15 @@
     const el = document.getElementById('dashgrades');
     if (!el) return;
     if (NO_GRADES) { el.closest('.card').style.display = 'none'; return; }
-    if (PART_B) {
+    if (PART_B && !PART_B_BONUS) {
       el.textContent = 'Die Noten gibt es erst zusammen mit Teil B (Papier) – deshalb hier kein Notenspiegel.';
       return;
     }
     if (!subs.length) { el.textContent = 'Noch keine Abgaben.'; return; }
     const hint = document.getElementById('gmhint');
     if (hint && NP) hint.textContent = 'Anzahl je Notenpunkte, darunter Zensur und Punkte dafür';
+    if (hint && PART_B_BONUS) hint.textContent = (NP ? 'Anzahl je Notenpunkte' : 'Anzahl je Note') +
+      ' aus Teil A, darunter die Punkte dafür · Teil B (Bonus) noch nicht enthalten';
     const steps = [];
     GRADE_SCALE.forEach(function (st) { if (steps.indexOf(String(st[1])) < 0) steps.push(String(st[1])); });
     const floor = NP ? '00' : '6';
