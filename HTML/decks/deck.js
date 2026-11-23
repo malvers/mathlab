@@ -1647,8 +1647,8 @@ fullBtn.addEventListener('click', function (e) {
   e.preventDefault(); e.stopPropagation();          // the dot does not send the deck into fullscreen
   paintFull();
   const say = screen.isExtended
-    ? 'Bildschirm ist erweitert – f startet Beamer und Referentenansicht'
-    : 'Nur ein Bildschirm. Am Mac Cmd F1, an Windows Win P – dann f';
+    ? 'Bildschirm ist erweitert – v startet Beamer und Referentenansicht'
+    : 'Nur ein Bildschirm. Am Mac Cmd F1, an Windows Win P – dann v';
   if (window.DeckNote) DeckNote(say);
   // the measuring box (screenProbe: "Messwerte", copied to the clipboard) is off - Doc, 23.11.2026: "Bitte wegmachen"
 }, true);
