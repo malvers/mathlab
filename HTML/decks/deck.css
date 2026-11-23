@@ -1067,6 +1067,30 @@ html.laser-on .p-cur .p-fit{cursor:none}
 /* caption under a preview (Doc, 16.09.2026: "Nächste Folie: ##" / "Übernächste Folie: ##"), like the count under the slide */
 .p-cap{min-height:1.5em;margin:6px 0 0;text-align:center;color:#B8C6DF;
   font-family:Raleway,system-ui,sans-serif;font-size:clamp(13px,1.2vw,17px)}
+/* the board's real picture (t, deck-spiegel.js: "Tafel live" where the slide after next was) stands in a monitor, so it
+   is unmistakable that this is exactly what the class sees (Doc, 23.11.2026: "irgendwie ein Fernsehrahmen oder so").
+   All of it is drawn around the picture - shadows for bezel, chin and rim, the slot's two pseudo elements for the LIVE
+   badge on the chin and the stand - so the picture keeps the size and place fitAll gives it and nothing covers it; only
+   the caption moves down below the foot. Bezel and rim in the colours of the .smartphone frame on the slides. */
+#pres .p-after.tafel{--tv-b:clamp(6px,.5vw,10px);--tv-chin:clamp(18px,1.45vw,27px);--tv-foot:clamp(10px,.85vw,16px)}
+#pres .p-after.tafel .p-fit{position:relative}
+#pres .p-after.tafel .p-frame{border-radius:3px;background:#000;
+  box-shadow:0 0 0 1px #000,                                                            /* the screen's edge */
+    0 0 0 var(--tv-b) #0B0F17,0 calc(var(--tv-chin) - var(--tv-b)) 0 var(--tv-b) #0B0F17,   /* bezel, chin below */
+    0 0 0 calc(var(--tv-b) + 1px) #3B4456,
+    0 calc(var(--tv-chin) - var(--tv-b)) 0 calc(var(--tv-b) + 1px) #3B4456,              /* the rim around both */
+    0 calc(var(--tv-chin) / 2 + 6px) 26px 2px rgba(0,0,0,.5)}
+/* the badge in the middle of the chin: a red pill, a white dot, LIVE */
+#pres .p-after.tafel .p-fit::after{content:'Live';position:absolute;left:50%;top:calc(100% + var(--tv-chin) / 2);
+  transform:translate(-50%,-50%);padding:.3em .6em .3em 1.5em;border-radius:999px;pointer-events:none;white-space:nowrap;
+  background:radial-gradient(circle at .78em 50%,#fff 0 .24em,transparent .29em) #B02418;color:#fff;
+  font:700 calc(var(--tv-chin) * .44)/1 Orbitron,system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+/* the stand: a neck from under the chin, widening into a flat foot with a lit edge */
+#pres .p-after.tafel .p-fit::before{content:'';position:absolute;left:50%;top:calc(100% + var(--tv-chin));
+  width:clamp(84px,8vw,150px);height:var(--tv-foot);transform:translateX(-50%);pointer-events:none;
+  background:linear-gradient(#0B0F17,#2A3242 56%,#5A6580 56% calc(56% + 1px),#262E3D calc(56% + 1px),#151A24);
+  clip-path:polygon(41% 0,59% 0,61% 56%,91% 56%,100% 100%,0 100%,9% 56%,39% 56%)}
+#pres .p-after.tafel .p-cap{margin-top:calc(var(--tv-chin) + var(--tv-foot) + 6px)}
 .p-strip{grid-area:strip;display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding:4px 4px 8px;
   position:relative;z-index:1;align-items:flex-end;   /* JS lends it room above for the dock magnification */
   scrollbar-width:thin;scrollbar-color:#7E8FB5 transparent}
