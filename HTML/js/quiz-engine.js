@@ -15,6 +15,8 @@
        submitLabel: 'Auswertung',   // optional: rename it (default "Abgeben")
        version: 'v9',               // optional: data pool version, default 'v1'
        solutions: 'always',         // optional: readable without submitting; 'none' = no panel
+       revealAfterSubmit: false,    // optional: right/wrong + solutions after "Abgeben"? Default: no
+                                    //   for graded tests, yes for exercise sheets (see SEALED_PAGE)
        gradeScale: [[95, 1], ...],  // optional
        questions: [ { q, opts, steps, solution }, ... ]
      };
@@ -225,6 +227,30 @@
      and percent only, no Note after submitting, no Notenspiegel in the dashboard; Mission Control reads it too */
   const NO_GRADES = CFG.noGrades === true;
 
+  /* No answers on the pupil's screen after a graded test (Doc, 23.11.2026, LT 1 Mathe BGY26, written on paper
+     first and then online: the result screen marked every question right or wrong and showed the correct option,
+     and 7 pupils mended their paper afterwards - "Das darf doch nicht sein, dass die beim Ablesen des Testes
+     rausfinden können, was die richtige Antwort ist." - "ja, abstellen"). A sealed test answers "Abgeben" with
+     "Abgegeben ✓", the slip code and the time - also after a reload - and nothing else: no right/wrong, no
+     correct option, no points, no class bars, no solution panels. ?auswertung and Mission Control still show
+     everything. QUIZ.revealAfterSubmit (true/false) decides for one page; without it the page decides by what
+     it is:
+       - an exercise sheet (solutions: 'always', or submit: false) reveals as before - its solutions are open anyway;
+       - a graded test is sealed: its own grade key (QUIZ.gradeScale), a paper part (QUIZ.partB), QUIZ.requireCode,
+         or a class run (?klasse - only the tests of Mission Control carry one);
+       - so is a submission under a Zettel-Code: the page then calls itself "Leistungstest" (tagContext);
+       - everything else - the weekly "Fragen" quizzes, an entry test taken anonymously - reveals as before. */
+  const REVEAL_CFG = typeof CFG.revealAfterSubmit === 'boolean' ? CFG.revealAfterSubmit : null;
+  const PRACTICE = FREE_SOLUTIONS || CFG.submit === false;
+  const SEALED_PAGE = REVEAL_CFG !== null ? !REVEAL_CFG
+                    : !PRACTICE && !!(CFG.gradeScale || PART_B || CFG.requireCode === true || KLASSE);
+  /* asked again on submitting: a code typed by hand turns the page into a Leistungstest */
+  function sealed() {
+    if (REVEAL_CFG !== null || PRACTICE) return SEALED_PAGE;
+    return SEALED_PAGE || CODE_RE.test(code);
+  }
+  const SEALED_AT_START = sealed();
+
   function gradeFor(pct) {
     for (let i = 0; i < GRADE_SCALE.length; i++) {
       if (pct >= GRADE_SCALE[i][0]) return GRADE_SCALE[i][1];
@@ -256,6 +282,14 @@
     if (!KEEP_ON) return;
     try { localStorage.setItem(KEEP_KEY, JSON.stringify({ code: code, answers: answers })); } catch (e) { /* no storage */ }
   }
+  /* the time the server took the submission, for "Abgegeben ✓ ... um 10:42 Uhr" after a reload */
+  let keptAt = null;
+  function keepSubmitted(at) {
+    if (!KEEP_ON) return;
+    try {
+      localStorage.setItem(KEEP_KEY, JSON.stringify({ code: code, answers: answers, at: at.toISOString() }));
+    } catch (e) { /* no storage */ }
+  }
   /* true when answers came back; marks them like a pick does */
   function restoreAnswers() {
     if (!KEEP_ON) return false;
@@ -264,6 +298,8 @@
     if (!kept || !Array.isArray(kept.answers) || kept.answers.length !== QUESTIONS.length) return false;
     /* another slip on this device: its answers are not ours */
     if (code && kept.code && kept.code !== code) return false;
+    const at = kept.at ? new Date(kept.at) : null;
+    keptAt = at && !isNaN(at.getTime()) ? at : null;
     /* typed by hand last time: the reload lost it from the field, not from here */
     if (!code && kept.code && CODE_RE.test(kept.code)) { code = kept.code; tagFooter(); }
     kept.answers.forEach(function (oi, qi) {
@@ -384,8 +420,10 @@
       });
 
       /* Solution toggle below the answer options; the step-by-step panel
-         opens directly underneath the button. */
-      if (NO_SOLUTIONS) {
+         opens directly underneath the button. A sealed test never unlocks it,
+         so it gets none - a grey "Lösung" would promise it after "Abgeben".
+         The demo pool (?test) keeps it open, as before. */
+      if (NO_SOLUTIONS || (SEALED_AT_START && !TEST_MODE)) {
         quizEl.appendChild(card);
         return;
       }
@@ -452,13 +490,15 @@
     if (codeInput) codeInput.disabled = true;
 
     let score = 0;
+    QUESTIONS.forEach(function (item, qi) { if (answers[qi] === item.solution) score++; });
+    if (sealed()) { showSealed(replay === true, score); return; }
+
     document.querySelectorAll('.opt').forEach(function (b) {
       b.disabled = true;
       const qi = Number(b.dataset.q), oi = Number(b.dataset.o);
       if (oi === QUESTIONS[qi].solution) b.classList.add('correct');
       else if (answers[qi] === oi) b.classList.add('wrong');
     });
-    QUESTIONS.forEach(function (item, qi) { if (answers[qi] === item.solution) score++; });
 
     document.querySelectorAll('.solbtn').forEach(function (b) {
       b.disabled = false;
@@ -493,6 +533,24 @@
 
   /* Send answers once; server stores one anonymous submission row ("12/20")
      plus aggregated per-question counters. */
+  function voteRequest(score) {
+    return fetch(DB_URL + '/rest/v1/rpc/quiz_vote', {
+      method: 'POST',
+      headers: {
+        apikey: DB_KEY,
+        Authorization: 'Bearer ' + DB_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        p_quiz: QUIZ_ID,
+        p_answers: answers,
+        p_score: score,
+        p_total: QUESTIONS.length,
+        p_code: code || null
+      })
+    });
+  }
+
   function sendStats(score) {
     const avgEl = document.getElementById('classavg');
     const alreadyDone = !TEST_MODE && localStorage.getItem(DONE_KEY) === '1';
@@ -500,21 +558,7 @@
       ? fetch(DB_URL + '/rest/v1/quiz_stats?quiz=eq.' + QUIZ_ID + '&order=q', {
           headers: { apikey: DB_KEY, Authorization: 'Bearer ' + DB_KEY }
         })
-      : fetch(DB_URL + '/rest/v1/rpc/quiz_vote', {
-          method: 'POST',
-          headers: {
-            apikey: DB_KEY,
-            Authorization: 'Bearer ' + DB_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            p_quiz: QUIZ_ID,
-            p_answers: answers,
-            p_score: score,
-            p_total: QUESTIONS.length,
-            p_code: code || null
-          })
-        });
+      : voteRequest(score);
 
     call.then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -526,6 +570,72 @@
       renderReview(null); /* still show own richtig/falsch without class data */
       avgEl.textContent = 'Klassendurchschnitt gerade nicht verfügbar.';
     });
+  }
+
+  /* The screen of a sealed test after "Abgeben" (see SEALED_PAGE): the questions go, only the confirmation stays.
+     "Abgegeben ✓" appears once the server has the submission - while it travels the card says so, and when it
+     does not arrive the pupil can send it again (the server keeps one submission per code). replay: shown again
+     after a reload, nothing is sent. */
+  function showSealed(replay, score) {
+    document.querySelectorAll('.opt, .solbtn').forEach(function (b) { b.disabled = true; });
+    quizEl.style.display = 'none';
+    document.querySelectorAll('.qbar .btn-fold, .coderow').forEach(function (el) { el.style.display = 'none'; });
+    const box = document.getElementById('submitBox');
+    if (box) box.style.display = 'none';
+    const resEl = document.getElementById('result');
+    resEl.className = 'card sealed';
+    resEl.innerHTML = '<h2></h2><div class="sealed-who"></div><p class="sealed-text"></p>' +
+      '<button type="button" class="btn sealed-retry" hidden>Nochmal senden</button>';
+    resEl.querySelector('.sealed-retry').addEventListener('click', function () { sendSealed(score); });
+    resEl.style.display = 'block';
+    let doneBefore = false;
+    try { doneBefore = !TEST_MODE && localStorage.getItem(DONE_KEY) === '1'; } catch (e) { /* no storage */ }
+    /* DONE_KEY is set only once the server took it: no second vote, as in sendStats */
+    if (replay || doneBefore) sealedState('done', keptAt);
+    else sendSealed(score);
+    resEl.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function sendSealed(score) {
+    sealedState('sending');
+    voteRequest(score).then(function (res) {
+      if (res.ok) return null;
+      return res.text().then(function (t) {
+        throw new Error(/aborted/.test(t) ? 'aborted' : 'HTTP ' + res.status);
+      });
+    }).then(function () {
+      const at = new Date();
+      if (!TEST_MODE) {
+        try { localStorage.setItem(DONE_KEY, '1'); } catch (e) { /* no storage */ }
+      }
+      keepSubmitted(at);
+      sealedState('done', at);
+    }).catch(function (e) {
+      sealedState(e && e.message === 'aborted' ? 'aborted' : 'error');
+    });
+  }
+
+  function sealedState(state, at) {
+    const resEl = document.getElementById('result');
+    const TEXT = {
+      sending: ['Wird abgegeben …', 'Einen Moment – gleich steht hier „Abgegeben ✓“.'],
+      done: ['Abgegeben ✓', 'Deine Antworten sind angekommen. Dein Ergebnis bekommst du von deiner Lehrkraft.'],
+      error: ['Noch nicht abgegeben', 'Deine Antworten sind noch nicht angekommen. Prüfe die Internetverbindung ' +
+        'und tippe auf „Nochmal senden“ – klappt es nicht, melde dich bei deiner Lehrkraft.'],
+      aborted: ['Test beendet', 'Deine Lehrkraft hat deinen Test beendet. Er wird nicht gewertet.']
+    }[state];
+    resEl.classList.toggle('wait', state === 'sending');
+    resEl.classList.toggle('err', state === 'error' || state === 'aborted');
+    resEl.querySelector('h2').textContent = TEXT[0];
+    resEl.querySelector('.sealed-text').textContent = TEXT[1];
+    const who = [];
+    if (CODE_RE.test(code)) who.push(slipLabel());
+    if (state === 'done' && at) {
+      who.push('abgegeben um ' + String(at.getHours()).padStart(2, '0') + ':' +
+        String(at.getMinutes()).padStart(2, '0') + ' Uhr');
+    }
+    resEl.querySelector('.sealed-who').textContent = who.join(' · ');
+    resEl.querySelector('.sealed-retry').hidden = state !== 'error';
   }
 
   /* Bar color ramp: palette red (0%) -> orange (50%) -> green (100%). */
