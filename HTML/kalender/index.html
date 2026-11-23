@@ -230,16 +230,16 @@
            Mitte, zentriert, machen wir den Gedanken der Woche hin"): a grid. Where back, period and forward have a row of
            their own (up to 1259px) an empty column on the left, as wide as the thought's on the right, keeps them in the
            middle as before; from 1260px the thought's column is what the bar leaves up to the people button. On the
-           phone that column is 28px at 390px - room for the round picture alone (the words go below 180px, see .gdw) */
-        :root { --gdw-min: 28px; }
+           phone that column is 32px - room for the pill with the picture alone (the words go below 180px, see .gdw) */
+        :root { --gdw-min: 32px; }
         .nav {
             display: grid; align-items: center; gap: var(--nav-gap);
             grid-template-columns: minmax(var(--gdw-min), 1fr) var(--ctl) var(--nav-box) var(--ctl) minmax(var(--gdw-min), 1fr);
             grid-template-areas: "sp prev per next gdw";
         }
-        /* below 390px the period gives up what the picture needs (192px at 360px; where a month no longer fits, renderWeek
-           writes it short) */
-        @media (max-width: 389px) { .nav { grid-template-columns: var(--gdw-min) var(--ctl) minmax(0, 1fr) var(--ctl) var(--gdw-min); } }
+        /* below 398px the period gives up what the pill needs (214px at 390px, 184px at 360px; where a month no longer
+           fits, renderWeek writes it short) */
+        @media (max-width: 397px) { .nav { grid-template-columns: var(--gdw-min) var(--ctl) minmax(0, 1fr) var(--ctl) var(--gdw-min); } }
         #prevBtn { grid-area: prev; }
         #nextBtn { grid-area: next; }
         .nav .period { grid-area: per; }
@@ -251,37 +251,44 @@
         /* back / forward are filled triangles with round corners (TRI; Doc, 23.11.2026: "schöne Dreiecke und nicht nur
            diese Chevrons") - stroke in the fill's colour rounds the corners */
         svg .tri { stroke: currentColor; stroke-width: 2.2px; stroke-linejoin: round; }
-        /* the thought in the header: the sheet as a round picture and its words on one line, centred in its column - a
-           size container, so where the column gets narrow (phone, a crowded bar) only the picture stays */
+        /* the thought in the header: a pill like the header's other controls - one control high, the period's line and
+           corners - with the sheet as a small page (round corners, no circle) and its words on one line, centred in its
+           column (Doc, 23.11.2026: "die Pille oben nicht Kreis"). A size container: where the column gets narrow (phone,
+           a crowded bar) only the pill with the picture stays */
         .gdw {
             grid-area: gdw; justify-self: stretch; min-width: 0; height: var(--ctl); padding: 0; border: 0; background: transparent;
             color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden;
             container-type: inline-size;
         }
-        .gdw-in { display: inline-flex; align-items: center; gap: 9px; min-width: 0; max-width: 100%; height: 100%; padding: 0 10px; border-radius: 10px; }
+        .gdw-in {
+            display: inline-flex; align-items: center; gap: 9px; min-width: 0; max-width: 100%; height: 100%; padding: 0 12px 0 4px;
+            border: 1px solid var(--line); border-radius: 10px;
+        }
         .gdw:hover .gdw-in { background: rgba(var(--tint), .1); }
         .gdw:focus-visible { outline: none; }
         .gdw:focus-visible .gdw-in { outline: 2px solid var(--lambda); outline-offset: -2px; }
-        .gdw-img {
-            flex: none; width: var(--gdw-min); height: var(--gdw-min); border-radius: 50%; object-fit: cover;
-            border: 1.5px solid rgba(var(--c-gold), .85); background: rgb(255, 255, 255);
-        }
+        .gdw-img { flex: none; height: 30px; width: auto; aspect-ratio: 200 / 289; border-radius: 4px; object-fit: cover; background: rgb(255, 255, 255); }
         .gdw-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 15px/1.3 Arial, Helvetica, sans-serif; }
         @container (max-width: 180px) {
             .gdw-txt { display: none; }
-            .gdw-in { padding: 0; }
+            .gdw-in { padding: 0 4px; }
         }
-        /* the thought whole: the sheet, its words, back / forward through the weeks */
-        .gdw-dlg { max-width: 400px; text-align: center; }
+        /* the thought whole: the sheet as large as the window allows (Doc, 23.11.2026: "Bitte größer"), its words and back /
+           forward under it. fitGdw sizes the sheet and with it the dialog: up to 92% of the window's height and 900px wide,
+           on the phone nearly the whole screen */
+        #gdwDlg { padding: 12px; }
+        /* .dlg.gdw-dlg: over the general .dlg further down (420px wide, 20px padding) */
+        .dlg.gdw-dlg { width: auto; max-width: none; max-height: calc(100dvh - 12px); overflow: auto; padding: 16px; text-align: center; }
         .gdw-dlg .ed-title { margin-bottom: 2px; }
-        .gdw-when { margin: 0 0 12px; font: 500 11px/1.5 Orbitron, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: pre-line; }
-        .gdw-big {
-            display: block; margin: 0 auto; width: min(100%, 332px, calc((100dvh - 290px) * 200 / 289)); height: auto;
-            aspect-ratio: 200 / 289; border-radius: 6px; background: rgb(255, 255, 255);
-        }
-        .gdw-quote { margin: 12px 0 0; font: 16px/1.45 Arial, Helvetica, sans-serif; color: var(--text); overflow-wrap: anywhere; }
+        .gdw-when { margin: 0 0 10px; font: 500 11px/1.5 Orbitron, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: pre-line; }
+        /* the frame shows the printed part of the sheet, without its empty white margins (trimGdw); the page inside is
+           placed by fitGdw */
+        .gdw-sheet { position: relative; margin: 0 auto; width: 300px; aspect-ratio: 200 / 289; overflow: hidden; border-radius: 6px; background: rgb(255, 255, 255); }
+        .gdw-big { position: absolute; left: 0; top: 0; display: block; width: 100%; height: 100%; max-width: none; }
+        .gdw-quote { margin: 10px 0 0; font: 16px/1.4 Arial, Helvetica, sans-serif; color: var(--text); overflow-wrap: anywhere; }
         .gdw-quote:empty { display: none; }
-        .gdw-dlg .dlg-btns { margin-top: 16px; }
+        .gdw-dlg .dlg-btns { margin-top: 12px; }
+        @media (max-width: 560px) { #gdwDlg { padding: 6px; } .dlg.gdw-dlg { padding: 12px; } }
         .dlg-btns button.gdw-step { flex: 0 0 var(--ctl); min-width: 0; padding: 0; display: grid; place-items: center; }
         .gdw-step svg { width: 22px; height: 22px; fill: currentColor; }
         .gdw-step:disabled { opacity: .35; cursor: default; }
@@ -1148,7 +1155,7 @@
         <div class="dlg gdw-dlg" role="dialog" aria-modal="true" aria-labelledby="gdwTitle">
             <p class="ed-title" id="gdwTitle">Gedanke der Woche</p>
             <p class="gdw-when" id="gdwWhen"></p>
-            <img class="gdw-big" id="gdwBig" alt="">
+            <div class="gdw-sheet" id="gdwSheet"><img class="gdw-big" id="gdwBig" alt=""></div>
             <p class="gdw-quote" id="gdwQuote"></p>
             <div class="dlg-btns">
                 <button type="button" class="gdw-step" id="gdwPrev" aria-label="Woche davor"></button>
@@ -1818,6 +1825,7 @@
                 if (b.dataset.sig === sig) return;   // the half-minute redraws leave it alone
                 b.dataset.sig = sig;
                 $('gdwImg').src = gdwThumb(e);
+                trimGdw(e);   // ready before the dialog is opened
                 $('gdwTxt').textContent = gdwQuote(e) || gdwHead(e);
                 const say = gdwHead(e) + (e.ferien ? ' · ' + e.ferien : '') + (e.titel ? ': ' + e.titel : '');
                 b.title = say + ' (antippen)';
@@ -1842,7 +1850,82 @@
                 $('gdwQuote').textContent = gdwQuote(e);
                 $('gdwPrev').disabled = !gdwNear(key, -1);
                 $('gdwNext').disabled = !gdwNear(key, 1);
+                trimGdw(e);
+                [-1, 1].forEach(d => { const k = gdwNear(key, d); if (k) trimGdw(gdw[k]); });   // the arrows' next sheets too
                 if ($('gdwDlg').hidden) { $('gdwDlg').hidden = false; $('gdwOk').focus(); }
+                fitGdw();
+            }
+            /* the printed part of a sheet: most sheets are a page with white margins around a photo or the words, and the
+               dialog shows them without that empty paper, so the print itself gets the room (Doc, 23.11.2026: "Bitte größer";
+               on the screenshot white above and below). Measured once per sheet on the small picture (200 px wide): the box
+               of everything that is not white, plus 3% paper round it. A picture the browser may not read (no CORS) or
+               one that is white all over: the whole sheet */
+            const GDW_FULL = { x: 0, y: 0, w: 1, h: 1 };
+            const gdwTrim = new Map();   // picture number -> { x, y, w, h } as fractions of the sheet; null while measuring
+            function trimGdw(e) {
+                if (!e || gdwTrim.has(e.bild)) return;
+                gdwTrim.set(e.bild, null);
+                const im = new Image();
+                im.crossOrigin = 'anonymous';
+                im.onload = () => {
+                    let t = null;
+                    try {
+                        const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas');
+                        c.width = W; c.height = H;
+                        const g = c.getContext('2d');
+                        g.drawImage(im, 0, 0);
+                        const px = g.getImageData(0, 0, W, H).data;
+                        let x0 = W, y0 = H, x1 = -1, y1 = -1;
+                        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+                            const i = (y * W + x) * 4;
+                            if (px[i] < 236 || px[i + 1] < 236 || px[i + 2] < 236) {
+                                if (x < x0) x0 = x;
+                                if (x > x1) x1 = x;
+                                if (y < y0) y0 = y;
+                                if (y > y1) y1 = y;
+                            }
+                        }
+                        if (x1 > x0 && y1 > y0) {
+                            const m = Math.round(W * 0.03);
+                            x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(W - 1, x1 + m); y1 = Math.min(H - 1, y1 + m);
+                            t = { x: x0 / W, y: y0 / H, w: (x1 - x0 + 1) / W, h: (y1 - y0 + 1) / H };
+                        }
+                    } catch (err) { t = null; }
+                    gdwTrim.set(e.bild, t || GDW_FULL);
+                    if (gdwOpen && gdw && gdw[gdwOpen] && gdw[gdwOpen].bild === e.bild) fitGdw();
+                };
+                im.onerror = () => gdwTrim.set(e.bild, GDW_FULL);
+                im.src = gdwThumb(e);
+            }
+            /* the sheet as large as it goes (Doc, 23.11.2026: "Bitte größer"): as wide as the dialog may be (900px, or the
+               window less its margin) and as high as 92% of the window leaves beside title, date, words and buttons. Twice,
+               because the words wrap anew once the dialog has its width. Again when a picture arrives or the window changes */
+            function fitGdw() {
+                const back = $('gdwDlg');
+                if (back.hidden) return;
+                const dlg = back.firstElementChild, img = $('gdwBig'), sheet = $('gdwSheet');
+                const full = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 200 / 289;
+                const t = (gdwOpen && gdw && gdw[gdwOpen] && gdwTrim.get(gdw[gdwOpen].bild)) || GDW_FULL;
+                const ratio = full * t.w / t.h;   // width : height of the printed part
+                const bs = getComputedStyle(back), ds = getComputedStyle(dlg), px = v => parseFloat(v) || 0;
+                const room = innerWidth - px(bs.paddingLeft) - px(bs.paddingRight);
+                const padX = px(ds.paddingLeft) + px(ds.paddingRight) + px(ds.borderLeftWidth) + px(ds.borderRightWidth);
+                const maxW = Math.min(900, room) - padX;
+                const maxH = Math.min(innerHeight * 0.92, innerHeight - px(bs.paddingTop) - px(bs.paddingBottom));
+                for (let i = 0; i < 2; i++) {
+                    const rest = dlg.offsetHeight - sheet.offsetHeight;
+                    const w = Math.floor(Math.max(120, Math.min((maxH - rest) * ratio, maxW))), h = Math.floor(w / ratio);
+                    sheet.style.width = w + 'px';
+                    sheet.style.height = h + 'px';
+                    sheet.style.aspectRatio = 'auto';
+                    // the whole page, as large as the printed part needs it, shifted so that part fills the frame
+                    const pw = w / t.w, ph = h / t.h;
+                    img.style.width = pw + 'px';
+                    img.style.height = ph + 'px';
+                    img.style.left = -t.x * pw + 'px';
+                    img.style.top = -t.y * ph + 'px';
+                    dlg.style.width = Math.min(room, Math.max(w + padX, 300)) + 'px';
+                }
             }
             // the week before / after that has a thought (every week of the school year has one, so it is the next week)
             function gdwNear(key, dir) {
@@ -3121,6 +3204,8 @@
                 $('gdwPrev').onclick = () => stepGdw(-1);
                 $('gdwNext').onclick = () => stepGdw(1);
                 $('gdwDlg').addEventListener('pointerdown', e => { if (e.target === $('gdwDlg')) closeGdw(); });
+                $('gdwBig').addEventListener('load', fitGdw);
+                addEventListener('resize', fitGdw);
                 document.addEventListener('keydown', e => {
                     if ($('gdwDlg').hidden) return;
                     e.stopPropagation();
