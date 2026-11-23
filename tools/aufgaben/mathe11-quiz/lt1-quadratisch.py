@@ -21,11 +21,12 @@ import sympy as sp
 from quiz import Quiz
 
 # Grade: Teil A (20 BE) + Teil B bonus (0-2 BE), the BGY 11 key stays on 20 BE (Doc: "10% mehr Punkte").
-# Mission Control grades A + B as a share of A + partB = 22 with the page's scale (svp/leistungstest.html
-# gradeAB: whole percent rounded half up). This percent scale on 22 gives exactly the thresholds of the
-# BGY 11 key on 20 BE - 19/16/13/9/5 BE - checked for every score 0..22 in check_scale().
+# QUIZ.partBBonus (Doc, 23.11.2026: "ist Bonus!"): Mission Control and the dashboard grade A + B as a share
+# of A alone = 20 (svp/leistungstest.html gradeAB: whole percent rounded half up), so the scale is the
+# BGY 11 key itself (svp/punktetabelle.html SCALES[11]) - 19/16/13/9/5 BE; A + B > 20 is over 100 % = 1.
+# Checked for every score 0..22 in check_scale(). (Until 23.11. the scale was 86/73/59/41/23 on a base of 22.)
 PART_B = 2
-SCALE = [[86, 1], [73, 2], [59, 3], [41, 4], [23, 5], [0, 6]]
+SCALE = [[95, 1], [80, 2], [65, 3], [45, 4], [25, 5], [0, 6]]
 
 
 class Test(Quiz):
@@ -38,14 +39,15 @@ class Test(Quiz):
         assert L.count(a) == 1 and L.count(b) == 1, 'quiz.py: exercise-sheet lines changed'
         cfg = ('  requireCode: true,   /* Code vom Zettel, wie in Mission Control */\n'
                '  partB: %d,   /* Teil B: Bonus auf Papier, Doc traegt ihn in Mission Control ein */\n'
-               '  gradeScale: %s,   /* = BGY-11-Schluessel auf 20 BE (19/16/13/9/5), Bonus obendrauf, siehe lt1-quadratisch.py */\n'
+               '  partBBonus: true,   /* Teil B is a bonus: Mission Control grades Teil A at once (base 20 BE), B lands on top (Doc, 23.11.2026) */\n'
+               '  gradeScale: %s,   /* BGY 11 key on a base of 20 BE (svp/punktetabelle.html SCALES[11]: 19/16/13/9/5 BE), Teil B bonus on top, A + B > 20 = over 100 %% */\n'
                % (PART_B, str(SCALE).replace(' ', '')))
         return L.replace(a, '').replace(b, cfg)
 
     def _expected(self, qs):
         exp = super()._expected(qs)
         del exp['submitLabel'], exp['solutions']
-        exp.update(requireCode=True, partB=PART_B, gradeScale=SCALE)
+        exp.update(requireCode=True, partB=PART_B, partBBonus=True, gradeScale=SCALE)
         return exp
 
 
@@ -198,13 +200,14 @@ Sr = lambda e, v=x: sorted(s for s in sp.solve(e, v) if s.is_real)
 def D(P, Q): return F(P, 2) ** 2 - Q
 
 def check_scale():
-    """The page's percent scale on 22 = the BGY 11 key on 20 BE (units rule of punktetabelle.html), for 0..22."""
+    """The page's percent scale on a base of 20 (partBBonus) = the BGY 11 key on 20 BE (units rule of
+    punktetabelle.html), for 0..22 - a bonus above 20 stays 1."""
     def bgy11_on_20(pts):                  # quiz-engine unitsMark with BGY11_SCALE, total 20, bonus may exceed 20
         for th, g in [(95, 1), (80, 2), (65, 3), (45, 4), (25, 5)]:
             if pts >= math.ceil(round(th / 100 * 20, 9)):
                 return g
         return 6
-    def mission_control(pts, mx=20 + PART_B):   # svp/leistungstest.html gradeAB with a percent scale
+    def mission_control(pts, mx=20):   # svp/leistungstest.html gradeAB with a percent scale, bonus: base = A
         pct = math.floor(pts * 100 / mx + 0.5 + 1e-9)
         return next(g for th, g in SCALE if pct >= th)
     assert [bgy11_on_20(s) for s in (19, 16, 13, 9, 5, 4)] == [1, 2, 3, 4, 5, 6]
