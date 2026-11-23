@@ -7,7 +7,7 @@
 //
 // On the deck:
 //   t (Tafel)    the mirror. Chrome asks once what to show - the board's screen (preselected) or the beamer window.
-//                Starting the show (f, two screens) asks by itself before it goes on - then the question costs
+//                Starting the show (v, two screens) asks by itself before it goes on - then the question costs
 //                nothing - and t in the normal view does the same by hand. Once the show runs, the picture
 //                stands in the presenter view where the slide after next was, captioned "Tafel live"
 //                (Doc, 03.11.2026: "ich will ja mein Presenter-Modus behalten ... dahin, wo übernächste Folie ist").

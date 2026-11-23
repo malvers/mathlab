@@ -207,13 +207,13 @@ if (PRESENTER) document.documentElement.classList.add('presenter');
 // how the help and the titles write Cmd+O, the class's overview: Cmd on a Mac, Ctrl elsewhere (both work everywhere)
 const MAC_KEYS = /Mac|iPhone|iPad/.test(navigator.platform);
 const AUD_KEY = MAC_KEYS ? '⌘O' : 'Strg+O';
-// "Beamer eingefroren" (link below): one key in both windows of a show. B for Beamer - E is the editor's on Doc's Mac
-// (deck-edit.js) and opens the local copy on docalvers.de, so it was not free in the beamer window
-const FREEZE_KEY = 'B';
+// "Beamer eingefroren" (link below): one key in both windows of a show. F for Freeze; fullscreen moved to V for
+// Vollbild (Doc, 23.11.2026: "V für Vollbild und F für Freeze")
+const FREEZE_KEY = 'F';
 const freezeKey = e => !e.metaKey && !e.ctrlKey && !e.altKey && String(e.key).toUpperCase() === FREEZE_KEY;
 // While the beamer window is frozen its own keys change its picture no more than the presenter's messages do. Window
 // capture, registered before every other key listener of the deck, so none of them sees the key; the arrows go on to
-// the presenter view, where Doc works meanwhile. B itself, Esc (the end of the show), Cmd/Ctrl/Alt (a reload) and a
+// the presenter view, where Doc works meanwhile. F itself, Esc (the end of the show), Cmd/Ctrl/Alt (a reload) and a
 // text being typed pass.
 addEventListener('keydown', function (e) {
   if (!window.DeckLink || !DeckLink.held() || freezeKey(e) || e.key === 'Escape' || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -807,7 +807,7 @@ addEventListener('keydown', e => {
   else if (k === 'Home') { si = Math.max(0, seek(0, 1)); step = 0; paint(); }
   else if (k === 'End') { si = Math.max(0, seek(slides.length - 1, -1)); step = groups(slides[si]); paint(); }
   else if (k === 'a' || k === 'A') { narr.stop(); step = groups(slides[si]); paint(); }   // everything on this slide in (Doc, 17.09.2026)
-  else if (k === 'f' || k === 'F') { full(); }
+  else if (k === 'v' || k === 'V') { full(); }            // V for Vollbild - F freezes the beamer (FREEZE_KEY)
   else if ((k === 'j' || k === 'J') && !(e.target.closest && e.target.closest('input, textarea, select, [contenteditable]'))) {
     jeopardy.toggle(); e.preventDefault();            // the think music (Doc, 12.11.2026)
   }
@@ -1309,7 +1309,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
       [K(['1', '7', 'Enter']), 'Zu Folie 17 springen'],
       [K(['O']) + hint('Overview'), 'Übersicht aller Folien'],
       [K([MAC_KEYS ? 'Cmd' : 'Strg', 'O']), 'Übersicht fürs Publikum – mit Referentenansicht nur auf dem Beamer, deine Ansicht bleibt'],
-      [K(['F']) + hint('Fullscreen'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
+      [K(['V']) + hint('Vollbild'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
       ...(jeopardy.available ? [[K(['J']) + hint('Jeopardy'), 'Jeopardy-Musik, 30 s – noch einmal J beendet sie']] : []),
       null,
       [K(['Leertaste', '/', 'P']), 'Während Solita erklärt: Pause / weiter – ein Pfeil springt, sie spricht dort weiter' + pic],
@@ -1324,7 +1324,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
         'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt'],
         ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
       [K(['L']), 'Laserpointer an / aus – auch der Knopf rechts neben H'],
-      [K([FREEZE_KEY]) + hint('Beamer'), 'Beamer einfrieren: das Bild an der Wand bleibt stehen, du blätterst in der Referentenansicht weiter – noch einmal ' + FREEZE_KEY + ': der Beamer springt dorthin, wo du bist'],
+      [K([FREEZE_KEY]) + hint('Freeze'), 'Beamer einfrieren: das Bild an der Wand bleibt stehen, du blätterst in der Referentenansicht weiter – noch einmal ' + FREEZE_KEY + ': der Beamer springt dorthin, wo du bist'],
       [K(['T']) + hint('Tafel'), 'Rückspiegel: die Tafel live in der Referentenansicht statt der übernächsten Folie – Chrome fragt beim Start'],
       [K(['N']) + hint('Natur'), 'Naturbild hinter den Folien wechseln – nach dem letzten wieder ohne'],
       null,
@@ -1587,7 +1587,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
       if (e.key === 'Escape') close();
       // E is the one key that still gets through: edit mode switches on with the overview open, which is
       // exactly where slides are moved and hidden (Doc, 21.09.2026: "kann ich E auch im OV drücken?").
-      // B too: freezing the beamer is what one wants before looking for a slide here
+      // F too: freezing the beamer is what one wants before looking for a slide here
       if (e.key === 'e' || e.key === 'E' || freezeKey(e)) return;
       e.preventDefault(); e.stopImmediatePropagation();
     }
@@ -1629,8 +1629,8 @@ function paintFull(){
     + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>'
     + (SCREEN_KNOWN && !PRESENTER ? '<span class="scr-dot ' + (ext ? 'ext' : 'one') + '" title="Bildschirme prüfen"></span>' : '');
   fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)'
-    : !PRESENTER && ext ? 'Bildschirm erweitert – Präsentieren: Beamer + Referentenansicht (f)'
-    : SCREEN_KNOWN ? 'Nur ein Bildschirm – gespiegelt? Cmd F1 / Win P erweitert – Vollbild (f)' : 'Vollbild (f)';
+    : !PRESENTER && ext ? 'Bildschirm erweitert – Präsentieren: Beamer + Referentenansicht (v)'
+    : SCREEN_KNOWN ? 'Nur ein Bildschirm – gespiegelt? Cmd F1 / Win P erweitert – Vollbild (v)' : 'Vollbild (v)';
 }
 // Cmd F1 flips isExtended while the page is open: repaint at once ('change' on screen), with a slow poll
 // as a net where the event does not fire
@@ -2935,7 +2935,7 @@ const link = (function () {
   function freezeToggle() {
     // a deck window without a presenter view has nobody to go on in
     if (!PRESENTER && !frozen && (!linked || (mine && (!peer || peer.closed)))) {
-      toast('Einfrieren (' + FREEZE_KEY + ') gibt es nur mit Referentenansicht');
+      toast('Einfrieren (' + FREEZE_KEY + ') gibt es nur mit Referentenansicht – Vollbild und Präsentieren jetzt mit V');
       return;
     }
     freezeSet(!frozen);
