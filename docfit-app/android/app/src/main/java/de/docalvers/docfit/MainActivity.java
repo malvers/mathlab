@@ -749,8 +749,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         // the command to say next instead of a state word (Doc, 20.11.2026: "schreiben nur hin, ohne
         // Anführungszeichen, DocFit Start. Und wenn es läuft, DocFit Stopp") - exactly the words Commands listens for
         state.setText(running ? "DocFit Stopp" : "DocFit Start");
-        // "DocFit Stopp" in the colour of the running stopwatch, not orange (Doc, 20.11.2026: "entscheide du")
-        state.setTextColor(running ? pal.runInk : PHI);
+        // the same ink ready and running (Doc, 23.11.2026: "Macht DocFit Start/Stopp weiß bitte.")
+        state.setTextColor(pal.commandInk);
         String shown = Times.duration(last.shown() ? last.duration : 0);
         if (!running) timer.setText(shown);
         // 00:00 pal.idleInk, running pal.runInk, a stopped time orange - never grey (Doc, 20.11.2026: "Wenn die
@@ -1838,7 +1838,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp.topMargin = dp(16);
         page.addView(kinds, lp);
 
-        state = text("DocFit Start", 26, PHI, true);
+        state = text("DocFit Start", 26, pal.commandInk, true);
         state.setGravity(Gravity.CENTER);
         state.setLetterSpacing(0.12f);
         // more air between the parts (Doc, 20.11.2026: "in Y auseinanderziehen, damit es gefälliger aussieht")

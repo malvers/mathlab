@@ -21,6 +21,8 @@ final class Palette {
     private static final int ORANGE = 0xFFF5C242, RED = 0xFFB02418, GREEN = 0xFF799E31;
     /** the svp's cyan (svp-tokens.css --cyan): rgb(90, 190, 230) on the dark grounds, rgb(28, 118, 158) on white */
     private static final int CYAN = 0xFF5ABEE6, CYAN_LIGHT = 0xFF1C769E;
+    /** near white on the dark grounds, anthracite on white (Doc, 23.11.2026: "fast weiß", "Hell-Modus Anthrazit") */
+    private static final int NEAR_WHITE = 0xFFF2F2F2, ANTHRACITE = 0xFF2F3236;
 
     final String key;
     final boolean light;
@@ -41,19 +43,25 @@ final class Palette {
      */
     final int alarm;
     /**
-     * the running stopwatch: its digits and "DocFit Stopp" above them. Red at first (Doc, 20.11.2026: "wir machen die
-     * rot, wenn sie läuft"), cyan as a trial since Doc, 23.11.2026: "die Stoppuhr bitte mal in Cyan probieren" - the
-     * svp's cyan, #5ABEE6 on Blau and Grau (contrast 8.7 / 8.8 on the page), the svp's darker light-scheme cyan #1C769E
-     * on Hell (4.8 on the page). Back to red = alarm here; nothing else changes.
+     * the running stopwatch's digits ("DocFit Stopp" above them too, until commandInk). Red at first (Doc, 20.11.2026:
+     * "wir machen die rot, wenn sie läuft"), cyan as a trial since Doc, 23.11.2026: "die Stoppuhr bitte mal in Cyan
+     * probieren" - the svp's cyan, #5ABEE6 on Blau and Grau (contrast 8.7 / 8.8 on the page), the svp's darker
+     * light-scheme cyan #1C769E on Hell (4.8 on the page). Back to red = alarm here; nothing else changes.
      */
     final int runInk;
     /**
      * the stopwatch digits while they read 00:00 (ready, or after Reset): green at first (Doc, 20.11.2026: "wenn das
      * Ding bereit ist, machen wir die Zahlen ... grün"), since Doc, 23.11.2026: "Wenn da steht 00:00, mach das bitte
      * fast weiß. Also im Dunkelmodus." - #F2F2F2 on Blau and Grau (contrast 16.4 / 16.6 on the page) - "Und im
-     * Hell-Modus bitte Anthrazit." - #2F3236 on Hell (12.1 on the page). "DocFit Start" above them stays phi green.
+     * Hell-Modus bitte Anthrazit." - #2F3236 on Hell (12.1 on the page).
      */
     final int idleInk;
+    /**
+     * the command above the stopwatch, "DocFit Start" while ready and "DocFit Stopp" while running: green / the running
+     * colour at first, since Doc, 23.11.2026: "Macht DocFit Start/Stopp weiß bitte." - the near white of 00:00 on Blau
+     * and Grau, and like 00:00 anthracite on Hell, where white would vanish
+     */
+    final int commandInk;
     /**
      * the ends of the score as text on a card - "7 fit" in a weigh-in row (Doc, 23.11.2026: "in der entsprechenden
      * Farbe"): the bar's red, orange and green, each moved just enough for 4.5:1 on the card at every score - on Blau and
@@ -86,7 +94,8 @@ final class Palette {
         this.scoreHigh = light ? 0xFF5C7A20 : GREEN;
         this.alarm = light ? RED : 0xFFE5533F;
         this.runInk = light ? CYAN_LIGHT : CYAN;
-        this.idleInk = light ? 0xFF2F3236 : 0xFFF2F2F2;
+        this.idleInk = light ? ANTHRACITE : NEAR_WHITE;
+        this.commandInk = light ? ANTHRACITE : NEAR_WHITE;
         this.scoreInkLow = light ? RED : 0xFFF06A55;
         this.scoreInkMid = light ? 0xFF946600 : ORANGE;
         this.scoreInkHigh = light ? 0xFF56731E : 0xFF7FA534;

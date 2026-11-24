@@ -59,6 +59,14 @@ public class PaletteTest {
     }
 
     @Test
+    public void theCommandAboveTheStopwatchIsWhiteOrAnthracite() {
+        // Doc, 23.11.2026: "Macht DocFit Start/Stopp weiß bitte." - on Hell anthracite like 00:00
+        assertEquals(0xFFF2F2F2, Palette.of("dark").commandInk);
+        assertEquals(0xFFF2F2F2, Palette.of("grey").commandInk);
+        assertEquals(0xFF2F3236, Palette.of("light").commandInk);
+    }
+
+    @Test
     public void theScoreInARowIsReadableAtEveryScore() {
         // Doc, 23.11.2026: "hinter das Datum die jeweilige Note, also '7 fit', in der entsprechenden Farbe"
         for (String k : Palette.KEYS) {
@@ -97,8 +105,9 @@ public class PaletteTest {
             assertTrue(k + " good", contrast(p.phi, p.card) >= 3);
             assertTrue(k + " increased", contrast(p.scoreMid, p.card) >= 3);
             assertTrue(k + " high", contrast(p.alarm, p.card) >= 3);
-            // "DocFit Start" above the stopwatch is green (Doc, 20.11.2026); the digits at 00:00 near white / anthracite
+            // "DocFit Start" / "DocFit Stopp" above the stopwatch and the digits at 00:00: near white / anthracite
             assertTrue(k + " ready", contrast(p.phi, p.bg) >= 4.5);
+            assertTrue(k + " command", contrast(p.commandInk, p.bg) >= 4.5);
             assertTrue(k + " zero", contrast(p.idleInk, p.bg) >= 4.5);
             assertTrue(k + " zero on card", contrast(p.idleInk, p.card) >= 4.5);
             assertTrue(k + " running", contrast(p.runInk, p.bg) >= 4.5);  // the digits while the stopwatch runs
