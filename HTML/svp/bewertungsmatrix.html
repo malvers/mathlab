@@ -451,6 +451,28 @@
             --cc-weight: 700;
             gap: 1px;
         }
+        /* Elapsed clock beside the countdown (Doc, 24.11.2026: "da auch eine
+           abgelaufene Uhr"): the same face with a small caption, counting UP
+           through the phase; it turns Upsilon red together with the countdown
+           once the target is passed. Hidden while there is no target - the
+           countdown face is then itself the plain stopwatch. */
+        .bm-clock-faces {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 10px;
+        }
+        .bm-clock-face[hidden] { display: none; }
+        .bm-clock-face.elapsed { gap: 10px; }
+        .bm-clock-cap {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            line-height: 1.15;
+            opacity: 0.75;
+        }
         .bm-clock-info { flex: 1 1 12rem; min-width: 0; }
         .bm-clock-phase {
             font-family: 'Orbitron', sans-serif;
@@ -566,6 +588,11 @@
             .bm-clock { gap: 10px 14px; }
             .bm-clock-digits .cyber-digits, .bm-clock-digits.cyber-digits { --cc-size: 1.7rem; }
             .bm-clock-sign { font-size: 1.35rem; }
+            /* phone: countdown and elapsed clock stacked, both boxes as wide as the wider one */
+            .bm-clock-faces { flex-direction: column; align-items: stretch; }
+            /* digits flush right in both boxes so they line up, the caption stays left */
+            .bm-clock-faces .bm-clock-face { justify-content: flex-end; }
+            .bm-clock-faces .bm-clock-cap { margin-right: auto; }
             .bm-clock-btns { flex-basis: 100%; }
             .bm-fields { grid-template-columns: 1fr; }
             .bm-big { font-size: 1.25rem; }
@@ -659,9 +686,16 @@
         <!-- Talk stopwatch (Doc, 17.11.2026: "ich brauche in der Bewertungsmatrix eine Stoppuhr").
              Texts come from SHEETS[lang].clock; the script fills and wires it. -->
         <section class="bm-card bm-clock bm-noprint" id="bmClock" aria-label="Stoppuhr">
-            <div class="bm-clock-face" id="bmClockFace" role="timer" aria-live="off">
-                <span class="bm-clock-sign" id="bmClockSign"></span>
-                <span class="bm-clock-digits" id="bmClockDigits">00:00</span>
+            <div class="bm-clock-faces">
+                <div class="bm-clock-face" id="bmClockFace" role="timer" aria-live="off">
+                    <span class="bm-clock-sign" id="bmClockSign"></span>
+                    <span class="bm-clock-digits" id="bmClockDigits">00:00</span>
+                </div>
+                <!-- elapsed time of the phase, counting up (Doc, 24.11.2026) -->
+                <div class="bm-clock-face elapsed" id="bmClockElFace" role="timer" aria-live="off" hidden>
+                    <span class="bm-clock-cap" id="bmClockElCap">abgelaufen</span>
+                    <span class="bm-clock-digits" id="bmClockElDigits">00:00</span>
+                </div>
             </div>
             <div class="bm-clock-info">
                 <div class="bm-clock-phase" id="bmClockPhase">Stoppuhr</div>
@@ -771,7 +805,8 @@
                         persons: ['Vortragende/r', 'Vortragende'],
                         redeWas: 'Rede gedauert: {t} (Soll {s})',
                         unknown: 'Sollzeit unbekannt – Namen der Vortragenden eintragen',
-                        paused: 'angehalten'
+                        paused: 'angehalten',
+                        elapsed: 'abgelaufen'
                     },
                     rows: [
                         { max: 2, bonus: 1, show: '2 + 1', text: 'Abstract erstellt (Inhalt des Vortrages kompakt zusammengefasst, written in English is a bonus)' },
@@ -831,7 +866,8 @@
                         persons: ['presenter', 'presenters'],
                         redeWas: 'Talk took {t} (target {s})',
                         unknown: 'Target time unknown – enter the presenters’ names',
-                        paused: 'paused'
+                        paused: 'paused',
+                        elapsed: 'elapsed'
                     },
                     rows: [
                         { max: 3, text: 'Abstract created (content of the presentation summarized concisely)?' },
@@ -1270,7 +1306,9 @@
                The number of presenters is read from the Vortragende field (the names the list hands over,
                separated by commas). With a target: two phases, Rede then Fragen, each counting DOWN to its
                target, orange in the last minute, red and "+mm:ss" once over, one quiet gong when a target is
-               reached (never again while it runs over). Without names: a plain stopwatch counting up.
+               reached (never again while it runs over). Beside the countdown an elapsed clock counts the
+               same phase UP (Doc, 24.11.2026: "da auch eine abgelaufene Uhr"), red once over, hidden
+               without a target. Without names: a plain stopwatch counting up.
                The state lives in localStorage per talk (both roles share it), so a reload keeps the running
                time: { phase, run, t0 = start of the running stretch, acc = ms per phase, gong = phases rung }.
                No key handling and no focus moves - the clock only reacts to clicks on its own buttons. */
@@ -1283,6 +1321,9 @@
             const elClockFace = document.getElementById('bmClockFace');
             const elClockSign = document.getElementById('bmClockSign');
             const elClockDigits = document.getElementById('bmClockDigits');
+            const elClockElFace = document.getElementById('bmClockElFace');
+            const elClockElCap = document.getElementById('bmClockElCap');
+            const elClockElDigits = document.getElementById('bmClockElDigits');
             const elClockPhase = document.getElementById('bmClockPhase');
             const elClockSub = document.getElementById('bmClockSub');
             const elClockSeg = document.getElementById('bmClockSeg');
@@ -1334,6 +1375,13 @@
                 return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
             }
             function setText(el, txt) { if (el.textContent !== txt) el.textContent = txt; }
+            /* digits through the site's widget, redrawn only when the shown value changes */
+            function setDigits(el, shown) {
+                if (el.dataset.shown === shown) return;
+                el.dataset.shown = shown;
+                if (window.CyberClock) CyberClock.digits(el, shown);
+                else el.textContent = shown;
+            }
 
             function clockDraw() {
                 const L = sheet().clock;
@@ -1350,14 +1398,20 @@
                     sign = '+';
                     cls = 'over';
                 }
-                if (elClockDigits.dataset.shown !== shown) {
-                    elClockDigits.dataset.shown = shown;
-                    if (window.CyberClock) CyberClock.digits(elClockDigits, shown);
-                    else elClockDigits.textContent = shown;
-                }
+                setDigits(elClockDigits, shown);
                 setText(elClockSign, sign);
                 elClockFace.classList.toggle('warn', cls === 'warn');
                 elClockFace.classList.toggle('over', cls === 'over');
+
+                /* elapsed clock: the phase's time gone, whole seconds (so it and the countdown always add
+                   up to the target), red from the moment the countdown goes over */
+                elClockElFace.hidden = !tgt;
+                if (tgt) {
+                    setDigits(elClockElDigits, mmss(el, true));
+                    elClockElFace.classList.toggle('over', el >= tgt);
+                }
+                setText(elClockElCap, L.elapsed);
+                elClockElFace.setAttribute('aria-label', L.elapsed);
 
                 const n = presenters();
                 const stopped = !clock.run && el > 0;
