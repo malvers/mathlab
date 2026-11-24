@@ -309,7 +309,8 @@ textarea.hand.multi { cursor: default; }
     radial-gradient(ellipse at 35% 15%, #2f4775, #16233f 75%) padding-box,
     var(--foil-paper) border-box;
   box-shadow: 0 -1px 3px rgba(0, 0, 0, .45); transition: transform .2s, box-shadow .2s; }
-.reg button::before { content: ''; position: absolute; inset: 3px 3px -2px; border: 1px solid rgba(226, 189, 92, .55); border-bottom: 0; border-radius: 7px 7px 0 0; pointer-events: none; }
+/* the inner gold line ends with the tab - it used to reach 2 px below it, onto the page (Doc, 24.11.2026: "2 px weg") */
+.reg button::before { content: ''; position: absolute; inset: 3px 3px 0; border: 1px solid rgba(226, 189, 92, .55); border-bottom: 0; border-radius: 7px 7px 0 0; pointer-events: none; }
 .reg button:not(.has) { filter: saturate(.5) brightness(.78); }
 .reg button:hover { transform: translateY(-3px); }
 /* no browser focus frame on the tabs after a click (Doc, 23.11.2026: "select rahmen weg") */
@@ -361,6 +362,78 @@ textarea.hand.multi { cursor: default; }
 .reg.l button { padding-top: 6px; }
 .reg.l svg { width: 18px; height: 11px; margin-top: 0; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .7)); }
 .stage.portrait .reg.l { left: 3%; right: auto; }
+/* the flap closure of the closed book (Doc, 24.11.2026: "rechts eine Lasche, die leicht wabert - on click klappt die Lasche
+   nach rechts, Buch öffnet"): a leather flap from the back board, wrapped round the fore-edge, lying on the front cover with
+   a gold snap. Its free end lifts and settles all the time; a click folds it open to the right, then the cover turns.
+   Subtle and always there ("subtiler und nicht ausblenden"): open, it lies beside the open book on the desk - a click
+   there closes the book - and once the cover has landed it folds back over it (script: updateStage). Only the closed back
+   has none (stage.clasp-off). */
+.clasp { --cw: 5.8cqw; --ch: 8cqw; position: absolute; z-index: 4; top: calc(50% - .25cqw); right: calc(-1 * (var(--er) + var(--bm)));
+  width: var(--cw); height: var(--ch); transform: translateY(-50%); perspective: 60cqw;
+  transition: opacity .3s ease; }
+.stage.clasp-off .clasp { opacity: 0; pointer-events: none; }
+/* open, a click on it closes the book again ("wenn offen schließt Lasche"); hovering lifts it a little off the desk */
+.stage:not(.flipping) .clasp.open .clasp-flip:hover { transform: rotateY(174deg); }
+.stage.portrait .clasp { --cw: 12.5cqw; --ch: 17cqw; top: calc(50% - .3cqw); right: -2.6cqw; }
+/* the bit that wraps round the board's edge: the same leather as the flap, its gold edge running on round the fold, in the
+   shade of the fold - one piece with the flap, no seam, never lighter than the flap (Doc: "noch nicht perfekt", "die Helle
+   ist nicht gut") */
+.clasp::after { content: ''; position: absolute; top: 0; bottom: 0; left: 100%; width: calc(var(--cw) * .08); box-sizing: border-box;
+  /* no gold edge round the fold (Doc, 24.11.2026: "lass mal die goldene Linie nach zu weg" ... "ja, bleibt so") */
+  border: 0; border-radius: 0 calc(var(--ch) * .07) calc(var(--ch) * .07) 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, .18), rgba(0, 0, 0, .5)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"),
+    #15213b;
+  box-shadow: .1cqw .2cqw .4cqw rgba(0, 0, 0, .45); pointer-events: none; transition: opacity .45s ease-in-out .25s; }
+/* open, the flap simply goes on from the board's edge - no wrap left there (Doc: "wenn offen wirkt das noch komisch").
+   It goes at once on opening; on closing it fades in softly while the folding flap arrives ("kommt zu zeitig", "smoother") */
+.clasp.open::after { opacity: 0; transition-delay: 0s; }
+.clasp-flip { position: absolute; inset: 0; padding: 0; border: 0; background: none; cursor: pointer; transform-origin: 100% 50%; transform-style: preserve-3d;
+  transition: transform .8s cubic-bezier(.45, 0, .25, 1); will-change: transform; -webkit-tap-highlight-color: transparent; }
+.clasp-flip:focus, .clasp-flip:focus-visible { outline: none; }
+/* the hover lift only while nothing turns: the flap moving away under the pointer switched hover on and off mid-turn and
+   restarted the turn each time (Doc: "das LaschKlapp ist nicht smooth") */
+.stage:not(.flipping) .clasp:not(.open) .clasp-flip:hover { transform: rotateY(6deg); }
+/* no flip while the page loads: an open book shows the flap already open */
+.stage:not(.ready) .clasp-flip { transition: none; }
+.clasp.open .clasp-flip { transform: rotateY(180deg); }
+/* folding back with the closing cover: slower than the board (950 ms), so it lands on the cover only after the cover is
+   down - otherwise no physics (Doc, 24.11.2026: "Lasche zu muss etwas langsamer"); the wrap comes as it lands */
+.stage.flipping .clasp:not(.open) .clasp-flip { transition-duration: 1.35s; transition-timing-function: cubic-bezier(.5, 0, .3, 1); }
+.stage.flipping .clasp:not(.open)::after { transition-delay: .95s; }
+/* "wabert leicht": the free end breathes - lifts a little off the cover and settles again */
+.clasp-wob { position: absolute; inset: 0; transform-origin: 100% 50%; transform-style: preserve-3d; will-change: transform; animation: clasp-breathe 3.6s ease-in-out infinite; }
+.clasp.open .clasp-wob { animation-play-state: paused; }
+@keyframes clasp-breathe { 0%, 100% { transform: rotateY(0deg) skewY(0deg); } 50% { transform: rotateY(8deg) skewY(-.6deg); } }
+@media (prefers-reduced-motion: reduce) { .clasp-wob { animation: none; } }
+/* the two sides: navy leather with a gold-foil edge and gold stitching like the tabs; underneath the same leather with the
+   snap's socket - open it must not look pale (Doc, 24.11.2026) */
+.clasp .f { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid transparent; }
+.clasp .f.front { border-right: 0; border-radius: calc(var(--ch) * .3) 0 0 calc(var(--ch) * .3);
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>") padding-box,
+    radial-gradient(ellipse at 30% 25%, #283c63, #15213b 75%) padding-box,
+    var(--foil-paper) border-box;
+  box-shadow: -.15cqw .25cqw .6cqw rgba(0, 0, 0, .45); }
+.clasp .f.back { border-left: 0; border-radius: 0 calc(var(--ch) * .3) calc(var(--ch) * .3) 0; transform: rotateY(180deg);
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>") padding-box,
+    radial-gradient(ellipse at 70% 25%, #283c63, #15213b 75%) padding-box,
+    var(--foil-paper) border-box;
+  box-shadow: .15cqw .25cqw .6cqw rgba(0, 0, 0, .4), inset .5cqw 0 .5cqw -.35cqw rgba(0, 0, 0, .45); }
+/* the stitching, a fine gold seam round the flap */
+.clasp .f.front::before, .clasp .f.back::before { content: ''; position: absolute; top: calc(var(--ch) * .085); bottom: calc(var(--ch) * .085); pointer-events: none;
+  border: 1px dashed rgba(236, 201, 105, .42); }
+.clasp .f.front::before { left: calc(var(--ch) * .085); right: 0; border-right: 0; border-radius: calc(var(--ch) * .22) 0 0 calc(var(--ch) * .22); }
+.clasp .f.back::before { right: calc(var(--ch) * .085); left: 0; border-left: 0; border-radius: 0 calc(var(--ch) * .22) calc(var(--ch) * .22) 0; }
+/* the gold snap on top, its socket underneath */
+.clasp .f.front::after, .clasp .f.back::after { content: ''; position: absolute; top: 50%; width: calc(var(--ch) * .2); aspect-ratio: 1; transform: translateY(-50%); border-radius: 50%; pointer-events: none; }
+.clasp .f.front::after { left: 24%;
+  background: radial-gradient(circle at 35% 30%, #e3c77e, #bf963b 28%, #85621c 68%, #4f370c 95%);
+  box-shadow: 0 1px 1.5px rgba(0, 0, 0, .55), 0 0 0 1px rgba(60, 40, 5, .4); }
+.clasp .f.back::after { right: 24%; background: radial-gradient(circle, #15213b 34%, #7a5814 38%, #f1d27a 48%, #c99a35 60%, #7a5814 66%, transparent 70%);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .35); }
+.stage.sch-nacht .clasp .f, .stage.sch-nacht .clasp::after { filter: brightness(.55); }
 
 /* StPageFlip base styles (from the package's stPageFlip.css, MIT) */
 .stf__parent { position: relative; display: block; box-sizing: border-box; transform: translateZ(0); touch-action: pan-y; }
@@ -846,6 +919,8 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
       <!-- the left register tab: contents - all 365 days and the parts of the book -->
       <div class="reg l" id="regToc"><button class="has" id="tocBtn" aria-label="Inhalt öffnen"><span>Inhalt</span><svg viewBox="0 0 20 14" aria-hidden="true"><path d="M1 2h18M1 7h18M1 12h11"/></svg></button></div>
       <div id="flipHost"></div>
+      <!-- the flap closure of the closed book: a click folds it open to the right, then the cover turns -->
+      <div class="clasp" id="clasp"><button class="clasp-flip" id="claspBtn" aria-label="Buch öffnen"><span class="clasp-wob"><span class="f front"></span><span class="f back"></span></span></button></div>
       <div class="spruch" id="spruchCard" aria-hidden="true">
         <span class="k">GEDANKE DES TAGES</span>
         <span class="s"></span>
@@ -2011,7 +2086,7 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
   /* where the running flip goes: known for the buttons, guessed from the grabbed half for a drag.
      Closing the book takes the whole left (or right) stack with it, cover board included - so the bare
      blue board must not stay behind on the empty half while the last page swings over. */
-  let target = null, chain = null, ribTimer = 0;
+  let target = null, chain = null, ribTimer = 0, claspHold = false;
   const ribbon = (under, hidden) => { stage.classList.toggle('rib-under', under); stage.classList.toggle('rib-hidden', hidden); };
   const stepTarget = back => {
     const last = SEQ[mode].length - 1;
@@ -2058,6 +2133,14 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
     if (onDay && state === 'read' && chain === null && here.key !== regDay) { regDay = here.key; renderReg(); }
     /* phone: the single page is the cover or the back - no tabs on the closed book */
     stage.classList.toggle('cover-shown', mode === 'phone' && (idx === 0 || idx >= last));
+    /* the flap closure stays: closed on the cover; it opens as soon as the cover moves (a click on it, a drag at the corner -
+       a mere hover peek leaves it shut) and lies open beside the open book. It folds back together with the closing cover
+       ("starte das Laschenklappen mit Buchcover", Doc 24.11.2026), slow enough to land with it. Only the closed back has none. */
+    stage.classList.toggle('clasp-off', idx >= last || (moving && target >= last));
+    const shutting = state === 'flipping' && target === 0;
+    const coverMoving = idx === 0 && (state === 'user_fold' || (state === 'flipping' && target !== 0));
+    $('#clasp').classList.toggle('open', (idx !== 0 && !shutting) || coverMoving || claspHold);
+    $('#claspBtn').setAttribute('aria-label', idx === 0 ? 'Buch öffnen' : 'Buch schließen');
     stage.classList.toggle('flipping', state !== 'read');
     /* the ribbon never fades. On the closed front it lies under the cover (only the tail hangs out), on the closed back it
        is inside. A turning board switches it exactly when the board passes the spine - half way through the flip. */
@@ -2175,10 +2258,23 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
      a sheet or the veil, those events stop at window (capture) before the library sees them. Clicks are separate events
      and still work. */
   const blockFlip = e => {
-    const onUi = e.target && e.target.closest && e.target.closest('.reg, .sheet, .veil');
+    const onUi = e.target && e.target.closest && e.target.closest('.reg, .sheet, .veil, .clasp');
     if (onUi || !$('#veil').hidden) e.stopImmediatePropagation();
   };
   ['mousedown', 'mousemove', 'mouseup', 'touchstart', 'touchmove', 'touchend'].forEach(t => window.addEventListener(t, blockFlip, { capture: true, passive: true }));
+  /* the flap closure on the closed book: it folds open to the right while the cover turns (CSS .clasp). claspHold keeps it
+     open until the turn has begun; should it not start (the library busy), updateStage folds it back. Open beside the book,
+     a click on it closes the book (go turns to the inside cover first, then the board); the flap folds back with the board. */
+  function openClasp() {
+    if (!pf || idx !== 0 || state !== 'read' || claspHold) return;
+    claspHold = true; updateStage();
+    go(1);
+    setTimeout(() => { claspHold = false; updateStage(); }, 300);
+  }
+  $('#claspBtn').addEventListener('click', () => {
+    if (idx === 0) { openClasp(); return; }
+    if (pf && state === 'read' && $('#clasp').classList.contains('open')) go(0);
+  });
   /* the five day tabs: the five days up to the open day (or up to today, when a week, a month or the front is open) */
   /* The day tabs: the open day always sits in the middle, two days before and two after it. Turning to another day slides the
      strip (Doc, 23.11.2026: "alle nach links shiften, der eine fadet aus, ein neuer fadet ein"): a strip of nine tabs, five of
@@ -2395,7 +2491,7 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
       return;
     }
     if (REVIEW && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { e.preventDefault(); stepSaying(e.key === 'ArrowRight' ? 1 : -1); return; }
-    if (e.key === 'ArrowRight') { e.preventDefault(); go(stepTarget(false)); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); if (idx === 0) openClasp(); else go(stepTarget(false)); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); go(stepTarget(true)); }
   });
 
