@@ -1163,6 +1163,33 @@
   let pingTimer = null;
   let pingSoon = null;
 
+  /* A tap into a field never brings full screen back (wasserzeichen-minitest,
+     FOW25-1, iPad Safari, 24.11.2026: the tap into a number box started the
+     switch, the page jumped, the box lost its focus and the soft keyboard never
+     came). Fields are everything that takes typing or opens a picker: text-like
+     inputs, textarea, select, contenteditable. Checkboxes, radios and buttons
+     stay ordinary taps, like an answer button. */
+  const TAP_INPUT_TYPES = /^(button|submit|reset|checkbox|radio|image|hidden)$/;
+  function isField(el) {
+    if (!el || el.nodeType !== 1) return false;
+    const tag = el.tagName;
+    if (tag === 'TEXTAREA' || tag === 'SELECT') return true;
+    if (tag === 'INPUT') return !TAP_INPUT_TYPES.test(String(el.type || 'text').toLowerCase());
+    return !!el.isContentEditable;
+  }
+  /* the tapped element, an ancestor of it, or the control of a label around it */
+  function tapsField(target) {
+    let el = target && target.nodeType === 1 ? target : (target && target.parentElement) || null;
+    for (; el; el = el.parentElement) {
+      if (isField(el)) return true;
+      if (el.tagName === 'LABEL') {
+        const ctl = el.control || (el.htmlFor ? document.getElementById(el.htmlFor) : el.querySelector('input, textarea, select'));
+        if (isField(ctl)) return true;
+      }
+    }
+    return false;
+  }
+
   function fsElement() {
     return document.fullscreenElement || document.webkitFullscreenElement || null;
   }
@@ -1587,8 +1614,13 @@
       document.addEventListener(ev, function () { if (!fsElement() && !GUARD_TOUCH) guardLeave('fullscreen'); });
     });
     if (GUARD_TOUCH) {
-      document.addEventListener('click', function () {
+      document.addEventListener('click', function (e) {
         if (!guardArmed || guardAway || guardAborted || locked || fsElement()) return;
+        /* Only the pupil's own tap outside a field, and never while a field has
+           the focus: a page may press an engine option from code while she types
+           (wasserzeichen-minitest clicks the hidden option on every keystroke) -
+           that click must not start a switch either. */
+        if (!e.isTrusted || tapsField(e.target) || isField(document.activeElement)) return;
         guardQuietUntil = Date.now() + 1500;
         enterFullscreen();
       }, true);
