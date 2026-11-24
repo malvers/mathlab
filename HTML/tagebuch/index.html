@@ -145,6 +145,14 @@ body { padding: 0; }
 .page { gap: 0; }
 .stage .bookwrap { width: 100%; max-width: min(1000px, calc((100vh - 150px) * 1000 / 700)); max-width: min(1000px, calc((100dvh - 150px) * 1000 / 700)); }
 .stage.portrait .bookwrap { max-width: min(440px, calc((100dvh - 140px) * 400 / 640)); }
+/* the book takes 90 % of the window, aspect kept (Doc, 24.11.2026: "mach es mal 90% des Fensters, keep aspect"): its whole
+   look - the boards (3.4 % wider, 2.1 % lower than the spread) and the open day's tab on top (40 px) - fits into 90 % of the
+   width and of the height, the 1000 px cap is gone. Not on an upright phone (one page) and not on a phone held sideways
+   (there the spread is as wide as the screen and the desk scrolls). */
+@media not all and (orientation: landscape) and (max-height: 500px) {
+  .stage:not(.portrait) { padding-top: calc(18px + env(safe-area-inset-top)); padding-bottom: env(safe-area-inset-bottom); }
+  .stage:not(.portrait) .bookwrap { max-width: none; width: min(86.5vw, calc((90dvh - 40px) / .721)); }
+}
 .sheet.gate { width: min(460px, calc(100% - 28px)); text-align: left; }
 .gate-t { font-size: 15px; line-height: 1.5; color: var(--print); margin: 10px 0 0; }
 textarea.hand.multi { cursor: default; }
@@ -381,6 +389,24 @@ textarea.hand.multi { cursor: default; }
 .reg.l button { padding-top: 6px; }
 .reg.l svg { width: 18px; height: 11px; margin-top: 0; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .7)); }
 .stage.portrait .reg.l { left: 3%; right: auto; }
+/* the tabs never grow with a bigger book, but shrink with a smaller one (Doc, 24.11.2026: "Reiter nicht vergrößern aber
+   verkleinern wenn"): every size is min(its px at a 1000 px book, the same in cqw of the book) - at 1000 px and more they stay
+   72 x 33 px, below that they scale with the book. Not on touch screens and phones: there they keep their thumb size. */
+@media (not (pointer: coarse)) and (min-width: 701px) and (min-height: 501px) {
+  .reg { top: calc(-1 * min(33px, 3.3cqw)); gap: min(6px, .6cqw); }
+  .reg button { width: min(72px, 7.2cqw); padding-top: min(6px, .6cqw); font-size: min(9.5px, .95cqw); letter-spacing: min(.6px, .06cqw);
+    border-radius: min(10px, 1cqw) min(10px, 1cqw) 0 0; }
+  .reg button span { font-size: min(8px, .8cqw); letter-spacing: min(1.6px, .16cqw); }
+  .reg button i { gap: min(4px, .4cqw); margin-top: min(3px, .3cqw); }
+  .reg button i b { width: min(6px, .6cqw); height: min(6px, .6cqw); }
+  #reg { --tw: min(72px, 7.2cqw); --tg: min(6px, .6cqw); width: calc(var(--tw) * 5 + 4 * var(--tg)); height: min(33px, 3.3cqw); }
+  #reg .reg-in { gap: var(--tg); transform: translateX(calc(var(--k, -2) * (var(--tw) + var(--tg)))); }
+  #reg button { height: min(33px, 3.3cqw); }
+  #reg button.sel { height: min(40px, 4cqw); }
+  .reg.l { top: calc(-1 * min(31px, 3.1cqw)); }
+  .reg.l button { width: min(69px, 6.9cqw); height: min(31px, 3.1cqw); }
+  .reg.l svg { width: min(18px, 1.8cqw); height: min(11px, 1.1cqw); }
+}
 /* the flap closure of the closed book (Doc, 24.11.2026: "rechts eine Lasche, die leicht wabert - on click klappt die Lasche
    nach rechts, Buch öffnet"): a leather flap from the back board, wrapped round the fore-edge, lying on the front cover with
    a gold snap. Its free end lifts and settles all the time; a click folds it open to the right, then the cover turns.
@@ -631,8 +657,12 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
 .stage:not(.portrait) .ft:not(.r) .pn { margin-left: 2.05em; }
 .stage:not(.portrait) .ft.r .pn { margin-right: 2.05em; }
 .stage.portrait .ft .pn { margin: 0 2.05em; }
-/* the evening footer keeps its one line with the arrow's room: the habits a little closer (2.6 -> 2.1 cqw) */
+/* the evening footer keeps its one line with the arrow's room: the habits a little closer (2.6 -> 2.1 cqw) and their words a
+   touch smaller - Petit Formal runs wider than the other two scripts, so it gets a little more (Doc, 24.11.2026: "für alle
+   Schriften testen": all three scripts, 1024-1920 px, one line) */
 .stage:not(.portrait) .habits { gap: 2.1cqw; }
+.stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * var(--sk) * .94); }
+html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * var(--sk) * .86); }
 .ft .pn:hover { color: var(--ochre); }
 /* the habits of the day: printed like the questions (the book's black script - the blue hand is the writer's own, Doc),
    each with a small gold-rimmed cup to tick */
@@ -853,6 +883,11 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
    Minibio"): the portrait in the gilt frame of the contents' painting with its brass plate (name, years), beside it name, what
    they were, life dates and a short life story - persoenlichkeiten.json, portraits public domain in img/pers/ */
 .pers { margin-top: 1.2cqh; }
+/* further down, just above the footer (Doc, 24.11.2026: "weiter runter"): the free space goes above the block */
+.pers { margin-top: auto; margin-bottom: 4.6cqh; }   /* a tick higher again (Doc: "'n Tick zu viel") */
+.pers ~ .ft { margin-top: 0; }
+/* the year's curve (with its heading) a little lower on the page (Doc, 24.11.2026: "die obere Grafik noch Stück runter") */
+.p-monatR .in > .lbl:first-child { margin-top: 4.6cqh; }
 .pers[hidden] { display: none; }
 .pers-in { display: flex; align-items: flex-start; gap: 5cqw; margin-top: 1.4cqh; }
 .toc-pic.pers-pic { flex: 0 0 27%; transform: translate(.6cqw, .6cqh) rotate(-2.5deg); cursor: default; }
@@ -884,6 +919,9 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
 .tp .sig .by { display: block; font-family: var(--script); font-size: calc(3cqw * var(--sk)); color: #2a2620; transform: rotate(3deg); margin-bottom: .4cqh; }
 .tp .copy { margin-top: -1cqh; font-family: var(--display); font-weight: 500; font-size: 2cqw; letter-spacing: .25em; color: var(--print-soft); }
 .tp .tp-plan { margin-top: -3cqh; }
+/* the signature block a little lower, nearer the foot of the page (Doc, 24.11.2026: "Stück weiter runter") - it hangs on
+   margin-top: auto, so only it moves */
+.tp { bottom: 4.5cqh; }
 .notes p { font-size: calc(var(--u) * 3.1); line-height: 1.45; color: var(--print); margin-top: 1.6cqh; }
 .notes p b { color: var(--ink); }
 .ruled { flex: 1; margin-top: 2cqh; background-image: repeating-linear-gradient(180deg, transparent 0 calc(var(--u) * 6.6 - 1px), rgba(60, 95, 150, .22) calc(var(--u) * 6.6 - 1px) calc(var(--u) * 6.6)); }
@@ -1113,6 +1151,7 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
           <div><dt><kbd>E</kbd></dt><dd>Einstellungen</dd></div>
           <div><dt><kbd>W</kbd></dt><dd>Woche</dd></div>
           <div><dt><kbd>M</kbd></dt><dd>Monatsblick</dd></div>
+          <div><dt><kbd>⇧</kbd><kbd>J</kbd></dt><dd>ein Monat: ⇧ + Anfangsbuchstabe (J: Januar, Juni, Juli)</dd></div>
           <div><dt><kbd>C</kbd></dt><dd>Jahr in Worten</dd></div>
           <div><dt><kbd>R</kbd></dt><dd>Rückseite</dd></div>
           <div><dt><kbd>S</kbd></dt><dd>Buch schließen</dd></div>
@@ -2062,9 +2101,10 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
     }
     const known = avg.map((v, i) => [v, i]).filter(p => p[0] !== null);
     if (known.length > 1) {
-      const d = known[known.length - 1][0] - known[0][0], ex = x(known[known.length - 1][1]), ey = y(known[known.length - 1][0]);
-      txt += '<text x="' + f1(Math.min(ex + 26, W - 60)) + '" y="' + f1(ey - 40) + '" font-family="Caveat" font-weight="700" font-size="30" fill="' + INK.phi + '">' + (d >= 0 ? '+' : '−') + de1(Math.abs(d)) + '</text>';
-      txt += '<text x="' + f1(Math.min(ex + 26, W - 60)) + '" y="' + f1(ey - 22) + '" font-family="Caveat" font-size="17" fill="' + INK.phi + '">seit ' + MONTHS[known[0][1]] + '</text>';
+      /* the gain beside the last point - a tick lower than before, away from the legend (Doc, 24.11.2026: "'n Tick runter") */
+      const d = known[known.length - 1][0] - known[0][0], ex = x(known[known.length - 1][1]), ey = Math.max(y(known[known.length - 1][0]), 54);
+      txt += '<text x="' + f1(Math.min(ex + 26, W - 60)) + '" y="' + f1(ey - 26) + '" font-family="Caveat" font-weight="700" font-size="30" fill="' + INK.phi + '">' + (d >= 0 ? '+' : '−') + de1(Math.abs(d)) + '</text>';
+      txt += '<text x="' + f1(Math.min(ex + 26, W - 60)) + '" y="' + f1(ey - 8) + '" font-family="Caveat" font-size="17" fill="' + INK.phi + '">seit ' + MONTHS[known[0][1]] + '</text>';
     } else {
       txt += '<text x="' + (W / 2) + '" y="' + (H / 2) + '" font-family="Caveat" font-size="22" fill="#8a7b62" text-anchor="middle">Die Kurve beginnt mit deinem ersten Monatsblick.</text>';
     }
@@ -2621,6 +2661,18 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeTop(); return; }
     if (e.target.closest && e.target.closest('textarea, input, select, [contenteditable]')) return;
+    /* Shift + a month's initial: that month's view - J January -> June -> July, M March -> May, A April -> August, pressed
+       again. Shift, not Cmd/Ctrl: Cmd+J/F/M/A/S/O/N/D (Ctrl on Windows) are the browser's own - downloads, find, minimise,
+       select all, save, open, new window, bookmark - and some cannot be taken at all (Doc, 24.11.2026: "cmd J-D für Monate").
+       Before any F key, so Shift+F is February, not full screen. */
+    const MON = { j: [1, 6, 7], f: [2], m: [3, 5], a: [4, 8], s: [9], o: [10], n: [11], d: [12] }[e.key.toLowerCase()];
+    if (MON && e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      e.preventDefault();
+      if (!pf || state !== 'read' || !$('#veil').hidden) return;
+      const here = SEQ[mode][idx] || {}, cur = /^monat[LR]$/.test(here.kind) ? +here.key.slice(5) : 0, at0 = MON.indexOf(cur);
+      goPage('monatL@' + YEAR + '-' + pad(MON[(at0 + 1) % MON.length]));
+      return;
+    }
     if (!$('#veil').hidden || !pf || state !== 'read') return;
     const r = stage.getBoundingClientRect();
     if (r.bottom < 0 || r.top > innerHeight) return;   /* only while the book is on screen */
