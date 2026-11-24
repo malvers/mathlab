@@ -196,7 +196,7 @@ textarea.hand.multi { cursor: default; }
 .setp .set-note { margin: 3cqh 0 0; font-size: calc(var(--u) * 2.1); line-height: 1.45; font-style: italic; color: var(--print-soft); }
 .toc-gear.on { transform: rotate(90deg); }
 .toc-gear.on:hover { transform: rotate(60deg); }
-.keys { display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--u) * .9) 0; margin: 0; }
+.keys { display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--u) * .55) 0; margin: 0; }   /* rows a little closer: 15 keys now */
 .keys > div { display: grid; grid-template-columns: calc(var(--u) * 28.5) minmax(0, 1fr); align-items: center; gap: calc(var(--u) * 2); min-width: 0; }
 .keys dt { display: flex; flex-wrap: wrap; gap: calc(var(--u) * .8); font: calc(var(--u) * 2.4) / 1.3 var(--read); color: var(--ink); }
 .keys dd { margin: 0; min-width: 0; font: calc(var(--u) * 2.4) / 1.3 var(--read); color: var(--print); }
@@ -287,6 +287,13 @@ textarea.hand.multi { cursor: default; }
 .stage.closed-front .edge, .stage.closed-back .edge,
 .stage.closed-front .headband, .stage.closed-back .headband { opacity: 0; }
 .stage.portrait .edge.l, .stage.portrait .headband { display: none; }
+/* the page block as one stack (Doc, 24.11.2026: "noch nicht so schön gestapelt"): the side edges run from the very top of the
+   page - no step below its corner any more - down to the bottom edge and meet it in a mitre at the corners, like the corner
+   of a real block of pages */
+.edge.l { top: 0; clip-path: polygon(0 0, 100% 0, 100% calc(100% - .7cqw), 0 100%); }
+.edge.r { top: 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - .7cqw)); }
+.edge.b { left: calc(-1 * var(--el)); right: calc(-1 * var(--er)); clip-path: polygon(var(--el) 0, calc(100% - var(--er)) 0, 100% 100%, 0 100%); }
+.stage.portrait .edge.b { left: 0; clip-path: polygon(0 0, calc(100% - var(--er)) 0, 100% 100%, 0 100%); }
 /* the bookmark ribbon lies IN the open spread: one smooth satin red from the very top of the spine down the gutter,
    gently onto the right page, the tail hangs out below and is a little darker where it bends over the page edge.
    It never fades: pages turn over the gutter, and when the book closes the board covers it the moment it passes
@@ -917,12 +924,25 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 .tp .sig { margin-top: auto; font-family: var(--hand); font-size: 6.5cqw; color: var(--pen); transform: rotate(-3deg); }
 /* "ein Buch von Doc Alvers", © below (Doc, 23.11.2026); the plan block sits higher */
 .tp .sig .by { display: block; font-family: var(--script); font-size: calc(3cqw * var(--sk)); color: #2a2620; transform: rotate(3deg); margin-bottom: .4cqh; }
-.tp .copy { margin-top: -1cqh; font-family: var(--display); font-weight: 500; font-size: 2cqw; letter-spacing: .25em; color: var(--print-soft); }
+/* "ein Claude-Buch von" (Doc, 24.11.2026: "weil ich das mit euch gemacht habe") a few px nearer the name, the © a few px up */
+.tp .sig .by { transform: translateY(.55cqh) rotate(3deg); }
+.tp .copy { margin-top: -1.55cqh; font-family: var(--display); font-weight: 500; font-size: 2cqw; letter-spacing: .25em; color: var(--print-soft); }
 .tp .tp-plan { margin-top: -3cqh; }
 /* the signature block a little lower, nearer the foot of the page (Doc, 24.11.2026: "Stück weiter runter") - it hangs on
    margin-top: auto, so only it moves */
 .tp { bottom: 4.5cqh; }
 .notes p { font-size: calc(var(--u) * 3.1); line-height: 1.45; color: var(--print); margin-top: 1.6cqh; }
+/* the imprint under "So geht's": small print, links in the book's ochre */
+.notes .imp { margin-top: 2.4cqh; }
+/* the imprint at the foot of the page, the lines are gone from here (Doc: "ganz nach unten, die Zeilen raus") */
+.notes .imp { margin-top: auto; margin-bottom: 1.6cqh; }
+.notes .imp ~ .ft { margin-top: 0; }
+/* the right page of the notes spread has no heading: its lines start where the left page's lines start */
+.ruled.ruled-full { margin-top: calc(var(--u) * 7.2 + 2cqh); }
+.notes .imp .lbl { margin: 0 0 .6cqh; }
+.notes .imp p { margin-top: .6cqh; font-size: calc(var(--u) * 1.9); line-height: 1.45; color: var(--print-soft); }
+.notes .imp a { color: var(--ochre); text-decoration: none; }
+.notes .imp a:hover { text-decoration: underline; }
 .notes p b { color: var(--ink); }
 .ruled { flex: 1; margin-top: 2cqh; background-image: repeating-linear-gradient(180deg, transparent 0 calc(var(--u) * 6.6 - 1px), rgba(60, 95, 150, .22) calc(var(--u) * 6.6 - 1px) calc(var(--u) * 6.6)); }
 
@@ -1075,7 +1095,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       <div><dt>Einmal im Monat</dt><dd>der Monatsblick</dd></div>
       <div><dt>Hinten</dt><dd>dein Jahr in Worten</dd></div>
     </dl>
-    <div class="sig"><span class="by">ein Buch von</span>Doc Alvers</div>
+    <div class="sig"><span class="by">ein Claude-Buch von</span>Doc Alvers</div>
     <div class="copy">© 2026</div>
   </div></div>
 </template>
@@ -1147,12 +1167,15 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       <div class="lbl">Tastatur <span>– noch einmal gedrückt: zurück zum Tag</span></div>
         <dl class="keys">
           <div><dt><kbd>←</kbd><kbd>→</kbd></dt><dd>umblättern</dd></div>
+          <div><dt><kbd>⇧</kbd><kbd>← →</kbd></dt><dd>eine Woche vor oder zurück</dd></div>
+          <div><dt><kbd>Ctrl</kbd><kbd>← →</kbd></dt><dd>ein Monat vor oder zurück (Mac: ⌥ ← →)</dd></div>
           <div><dt><kbd>I</kbd></dt><dd>Inhalt</dd></div>
           <div><dt><kbd>E</kbd></dt><dd>Einstellungen</dd></div>
           <div><dt><kbd>W</kbd></dt><dd>Woche</dd></div>
           <div><dt><kbd>M</kbd></dt><dd>Monatsblick</dd></div>
           <div><dt><kbd>⇧</kbd><kbd>J</kbd></dt><dd>ein Monat: ⇧ + Anfangsbuchstabe (J: Januar, Juni, Juli)</dd></div>
           <div><dt><kbd>C</kbd></dt><dd>Jahr in Worten</dd></div>
+          <div><dt><kbd>P</kbd></dt><dd>letzte Seite mit Impressum</dd></div>
           <div><dt><kbd>R</kbd></dt><dd>Rückseite</dd></div>
           <div><dt><kbd>S</kbd></dt><dd>Buch schließen</dd></div>
           <div><dt><kbd>1</kbd><kbd>2</kbd><kbd>Enter</kbd></dt><dd>Seite 12 aufschlagen (= 12. Januar)</dd></div>
@@ -1373,15 +1396,41 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 <template id="tpl-wolkeR"><div class="pg paper"><div class="cloud"><svg viewBox="500 0 500 700" preserveAspectRatio="xMidYMid slice" aria-label="Mein Jahr in Worten, rechte Hälfte"><use href="#draw-cloud-spread"/></svg></div></div></template>
 <template id="tpl-wolkeP"><div class="pg paper"><div class="cloud"><svg viewBox="0 0 600 960" preserveAspectRatio="xMidYMid slice" aria-label="Mein Jahr in Worten, gemalt (Beispielwörter)"><use href="#draw-cloud-portrait"/></svg></div></div></template>
 
+<!-- a whole page for notes before "So geht's" (Doc, 24.11.2026: "vorher eine extra Seite, eine ganze Seite mit Notizen"); on the
+     desk a spread of two, because the back board must close alone (the book keeps its pages in pairs) -->
+<template id="tpl-lines1">
+  <div class="pg paper"><div class="in notes">
+    <div class="hd"><div class="nm">NOTIZEN</div></div>
+    <div class="ruled"></div>
+    <div class="ft"><span class="pn"></span><span>Notizen</span></div>
+  </div></div>
+</template>
+<template id="tpl-lines2">
+  <div class="pg paper"><div class="in notes">
+    <div class="ruled ruled-full"></div>
+    <div class="ft r"><span class="pn"></span><span>Notizen</span></div>
+  </div></div>
+</template>
+
 <template id="tpl-notes">
   <div class="pg paper"><div class="in notes">
     <div class="hd"><div class="nm">SO GEHT'S</div></div>
     <p><b>Morgens</b> drei Gedanken, jeder 30 Sekunden. Die Uhr gibt nur den Takt vor, sie drängt nicht.</p>
-    <p><b>In der Mitte</b> liegt ein Gedanke für den Tag, montags der Gedanke der Woche.</p>
+    <p><b>In der Mitte</b> liegt ein Gedanke für den Tag; den Gedanken der Woche zeigt die Wochenseite.</p>
     <p><b>Abends</b> drei Gedanken, dann die Haken für die Gewohnheiten.</p>
     <p><b>Sonntags</b> die Woche auf einer Doppelseite. Hinten wächst dein Jahr in Worten.</p>
-    <div class="ruled"></div>
-    <div class="ft"><span class="pn">365</span><span>Notizen</span></div>
+    <!-- a small imprint under "So geht's" (Doc, 24.11.2026: "ein kleines Impressum mit Verweis auf unsere Seite docalvers
+         und Datenschutzerklärung") -->
+    <div class="imp">
+      <div class="lbl">Impressum</div>
+      <p>„Grateful – Das 3-Minuten-Tagebuch“ ist ein Buch von Dr. Michael R. Alvers (Doc Alvers), © 2026. Anbieter und Kontakt:
+        <a href="https://docalvers.de/impressum.html" target="_blank" rel="noopener">docalvers.de/impressum</a> · Datenschutz:
+        <a href="https://docalvers.de/datenschutz.html" target="_blank" rel="noopener">docalvers.de/datenschutz</a>.</p>
+      <p>Deine Einträge liegen in deinem Konto; die Einstellungen merkt sich nur dieser Browser.</p>
+      <p>Bilder: Arnold Böcklin, „Vita somnium breve“ (1888, Kunstmuseum Basel) und die Porträts der Persönlichkeiten, gemeinfrei,
+        über Wikimedia Commons · Holz: Poly Haven (CC0) · Schriften: Google Fonts (SIL Open Font License).</p>
+    </div>
+    <div class="ft"><span class="pn">365</span><span>So geht's · Impressum</span></div>
   </div></div>
 </template>
 
@@ -1719,13 +1768,25 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     timers[k] = { t0: performance.now(), buzzed: false };
     if (!looping) { looping = true; requestAnimationFrame(tick); }
   }
+  /* stop a running clock without its tick: the ring goes back to 30 (Doc, 24.11.2026: typed into a field by mistake - "Escape
+     oder irgendwo außerhalb des Textfelds klicke, soll es abbrechen"); the next keystroke starts it afresh */
+  function cancelTimer(k) {
+    if (!timers[k]) return;
+    delete timers[k];
+    paintRing(k, 0, 30);
+  }
   function tick(now) {
     let busy = false;
     Object.keys(timers).forEach(k => {
       const t = timers[k]; const el = (now - t.t0) / 1000; const left = Math.max(0, 30 - el);
       paintRing(k, Math.min(1, el / 30), left);
       if (left > 0) busy = true;
-      else if (!t.buzzed) { t.buzzed = true; done.add(k); saveLocal(); markDirty(k); try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) { } }
+      else if (!t.buzzed) {
+        t.buzzed = true;
+        /* no tick for an empty field ("Checkmark nach 30 Sekunden, obwohl ich nichts getippt habe. Das geht auch nicht.") */
+        if (!String(vals[k] || '').trim()) { cancelTimer(k); return; }
+        done.add(k); saveLocal(); markDirty(k); try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) { }
+      }
     });
     if (busy) requestAnimationFrame(tick); else looping = false;
   }
@@ -1823,6 +1884,12 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       if (o === from && o.classList.contains('scrolls') && o.selectionEnd === o.value.length) { o.scrollTop = o.scrollHeight; fades(o); }
     });
   }
+  /* leaving the field stops its running clock (not while dictating into it - the microphone runs the clock then) */
+  document.addEventListener('focusout', e => {
+    const t = e.target; if (!t.matches || !t.matches('textarea[data-k]')) return;
+    const k = t.dataset.k;
+    if (timers[k] && !done.has(k) && !(ear && ear.active && earKey === k)) cancelTimer(k);
+  });
   document.addEventListener('input', e => {
     const t = e.target; if (!t.matches || !t.matches('textarea[data-k]')) return;
     const k = t.dataset.k; vals[k] = t.value;
@@ -2144,6 +2211,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       if (!next || dateOf(next).getMonth() !== dt.getMonth()) { add('monatL', d.slice(0, 7)); add('monatR', d.slice(0, 7)); }
     });
     if (m === 'desk') { add('wolkeL'); add('wolkeR'); } else add('wolkeP');
+    add('lines1'); if (m === 'desk') add('lines2');
     add('notes'); if (m === 'desk') add('endpaper2');
     add('back');
     return seq;
@@ -2550,7 +2618,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     const sun = sundayOf(TODAY), mon = TODAY.slice(0, 7);
     const book = [['Einband', 'cover', ''], ['Titelseite', 'title', ''], ['Einstellungen', 'set1', ''], ['Einführung', 'intro1', 'I–IV'], ['Heute', 'morgen@' + TODAY, short(TODAY)],
       ['Diese Woche', 'wocheL@' + sun, 'Woche ' + isoWeek(sun)], ['Monatsblick', 'monatL@' + mon, MONTHS[+mon.slice(5) - 1]],
-      ['Mein Jahr in Worten', mode === 'desk' ? 'wolkeL' : 'wolkeP', String(YEAR)], ['Notizen', 'notes', ''], ['Rückseite', 'back', '']].filter(e => at(e[1]) >= 0);
+      ['Mein Jahr in Worten', mode === 'desk' ? 'wolkeL' : 'wolkeP', String(YEAR)], ['Notizen', 'lines1', ''], ['Impressum', 'notes', ''], ['Rückseite', 'back', '']].filter(e => at(e[1]) >= 0);
     const bookHtml = book.map(([l, pg, info]) => '<button data-page="' + pg + '"><span>' + l + '</span><i></i><em>' + info + '</em></button>').join('');
     $$('[data-toc-book]').forEach(el => { el.innerHTML = bookHtml; });
     $$('[data-toc-year]').forEach(el => { const m0 = +el.dataset.tocYear; el.innerHTML = [0, 1, 2, 3, 4, 5].map(i => monthGrid(m0 + i)).join(''); });
@@ -2659,7 +2727,12 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   /* the arrows are gone: on a computer the arrow keys turn the pages, Escape closes a sheet */
   let pageBuf = '', pageT = 0;
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeTop(); return; }
+    /* Escape in a field: out of it (which stops its running clock, see focusout); elsewhere it closes a sheet or the picture */
+    if (e.key === 'Escape') {
+      const a = document.activeElement;
+      if (a && a.matches && a.matches('textarea[data-k]')) { a.blur(); return; }
+      closeTop(); return;
+    }
     if (e.target.closest && e.target.closest('textarea, input, select, [contenteditable]')) return;
     /* Shift + a month's initial: that month's view - J January -> June -> July, M March -> May, A April -> August, pressed
        again. Shift, not Cmd/Ctrl: Cmd+J/F/M/A/S/O/N/D (Ctrl on Windows) are the browser's own - downloads, find, minimise,
@@ -2706,12 +2779,30 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
        open day (Doc, 24.11.2026; explained in the settings). Cmd/Ctrl combinations stay the browser's. */
     const jump = !e.metaKey && !e.ctrlKey && !e.altKey && ({
       w: () => 'wocheL@' + sundayOf(regDay || TODAY), m: () => 'monatL@' + (regDay || TODAY).slice(0, 7),
-      c: () => mode === 'desk' ? 'wolkeL' : 'wolkeP', r: () => 'back', s: () => 'cover' })[e.key.toLowerCase()];
+      c: () => mode === 'desk' ? 'wolkeL' : 'wolkeP', r: () => 'back', s: () => 'cover',
+      p: () => 'notes' /* P = the last page with "So geht's" and the imprint (Doc, 24.11.2026) */ })[e.key.toLowerCase()];
     if (jump) {
       e.preventDefault();
       const name = jump(), t = at(name);
       const there = t >= 0 && (idx === t || (/L(@|$)/.test(name) && idx === t + 1));
       goPage(there ? 'morgen@' + (regDay || TODAY) : name);
+      return;
+    }
+    /* Shift + arrow: a week on or back, Ctrl + arrow (on a Mac Option, Ctrl + arrow switches the desktops there): a month -
+       from the open day to the same weekday / the same date, kept inside the year (Doc, 24.11.2026: "Shift-Pfeil-Links soll
+       wochenweise blättern und Control-Pfeil-Links oder Rechts monatsweise"). Cmd + arrow stays the browser's back/forward. */
+    if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.metaKey && (e.shiftKey || e.ctrlKey || e.altKey)) {
+      e.preventDefault();
+      const dir = e.key === 'ArrowRight' ? 1 : -1, here = SEQ[mode][idx] || {};
+      const from = /^(morgen|spruch|abend)$/.test(here.kind) ? here.key : (regDay || TODAY);
+      let to;
+      if (e.shiftKey && !e.ctrlKey && !e.altKey) to = addDays(from, 7 * dir);
+      else {
+        const f = dateOf(from), y = f.getFullYear(), m = f.getMonth() + dir;
+        to = iso(new Date(y, m, Math.min(f.getDate(), new Date(y, m + 1, 0).getDate())));
+      }
+      to = to < DAYS[0] ? DAYS[0] : to > DAYS[DAYS.length - 1] ? DAYS[DAYS.length - 1] : to;
+      if (to !== from) goPage('morgen@' + to);
       return;
     }
     if (REVIEW && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { e.preventDefault(); stepSaying(e.key === 'ArrowRight' ? 1 : -1); return; }
