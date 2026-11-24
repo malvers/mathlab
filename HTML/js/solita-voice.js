@@ -15,14 +15,18 @@
 
     // Make speech sound right: drop markdown + emoji (don't read them aloud), and fix Solita's name + the
     // acronyms KI/UI so the engine pronounces them the way Doc wants. Shared so every host sounds identical.
-    function clean(text) {
-        return String(text || '')
+    // A number that ends a sentence as a number, "Seite 20." -> "zwanzig", not "zwanzigste" (Doc, 24.11.2026): the rule
+    // of js/solita-karaoke.js, which the host loads next to this file (tracker.html); German only.
+    function clean(text, lang) {
+        const t = String(text || '')
             .replace(/[\p{Extended_Pictographic}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}️‍]/gu, '')
             .replace(/[*_`#>•]/g, '')
             .replace(/\bSolita\b/gi, 'Solíta')   // so-LÍ-ta (stress 2nd syllable)
             .replace(/\bUI\b/g, 'Ju Ei')         // "you-eye", not German "oo-ee"
             .replace(/\bKI\b/g, 'Kah Ih')        // the letters K-I, not the word „kih"
             .replace(/\s+/g, ' ').trim();
+        const SK = global.SolitaKaraoke;
+        return SK && SK.satzendZahlen && /^de/i.test(lang || DEFAULT_LANG) ? SK.satzendZahlen(t) : t;
     }
 
     let audio = null;
@@ -49,7 +53,7 @@
     }
     function speak(text, opts) {
         opts = opts || {};
-        const t = clean(text);
+        const t = clean(text, opts.lang);
         if (!t) { if (opts.onstate) opts.onstate(false); return Promise.resolve(); }
         if (opts.onstate) opts.onstate(true);
         return synth(t, opts)
@@ -61,7 +65,7 @@
         const ck = 'solita_tts_cache_' + key;
         let b64 = null; try { b64 = localStorage.getItem(ck); } catch (e) { }
         if (b64) { playB64(b64); return Promise.resolve(); }
-        return synth(clean(phrase), opts).then(function (b) {
+        return synth(clean(phrase, opts && opts.lang), opts).then(function (b) {
             if (b) { try { localStorage.setItem(ck, b); } catch (e) { } playB64(b); }
         }).catch(function () { });
     }

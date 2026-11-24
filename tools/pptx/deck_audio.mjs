@@ -19,6 +19,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { satzendZahlen } from '../../videopipeline/lib/tts.mjs';
 
 const ROOT = new URL('../../', import.meta.url).pathname;
 const TTS = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/tts';
@@ -45,8 +46,13 @@ const SAY = { Backpropagation: 'Bäckproppagäjschn', Deepfakes: 'Diepfäiks', D
   // "interaktive" came out with the r rolled into the a; Doc picked "inter-aktive" by ear out of five (03.11.2026: "2")
   'interaktiv(e|en|er|es|em)?': 'inter-aktiv$1',
   Schwenkarm: 'Schwenk-Arm' };   // in one word it came out as "schwarzen Kahn" (Doc and Gemini heard the same)
-const fix = t => Object.entries(SAY).reduce((x, [w, s]) => x.replace(new RegExp('(?<![\\p{L}])' + w + '(?![\\p{L}])', 'gu'), s), t.replace(/\bSolita\b/g, 'Solíta').replace(/\bDOCPAD\b/g, 'Dockpäd'))
+const fixWords = t => Object.entries(SAY).reduce((x, [w, s]) => x.replace(new RegExp('(?<![\\p{L}])' + w + '(?![\\p{L}])', 'gu'), s), t.replace(/\bSolita\b/g, 'Solíta').replace(/\bDOCPAD\b/g, 'Dockpäd'))
   .replace(/\bKI-/g, 'Ka I ').replace(/\bKI\b/g, 'Ka I');   // spelled out, "KI-Text" came out as "Kitext" and "Key Text"
+// A number that ends a sentence is said as a number, "Seite 20." as "zwanzig", not "zwanzigste" (Doc, 24.11.2026) - the
+// rule of her live answers, HTML/js/solita-karaoke.js, through videopipeline/lib/tts.mjs. Clips made before it stay as
+// they are: a part whose clip went out without the rule counts as done and is only listed at the end - speaking those
+// again is Doc's call (--force <clip>).
+const fix = t => fixWords(satzendZahlen(t));
 // [0.7s] in a narration text: she pauses there, by the voice itself (never cut in afterwards)
 const pauses = t => {
   if (!/\[[\d.]+s\]/.test(t)) return '';
@@ -165,7 +171,7 @@ async function speak(name, text, ssml, en) {
 }
 
 let n = 0, sent = 0, chars = 0;
-const used = new Set();
+const used = new Set(), before = [];
 for (const part of say) {
   if (!part.trim()) continue;                         // a line copied in the deck editor: Solita stays quiet there
   const name = clipName(part);
@@ -175,7 +181,10 @@ for (const part of say) {
   const text = en ? part.replace(/^\[en\]\s*/, '') : fix(part), ssml = pauses(text), key = (en ? '[en] ' : '') + (ssml || text);
   n++;
   const forced = FORCE.some(f => name.startsWith(f.replace(/\.mp3$/, '')) || part.toLowerCase().includes(f.toLowerCase()));
-  if (!forced && done[name] === key && existsSync(dir + name)) continue;
+  const ready = !forced && existsSync(dir + name);
+  if (ready && done[name] === key) continue;
+  const old = en ? '' : fixWords(part);                // what was sent before the sentence-end numbers (24.11.2026)
+  if (ready && !en && done[name] === (pauses(old) || old)) { before.push(name); continue; }
   chars += text.length;
   if (DRY) { console.log('would make', name, text.length, 'chars' + (forced ? ' (--force)' : ''), '-', part.slice(0, 70)); continue; }
   if (sent) await sleep(GAP_MS);
@@ -196,5 +205,7 @@ for (const part of say) {
   console.log(name, text.length, 'chars');
 }
 const unused = readdirSync(dir).filter(f => /^[0-9a-f]{12}\.mp3$/.test(f) && !used.has(f));
+if (before.length) console.log(before.length + ' clips say a number at a sentence end the old way (kept; again only on Doc\'s word, --force <clip>):',
+  before.join(' '));
 console.log((N.deck || deck) + ':', n, 'clips,', DRY ? chars + ' chars would be sent' : sent + ' new', 'in', dir
   + (unused.length ? ' - ' + unused.length + ' clips no slide uses any more (kept)' : ''));
