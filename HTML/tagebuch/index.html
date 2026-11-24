@@ -540,6 +540,29 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
 .spruch .s { display: block; font-size: 1.55cqw; line-height: 1.32; font-weight: 600; color: var(--ink); }
 .spruch .s em, .spr-page .s em, .gdw em { font-style: normal; color: var(--ypsi-ink); font-weight: 700; }
 .spruch .w { display: block; margin-top: .6cqw; font-size: 1.05cqw; font-style: italic; color: var(--print-soft); }
+/* long sayings (fitCard): a little wider and smaller, so the card ends above the first question (Doc, 24.11.2026) */
+.spruch.long, .spruch.longer { width: 40cqw; }
+.spruch.long .s { font-size: 1.4cqw; }
+.spruch.longer .s { font-size: 1.27cqw; line-height: 1.28; }
+.spruch.long .w, .spruch.longer .w { font-size: .98cqw; }
+/* the source: a quiet tooltip on the author line. Going through the sayings (?spruch=…) it stands on the card, with the day
+   and the number of the saying underneath (Doc, 24.11.2026) */
+.stage.show-card .spruch .w[title] { pointer-events: auto; cursor: help; }
+.spruch .q, .spruch .r { display: none; }
+.stage.review.show-card .spruch { pointer-events: auto; }
+.stage.review .spruch .q:not(:empty) { display: block; margin-top: .5cqw; font-size: .85cqw; line-height: 1.35; color: var(--print-soft); overflow-wrap: anywhere; }
+.spruch .q a { color: var(--ochre); text-decoration: none; white-space: nowrap; }
+.spruch .q a:hover { text-decoration: underline; }
+.stage.review .spruch .r { display: block; margin-top: .7cqw; padding-top: .5cqw; border-top: 1px solid rgba(176, 122, 20, .3);
+  font-family: var(--display); font-weight: 700; font-size: .8cqw; letter-spacing: .25em; text-transform: uppercase; color: var(--ochre); }
+/* phone: no card in the book; going through the sayings it lies across the top of the page */
+.stage.portrait.review .spruch { top: 2.5cqw; width: 84cqw; padding: 4cqw 4.5cqw 3cqw; }
+.stage.portrait.review .spruch::before, .stage.portrait.review .spruch::after { top: -2cqw; width: 14cqw; height: 4.4cqw; }
+.stage.portrait.review .spruch .k { font-size: 2.5cqw; margin-bottom: 1.4cqw; }
+.stage.portrait.review .spruch .s { font-size: 4.3cqw; }
+.stage.portrait.review .spruch .w { margin-top: 1.4cqw; font-size: 3cqw; }
+.stage.portrait.review .spruch .q:not(:empty) { margin-top: 1.2cqw; font-size: 2.4cqw; }
+.stage.portrait.review .spruch .r { margin-top: 1.6cqw; padding-top: 1.2cqw; font-size: 2.2cqw; }
 .spr-page { position: absolute; inset: 8cqh 9cqw 6cqh 11cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 3cqh; }
 .spr-page .k { font-family: var(--display); font-weight: 700; font-size: 3.2cqw; letter-spacing: .3em; color: var(--ochre); }
 .spr-page .s { font-size: 6.2cqw; line-height: 1.35; font-weight: 600; color: var(--ink); }
@@ -827,6 +850,9 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
         <span class="k">GEDANKE DES TAGES</span>
         <span class="s"></span>
         <span class="w"></span>
+        <!-- only when going through the sayings (?spruch=…): the source and the day / number of the saying -->
+        <span class="q"></span>
+        <span class="r"></span>
       </div>
     </div>
     <div class="veil" id="veil" hidden></div>
@@ -1170,6 +1196,17 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
   const dayNo = s => DAYS.indexOf(s) + 1;
   const isoWeek = s => { const d = dateOf(s); d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7); const w1 = new Date(d.getFullYear(), 0, 4); return 1 + Math.round(((d - w1) / 864e5 - 3 + (w1.getDay() + 6) % 7) / 7); };
   const weekDays = sunday => Array.from({ length: 7 }, (_, i) => addDays(sunday, i - 6)).filter(d => d.startsWith(YEAR + '-'));
+  /* ?spruch=45 : going through the sayings one by one (Doc, 24.11.2026). The book opens at day 45 of the year, the card shows
+     that day's saying with its source, day and number, the arrow keys step one day back or on (past the week and month
+     pages). ?spruch without a number starts at today. 0 = the normal book. */
+  const REVIEW = (() => {
+    let v = null;
+    try { v = new URLSearchParams(location.search).get('spruch'); } catch (e) { }
+    if (v === null) return 0;
+    const n = parseInt(v, 10);
+    return n >= 1 ? Math.min(n, DAYS.length) : dayNo(TODAY);
+  })();
+  let reviewDay = REVIEW;
 
   /* Field values, one key per field and day: "m1@2026-11-23" = morning 1 of that day. m1 is the thanks sentence and lives in
      Doc's table grateful (like on /grateful/). Everything else - morning 2-3, evening, habits, week, month - is kept in this
@@ -1233,12 +1270,15 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
   /* ---------- sayings: the weekly thoughts (gdw.json, Doc's sheets) and the wisdoms of the world (gdw-weisheiten.json) ---------- */
   /* SPR: every sheet with its true author and source (sprueche.json, made by tools/gdw/sprueche.py from blaetter.json);
      the card and the week page name the author, never a sheet number (Doc, 23.11.2026) */
-  let GDW = [], WEISHEIT = [], SPR = {};
+  /* TAG: the sayings for the days of the year (sprueche-tag.json, nr 102 on, each with author, work and checked source).
+     Kept apart from SPR: SPR is looked up by sheet number, TAG is no sheet. */
+  let GDW = [], WEISHEIT = [], SPR = {}, TAG = [];
   async function loadSayings() {
     const get = async (u, list) => { try { const r = await fetch(u); if (!r.ok) return list ? [] : {}; const j = await r.json(); return list ? Object.values(j) : j; } catch (e) { return list ? [] : {}; } };
     let spr;
-    [GDW, WEISHEIT, spr] = await Promise.all([get('../svp/gdw.json', true), get('../svp/gdw-weisheiten.json', true), get('sprueche.json', true)]);
+    [GDW, WEISHEIT, spr, TAG] = await Promise.all([get('../svp/gdw.json', true), get('../svp/gdw-weisheiten.json', true), get('sprueche.json', true), get('sprueche-tag.json', true)]);
     SPR = {}; spr.forEach(s => { SPR[pad(s.nr)] = s; });
+    PLAN = null;
   }
   const abDate = s => { const m = /^(\d\d)\.(\d\d)\.(\d\d)$/.exec(s || ''); return m ? '20' + m[3] + '-' + m[2] + '-' + m[1] : ''; };
   /* text (may carry <em> red words and <br>) and the line with the author */
@@ -1251,23 +1291,85 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
     const s = SPR[pick.bild];
     return { bild: pick.bild, html: s ? s.text : esc(pick.titel || ''), by: byLine(s), own: !!own };
   }
-  /* the thought of the day (the taped card): monday = the weekly thought, the other days in turn the sayings with an author */
-  let dayOrder = null;
+  /* The thought of the day (the taped card): every day of the year its own saying, none twice (Doc, 24.11.2026).
+     Pool: the sayings with an author (sprueche.json, sprueche-tag.json) and Doc's own sheets with words (gdw.json).
+     1. Monday keeps the weekly thought (Doc's sheet or the wisdom of that week) unless it already stood on an earlier Monday.
+     2. A saying with a season ("zeit" in sprueche-tag.json) only stands in its season: spread evenly over it, the
+        narrowest seasons first (Christmas, the turn of the year, May, ...).
+     3. Every other day walks through one shuffled list of the rest (fixed seed = the year) and skips what is taken.
+     Only if the pool is smaller than the year does a saying come back - the one of the earliest day without a season.
+     (The old rotation, day * 7 % 42, only ever reached 6 sayings - Einstein came back every week.) */
+  let PLAN = null;
+  const sayKey = h => String(h || '').replace(/<[^>]*>/g, ' ').toLowerCase().replace(/ß/g, 'ss').replace(/[^a-z0-9äöü]+/g, '');
+  /* Doc's sheets that are no thought of the day (a single word, a cut-off text, a picture caption): never in the daily
+     rotation, but still the weekly thought on their own Monday (Doc / Marie, 24.11.2026) */
+  const NOT_DAILY = new Set(['02', '03', '16']);
+  /* the seasons as month-day ranges (a range may run over the new year) */
+  const ZEIT = {
+    fruehling: ['03-21', '06-20'], mai: ['05-01', '05-31'], sommer: ['06-21', '09-22'], herbst: ['09-23', '12-20'],
+    winter: ['12-21', '03-20'], winterende: ['02-15', '03-20'], weihnacht: ['12-24', '12-26'], jahreswechsel: ['12-31', '01-01']
+  };
+  const ZEIT_NAME = { fruehling: 'Frühling', mai: 'Mai', sommer: 'Sommer', herbst: 'Herbst', winter: 'Winter', winterende: 'Winterende',
+    weihnacht: 'Weihnachten', jahreswechsel: 'Jahreswechsel' };
+  const inZeit = (z, day) => {
+    const w = ZEIT[z], md = day.slice(5);
+    return !w || (w[0] <= w[1] ? md >= w[0] && md <= w[1] : md >= w[0] || md <= w[1]);
+  };
+  function yearPlan() {
+    if (PLAN) return PLAN;
+    const pool = [], byKey = new Map();
+    const add = t => { t.key = sayKey(t.html); if (t.key && !byKey.has(t.key)) { byKey.set(t.key, t); pool.push(t); } };
+    const authored = s => ({ html: s.text, by: byLine(s), nr: s.nr, quelle: s.quelle || '', zeit: ZEIT[s.zeit] ? s.zeit : '' });
+    Object.values(SPR).filter(s => s.wer && s.text).forEach(s => add(authored(s)));
+    TAG.filter(s => s.wer && s.text).forEach(s => add(authored(s)));
+    GDW.forEach(g => {
+      const s = SPR[g.bild];
+      if ((s && s.wer) || NOT_DAILY.has(g.bild)) return;
+      add({ html: s ? s.text : esc(g.titel || ''), by: 'Gedanke der Woche', nr: g.bild, quelle: '', own: true, zeit: '' });
+    });
+    const plan = DAYS.map(() => null), used = new Set();
+    /* 1. Mondays */
+    DAYS.forEach((day, i) => {
+      if (dateOf(day).getDay() !== 1) return;
+      const w = weekThought(day);
+      if (!w || !w.html) return;
+      const k = sayKey(w.html);
+      if (!k || used.has(k)) return;
+      used.add(k);
+      plan[i] = byKey.get(k) || { html: w.html, by: w.by || 'Gedanke der Woche', nr: w.bild, quelle: '', own: w.own, key: k, zeit: '' };
+    });
+    const r = mulberry32(YEAR);
+    const order = pool.map(t => [r(), t]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+    /* 2. the sayings with a season, each group spread evenly over its days (the nearest free day to its share) */
+    const groups = {};
+    order.filter(t => t.zeit && !used.has(t.key)).forEach(t => { (groups[t.zeit] = groups[t.zeit] || []).push(t); });
+    const span = z => DAYS.filter(d => inZeit(z, d)).length;
+    Object.keys(groups).sort((a, b) => span(a) - span(b)).forEach(z => {
+      const win = DAYS.map((d, i) => i).filter(i => inZeit(z, DAYS[i]));
+      groups[z].forEach((t, n) => {
+        const want = Math.floor((n + 0.5) * win.length / groups[z].length);
+        for (let off = 0; off < win.length; off++) {
+          const k = [want + off, want - off].find(x => x >= 0 && x < win.length && !plan[win[x]]);
+          if (k !== undefined) { plan[win[k]] = t; used.add(t.key); return; }
+        }
+      });
+    });
+    /* 3. all other days */
+    const rest = order.filter(t => !t.zeit);
+    let j = 0, back = 0;
+    DAYS.forEach((day, i) => {
+      if (plan[i]) return;
+      while (j < rest.length && used.has(rest[j].key)) j++;
+      if (j < rest.length) { plan[i] = rest[j++]; used.add(plan[i].key); return; }
+      /* pool used up: the saying of the earliest day (without a season) comes back, marked with that day */
+      while (back < i && (!plan[back] || plan[back].again || plan[back].zeit)) back++;
+      if (back < i) { plan[i] = Object.assign({}, plan[back], { again: back + 1 }); back++; }
+    });
+    return (PLAN = plan);
+  }
   function dayThought(day) {
-    const d = dateOf(day);
-    if (d.getDay() === 1) {
-      const w = weekThought(addDays(day, -((d.getDay() + 6) % 7)));
-      if (w && w.html) return { html: w.html, by: w.by || 'Gedanke der Woche' };
-    }
-    /* the old rotation (day * 7 % 42) only ever reached 6 sayings - Einstein came back every week (Doc). Now the sayings
-       are shuffled once (fixed seed) and the days walk through them in turn: no repeat within 42 days */
-    if (!dayOrder) {
-      const r = mulberry32(YEAR);
-      dayOrder = Object.values(SPR).filter(s => s.wer && s.text).map(s => [r(), s]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
-    }
-    if (!dayOrder.length) return null;
-    const s = dayOrder[(dayNo(day) - 1) % dayOrder.length];
-    return { html: s.text, by: byLine(s) };
+    const i = DAYS.indexOf(day);
+    return i < 0 ? null : yearPlan()[i];
   }
 
 
@@ -1945,7 +2047,8 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
     const here = SEQ[mode][idx] || {};
     const onDay = here.kind === 'morgen' || here.kind === 'abend';
     if (onDay && here.key !== cardDay) setCard(here.key);
-    stage.classList.toggle('show-card', mode === 'desk' && onDay && !!cardText && (state === 'read' || state === 'fold_corner'));
+    /* the phone shows the card only while going through the sayings (?spruch=…) */
+    stage.classList.toggle('show-card', (mode === 'desk' || !!REVIEW) && onDay && !!cardText && (state === 'read' || state === 'fold_corner'));
     /* the page block: the left side grows with the year, the right side shrinks */
     const frac = idx / Math.max(1, SEQ[mode].length - 1);
     $('#bookwrap').style.setProperty('--el', (0.2 + 0.8 * frac).toFixed(2) + 'cqw');
@@ -2004,6 +2107,8 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
     if (pf) { try { pf.destroy(); } catch (e) { } pf = null; }
     host.innerHTML = '';
     stage.classList.toggle('portrait', mode === 'phone');
+    stage.classList.toggle('review', !!REVIEW);
+    fitCard();
     const root = document.createElement('div');
     host.appendChild(root);
     const pages = pagesEl = SEQ[mode].map(makePage);
@@ -2013,6 +2118,7 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
     try { q = new URLSearchParams(location.search); } catch (e) { }
     const tag = q && q.get('tag'), seite = q && q.get('seite');
     let start = at('morgen@' + (tag && DAYS.includes(tag) ? tag : TODAY));
+    if (REVIEW) start = at('morgen@' + DAYS[reviewDay - 1]);   /* ?spruch=45: day 45, also after a switch desk <-> phone */
     if (seite === 'cover') start = 0;
     if (seite === 'innen') start = mode === 'desk' ? 1 : 0;   /* the inside of the cover with the plate (für …) */
     if (seite === 'woche') start = at('wocheL@' + sundayOf(TODAY));
@@ -2114,8 +2220,35 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
     const t = dayThought(day);
     cardText = t ? t.html : '';
     /* our own file, already cleaned to <em> and <br> */
-    $('#spruchCard .s').innerHTML = cardText;
-    setText($('#spruchCard'), '.w', t ? t.by : '');
+    const card = $('#spruchCard'), w = card.querySelector('.w'), src = t && t.quelle ? t.quelle : '';
+    card.querySelector('.s').innerHTML = cardText;
+    w.textContent = t ? t.by : '';
+    if (src) w.title = 'Quelle: ' + src; else w.removeAttribute('title');
+    fitCard();
+    if (!REVIEW) return;
+    /* going through the sayings: the source with its links, then day and number - and the address keeps the day */
+    const n = dayNo(day);
+    reviewDay = n;
+    card.querySelector('.q').innerHTML = src ? esc(src).replace(/https?:\/\/[^\s<>"]+[^\s<>".,;:)]/g, u => {
+      let host = u;
+      try { host = new URL(u.replace(/&amp;/g, '&')).hostname.replace(/^www\./, ''); } catch (e) { }
+      return '<a href="' + u + '" target="_blank" rel="noopener">' + host + ' ↗</a>';
+    }) : '';
+    setText(card, '.r', 'Tag ' + n + ' von ' + DAYS.length + (t ? ' · Nr. ' + t.nr : '') + (t && t.zeit ? ' · ' + ZEIT_NAME[t.zeit] : '') + (t && t.again ? ' · doppelt, wie Tag ' + t.again : ''));
+    try { const q = new URLSearchParams(location.search); q.set('spruch', String(n)); history.replaceState(null, '', '?' + q.toString() + location.hash); } catch (e) { }
+  }
+
+  /* long sayings: the card grows a little wider and its letters a little smaller until it ends above the first question,
+     so the questions stay readable. Measured on the desk only (the phone shows the card only with ?spruch=, in its own size). */
+  function fitCard() {
+    const card = $('#spruchCard'), w = card.querySelector('.w'), cw = $('#bookwrap').clientWidth / 100;
+    card.classList.remove('long', 'longer');
+    if (mode !== 'desk' || !cw) return;
+    const pb = parseFloat(getComputedStyle(card).paddingBottom) || 0;
+    for (const c of ['long', 'longer']) {
+      if (w.offsetTop + w.offsetHeight + pb <= 16.4 * cw) break;
+      card.classList.add(c);
+    }
   }
 
   /* ---------- sheets: contents (left tab) and settings (gear) ---------- */
@@ -2228,6 +2361,15 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
   }
   setInterval(cornerHint, 9000);
 
+  /* going through the sayings (?spruch=…): one day back or on, straight to that day's morning */
+  function stepSaying(n) {
+    const here = SEQ[mode][idx] || {};
+    const cur = here.kind === 'morgen' || here.kind === 'abend' ? DAYS.indexOf(here.key) : reviewDay - 1;
+    const i = cur + n;
+    if (i < 0 || i >= DAYS.length) { toast(i < 0 ? 'Das ist der erste Spruch des Jahres.' : 'Das war der letzte Spruch des Jahres.'); return; }
+    goPage('morgen@' + DAYS[i]);
+  }
+
   /* the arrows are gone: on a computer the arrow keys turn the pages, Escape closes a sheet */
   let pageBuf = '', pageT = 0;
   document.addEventListener('keydown', e => {
@@ -2252,6 +2394,7 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
       goPage('morgen@' + DAYS[n - 1]);
       return;
     }
+    if (REVIEW && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { e.preventDefault(); stepSaying(e.key === 'ArrowRight' ? 1 : -1); return; }
     if (e.key === 'ArrowRight') { e.preventDefault(); go(stepTarget(false)); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); go(stepTarget(true)); }
   });
@@ -2302,6 +2445,7 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
     build();
     renderReg();
     renderTocPages();
+    if (REVIEW) toast('Sprüche durchblättern mit ← und →  ·  Tag ' + reviewDay + ' von ' + DAYS.length);
   }
   $('#loginBtn').addEventListener('click', () => auth.loginDialog(start, 'Anmelden für dein Tagebuch'));
   if (auth && auth.hasSession()) start(); else $('#gate').hidden = false;
