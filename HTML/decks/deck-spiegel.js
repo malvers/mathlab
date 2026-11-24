@@ -6,7 +6,9 @@
 // an animation) - this is the real picture.
 //
 // On the deck:
-//   t (Tafel)    the mirror. Chrome asks once what to show - the board's screen (preselected) or the beamer window.
+//   t (Tafel)    the mirror. Chrome asks once what to show - a whole screen (its tab opens first, but which screen
+//                is the board no page can tell Chrome: Doc picks it) or the beamer window. A whole screen that is
+//                the presenter's own never goes in (ownScreen below).
 //                Starting the show (v, two screens) asks by itself before it goes on - then the question costs
 //                nothing - and t in the normal view does the same by hand. Once the show runs, the picture
 //                stands in the presenter view where the slide after next was, captioned "Tafel live"
@@ -106,9 +108,18 @@ function start() {
   };
   asked.then(settled, settled);
   const after = PRES && document.querySelector('#pres .p-after');   // the presenter view: the slot
-  asked.then(s => {
+  const checked = asked.then(s => {
     try { if (ctl) ctl.setFocusBehavior('no-focus-change'); } catch (e) { }   // an older Chrome: only right here
+    return ownScreen(s).catch(() => '').then(own => ({ s, own }));
+  });
+  checked.then(({ s, own }) => {
     if (my !== run) { s.getTracks().forEach(tr => tr.stop()); return; }
+    if (own) {                                       // the presenter's own screen: never in, ask again next time
+      s.getTracks().forEach(tr => tr.stop());
+      stop();
+      note(own === 'one' ? ONE : SELF);
+      return;
+    }
     stream = s;
     s.getVideoTracks()[0].addEventListener('ended', stop);   // Chrome's own "Freigabe beenden"
     picture(s);
@@ -125,7 +136,52 @@ function start() {
       + 'Datenschutz › Bildschirmaufnahme' : e && e.name === 'NotAllowedError' ? 'Rückspiegel abgebrochen'
       : 'Rückspiegel geht nicht: ' + (msg || e));
   });
-  return asked.then(() => { }, () => { });
+  return checked.then(() => { }, () => { });         // the question and the check are over
+}
+
+// Doc, 24.11.2026 (FOW25-1, screenshot 12:30): "Tafel live" showed his own laptop - the presenter view inside itself,
+// smaller and smaller ("Das ist Käse"). Chrome offers every screen and no page may preselect one, so a picture of the
+// laptop - or of the only screen while the Mac mirrors - went straight into the slot. home: the screen the presenter
+// view stands on (in the normal view the laptop, where present() in deck.js will put it). A whole screen with the shape
+// of home and of no other screen is home ('self'); with one screen it can only be the one Doc sees ('one'). '' = fine,
+// or not to be told (a window or a tab, no screen list allowed, two screens of the same size).
+const SELF = 'Rückspiegel: Das war dein eigener Bildschirm, nicht die Tafel – beim nächsten Fragen den Tafel-Bildschirm wählen';
+const ONE = 'Rückspiegel: Nur ein Bildschirm – die Tafel zeigt, was du siehst. Cmd F1 / Win P erweitert';
+async function screensNow() {                        // never asks "Fenster verwalten" just for this
+  if (!window.getScreenDetails || !navigator.permissions) return null;
+  for (const name of ['window-management', 'window-placement']) {   // the older Chrome's name second
+    let p;
+    try { p = await navigator.permissions.query({ name }); } catch (e) { continue; }
+    return p.state === 'granted' ? window.getScreenDetails().catch(() => null) : null;
+  }
+  return null;
+}
+function sizeOf(s) {                                 // the picture's size, from Chrome or from its first frame
+  const tr = s.getVideoTracks()[0];
+  const st = tr && tr.getSettings ? tr.getSettings() : {};
+  if (st.width && st.height) return Promise.resolve({ w: st.width, h: st.height, kind: st.displaySurface });
+  return new Promise(done => {
+    const v = document.createElement('video');
+    v.muted = true; v.srcObject = s;
+    const got = () => { done({ w: v.videoWidth, h: v.videoHeight, kind: st.displaySurface }); v.srcObject = null; };
+    v.addEventListener('loadedmetadata', got, { once: true });
+    setTimeout(got, 1500);
+    v.play().catch(() => { });
+  });
+}
+async function ownScreen(s) {
+  const d = await sizeOf(s);
+  if ((d.kind && d.kind !== 'monitor') || !d.w || !d.h) return '';
+  if (screen.isExtended === false) return 'one';
+  const sd = await screensNow();
+  if (!sd || sd.screens.length < 2) return '';
+  const home = PRES ? sd.currentScreen : sd.screens.filter(x => x.isInternal)[0] || sd.currentScreen;
+  const ar = d.w / d.h;
+  const shape = x => Math.abs(x.width / x.height - ar) < 0.01 * ar;
+  const size = x => [1, x.devicePixelRatio || 1].some(k => Math.abs(x.width * k - d.w) <= 2 && Math.abs(x.height * k - d.h) <= 2);
+  if (!shape(home)) return '';
+  const rivals = sd.screens.filter(x => x !== home && shape(x));
+  return !rivals.length || (size(home) && !rivals.some(size)) ? 'self' : '';
 }
 
 function stop() {
