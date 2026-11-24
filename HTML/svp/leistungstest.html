@@ -552,6 +552,17 @@
         .lt-tile.run { border: 2px solid var(--cyan); padding: 9px 11px 9px; }
         .lt-tile.run .tl-state { color: var(--cyan); }
         .lt-tile.run .tl-bar i { background: var(--cyan); }
+        /* started = clearly lit (Doc, 24.11.2026: "wenn begonnen, deutlicher erkennbar"): the 2 px cyan frame alone
+           read like the 1 px grey one across a grid of 25. A running tile gets a solid cyan edge on the left (it
+           survives a washed-out projector), a soft cyan ground and "läuft" as a filled pill like the other states;
+           a tile nobody has started stays flat - no ground, code and bar faded, the name clear, so who still sits
+           idle shows as a gap. Away (red ground), offline (dashed), finished (band) and aborted keep their looks;
+           the WebUntis triangle keeps its own fading. The 6 px edge takes 4 px of the left padding: same content box */
+        .lt-tiles .lt-tile.run { border-left-width: 6px; padding-left: 7px; background: color-mix(in srgb, var(--cyan) 22%, transparent); }
+        .lt-tiles .lt-tile.run .tl-att { left: -12px; }
+        .lt-tile.run .tl-pill { background: var(--cyan); color: var(--bg); border-radius: 999px; padding: 0 9px; }
+        .lt-tiles .lt-tile.none { background: transparent; }
+        .lt-tiles .lt-tile.none:not(.untis-alarm) > .tl-code, .lt-tiles .lt-tile.none:not(.untis-alarm) > .tl-bar { opacity: 0.5; }
         .lt-tile.away { border: 2px solid var(--ypsilon); padding: 9px 11px 9px; }
         .lt-tile.away .tl-bar i { background: var(--ypsilon); }
         .lt-tile.away .tl-pill { background: var(--ypsilon); color: #fff; border-radius: 999px; padding: 1px 9px;
