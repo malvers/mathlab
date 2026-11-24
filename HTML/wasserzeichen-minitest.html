@@ -52,6 +52,21 @@
   .wm-choice input { width: 20px; height: 20px; accent-color: var(--blue); }
   .wm-choice label.sel { border-color: var(--blue); background: var(--blue-soft); }
   .wm-points { font-size: 0.85rem; opacity: 0.75; margin-top: 10px; }
+  /* the pupil's own result after "Abgegeben ✓" */
+  .wm-review .wm-score { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.9rem; margin: 6px 0 2px; }
+  .wm-review .wm-s { margin-top: 18px; }
+  .wm-review .wm-s-head { font-weight: bold; margin-bottom: 8px; }
+  .wm-out {
+    width: 4.2em; height: 2.3em; display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+    font: bold 1.05rem Arial, Helvetica, sans-serif; border: 2px solid; border-radius: 8px;
+  }
+  .wm-out.ok { border-color: var(--green); background: rgba(121, 158, 49, 0.10); color: var(--green-dark); }
+  .wm-out.bad { border-color: var(--red); background: rgba(176, 36, 24, 0.07); color: var(--red); }
+  .wm-out.given { border: 2px dashed rgba(14, 36, 78, 0.35); background: var(--blue-soft); color: rgba(14, 36, 78, 0.6); }
+  .wm-right { font-size: 0.82rem; font-weight: bold; color: var(--green-dark); }
+  .wm-pick { margin-top: 10px; }
+  .wm-pick .ok { color: var(--green-dark); font-weight: bold; }
+  .wm-pick .bad { color: var(--red); font-weight: bold; }
   @media (max-width: 560px) {
     .wm-row { grid-template-columns: 1fr; }
     .wm-choice { flex-direction: row; }
@@ -155,6 +170,14 @@
   if (!quizEl || !WM || new URLSearchParams(location.search).has('auswertung')) return;
   var PARAMS = new URLSearchParams(location.search);
   var TEST = PARAMS.has('test');
+  /* No full screen on touch devices for this typing test (Leni, FOW25-1, iPad Safari, 24.11.2026: no number
+     could be typed). On touch the engine's guard answers every tap with a request for full screen; on the iPad
+     the tap into a box started the switch, the page jumped, the box lost its focus and the keyboard never came.
+     A lost full screen is no leave on touch anyway; another tab or app still locks the test. */
+  if ((window.matchMedia && matchMedia('(pointer: coarse)').matches) || navigator.maxTouchPoints > 0) {
+    document.documentElement.requestFullscreen = undefined;
+    document.documentElement.webkitRequestFullscreen = undefined;
+  }
   var engineCards = Array.prototype.slice.call(quizEl.querySelectorAll(':scope > .card'));
   engineCards.forEach(function (c) { c.classList.add('wm-engine'); });
   function press(qi, oi) {
@@ -310,6 +333,88 @@
     var k = wantedKey();
     if (k !== shownKey) switchTo(k);
   }, 400);
+
+  /* After "Abgeben" the pupil sees her own result at once (Doc, 24.11.2026: "Das sollen die natürlich sofort
+     sehen für ihren Test. Bitte dringend ändern."): points, every box and every AI/Human pick right or wrong,
+     the right number next to a wrong one. Only once the engine says "Abgegeben ✓" - the server has the
+     submission; before that a reload would open the test again. Only this page: the engine keeps graded tests
+     sealed, the class figures stay in the dashboard. */
+  var resEl = document.getElementById('result');
+  var reviewEl = null;
+  var DONE_TEXT = 'Deine Antworten sind angekommen. Deine Auswertung steht darunter.';
+  function showReview() {
+    var V = WM.VARIANTS[state.key];
+    if (reviewEl || !V) return;
+    var pts = 0;
+    reviewEl = document.createElement('div');
+    reviewEl.className = 'card wm-review';
+    var head = document.createElement('div');
+    head.className = 'qnum';
+    head.textContent = 'DEINE AUSWERTUNG · SCHLÜSSEL ' + V.key;
+    var score = document.createElement('div');
+    score.className = 'wm-score';
+    reviewEl.appendChild(head);
+    reviewEl.appendChild(score);
+    V.sentences.forEach(function (s, si) {
+      var box = document.createElement('div');
+      box.className = 'wm-s';
+      var sh = document.createElement('div');
+      sh.className = 'wm-s-head';
+      sh.textContent = 'Satz ' + (si + 1);
+      box.appendChild(sh);
+      var words = document.createElement('div');
+      words.className = 'wm-words';
+      s.words.forEach(function (w, wi) {
+        var col = document.createElement('div');
+        col.className = 'wm-w';
+        var out = document.createElement('div');
+        var t = wi === 0 ? String(w[1]) : (state.typed[si + '-' + wi] || '');
+        var ok = wi > 0 && t !== '' && Number(t) === s.results[wi];
+        if (ok) pts++;
+        out.className = 'wm-out ' + (wi === 0 ? 'given' : ok ? 'ok' : 'bad');
+        out.textContent = wi === 0 ? t : (t === '' ? '–' : t) + (ok ? ' ✓' : ' ✗');
+        col.appendChild(out);
+        var word = document.createElement('div');
+        word.className = 'wm-word';
+        word.textContent = w[0];
+        col.appendChild(word);
+        if (wi > 0 && !ok) {
+          var right = document.createElement('div');
+          right.className = 'wm-right';
+          right.textContent = 'richtig: ' + s.results[wi];
+          col.appendChild(right);
+        }
+        words.appendChild(col);
+      });
+      box.appendChild(words);
+      var c = state.choice[si];
+      var picked = c === 0 ? 'AI' : c === 1 ? 'Human' : 'nichts gewählt';
+      var cOk = (c === 0 || c === 1) && (c === 0) === s.ai;
+      if (cOk) pts++;
+      var pick = document.createElement('div');
+      pick.className = 'wm-pick';
+      var mark = document.createElement('span');
+      mark.className = cOk ? 'ok' : 'bad';
+      mark.textContent = cOk ? 'richtig ✓' : 'falsch ✗ – richtig: ' + (s.ai ? 'AI' : 'Human');
+      pick.appendChild(document.createTextNode('Deine Wahl: ' + picked + ' · '));
+      pick.appendChild(mark);
+      pick.appendChild(document.createTextNode(' (' + s.green + ' von 7 grün)'));
+      box.appendChild(pick);
+      reviewEl.appendChild(box);
+    });
+    score.textContent = pts + ' / ' + QZ.questions.length + ' Punkte';
+    resEl.parentNode.insertBefore(reviewEl, resEl.nextSibling);
+  }
+  function checkDone() {
+    var h = resEl.querySelector('h2'), p = resEl.querySelector('.sealed-text');
+    if (!resEl.classList.contains('sealed') || !h || h.textContent !== 'Abgegeben ✓') return;
+    if (p && p.textContent !== DONE_TEXT) p.textContent = DONE_TEXT;
+    showReview();
+  }
+  if (resEl) {
+    new MutationObserver(checkDone).observe(resEl, { childList: true, subtree: true, characterData: true, attributes: true });
+    checkDone();   /* submitted before a reload: the engine showed "Abgegeben ✓" already */
+  }
 })();
 </script>
 </body>
