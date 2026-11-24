@@ -273,25 +273,23 @@
             .gdw-txt { display: none; }
             .gdw-in { padding: 0 4px; }
         }
-        /* the thought whole: the sheet as large as the window allows (Doc, 23.11.2026: "Bitte größer"), its words and back /
-           forward under it. fitGdw sizes the sheet and with it the dialog: up to 92% of the window's height and 900px wide,
-           on the phone nearly the whole screen */
+        /* the thought whole: the sheet as large as the window allows (Doc, 23.11.2026: "Bitte größer"). No words and no
+           button bar under it any more (Doc, 24.11.2026: "Lass rausnehmen, bitte" - the ◀ Schließen ▶ bar - and "auch den
+           Spruch drüber ... genau nochmal das Gleiche": the sheet carries the words itself); it closes with the drawn X top
+           right (.dlg-x), Escape or a tap beside it, and goes through the weeks with the arrow keys or a swipe sideways.
+           fitGdw sizes the sheet and with it the dialog: up to 92% of the window's height and 900px wide, on the phone
+           nearly the whole screen */
         #gdwDlg { padding: 12px; }
         /* .dlg.gdw-dlg: over the general .dlg further down (420px wide, 20px padding) */
         .dlg.gdw-dlg { width: auto; max-width: none; max-height: calc(100dvh - 12px); overflow: auto; padding: 16px; text-align: center; }
-        .gdw-dlg .ed-title { margin-bottom: 2px; }
-        .gdw-when { margin: 0 0 10px; font: 500 11px/1.5 Orbitron, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: pre-line; }
+        /* title and date stay centred and keep clear of the X on both sides */
+        .gdw-dlg .ed-title { margin-bottom: 2px; padding: 0 calc(var(--ctl) + 4px); }
+        .gdw-when { margin: 0 0 10px; padding: 0 calc(var(--ctl) + 4px); font: 500 11px/1.5 Orbitron, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: pre-line; }
         /* the frame shows the printed part of the sheet, without its empty white margins (trimGdw); the page inside is
            placed by fitGdw */
         .gdw-sheet { position: relative; margin: 0 auto; width: 300px; aspect-ratio: 200 / 289; overflow: hidden; border-radius: 6px; background: rgb(255, 255, 255); }
         .gdw-big { position: absolute; left: 0; top: 0; display: block; width: 100%; height: 100%; max-width: none; }
-        .gdw-quote { margin: 10px 0 0; font: 16px/1.4 Arial, Helvetica, sans-serif; color: var(--text); overflow-wrap: anywhere; }
-        .gdw-quote:empty { display: none; }
-        .gdw-dlg .dlg-btns { margin-top: 12px; }
         @media (max-width: 560px) { #gdwDlg { padding: 6px; } .dlg.gdw-dlg { padding: 12px; } }
-        .dlg-btns button.gdw-step { flex: 0 0 var(--ctl); min-width: 0; padding: 0; display: grid; place-items: center; }
-        .gdw-step svg { width: 22px; height: 22px; fill: currentColor; }
-        .gdw-step:disabled { opacity: .35; cursor: default; }
         .nav .period {
             flex: 0 1 var(--nav-box); min-width: 0; height: var(--ctl); padding: 0 10px; border: 1px solid var(--line); border-radius: 10px;
             display: flex; flex-direction: column; justify-content: center;   /* the two lines in the middle of the box */
@@ -555,6 +553,18 @@
             width: 100%; max-width: 420px; max-height: calc(100dvh - 32px); overflow: auto; padding: 20px; border-radius: 14px;
             background: var(--card); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
         }
+        /* the close button top right of a dialog, for every dialog that takes one (<button class="dlg-x"> as the
+           dialog's child): a drawn X - two strokes with round ends, no letter (Doc, 24.11.2026: "oben rechts ein schönes
+           X, kein Buchstaben") - in a box one control high like the header's buttons; λ on hover, in every scheme */
+        .dlg:has(> .dlg-x) { position: relative; }
+        .dlg-x {
+            position: absolute; top: 8px; right: 8px; z-index: 1; width: var(--ctl); height: var(--ctl); padding: 0;
+            display: grid; place-items: center; border-radius: 10px; cursor: pointer;
+            background: var(--card); color: var(--text); border: 1px solid var(--line);
+        }
+        .dlg-x svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+        .dlg-x:hover { color: var(--lambda); border-color: var(--lambda); }
+        .dlg-x:focus-visible { outline: 2px solid var(--lambda); outline-offset: 0; }
         .dlg p.msg { margin: 0 0 18px; font: 17px/1.45 Raleway, sans-serif; color: var(--text); white-space: pre-line; }
         .dlg-btns { display: flex; gap: 10px; flex-wrap: wrap; }
         .dlg-btns button, .dlg-btns a {
@@ -748,6 +758,11 @@
             background: rgb(var(--c)) content-box;
         }
         .colors button[aria-checked="true"] { border-color: rgb(var(--c)); padding: 3px; }
+        /* colour 8, the lesson colour (Doc, 24.11.2026: "auch die Stundenfarbe mit reinpacken"): the swatch looks like a
+           lesson tile - the scheme's tint, quiet over the card, with its rim - not like one more full colour */
+        .colors button.cl {
+            background: radial-gradient(closest-side, rgba(var(--tint), .22) calc(100% - 2px), rgba(var(--tint), .75) calc(100% - 1.5px) 100%, transparent 100%) content-box;
+        }
         .ed-note { margin: -4px 0 12px; font: 14px/1.4 Raleway, sans-serif; color: var(--muted); }
         /* the appointment editor tighter and a little smaller (Doc, 19.11.2026: "alles in Y ein bisschen enger und
            wahrscheinlich auch kleiner"): less air between the rows, smaller words, switches and chips - every target
@@ -768,7 +783,11 @@
         .ed #remindRow { margin-top: 4px; }
         .ed .chips { gap: 6px; }
         .ed .chips button { padding: 0 10px; font-size: 11px; }
-        .ed .colors { flex-wrap: wrap; gap: 6px; }
+        /* eight swatches since the lesson colour (24.11.2026): always one row - a little closer on the phone, and on the
+           smallest ones (360px) each gives up a few pixels instead of one dropping to a row of its own */
+        .ed .colors { flex-wrap: nowrap; align-items: center; gap: 6px; }
+        .ed .colors button { flex: 0 1 var(--ctl); min-width: 0; height: auto; aspect-ratio: 1; }
+        @media (max-width: 420px) { .ed .colors { gap: 4px; } }
         .ed .ed-note { margin: 0 0 8px; font-size: 13px; }
         .ed .ed-note:empty { display: none; }
         .ed .dlg-btns { gap: 8px; }
@@ -1115,6 +1134,8 @@
                     <button type="button" class="c5" role="radio" data-color="5" aria-label="Violett"></button>
                     <button type="button" class="c4" role="radio" data-color="4" aria-label="Blau"></button>
                     <button type="button" class="c3" role="radio" data-color="3" aria-label="Grün"></button>
+                    <!-- 8 = the lesson colour: the entry looks like the timetable's lessons (needs 20261124_calendar_lesson_color.sql) -->
+                    <button type="button" class="cl" role="radio" data-color="8" aria-label="Stundenfarbe – wie der Unterricht" title="Stundenfarbe – wie der Unterricht"></button>
                 </div>
             </div>
             <p class="ed-note" id="edNote"></p>
@@ -1150,18 +1171,13 @@
         </div>
     </div>
 
-    <!-- the thought of the week, whole: the sheet, its words, and back / forward through the weeks (openGdw) -->
+    <!-- the thought of the week, whole: the sheet alone, the X top right; arrow keys / a swipe go through the weeks (openGdw) -->
     <div class="dlg-back" id="gdwDlg" hidden>
         <div class="dlg gdw-dlg" role="dialog" aria-modal="true" aria-labelledby="gdwTitle">
+            <button type="button" class="dlg-x" id="gdwClose" aria-label="Schließen" title="Schließen (Esc)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button>
             <p class="ed-title" id="gdwTitle">Gedanke der Woche</p>
             <p class="gdw-when" id="gdwWhen"></p>
             <div class="gdw-sheet" id="gdwSheet"><img class="gdw-big" id="gdwBig" alt=""></div>
-            <p class="gdw-quote" id="gdwQuote"></p>
-            <div class="dlg-btns">
-                <button type="button" class="gdw-step" id="gdwPrev" aria-label="Woche davor"></button>
-                <button type="button" class="yes" id="gdwOk">Schließen</button>
-                <button type="button" class="gdw-step" id="gdwNext" aria-label="Woche danach"></button>
-            </div>
         </div>
     </div>
 
@@ -1264,11 +1280,14 @@
             let selDay = K.startOfDay(new Date());   // the chosen day in the month view
             let agendaDays = AGENDA_DAYS;
 
-            const COLORS = [1, 2, 3, 4, 5, 6, 7];   // calendar_event.color (20261119c_calendar_colors.sql): red, gold, green, blue, violet, orange, pink
+            const COLORS = [1, 2, 3, 4, 5, 6, 7, 8];   // calendar_event.color (20261119c_calendar_colors.sql): red, gold, green, blue, violet, orange, pink; 8 (20261124_calendar_lesson_color.sql) below
+            // colour 8 = the lesson colour (Doc, 24.11.2026: "auch die Stundenfarbe"): an appointment of Doc's drawn exactly
+            // like the timetable's lessons - class cl, the scheme's tint - but still his own row (editable, Solita reminds)
+            const LESSON_COLOR = 8;
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             // a joint appointment (Doc's and the guest's): a guest row with together - in the guest's view one of their own
             const isJoint = ev => !!(ev && ev.together && (GUEST ? ev.kind === 'own' : ev.shared_by));
-            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : isRem(ev) ? 'r' : isJoint(ev) ? 'w' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : COLORS.includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 'r' -> cr (a reminder: red, whatever its colour), 's' -> cs (the guest's turquoise), 'w' -> cw (joint: gold and turquoise)
+            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : isRem(ev) ? 'r' : isJoint(ev) ? 'w' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : ev.color === LESSON_COLOR ? 'l' : COLORS.includes(ev.color) ? ev.color : 2);   // 'l' -> class cl (a lesson, or colour 8), 'h' -> ch, 'r' -> cr (a reminder: red, whatever its colour), 's' -> cs (the guest's turquoise), 'w' -> cw (joint: gold and turquoise)
             // the guest's name lives only in the database (calendar_share.label); one share for now, so its label names
             // every shared_by row
             const guestName = () => (share && share.label) || 'Gast';
@@ -1727,7 +1746,7 @@
             const WK_SEP = '<div class="wk-sep"><i></i></div>';
             /* back (d < 0) / forward: a filled triangle with round corners (Doc, 23.11.2026: "schöne Dreiecke und nicht nur
                diese Chevrons") - the one drawing for every arrow of the page: the header's, the ones beside the day names of
-               week and month, the thought of the week's. Its centre of mass sits on the middle of the box (x = 12) */
+               week and month. Its centre of mass sits on the middle of the box (x = 12) */
             const TRI = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path class="tri" d="${d < 0 ? 'M15 6.2v11.6L6.4 12z' : 'M9 6.2v11.6L17.6 12z'}"/></svg>`;
             // back / forward beside the day names of the week and the month, the same as the header's
             const STEP_BTN = d => `<button type="button" class="icon nav-step" data-step="${d}" aria-label="${view === 'week' ? (d < 0 ? 'Vorige Woche' : 'Nächste Woche') : (d < 0 ? 'Voriger Monat' : 'Nächster Monat')}">${TRI(d)}</button>`;
@@ -1847,12 +1866,9 @@
                 const pre = new Image();
                 pre.onload = () => { if (gdwOpen === key) img.src = big; };
                 pre.src = big;
-                $('gdwQuote').textContent = gdwQuote(e);
-                $('gdwPrev').disabled = !gdwNear(key, -1);
-                $('gdwNext').disabled = !gdwNear(key, 1);
                 trimGdw(e);
                 [-1, 1].forEach(d => { const k = gdwNear(key, d); if (k) trimGdw(gdw[k]); });   // the arrows' next sheets too
-                if ($('gdwDlg').hidden) { $('gdwDlg').hidden = false; $('gdwOk').focus(); }
+                if ($('gdwDlg').hidden) { $('gdwDlg').hidden = false; $('gdwClose').focus(); }
                 fitGdw();
             }
             /* the printed part of a sheet: most sheets are a page with white margins around a photo or the words, and the
@@ -3192,18 +3208,25 @@
                 $('text').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); quick(); } });
                 $('micBtn').onclick = dictate;
                 $('views').onclick = e => { const b = e.target.closest('button'); if (b) setView(b.dataset.view); };
-                $('prevBtn').innerHTML = $('gdwPrev').innerHTML = TRI(-1);
-                $('nextBtn').innerHTML = $('gdwNext').innerHTML = TRI(1);
+                $('prevBtn').innerHTML = TRI(-1);
+                $('nextBtn').innerHTML = TRI(1);
                 $('prevBtn').onclick = () => step(-1);
                 $('nextBtn').onclick = () => step(1);
-                // the thought of the week: a tap opens it whole; in the dialog the arrows (buttons and keys) go through the
-                // weeks without moving the calendar, Escape or a tap beside it closes. While it is open the keys are its
-                // own - taken in the capture phase, before the calendar's arrows, T / W / M and "/" see them
+                // the thought of the week: a tap opens it whole; in the dialog the arrow keys or a swipe sideways go through
+                // the weeks without moving the calendar, the X, Escape or a tap beside it closes. While it is open the keys
+                // are its own - taken in the capture phase, before the calendar's arrows, T / W / M and "/" see them
                 $('gdwBtn').onclick = () => openGdw(K.ymd(gdwMonday()));
-                $('gdwOk').onclick = closeGdw;
-                $('gdwPrev').onclick = () => stepGdw(-1);
-                $('gdwNext').onclick = () => stepGdw(1);
+                $('gdwClose').onclick = closeGdw;
                 $('gdwDlg').addEventListener('pointerdown', e => { if (e.target === $('gdwDlg')) closeGdw(); });
+                // swipe on the sheet (touch has no arrow keys, and the ◀ ▶ buttons are gone): left = the week after
+                let gx = null, gy = 0;
+                $('gdwDlg').addEventListener('touchstart', e => { if (e.touches.length === 1) { gx = e.touches[0].clientX; gy = e.touches[0].clientY; } }, { passive: true });
+                $('gdwDlg').addEventListener('touchend', e => {
+                    if (gx === null) return;
+                    const dx = e.changedTouches[0].clientX - gx, dy = e.changedTouches[0].clientY - gy;
+                    gx = null;
+                    if (Math.abs(dx) > 60 && Math.abs(dy) < 50) stepGdw(dx < 0 ? 1 : -1);
+                }, { passive: true });
                 $('gdwBig').addEventListener('load', fitGdw);
                 addEventListener('resize', fitGdw);
                 document.addEventListener('keydown', e => {
