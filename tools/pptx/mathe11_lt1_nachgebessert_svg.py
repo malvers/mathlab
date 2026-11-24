@@ -272,13 +272,16 @@ def beispiel(keys, hinweis=None):
 #   ONLINE  what was submitted online, without bonus - recomputed 23.11.2026, 19:40 from the submissions;
 #   PAPIER  what the changed paper would have given - the paper points of the correction of the scanned sheets
 #           (4 uncertain readings, counted as there); it does NOT count;
-#   FINAL   online + bonus points (Teil B) - None until the bonus sheets are scanned again (24.11.), then the third
-#           panel fills itself.
+#   FINAL   online Teil A + bonus points (Teil B, 0-2 BE) - graded 24.11.2026 from the second bonus scan (13 slips:
+#           12 x 2 BE, 1 x 1 BE; the 7 tests without a slip get 0), same key, A + B above 20 stays Note 1. Two grades
+#           move against ONLINE (FINAL_SPRUENGE, online points -> final points), test by test in Doc's private file
+#           lt1-bgy26-notenspiegel-final.json (codes stay there, never here).
 # BESSER / SCHLECHTER: grades better / worse on paper than online, compared test by test in Doc's private file
 # lt1-bgy26-notenspiegel-papier.json (codes stay there, never here).
 ONLINE = {1: 10, 2: 7, 3: 0, 4: 3, 5: 0, 6: 0}
 PAPIER = {1: 14, 2: 4, 3: 1, 4: 1, 5: 0, 6: 0}
-FINAL = None
+FINAL = {1: 11, 2: 6, 3: 1, 4: 2, 5: 0, 6: 0}
+FINAL_SPRUENGE = [(18, 20), (12, 13)]
 STAND_ONLINE = "23.11., 19:40"
 FINAL_FOLGT = "am 24.11."
 UNSICHER = 4
@@ -297,7 +300,7 @@ def schnitt(counts):
 
 assert sum(ONLINE.values()) == 20 and schnitt(ONLINE)[0] == "1,80"
 assert sum(PAPIER.values()) == 20 and schnitt(PAPIER)[0] == "1,45"
-assert FINAL is None or sum(FINAL.values()) == 20
+assert sum(FINAL.values()) == 20 and schnitt(FINAL)[0] == "1,70"
 
 
 def _panel(c, labels, x0, w, title, sub, counts, y_max, faint=False):
@@ -370,7 +373,7 @@ def notenspiegel_quelle(online=ONLINE, papier=PAPIER, final=FINAL):
     parts = ["Ø online %s" % short(online), "Ø Papier %s" % short(papier)]
     if final:
         parts.append("Ø final %s" % short(final))
-    parts.append("Papier: %d unsichere Lesestellen, gewertet wie in der Korrektur" % UNSICHER)
+    parts.append("Papier: %d unsichere Lesestellen wie in der Korrektur" % UNSICHER)   # shorter: one line with Ø final
     parts.append("Schlüssel 19/16/13/9/5 von 20 BE")
     return " · ".join(parts)
 
@@ -408,6 +411,19 @@ def _check_faelle():
 
 
 _check_faelle()
+
+
+def _check_final():
+    """ONLINE with the tests of FINAL_SPRUENGE moved to their final grade = FINAL (bonus only ever helps)."""
+    spiegel = dict(ONLINE)
+    for o, f in FINAL_SPRUENGE:
+        assert f > o and note(f) < note(o)
+        spiegel[note(o)] -= 1
+        spiegel[note(f)] += 1
+    assert spiegel == FINAL, spiegel
+
+
+_check_final()
 
 
 PFEIL = ('<svg class="pfeil" viewBox="0 0 96 26" aria-hidden="true" style="color:var(--red)"><line x1="2" y1="13" '
