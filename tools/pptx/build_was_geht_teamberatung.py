@@ -308,9 +308,9 @@ BUECHER = ["mathe5", "mathe6", "mathe7", "mathe8", "mathe9", "mathe10",
            "mathefos11", "mathefos12", "pruefung"]
 covers = "".join('<img src="../resources/og/buch-%s-cover.jpg" alt="" loading="lazy" decoding="async">' % b for b in BUECHER)
 d._slide("content", '%s<h3>24 Bücher in 5 Sprachen – and counting</h3><div class="rules"></div>'
-         '<div class="cover-wand trommel-folge step kommt" data-g="0">%s</div>'
+         '<div class="cover-wand step kommt" data-g="0">%s</div>'
          '<p class="labnote cover-wand-unter">131 Ausgaben – kostenlos online, als PDF, gedruckt mit ISBN</p>'
-         % (cue("0:20", "Ein Klick: Trommelwirbel, die 24 Einbände fallen herein. 131 Ausgaben, 5 Sprachen, manche in 9."),
+         % (cue("0:20", "Ein Klick: die 24 Einbände kommen herein (ohne Trommelwirbel, Doc 25.11.). 131 Ausgaben, 5 Sprachen, manche in 9."),
             covers))
 d.summary("24 Lehrbücher in 5 Sprachen (131 Ausgaben, manche in 9 Sprachen) - and counting: Oberschule 5-10, Gymnasium "
           "5-12 mit Leistungskurs, Berufliches Gymnasium 11-13, Fachoberschule 11/12 und ein Prüfungsbuch.")
@@ -427,7 +427,7 @@ NUMBERS = [
 ]
 tiles = "".join('<div class="zahl"><b>%s</b><span>%s</span></div>' % (n, t) for n, t in NUMBERS)
 d._slide("content", '%s<h3>Die Zahlenwand</h3><div class="rules"></div>'
-         '<div class="zahlen-wand trommel-folge step kommt" data-g="0">%s</div>'
+         '<div class="zahlen-wand step kommt" data-g="0">%s</div>'
          '<p class="labnote zahlen-quelle">Gezählt am 24.11.2026 auf dem Stand, der auf docalvers.de läuft.</p>' % (
              cue("0:45", "Ein Klick: Trommelwirbel, die Zahlen fallen nacheinander herein."), tiles))
 d.summary("Die Zahlenwand, gezählt am 24.11.2026: 234 Tage seit dem 05.04.2026, 5.314 gespeicherte Arbeitsstände, rund "
@@ -470,7 +470,7 @@ d._slide("merksatz", '%s<div class="quote-bar"></div>'
          'der Rest ist Vibe-Coding.</p>'
          # a Falcon 9 lift-off (NASA, public domain: images.nasa.gov, KSC-20250115-MH-AJN01-0001-CLPS_Firefly_Blue_Ghost_
          # Mission_1_Isolated_Launch_Views-M11191, 00:45-00:54), silent and looping as a card on the right (Doc 07:00)
-         '<figure class="live-shot karte" style="top:150px"><video src="img/was-geht/start-falcon9.mp4" muted autoplay loop '
+         '<figure class="live-shot karte" style="top:225px"><video src="img/was-geht/start-falcon9.mp4" muted autoplay loop '
          'playsinline preload="metadata" aria-label="Start einer Falcon-9-Rakete (NASA)"></video></figure>'
          '<p class="labnote live-credit" style="left:532px;top:356px;width:356px">Video: NASA</p>' % (cue("0:30", "Pause nach First HMTL, dann der Satz. Danach das "
                                                                   "Tagebuch als Finale."), ARIAL, ARIAL))
