@@ -70,6 +70,9 @@ final class BpLink {
 
         /** the monitor let go after a transfer */
         void onBpTransferDone();
+
+        /** the monitor's clock was set to the phone's time */
+        void onBpClockSet();
     }
 
     private static final String TAG = "DocFit";
@@ -107,6 +110,7 @@ final class BpLink {
     private Step step = Step.NONE;
     private int keyTries, bondTries;
     private byte[] key;   // the 16-byte key stored in the monitor (MainActivity keeps it on the phone)
+    private boolean clockDue, pairedNow;
     private final Bpm.Frames frames = new Bpm.Frames();
     private String paired;   // the paired monitor's address, null = none
     private BluetoothGatt gatt;
@@ -167,6 +171,11 @@ final class BpLink {
     /** The 16 bytes DocFit stores in the monitor when pairing and shows it on each connection. */
     void setKey(byte[] key) {
         this.key = key == null || key.length != 16 ? null : key.clone();
+    }
+
+    /** Whether the next connection should set the monitor's clock (MainActivity: about once a day). */
+    void setClockDue(boolean due) {
+        clockDue = due;
     }
 
     /** Start: wait for the paired monitor (the Bluetooth permissions must be granted). */
@@ -358,6 +367,7 @@ final class BpLink {
         opBusy = false;
         subscribed = false;
         talking = false;
+        pairedNow = false;
     }
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
@@ -561,13 +571,10 @@ final class BpLink {
             else failPairing("key refused");
         } else if (step == Step.UNLOCK) {
             main.removeCallbacks(stepTimeout);
-            if (Bpm.isAnswer(v, 0x81, 0x00)) {
-                setClock(g);
-            } else {
-                Log.w(TAG, "omron: the monitor does not know DocFit's key");
-                step = Step.NONE;
-                talkStandard(g);
-            }
+            if (!Bpm.isAnswer(v, 0x81, 0x00)) Log.w(TAG, "omron: the monitor does not know DocFit's key");
+            step = Step.NONE;
+            if (clockDue) setClock(g);
+            else talkStandard(g);
         }
         // KEY_MODE with another answer: the timeout asks again
     }
@@ -615,11 +622,20 @@ final class BpLink {
         } else if (step == Step.CLK_WRITE) {
             boolean ok = Bpm.frameOk(v) && (v[1] & 0xFF) == 0x81 && (v[2] & 0xFF) == 0xC0;
             Log.i(TAG, "omron: clock " + (ok ? "SET" : "not confirmed"));
+            if (ok) {
+                clockDue = false;
+                callback.onBpClockSet();
+            }
             endClock(g);
         } else if (step == Step.CLK_END && Bpm.isFrame(v, 0x8F)) {
             main.removeCallbacks(stepTimeout);
             step = Step.NONE;
-            talkStandard(g);
+            if (subscribed) {
+                main.removeCallbacks(quiet);
+                main.postDelayed(quiet, 800);   // done: let go
+            } else {
+                talkStandard(g);
+            }
         } else if (step == Step.TX_START && Bpm.isFrame(v, 0x80)) {
             step = Step.TX_END;
             ops.add(new Op(omronChar(g, TX0), null, Bpm.END_TRANSMISSION));
@@ -648,9 +664,10 @@ final class BpLink {
     }
 
     /**
-     * A normal connection, after the key: set the monitor's clock as Omron's app does - its standard clock (0x2A2B)
-     * ignores writes (24./25.11.2026, both adjust reasons: 0x80) and the monitor shows "date and time not set" until an
-     * app sets it. Start transmission, read the 16-byte clock block, write it back with the phone's time, end.
+     * A normal connection, after the key, when the clock is due: set the monitor's clock as Omron's app does - its
+     * standard clock (0x2A2B) ignores writes (24./25.11.2026, both adjust reasons: 0x80) and the monitor shows "date
+     * and time not set" until an app sets it. Start transmission, read the 16-byte clock block, write it back with the
+     * phone's time, end - then the indications (talkStandard). Set and confirmed on Doc's monitor 25.11.2026 19:42.
      */
     private void setClock(BluetoothGatt g) {
         if (omronChar(g, TX0) == null) {
@@ -673,10 +690,14 @@ final class BpLink {
         restartStepTimeout(4 * STEP_MS);
     }
 
-    /** After the key and the first transmission: set the clock too (Omron's app does it when pairing), then the rest. */
+    /**
+     * After the key and the first transmission: the standard part, which completes the pairing. The clock is set on the
+     * next normal connection (25.11.2026 19:07: setting it right here, a second transmission in pairing mode, made the
+     * monitor let go 5 s after the bond, before the pairing was complete).
+     */
     private void finishOmronPairing(BluetoothGatt g) {
         step = Step.NONE;
-        setClock(g);
+        talkStandard(g);
     }
 
     /** No answer in time: ask again for the key mode, give up, or go on without the optional steps. */
@@ -765,34 +786,17 @@ final class BpLink {
         main.postDelayed(stepTimeout, 2 * STEP_MS);
     }
 
-    /** The standard part: read the clock, set it, switch the indications on - then the monitor sends. */
+    /**
+     * The standard part: switch the indications on - then the monitor sends the readings it has not sent yet.
+     * The clock, when due, comes BEFORE this (talk): after the readings the monitor no longer answers on its channel
+     * (25.11.2026 19:51), and right after a clock transmission it keeps the new readings for the next connection
+     * (19:48 -> came at 19:51) - so the clock is set rarely (MainActivity) and readings are never lost.
+     */
     @SuppressLint("MissingPermission")
     private void talkStandard(BluetoothGatt g) {
         if (g != gatt || talking) return;
         talking = true;
-        BluetoothGattCharacteristic feature = g.getService(Bpm.SERVICE).getCharacteristic(FEATURE);
-        if (feature != null) ops.add(new Op(feature, null, null));
-        BluetoothGattService uds = g.getService(UDS);
-        BluetoothGattCharacteristic index = uds == null ? null : uds.getCharacteristic(USER_INDEX);
-        if (index != null) ops.add(new Op(index, null, null));
-        BluetoothGattService ts = g.getService(Bpm.TIME_SERVICE);
-        BluetoothGattCharacteristic clock = ts == null ? null : ts.getCharacteristic(Bpm.CURRENT_TIME);
-        if (clock != null) {
-            int p = clock.getProperties();
-            boolean read = (p & BluetoothGattCharacteristic.PROPERTY_READ) != 0;
-            if (read) ops.add(new Op(clock, null, null));
-            if ((p & (BluetoothGattCharacteristic.PROPERTY_WRITE | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)) != 0) {
-                // the bytes are made when it is sent (the exact second); the one byte here is the "adjust reason".
-                // 24.11.2026: 0x01 answered 0x80 ("data field ignored") and the clock stayed unknown - so 0x00 first,
-                // each followed by a read to see whether it took
-                ops.add(new Op(clock, null, new byte[]{0x00}));
-                if (read) ops.add(new Op(clock, null, null));
-                ops.add(new Op(clock, null, new byte[]{0x01}));
-                if (read) ops.add(new Op(clock, null, null));
-            }
-        } else {
-            Log.i(TAG, "omron: no current time service - the clock stays as it is");
-        }
+        // only the indications (the standard clock 0x2A2B ignores writes - the clock goes over Omron's channel)
         BluetoothGattCharacteristic m = g.getService(Bpm.SERVICE).getCharacteristic(Bpm.MEASUREMENT);
         try {
             g.setCharacteristicNotification(m, true);
@@ -881,6 +885,7 @@ final class BpLink {
             if (st == BluetoothGatt.GATT_SUCCESS) {
                 subscribed = true;
                 if (pairing) {
+                    pairedNow = true;   // no clock in the pairing connection (19:07: it made the monitor let go)
                     pairing = false;
                     main.removeCallbacks(pairGiveUp);
                     paired = g.getDevice().getAddress();

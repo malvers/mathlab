@@ -141,7 +141,12 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private int LAMBDA, UPSILON, PHI, TEXT, MUTED, CARD, BG;
     private static final int ASK_MIC = 1, ASK_BT = 2;
     // the paired Omron's address and the first day whose readings count (only on this phone, never synced)
-    private static final String OMRON_ADDRESS = "omronAddress", OMRON_SINCE = "omronSince", OMRON_KEY = "omronKey";
+    private static final String OMRON_ADDRESS = "omronAddress", OMRON_SINCE = "omronSince", OMRON_KEY = "omronKey",
+            OMRON_CLOCK = "omronClockSet", OMRON_CLOCK_OFFSET = "omronClockOffset", OMRON_CLOCK_NEEDED = "omronClockNeeded";
+    // the Omron's clock is set rarely (BpLink: a clock transmission makes the monitor keep that connection's readings
+    // for the next one): when a reading had no time (batteries out), when summer/winter time changed since, or after
+    // 30 days (drift)
+    private static final long OMRON_CLOCK_EVERY_MS = 30L * 24 * 3_600_000L;
     // TAB_FAST is the fasting view, opened from the settings (no tab of its own since 20.11.2026)
     private static final int TAB_WATCH = 0, TAB_SCALE = 1, TAB_FAST = 2, TAB_BP = 3, TAB_GLU = 4;
     private static final String FASTING_PAGE = "file:///android_asset/fasting/index.html";
@@ -191,7 +196,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private Button bpPair;
     private String bpDoneText;
     private int bpNew, bpNewOther, bpSkipped, bpNoTime;
-    private boolean bpJustPaired, pendingPair;
+    private boolean bpJustPaired, pendingPair, bpClockNow;
     private BpLink.Status bpLast = BpLink.Status.IDLE;
     private final TextView[] bpPersonChips = new TextView[SLOTS.length];
     private View bpPersonRow;
@@ -311,6 +316,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         scale = new ScaleLink(this, this);
         bp = new BpLink(this, this);
         bp.setKey(omronKey());
+        bp.setClockDue(omronClockDue());
         bp.setPaired(prefs.getString(OMRON_ADDRESS, null));
         sync = new Sync(this, changed -> {
             if (changed) reloadFromSync();
@@ -2046,6 +2052,28 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         return k;
     }
 
+    private boolean omronClockDue() {
+        if (prefs.getBoolean(OMRON_CLOCK_NEEDED, false)) return true;
+        long set = prefs.getLong(OMRON_CLOCK, 0), now = System.currentTimeMillis();
+        if (set == 0) return false;   // not known yet: the first reading with a time says the clock runs
+        int offset = TimeZone.getDefault().getOffset(now);
+        return prefs.getInt(OMRON_CLOCK_OFFSET, offset) != offset || now - set > OMRON_CLOCK_EVERY_MS;
+    }
+
+    /** The Omron's clock runs right as of now (set by DocFit, or a reading came with a time). */
+    private void omronClockFine() {
+        long now = System.currentTimeMillis();
+        prefs.edit().putLong(OMRON_CLOCK, now).putInt(OMRON_CLOCK_OFFSET, TimeZone.getDefault().getOffset(now))
+                .remove(OMRON_CLOCK_NEEDED).apply();
+    }
+
+    @Override
+    public void onBpClockSet() {
+        omronClockFine();
+        bpClockNow = true;
+        bp.setClockDue(false);
+    }
+
     private boolean omronPaired() {
         return prefs.getString(OMRON_ADDRESS, null) != null;
     }
@@ -2058,6 +2086,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         } else if (!hasBluetoothPermission()) {
             if (omronPaired() || pendingPair) askBluetooth(false);
         } else {
+            bp.setClockDue(omronClockDue());
             bp.start();
             if (pendingPair) {
                 pendingPair = false;
@@ -2167,8 +2196,11 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         // readings in the memory all arrive "now" (24.11.2026: 57 of them, the seller's among them, at 19:37)
         if (Bpm.timeIsArrival(m, clockLag, now)) {
             bpNoTime++;
+            prefs.edit().putBoolean(OMRON_CLOCK_NEEDED, true).apply();   // its clock is off: set it next time
+            bp.setClockDue(true);
             return;
         }
+        if (prefs.getLong(OMRON_CLOCK, 0) == 0) omronClockFine();
         long t = Bpm.when(m, clockLag, now);
         if (t < prefs.getLong(OMRON_SINCE, 0)) {
             bpSkipped++;
@@ -2192,6 +2224,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     public void onBpTransferDone() {
         int n = bpNew + bpNewOther;
         String s = bpJustPaired ? "Omron gekoppelt ✓"
+                : bpClockNow && n == 0 ? "Uhr des Omron gestellt ✓ – neue Werte kommen beim nächsten Mal"
                 : n == 0 ? "Omron: nichts Neues" : n == 1 ? "1 neue Messung vom Omron ✓" : n + " neue Messungen vom Omron ✓";
         if (bpJustPaired && n > 0) s += " · " + n + " neu";
         if (bpNewOther > 0) s += " (" + bpNewOther + " für " + names[1] + ")";
@@ -2199,6 +2232,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         if (bpNoTime > 0) s += " · " + bpNoTime + " ohne Uhrzeit übersprungen";
         bpDoneText = s;
         bpJustPaired = false;
+        bpClockNow = false;
         refreshBpState();
     }
 
