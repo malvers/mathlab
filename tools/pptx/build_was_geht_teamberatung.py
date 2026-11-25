@@ -216,7 +216,7 @@ d._slide("content", '%s<h3>Die Klasse im Blick</h3><div class="rules"></div>'
                          "Dann Pfeil rechts: Mission Control live."),
              button(QUIZ_JUMP, "Mission Control"), html.escape(QUIZ_URL, quote=True), qr))
 modul(MC_URL.replace(LOCAL, ""), "Mission Control", cue(
-    "4:15", "ZUERST in Mission Control 'Namen verbergen' klicken - sonst stehen die Namen der Kollegen an den Kacheln "
+    "3:55", "ZUERST in Mission Control 'Namen verbergen' klicken - sonst stehen die Namen der Kollegen an den Kacheln "
             "auf dem Beamer. Dann "
             "laufen lassen: jede Kachel ein Smartphone, wer raus ist, wird rot. Zurück zum Deck: neben die Seite "
             "klicken, dann Pfeil."))
@@ -299,6 +299,21 @@ def aus_lehrbuch(titel):
     body = re.sub(r'<div class="anthropic-clawd[^"]*"[^>]*><img[^>]*></div>', '', body)   # Clawd only on "Danke, Claude!"
     return m.group(1), body
 
+
+# the cover wall (Doc, 25.11.2026 07:08: "unbedingt"): the 24 German books with the hub's own covers
+# (resources/og/buch-<book>-cover.jpg, as index.html#buecher shows them), loaded only when the slide shows (lazy)
+BUECHER = ["mathe5", "mathe6", "mathe7", "mathe8", "mathe9", "mathe10",
+           "mathegy5", "mathegy6", "mathegy7", "mathegy8", "mathegy9", "mathegy10", "mathegy11", "mathegy11lk",
+           "mathegy12", "mathegy12lk", "mathe11", "mathe12", "mathe12lk", "mathe13", "mathe13lk",
+           "mathefos11", "mathefos12", "pruefung"]
+covers = "".join('<img src="../resources/og/buch-%s-cover.jpg" alt="" loading="lazy" decoding="async">' % b for b in BUECHER)
+d._slide("content", '%s<h3>24 Bücher in 5 Sprachen – and counting</h3><div class="rules"></div>'
+         '<div class="cover-wand trommel-folge step kommt" data-g="0">%s</div>'
+         '<p class="labnote cover-wand-unter">131 Ausgaben – kostenlos online, als PDF, gedruckt mit ISBN</p>'
+         % (cue("0:20", "Ein Klick: Trommelwirbel, die 24 Einbände fallen herein. 131 Ausgaben, 5 Sprachen, manche in 9."),
+            covers))
+d.summary("24 Lehrbücher in 5 Sprachen (131 Ausgaben, manche in 9 Sprachen) - and counting: Oberschule 5-10, Gymnasium "
+          "5-12 mit Leistungskurs, Berufliches Gymnasium 11-13, Fachoberschule 11/12 und ein Prüfungsbuch.")
 
 for titel, was in (("Was haben wir dafür bezahlt?", "107 € im Monat, : 4,33 = 24,71 € pro Woche, davon 2 % = 0,49 € für "
                                                       "ein ganzes Lehrbuch."),
@@ -449,10 +464,15 @@ d._slide("merksatz", '%s<div class="quote-bar"></div>'
          # "Der Start" (Doc 07:00: the old headline out) - the first commit's story stays below it
          '<p class="label" style="top:150px">05.04.2026 · 17:50</p>'
          '<p class="satz" style="top:180px;font:700 48px/1.15 Orbitron,system-ui,sans-serif;color:var(--ink)">Der Start</p>'
-         '<p class="satz" style="top:252px;font:26px/1.3 %s;color:var(--body)">Der allererste Commit: „First '
+         '<p class="satz" style="top:252px;width:400px;font:24px/1.3 %s;color:var(--body)">Der allererste Commit: „First '
          '<span class="c2">HMTL</span>“ – mit Tippfehler.</p>'
-         '<p class="satz step kommt" data-g="0" style="top:320px;font:28px/1.3 %s">Die Tippfehler sind von mir, '
-         'der Rest ist Vibe-Coding.</p>' % (cue("0:30", "Pause nach First HMTL, dann der Satz. Danach das "
+         '<p class="satz step kommt" data-g="0" style="top:345px;width:400px;font:26px/1.3 %s">Die Tippfehler sind von mir, '
+         'der Rest ist Vibe-Coding.</p>'
+         # a Falcon 9 lift-off (NASA, public domain: images.nasa.gov, KSC-20250115-MH-AJN01-0001-CLPS_Firefly_Blue_Ghost_
+         # Mission_1_Isolated_Launch_Views-M11191, 00:45-00:54), silent and looping as a card on the right (Doc 07:00)
+         '<figure class="live-shot karte" style="top:150px"><video src="img/was-geht/start-falcon9.mp4" muted autoplay loop '
+         'playsinline preload="metadata" aria-label="Start einer Falcon-9-Rakete (NASA)"></video></figure>'
+         '<p class="labnote live-credit" style="left:532px;top:356px;width:356px">Video: NASA</p>' % (cue("0:30", "Pause nach First HMTL, dann der Satz. Danach das "
                                                                   "Tagebuch als Finale."), ARIAL, ARIAL))
 d.summary("Zum Schluss: der allererste Eintrag vom 05.04.2026 heißt First HMTL, mit Tippfehler. Die Tippfehler sind "
           "von Doc, der Rest ist Vibe-Coding.")
