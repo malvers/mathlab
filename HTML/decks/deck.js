@@ -1240,12 +1240,35 @@ if (!PRESENTER) {
   document.querySelectorAll('.labframe iframe').forEach(f => {   // loaded before this line ran
     try { if (f.contentDocument && f.contentDocument.readyState === 'complete') loadedHidden(f); } catch (e) { }
   });
+  // ... and it stays out of sight until the new load has laid itself out, then fades in: the page laid out at 0 x 0 showed
+  // for a moment as a squeezed strip before the reload (Doc, 25.11.2026, the Tagebuch: "Das sieht wirklich doof aus").
+  // In a show the beamer's frames reload for every slide (mirror.fresh, on the presenter's word) - there, too, a frame
+  // is hidden from the moment its slide shows until that load. A frame that loads nothing more shows after 3 s anyway.
+  function untilLoaded(f) {
+    let done = false, timer = 0;
+    const show = () => {
+      if (done) return;
+      done = true; clearTimeout(timer); f.removeEventListener('load', show);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        f.style.visibility = '';
+        try { f.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' }); } catch (e) { }
+      }));
+    };
+    f.style.visibility = 'hidden';
+    f.addEventListener('load', show);
+    timer = setTimeout(show, 3000);
+  }
+  let lastSlide = -1;
   painted.push(() => {
-    if (window.__deckReplica) return;                // a show: mirror.fresh loads them as the presenter turns
     const s = slides[si];
-    if (s) s.querySelectorAll('.labframe iframe').forEach(f => {
+    if (!s || si === lastSlide) return;               // a click on the same slide changes nothing here
+    lastSlide = si;
+    const show = !!window.__deckReplica;              // a show: mirror.fresh loads them as the presenter turns
+    s.querySelectorAll('.labframe iframe').forEach(f => {
+      if (show) { hiddenLoaded.delete(f); untilLoaded(f); return; }
       if (!hiddenLoaded.has(f)) return;
       hiddenLoaded.delete(f);
+      untilLoaded(f);
       try { f.contentWindow.location.reload(); } catch (e) { f.src = f.getAttribute('src'); }
     });
   });
