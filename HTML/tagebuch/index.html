@@ -595,14 +595,23 @@ textarea.hand.multi { cursor: default; }
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"); }
 .stage.portrait .p-cover .cover-front { inset: -2.4cqw -2.6cqw -3cqw -1.4cqw; }
 .stage.portrait .p-back .cover-back { inset: -2.4cqw -2.6cqw -3cqw -1.4cqw; border-radius: 0 .9cqw .9cqw 0; }
-.cv-in { position: absolute; inset: 0 0 0 3cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4cqh; }
+/* heart, lettering and the name as one block, centred up and down in the frame (Doc, 25.11.2026: "alles weiter runter
+   y zent") - the frame's insets are the same at top and bottom, so the page's middle is the frame's */
+.cv-in { position: absolute; inset: 0 0 0 3cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.cv-main { display: flex; flex-direction: column; align-items: center; gap: 2.4cqh; }
 .foil { background: linear-gradient(100deg, var(--foil-1), var(--foil-2) 28%, #b8913a 48%, #f8e08e 68%, #93701f); -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 .25cqw .1cqw rgba(0, 0, 0, .55)) drop-shadow(0 -.1cqw 0 rgba(255, 255, 255, .12)); }
 /* "Grateful" in a sweeping script (Doc, 23.11.2026) - padding, because the foil only fills the box and the swashes overshoot it */
 .cv-title { font-family: 'Great Vibes', 'Pinyon Script', cursive; font-weight: 400; font-size: 16cqw; line-height: 1.15; letter-spacing: 0; padding: .06em .3em .16em; margin: -1cqh 0 -2cqh; }
 .cv-sub { font-family: var(--display); font-weight: 500; font-size: 3cqw; letter-spacing: .3em; padding-left: .3em; }
 .cv-year { font-family: var(--display); font-weight: 700; font-size: 5.6cqw; letter-spacing: .25em; padding-left: .25em; margin-top: 4cqh; }
-.cv-icon { width: 15cqw; height: auto; filter: drop-shadow(0 .25cqw .1cqw rgba(0, 0, 0, .55)); }
+/* under the year the name from the link (?fuer=meine%20Cutie -> "Cutie"; Doc, 25.11.2026: "schreib unter 2026 noch Cutie"),
+   in the title's script and foil; Doc's own copy (no link) keeps its cover as it was. Padding for the swashes, as .cv-title */
+.cv-for { margin-top: 11cqh; /* well below the year ("Cutie weiter runter") */
+  font-family: 'Great Vibes', 'Pinyon Script', cursive; font-weight: 400; font-size: 9cqw; line-height: 1.15; letter-spacing: 0; padding: .06em .3em .16em; }
+.cv-for:empty { display: none; }
+/* more room between the heart and "Grateful" (Doc, 25.11.2026: "das Herz höher") - as a margin, so the block stays centred */
+.cv-icon { width: 15cqw; height: auto; filter: drop-shadow(0 .25cqw .1cqw rgba(0, 0, 0, .55)); margin-bottom: 8cqh; }
 .cv-slogan { position: absolute; left: 0; right: 3cqw; bottom: 13cqh; text-align: center; font-family: var(--display); font-weight: 500; font-size: 2.6cqw; letter-spacing: .25em; }
 .cv-name { position: absolute; left: 0; right: 3cqw; bottom: 8.5cqh; text-align: center; font-family: var(--hand); font-size: 5cqw; }
 
@@ -1215,6 +1224,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 
 /* no slide-in of boards and card while the page loads */
 .stage:not(.ready) .boards, .stage:not(.ready) .spruch, .stage:not(.ready) .edge, .stage:not(.ready) .ribbon, .stage:not(.ready) .headband { transition: none; }
+/* before the first build the book has no height yet: boards, edges and the Inhalt tab stood as a flat bar while the
+   entries loaded (Doc, 25.11.2026: "der Artefakt am Anfang") - nothing of the book until it is built */
+.stage:not(.built) .bookwrap { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) { .boards, .spruch, .edge, .ribbon { transition: none; } }
 @media (max-width: 920px) { .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 700px) {
@@ -1420,13 +1432,14 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 <template id="tpl-cover">
   <div class="pg leather cover-front">
     <div class="cv-frame"></div>
-    <div class="cv-in">
+    <div class="cv-in"><div class="cv-main">
       <svg class="cv-icon" viewBox="0 0 64 56" aria-hidden="true"><defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8a6a22"/><stop offset=".35" stop-color="#f6dc85"/><stop offset=".6" stop-color="#b8913a"/><stop offset="1" stop-color="#f1d27a"/></linearGradient></defs>
         <path d="M32 52 C14 40 4 30 4 18 C4 9 11 3 19 3 C25 3 29 6 32 11 C35 6 39 3 45 3 C53 3 60 9 60 18 C60 30 50 40 32 52 Z" fill="none" stroke="url(#gold)" stroke-width="3.2"/>
         <path d="M18 30 C22 34 26 36 32 36 C38 36 42 34 46 30" fill="none" stroke="url(#gold)" stroke-width="2.4" stroke-linecap="round"/></svg>
       <div class="cv-title foil">Grateful</div>
       <div class="cv-sub foil">DAS 3-MINUTEN-TAGEBUCH</div>
-      <div class="cv-year foil">2026</div>
+      <div class="cv-year foil">2026</div></div>
+      <div class="cv-for foil"></div>
     </div>
   </div>
 </template>
@@ -1682,13 +1695,13 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     <div class="cardgap"></div>
     <div class="q"><button class="ring" data-k="m1" aria-label="30-Sekunden-Uhr"></button><div>
       <p class="q-t"><span class="tx">Heute früh sage ich Danke für&nbsp;…</span><span class="tag"><svg viewBox="0 0 64 56" aria-hidden="true"><path d="M32 52 C14 40 4 30 4 18 C4 9 11 3 19 3 C25 3 29 6 32 11 C35 6 39 3 45 3 C53 3 60 9 60 18 C60 30 50 40 32 52 Z" fill="none" stroke="url(#g-foil-ring)" stroke-width="5"/></svg>GRATEFUL</span></p>
-      <div class="fld"><textarea class="hand" data-k="m1" rows="3" aria-label="Heute früh sage ich Danke für"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+      <div class="fld"><textarea class="hand" data-k="m1" rows="3" style="--rows: 3" aria-label="Heute früh sage ich Danke für"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
     <div class="q"><button class="ring" data-k="m2" aria-label="30-Sekunden-Uhr"></button><div>
       <p class="q-t"><span class="tx">Mein kleiner Schritt, der heute zählt:</span></p>
-      <div class="fld"><textarea class="hand" data-k="m2" rows="3" aria-label="Mein kleiner Schritt, der heute zählt"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+      <div class="fld"><textarea class="hand" data-k="m2" rows="3" style="--rows: 3" aria-label="Mein kleiner Schritt, der heute zählt"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
     <div class="q"><button class="ring" data-k="m3" aria-label="30-Sekunden-Uhr"></button><div>
       <p class="q-t"><span class="tx">Mit dieser Haltung gehe ich in den Tag:</span></p>
-      <div class="fld"><textarea class="hand" data-k="m3" rows="3" placeholder="tippen oder sprechen" aria-label="Mit dieser Haltung gehe ich in den Tag"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+      <div class="fld"><textarea class="hand" data-k="m3" rows="3" style="--rows: 3" placeholder="tippen oder sprechen" aria-label="Mit dieser Haltung gehe ich in den Tag"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
     <!-- love, friendship, mindfulness on the morning page instead of the word "Morgen" (Doc, 24.11.2026) -->
     <div class="ft"><span class="pn">326</span><span class="habits">
       <button class="hb" data-h="4"><i></i>Liebe</button><button class="hb" data-h="5"><i></i>Freundschaft</button><button class="hb" data-h="3"><i></i>Achtsamkeit</button></span></div>
@@ -1727,13 +1740,13 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     <div class="q"><button class="ring" data-k="e1" aria-label="30-Sekunden-Uhr"></button><div>
       <!-- questions end in "…" instead of "?" (Doc, 24.11.2026); this one was "Wem habe ich heute den Tag ein wenig leichter gemacht?" -->
       <p class="q-t"><span class="tx">Wem habe ich heute gutgetan&nbsp;…</span></p>
-      <div class="fld"><textarea class="hand" data-k="e1" rows="3" aria-label="Wem habe ich heute den Tag leichter gemacht"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+      <div class="fld"><textarea class="hand" data-k="e1" rows="3" style="--rows: 3" aria-label="Wem habe ich heute den Tag leichter gemacht"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
     <div class="q"><button class="ring" data-k="e2" aria-label="30-Sekunden-Uhr"></button><div>
       <p class="q-t"><span class="tx">Mein Lichtblick des Tages:</span></p>
-      <div class="fld"><textarea class="hand" data-k="e2" rows="3" aria-label="Mein Lichtblick des Tages"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+      <div class="fld"><textarea class="hand" data-k="e2" rows="3" style="--rows: 3" aria-label="Mein Lichtblick des Tages"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
     <div class="q"><button class="ring" data-k="e3" aria-label="30-Sekunden-Uhr"></button><div>
       <p class="q-t"><span class="tx">Was nehme ich mit, was lasse ich hier&nbsp;…</span></p>
-      <div class="fld"><textarea class="hand" data-k="e3" rows="3"aria-label="Was nehme ich aus heute mit"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+      <div class="fld"><textarea class="hand" data-k="e3" rows="3" style="--rows: 3"aria-label="Was nehme ich aus heute mit"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
     <!-- six things to keep in mind, no "HEUTE" any more (Doc, 24.11.2026: "nimm das Heute raus und mach noch 3 andere Sachen,
          die man sich vornimmt - Achtsamkeit, Liebe, Freundschaft") -->
     <div class="ft r"><span class="pn">326</span><span class="habits">
@@ -2223,6 +2236,11 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       el.querySelector('.n').textContent = m ? m[2] : FUER;
     });
     root.querySelectorAll('.scale').forEach(sc => {
+    /* the cover carries the name alone under the year ("meine Cutie" -> "Cutie") */
+    if (FUER) root.querySelectorAll('.cv-for').forEach(el => {
+      const m = /^(meinen|meine|mein)\s+(.+)$/i.exec(FUER);
+      el.textContent = m ? m[2] : FUER;
+    });
       if (!sc.firstChild) sc.innerHTML = Array.from({ length: 10 }, (_, i) => '<button data-v="' + (i + 1) + '" aria-label="' + (i + 1) + ' von 10">' + (i + 1) + '</button>').join('');
       markScale(sc);
     });
@@ -2991,6 +3009,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   }
   /* a short note on the desk instead of the old hint line */
   let toastT = 0;
+    stage.classList.add('built');   /* once, never taken away: the book shows from its first build on */
   function toast(msg) {
     const t = $('#toast'); t.textContent = msg; t.classList.add('show');
     clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3400);

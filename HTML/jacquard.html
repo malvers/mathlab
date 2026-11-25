@@ -158,6 +158,27 @@
             transform: rotate(-90deg);
         }
 
+        /* Folded, the bar shrinks to its caption and the triangle, unfolded it is as wide as the
+           excerpt again (Doc, 25.11.2026: "zugeklappt bitte schrumpfen lassen"). The panel stands by
+           its right edge - the corner's right: 18px, or the dragged spot (setHudXY) - so it shrinks
+           towards the triangle and the triangle stays under the pointer. max-content / min-content
+           are never capped by the room left of it, so a panel at the left edge still opens fully.
+           Two keywords cannot be animated, so glideHudWidth runs the glide between their pixel
+           widths and then hands back to the keyword. Folded, the canvas no longer counts for the
+           width (contain), it is only cut off. */
+        #pattern-hud {
+            width: max-content;
+            transition: width .25s ease;
+        }
+
+        #pattern-hud.collapsed {
+            width: min-content;
+        }
+
+        #pattern-hud.collapsed .hud-clip {
+            contain: inline-size;
+        }
+
         /* the fold stored from last time comes without the animation */
         #pattern-hud.hud-instant,
         #pattern-hud.hud-instant * {
@@ -1707,14 +1728,17 @@
 
         function hudRoom() { return document.getElementById('canvas-container'); }
 
-        /** Move the panel to (x, y) in the loom's box, never past its edges. */
+        /**
+         * Move the panel's left edge to x, its top to y, never past the loom box's edges. It is held
+         * by its right edge, like in its corner: folding then shrinks it towards the triangle.
+         */
         function setHudXY(x, y) {
-            const box = hud.box, room = hudRoom();
-            const maxX = Math.max(0, room.clientWidth - box.offsetWidth);
+            const box = hud.box, room = hudRoom(), w = box.offsetWidth;
+            const maxX = Math.max(0, room.clientWidth - w);
             const maxY = Math.max(0, room.clientHeight - box.offsetHeight);
-            box.style.left = Math.round(clamp(x, 0, maxX)) + 'px';
+            box.style.right = Math.round(room.clientWidth - w - clamp(x, 0, maxX)) + 'px';
             box.style.top = Math.round(clamp(y, 0, maxY)) + 'px';
-            box.style.right = 'auto';
+            box.style.left = 'auto';
             box.style.bottom = 'auto';
         }
 
@@ -1748,30 +1772,73 @@
          */
         function hudResized() {
             if (!S.hudPos || (hud.drag && hud.drag.moved)) return;
-            const room = hudRoom();
+            const room = hudRoom(), box = hud.box;
             if (!room.clientWidth || !room.clientHeight) return;
-            setHudXY(hud.box.offsetLeft, hud.box.offsetTop);
+            // only when it runs past an edge - re-setting it every frame from rounded offsets would creep
+            const l = box.offsetLeft, t = box.offsetTop;
+            if (l < 0 || t < 0 || l + box.offsetWidth > room.clientWidth || t + box.offsetHeight > room.clientHeight) setHudXY(l, t);
         }
 
         /** The fold has run: the bar stayed where it was, so note that spot for the new size. */
         function foldDone() {
             clearTimeout(hud.foldEnd);
             hud.foldEnd = 0;
-            if (!S.hudPos) return;
+            if (!S.hudPos || (hud.drag && hud.drag.moved)) return;   // a drag notes its own spot
             hudResized();
             rememberHud();
         }
 
+        /** A width for the box's own width property, from a measured border-box width. */
+        function hudCssWidth(px) {
+            const cs = getComputedStyle(hud.box);
+            if (cs.boxSizing === 'border-box') return px;
+            return px - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+                - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
+        }
+
+        /**
+         * Fold or unfold with the width gliding: the keyword width (max-content open, min-content
+         * folded) cannot be animated, so measure where it goes, glide there in pixels and hand
+         * back to the keyword when the glide has run (hudWidthDone).
+         */
+        function glideHudWidth(change) {
+            const box = hud.box;
+            const from = box.getBoundingClientRect().width;     // also mid-glide, when folded again quickly
+            box.style.transition = 'none';
+            box.style.width = '';
+            change();
+            const to = box.getBoundingClientRect().width;       // the keyword width of the new state
+            if (Math.abs(to - from) < 0.5) { box.style.transition = ''; return; }
+            box.style.width = hudCssWidth(from) + 'px';
+            void box.offsetWidth;
+            box.style.transition = '';
+            box.style.width = hudCssWidth(to) + 'px';
+        }
+
+        /** The glide has run: back to the keyword width (the same size), which follows the caption again. */
+        function hudWidthDone() {
+            const box = hud.box;
+            if (!box.style.width) return;
+            box.style.transition = 'none';
+            box.style.width = '';
+            void box.offsetWidth;
+            box.style.transition = '';
+        }
+
         function foldHud(open, save) {
-            S.hudOpen = open;
-            hud.box.classList.toggle('collapsed', !open);
+            const apply = () => {
+                S.hudOpen = open;
+                hud.box.classList.toggle('collapsed', !open);
+            };
+            if (save) glideHudWidth(apply); else apply();
             hud.btn.setAttribute('aria-expanded', String(open));
             hud.btn.title = open ? 'Ausschnitt einklappen' : 'Ausschnitt aufklappen';
             hud.btn.setAttribute('aria-label', hud.btn.title);
             if (!save) return;
             savePrefs();
             clearTimeout(hud.foldEnd);
-            if (S.hudPos) hud.foldEnd = setTimeout(foldDone, 1200);   // transitionend below is the usual end
+            // transitionend (initHudPanel) is the usual end, this the safe one
+            hud.foldEnd = setTimeout(() => { hudWidthDone(); foldDone(); }, 1200);
         }
 
         function initHudPanel() {
@@ -1823,9 +1890,11 @@
             });
 
             if (window.ResizeObserver) new ResizeObserver(hudResized).observe(box);
+            // a fold runs two transitions, the height (body) and the width (box): note the spot after each
             const body = box.querySelector('.hud-body');
-            body.addEventListener('transitionend', (e) => {
-                if (e.target === body && e.propertyName === 'grid-template-rows' && hud.foldEnd) foldDone();
+            box.addEventListener('transitionend', (e) => {
+                if (e.target === box && e.propertyName === 'width') { hudWidthDone(); foldDone(); }
+                else if (e.target === body && e.propertyName === 'grid-template-rows') foldDone();
             });
 
             // the stored fold, without the animation
