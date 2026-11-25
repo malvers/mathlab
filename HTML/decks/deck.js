@@ -774,6 +774,16 @@ const jeopardy = (function () {
       if (i >= n) { clearInterval(t); end(); }
     }, 40);
   }
+  // A slide with data-jeopardy plays the think music while it stands and stops it when left (Doc, 25.11.2026: the survey
+  // of "Was geht?!") - only in the window that plays (in a show the beamer, the presenter stays silent), only where the
+  // file is (Doc's Mac). Music started by J stays J's business.
+  let auto = false;
+  painted.push(function () {
+    if (PRESENTER || !LOCAL || document.documentElement.classList.contains('deck-edit')) return;
+    const want = !!(slides[si] && slides[si].hasAttribute('data-jeopardy'));
+    if (want && !on) { auto = true; start(); }
+    else if (!want && on && auto) { auto = false; stop(); }
+  });
   return {
     available: LOCAL || YOUTUBE,                       // the help shows J only where it can play
     toggle: function () {
