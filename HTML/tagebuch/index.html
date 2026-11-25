@@ -200,13 +200,14 @@ textarea.hand.multi { cursor: default; }
 .setp .set-note { margin: 3cqh 0 0; font-size: calc(var(--u) * 2.1); line-height: 1.45; font-style: italic; color: var(--print-soft); }
 .toc-gear.on { transform: rotate(90deg); }
 .toc-gear.on:hover { transform: rotate(60deg); }
-.keys { display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--u) * .55) 0; margin: 0; }   /* rows a little closer: 15 keys now */
+.keys { display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--u) * .3) 0; margin: 0; }   /* rows closer: 20 keys now */
 .keys > div { display: grid; grid-template-columns: calc(var(--u) * 28.5) minmax(0, 1fr); align-items: center; gap: calc(var(--u) * 2); min-width: 0; }
-.keys dt { display: flex; flex-wrap: wrap; gap: calc(var(--u) * .8); font: calc(var(--u) * 2.4) / 1.3 var(--read); color: var(--ink); }
+.keys dt { display: flex; flex-wrap: wrap; gap: calc(var(--u) * .6); font: calc(var(--u) * 2.4) / 1.3 var(--read); color: var(--ink); }
 .keys dd { margin: 0; min-width: 0; font: calc(var(--u) * 2.4) / 1.3 var(--read); color: var(--print); }
-.keys kbd { font: 700 calc(var(--u) * 1.75) / 1 var(--display); letter-spacing: .12em; color: var(--ink); padding: calc(var(--u) * .95) 0 calc(var(--u) * .8);
-  /* every pill the same width, "Enter" included (Doc, 24.11.2026: "bitte Pillen gleich") */
-  width: calc(var(--u) * 8.6); box-sizing: border-box; text-align: center; border: max(1px, calc(var(--u) * .28)) solid rgba(176, 122, 20, .5); border-radius: 999px; background: rgba(255, 255, 255, .35); }
+.keys kbd { font: 700 calc(var(--u) * 1.5) / 1 var(--display); letter-spacing: .12em; color: var(--ink); padding: calc(var(--u) * .6) 0 calc(var(--u) * .5);
+  /* every pill the same width, "Enter" included (Doc, 24.11.2026: "bitte Pillen gleich"); smaller and narrower, so the page
+     ends level with the one beside it (Doc, 25.11.2026: "die müssen auf gleicher Höhe sein ... die Pillen enger machen, kleiner") */
+  width: calc(var(--u) * 7.4); box-sizing: border-box; text-align: center; border: max(1px, calc(var(--u) * .28)) solid rgba(176, 122, 20, .5); border-radius: 999px; background: rgba(255, 255, 255, .35); }
 .k-phone { display: none !important; }
 .stage.portrait .k-desk { display: none !important; }
 .stage.portrait .k-phone { display: grid !important; }
@@ -269,13 +270,38 @@ textarea.hand.multi { cursor: default; }
 .stage.sch-modern .reg button { background: linear-gradient(180deg, #30343c, #23262d) padding-box, linear-gradient(rgb(245, 194, 66), rgb(245, 194, 66)) border-box; }
 .stage.sch-modern .reg button::before { border-color: transparent; }
 .stage.sch-modern .toast { background: rgba(35, 38, 45, .88); }
-.stage.sch-nacht { background: radial-gradient(ellipse 80% 70% at 45% 30%, #1b2440, #070a12 75%); --leather: #0c1323; }
+.stage.sch-nacht { background: radial-gradient(ellipse 80% 70% at 45% 30%, #1b2440, #070a12 75%); --leather: #0e172a; --leather-in: #111b31; }   /* a touch lighter (Doc, 25.11.2026: "ein mü heller, aber nur ganz wenig"; was
+   #0c1323), the inside of the boards (round the open pages, the endpapers' board) a touch more ("nur innen noch mü") */
+.stage.closed-front, .stage.closed-back { --leather-in: var(--leather); }   /* closed: the edges match the cover */
 /* the night sky behind the book (script: the sky canvas) - only in the night scheme */
 .sky { display: none; position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 .stage.sch-nacht .sky { display: block; }
 /* the birthday celebration above the book (z-index under the sheets) */
 .fest { position: absolute; left: 0; top: 0; z-index: 12; pointer-events: none; opacity: 0; transition: opacity .6s; }
 .fest.on { opacity: 1; }
+/* the Christmas Oratorio on the Sundays of Advent (script: wo): Bach and an icon in pencil on the pages (they play and pause),
+   and while it plays YouTube's player in a gilded baroque frame over the book - the frame round the video, nothing over it */
+.wo { position: fixed; opacity: 0; visibility: hidden; transition: opacity .6s, visibility 0s .6s; }
+.wo.on { opacity: 1; visibility: visible; transition: opacity .6s; }
+@media (prefers-reduced-motion: reduce) { .wo, .wo.on { transition: none; } }
+.wo-art { z-index: 46; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; mix-blend-mode: multiply; }
+.wo-art img { display: block; width: 100%; height: 100%; object-fit: contain; transition: filter .25s; }
+.wo-art:hover img, .wo-art:focus-visible img { filter: contrast(1.35) brightness(.88); }
+.wo-dim { z-index: 44; inset: 0; background: rgba(15, 10, 4, .3); pointer-events: none; }
+.wo-box { z-index: 45; box-sizing: content-box; border: 50px solid transparent; border-image: url(img/barockrahmen.webp) 88 round;
+  background: #000; background-clip: content-box; box-shadow: 0 18px 44px rgba(0, 0, 0, .5); }
+.wo-box iframe { display: block; transition: opacity .4s; }
+/* while the video loads (about 3 s): a gold ring in the frame, the player shows as it starts to play (Doc, 25.11.2026:
+   "während das Video lädt ... einen Indikator zeigen") - nothing lies over a playing video */
+.wo-load { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.1em;
+  background: radial-gradient(ellipse at 50% 45%, #2a1a10, #0b0705 70%); color: rgb(245, 194, 66); font: 500 clamp(10px, 1.1vw, 15px) / 1 Orbitron, sans-serif;
+  letter-spacing: .28em; text-transform: uppercase; opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s .3s; pointer-events: none; }
+.wo-load i { width: 3.2em; height: 3.2em; border-radius: 50%; border: 2px solid rgba(245, 194, 66, .22); border-top-color: rgb(245, 194, 66);
+  animation: wo-spin 1.1s linear infinite; }
+@keyframes wo-spin { to { transform: rotate(360deg); } }
+.wo-box.loading .wo-load { opacity: 1; visibility: visible; transition: opacity .3s; }
+.wo-box.loading iframe { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .wo-load i { animation-duration: 3s; } }
 /* the birthday on the settings page: two selects in the style of the pills */
 .setp .geb { display: flex; gap: calc(var(--u) * 1.3); margin-bottom: calc(var(--u) * 1.3); }
 .setp .geb select { font: 700 calc(var(--u) * 1.85) / 1 var(--display); letter-spacing: .08em; color: var(--ink); padding: calc(var(--u) * 1) calc(var(--u) * 2);
@@ -297,8 +323,9 @@ textarea.hand.multi { cursor: default; }
    to follow the page block's thickness (--el / --er, set on every turn) and moved by a pixel now and then; now they stand at
    the thickest block (1 cqw) plus their margin on both sides, always - the block grows inside them. The same fixed edge for
    the cover, the back, the inside boards and the flap. */
-.boards { position: absolute; z-index: 0; top: -1.6cqw; bottom: -2.1cqw; left: calc(-1 * (1cqw + var(--bm))); right: calc(-1 * (1cqw + var(--bm))); border-radius: .9cqw;
-  background-color: var(--leather);
+.boards { position: absolute; z-index: 0; top: -1.1cqw; bottom: -1.5cqw;   /* a narrower edge above and below (Doc, 25.11.2026) */
+   left: calc(-1 * (1cqw + var(--bm))); right: calc(-1 * (1cqw + var(--bm))); border-radius: .9cqw;
+  background-color: var(--leather-in, var(--leather));
   background-image:
     linear-gradient(90deg, transparent 48.6%, rgba(0, 0, 0, .45) 50%, transparent 51.4%),
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"),
@@ -309,7 +336,7 @@ textarea.hand.multi { cursor: default; }
    (it leaves at once with the turning page), and when it opens, the board lands and becomes the background again */
 .stage.closed-front .boards { left: calc(50% - .3cqw); }
 .stage.closed-back .boards { right: calc(50% - .3cqw); }
-.stage.portrait .boards { top: -2.4cqw; bottom: -3cqw; left: -1.4cqw; right: -2.6cqw; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"); }
+.stage.portrait .boards { top: -1.7cqw; bottom: -2.1cqw; left: -1.4cqw; right: -2.6cqw; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"); }
 /* the edges of the page block: thicker on the side that is already written - it grows with the year */
 .edge { position: absolute; z-index: 1; pointer-events: none; opacity: 1; transition: opacity .3s; }
 /* the page block's edges: fine, soft paper lines with a little shade towards the outside - both sides alike, the left one
@@ -340,7 +367,8 @@ textarea.hand.multi { cursor: default; }
    the spine (rib-under, set by script) - only the tail still hangs out below the closed book.
    The shape is clipped on ::before, so the drop shadow on the element itself survives the clip. */
 /* the top end pokes out a little above the board, as if it came from behind the spine over the edge to the front */
-.ribbon { position: absolute; z-index: 3; left: calc(50% - 1.1cqw); top: -1.75cqw; width: 2.2cqw; height: calc(100% + 4.75cqw); pointer-events: none;
+.ribbon { position: absolute; z-index: 3; left: calc(50% - 1.1cqw); top: -1.25cqw; width: 2.2cqw; height: calc(100% + 4.25cqw);   /* its end hangs as before; the top follows the narrower edge */
+   pointer-events: none;
   transform-origin: 50% 0; transform: rotate(-1deg); filter: drop-shadow(.12cqw .18cqw .12cqw rgba(40, 25, 10, .45)); }
 .ribbon::after { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(90deg, #e9dcc8, #fbf5ea 50%, #e3d4bd);
@@ -579,22 +607,22 @@ textarea.hand.multi { cursor: default; }
 /* the cover IS the board: as big as the leather boards behind the open book (they stick out over the page block),
    so the closed book shows no second blue edge around the cover. Same insets as .boards (cqw of the book wrapper). */
 .leaf.p-cover, .leaf.p-back { overflow: visible; }
-.p-cover .cover-front { inset: -1.6cqw calc(-1 * (1cqw + var(--bm))) -2.1cqw -.3cqw; border-radius: 0 .9cqw .9cqw 0; }
-.p-back .cover-back { inset: -1.6cqw -.3cqw -2.1cqw calc(-1 * (1cqw + var(--bm))); border-radius: .9cqw 0 0 .9cqw; }
+.p-cover .cover-front { inset: -1.1cqw calc(-1 * (1cqw + var(--bm))) -1.5cqw -.3cqw; border-radius: 0 .9cqw .9cqw 0; }
+.p-back .cover-back { inset: -1.1cqw -.3cqw -1.5cqw calc(-1 * (1cqw + var(--bm))); border-radius: .9cqw 0 0 .9cqw; }
 /* inside of the front / back board: the endpaper is glued onto the board, which sticks out around it - so these pages
    turn with the full size of their half of the background, and the background half they leave (or land on) is the same board */
 .leaf.p-endpaper, .leaf.p-endpaper2 { overflow: visible; }
-.board-in { position: absolute; pointer-events: none; background-color: var(--leather);
+.board-in { position: absolute; pointer-events: none; background-color: var(--leather-in, var(--leather));
   background-image:
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"),
     radial-gradient(ellipse at 60% 20%, rgba(255, 255, 255, .10), transparent 60%);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .05); }
-.p-endpaper .board-in { inset: -1.6cqw 0 -2.1cqw calc(-1 * (1cqw + var(--bm))); border-radius: .9cqw 0 0 .9cqw; }
-.p-endpaper2 .board-in { inset: -1.6cqw calc(-1 * (1cqw + var(--bm))) -2.1cqw 0; border-radius: 0 .9cqw .9cqw 0;
+.p-endpaper .board-in { inset: -1.1cqw 0 -1.5cqw calc(-1 * (1cqw + var(--bm))); border-radius: .9cqw 0 0 .9cqw; }
+.p-endpaper2 .board-in { inset: -1.1cqw calc(-1 * (1cqw + var(--bm))) -1.5cqw 0; border-radius: 0 .9cqw .9cqw 0;
   background-image:
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"); }
-.stage.portrait .p-cover .cover-front { inset: -2.4cqw -2.6cqw -3cqw -1.4cqw; }
-.stage.portrait .p-back .cover-back { inset: -2.4cqw -2.6cqw -3cqw -1.4cqw; border-radius: 0 .9cqw .9cqw 0; }
+.stage.portrait .p-cover .cover-front { inset: -1.7cqw -2.6cqw -2.1cqw -1.4cqw; }
+.stage.portrait .p-back .cover-back { inset: -1.7cqw -2.6cqw -2.1cqw -1.4cqw; border-radius: 0 .9cqw .9cqw 0; }
 /* heart, lettering and the name as one block, centred up and down in the frame (Doc, 25.11.2026: "alles weiter runter
    y zent") - the frame's insets are the same at top and bottom, so the page's middle is the frame's */
 .cv-in { position: absolute; inset: 0 0 0 3cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -612,6 +640,28 @@ textarea.hand.multi { cursor: default; }
 .cv-for:empty { display: none; }
 /* more room between the heart and "Grateful" (Doc, 25.11.2026: "das Herz höher") - as a margin, so the block stays centred */
 .cv-icon { width: 15cqw; height: auto; filter: drop-shadow(0 .25cqw .1cqw rgba(0, 0, 0, .55)); margin-bottom: 8cqh; }
+/* heart and name breathe together on the cover: a slow pulse with a golden glow (Doc, 25.11.2026: "lass das Herz und
+   [den Namen] (oder welcher Name auch immer da steht) pulsieren glow") - the foil's own shadows stay in every frame */
+@keyframes cv-glow {
+  0%, 100% { transform: scale(1);
+    filter: drop-shadow(0 .25cqw .1cqw rgba(0, 0, 0, .55)) drop-shadow(0 -.1cqw 0 rgba(255, 255, 255, .12)) drop-shadow(0 0 0 rgba(245, 194, 66, 0)); }
+  50% { transform: scale(1.06);
+    filter: drop-shadow(0 .25cqw .1cqw rgba(0, 0, 0, .55)) drop-shadow(0 -.1cqw 0 rgba(255, 255, 255, .12)) drop-shadow(0 0 1.8cqw rgba(245, 194, 66, .8)); }
+}
+.cv-icon, .cv-for { animation: cv-glow 2.8s ease-in-out infinite; }
+/* with a name on the cover the heart glows from gold to red and back, in the same beat (Doc, 25.11.2026: "wenn der Qt
+   steht, lasst das Herz pulsieren, von gelb zu rot") - the red heart lies over the gold one and fades in, its glow red */
+@keyframes cv-glow-love {
+  0%, 100% { transform: scale(1);
+    filter: drop-shadow(0 .25cqw .1cqw rgba(0, 0, 0, .55)) drop-shadow(0 0 0 rgba(176, 36, 24, 0)); }
+  50% { transform: scale(1.06);
+    filter: drop-shadow(0 .25cqw .1cqw rgba(0, 0, 0, .55)) drop-shadow(0 0 1.8cqw rgba(214, 52, 34, .85)); }
+}
+@keyframes cv-love { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+.cv-love { opacity: 0; }
+.cv-in.has-for .cv-icon { animation-name: cv-glow-love; }
+.cv-in.has-for .cv-love { animation: cv-love 2.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .cv-icon, .cv-for, .cv-in.has-for .cv-love { animation: none; } }
 .cv-slogan { position: absolute; left: 0; right: 3cqw; bottom: 13cqh; text-align: center; font-family: var(--display); font-weight: 500; font-size: 2.6cqw; letter-spacing: .25em; }
 .cv-name { position: absolute; left: 0; right: 3cqw; bottom: 8.5cqh; text-align: center; font-family: var(--hand); font-size: 5cqw; }
 
@@ -772,6 +822,8 @@ textarea.hand.multi { cursor: default; }
 .back-note .bn-t { margin-top: 1.4cqh; font-family: var(--script); font-size: calc(var(--u) * 5.2 * var(--sk)); line-height: 1.1; color: var(--ink); }
 .back-note .bn-d { margin: .4cqh 0 2.4cqh; font-size: calc(var(--u) * 2.6); font-style: italic; color: var(--print-soft); }
 .back-note textarea.hand { flex: 1; min-height: 0; height: auto; overflow-y: auto; }
+/* the back's note dictates too, its microphone as on the front (Doc, 25.11.2026: "hier auch Mic bitte") - the field box fills the page as the bare field did */
+.back-note .fld { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 /* one line each, so both pages' feet stand at the same height; the saying ends flush with the lines (Doc, 24.11.2026) */
 .ft-say { font-family: var(--script); font-size: calc(var(--u) * 2.5 * var(--sk)); color: var(--print-soft); white-space: nowrap; text-align: right; }
 .ft-say i { font-family: var(--display); font-style: normal; font-size: calc(var(--u) * 1.5); letter-spacing: .14em; text-transform: uppercase; margin-left: .6em; }
@@ -883,7 +935,10 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
    Schriften testen": all three scripts, 1024-1920 px, one line) */
 .stage:not(.portrait) .habits { gap: 2.1cqw; }
 /* six habits: two rows of three, aligned in columns */
-.habits { display: grid; grid-template-columns: repeat(3, max-content); gap: .6cqh 2.6cqw; }
+.habits { display: grid; grid-template-columns: repeat(3, max-content); gap: .6cqh 2.6cqw; transition: opacity .6s; }
+/* Advent and the Sunday of the dead: the candles stand on this row, the bullets go while they burn (Doc, 25.11.2026:
+   "Bullets dann ganz weg") */
+.stage.sun-candles .habits { opacity: 0; pointer-events: none; }
 .stage:not(.portrait) .habits { gap: .6cqh 2.1cqw; }
 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * var(--sk) * .94); }
 html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * var(--sk) * .86); }
@@ -1304,7 +1359,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 /* the week page's five questions a little closer on the phone - its footer was cut off below the page */
 .stage.portrait .wq { margin-top: .9cqh; }
 /* the inside of the front board on the phone (with the plate "für …"): the board stands round the page like the cover */
-.stage.portrait .p-endpaper .board-in { inset: -2.4cqw -2.6cqw -3cqw -1.4cqw; border-radius: 0 .9cqw .9cqw 0; }
+.stage.portrait .p-endpaper .board-in { inset: -1.7cqw -2.6cqw -2.1cqw -1.4cqw; border-radius: 0 .9cqw .9cqw 0; }
 /* the thought of the day on the phone: its own page between morning and evening ("in der Mitte"), no card over the page.
    A sheet of Doc's own shows its picture; long sayings get smaller letters; going through the sayings (?spruch=) the
    page also names the source and the day. */
@@ -1391,7 +1446,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   <div class="stage" id="stage">
     <!-- the night sky with its slowly turning stars (night scheme only) -->
     <canvas class="sky" id="sky" aria-hidden="true"></canvas>
-    <!-- the birthday celebration over the book: sparklers or a rain of blossoms (script: fest) -->
+    <!-- the birthday celebration over the book: sparklers or a rain of blossoms (script: fest); on Sundays a little surprise (script: sun) -->
     <canvas class="fest" id="fest" aria-hidden="true"></canvas>
     <div class="bookwrap" id="bookwrap" style="--el: 0.9cqw; --er: 0.35cqw;">
       <div class="boards"></div>
@@ -1435,7 +1490,11 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     <div class="cv-in"><div class="cv-main">
       <svg class="cv-icon" viewBox="0 0 64 56" aria-hidden="true"><defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8a6a22"/><stop offset=".35" stop-color="#f6dc85"/><stop offset=".6" stop-color="#b8913a"/><stop offset="1" stop-color="#f1d27a"/></linearGradient></defs>
         <path d="M32 52 C14 40 4 30 4 18 C4 9 11 3 19 3 C25 3 29 6 32 11 C35 6 39 3 45 3 C53 3 60 9 60 18 C60 30 50 40 32 52 Z" fill="none" stroke="url(#gold)" stroke-width="3.2"/>
-        <path d="M18 30 C22 34 26 36 32 36 C38 36 42 34 46 30" fill="none" stroke="url(#gold)" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <path d="M18 30 C22 34 26 36 32 36 C38 36 42 34 46 30" fill="none" stroke="url(#gold)" stroke-width="2.4" stroke-linecap="round"/>
+        <!-- the same heart in red over the gold one: with a name on the cover it glows from gold to red and back (.cv-love) -->
+        <g class="cv-love"><linearGradient id="love" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7a140e"/><stop offset=".35" stop-color="#e2533e"/><stop offset=".6" stop-color="#b02418"/><stop offset="1" stop-color="#d8412f"/></linearGradient>
+        <path d="M32 52 C14 40 4 30 4 18 C4 9 11 3 19 3 C25 3 29 6 32 11 C35 6 39 3 45 3 C53 3 60 9 60 18 C60 30 50 40 32 52 Z" fill="none" stroke="url(#love)" stroke-width="3.2"/>
+        <path d="M18 30 C22 34 26 36 32 36 C38 36 42 34 46 30" fill="none" stroke="url(#love)" stroke-width="2.4" stroke-linecap="round"/></g></svg>
       <div class="cv-title foil">Grateful</div>
       <div class="cv-sub foil">DAS 3-MINUTEN-TAGEBUCH</div>
       <div class="cv-year foil">2026</div></div>
@@ -1544,7 +1603,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
         <dl class="keys">
           <div><dt><kbd>←</kbd><kbd>→</kbd></dt><dd>umblättern</dd></div>
           <div><dt><kbd>⇧</kbd><kbd>← →</kbd></dt><dd>Anfang der nächsten / vorigen Woche</dd></div>
-          <div><dt><kbd>Ctrl</kbd><kbd>← →</kbd></dt><dd>Anfang des nächsten / vorigen Monats (Mac: ⌥ ← →)</dd></div>
+          <div><dt><kbd>Ctrl</kbd><kbd>← →</kbd></dt><dd>Anfang des nächsten / vorigen Monats (Mac: ⌥)</dd></div>
+          <div><dt><kbd>⌥</kbd><kbd>⇧</kbd><kbd>← →</kbd></dt><dd>Sonntag vor / zurück (Debug; Win: Alt)</dd></div>
+          <div><dt><kbd>H</kbd></dt><dd>heute</dd></div>
           <div><dt><kbd>I</kbd></dt><dd>Inhalt</dd></div>
           <div><dt><kbd>E</kbd></dt><dd>Einstellungen</dd></div>
           <div><dt><kbd>W</kbd></dt><dd>Woche</dd></div>
@@ -1711,7 +1772,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     <div class="back-note" aria-hidden="true">
       <div class="bn-hd"><span class="bn-k">Rückseite</span><button class="quill bn-quill" data-turn aria-label="Zurück zur Vorderseite" title="Zurück zur Vorderseite"><svg viewBox="0 0 40 64" aria-hidden="true"><g class="fe"><use href="#quill-feather"/><path d="M18.7 36.2 C18.9 34.4 19.6 33.6 20.2 34.4 C20.6 32.6 21.4 32 22.1 32.2 C22.8 32.6 23 33.8 22.8 34.6 C23.6 33.8 24.6 34.4 24.2 36.4 Z" class="crown"/><path d="M19.9 36 L23.1 36 L22.6 52.5 L20.4 52.5 Z" class="stem"/><path d="M20.1 40 h2.8 M20.2 44 h2.6 M20.3 48 h2.4" class="band"/></g><path d="M11.2 57.6 v2.2 a10.3 3.2 0 0 0 20.6 0 v-2.2 Z" class="base"/><ellipse cx="21.5" cy="57.6" rx="10.3" ry="3.2" class="base-top"/><path d="M19.6 52.2 h3.8 v4.8 a1.9 .7 0 0 1 -3.8 0 Z" class="socket"/><circle cx="21.5" cy="52.4" r="1.9" class="ball"/></svg></button></div>
       <div class="bn-t">Notiz zum Morgen</div><div class="bn-d"></div>
-      <textarea class="hand" data-k="n1" rows="12" style="--rows: 12" placeholder="was dir noch einfällt …" aria-label="Notiz zum Morgen"></textarea>
+      <div class="fld"><textarea class="hand" data-k="n1" rows="12" style="--rows: 12" placeholder="was dir noch einfällt …" aria-label="Notiz zum Morgen"></textarea><button class="mic" aria-label="Diktat"></button></div>
     </div>
   </div>
 </template>
@@ -1757,7 +1818,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     <div class="back-note" aria-hidden="true">
       <div class="bn-hd"><span class="bn-k">Rückseite</span><button class="quill bn-quill" data-turn aria-label="Zurück zur Vorderseite" title="Zurück zur Vorderseite"><svg viewBox="0 0 40 64" aria-hidden="true"><g class="fe"><use href="#quill-feather"/><path d="M18.7 36.2 C18.9 34.4 19.6 33.6 20.2 34.4 C20.6 32.6 21.4 32 22.1 32.2 C22.8 32.6 23 33.8 22.8 34.6 C23.6 33.8 24.6 34.4 24.2 36.4 Z" class="crown"/><path d="M19.9 36 L23.1 36 L22.6 52.5 L20.4 52.5 Z" class="stem"/><path d="M20.1 40 h2.8 M20.2 44 h2.6 M20.3 48 h2.4" class="band"/></g><path d="M11.2 57.6 v2.2 a10.3 3.2 0 0 0 20.6 0 v-2.2 Z" class="base"/><ellipse cx="21.5" cy="57.6" rx="10.3" ry="3.2" class="base-top"/><path d="M19.6 52.2 h3.8 v4.8 a1.9 .7 0 0 1 -3.8 0 Z" class="socket"/><circle cx="21.5" cy="52.4" r="1.9" class="ball"/></svg></button></div>
       <div class="bn-t">Notiz zum Abend</div><div class="bn-d"></div>
-      <textarea class="hand" data-k="n2" rows="12" style="--rows: 12" placeholder="was dir noch einfällt …" aria-label="Notiz zum Abend"></textarea>
+      <div class="fld"><textarea class="hand" data-k="n2" rows="12" style="--rows: 12" placeholder="was dir noch einfällt …" aria-label="Notiz zum Abend"></textarea><button class="mic" aria-label="Diktat"></button></div>
     </div>
   </div>
 </template>
@@ -1837,9 +1898,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
         einem KI-Modell von Anthropic PBC, San Francisco –
         <a href="https://www.anthropic.com/claude" target="_blank" rel="noopener">anthropic.com/claude</a>.
         Idee, Auswahl und letzte Entscheidung: Dr. Michael R. Alvers.</p>
-      <p>Deine Einträge liegen in deinem Konto; die Einstellungen merkt sich nur dieser Browser.</p>
+      <p>Deine Einträge liegen in deinem Konto; die Einstellungen merkt sich nur dieser Browser. Nur an den Adventssonntagen und erst, wenn du auf Bach oder die Pauken klickst, lädt ein YouTube-Player (über youtube-nocookie.com).</p>
       <p>Bilder: Arnold Böcklin, „Vita somnium breve“ (1888, Kunstmuseum Basel) und die Porträts der Persönlichkeiten, gemeinfrei,
-        über Wikimedia Commons · Holz: Poly Haven (CC0) · Spieluhren „Happy Birthday“: marianna-emma, „Guten Abend, gut’ Nacht“: Garuda1982, beide freesound.org (CC0) · Schriften: Google Fonts (SIL Open Font License).</p>
+        über Wikimedia Commons · Holz: Poly Haven (CC0) · Spieluhren „Happy Birthday“: marianna-emma, „Guten Abend, gut’ Nacht“: Garuda1982, beide freesound.org (CC0) · Adventskranz: „2023 Adventskranz 6“ von Burkhard Mücke, Wikimedia Commons (CC BY 4.0), freigestellt, die Kerzen je Sonntag heruntergebrannt · Kerze und Flamme: Richard W. M. Jones und Jon Sullivan, Wikimedia Commons (gemeinfrei) · Musik im Advent: J. S. Bach, Weihnachtsoratorium BWV 248 – Netherlands Bach Society (All of Bach), Shunske Sato, eingebettet von YouTube · J. S. Bach nach dem Porträt von Elias Gottlob Haußmann (1748, gemeinfrei), als Bleistiftzeichnung · Barockrahmen: Neapel um 1660, The Metropolitan Museum of Art (CC0) · Flammen: Simplex-Rauschen aus „webgl-noise“ von Ian McEwan (Ashima Arts) und Stefan Gustavson (MIT-Lizenz) · Schriften: Google Fonts (SIL Open Font License).</p>
     </div>
     <!-- no page number here: 365 is the 31st of December (Doc, 24.11.2026) -->
     <!-- no "So geht's · Impressum" down here (Doc, 24.11.2026) - his slogan instead, the back cover carries the other one -->
@@ -2235,12 +2296,13 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       el.querySelector('.t').textContent = 'für' + (m ? ' ' + m[1].toLowerCase() : '');
       el.querySelector('.n').textContent = m ? m[2] : FUER;
     });
-    root.querySelectorAll('.scale').forEach(sc => {
     /* the cover carries the name alone under the year ("meine Cutie" -> "Cutie") */
     if (FUER) root.querySelectorAll('.cv-for').forEach(el => {
       const m = /^(meinen|meine|mein)\s+(.+)$/i.exec(FUER);
       el.textContent = m ? m[2] : FUER;
+      el.closest('.cv-in').classList.add('has-for');   /* with a name the heart glows from gold to red (.cv-love) */
     });
+    root.querySelectorAll('.scale').forEach(sc => {
       if (!sc.firstChild) sc.innerHTML = Array.from({ length: 10 }, (_, i) => '<button data-v="' + (i + 1) + '" aria-label="' + (i + 1) + ' von 10">' + (i + 1) + '</button>').join('');
       markScale(sc);
     });
@@ -2847,6 +2909,21 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     /* the reader's birthday: celebrate once each time the book comes to rest on that day */
     const bday = birthDay();
     if (state === 'read' && chain === null) { if (onDay && here.key === bday) { if (!festDone) { festDone = true; festStart(); } } else festDone = false; }
+    /* a Sunday: its own surprise each time the book comes to rest on it - not on the birthday, which has its show (sunStart).
+       ?sonntag=N opens that week's Sunday (build); a week outside the book plays a moment later on the page that is open
+       (sunTryOnce - the library first reports the cover while the book is being built). The fixed special days (sonderTag:
+       Oct 31, Dec 31) run the same way, whatever the weekday - in place of a Sunday's piece */
+    if (state === 'read' && chain === null) {
+      const sun = onDay && here.key !== bday && (dateOf(here.key).getDay() === 0 || sonderTag(here.key));
+      if (!sun) sunDay = '';
+      else if (sunDay !== here.key) { sunDay = here.key; sunStart(here.key); }
+      if (sunTry && !sunTryT) sunTryT = setTimeout(sunTryOnce, 80);
+    }
+    /* it runs until someone does something - and a page turning away (however it was started) is that, too */
+    if (sunOn && !sunEnd && state === 'flipping') sunEnd = performance.now();
+    /* the Christmas Oratorio on the four Sundays of Advent (woShow): shown at rest there, paused and hidden as the page turns */
+    if (state === 'read' && chain === null) { const adv = onDay && dateOf(here.key).getDay() === 0 && /^advent(\d)$/.exec(sunSpecial(here.key)); woShow(adv ? +adv[1] : 0, adv ? here.key : ''); }
+    else if (state === 'flipping') woShow(0);
     /* phone: the single page is the cover or the back - no tabs on the closed book */
     stage.classList.toggle('cover-shown', mode === 'phone' && (idx === 0 || idx >= last));
     /* the flap closure stays: closed on the cover; it opens as soon as the cover moves (a click on it, a drag at the corner -
@@ -2968,6 +3045,8 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     if (!tag && !seite && !REVIEW) { const last = lastPage(); if (last >= 0) start = last; }
     /* ?spruch=45: day 45, also after a switch desk <-> phone (the phone opens that day's page of the thought) */
     if (REVIEW) start = at((mode === 'phone' ? 'spruch@' : 'morgen@') + DAYS[reviewDay - 1]);
+    /* ?sonntag=48: the Sunday of that ISO week, to look at its surprise */
+    if (sunTry && DAYS.includes(sunTry)) start = at('morgen@' + sunTry);
     if (seite === 'cover') start = 0;
     if (seite === 'innen') start = at('endpaper');   /* the inside of the cover with the plate (für …) */
     if (seite === 'woche') start = at('wocheL@' + sundayOf(TODAY));
@@ -2997,6 +3076,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     idx = start; state = 'read'; updateStage();
     setTimeout(growAll, 60);
     stage.classList.remove('ready');
+    stage.classList.add('built');   /* once, never taken away: the book shows from its first build on */
     requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.add('ready')));
   }
   function fallback(root, pages) {
@@ -3009,7 +3089,6 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   }
   /* a short note on the desk instead of the old hint line */
   let toastT = 0;
-    stage.classList.add('built');   /* once, never taken away: the book shows from its first build on */
   function toast(msg) {
     const t = $('#toast'); t.textContent = msg; t.classList.add('show');
     clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3400);
@@ -3395,6 +3474,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     const jump = !e.metaKey && !e.ctrlKey && !e.altKey && ({
       w: () => 'wocheL@' + sundayOf(regDay || TODAY), m: () => 'monatL@' + (regDay || TODAY).slice(0, 7),
       c: () => mode === 'desk' ? 'wolkeL' : 'wolkeP', r: () => 'back', s: () => 'cover',
+      h: () => 'morgen@' + TODAY /* H = today (Doc, 25.11.2026: "eine Pille für H wie heute") */,
       p: () => 'notes' /* P = the last page with "So geht's" and the imprint (Doc, 24.11.2026) */,
       n: () => 'lines1' /* N = the notes page (Doc, 24.11.2026) */ })[e.key.toLowerCase()];
     if (jump) {
@@ -3402,6 +3482,19 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       const name = jump(), t = at(name);
       const there = t >= 0 && (idx === t || (/L(@|$)/.test(name) && idx === t + 1));
       goPage(there ? 'morgen@' + (regDay || TODAY) : name);
+      return;
+    }
+    /* Option + Shift + arrow (Windows, Linux: Alt + Shift): the next / previous Sunday, to look through the Sunday surprises
+       (Doc, 25.11.2026: "Option-Shift spring von Sonntag zu Sonntag (debug)"). Before the week / month jumps below, which
+       take Option alone; by e.code too, as a Mac may report another key with Option held. In a field (left above) Option +
+       Shift + arrow stays the selection of words. */
+    const sunArrow = e.code === 'ArrowRight' || e.key === 'ArrowRight' ? 1 : e.code === 'ArrowLeft' || e.key === 'ArrowLeft' ? -1 : 0;
+    if (sunArrow && e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      const here = SEQ[mode][idx] || {}, from = DAYPAGE.has(here.kind) ? here.key : (regDay || TODAY), wd = dateOf(from).getDay();
+      const to = addDays(from, sunArrow > 0 ? 7 - wd : -(wd || 7));
+      if (DAYS.includes(to)) goPage('morgen@' + to);
+      else toast(sunArrow > 0 ? 'Das war der letzte Sonntag des Jahres.' : 'Das ist der erste Sonntag des Jahres.');
       return;
     }
     /* Shift + arrow: a week on or back, Ctrl + arrow (on a Mac Option, Ctrl + arrow switches the desktops there): a month -
@@ -3663,12 +3756,17 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   function festKeys() {
     let k = '';
     try { k = (new URLSearchParams(location.search).get('taste') || '').toLowerCase(); } catch (e) { }
-    return /^[a-z]$/.test(k) && !'iewmcrspnfx'.includes(k) ? ['g', k] : ['g'];
+    return /^[a-z]$/.test(k) && !'iewmcrspnfxh'.includes(k) ? ['g', k] : ['g'];
   }
   /* the first click or key ends the show: the sparklers set off (X itself starts it again) */
   function festLeave(e) {
+    /* modifier keys and Cmd/Ctrl shortcuts leave the show running - a screenshot with Cmd Shift 4, copying (Doc,
+       25.11.2026: "ich kann keinen SS machen da JEDER Click genommen wird (so cmd shift 4)") */
+    if (e.type === 'keydown' && (e.metaKey || e.ctrlKey || /^(Shift|Meta|Alt|Control|CapsLock|Fn|OS)$/.test(e.key || ''))) return;
     const seen = festSeenInput;
     festSeenInput = true;
+    if (e.target && e.target.closest && e.target.closest('.wo')) return;   /* the oratorio's label: its own buttons */
+    if (sunOn) { if (!sunEnd) sunEnd = performance.now(); return; }   /* the Sunday surprise: gone at once (sunDraw) */
     if (!festRaf || festLeaveT >= 0 || settings.fest === 'blueten' || !festEmit.length) return;
     if (e.type === 'keydown' && (/^x$/i.test(e.key || '') || festKeys().includes((e.key || '').toLowerCase()))) return;   /* those start it */
     /* the book opened on the birthday by itself, and the browser kept the song back until the first click: that click starts
@@ -3685,12 +3783,25 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   document.addEventListener('keydown', festLeave, true);
   function festStart() {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    sunOn = 0; sunDim = false; stage.classList.remove('sun-candles');   /* the birthday takes the stage from a Sunday surprise */
+    festParts = []; festT0 = performance.now(); festPrev = festT0;
+    festEmit = []; festMeasured = false;   /* the places follow on the first frame (festMeasure) */
+    festGlints = []; festLeaveT = -1; festLeaveFrom = []; festSongStop(); festSongBlocked = false;
+    if (settings.fest !== 'blueten') { festLoad(FEST_SONG); festLoad(FEST_BYE); }
+    fest.classList.add('on');
+    cancelAnimationFrame(festRaf); festRaf = requestAnimationFrame(festDraw);
+  }
+  /* the canvas and the places are measured on the first frame, not at the call: opened straight on the birthday, the call
+     comes while the book is being built, and on a phone the book's box is not yet its final size then (the show stayed
+     empty there; Doc, 25.11.2026, as for the Sunday surprise) */
+  let festMeasured = true;
+  function festMeasure() {
+    festMeasured = true;
     festDpr = Math.min(2, window.devicePixelRatio || 1);
     const W = stage.clientWidth, H = Math.min(stage.clientHeight, innerHeight);
     fest.width = Math.round(W * festDpr); fest.height = Math.round(H * festDpr);
     fest.style.width = W + 'px'; fest.style.height = H + 'px';
     const b = $('#bookwrap').getBoundingClientRect(), s = stage.getBoundingClientRect(), bx = b.left - s.left, by = b.top - s.top;
-    festParts = []; festT0 = performance.now(); festPrev = festT0;
     /* sparklers: eleven glowing points drifting slowly over the whole spread, in three staggered rows down to the foot of the
        pages (Doc, 24.11.2026: "noch ein paar mehr Wunderkerzen, auch unten noch") */
     const SPARKS = [[.12, .2], [.37, .16], [.63, .22], [.88, .18], [.24, .48], [.5, .44], [.76, .5], [.1, .78], [.38, .82], [.64, .76], [.9, .8]];
@@ -3698,10 +3809,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       on: i * .13, slot: 6.2832 * i / SPARKS.length - 1.5708 }));
     /* the ring: round the middle of the spread, as wide as the pages allow */
     festRing = { cx: bx + b.width / 2, cy: by + b.height * .5, r: Math.min(b.width * .3, b.height * .36), bx, by, bw: b.width, bh: b.height };
-    festGlints = []; festPath = festBuildPath(festRing); festLeaveT = -1; festLeaveFrom = []; festSongStop(); festSongBlocked = false;
-    if (settings.fest !== 'blueten') { festLoad(FEST_SONG); festLoad(FEST_BYE); }
-    fest.classList.add('on');
-    cancelAnimationFrame(festRaf); festRaf = requestAnimationFrame(festDraw);
+    festPath = festBuildPath(festRing);
   }
   function petal(c, p) {
     /* a cherry blossom petal: a soft rounded shape with a notch, shaded from a white base to pink, a fine crease, turning in 3D */
@@ -3725,6 +3833,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   }
   const PETALS = [['#fff7fa', '#fbd3df', '#f2a2b8'], ['#fffafc', '#f8c4d3', '#e98aa6'], ['#ffffff', '#fde6ee', '#f6b8ca'], ['#fff3f6', '#f5b1c4', '#dc6f90']];
   function festDraw(now) {
+    if (!festMeasured) festMeasure();
     const t = (now - festT0) / 1000, dt = Math.min(.05, (now - festPrev) / 1000); festPrev = now;
     const W = fest.width / festDpr, H = fest.height / festDpr, c = festCtx;
     c.setTransform(festDpr, 0, 0, festDpr, 0, 0);
@@ -3834,6 +3943,783 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     }
     if (live || festParts.length || festGlints.length) festRaf = requestAnimationFrame(festDraw);
     else { festRaf = 0; fest.classList.remove('on'); c.clearRect(0, 0, W, H); }
+  }
+
+  /* ---------- the Sunday surprise (Doc, 25.11.2026: "Grateful jeden Tag eine Überraschung animiert" ... "mach erstmal nur
+     Sonntag" ... "Die Sonntagseffekte bitte nicht aufhören, erst nach Click." ... "Die Effekte müssen für jeden Sonntag
+     verschieden sein!"): when the book comes to rest on a Sunday, a quiet animation runs over the open book on the
+     birthday's canvas - every Sunday of the year its own. It is put together from an element (stars, hearts, leaves,
+     blossoms, snow, seeds, gold leaf, bubbles, butterflies, planes, notes, rings, feathers, fireflies, confetti, the gold
+     flourish) and a movement (fall, rise, drift, wave, orbit, spiral, vortex, swarm, firework, fountain, twinkle, shooting
+     star, gather into a figure, loop), with a palette and a pace: SUN_YEAR holds one pair per Sunday of the year, no pair
+     twice, and two Sundays in a row never share element or movement. Special Sundays have pieces of their own (SUN_SPECIAL),
+     their dates by formula: the first of the year, Easter (Meeus), Mother's Day, Whit Sunday, the Sunday of the dead (still)
+     and Advent with one to four candles lit. It runs without end until a click, a key or a touch (festLeave) or a page turn,
+     then fades in a third of a second; silent; the birthday wins; with reduced motion nothing moves; in a tab in the
+     background it pauses. ?sonntag=48 opens the Sunday of ISO week 48, ?sonntag=2027-03-28 plays
+     that Sunday's piece on the open page (Option + Shift + arrow: Sunday to Sunday).
+     Endless and the same in every copy (the presenter and the beamer's copy of a deck): each layer is a fixed set of slots;
+     slot i starts after its delay d and repeats with its period P - cycle k, age a - and each cycle takes its values from a
+     generator seeded by the day, the slot and the cycle (sunAt). Everything is drawn from the time since the start: nothing
+     piles up, the work per frame stays the same for minutes, and a slower copy lands on the same picture. */
+  let sunOn = 0, sunT0 = 0, sunEnd = 0, sunScene = null, sunArgs = '', sunDay = '', sunDim = false;
+  /* the Sunday of ISO week n of the book's year */
+  const sunWeekSunday = n => { const j4 = new Date(YEAR, 0, 4); return iso(new Date(YEAR, 0, 4 - (j4.getDay() + 6) % 7 + 7 * (n - 1) + 6)); };
+  /* ?sonntag=48 (ISO week of the book's year) or ?sonntag=2027-03-28 (any Sunday): the Sunday to look at;
+     ?sondertag=1031 or 1231: that fixed special day of the book's year */
+  const sunTry = (() => {
+    let v = '', w = ''; try { const q = new URLSearchParams(location.search); v = q.get('sonntag') || ''; w = q.get('sondertag') || ''; } catch (e) { }
+    if (/^(1031|1231)$/.test(w)) return YEAR + '-' + w.slice(0, 2) + '-' + w.slice(2);
+    if (/^\d{4}-\d\d-\d\d$/.test(v) && dateOf(v).getDay() === 0) return v;
+    return /^([1-9]|[1-4]\d|5[0-3])$/.test(v) ? sunWeekSunday(+v) : '';
+  })();
+  /* ---------- the fixed special days, whatever the weekday (Doc, 25.11.2026): Dec 31 a big firework ("ein tierisches
+     Feuerwerk. Endless, bis man klickt."), Oct 31 special: two matches. Their scenes live in sondertage.js, imported only
+     when such a day is open (nothing loads on any other day), and run like a Sunday's piece - on its canvas, its clock, its
+     end (festLeave), the same in the beamer's copy. They take a Sunday's place (31.10.2027 is one); the birthday still
+     wins. ---------- */
+  function sonderTag(d) { return /-(10-31|12-31)$/.test(d || ''); }
+  let sonderMod = null, sonderScene = null, sonderTok = 0, sonderRsz = 0;
+  const sonderLoad = () => sonderMod || (sonderMod = import('./sondertage.js').catch(e => { sonderMod = null; throw e; }));
+  /* the book's box on the canvas, measured like sunSetup does (the canvas sized to the stage) */
+  function sonderBox() {
+    festDpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = stage.clientWidth, H = Math.min(stage.clientHeight, innerHeight);
+    fest.width = Math.round(W * festDpr); fest.height = Math.round(H * festDpr);
+    fest.style.width = W + 'px'; fest.style.height = H + 'px';
+    const b = $('#bookwrap').getBoundingClientRect(), s = stage.getBoundingClientRect();
+    const B = { x: b.left - s.left, y: b.top - s.top, w: b.width, h: b.height, W, H };
+    B.h = Math.max(B.w * .3, Math.min(B.h, H - B.y));
+    return B;
+  }
+  /* the clock starts at once; until the module is there the canvas stays empty, so every copy shows the same moment */
+  function sonderSetup(day, now) {
+    const B = sonderBox(), tok = ++sonderTok;
+    sunScene = () => { }; sunDim = false; sunT0 = now;
+    if (sonderScene) { sonderScene.destroy(); sonderScene = null; }
+    sonderLoad().then(m => {
+      if (tok !== sonderTok || !sunOn || sunArgs !== day) return;
+      const sc = m.createSondertag(m.sondertagFor(day), { box: B, seed: +day.replace(/-/g, '') });
+      if (sc) { sonderScene = sc; sunScene = (c, t, A) => sc.draw(c, t, A); }
+    }).catch(e => console.warn('sondertage:', e && e.message));
+  }
+  window.addEventListener('resize', () => {
+    clearTimeout(sonderRsz);
+    sonderRsz = setTimeout(() => { if (sunOn && !sunEnd && sonderScene && sonderTag(sunArgs)) sonderScene.resize(sonderBox()); }, 150);
+  });
+  const sunEase = u => u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u);
+  const sunRgb = (a, b, k) => 'rgb(' + a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(', ') + ')';
+  const sunSeed = r => r() * 4294967296 | 0;
+  const sunHash = (s, i, k) => mulberry32((s ^ Math.imul(i + 1, 0x9E3779B1) ^ Math.imul(k + 7, 0x85EBCA77)) | 0);
+  /* slot sl (number i) at time t: sets sl.a (age in its cycle), sl.k (the cycle) and sl.v (the cycle's values, made once by
+     make(generator, k, i)); false before the slot starts */
+  function sunAt(sl, i, t, seed, make) {
+    const q = t - sl.d; if (q < 0) return false;
+    const k = Math.floor(q / sl.P);
+    if (sl.k !== k) { sl.k = k; sl.v = make(sunHash(seed, i, k), k, i); }
+    sl.a = q - k * sl.P;
+    return true;
+  }
+  const SUN_PAL = {
+    gold: [[180, 134, 42], [226, 189, 92], [246, 220, 133], [138, 106, 34]], rose: [[196, 74, 96], [232, 140, 160], [244, 190, 200], [163, 48, 31]],
+    ice: [[255, 255, 255], [205, 220, 255], [160, 190, 230], [226, 236, 250]], night: [[205, 220, 255], [255, 255, 255], [255, 226, 176], [150, 170, 220]],
+    autumn: [[176, 122, 20], [163, 48, 31], [201, 162, 39], [125, 106, 30], [194, 88, 31]], spring: [[244, 170, 190], [255, 214, 224], [150, 190, 90], [250, 240, 200]],
+    summer: [[245, 194, 66], [121, 158, 49], [255, 236, 170], [230, 140, 40]], pastel: [[244, 190, 200], [190, 220, 250], [200, 235, 190], [250, 230, 170]],
+    ink: [[35, 58, 99], [28, 58, 140], [90, 120, 175], [180, 134, 42]], fire: [[255, 190, 80], [240, 120, 40], [255, 226, 140], [200, 70, 30]],
+    doc: [[245, 194, 66], [176, 36, 24], [121, 158, 49]]   /* λ, Υ, φ */
+  };
+  /* ---- the elements: each drawn at p.x, p.y in size p.R, turned p.a, with its phase p.f, colour p.col and variety p.k ---- */
+  const sunFillLine = (c, col) => { c.fillStyle = 'rgb(' + col + ')'; c.fill(); c.strokeStyle = 'rgba(35, 58, 99, .35)'; c.lineWidth = .8; c.stroke(); };
+  /* a four-pointed glint with a light heart - it shows on the paper and on the night sky alike */
+  function sunGlint(c, x, y, s, a, col) {
+    if (s <= .2 || a <= 0) return;
+    c.fillStyle = 'rgba(' + (col || [180, 134, 42]) + ', ' + a + ')';
+    c.beginPath(); c.moveTo(x, y - s * 2); c.lineTo(x + s * .3, y - s * .3); c.lineTo(x + s * 1.6, y); c.lineTo(x + s * .3, y + s * .3);
+    c.lineTo(x, y + s * 2); c.lineTo(x - s * .3, y + s * .3); c.lineTo(x - s * 1.6, y); c.lineTo(x - s * .3, y - s * .3); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(255, 246, 214, ' + a + ')'; c.beginPath(); c.arc(x, y, s * .45, 0, 6.2832); c.fill();
+  }
+  function sunStar5(c, p) {
+    c.save(); c.translate(p.x, p.y); c.rotate(p.a); c.beginPath();
+    for (let i = 0; i < 10; i++) { const rr = i % 2 ? p.R * .45 : p.R, an = i * .6283 - 1.5708; c.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); }
+    c.closePath(); sunFillLine(c, p.col); c.restore();
+  }
+  function sunHeart(c, p) {
+    const R = p.R; c.save(); c.translate(p.x, p.y); c.rotate(Math.sin(p.a) * .35); c.beginPath();
+    c.moveTo(0, R * .9); c.bezierCurveTo(-R * 1.3, 0, -R * .7, -R * 1.05, 0, -R * .35); c.bezierCurveTo(R * .7, -R * 1.05, R * 1.3, 0, 0, R * .9);
+    sunFillLine(c, p.col); c.restore();
+  }
+  /* autumn leaves, their backs a shade darker as they flip */
+  function sunLeaf(c, p) {
+    const R = p.R, wd = .38 + p.k * .25, f = Math.cos(p.f);
+    c.save(); c.translate(p.x, p.y); c.rotate(p.a); c.scale(Math.max(.15, Math.abs(f)), 1);
+    c.fillStyle = sunRgb(p.col.map(v => v * .7), p.col, .5 + .5 * f);
+    c.beginPath(); c.moveTo(0, -R); c.bezierCurveTo(R * wd * 1.6, -R * .5, R * wd * 1.2, R * .6, 0, R * .8); c.bezierCurveTo(-R * wd * 1.2, R * .6, -R * wd * 1.6, -R * .5, 0, -R); c.fill();
+    c.strokeStyle = 'rgba(60, 32, 12, .45)'; c.lineWidth = Math.max(.7, R * .06);
+    c.beginPath(); c.moveTo(0, -R * .85); c.lineTo(0, R * 1.05);
+    for (const y of [-.35, .05, .4]) { c.moveTo(0, R * y); c.lineTo(R * wd * .9, R * (y - .25)); c.moveTo(0, R * y); c.lineTo(-R * wd * .9, R * (y - .25)); }
+    c.stroke(); c.restore();
+  }
+  /* snow: six-armed crystals and soft flakes, white with a faint ink shadow so they show on the paper too */
+  function sunSnow(c, p) {
+    const R = p.R;
+    c.save(); c.translate(p.x, p.y); c.rotate(p.a);
+    if (p.k < .45) {
+      c.fillStyle = 'rgba(35, 58, 99, .22)'; c.beginPath(); c.arc(.8, .9, R * .32, 0, 6.2832); c.fill();
+      c.fillStyle = '#ffffff'; c.beginPath(); c.arc(0, 0, R * .3, 0, 6.2832); c.fill();
+    } else {
+      c.lineCap = 'round';
+      for (const [col, o, lw] of [['rgba(35, 58, 99, .3)', .9, 1.6], ['#ffffff', 0, 1.2]]) {
+        c.strokeStyle = col; c.lineWidth = lw; c.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const ca = Math.cos(i * 1.0472), sa = Math.sin(i * 1.0472), X = (x, y) => [o + x * ca - y * sa, o + x * sa + y * ca];
+          c.moveTo(...X(0, 0)); c.lineTo(...X(R, 0));
+          c.moveTo(...X(R * .5, 0)); c.lineTo(...X(R * .78, R * .24)); c.moveTo(...X(R * .5, 0)); c.lineTo(...X(R * .78, -R * .24));
+        }
+        c.stroke();
+      }
+    }
+    c.restore();
+  }
+  /* dandelion seeds: a little white umbrella on its stalk */
+  function sunDandelion(c, p) {
+    const R = p.R;
+    c.save(); c.translate(p.x, p.y); c.rotate(Math.sin(p.f) * .35);
+    for (const [col, o, lw] of [['rgba(80, 66, 40, .35)', .8, 1.2], ['rgba(255, 255, 255, .95)', 0, .8]]) {
+      c.strokeStyle = col; c.lineWidth = lw; c.beginPath();
+      c.moveTo(o, o); c.lineTo(o, R * 1.5 + o);
+      for (let i = 0; i <= 10; i++) { const a = Math.PI * (1.08 + i * .084); c.moveTo(o, o); c.lineTo(o + Math.cos(a) * R, o + Math.sin(a) * R * .8); }
+      c.stroke();
+    }
+    c.fillStyle = 'rgba(110, 80, 40, .85)'; c.beginPath(); c.ellipse(0, R * 1.6, R * .08, R * .2, 0, 0, 6.2832); c.fill();
+    c.restore();
+  }
+  /* gold leaf: torn little flakes, dark as they turn away, bright where they catch the light */
+  function sunGoldLeaf(c, p) {
+    const f = Math.cos(p.f);
+    c.save(); c.translate(p.x, p.y); c.rotate(p.a); c.scale(1, Math.max(.08, Math.abs(f)));
+    c.fillStyle = sunRgb(p.col.map(v => v * .62), p.col.map(v => v + (255 - v) * .55), f * f);
+    c.beginPath(); p.v.pts.forEach(([x, y], i) => i ? c.lineTo(x * p.R, y * p.R) : c.moveTo(x * p.R, y * p.R)); c.closePath(); c.fill();
+    c.restore();
+  }
+  /* soap bubbles: clear, a coloured shimmer on the rim and a highlight */
+  function sunBubble(c, p) {
+    const R = p.R, q = Math.sin(p.f * 3) * .05, hue = Math.round(p.k * 360);
+    c.save(); c.translate(p.x, p.y); c.scale(1 + q, 1 - q);
+    const g = c.createRadialGradient(-R * .3, -R * .35, R * .1, 0, 0, R);
+    g.addColorStop(0, 'rgba(255, 255, 255, .05)'); g.addColorStop(.72, 'rgba(255, 255, 255, .1)');
+    g.addColorStop(.92, 'hsla(' + hue + ', 70%, 72%, .35)'); g.addColorStop(1, 'rgba(255, 255, 255, .6)');
+    c.fillStyle = g; c.beginPath(); c.arc(0, 0, R, 0, 6.2832); c.fill();
+    c.lineWidth = 1; c.strokeStyle = 'rgba(35, 58, 99, .25)'; c.stroke();
+    c.lineWidth = Math.max(1, R * .07);
+    c.strokeStyle = 'hsla(' + (hue + 140) % 360 + ', 75%, 58%, .45)'; c.beginPath(); c.arc(0, 0, R * .9, .3, 1.6); c.stroke();
+    c.strokeStyle = 'hsla(' + (hue + 260) % 360 + ', 75%, 60%, .4)'; c.beginPath(); c.arc(0, 0, R * .9, 3.4, 4.4); c.stroke();
+    c.fillStyle = 'rgba(255, 255, 255, .85)'; c.beginPath(); c.ellipse(-R * .38, -R * .42, R * .2, R * .1, -.7, 0, 6.2832); c.fill();
+    c.restore();
+  }
+  /* butterflies - gold, ink blue, paper white with gold veins - seen from above, beating in bursts and gliding */
+  const SUN_BFLY = [['#f6dc85', '#b4862a', 'rgba(110, 79, 16, .8)'], ['#5a78af', '#233a63', 'rgba(226, 189, 92, .95)'], ['#fffcf2', '#e6dcc2', 'rgba(150, 112, 30, .85)']];
+  function sunButterfly(c, p) {
+    const s = p.R, col = SUN_BFLY[Math.floor(p.k * SUN_BFLY.length)], open = Math.sin(p.f * .7) > -.5 ? .15 + .85 * (.5 + .5 * Math.cos(p.f * 6)) : .55;
+    c.save(); c.translate(p.x, p.y - 3 * Math.sin(p.f * 6)); c.rotate(p.a);
+    for (const side of [1, -1]) {
+      c.save(); c.scale(1, side * open);
+      const g = c.createLinearGradient(0, 0, 0, s); g.addColorStop(0, col[1]); g.addColorStop(1, col[0]);
+      c.fillStyle = g; c.strokeStyle = col[2]; c.lineWidth = .9;
+      c.beginPath(); c.moveTo(-.02 * s, .05 * s); c.bezierCurveTo(-.05 * s, .45 * s, -.25 * s, .8 * s, -.5 * s, .7 * s); c.bezierCurveTo(-.72 * s, .55 * s, -.5 * s, .2 * s, -.15 * s, 0); c.closePath(); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(.1 * s, 0); c.bezierCurveTo(.45 * s, .2 * s, .75 * s, .85 * s, .3 * s, s); c.bezierCurveTo(.05 * s, 1.05 * s, -.15 * s, .55 * s, -.05 * s, 0); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = col[2]; c.beginPath(); c.arc(.27 * s, .68 * s, .07 * s, 0, 6.2832); c.fill();
+      c.restore();
+    }
+    c.fillStyle = '#2b2a28'; c.beginPath(); c.ellipse(0, 0, .45 * s, .07 * s, 0, 0, 6.2832); c.fill();
+    c.beginPath(); c.arc(.46 * s, 0, .08 * s, 0, 6.2832); c.fill();
+    c.strokeStyle = '#2b2a28'; c.lineWidth = .8; c.beginPath();
+    c.moveTo(.5 * s, 0); c.quadraticCurveTo(.7 * s, .05 * s, .85 * s, .22 * s); c.moveTo(.5 * s, 0); c.quadraticCurveTo(.7 * s, -.05 * s, .85 * s, -.22 * s); c.stroke();
+    c.restore();
+  }
+  /* a paper plane, nose ahead; mirrored when it flies from the right so the light wing stays on top */
+  function sunPaperPlane(c, p) {
+    const s = p.R, flip = p.v.flip !== undefined ? p.v.flip : Math.cos(p.a) < 0;
+    c.save(); c.translate(p.x, p.y); c.rotate(p.a); if (flip) c.scale(1, -1); c.lineJoin = 'round';
+    c.shadowColor = 'rgba(26, 42, 75, .35)'; c.shadowBlur = s * .36; c.shadowOffsetY = s * .23;   /* shadow offsets ignore the transform: always down */
+    c.fillStyle = '#e2d6b8'; c.beginPath(); c.moveTo(1.4 * s, 0); c.lineTo(-s, .8 * s); c.lineTo(-.5 * s, .1 * s); c.closePath(); c.fill();
+    c.shadowColor = 'transparent';
+    c.fillStyle = '#fbf4e2'; c.beginPath(); c.moveTo(1.4 * s, 0); c.lineTo(-s, -.7 * s); c.lineTo(-.5 * s, .1 * s); c.closePath(); c.fill();
+    c.fillStyle = '#cdbf9c'; c.beginPath(); c.moveTo(1.4 * s, 0); c.lineTo(-.5 * s, .1 * s); c.lineTo(-.85 * s, .32 * s); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(35, 58, 99, .7)'; c.lineWidth = 1.1;
+    c.beginPath(); c.moveTo(1.4 * s, 0); c.lineTo(-s, -.7 * s); c.lineTo(-.5 * s, .1 * s); c.lineTo(-s, .8 * s); c.closePath(); c.moveTo(1.4 * s, 0); c.lineTo(-.5 * s, .1 * s); c.stroke();
+    c.restore();
+  }
+  function sunNote(c, p) {
+    const R = p.R; c.save(); c.translate(p.x, p.y); c.rotate(Math.sin(p.a) * .3);
+    c.beginPath(); c.ellipse(0, R * .7, R * .42, R * .3, -.4, 0, 6.2832); sunFillLine(c, p.col);
+    c.strokeStyle = 'rgb(' + p.col + ')'; c.lineWidth = Math.max(1, R * .12);
+    c.beginPath(); c.moveTo(R * .36, R * .6); c.lineTo(R * .36, -R); c.quadraticCurveTo(R * .5, -R * .4, R, -R * .3); c.stroke(); c.restore();
+  }
+  function sunRing(c, p) {
+    c.save(); c.translate(p.x, p.y); c.rotate(p.a); c.scale(1, Math.max(.25, Math.abs(Math.cos(p.f))));
+    c.lineWidth = Math.max(1.2, p.R * .28); c.strokeStyle = 'rgb(' + p.col + ')'; c.beginPath(); c.arc(0, 0, p.R, 0, 6.2832); c.stroke();
+    c.lineWidth *= .4; c.strokeStyle = 'rgba(255, 246, 214, .9)'; c.beginPath(); c.arc(0, 0, p.R, 3.6, 4.6); c.stroke(); c.restore();
+  }
+  function sunFeather(c, p) {
+    const R = p.R; c.save(); c.translate(p.x, p.y); c.rotate(.6 + Math.sin(p.f) * .5);
+    c.beginPath(); c.moveTo(0, -R); c.bezierCurveTo(R * .45, -R * .5, R * .35, R * .45, 0, R * .8); c.bezierCurveTo(-R * .3, R * .4, -R * .4, -R * .5, 0, -R);
+    c.fillStyle = 'rgba(' + p.col + ', .85)'; c.fill(); c.strokeStyle = 'rgba(35, 58, 99, .4)'; c.lineWidth = .8; c.stroke();
+    c.beginPath(); c.moveTo(0, -R * .9); c.quadraticCurveTo(R * .05, 0, 0, R * 1.15); c.stroke(); c.restore();
+  }
+  function sunFirefly(c, p) {
+    const R = p.R * 3, w = .55 + .45 * Math.sin(p.f * 2), g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, R);
+    g.addColorStop(0, 'rgba(255, 252, 225, ' + w + ')'); g.addColorStop(.2, 'rgba(' + p.col + ', ' + .8 * w + ')');
+    g.addColorStop(.55, 'rgba(' + p.col + ', ' + .25 * w + ')'); g.addColorStop(1, 'rgba(' + p.col + ', 0)');
+    c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, R, 0, 6.2832); c.fill();
+  }
+  function sunConfetti(c, p) {
+    c.save(); c.translate(p.x, p.y); c.rotate(p.a); c.scale(1, Math.cos(p.f * 2));
+    c.fillStyle = 'rgb(' + p.col + ')'; c.fillRect(-p.R * .5, -p.R, p.R, p.R * 2); c.restore();
+  }
+  /* a flame (Whitsun, the candles): a flickering drop with a warm glow */
+  function sunFlame(c, p) {
+    const R = p.R * (1 + .12 * Math.sin(p.f * 7) + .06 * Math.sin(p.f * 17)), w = p.R * .55;
+    c.save(); c.translate(p.x, p.y); c.rotate(Math.sin(p.f * 3) * .12);
+    const g = c.createRadialGradient(0, R * .3, 0, 0, R * .3, R * 1.5); g.addColorStop(0, 'rgba(255, 200, 90, .45)'); g.addColorStop(1, 'rgba(255, 170, 60, 0)');
+    c.fillStyle = g; c.beginPath(); c.arc(0, R * .3, R * 1.5, 0, 6.2832); c.fill();
+    c.beginPath(); c.moveTo(0, -R); c.bezierCurveTo(w, -R * .2, w, R * .6, 0, R * .6); c.bezierCurveTo(-w, R * .6, -w, -R * .2, 0, -R);
+    const f = c.createLinearGradient(0, -R, 0, R * .6); f.addColorStop(0, 'rgba(255, 240, 200, .95)'); f.addColorStop(.5, 'rgb(' + p.col + ')'); f.addColorStop(1, 'rgba(200, 80, 30, .9)');
+    c.fillStyle = f; c.fill(); c.restore();
+  }
+  const sunFlakePts = r => Array.from({ length: 6 }, (_, i) => { const a = i / 6 * 6.2832 + r() * .5, d = .55 + r() * .5; return [Math.cos(a) * d, Math.sin(a) * d]; });
+  /* size (at a book of 900 px), count factor nf, spin, orient: turned along the way it moves */
+  const SUN_EL = {
+    star: { size: 3.6, paint: (c, p) => sunGlint(c, p.x, p.y, p.R, 1, p.col) }, star5: { size: 9, paint: sunStar5 }, heart: { size: 9, spin: .8, paint: sunHeart },
+    leaf: { size: 14, spin: 2.4, paint: sunLeaf }, petal: { size: 9, paint: (c, p) => { p.r = p.R; p.c = PETALS[Math.floor(p.k * PETALS.length)]; petal(c, p); } },
+    snow: { size: 7, spin: 1.5, paint: sunSnow }, seed: { size: 14, spin: 0, paint: sunDandelion }, flake: { size: 9, init: (q, v) => { v.pts = sunFlakePts(q); }, paint: sunGoldLeaf },
+    bubble: { size: 22, nf: .55, paint: sunBubble }, butterfly: { size: 28, nf: .2, orient: true, paint: sunButterfly }, plane: { size: 22, nf: .12, orient: true, paint: sunPaperPlane },
+    note: { size: 10, spin: .8, paint: sunNote }, ring: { size: 8, spin: 1, paint: sunRing }, feather: { size: 16, nf: .6, spin: 1.2, paint: sunFeather },
+    firefly: { size: 7, paint: sunFirefly }, confetti: { size: 6, spin: 4, paint: sunConfetti }, flame: { size: 11, spin: 0, paint: sunFlame }
+  };
+  /* ---- the movements: slot(r, i, e) fixes a slot's delay d, period P and constants; make(q, e, i, k, slot) a cycle's values;
+     pos(v, a, slot, e) where it is at age a and how visible ([x, y, alpha]). e: the book box B, centre cx/cy, radii RX/RY,
+     size unit u, pace v, direction dir ---- */
+  const sunVert = (v, a, s) => [v.x0 + Math.sin(a * v.w + v.ph) * v.sw, s.y0 + s.vy * a, Math.min(1, a / .5)];
+  const sunSpin = (q, e) => ({ th: q() * 6.2832, tw: (1.2 + q() * .8) * e.dir });
+  const SUN_CH = {
+    fall: { n: 30, slot: (r, i, e) => { const vy = e.B.h * (.13 + r() * .13) * e.v, y0 = e.B.y - e.B.h * (.03 + r() * .1), P = (e.B.H + 60 - y0) / vy; return { d: r() * P, P, vy, y0 }; },
+      make: (q, e) => ({ x0: e.B.x + e.B.w * (-.04 + q() * 1.08), sw: 26 * e.u * (.5 + q()), w: .8 + q() * 1.4, ph: q() * 6.28 }), pos: sunVert },
+    rise: { n: 24, slot: (r, i, e) => { const vy = e.B.h * (.08 + r() * .09) * e.v, y0 = e.B.y + e.B.h * (.85 + r() * .2), P = (y0 + 60) / vy; return { d: r() * P, P, vy: -vy, y0 }; },
+      make: (q, e) => ({ x0: e.B.x + e.B.w * (-.04 + q() * 1.08), sw: 22 * e.u * (.5 + q()), w: .7 + q() * 1.2, ph: q() * 6.28 }), pos: sunVert },
+    drift: { n: 16, slot: (r, i, e) => { const vx = e.B.w * (.09 + r() * .08) * e.v, P = 1.36 * e.B.w / vx; return { d: r() * P, P, vx }; },
+      make: (q, e) => ({ y0: e.B.y + e.B.h * (.08 + q() * .84), amp: e.B.h * (.03 + q() * .07), w: .7 + q() * 1.3, ph: q() * 6.28 }),
+      pos: (v, a, s, e) => [e.dir > 0 ? e.B.x - .18 * e.B.w + s.vx * a : e.B.x + 1.18 * e.B.w - s.vx * a, v.y0 + Math.sin(a * v.w + v.ph) * v.amp, Math.min(1, a / .6, (s.P - a) / .6)] },
+    wave: { n: 18, slot: (r, i, e) => { const P = 1.36 / (.15 * e.v); return { d: i * P / e.n, P }; }, make: () => ({}),
+      pos: (v, a, s, e) => { const f = a / s.P, T = s.d + s.k * s.P + a, x = e.B.x + e.B.w * (e.dir > 0 ? -.18 + 1.36 * f : 1.18 - 1.36 * f);
+        return [x, e.cy + Math.sin(f * 9.4 - T * .6) * e.B.h * .2 + Math.sin(f * 3.1 + T * .4) * e.B.h * .06, Math.min(1, f / .06, (1 - f) / .06)]; } },
+    orbit: { n: 26, slot: r => { const P = 5 + r() * 3; return { d: r() * P, P }; },
+      make: (q, e) => ({ rr: .15 + q() * .85, th: q() * 6.2832, om: (.35 + q() * .45) * e.v * e.dir }),
+      pos: (v, a, s, e) => { const th = v.th + v.om * a; return [e.cx + Math.cos(th) * v.rr * e.RX, e.cy + Math.sin(th) * v.rr * e.RY, Math.min(1, a / .8, (s.P - a) / .8)]; } },
+    spiral: { n: 30, slot: (r, i, e) => { const P = (4 + r() * 2.5) / e.v; return { d: r() * P, P }; }, make: sunSpin,
+      pos: (v, a, s, e) => { const f = a / s.P, th = v.th + f * v.tw * 3.1416; return [e.cx + Math.cos(th) * f * e.RX * 1.15, e.cy + Math.sin(th) * f * e.RY * 1.15, Math.min(1, f / .12, (1 - f) / .3)]; } },
+    vortex: { n: 30, slot: (r, i, e) => { const P = (4 + r() * 2.5) / e.v; return { d: r() * P, P }; }, make: sunSpin,
+      pos: (v, a, s, e) => { const f = a / s.P, g = 1 - f, th = v.th + f * f * v.tw * 6.2832; return [e.cx + Math.cos(th) * g * e.RX * 1.2, e.cy + Math.sin(th) * g * e.RY * 1.2, Math.min(1, f / .15, g / .15)]; } },
+    swarm: { n: 22, slot: (r, i) => ({ d: 0, P: 1e7, lag: i * .07 }),
+      make: (q, e) => ({ ro: e.B.w * .04 * (.3 + q()), om: (1 + q() * 2) * (q() < .5 ? -1 : 1), ph: q() * 6.28 }),
+      pos: (v, a, s, e) => { const T = (a - s.lag) * e.v; return [e.cx + Math.sin(.37 * T + e.p1) * e.RX * .7 + Math.cos(a * v.om + v.ph) * v.ro, e.cy + Math.sin(.53 * T + e.p2) * e.RY * .75 + Math.sin(a * v.om + v.ph) * v.ro, Math.min(1, a / .8)]; } },
+    burst: { n: 42, group: 14, slot: (r, i) => ({ d: Math.floor(i / 14) * .95, P: 2.85 }),
+      make: (q, e, i, k) => { const h = sunHash(e.seed ^ 0x2545F491, Math.floor(i / 14), k); return { x0: e.B.x + e.B.w * (.15 + h() * .7), y0: e.B.y + e.B.h * (.18 + h() * .5), an: (i % 14) / 14 * 6.2832 + q() * .35, sp: e.B.w * (.13 + q() * .09) * e.v }; },
+      pos: (v, a, s, e) => { const g = (1 - Math.exp(-2.6 * a)) / 2.6; return [v.x0 + Math.cos(v.an) * v.sp * g, v.y0 + Math.sin(v.an) * v.sp * g + .06 * e.B.h * a * a, Math.min(1, a / .08, Math.max(0, 1 - a / 2.3))]; } },
+    fountain: { n: 28, slot: (r, i, e) => { const vy = e.B.h * (1.05 + r() * .3) * Math.sqrt(e.v), g = vy * vy / (1.7 * e.B.h), P = 2 * vy / g + .15; return { d: r() * P, P, vy, g }; },
+      make: (q, e, i, k, s) => ({ vx: (q() - .5) * e.B.w * .9 / s.P }),
+      pos: (v, a, s, e) => [e.cx + v.vx * a, e.B.y + e.B.h * .96 - s.vy * a + .5 * s.g * a * a, Math.min(1, a / .2, (s.P - a) / .4)] },
+    twinkle: { n: 26, slot: r => { const P = 2.2 + r() * 1.6; return { d: r() * P, P }; },
+      make: (q, e, i, k, s) => ({ x: e.B.x + e.B.w * (.03 + q() * .94), y: e.B.y + e.B.h * (.04 + q() * .92), life: s.P * (.6 + q() * .35) }),
+      pos: (v, a) => [v.x, v.y - a * 3, a < v.life ? Math.sin(Math.PI * a / v.life) : 0] },
+    streak: { n: 4, fixed: true, trail: true, slot: (r, i) => ({ d: .2 + i * .9 + r() * .3, P: 3.6 }),
+      make: (q, e) => { const an = Math.PI * (.68 + q() * .12), len = e.B.w * (.55 + q() * .35);
+        return { x0: e.B.x + e.B.w * (e.dir > 0 ? .35 + q() * .8 : .65 - q() * .8), y0: e.B.y + e.B.h * (q() * .35 - .12), dx: Math.cos(an) * len * e.dir, dy: Math.sin(an) * len, life: (1.1 + q() * .5) / e.v }; },
+      pos: (v, a) => { const k = Math.min(1, a / v.life), f = 1 - (1 - k) * (1 - k); return [v.x0 + v.dx * f, v.y0 + v.dy * f, a < v.life ? 1 - k * k : 0]; } },
+    /* fly in from far round the book to a figure (a heart, a star, the day's number, the year), hold, fly off - and the next
+       cycle starts exactly where this one left, so the coming and going never stops */
+    gather: { n: 64, slot: (r, i) => ({ d: (i % 16) * .05, P: 9 }),
+      make: (q, e, i, k) => { const F = e.figs[k % e.figs.length], o = j => { const w = sunHash(e.seed ^ 0x51ED27, i, j)() * 6.2832; return [e.cx + Math.cos(w) * e.Ro, e.cy + Math.sin(w) * e.Ro]; };
+        return { s0: o(k), s1: o(k + 1), tg: F[i % F.length] }; },
+      pos: (v, a, s, e) => {
+        if (a < 2.6) { const f = sunEase(a / 2.6); return [v.s0[0] + (v.tg[0] - v.s0[0]) * f, v.s0[1] + (v.tg[1] - v.s0[1]) * f, Math.min(1, f * 1.6)]; }
+        if (a < 6.2) return [v.tg[0] + Math.sin(a * 3 + v.tg[1]) * 1.5 * e.u, v.tg[1] + Math.cos(a * 2.6 + v.tg[0]) * 1.5 * e.u, 1];
+        const f = sunEase((a - 6.2) / 2.8); return [v.tg[0] + (v.s1[0] - v.tg[0]) * f, v.tg[1] + (v.s1[1] - v.tg[1]) * f, 1 - f * f]; } },
+    /* paper planes taking turns: in low from one side, once round a loop that turns back over the top, out high on the other;
+       the loop stays under the card of the day; a dotted trail */
+    loop: { n: 2, fixed: true, dots: true, slot: (r, i) => ({ d: .2 + i * 3.6, P: 7.2 }),
+      make: (q, e, i, k) => { const B = e.B, sx = B.x - .15 * B.w, sy = B.y + B.h * (.84 + q() * .06), ex = B.x + 1.15 * B.w, ey = B.y + B.h * (.24 + q() * .06), L = Math.hypot(ex - sx, ey - sy);
+        return { sx, sy, ex, ey, fx: (ex - sx) / L, fy: (ey - sy) / L, R: L * .24 / Math.PI, flip: (i + k) % 2 === 1 }; },
+      pos: (v, a, s, e) => { const p = a / 5.2, w = Math.min(1, Math.max(0, (p - .3) / .24)), lo = v.R * Math.sin(6.2832 * w), up = v.R * (1 - Math.cos(6.2832 * w)), x = v.sx + (v.ex - v.sx) * p + v.fx * lo + v.fy * up;
+        return [v.flip ? 2 * e.cx - x : x, v.sy + (v.ey - v.sy) * p + v.fy * lo - v.fx * up, a < 5.7 ? 1 : 0]; } }
+  };
+  /* a figure as points: the text drawn small off screen (Orbitron for numbers), its inked pixels sampled, scaled into the book */
+  function sunFigure(txt, n, e) {
+    const W = 220, H = 150, cv = document.createElement('canvas'), x = cv.getContext('2d', { willReadFrequently: true });
+    cv.width = W; cv.height = H;
+    x.font = /^\d+$/.test(txt) ? '900 ' + Math.round(H * (txt.length > 2 ? .62 : .8)) + 'px Orbitron, sans-serif' : Math.round(H * .9) + 'px serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(txt, W / 2, H / 2, W * .96);
+    const d = x.getImageData(0, 0, W, H).data, pts = [];
+    for (let y = 0; y < H; y += 2) for (let X = 0; X < W; X += 2) if (d[(y * W + X) * 4 + 3] > 128) pts.push([X, y]);
+    if (!pts.length) pts.push([W / 2, H / 2]);
+    let x0 = W, x1 = 0, y0 = H, y1 = 0;
+    pts.forEach(([a, b]) => { x0 = Math.min(x0, a); x1 = Math.max(x1, a); y0 = Math.min(y0, b); y1 = Math.max(y1, b); });
+    const sc = Math.min(e.B.w * .5 / (x1 - x0 + 1), e.B.h * .5 / (y1 - y0 + 1));
+    return Array.from({ length: n }, (_, i) => { const [a, b] = pts[Math.floor((i + .5) * pts.length / n)]; return [e.cx + (a - (x0 + x1) / 2) * sc, e.cy + (b - (y0 + y1) / 2) * sc]; });
+  }
+  /* one layer: an element on a movement (or a piece of its own, L.fn) */
+  function sunLayer(L, B, r, u, day) {
+    if (L.fn) return L.fn(B, r, u, day, L);
+    if (L.ch === 'write') return sunFlourish(B, r, u);
+    const E = SUN_EL[L.el], C = SUN_CH[L.ch], pal = SUN_PAL[L.pal] || SUN_PAL.gold;
+    let n = C.fixed ? C.n : Math.max(1, Math.round(C.n * (E.nf || 1) * (L.d || 1)));
+    if (C.group) n = Math.max(C.group, Math.round(n / C.group) * C.group);
+    const e = { B, u, n, v: L.v || 1, dir: L.dir || 1, seed: sunSeed(r), p1: r() * 6.28, p2: r() * 6.28, cx: B.x + B.w / 2, cy: B.y + B.h / 2 };
+    e.RX = Math.min(B.w * .48, B.h * .68); e.RY = Math.min(B.h * .44, e.RX * .72); e.Ro = .72 * Math.max(B.w, B.h);
+    if (L.ch === 'gather') e.figs = (L.fig || '♥|★').split('|').map(f => sunFigure(f === '#day' ? String(+day.slice(8)) : f === '#year' ? day.slice(0, 4) : f, n, e));
+    const size = E.size * u * (L.s || 1), spin = E.spin === undefined ? 2 : E.spin;
+    const slots = Array.from({ length: n }, (_, i) => Object.assign({ k: -1 }, C.slot(r, i, e)));
+    const make = (q, k, i) => {
+      const v = C.make(q, e, i, k, slots[i]);
+      v.R = size * (.6 + q() * .8); v.col = pal[Math.floor(q() * pal.length)]; v.k = q(); v.a0 = q() * 6.2832; v.va = (q() - .5) * spin; v.f0 = q() * 6.2832; v.vf = 1 + q() * 3;
+      if (E.init) E.init(q, v);
+      return v;
+    };
+    const p = {};
+    return (c, t, A) => {
+      for (let i = 0; i < n; i++) {
+        const sl = slots[i];
+        if (!sunAt(sl, i, t, e.seed, make)) continue;
+        const v = sl.v, a = sl.a, P = C.pos(v, a, sl, e);
+        if (C.dots) for (let j = 1; j * .06 < 1.4 && j * .06 <= a; j++) {   /* the plane's trail: a dot every .06 s, gone after 1.4 s */
+          const Q = C.pos(v, a - j * .06, sl, e);
+          if (Q[2] > 0) { c.globalAlpha = A * .7 * (1 - j * .06 / 1.4); c.fillStyle = 'rgb(' + v.col + ')'; c.beginPath(); c.arc(Q[0], Q[1], 1.8 * u, 0, 6.2832); c.fill(); }
+        }
+        if (P[2] <= .01) continue;
+        if (C.trail) {   /* the shooting star's tail and the glints it sheds */
+          const T = C.pos(v, Math.max(0, a - .28), sl, e), g = c.createLinearGradient(P[0], P[1], T[0], T[1]);
+          g.addColorStop(0, 'rgba(' + v.col + ', ' + P[2] + ')'); g.addColorStop(1, 'rgba(' + v.col + ', 0)');
+          c.globalAlpha = A; c.strokeStyle = g; c.lineCap = 'round'; c.lineWidth = 3 * u; c.beginPath(); c.moveTo(T[0], T[1]); c.lineTo(P[0], P[1]); c.stroke();
+          for (let j = 1; j < 5; j++) { const Q = C.pos(v, Math.max(0, a - j * .11), sl, e); sunGlint(c, Q[0] + Math.sin(j * 7 + v.k * 9) * 5 * u, Q[1] + j * 3 * u, 1.8 * u * (1 - j / 5), P[2] * (1 - j / 5), v.col); }
+        }
+        p.x = P[0]; p.y = P[1]; p.R = v.R; p.col = v.col; p.k = v.k; p.v = v; p.f = v.f0 + v.vf * a;
+        if (E.orient) { const Q = C.pos(v, a + .03, sl, e); p.a = Math.atan2(Q[1] - P[1], Q[0] - P[0]); } else p.a = v.a0 + v.va * a;
+        c.globalAlpha = A * P[2];
+        E.paint(c, p);
+      }
+      c.globalAlpha = A;
+    };
+  }
+  /* the gold flourish: an unseen pen writes a sweeping line with two loops across the spread, broad and fine like a nib, a
+     shine runs along it, then it falls apart from its start into gold dust that rises and fades - and as it falls apart the
+     pen writes the next one, each a little different, every other one mirrored top to bottom */
+  function sunFlourish(B, r, u) {
+    const P0 = [[.08, .64], [.19, .5], [.3, .42], [.37, .52], [.31, .61], [.24, .52], [.34, .4], [.5, .36], [.63, .45], [.57, .56], [.49, .48], [.6, .38], [.76, .4], [.86, .5], [.94, .43]];
+    const seed = sunSeed(r), bh = Math.min(B.h, B.w * .75), PER = 5;
+    const W0 = .3, W1 = 2.9, D0 = 3.6, D1 = 5.3;   /* written from .3 s to 2.9 s, falling apart from 3.6 s to 5.3 s, its dust until 7.1 s */
+    const make = (q, k) => {
+      const P = P0.map(([x, y], i) => [x + (i && i < P0.length - 1 ? (q() - .5) * .06 : 0), (k % 2 ? 1 - y : y) + (q() - .5) * .06]), pts = [];
+      for (let i = 0; i < P.length - 1; i++) {   /* Catmull-Rom through the points */
+        const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
+        for (let j = 0; j < 16; j++) {
+          const w = j / 16, w2 = w * w, w3 = w2 * w, cr = n => .5 * (2 * p1[n] + (p2[n] - p0[n]) * w + (2 * p0[n] - 5 * p1[n] + 4 * p2[n] - p3[n]) * w2 + (3 * p1[n] - p0[n] - 3 * p2[n] + p3[n]) * w3);
+          pts.push([B.x + B.w * cr(0), B.y + B.h / 2 + (cr(1) - .5) * bh]);
+        }
+      }
+      return { pts, dust: pts.map(() => ({ vx: (q() - .5) * 30 * u, vy: -(14 + q() * 36) * u, life: .9 + q() * .9, s: (1.2 + q() * 2) * u })) };
+    };
+    /* the cycle now and the one before (its dust still rising) - two kept, never more */
+    const cur = { d: 0, P: PER, k: -1 }, prev = { d: PER, P: PER, k: -1 };
+    let G = null;
+    const draw = (c, f, a) => {
+      const N = f.pts.length, head = Math.floor((N - 1) * sunEase((a - W0) / (W1 - W0))), shine = (a - W1) / .8 * N;
+      if (a < W0) return;
+      c.lineCap = 'round';
+      for (let i = 1; i <= head; i++) {
+        const td = D0 + (D1 - D0) * i / N;
+        if (a > td) { const d = f.dust[i], ad = a - td; if (i % 2 && ad < d.life) sunGlint(c, f.pts[i][0] + d.vx * ad, f.pts[i][1] + d.vy * ad, d.s * (1 - ad / d.life), .95); continue; }
+        const [x0, y0] = f.pts[i - 1], [x1, y1] = f.pts[i];
+        c.strokeStyle = Math.abs(i - shine) < 6 ? '#f6dc85' : G;
+        c.lineWidth = u * (1 + 4.4 * Math.abs(Math.sin(Math.atan2(y1 - y0, x1 - x0) - .785)));
+        c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
+      }
+      if (a < W1 + .2) sunGlint(c, f.pts[head][0], f.pts[head][1], 3 * u, 1);   /* the pen's tip */
+    };
+    return (c, t) => {
+      if (!G) { G = c.createLinearGradient(B.x, 0, B.x + B.w, 0); [['#8a6a22', 0], ['#d9b04e', .25], ['#a87b22', .5], ['#e2bd5c', .72], ['#7a5814', 1]].forEach(([col, k]) => G.addColorStop(k, col)); }
+      /* the one before: same slot, one period later (only its dust is left by then) */
+      if (sunAt(prev, 0, t, seed, make) && prev.a + PER < D1 + 1.9) draw(c, prev.v, prev.a + PER);
+      if (sunAt(cur, 0, t, seed, make)) draw(c, cur.v, cur.a);
+    };
+  }
+  /* Easter: golden eggs roll across the spread (Doc, 25.11.2026: "Goldene Eier, die über die Seite rollen") - foil gold like
+     the cover with a highlight from the top left, some with a fine engraving. Egg-shaped, so they roll as eggs do: the
+     centre rises and dips with the point of the outline that touches the ground (its support function h, rolled out without
+     slipping: x' = h), the heavy end makes them lurch, and they sway a little in depth. One egg per line, in turns from the
+     left and the right. */
+  function sunGoldEggs(B, r, u) {
+    const seed = sunSeed(r), TAU = 6.2832;
+    const slots = [.3, .5, .7, .9].map((l, i) => {
+      const a = B.h * .055 * (.85 + r() * .3), b = a * .74, pts = [], hs = [], X = [0];
+      for (let j = 0; j < 28; j++) { const f = j / 28 * TAU; pts.push([Math.cos(f) * a, Math.sin(f) * b * (1 + .16 * Math.cos(f))]); }   /* fat end at +x */
+      for (let j = 0; j <= 64; j++) {
+        const th = j / 64 * TAU, sn = Math.sin(th), cs = Math.cos(th);
+        let h = 0; for (const [x, y] of pts) h = Math.max(h, x * sn + y * cs);
+        hs.push(h); if (j) X.push(X[j - 1] + (hs[j - 1] + h) / 2 * TAU / 64);
+      }
+      const om = B.w * (.08 + r() * .04) / (X[64] / TAU), P = 1.3 * B.w / X[64] * TAU / om + 1;
+      return { d: i * 1.7 + r() * .9, P, k: -1, gy: B.y + B.h * l, a, b, pts, hs, X, om };
+    });
+    const make = q => ({ dir: q() < .5 ? 1 : -1, ph: q() * TAU, pat: Math.floor(q() * 4) });
+    /* a table over one turn, read at any angle */
+    const lerp = (T, th) => { const w = ((th % TAU) + TAU) % TAU / TAU * 64, j = Math.min(63, Math.floor(w)); return T[j] + (T[j + 1] - T[j]) * (w - j); };
+    return (c, t, A) => {
+      slots.forEach((sl, i) => {
+        if (!sunAt(sl, i, t, seed, make)) return;
+        const v = sl.v, a = sl.a, th = sl.om * a + .45 * Math.sin(sl.om * a + v.ph);   /* the lurch */
+        const x = (v.dir > 0 ? B.x - .15 * B.w : B.x + 1.15 * B.w) + v.dir * (Math.floor(th / TAU) * sl.X[64] + lerp(sl.X, th));
+        const y = sl.gy - lerp(sl.hs, th), wob = 1 - .06 * (.5 + .5 * Math.sin(2 * th + v.ph));
+        c.globalAlpha = A * Math.min(1, a / .6, (sl.P - a) / .6);
+        c.fillStyle = 'rgba(26, 42, 75, .22)'; c.beginPath(); c.ellipse(x, sl.gy + 1, sl.a * .95, sl.a * .15, 0, 0, TAU); c.fill();
+        c.save(); c.translate(x, y);
+        c.save(); c.scale(v.dir, 1); c.rotate(th); c.scale(1, wob);
+        c.beginPath(); sl.pts.forEach(([px, py], j) => j ? c.lineTo(px, py) : c.moveTo(px, py)); c.closePath();
+        c.restore();
+        /* the foil keeps to the light, the egg turns under it */
+        const g = c.createLinearGradient(-sl.a, -sl.a * .9, sl.a, sl.a * .9);
+        [['#6e4f10', 0], ['#b4862a', .24], ['#e2bd5c', .4], ['#a87b22', .55], ['#d9b04e', .72], ['#7a5814', 1]].forEach(([col, k]) => g.addColorStop(k, col));
+        c.fillStyle = g; c.fill(); c.strokeStyle = 'rgba(90, 64, 12, .6)'; c.lineWidth = 1; c.stroke();
+        const hl = c.createRadialGradient(-sl.a * .32, -sl.b * .45, 0, -sl.a * .32, -sl.b * .45, sl.a * .55);
+        hl.addColorStop(0, 'rgba(255, 248, 220, .8)'); hl.addColorStop(1, 'rgba(255, 248, 220, 0)');
+        c.fillStyle = hl; c.fill();   /* the highlight, before the engraving takes the path */
+        if (v.pat) {   /* the engraving turns with the egg: zigzag bands, a dotted band or a lattice */
+          c.save(); c.clip(); c.scale(v.dir, 1); c.rotate(th); c.scale(1, wob);
+          c.strokeStyle = c.fillStyle = 'rgba(110, 79, 16, .55)'; c.lineWidth = Math.max(.7, sl.a * .03); c.beginPath();
+          if (v.pat === 1) for (const o of [-.12, .12]) { c.moveTo(-sl.a, o * sl.b); for (let j = 1; j <= 12; j++) c.lineTo(-sl.a + j * sl.a / 6, (o + (j % 2 ? .1 : -.1)) * sl.b); }
+          if (v.pat === 2) for (const o of [-.24, .24]) { c.moveTo(-sl.a, o * sl.b); c.lineTo(sl.a, o * sl.b); }
+          if (v.pat === 3) for (let j = -5; j <= 5; j++) { c.moveTo(j * sl.a * .28 - sl.b, -sl.b * 1.2); c.lineTo(j * sl.a * .28 + sl.b, sl.b * 1.2); c.moveTo(j * sl.a * .28 + sl.b, -sl.b * 1.2); c.lineTo(j * sl.a * .28 - sl.b, sl.b * 1.2); }
+          c.stroke();
+          if (v.pat === 2) for (let j = -4; j <= 4; j++) { c.beginPath(); c.arc(j * sl.a * .22, 0, Math.max(.8, sl.a * .045), 0, TAU); c.fill(); }
+          c.restore();
+        }
+        c.restore();
+      });
+      c.globalAlpha = A;
+    };
+  }
+  /* candles (Doc, 25.11.2026: "Beim 2. Advent muss die erste schon bissl runtergebrannt sein" ... "Das muss noch
+     fotorealistischer sein. Weiter runter" ... "den Teller auch irgendwie kleiner und schönes Holz"): real photos, cut out.
+     Advent: a wreath of fir, juniper, cones, stars, orange slices and cinnamon with four red candles ("2023 Adventskranz 6",
+     Burkhard Mücke, Wikimedia Commons, CC BY 4.0), one image per Sunday, the candles burnt down by the Sundays they burnt
+     before (img/advent-kranz-1..4.webp, the wreath's plane flattened, the candles upright), on a small tray of real wood
+     (the desk's mahogany, Poly Haven CC0). The Sunday of the dead: one candle with its own flame (public domain photo) on a
+     wooden coaster. The flames live: a real flame (public domain) on each lit wick, flickering a little in size and
+     brightness, and a pulsing warm glow. It stands in the room under the page's last field down to its lower edge, never in
+     a question; on a narrow screen left of the oratorio's player. The images load only on these Sundays. */
+  /* the wreath images: their size, the ellipse the tray follows ([cx, cy, rx, ry] in parts of the image) and each Sunday's lit
+     wicks ([x, y, the candle's width]); the plane of the wreath is flattened (seen less from above), the candles stand
+     upright at full height on it */
+  const SUN_WREATH = { w: 760, h: 458, tray: [.498, .5703, .5021, .4297], adv: [[[.2791, .3199, .1512]], [[.2791, .3942, .1512], [.2741, .0614, .1384]],
+    [[.2791, .4693, .1512], [.2741, .1266, .1384], [.7163, .0341, .137]], [[.2791, .5444, .1512], [.2741, .1926, .1384], [.7163, .0993, .137], [.7332, .3083, .154]]] };
+  const SUN_IMG = {};
+  const sunImg = src => SUN_IMG[src] || (SUN_IMG[src] = Object.assign(new Image(), { decoding: 'async', src }));
+  function sunCandles(B, r, u, day, L) {
+    const TAU = 6.2832, four = L.c > 1, s = stage.getBoundingClientRect();
+    const img = sunImg(four ? 'img/advent-kranz-' + L.n + '.webp' : 'img/totensonntag-kerze.webp'), fl = sunImg('img/advent-flamme.webp'), wood = sunImg('img/mahagoni.webp');
+    /* where it stands (Doc, 25.11.2026: "ja, darf er" ... "doch in der Mitte" ... "er malt unten übers Buch ... zu groß"): an
+       object in front of the book, in the middle under the fold (the ribbon runs behind it), about a quarter of the spread
+       wide (on the phone half the page); its tray reaches at most down to the cover's lower edge, never onto the desk, and no
+       flame rises into a question: everything stays under the text of the last questions. Less room, a smaller wreath. */
+    const qs = $$('textarea[data-k^="e3@"], textarea[data-k^="m3@"]').filter(t => {
+      const b = t.getBoundingClientRect(); return b.width > 0 && b.left >= s.left + B.x - 2 && b.right <= s.left + B.x + B.w + 2 && b.top > s.top + B.y && b.bottom < s.top + B.y + B.h;
+    }).map(t => t.closest('.q') && t.closest('.q').querySelector('.q-t')).filter(Boolean);
+    const boards = $('#bookwrap .boards'), coverBottom = boards ? boards.getBoundingClientRect().bottom - s.top : B.y + B.h;
+    const top = qs.length ? Math.max(...qs.map(q => q.getBoundingClientRect().bottom)) - s.top + 8 : B.y + B.h * .8, limit = Math.min(B.H - 6, coverBottom - 1);
+    const ar = four ? SUN_WREATH.w / SUN_WREATH.h : 260 / 395, T = SUN_WREATH.tray, wicks = four ? SUN_WREATH.adv[L.n - 1] : [];
+    /* in parts of the image's height: how far the flames rise above it (hi < 0) and the tray reaches below it (lo) */
+    const hi = four ? Math.min(0, ...wicks.map(([fx, fy, fw]) => fy - .9 * fw * ar)) : 0, lo = four ? T[1] + T[3] * 1.04 + .035 : 1.122;
+    /* a little smaller and a little higher, its tray clear of the cover's edge (Doc, 25.11.2026: "noch ein bisschen kleiner
+       und ein Stück höher") */
+    const want = (B.w > B.h ? B.w * (four ? .21 : .09) : B.w * (four ? .52 : .26)), lift = B.h * .035;   /* "jetzt zu klein. Ein bisschen größer" */
+    const ih = Math.max(24, Math.min((limit - lift - top) / (lo - hi), want / ar)), iw = ih * ar, cx = B.x + B.w / 2;
+    const y0 = limit - lift - ih * lo, x0 = cx - iw / 2;
+    /* a tray (or coaster) of real wood in the photo's perspective: a soft contact shadow, its edge, its top with a sheen */
+    function tray(c, tx, ty, rx, ry, th) {
+      c.save(); c.filter = 'blur(' + Math.max(2, th).toFixed(1) + 'px)'; c.fillStyle = 'rgba(25, 14, 6, .38)';
+      c.beginPath(); c.ellipse(tx + rx * .02, ty + th * 1.4, rx * 1.02, ry * 1.02, 0, 0, TAU); c.fill(); c.restore();
+      const pat = wood.complete && wood.naturalWidth ? c.createPattern(wood, 'repeat') : null, sc = rx * 2.4 / 1024;
+      if (pat && pat.setTransform) pat.setTransform(new DOMMatrix([sc, 0, 0, sc * .9, tx - rx, ty - ry]));
+      c.beginPath(); c.ellipse(tx, ty, rx, ry, 0, 0, Math.PI); c.lineTo(tx - rx, ty + th); c.ellipse(tx, ty + th, rx, ry, 0, Math.PI, 0, true); c.closePath();
+      c.fillStyle = pat || '#5a3a20'; c.fill(); c.fillStyle = 'rgba(0, 0, 0, .4)'; c.fill();
+      c.beginPath(); c.ellipse(tx, ty, rx, ry, 0, 0, TAU); c.fillStyle = pat || '#7a5532'; c.fill();
+      c.fillStyle = 'rgba(160, 100, 50, .2)'; c.fill();   /* a warmer, walnut tone over the mahogany */
+      const g = c.createLinearGradient(tx - rx, ty - ry, tx + rx * .6, ty + ry);
+      g.addColorStop(0, 'rgba(255, 236, 205, .24)'); g.addColorStop(.5, 'rgba(255, 236, 205, 0)'); g.addColorStop(1, 'rgba(0, 0, 0, .18)');
+      c.fillStyle = g; c.fill();
+      c.strokeStyle = 'rgba(255, 230, 190, .4)'; c.lineWidth = Math.max(.8, th * .25); c.beginPath(); c.ellipse(tx, ty, rx * .985, ry * .985, 0, Math.PI * 1.05, Math.PI * 1.75); c.stroke();
+    }
+    /* a living flame on the wick at x, y (cw: the candle's width): the real flame, its size and brightness trembling a
+       little, and a warm glow that breathes */
+    function flame(c, x, y, cw, t, i, A, alpha) {
+      const j = 1 + .06 * Math.sin(t * 9.1 + i * 1.9) + .04 * Math.sin(t * 23.7 + i * 2.3), fh = cw * .8 * j, fw = fh * .355 * (1 + .03 * Math.sin(t * 13.3 + i));
+      const gy = y - fh * .45, gr = cw * 1.6, g = c.createRadialGradient(x, gy, 0, x, gy, gr), w = .2 * (.8 + .2 * Math.sin(t * 5.3 + i));
+      g.addColorStop(0, 'rgba(255, 170, 70, ' + w + ')'); g.addColorStop(1, 'rgba(255, 150, 60, 0)');
+      c.globalCompositeOperation = 'lighter'; c.globalAlpha = A; c.fillStyle = g; c.beginPath(); c.arc(x, gy, gr, 0, TAU); c.fill();
+      c.globalCompositeOperation = 'source-over';
+      if (fl.complete && fl.naturalWidth) { c.globalAlpha = A * alpha * (.92 + .08 * Math.sin(t * 17.1 + i)); c.drawImage(fl, x - fw / 2 + Math.sin(t * 3.1 + i) * fw * .04, y - fh * .93, fw, fh); }
+      c.globalAlpha = A;
+    }
+    return (c, t, A) => {
+      if (!img.complete || !img.naturalWidth) return;
+      if (four) tray(c, x0 + T[0] * iw, y0 + T[1] * ih, T[2] * iw * 1.03, T[3] * ih * 1.04, ih * .035); else tray(c, cx, y0 + ih * .955, iw * .62, iw * .2, ih * .035);
+      c.drawImage(img, x0, y0, iw, ih);
+      if (four) wicks.forEach(([fx, fy, fw], i) => flame(c, x0 + fx * iw, y0 + fy * ih, fw * iw, t, i, A, 1));
+      else flame(c, x0 + .505 * iw, y0 + .35 * ih, .45 * ih, t, 0, A, .4);   /* the photo's own flame, living a little */
+    };
+  }
+  /* one pair per Sunday of the year (the n-th Sunday of the calendar year; "element movement palette [figures]"): no pair
+     twice, never the same element or movement two Sundays in a row; the seasons in their elements and colours. Where a
+     special Sunday falls, its own piece is shown instead (the first entry: always the first Sunday of the year). */
+  const SUN_YEAR = ['star burst gold', 'snow fall ice', 'ring orbit gold', 'star5 twinkle night', 'feather vortex ice', 'snow spiral night',
+    'heart gather rose ♥|#day', 'confetti drift doc', 'star streak gold', 'bubble rise pastel', 'note wave ink', 'petal fall spring', 'butterfly drift spring',
+    'flake fountain gold', 'petal vortex spring', 'heart rise rose', 'plane loop pastel', 'ring spiral pastel', 'butterfly orbit pastel', 'petal swarm spring',
+    'feather fall gold', 'bubble drift pastel', 'seed rise summer', 'firefly swarm summer', 'star orbit gold', 'butterfly wave summer', 'confetti fountain summer',
+    'seed drift summer', 'firefly twinkle summer', 'bubble swarm pastel', 'plane drift doc', 'star5 fountain gold', 'note fall doc', 'firefly rise summer',
+    'heart orbit doc', 'flourish write gold', 'leaf drift autumn', 'star gather gold ★|#day', 'leaf fall autumn', 'flake swarm gold', 'feather drift autumn',
+    'leaf vortex autumn', 'note spiral ink', 'ring twinkle gold', 'leaf wave autumn', 'flake fall gold', 'star5 drift night', 'snow twinkle ice', 'star fall gold',
+    'snow vortex ice', 'star5 orbit gold', 'confetti burst gold', 'star spiral night'];
+  const SUN_SPECIAL = {
+    neujahr: [{ el: 'star5', ch: 'gather', pal: 'gold', fig: '#year', d: 1.2 }, { el: 'star', ch: 'burst', pal: 'gold', d: .7 }],
+    ostern: [{ el: 'petal', ch: 'drift', pal: 'spring', d: .35 }, { fn: sunGoldEggs }],
+    muttertag: [{ el: 'petal', ch: 'gather', pal: 'rose', fig: '♥' }, { el: 'heart', ch: 'drift', pal: 'rose', d: .6 }],
+    pfingsten: [{ el: 'flame', ch: 'rise', pal: 'fire', d: .7 }, { el: 'star', ch: 'twinkle', pal: 'gold', d: .5 }],
+    totensonntag: [{ el: 'firefly', ch: 'drift', pal: 'night', d: .4, v: .45 }, { fn: sunCandles, c: 1, n: 1 }],
+    advent1: [{ el: 'snow', ch: 'drift', pal: 'ice', d: .8, v: .6 }, { fn: sunCandles, c: 4, n: 1 }],
+    advent2: [{ el: 'star5', ch: 'fall', pal: 'gold', d: .5 }, { fn: sunCandles, c: 4, n: 2 }],
+    advent3: [{ el: 'snow', ch: 'swarm', pal: 'ice' }, { fn: sunCandles, c: 4, n: 3 }],
+    advent4: [{ el: 'star', ch: 'rise', pal: 'gold' }, { fn: sunCandles, c: 4, n: 4 }]
+  };
+  /* Easter Sunday of year y (Meeus / Jones / Butcher, Gregorian) */
+  function sunEaster(y) {
+    const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+    return iso(new Date(y, Math.floor((h + l - 7 * m + 114) / 31) - 1, (h + l - 7 * m + 114) % 31 + 1));
+  }
+  /* which special Sunday a date is ('' for none): the 4th of Advent is the last Sunday up to 24 December */
+  function sunSpecial(d) {
+    const [y, m, dd] = d.split('-').map(Number), e = sunEaster(y), x24 = new Date(y, 11, 24).getDay(), adv = n => iso(new Date(y, 11, 24 - x24 - 7 * (4 - n)));
+    if (m === 1 && dd <= 7) return 'neujahr';
+    if (d === e) return 'ostern';
+    if (d === addDays(e, 49)) return 'pfingsten';
+    if (m === 5 && dd >= 8 && dd <= 14) return 'muttertag';
+    for (let n = 1; n <= 4; n++) if (d === adv(n)) return 'advent' + n;
+    return d === adv(0) ? 'totensonntag' : '';
+  }
+  /* the layers of a Sunday: its special piece, or its pair from SUN_YEAR with a pace, size, density and direction of its own */
+  function sunPlan(d) {
+    const sp = sunSpecial(d);
+    if (sp) return SUN_SPECIAL[sp];
+    const [y, m, dd] = d.split('-').map(Number), i = Math.floor(Math.round((new Date(y, m - 1, dd) - new Date(y, 0, 1)) / 864e5) / 7);
+    const [el, ch, pal, fig] = SUN_YEAR[Math.min(i, SUN_YEAR.length - 1)].split(' '), h = mulberry32(y * 53 + i);
+    return [{ el, ch, pal, fig, v: .85 + h() * .35, s: .9 + h() * .3, d: .85 + h() * .3, dir: h() < .5 ? 1 : -1 }];
+  }
+  /* ?sonntag= for a Sunday that is not in this book (week 53, another year): played on the page the book rests on, in place
+     of whatever runs there */
+  let sunTryT = 0;
+  function sunTryOnce() { if (state === 'read' && !DAYS.includes(sunTry)) sunStart(sunTry); }
+  function sunStart(day) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (festRaf && !sunOn) return;   /* the birthday show (or its goodbye) is still on: it keeps the stage */
+    sunOn = 1; sunEnd = 0; sunScene = null; sunArgs = day;
+    fest.classList.add('on');
+    cancelAnimationFrame(festRaf); festRaf = requestAnimationFrame(sunDraw);
+  }
+  /* the scene is laid out on the first frame, not at the call: opened straight on a Sunday, the call comes while the book is
+     being built, and on a phone the book's box is not yet its final size then (everything fell far below the screen) */
+  function sunSetup(now) {
+    const day = sunArgs;
+    if (sonderTag(day)) { sonderSetup(day, now); return; }   /* Oct 31 / Dec 31: their own scene (sondertage.js) */
+    festDpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = stage.clientWidth, H = Math.min(stage.clientHeight, innerHeight);
+    fest.width = Math.round(W * festDpr); fest.height = Math.round(H * festDpr);
+    fest.style.width = W + 'px'; fest.style.height = H + 'px';
+    const b = $('#bookwrap').getBoundingClientRect(), s = stage.getBoundingClientRect();
+    const B = { x: b.left - s.left, y: b.top - s.top, w: b.width, h: b.height, W, H };
+    /* sizes follow the book: a phone's page is about half, a big screen up to one and a half */
+    const u = Math.max(.55, Math.min(1.6, B.w / 900, B.h / 630));
+    /* a book taller than the window (a phone held sideways): the surprise stays in the part that is seen */
+    B.h = Math.max(B.w * .3, Math.min(B.h, H - B.y));
+    const plan = sunPlan(day), r = mulberry32(+day.replace(/-/g, '')), layers = plan.map(L => sunLayer(L, B, r, u, day));
+    sunScene = (c, t, A) => layers.forEach(f => f(c, t, A));
+    sunDim = plan.some(L => L.fn === sunCandles);
+    sunT0 = now;
+  }
+  function sunDraw(now) {
+    festRaf = 0;
+    if (!sunOn) return;
+    if (document.hidden) return;   /* a tab in the background: paused, the clock runs on (visibilitychange below) */
+    if (!sunScene) sunSetup(now);
+    const c = festCtx, W = fest.width / festDpr, H = fest.height / festDpr, t = (now - sunT0) / 1000;
+    /* no end of its own: a click, a key or a touch (festLeave) or a page turn (updateStage) fades it in a third of a second */
+    const A = sunEnd ? 1 - (now - sunEnd) / 350 : 1;
+    /* candles stand on the habits' row: the bullets fade back while they burn and come back as the scene goes (Doc,
+       25.11.2026: "wenn da Kerzen dann die bullets ausdünnen") */
+    stage.classList.toggle('sun-candles', sunDim && !sunEnd);
+    c.setTransform(festDpr, 0, 0, festDpr, 0, 0);
+    c.clearRect(0, 0, W, H);
+    if (A <= 0) { sunOn = 0; sunScene = null; sunDim = false; stage.classList.remove('sun-candles'); fest.classList.remove('on'); return; }
+    c.save(); c.globalAlpha = A; sunScene(c, t, A); c.restore();
+    festRaf = requestAnimationFrame(sunDraw);
+  }
+  document.addEventListener('visibilitychange', () => { if (sunOn && !festRaf && !document.hidden) festRaf = requestAnimationFrame(sunDraw); });
+
+  /* ---------- the Christmas Oratorio on the four Sundays of Advent (Doc, 25.11.2026: "Weihnachtsoratorium einbauen" ... "Macht
+     da bitte Johann Sebastian Bach hin als Bleistiftzeichnung. Mit Blick nach links. Wenn man ihn klickt, dann spielt es. Auf
+     der linken Seite genau an die gleiche Stelle irgendein Icon fürs Weihnachtsoratorium ... Wenn man nochmal klickt, macht's
+     Pause." ... "den Player in der Mitte in einem schönen barocken Rahmen (fade in), 2/3 des Buches"): J. S. Bach, BWV 248 -
+     Netherlands Bach Society (All of Bach), Shunske Sato, 2023 - one part per Sunday. On those Sundays Bach, drawn in pencil
+     after Haussmann's portrait, looks from the evening page towards the fold, and kettledrums with a trumpet stand at the
+     same place on the morning page; only these two play and pause the music. The first click loads YouTube's player (IFrame
+     API, host youtube-nocookie.com - not a single request before) and it plays at once (the click is the gesture; autoplay is
+     delegated to its frame): it fades in over the middle of the book in a carved, gilded baroque frame (Naples, about 1660,
+     The Metropolitan Museum of Art, CC0) about two thirds of the spread wide, the book dimmed a little behind it. The frame
+     lies round the video, never over it. A pause hides it (kept, not rebuilt), the next click plays on. Turning the page
+     pauses and hides it all. The beamer's copy of a deck plays muted; with reduced motion nothing fades. ---------- */
+  const WO = [null, { id: 'PhhRDst_l10', s: 6, e: 960 }, { id: 'PhhRDst_l10', s: 960, e: 1540 }, { id: '0SJxUZj0PDU', s: 6, e: 782 }, { id: '0SJxUZj0PDU', s: 782, e: 1618 }];
+  const WO_ART = [['abend', 'bach-bleistift', 422 / 440, 'Johann Sebastian Bach, Bleistiftzeichnung'], ['morgen', 'oratorium-bleistift', 420 / 397, 'Pauken und Trompete, Bleistiftzeichnung']];
+  let woN = 0, woDay = '', woArt = null, woBox = null, woDim = null, woYT = null, woReady = false, woApi = null, woVid = 0;
+  function woLoad() {
+    if (!woApi) woApi = new Promise(res => {
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => { try { if (prev) prev(); } catch (e) { } res(); };
+      const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; sc.async = true; document.head.appendChild(sc);
+    });
+    return woApi;
+  }
+  /* Bach and the icon: made on the first Advent Sunday (their images load only then) */
+  function woMakeArt() {
+    woArt = WO_ART.map(([, file, , alt]) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'wo wo-art';
+      const img = new Image(); img.alt = alt; img.decoding = 'async'; img.src = 'img/' + file + '.webp'; b.appendChild(img);
+      b.addEventListener('click', woToggle); document.body.appendChild(b); return b;
+    });
+    window.addEventListener('resize', () => { if (woN) { woPlaceArt(); if (woBox && woBox.classList.contains('on')) woPlace(); } });
+  }
+  /* each on its page, in the room between the date and the first question beside the quill: Bach left of it on the evening
+     page (right of the card of the day), the icon mirrored on the morning page; a page not open: none */
+  function woPlaceArt() {
+    const card = $('#spruchCard'), cr = card && card.getBoundingClientRect(), cardOn = !!(cr && cr.width > 0 && stage.classList.contains('show-card'));
+    WO_ART.forEach(([kind, , ar], i) => {
+      const el = woArt[i], leaf = $$('.leaf.p-' + kind + '[data-day="' + woDay + '"]').find(l => { const r = l.getBoundingClientRect(); return r.width > 0 && r.right > 0 && r.left < innerWidth && r.bottom > 0 && r.top < innerHeight; });
+      const dt = leaf && leaf.querySelector('.hd .dt'), qu = leaf && leaf.querySelector('.hd .quill'), q1 = leaf && leaf.querySelector('.q');
+      if (!dt || !qu || !q1) { el.classList.remove('on'); return; }
+      const L = leaf.getBoundingClientRect(), D = dt.getBoundingClientRect(), Q = qu.getBoundingClientRect(), F = q1.getBoundingClientRect();
+      let top = D.bottom + 4, bottom = F.top - 4, left, right;
+      /* both a little further from the quill, towards the fold (Doc, 25.11.2026: "die Trommeln ein Stück nach rechts und Bach
+         ein Stück nach links") */
+      if (kind === 'abend') { right = Q.left - 6 - L.width * .05; left = L.left + L.width * .06; if (cardOn && cr.bottom > top) left = Math.max(left, cr.right + 8); }
+      else { left = Q.right + 6 + L.width * .05; right = L.right - L.width * .06; if (cardOn && cr.bottom > top) right = Math.min(right, cr.left - 8); }
+      if (bottom - top < 40) {   /* a narrow page (the phone): beside the title and the date's text instead, down to the question */
+        const nm = leaf.querySelector('.hd .nm'), text = e => { const rg = document.createRange(); rg.selectNodeContents(e); return rg.getBoundingClientRect(); };
+        const N = text(nm), T = text(dt);
+        top = N.top - 2; bottom = F.top - 4;
+        if (kind === 'abend') { left = L.left + L.width * .06; right = Math.min(N.left, T.left) - 10; }
+        else { left = Math.max(N.right, T.right) + 10; right = L.right - L.width * .06; }
+      }
+      const bw = right - left, bh = bottom - top;
+      if (bw < 40 || bh < 30) { el.classList.remove('on'); return; }
+      /* both small, a sign beside the quill rather than a picture, Bach as big as the drums (Doc, 25.11.2026: "zu groß" ...
+         "den Bach ein bisschen kleiner, dass der etwa so ist wie ... die beiden Trommeln") */
+      const h = Math.min(bh, bw / ar) * (kind === 'abend' ? .82 : .62), w = h * ar;   /* Bach's head reads as big as the drums ("jetzt zu klein") */
+      el.style.width = Math.round(w) + 'px'; el.style.height = Math.round(h) + 'px';
+      el.style.left = Math.round(kind === 'abend' ? right - w : left) + 'px'; el.style.top = Math.round(top + (bh - h) / 2) + 'px';
+      el.classList.add('on');
+    });
+  }
+  function woMakeBox() {
+    woDim = document.createElement('div'); woDim.className = 'wo wo-dim'; document.body.appendChild(woDim);
+    woBox = document.createElement('div'); woBox.className = 'wo wo-box'; woBox.setAttribute('role', 'region'); woBox.setAttribute('aria-label', 'J. S. Bach, Weihnachtsoratorium');
+    woBox.innerHTML = '<div id="woPlayer"></div><div class="wo-load" aria-hidden="true"><i></i><span>J. S. Bach · Weihnachtsoratorium</span></div>';
+    document.body.appendChild(woBox);
+  }
+  /* centred over the book, the frame about two thirds of the spread wide (on a phone the page's width), 16:9 inside and at
+     least 200 high, below Bach and the icon so they stay to be clicked; smaller if the window is short */
+  function woPlace() {
+    const b = $('#bookwrap').getBoundingClientRect(), desk = b.width > b.height, fw = Math.round(Math.max(24, Math.min(60, b.width * (desk ? .05 : .055))));
+    /* a little smaller and higher (Doc, 25.11.2026: "Rahmen noch bissl größer" ... "Rahmen etwas kleiner und höher"): on the
+       desk it stays between the drums and Bach, so it may rise to their height and they stay to be clicked; where that
+       leaves too little room (the phone), below them as before */
+    const cx = b.left + b.width / 2, arts = woArt.filter(a => a.classList.contains('on')).map(a => a.getBoundingClientRect());
+    let vw = Math.round((desk ? b.width * .7 : b.width - 6) - 2 * fw), artBottom = 0;
+    if (desk && arts.length) {
+      const half = Math.min(...arts.map(r => r.left > cx ? r.left - cx : cx - r.right)) - 14;
+      if (half - fw > 180) vw = Math.min(vw, Math.round(2 * (half - fw))); else artBottom = Math.max(...arts.map(r => r.bottom));
+    } else artBottom = Math.max(0, ...arts.map(r => r.bottom));
+    if (desk && !artBottom) vw = Math.round(vw * 1.05);   /* 5 % more at the same place (Doc, 25.11.2026); its border may touch the two, the video not */
+    let vh = Math.max(200, Math.round(vw * 9 / 16));
+    const top = Math.max(artBottom + 8, b.top + (b.height - vh - 2 * fw) * .3, 4), room = innerHeight - 6 - top;
+    if (vh + 2 * fw > room) { vh = Math.max(200, room - 2 * fw); vw = Math.round(Math.min(vw, Math.max(200, vh * 16 / 9))); }
+    woBox.style.left = Math.round(b.left + b.width / 2 - vw / 2 - fw) + 'px'; woBox.style.top = Math.round(top) + 'px';
+    woBox.style.borderWidth = fw + 'px'; woBox.style.width = vw + 'px'; woBox.style.height = vh + 'px';
+    if (woYT && woYT.setSize) woYT.setSize(vw, vh);
+    return [vw, vh];
+  }
+  function woHide() {
+    if (woReady) try { woYT.pauseVideo(); } catch (e) { }
+    if (woBox) { woBox.classList.remove('on', 'loading'); woDim.classList.remove('on'); }
+  }
+  /* show the framed player and play this Sunday's part (from its start, or on where it was paused) */
+  function woOpen() {
+    if (!woBox) woMakeBox();
+    const [vw, vh] = woPlace(), v = WO[woN];
+    woBox.classList.add('on', 'loading'); woDim.classList.add('on');
+    if (woYT && woReady) {
+      if (woVid !== woN || woYT.getPlayerState() === 0) { woVid = woN; woYT.loadVideoById({ videoId: v.id, startSeconds: v.s, endSeconds: v.e }); } else woYT.playVideo();
+      if (festReplica()) woYT.mute();
+      return;
+    }
+    if (woYT) return;   /* still loading: it plays as soon as it is ready */
+    woVid = woN;
+    woLoad().then(() => {
+      woYT = new YT.Player('woPlayer', { host: 'https://www.youtube-nocookie.com', width: vw, height: vh, videoId: v.id,
+        /* no subtitles; YouTube's own title and controls only while the mouse moves over it (controls: 1 hides them while it
+           plays), no cards (Doc, 25.11.2026: "subtitle abschalten und deco on mouse") */
+        playerVars: { autoplay: 1, start: v.s, end: v.e, playsinline: 1, rel: 0, modestbranding: 1, controls: 1, cc_load_policy: 0, iv_load_policy: 3 },
+        events: {
+          onReady: () => {
+            woReady = true;
+            if (festReplica()) woYT.mute();
+            if (!woN || !woBox.classList.contains('on')) { woYT.pauseVideo(); return; }   /* paused or the page turned meanwhile */
+            if (woVid !== woN) { const n = WO[woVid = woN]; woYT.loadVideoById({ videoId: n.id, startSeconds: n.s, endSeconds: n.e }); } else woYT.playVideo();
+          },
+          onStateChange: e => {
+            /* the ring goes as it plays - or as it stops anywhere else (cued, paused, ended), so a blocked start shows the play button */
+            if (e.data !== -1 && e.data !== 3) woBox.classList.remove('loading');
+            if (e.data === 1) { if (festReplica()) woYT.mute(); woNoCaptions(); } } } });
+    });
+  }
+  /* subtitles off: the captions module loads with playing, so it is unloaded then (and its track cleared) */
+  function woNoCaptions() {
+    try { woYT.setOption('captions', 'track', {}); } catch (e) { }
+    try { woYT.unloadModule('captions'); } catch (e) { }
+    try { woYT.unloadModule('cc'); } catch (e) { }
+  }
+  /* Bach or the icon: playing (or still loading) -> pause and hide; else -> show and play */
+  function woToggle() {
+    if (!woN) return;
+    const st = woReady ? woYT.getPlayerState() : (woYT ? 1 : -1);
+    if (woBox && woBox.classList.contains('on') && (st === 1 || st === 3)) woHide(); else woOpen();
+  }
+  /* n = 1..4 on that Sunday of Advent (day), at rest: Bach and the icon on their pages; 0: anything else - all paused, hidden */
+  function woShow(n, day) {
+    if (n === woN && day === woDay) { if (n) woPlaceArt(); return; }
+    woN = n; woDay = day || '';
+    woHide();
+    if (!n) { if (woArt) woArt.forEach(a => a.classList.remove('on')); return; }
+    if (!woArt) woMakeArt();
+    const t = 'J. S. Bach · Weihnachtsoratorium · ' + n + '. Advent – Klick: spielen / Pause';
+    woArt.forEach(a => { a.title = t; a.setAttribute('aria-label', t); });
+    /* placed once the pages are laid out: on arrival the book may still be building */
+    woPlaceArt(); requestAnimationFrame(() => requestAnimationFrame(() => { if (woN) woPlaceArt(); })); setTimeout(() => { if (woN) woPlaceArt(); }, 400);
   }
 
   /* settings: kept per browser only (localStorage may be blocked - then the defaults stay) */

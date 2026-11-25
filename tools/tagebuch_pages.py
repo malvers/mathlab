@@ -37,6 +37,7 @@ FILES = {
     'tagebuch/index.html': 'index.html',
     'tagebuch/sprueche.json': 'sprueche.json',            # thought of the day, the sheets with an author
     'tagebuch/sprueche-tag.json': 'sprueche-tag.json',    # thought of the day, one for every day of the year
+    'tagebuch/sondertage.js': 'sondertage.js',            # the fixed special days (Oct 31, Dec 31), imported only then
     'svp/svp-auth.js': 'svp/svp-auth.js',
     'svp/svp-gate.js': 'svp/svp-gate.js',
     'svp/svp-tokens.css': 'svp/svp-tokens.css',          # the colours of Hell and Grau
