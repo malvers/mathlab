@@ -70,6 +70,100 @@
             touch-action: none;
         }
 
+        /* The caption is the excerpt's head bar now, not its foot: grab it to move the
+           excerpt anywhere over the loom, the triangle folds it down to the bar alone
+           (Doc, 25.11.2026: "die Fußzeile machen wir oben hin, und dann machen wir oben
+           ein kleines Dreieck, was auf und zu klappt ... verschieben können, irgendwo hin").
+           A double click on the bar puts it back in its corner. */
+        #pattern-hud .hud-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: margin-bottom .25s ease;
+        }
+
+        #pattern-hud.dragging .hud-head {
+            cursor: grabbing;
+        }
+
+        #pattern-hud .hud-head .map-cap {
+            flex: 1 1 auto;
+            min-width: 0;
+            margin: 0 0 0 2px;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #pattern-hud .hud-toggle {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            border: 1px solid rgba(120, 170, 255, .35);
+            border-radius: 6px;
+            background: rgba(120, 170, 255, .08);
+            color: rgba(200, 225, 255, .9);
+            cursor: pointer;
+            transition: background .2s ease;
+        }
+
+        #pattern-hud .hud-toggle:hover {
+            background: rgba(120, 170, 255, .22);
+        }
+
+        #pattern-hud .hud-toggle svg {
+            pointer-events: none;
+            transition: transform .25s ease;
+        }
+
+        /* a finger needs a bigger target than the mouse */
+        @media (pointer: coarse) {
+            #pattern-hud .hud-toggle {
+                width: 30px;
+                height: 30px;
+            }
+        }
+
+        /* folding: the body's grid row runs from its full height down to zero */
+        #pattern-hud .hud-body {
+            display: grid;
+            grid-template-rows: 1fr;
+            transition: grid-template-rows .25s ease;
+        }
+
+        #pattern-hud .hud-clip {
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        #pattern-hud.collapsed .hud-body {
+            grid-template-rows: 0fr;
+        }
+
+        #pattern-hud.collapsed .hud-head {
+            margin-bottom: 0;
+        }
+
+        #pattern-hud.collapsed .hud-toggle svg {
+            transform: rotate(-90deg);
+        }
+
+        /* the fold stored from last time comes without the animation */
+        #pattern-hud.hud-instant,
+        #pattern-hud.hud-instant * {
+            transition: none !important;
+        }
+
         #muster-pane {
             position: absolute;
             inset: 0;
@@ -252,8 +346,21 @@
                 </div>
                 <canvas id="canvas"></canvas>
                 <div id="pattern-hud" class="map-box">
-                    <canvas id="hud-canvas"></canvas>
-                    <div class="map-cap"></div>
+                    <div class="hud-head" title="Ziehen: verschieben · Doppelklick: zurück in die Ecke">
+                        <div class="map-cap"></div>
+                        <button type="button" class="hud-toggle" aria-controls="hud-body" aria-expanded="true"
+                            aria-label="Ausschnitt einklappen" title="Ausschnitt einklappen">
+                            <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true">
+                                <path d="M1.5 3.5h9L6 9z" fill="currentColor" stroke="currentColor"
+                                    stroke-width="1" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="hud-body" id="hud-body">
+                        <div class="hud-clip">
+                            <canvas id="hud-canvas"></canvas>
+                        </div>
+                    </div>
                 </div>
                 <div id="card-readout"></div>
             </div>
@@ -485,6 +592,8 @@
             tab: 'webstuhl',    // 'webstuhl' | 'muster'
             overlay: false,     // punched cards drawn on top of the design
             overlayAlpha: 0.94, // how opaque those cards are
+            hudOpen: true,      // the excerpt unfolded (false = only its head bar)
+            hudPos: null,       // where it was dragged to, {x, y} in 0..1 of the free room; null = its corner
             view: null,         // remembered camera pose {p,t,u}
             n: 28,              // warp threads = pattern columns being woven
             rows: 28,           // weft rows to weave
@@ -570,7 +679,7 @@
 
         // ---- preferences: the lab opens the way it was left ----------------
         const PREF_KEY = 'jacquard-prefs-3';
-        const PREF_KEYS = ['design', 'threads', 'winX', 'winY', 'winW', 'winH', 'speed', 'threshold', 'showCards', 'showHeddles', 'ctrl', 'view', 'tab', 'overlay', 'overlayAlpha'];
+        const PREF_KEYS = ['design', 'threads', 'winX', 'winY', 'winW', 'winH', 'speed', 'threshold', 'showCards', 'showHeddles', 'ctrl', 'view', 'tab', 'overlay', 'overlayAlpha', 'hudOpen', 'hudPos'];
         const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
         const SPEED_MIN = 0.2, SPEED_MAX = 12;
@@ -605,6 +714,10 @@
             S.showHeddles = !!S.showHeddles;
             S.overlay = !!S.overlay;
             S.overlayAlpha = clamp(+S.overlayAlpha || 0.94, 0.1, 1);
+            S.hudOpen = S.hudOpen !== false;
+            const hp = S.hudPos;
+            S.hudPos = hp && Number.isFinite(hp.x) && Number.isFinite(hp.y)
+                ? { x: clamp(hp.x, 0, 1), y: clamp(hp.y, 0, 1) } : null;
         }
 
         let prefTimer = null;
@@ -633,7 +746,10 @@
             loadPrefs();
             loadStoff();
             const stage = document.getElementById('tab-stage');
-            makeMap(document.getElementById('hud-canvas'), () => 360, false, true);
+            // 360 px wide, but never wider than the stage minus its gutters (a phone is 390 px)
+            const loomBox = document.getElementById('canvas-container');
+            makeMap(document.getElementById('hud-canvas'), () => Math.min(360, loomBox.clientWidth - 54), false, true);
+            initHudPanel();
             makeMap(document.getElementById('map-canvas'),
                 () => Math.min(stage.clientWidth - 80, (stage.clientHeight - 130) * designAspect()), true);
             const cb = document.getElementById('overlay-cb');
@@ -1291,7 +1407,7 @@
          */
         function makeMap(canvas, sizeFn, big, crop) {
             const ctx = canvas.getContext('2d');
-            const cap = canvas.parentElement.querySelector('.map-cap');
+            const cap = canvas.closest('.map-box').querySelector('.map-cap');
             let size = 0, sizeH = 0, drag = null, bmp = null, bmpKey = '', hover = null;
             const view = { cx: 0.5, cy: 0.5, z: 1 };   // centre and zoom, in design units
 
@@ -1580,7 +1696,144 @@
         }
 
         function drawMaps() { for (const m of maps) m.draw(); }
-        function layoutMaps() { for (const m of maps) m.layout(); drawMaps(); }
+        function layoutMaps() { for (const m of maps) m.layout(); drawMaps(); placeHud(); }
+
+        // ---- the excerpt panel: fold it, drag it ---------------------------
+        // The excerpt hangs over the loom and hides part of it (Doc, 25.11.2026: "der verdeckt den
+        // Webstuhl"). Its head bar moves it, the triangle folds it down to the bar alone; both are
+        // kept with the other prefs. In a deck's presenter view the beamer's copy replays the same
+        // pointer events (decks/deck.js, mirror), so both copies fold and move alike.
+        const hud = { box: null, head: null, btn: null, drag: null, foldEnd: 0 };
+
+        function hudRoom() { return document.getElementById('canvas-container'); }
+
+        /** Move the panel to (x, y) in the loom's box, never past its edges. */
+        function setHudXY(x, y) {
+            const box = hud.box, room = hudRoom();
+            const maxX = Math.max(0, room.clientWidth - box.offsetWidth);
+            const maxY = Math.max(0, room.clientHeight - box.offsetHeight);
+            box.style.left = Math.round(clamp(x, 0, maxX)) + 'px';
+            box.style.top = Math.round(clamp(y, 0, maxY)) + 'px';
+            box.style.right = 'auto';
+            box.style.bottom = 'auto';
+        }
+
+        /** Where it stands now, as a share of the free room - so it keeps its edge when the window changes. */
+        function rememberHud() {
+            const box = hud.box, room = hudRoom();
+            if (!room.clientWidth || !room.clientHeight) return;   // the loom's tab is hidden: nothing to measure
+            const freeX = room.clientWidth - box.offsetWidth, freeY = room.clientHeight - box.offsetHeight;
+            S.hudPos = {
+                x: freeX > 0 ? clamp(box.offsetLeft / freeX, 0, 1) : 0,
+                y: freeY > 0 ? clamp(box.offsetTop / freeY, 0, 1) : 0,
+            };
+            savePrefs();
+        }
+
+        /** Put the panel where it was dragged to - or leave it to its corner in the CSS. */
+        function placeHud() {
+            const box = hud.box;
+            if (!box || (hud.drag && hud.drag.moved)) return;
+            if (!S.hudPos) { box.style.left = box.style.top = box.style.right = box.style.bottom = ''; return; }
+            const room = hudRoom();
+            if (!room.clientWidth || !room.clientHeight) return;   // the loom's tab is hidden
+            setHudXY(S.hudPos.x * Math.max(0, room.clientWidth - box.offsetWidth),
+                S.hudPos.y * Math.max(0, room.clientHeight - box.offsetHeight));
+        }
+
+        /**
+         * The panel changed size - unfolding grows it downwards: a dragged panel keeps its spot but
+         * never runs past the edge. Frame by frame, however slow the frames come. The stored share
+         * stays as it is; only a finished fold (foldDone) or a drag takes it anew.
+         */
+        function hudResized() {
+            if (!S.hudPos || (hud.drag && hud.drag.moved)) return;
+            const room = hudRoom();
+            if (!room.clientWidth || !room.clientHeight) return;
+            setHudXY(hud.box.offsetLeft, hud.box.offsetTop);
+        }
+
+        /** The fold has run: the bar stayed where it was, so note that spot for the new size. */
+        function foldDone() {
+            clearTimeout(hud.foldEnd);
+            hud.foldEnd = 0;
+            if (!S.hudPos) return;
+            hudResized();
+            rememberHud();
+        }
+
+        function foldHud(open, save) {
+            S.hudOpen = open;
+            hud.box.classList.toggle('collapsed', !open);
+            hud.btn.setAttribute('aria-expanded', String(open));
+            hud.btn.title = open ? 'Ausschnitt einklappen' : 'Ausschnitt aufklappen';
+            hud.btn.setAttribute('aria-label', hud.btn.title);
+            if (!save) return;
+            savePrefs();
+            clearTimeout(hud.foldEnd);
+            if (S.hudPos) hud.foldEnd = setTimeout(foldDone, 1200);   // transitionend below is the usual end
+        }
+
+        function initHudPanel() {
+            const box = hud.box = document.getElementById('pattern-hud');
+            const head = hud.head = box.querySelector('.hud-head');
+            const btn = hud.btn = box.querySelector('.hud-toggle');
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                foldHud(!S.hudOpen, true);
+                if (e.detail > 0) btn.blur();   // after a click Space stays the loom's stop / go
+            });
+
+            head.addEventListener('pointerdown', (e) => {
+                if (hud.drag || e.target.closest('.hud-toggle')) return;   // the triangle folds, it never drags
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                e.preventDefault();                                       // no text selection
+                e.stopPropagation();
+                hud.drag = { id: e.pointerId, x: e.clientX, y: e.clientY, l: box.offsetLeft, t: box.offsetTop, moved: false };
+                try { head.setPointerCapture(e.pointerId); } catch (err) { /* replayed pointer: nothing to capture */ }
+            });
+            head.addEventListener('pointermove', (e) => {
+                const d = hud.drag;
+                if (!d || e.pointerId !== d.id) return;
+                const dx = e.clientX - d.x, dy = e.clientY - d.y;
+                if (!d.moved) {
+                    if (Math.abs(dx) + Math.abs(dy) < 4) return;          // a shaky tap is not a drag
+                    d.moved = true;
+                    box.classList.add('dragging');
+                }
+                setHudXY(d.l + dx, d.t + dy);
+            });
+            const end = (e) => {
+                const d = hud.drag;
+                if (!d || e.pointerId !== d.id) return;
+                hud.drag = null;
+                box.classList.remove('dragging');
+                if (d.moved) rememberHud();
+            };
+            head.addEventListener('pointerup', end);
+            head.addEventListener('pointercancel', end);
+            head.addEventListener('lostpointercapture', end);
+
+            head.addEventListener('dblclick', (e) => {                    // back to its corner
+                if (e.target.closest('.hud-toggle')) return;
+                S.hudPos = null;
+                placeHud();
+                savePrefs();
+            });
+
+            if (window.ResizeObserver) new ResizeObserver(hudResized).observe(box);
+            const body = box.querySelector('.hud-body');
+            body.addEventListener('transitionend', (e) => {
+                if (e.target === body && e.propertyName === 'grid-template-rows' && hud.foldEnd) foldDone();
+            });
+
+            // the stored fold, without the animation
+            box.classList.add('hud-instant');
+            foldHud(S.hudOpen, false);
+            void box.offsetHeight;
+            box.classList.remove('hud-instant');
+        }
 
         function updateReadout() {
             let holes = 0;
