@@ -489,21 +489,20 @@ d.summary("Zum Schluss: der allererste Eintrag vom 05.04.2026 heißt First HMTL,
 # the finale after the closing line (Doc, 19:22: "Folie 18 nach 29"): the sparklers, then the survey
 # The module opens a birthday view of the book: an empty page with a card, the sparklers and the music box.
 TAGEBUCH_ALT = ""
-# Doc's chief's belated birthday (23.11.): Ada's safe view with the card "Nachträglich alles Gute, Dr. Hansen!" -
-# an empty page, nothing from the real diary. A SURPRISE (Doc, 20:00): nothing about it on the poster - title, line
-# and picture are the plain Tagebuch ones; the card only shows once the module is up.
-# Ada's closed-book view (20:10): opens on the cover; the secret key H (or G) jumps to the card
-HANSEN = "tagebuch/?seite=cover&geb=25.11&taste=h&gruss=Nachtr%C3%A4glich%20alles%20Gute%2C%7C_Dr.%20Hansen_!"
+# A safe birthday view: an empty page, nothing from the real diary, the book's own birthday card. Opens on the cover;
+# the secret key G jumps to the card. No name any more (Doc, 25.11.2026, after the talk: the name out, the birthday
+# show stays)
+GEBURTSTAG = "tagebuch/?seite=cover&geb=25.11"
 live("Dankbarkeits-Tagebuch",
      "Ein Dankbarkeits-Tagebuch als Buch im Browser – Leder, Goldschnitt, Büttenpapier, Siegellack, echte Seiten zum "
      "Umblättern.",
-     LOCAL + HANSEN, "Tagebuch öffnen",
+     LOCAL + GEBURTSTAG, "Tagebuch öffnen",
      "Und am Geburtstag tanzen Wunderkerzen über die Seite.",
      SHOTS + "tagebuch-cover.webp", "Das Tagebuch geschlossen: der Einband Grateful, das 3-Minuten-Tagebuch 2026",
      cue("0:45", "Öffnet GESCHLOSSEN und still. Pfeil rechts oder Klick auf Schließe/Einband: auf (innen 'Doc "
-                 "Alvers', Titelseite); I oder Reiter Inhalt = Inhalt. GEHEIMTASTE H (auch G): von überall zur leeren "
-                 "Seite 25.11. mit der Karte für Dr. Hansen, die Runde startet sofort, nach ca. 4 s Spieluhr Happy "
-                 "Birthday. Nächster Klick: Wiegenlied + Abschied. X oder H: noch einmal. Nur die Geburtstagsseite zeigen. "
+                 "Alvers', Titelseite); I oder Reiter Inhalt = Inhalt. GEHEIMTASTE G: von überall zur leeren "
+                 "Seite 25.11. mit der Geburtstagskarte, die Runde startet sofort, nach ca. 4 s Spieluhr Happy "
+                 "Birthday. Nächster Klick: Wiegenlied + Abschied. X oder G: noch einmal. Nur die Geburtstagsseite zeigen. "
                  "Vorher einmal in das Buch klicken, damit die Tasten dort ankommen."),
      kind="karte gross", extra=TAGEBUCH_ALT)
 d.summary("Ein Dankbarkeits-Tagebuch als Buch im Browser: Leder, Goldschnitt, Büttenpapier, Siegellack, echte Seiten zum "
