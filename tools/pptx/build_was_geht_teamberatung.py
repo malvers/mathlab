@@ -68,11 +68,19 @@ d = MathDeck("was-geht-teamberatung.pptx", greet_image="morning/morning-038f4b57
 _render = d.render
 
 
+# talk deck only (Doc, 25.11.2026 10:20): H is the secret key of the Tagebuch finale, not the deck's help - a small
+# script after deck.js keeps the help shut and hands H to the live page of the current slide
+H_KEY = "<script>\n/* Talk deck only (Doc, 25.11.2026 10:20): H must not open the deck help - it is the secret key of the\n   Tagebuch finale. On H the help stays shut and the key goes to the live page of the current slide. */\naddEventListener('keydown', function (e) {\n  if (e.metaKey || e.ctrlKey || e.altKey) return;\n  if (e.key !== 'h' && e.key !== 'H') return;\n  e.stopImmediatePropagation(); e.preventDefault();\n  var f = document.querySelector('section.slide.on iframe');\n  try {\n    var d = f && f.contentDocument;\n    if (d) {\n      if (f.contentWindow) f.contentWindow.focus();\n      ['keydown', 'keyup'].forEach(function (t) {\n        d.dispatchEvent(new KeyboardEvent(t, { key: e.key, code: 'KeyH', bubbles: true, cancelable: true }));\n      });\n    }\n  } catch (err) { }\n}, true);\n</script>\n"
+
+
 def render_with_live_css():
     page = _render()
     link = '<link rel="stylesheet" href="deck.css">'
     assert page.count(link) == 1, "deck.css link moved in html_deck.PAGE"
-    return page.replace(link, link + '\n<link rel="stylesheet" href="deck-live.css">', 1)
+    page = page.replace(link, link + '\n<link rel="stylesheet" href="deck-live.css">', 1)
+    end = '<script src="deck.js"></script>\n'
+    assert page.count(end) == 1, "deck.js script tag moved in html_deck.PAGE"
+    return page.replace(end, end + H_KEY, 1)
 
 
 d.render = render_with_live_css
@@ -187,20 +195,12 @@ d.slides[-2] = d.slides[-2].replace(
 # and on the greeting, the very first slide, the same rule (0:00 - it stands while people sit down)
 d.slides[0] = d.slides[0].replace('<section class="slide greet">', '<section class="slide greet">' + cue(
     "0:00", "Show immer mit Esc beenden, nie das Präsenterfenster zumachen."), 1)
-# d.summary() would land on the buzzer stub title() appended after the title slide - so straight onto the title
-d.summaries[len(d.slides) - 2] = ("Titel: Was geht?! Was eine einzelne Lehrkraft mit KI heute bauen kann - Kurzfassung "
-                                  "für die Teamberatung BGY am 25.11.2026; erst ein Quiz mit dem Kollegium, dann wird alles "
-                                  "live gezeigt, die Folien sind nur der Rahmen.")
-
-# ------------------------------------------------- the buzzer ("Verstanden?") ---
-# the central buzzer slide every lesson deck has right after its title (vorspann/buzzer.html, filled by deck.js) -
-# Doc, 24.11.2026 18:05: "wie wir das immer gemacht haben"; html_deck.title() put the stub in, it only gets its cue
 STUB = '<section class="slide" data-aus="vorspann/buzzer.html#1"></section>'
 assert d.slides[-1] == STUB, "the buzzer stub moved in html_deck.title()"
-d.slides[-1] = STUB.replace("></section>", ">%s</section>" % cue(
-    "0:30", "Das Werkzeug aus jeder Stunde: QR scannen, dann jederzeit 'Hab ich nicht verstanden', "
-                    "'zu langsam', 'zu schnell' oder anonymes Feedback. Während des Quiz nicht zum Buzzer wechseln: "
-                    "Sperrschirm."), 1)
+d.slides.pop()             # it comes after the bridge (Doc, 25.11.2026: "Verstanden?" for the show, not for the quiz)
+d.summary("Titel: Was geht?! Was eine einzelne Lehrkraft mit KI heute bauen kann - Kurzfassung für die Teamberatung "
+          "BGY am 25.11.2026; erst ein Quiz mit dem Kollegium, dann wird alles live gezeigt, die Folien sind nur der "
+          "Rahmen.")
 
 # ------------------------------------------- the quiz: Die Klasse im Blick ---
 qr = segno.make(QUIZ_URL, error="m", micro=False).svg_inline(border=0, omitsize=True, dark="#000050")
@@ -246,6 +246,14 @@ d._slide("merksatz", '%s<div class="quote-bar"></div>'
                                                                     "zeige ich, was sonst noch geht."), ARIAL, ARIAL))
 d.summary("Überleitung: Nach dem Quiz (Die Klasse im Blick) beginnt die Show Was geht?! - ein ganz normaler Schultag, "
           "alles live gezeigt.")
+
+# ------------------------------------------------- the buzzer ("Verstanden?") ---
+# the central buzzer slide every lesson deck has (vorspann/buzzer.html, filled by deck.js) - Doc, 24.11.2026 18:05:
+# "wie wir das immer gemacht haben"; since the talk right after the bridge, before the show
+d.slides.append(STUB.replace("></section>", ">%s</section>" % cue(
+    "0:30", "Das Werkzeug aus jeder Stunde: QR scannen, dann jederzeit 'Hab ich nicht verstanden', "
+            "'zu langsam', 'zu schnell' oder anonymes Feedback. Während des Quiz nicht zum Buzzer wechseln: "
+            "Sperrschirm."), 1))
 
 # ------------------------------------------------------------- the plan ---
 live("Ein Schuljahr auf einer Seite",
