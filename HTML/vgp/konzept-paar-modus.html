@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>VGP Paar-Modus — Konzept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<meta name="theme-color" content="#070d18">
+<!-- Central VGP palette (incl. the λ / Υ / φ tokens) -->
+<link rel="stylesheet" href="theme.css?v=4">
+<style>
+/* Concept page layout — colours come only from theme.css tokens */
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:var(--vgp-bg)}
+body{font-family:'Raleway',system-ui,sans-serif;background:var(--vgp-bg);color:var(--vgp-text2);font-size:14px;line-height:1.45;padding:22px 16px 34px;-webkit-text-size-adjust:100%;overflow-x:hidden}
+.page{max-width:1160px;margin:0 auto;display:grid;gap:12px}
+h1,h2,dt{font-family:'Orbitron',sans-serif}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px}
+h1{font-size:clamp(20px,4.4vw,28px);font-weight:900;letter-spacing:2px;color:var(--vgp-accent)}
+h1 span{color:var(--vgp-orange)}
+.meta{color:rgba(var(--vgp-text-dim-rgb),.6);font-size:12.5px}
+.card{background:var(--vgp-panel);border:1px solid rgba(var(--vgp-accent-rgb),.16);border-radius:14px;padding:12px 16px}
+h2{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--vgp-orange);margin-bottom:8px}
+b{color:var(--vgp-bright)}
+code{font-family:ui-monospace,Menlo,monospace;font-size:.86em;color:var(--vgp-accent-light);background:rgba(var(--vgp-accent-rgb),.08);padding:0 4px;border-radius:4px;overflow-wrap:anywhere}
+ul,ol{padding-left:18px}
+li{margin:3px 0}
+li::marker{color:rgba(var(--vgp-accent-rgb),.7)}
+
+/* Goal band */
+.goal{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
+.goal h2{margin:0}
+.claim{font-size:16px}
+.note{flex-basis:100%;color:rgba(var(--vgp-text-dim-rgb),.62);font-size:12.5px}
+
+/* Flow: steps + diagram */
+.flow{display:grid;grid-template-columns:1fr 1.15fr;gap:8px 22px;align-items:center}
+.steps li{padding-left:2px}
+.steps li::marker{font-family:'Orbitron',sans-serif;color:var(--vgp-orange);font-weight:700}
+
+/* Diagram: inline SVG + HTML labels placed in viewBox percentages (800 × 300) */
+.dia{position:relative;width:100%;aspect-ratio:800/300;container-type:inline-size}
+.dia svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fl{position:absolute;transform:translate(-50%,-50%);text-align:center;font-size:clamp(9px,1.85cqw,14px);line-height:1.25;color:var(--vgp-text2);white-space:nowrap}
+.fl.small{font-size:clamp(8px,1.55cqw,12px);color:rgba(var(--vgp-text-dim-rgb),.75)}
+.fl.who{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--vgp-accent);letter-spacing:1px}
+.fl.qr{color:var(--vgp-orange)}
+.fl.emo{font-size:clamp(8px,1.7cqw,14px);letter-spacing:1px}
+
+/* Tech grid */
+.tech{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 18px}
+dt{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--vgp-accent);margin-bottom:2px}
+dd{font-size:13.5px}
+.foot{margin-top:10px;font-size:12.5px;color:rgba(var(--vgp-text-dim-rgb),.68)}
+
+/* Two-up rows */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}
+.split h3{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:2px}
+.keep h3{color:var(--vgp-green)}
+.drop h3{color:var(--vgp-red);filter:brightness(1.6)}
+.keep li::marker{color:var(--vgp-green)}
+.drop li::marker{color:var(--vgp-red)}
+.split ul{font-size:13.5px}
+.hint{margin-top:8px;font-size:12.5px;color:rgba(var(--vgp-text-dim-rgb),.62)}
+
+/* Effort table */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+td{padding:4px 0;border-bottom:1px solid rgba(var(--vgp-accent-rgb),.1);vertical-align:top}
+td:first-child{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--vgp-orange);width:34px;padding-top:6px}
+td:last-child{text-align:right;white-space:nowrap;padding-left:10px;color:var(--vgp-bright)}
+tr.opt td{color:rgba(var(--vgp-text-dim-rgb),.7)}
+tr.sum td{border-bottom:none;padding-top:7px;font-weight:700}
+.ask ol li{margin:6px 0}
+.ask ol li::marker{font-family:'Orbitron',sans-serif;color:var(--vgp-orange);font-weight:700}
+.why{display:block;font-size:12.5px;color:rgba(var(--vgp-text-dim-rgb),.62)}
+
+@media (max-width:900px){
+  .flow,.two{grid-template-columns:1fr}
+  .tech{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){
+  .tech,.split{grid-template-columns:1fr}
+  .card{padding:12px 13px}
+}
+</style>
+</head>
+<body>
+<main class="page">
+
+  <header>
+    <h1>VGP <span>·</span> Paar-Modus</h1>
+    <p class="meta">Konzept für Doc · 19.11.2026 · nichts gebaut, nichts gepusht</p>
+  </header>
+
+  <section class="card goal">
+    <h2>Ziel</h2>
+    <p class="claim">Ein Chat, zwei Menschen, keine Anmeldung: <b>App öffnen → Ute.</b></p>
+    <p class="note">Ehrlich: Signal kann das schon. VGP lohnt sich als eigene App in deinem Stil, unter deiner Kontrolle – später vielleicht mit Solita.</p>
+  </section>
+
+  <section class="card flow">
+    <div>
+      <h2>Ablauf</h2>
+      <ol class="steps">
+        <li><b>Einmal einrichten:</b> Ute öffnet deinen Link und legt VGP auf den Home-Bildschirm.</li>
+        <li><b>Koppeln:</b> Ihre App zeigt einen QR-Code, du scannst ihn mit deiner VGP-App. (Umgekehrt geht auch – so muss Ute aber nichts scannen.)</li>
+        <li><b>Prüfen:</b> Beide Phones zeigen dieselben 4 Symbole → „Passt“ tippen.</li>
+        <li><b>Fertig:</b> Die App öffnet ab jetzt direkt euren Chat. Push wie heute, auf Wunsch Fingerabdruck davor.</li>
+        <li><b>Neues Phone:</b> einfach neu koppeln – das andere Phone reicht den Verlauf weiter.</li>
+      </ol>
+    </div>
+
+    <figure class="dia" aria-label="Kopplung: Doc scannt Utes QR-Code, danach laufen nur verschlüsselte Nachrichten über Supabase">
+      <svg viewBox="0 0 800 300" aria-hidden="true">
+        <defs>
+          <marker id="ah-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--vgp-orange)"/>
+          </marker>
+          <marker id="ah-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--vgp-accent)"/>
+          </marker>
+        </defs>
+        <!-- phones -->
+        <rect x="30" y="20" width="130" height="236" rx="20" fill="var(--vgp-bg2)" stroke="rgba(var(--vgp-accent-rgb),.55)" stroke-width="2"/>
+        <rect x="42" y="44" width="106" height="188" rx="8" fill="var(--vgp-chat)" stroke="rgba(var(--vgp-accent-rgb),.18)"/>
+        <rect x="640" y="20" width="130" height="236" rx="20" fill="var(--vgp-bg2)" stroke="rgba(var(--vgp-accent-rgb),.55)" stroke-width="2"/>
+        <rect x="652" y="44" width="106" height="188" rx="8" fill="var(--vgp-chat)" stroke="rgba(var(--vgp-accent-rgb),.18)"/>
+        <!-- Doc: camera frame corners -->
+        <g stroke="var(--vgp-orange)" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M65,85 v-14 h14"/><path d="M111,71 h14 v14"/><path d="M125,121 v14 h-14"/><path d="M79,135 h-14 v-14"/>
+        </g>
+        <!-- Ute: stylised QR code -->
+        <rect x="670" y="66" width="70" height="70" rx="4" fill="var(--vgp-white)"/>
+        <g fill="var(--vgp-ink)">
+          <rect x="675" y="71" width="18" height="18"/><rect x="717" y="71" width="18" height="18"/><rect x="675" y="113" width="18" height="18"/>
+          <rect x="699" y="73" width="6" height="6"/><rect x="707" y="83" width="6" height="6"/><rect x="699" y="95" width="6" height="6"/>
+          <rect x="713" y="99" width="6" height="6"/><rect x="725" y="97" width="6" height="6"/><rect x="701" y="111" width="6" height="6"/>
+          <rect x="715" y="117" width="6" height="6"/><rect x="727" y="113" width="6" height="6"/><rect x="709" y="125" width="6" height="6"/>
+        </g>
+        <!-- 1: optical QR channel (Ute shows, Doc scans) -->
+        <line x1="636" y1="101" x2="166" y2="101" stroke="var(--vgp-orange)" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#ah-o)"/>
+        <!-- server -->
+        <rect x="300" y="196" width="200" height="66" rx="14" fill="var(--vgp-field)" stroke="rgba(var(--vgp-accent-rgb),.45)" stroke-width="1.5"/>
+        <!-- 2: encrypted traffic via Supabase -->
+        <line x1="166" y1="229" x2="294" y2="229" stroke="var(--vgp-accent)" stroke-width="2.5" marker-start="url(#ah-c)" marker-end="url(#ah-c)"/>
+        <line x1="506" y1="229" x2="634" y2="229" stroke="var(--vgp-accent)" stroke-width="2.5" marker-start="url(#ah-c)" marker-end="url(#ah-c)"/>
+      </svg>
+      <p class="fl qr" style="left:50%;top:24%">① Doc scannt Utes QR – persönlich</p>
+      <p class="fl small" style="left:50%;top:42%">Schlüssel + Einmal-Geheimnis (2 Min.)</p>
+      <p class="fl emo" style="left:11.9%;top:60%">🐢🍋🚲⭐</p>
+      <p class="fl emo" style="left:88.1%;top:60%">🐢🍋🚲⭐</p>
+      <p class="fl small" style="left:11.9%;top:71.5%">③ gleich?</p>
+      <p class="fl small" style="left:88.1%;top:71.5%">③ gleich?</p>
+      <p class="fl small" style="left:50%;top:57%">② Handschlag, dann Nachrichten + Push</p>
+      <p class="fl" style="left:50%;top:71.5%"><b>Supabase</b></p>
+      <p class="fl small" style="left:50%;top:81%">sieht nur Geheimtext</p>
+      <p class="fl who" style="left:11.9%;top:94%">Doc</p>
+      <p class="fl who" style="left:88.1%;top:94%">Ute</p>
+    </figure>
+  </section>
+
+  <section class="card">
+    <h2>Technik in Kürze</h2>
+    <dl class="tech">
+      <div><dt>Kopplung</dt><dd>QR = Utes öffentliche Schlüssel + Einmal-Geheimnis (2 Min., einmal). Antwort über einen kurzlebigen Realtime-Kanal wie „tippt…“ – nichts landet in der Datenbank. Die 4 Symbole kommen aus beiden Schlüsseln (wie Signals Sicherheitsnummer).</dd></div>
+      <div><dt>Schlüssel</dt><dd>Pro Phone ECDSA + ECDH als <i>nicht exportierbare</i> CryptoKeys in IndexedDB: benutzbar, aber nicht auslesbar. Dazu ein gemeinsamer Paarschlüssel (AES-256) für den Verlauf – kein Passwort mehr.</dd></div>
+      <div><dt>Transport</dt><dd>Bestehende Tabelle <code>messages</code> im heutigen 1:1-Format (<code>pubkey</code>, <code>recipient_pubkey</code>, <code>content</code>, <code>sig</code>); Bilder/Sprache über <code>media</code>, Häkchen über <code>receipts</code>. Keine neue Tabelle.</dd></div>
+      <div><dt>Push</dt><dd>Bleibt, wie er ist: <code>dynamic-responder</code> pingt bei 1:1 schon heute genau das Abo des Empfängers – ohne Inhalt.</dd></div>
+      <div><dt>App-Sperre</dt><dd>Optional WebAuthn: Fingerabdruck bzw. Display-Sperre des Phones. Ein Türsteher, keine Verschlüsselung – Stufe 2 (PRF, Android-Chrome, ab iOS 18.4) sperrt zusätzlich den Schlüssel.</dd></div>
+      <div><dt>Backup</dt><dd>Der Verlauf liegt verschlüsselt auf dem Server; beim Neu-Koppeln reicht das andere Phone den Paarschlüssel weiter: <b>ihr seid gegenseitig euer Backup.</b> Nur für „beide Phones weg“: optional 5 Merkwörter (die App würfelt sie), Schlüssel verschlüsselt in <code>vaults</code>.</dd></div>
+    </dl>
+    <p class="foot">iPhone: nur als Home-Bildschirm-App (eigener Speicher, kein 7-Tage-Löschen wie in Safari; Push gibt es dort ohnehin nur so) + <code>navigator.storage.persist()</code>.</p>
+  </section>
+
+  <div class="two">
+    <section class="card">
+      <h2>Vom heutigen VGP</h2>
+      <div class="split">
+        <div class="keep">
+          <h3>Bleibt</h3>
+          <ul>
+            <li>Chat-Oberfläche (Bilder, Sprache, Reaktionen, Häkchen …)</li>
+            <li>Krypto-Kern <code>vgp-crypto.js</code> (AES-GCM, ECDSA)</li>
+            <li>Push, Supabase-Tabellen, <code>theme.css</code>, App-Icon</li>
+          </ul>
+        </div>
+        <div class="drop">
+          <h3>Fällt weg</h3>
+          <ul>
+            <li>Gründen / Beitreten / Anmelden</li>
+            <li>Konto- und Gruppen-Passwort, Wiederherstellungs-Code</li>
+            <li>Kontaktliste, Gruppen, „an alle“</li>
+            <li>Verzeichnis-Eintrag (<code>identities</code>, <code>group_meta</code>)</li>
+          </ul>
+        </div>
+      </div>
+      <p class="hint">Kein zweiter Chat: ein neues Modul <code>js/vgp-pair.js</code> + Paar-Schalter in <code>vgpchat.html</code>. Das Gruppen-VGP bleibt unangetastet – gelöscht wird nichts ohne dein OK.</p>
+    </section>
+
+    <section class="card">
+      <h2>Sicherheit ehrlich</h2>
+      <div class="split">
+        <div class="keep">
+          <h3>Schützt</h3>
+          <ul>
+            <li>Supabase und jeder Admin sehen keinen Inhalt.</li>
+            <li>Niemand koppelt sich heimlich dazu: QR nur persönlich + 4 Symbole.</li>
+            <li>Gefälschte Nachrichten fallen auf (Signatur ⚠️ wie heute).</li>
+          </ul>
+        </div>
+        <div class="drop">
+          <h3>Schützt nicht</h3>
+          <ul>
+            <li><b>Verlorenes, entsperrtes Phone</b> = offener Chat (wie bei WhatsApp). Dann „altes Phone abmelden“ → neuer Schlüssel.</li>
+            <li><b>Metadaten:</b> Der Server sieht, wann ihr euch schreibt. Heute kann jedes VGP-Gerät die Geheimtexte abrufen → E7.</li>
+            <li>Kein Forward Secrecy wie Signal: Wer den Paarschlüssel hat, liest alles.</li>
+            <li>Web-App: Code kommt bei jedem Start von docalvers.de.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="card">
+      <h2>Aufwand (grob)</h2>
+      <table>
+        <tr><td>E1</td><td>Paar-Start: App öffnet direkt den Chat, Schlüssel in IndexedDB</td><td>4–6 h</td></tr>
+        <tr><td>E2</td><td>Koppeln: QR + Scanner (<code>qr-scanner</code>) + 4 Symbole</td><td>4–6 h</td></tr>
+        <tr><td>E3</td><td>Push anbinden, Test mit beiden Phones</td><td>1–2 h</td></tr>
+        <tr><td>E4</td><td>Fingerabdruck-Sperre (WebAuthn)</td><td>2–3 h</td></tr>
+        <tr><td>E5</td><td>Handywechsel: Verlauf weiterreichen, altes Phone abmelden</td><td>3–4 h</td></tr>
+        <tr class="opt"><td>E6</td><td>optional: Merkwörter-Backup</td><td>2–3 h</td></tr>
+        <tr class="opt"><td>E7</td><td>optional: Server-Regeln enger (nur eure zwei Geräte lesen mit)</td><td>2–3 h</td></tr>
+        <tr class="sum"><td></td><td>Kern E1–E3 · alles</td><td>9–14 h · 18–27 h</td></tr>
+      </table>
+    </section>
+
+    <section class="card ask">
+      <h2>Offene Fragen an dich</h2>
+      <ol>
+        <li>Hat Ute ein iPhone oder ein Android-Smartphone?
+          <span class="why">iPhone heißt: Einrichtung über „Zum Home-Bildschirm“, Push erst ab iOS 16.4.</span></li>
+        <li>Reicht beim Handywechsel „neu koppeln, das andere Phone reicht den Verlauf weiter“ – oder willst du zusätzlich die Merkwörter?
+          <span class="why">Die braucht es nur, wenn beide Phones gleichzeitig weg sind.</span></li>
+        <li>Bleibt das Gruppen-VGP daneben (Ute als Start, Gruppen im ⋮-Menü) – oder wird VGP ganz zum Paar-Chat?</li>
+      </ol>
+    </section>
+  </div>
+
+</main>
+</body>
+</html>
