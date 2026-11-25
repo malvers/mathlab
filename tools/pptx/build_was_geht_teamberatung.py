@@ -472,7 +472,7 @@ d._slide("merksatz", '%s<div class="quote-bar"></div>'
          # Mission_1_Isolated_Launch_Views-M11191, 00:45-00:54), silent and looping as a card on the right (Doc 07:00)
          '<figure class="live-shot karte" style="top:225px"><video src="img/was-geht/start-falcon9.mp4" muted autoplay loop '
          'playsinline preload="metadata" aria-label="Start einer Falcon-9-Rakete (NASA)"></video></figure>'
-         '<p class="labnote live-credit" style="left:532px;top:356px;width:356px">Video: NASA</p>' % (cue("0:30", "Pause nach First HMTL, dann der Satz. Danach das "
+         '<p class="labnote live-credit" style="left:532px;top:433px;width:356px;text-align:right">Video: NASA</p>' % (cue("0:30", "Pause nach First HMTL, dann der Satz. Danach das "
                                                                   "Tagebuch als Finale."), ARIAL, ARIAL))
 d.summary("Zum Schluss: der allererste Eintrag vom 05.04.2026 heißt First HMTL, mit Tippfehler. Die Tippfehler sind "
           "von Doc, der Rest ist Vibe-Coding.")
