@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Grateful · Tagebuch</title>
+<!-- home screen app: starts without the browser bar (manifest display: fullscreen); theme colour = the navy --bg of svp-tokens.css -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#08142a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tagebuch">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Orbitron = brand (cover, titles), Caveat = handwriting of the entries, Caveat Brush = painted words of the cloud,
@@ -47,6 +55,10 @@
         --script: 'Pinyon Script', 'Great Vibes', cursive; --sk: 1.42;
         /* deeper foil for gold lettering on paper (the cover foil is too pale on cream) */
         --foil-paper: linear-gradient(100deg, #6e4f10 0%, #b4862a 24%, #e2bd5c 40%, #a87b22 55%, #d9b04e 72%, #7a5814 100%);
+        /* handmade paper (Büttenpapier) with a torn, deckled edge and fibres, for the weekly thought's print (tall) and the card of
+           the day (wide): noise displaces the sheet's edge, finer noise lays the fibres in, a darker rim where the edge is thin */
+        --deckle-tall: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 400' preserveAspectRatio='none'><filter id='d' x='-4%' y='-4%' width='108%' height='108%'><feTurbulence type='fractalNoise' baseFrequency='0.11' numOctaves='4' seed='3' result='n'/><feDisplacementMap in='SourceGraphic' in2='n' scale='10' xChannelSelector='R' yChannelSelector='G' result='e'/><feTurbulence type='fractalNoise' baseFrequency='0.9 0.35' numOctaves='3' seed='8' result='f'/><feColorMatrix in='f' values='0 0 0 0 0.5  0 0 0 0 0.42  0 0 0 0 0.28  0 0 0 0.2 0' result='fc'/><feComposite in='fc' in2='e' operator='in' result='tex'/><feMorphology in='e' operator='erode' radius='3' result='core'/><feComposite in='e' in2='core' operator='out' result='rim'/><feColorMatrix in='rim' values='0 0 0 0 0.78  0 0 0 0 0.69  0 0 0 0 0.5  0 0 0 0.35 0' result='rimc'/><feMerge><feMergeNode in='e'/><feMergeNode in='tex'/><feMergeNode in='rimc'/></feMerge></filter><rect x='7' y='7' width='286' height='386' fill='%23fbf4e2' filter='url(%23d)'/></svg>");
+        --deckle-wide: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 210' preserveAspectRatio='none'><filter id='d' x='-4%' y='-4%' width='108%' height='108%'><feTurbulence type='fractalNoise' baseFrequency='0.11' numOctaves='4' seed='3' result='n'/><feDisplacementMap in='SourceGraphic' in2='n' scale='10' xChannelSelector='R' yChannelSelector='G' result='e'/><feTurbulence type='fractalNoise' baseFrequency='0.9 0.35' numOctaves='3' seed='8' result='f'/><feColorMatrix in='f' values='0 0 0 0 0.5  0 0 0 0 0.42  0 0 0 0 0.28  0 0 0 0.2 0' result='fc'/><feComposite in='fc' in2='e' operator='in' result='tex'/><feMorphology in='e' operator='erode' radius='3' result='core'/><feComposite in='e' in2='core' operator='out' result='rim'/><feColorMatrix in='rim' values='0 0 0 0 0.78  0 0 0 0 0.69  0 0 0 0 0.5  0 0 0 0.35 0' result='rimc'/><feMerge><feMergeNode in='e'/><feMergeNode in='tex'/><feMergeNode in='rimc'/></feMerge></filter><rect x='8' y='8' width='584' height='194' fill='%23fbf4e2' filter='url(%23d)'/></svg>");
         /* calligraphic tick in green ink: thin hairline in, swelling down-stroke, long tapering up-stroke */
         --tick: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M9.6 21.4 C12.4 20.6 14.9 23.1 17.1 26.4 C20.9 19.3 26.3 12.4 33.8 6.6 C27.6 13.2 22.1 21.3 18.6 29.6 C18.1 30.6 16.7 30.7 16.1 29.8 C14.3 26.6 12.3 23.4 9.6 21.4 Z' fill='%2355801c'/></svg>"); }
 html.sf-2 { --script: 'Great Vibes', 'Pinyon Script', cursive; --sk: 1.36; }
@@ -145,14 +157,6 @@ body { padding: 0; }
 .page { gap: 0; }
 .stage .bookwrap { width: 100%; max-width: min(1000px, calc((100vh - 150px) * 1000 / 700)); max-width: min(1000px, calc((100dvh - 150px) * 1000 / 700)); }
 .stage.portrait .bookwrap { max-width: min(440px, calc((100dvh - 140px) * 400 / 640)); }
-/* the book takes 90 % of the window, aspect kept (Doc, 24.11.2026: "mach es mal 90% des Fensters, keep aspect"): its whole
-   look - the boards (3.4 % wider, 2.1 % lower than the spread) and the open day's tab on top (40 px) - fits into 90 % of the
-   width and of the height, the 1000 px cap is gone. Not on an upright phone (one page) and not on a phone held sideways
-   (there the spread is as wide as the screen and the desk scrolls). */
-@media not all and (orientation: landscape) and (max-height: 500px) {
-  .stage:not(.portrait) { padding-top: calc(18px + env(safe-area-inset-top)); padding-bottom: env(safe-area-inset-bottom); }
-  .stage:not(.portrait) .bookwrap { max-width: none; width: min(86.5vw, calc((90dvh - 40px) / .721)); }
-}
 .sheet.gate { width: min(460px, calc(100% - 28px)); text-align: left; }
 .gate-t { font-size: 15px; line-height: 1.5; color: var(--print); margin: 10px 0 0; }
 textarea.hand.multi { cursor: default; }
@@ -244,6 +248,20 @@ textarea.hand.multi { cursor: default; }
 
 /* ===== Schemes (settings): Klassisch = leather, wood and paper as above ===== */
 .stage.sch-modern { background: radial-gradient(ellipse 85% 75% at 50% 38%, #f7f8fa, #dde1e7); }
+/* TEST (Doc, 24.11.2026: "bei Modern bitte den HG nicht weiß, ggf. gebürsteter Stahl" ... "deutlich dunkler" ... "da ist irgendwie
+   ein Absatz, das sieht nicht gut aus, und bitte noch dunkler" ... "lieber das Bild in der Mitte auseinanderziehen ... noch einen
+   Tick dunkler"): dark brushed steel. The grain is ONE noise picture stretched over the whole desk - no repeat at all, so no
+   seam anywhere; tall enough (1400 px) that its lines stay fine; a soft sheen top left, darker edges */
+.stage.sch-modern {
+  background-color: #33373c;
+  background-image:
+    radial-gradient(ellipse 75% 55% at 38% 22%, rgba(255, 255, 255, .09), transparent 70%),
+    radial-gradient(ellipse 120% 95% at 50% 50%, transparent 45%, rgba(6, 8, 11, .62)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='1400' preserveAspectRatio='none'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.75' numOctaves='3' seed='8'/><feColorMatrix values='0 0 0 0 0.3  0 0 0 0 0.32  0 0 0 0 0.35  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23b)'/></svg>"),
+    linear-gradient(180deg, #40444a, #24272b);
+  background-size: auto, auto, 100% 100%, auto;
+  background-repeat: no-repeat;
+}
 .stage.sch-modern .boards, .stage.sch-modern .board-in, .stage.sch-modern .leather { background: #23262d; }
 .stage.sch-modern .boards { box-shadow: 0 1.8cqw 3.2cqw -.8cqw rgba(30, 35, 45, .4), 0 .4cqw 1cqw rgba(30, 35, 45, .22); }
 .stage.sch-modern .paper { background: #fdfdfb; }
@@ -252,6 +270,20 @@ textarea.hand.multi { cursor: default; }
 .stage.sch-modern .reg button::before { border-color: transparent; }
 .stage.sch-modern .toast { background: rgba(35, 38, 45, .88); }
 .stage.sch-nacht { background: radial-gradient(ellipse 80% 70% at 45% 30%, #1b2440, #070a12 75%); --leather: #0c1323; }
+/* the night sky behind the book (script: the sky canvas) - only in the night scheme */
+.sky { display: none; position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.stage.sch-nacht .sky { display: block; }
+/* the birthday celebration above the book (z-index under the sheets) */
+.fest { position: absolute; left: 0; top: 0; z-index: 12; pointer-events: none; opacity: 0; transition: opacity .6s; }
+.fest.on { opacity: 1; }
+/* the birthday on the settings page: two selects in the style of the pills */
+.setp .geb { display: flex; gap: calc(var(--u) * 1.3); margin-bottom: calc(var(--u) * 1.3); }
+.setp .geb select { font: 700 calc(var(--u) * 1.85) / 1 var(--display); letter-spacing: .08em; color: var(--ink); padding: calc(var(--u) * 1) calc(var(--u) * 2);
+  border: max(1px, calc(var(--u) * .28)) solid rgba(176, 122, 20, .5); border-radius: 999px; background: rgba(255, 255, 255, .35); cursor: pointer; }
+/* the slogan as a weekly thought: a small navy card with gold foil instead of a sheet's photo */
+.gdw .gdw-card { aspect-ratio: 3 / 4; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1.5cqw; border-radius: .4cqw;
+  background: radial-gradient(ellipse at 35% 25%, #2a3f68, #16233f 70%); box-shadow: inset 0 0 0 .3cqw rgba(214, 178, 90, .55); }
+.gdw .gdw-card span { font-family: var(--display); font-weight: 700; font-size: 2.1cqw; line-height: 1.5; letter-spacing: .14em; text-transform: uppercase; }
 .stage.sch-nacht .pg.paper::before { content: ''; position: absolute; inset: 0; z-index: 6; pointer-events: none; background: rgba(18, 26, 52, .16); }
 .stage.sch-nacht .sheet { filter: brightness(.9); }
 /* the cover's own leather has an opaque gradient: darken it underneath frame and foil (they come later and stay bright) */
@@ -261,7 +293,11 @@ textarea.hand.multi { cursor: default; }
 .bookwrap { position: relative; max-width: 1000px; margin: 0 auto; container-type: inline-size; --bm: 1.1cqw; }
 /* --el / --er = thickness of the page block left / right (the turned pages, set by the script); the leather boards always
    stand --bm beyond it, so the blue margin is the same on both sides (Doc, 23.11.2026) */
-.boards { position: absolute; z-index: 0; top: -1.6cqw; bottom: -2.1cqw; left: calc(-1 * (var(--el) + var(--bm))); right: calc(-1 * (var(--er) + var(--bm))); border-radius: .9cqw;
+/* the boards are rigid (Doc, 24.11.2026: "der Hintergrund springt beim Blättern leicht ... der muss starr sein"): they used
+   to follow the page block's thickness (--el / --er, set on every turn) and moved by a pixel now and then; now they stand at
+   the thickest block (1 cqw) plus their margin on both sides, always - the block grows inside them. The same fixed edge for
+   the cover, the back, the inside boards and the flap. */
+.boards { position: absolute; z-index: 0; top: -1.6cqw; bottom: -2.1cqw; left: calc(-1 * (1cqw + var(--bm))); right: calc(-1 * (1cqw + var(--bm))); border-radius: .9cqw;
   background-color: var(--leather);
   background-image:
     linear-gradient(90deg, transparent 48.6%, rgba(0, 0, 0, .45) 50%, transparent 51.4%),
@@ -294,6 +330,10 @@ textarea.hand.multi { cursor: default; }
 .edge.r { top: 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - .7cqw)); }
 .edge.b { left: calc(-1 * var(--el)); right: calc(-1 * var(--er)); clip-path: polygon(var(--el) 0, calc(100% - var(--er)) 0, 100% 100%, 0 100%); }
 .stage.portrait .edge.b { left: 0; clip-path: polygon(0 0, calc(100% - var(--er)) 0, 100% 100%, 0 100%); }
+/* no stack edge below the pages - as at the top only the sides show the page block (Doc, 24.11.2026: "unten muss es auch
+   weg"): the side edges end with the page */
+.edge.b { display: none; }
+.edge.l, .edge.r { bottom: 0; clip-path: none; }
 /* the bookmark ribbon lies IN the open spread: one smooth satin red from the very top of the spine down the gutter,
    gently onto the right page, the tail hangs out below and is a little darker where it bends over the page edge.
    It never fades: pages turn over the gutter, and when the book closes the board covers it the moment it passes
@@ -420,10 +460,11 @@ textarea.hand.multi { cursor: default; }
    Subtle and always there ("subtiler und nicht ausblenden"): open, it lies beside the open book on the desk - a click
    there closes the book - and once the cover has landed it folds back over it (script: updateStage). Only the closed back
    has none (stage.clasp-off). */
-.clasp { --cw: 5.8cqw; --ch: 8cqw; position: absolute; z-index: 4; top: calc(50% - .25cqw); right: calc(-1 * (var(--er) + var(--bm)));
+.clasp { --cw: 5.8cqw; --ch: 8cqw; position: absolute; z-index: 4; top: calc(50% - .25cqw); right: calc(-1 * (1cqw + var(--bm)));
   width: var(--cw); height: var(--ch); transform: translateY(-50%); perspective: 60cqw;
   transition: opacity .3s ease; }
 .stage.clasp-off .clasp { opacity: 0; pointer-events: none; }
+.stage:not(.ready) .clasp { opacity: 0; pointer-events: none; }
 /* open, a click on it closes the book again ("wenn offen schließt Lasche"); hovering lifts it a little off the desk */
 .stage:not(.flipping) .clasp.open .clasp-flip:hover { transform: rotateY(174deg); }
 /* no flap on the phone (Doc, 24.11.2026: "auf dem Phone ist das schwierig mit Lasche - weglassen"): open it lay off the
@@ -498,6 +539,13 @@ textarea.hand.multi { cursor: default; }
    WITHOUT position, so .leaf won and the page under the turning one dropped into the flow, below the book. Keep them absolute. */
 .leaf.stf__item { position: absolute; }
 .stf__outerShadow, .stf__innerShadow, .stf__hardShadow, .stf__hardInnerShadow { position: absolute; left: 0; top: 0; }
+/* the back of a corner that only peeks (hover, idle hint) shines gold instead of shadow grey (Doc, 24.11.2026): the library's
+   black inner shadow turned gold by a filter - while the page really turns it stays a shadow */
+.stage.peek .stf__innerShadow { filter: invert(1) sepia(1) saturate(3.4) hue-rotate(-12deg) brightness(.86); }
+/* ... and the back of the lifted corner itself (the page turning over, the one with a rotate in its inline transform) in a soft
+   gold instead of grey (Doc, 24.11.2026: "dahinter sieht ziemlich dunkel aus, ziemlich grau ... ein bisschen Gold") */
+.stage.peek .leaf.stf__item[style*="rotate("] .pg::after { background: linear-gradient(135deg, rgba(255, 238, 178, .5), rgba(226, 184, 88, .5) 45%, rgba(176, 128, 44, .55)); }
+.stage.peek .leaf.stf__item[style*="rotate("] .pg::before { display: none; }
 
 /* ===== Pages (shared by the flip book and the static spreads) ===== */
 .leaf { position: relative; overflow: hidden; }
@@ -531,8 +579,8 @@ textarea.hand.multi { cursor: default; }
 /* the cover IS the board: as big as the leather boards behind the open book (they stick out over the page block),
    so the closed book shows no second blue edge around the cover. Same insets as .boards (cqw of the book wrapper). */
 .leaf.p-cover, .leaf.p-back { overflow: visible; }
-.p-cover .cover-front { inset: -1.6cqw calc(-1 * (var(--er) + var(--bm))) -2.1cqw -.3cqw; border-radius: 0 .9cqw .9cqw 0; }
-.p-back .cover-back { inset: -1.6cqw -.3cqw -2.1cqw calc(-1 * (var(--el) + var(--bm))); border-radius: .9cqw 0 0 .9cqw; }
+.p-cover .cover-front { inset: -1.6cqw calc(-1 * (1cqw + var(--bm))) -2.1cqw -.3cqw; border-radius: 0 .9cqw .9cqw 0; }
+.p-back .cover-back { inset: -1.6cqw -.3cqw -2.1cqw calc(-1 * (1cqw + var(--bm))); border-radius: .9cqw 0 0 .9cqw; }
 /* inside of the front / back board: the endpaper is glued onto the board, which sticks out around it - so these pages
    turn with the full size of their half of the background, and the background half they leave (or land on) is the same board */
 .leaf.p-endpaper, .leaf.p-endpaper2 { overflow: visible; }
@@ -541,8 +589,8 @@ textarea.hand.multi { cursor: default; }
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"),
     radial-gradient(ellipse at 60% 20%, rgba(255, 255, 255, .10), transparent 60%);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .05); }
-.p-endpaper .board-in { inset: -1.6cqw 0 -2.1cqw calc(-1 * (var(--el) + var(--bm))); border-radius: .9cqw 0 0 .9cqw; }
-.p-endpaper2 .board-in { inset: -1.6cqw calc(-1 * (var(--er) + var(--bm))) -2.1cqw 0; border-radius: 0 .9cqw .9cqw 0;
+.p-endpaper .board-in { inset: -1.6cqw 0 -2.1cqw calc(-1 * (1cqw + var(--bm))); border-radius: .9cqw 0 0 .9cqw; }
+.p-endpaper2 .board-in { inset: -1.6cqw calc(-1 * (1cqw + var(--bm))) -2.1cqw 0; border-radius: 0 .9cqw .9cqw 0;
   background-image:
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 -0.12'/></filter><rect width='100%25' height='100%25' filter='url(%23l)'/></svg>"); }
 .stage.portrait .p-cover .cover-front { inset: -2.4cqw -2.6cqw -3cqw -1.4cqw; }
@@ -574,6 +622,26 @@ textarea.hand.multi { cursor: default; }
 .exlibris .t:empty { display: none; }
 .exlibris.fuer .t { font-family: 'Great Vibes', 'Pinyon Script', cursive; font-weight: 400; font-size: 6.4cqw; letter-spacing: 0; line-height: 1; text-transform: none; }
 .exlibris.fuer .n { font-size: 9cqw; line-height: 1.05; margin-top: 1.2cqw; overflow-wrap: anywhere; }
+/* a finer plate (Doc, 24.11.2026: "ein schöneres Schild, das sieht so aufklebermäßig aus"): set into the board instead of stuck
+   on - level, no sticker shadow; a dark recess and a gold-foil line pressed into the leather round it, laid paper inside with a
+   printed double gold rule and a small ornament under the name, like an old bookplate */
+.exlibris { transform: translate(-50%, -50%); width: 50cqw; padding: 6.2cqw 5cqw 7.6cqw; border-radius: .35cqw; outline: none;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.36  0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0.09 0'/></filter><rect width='100%25' height='100%25' filter='url(%23p)'/></svg>"),
+    linear-gradient(180deg, #faf4e4, #f0e5ca);
+  /* the title page's ornament above and below the name, same size and weight (Doc, 24.11.2026: "dieses Element auch in dieser
+     Größe und oben auch") */
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20'><path d='M5 10 H80 M120 10 H195' stroke='%23b07a14' stroke-width='.95'/><path d='M100 3 L107 10 L100 17 L93 10 Z' fill='none' stroke='%23b07a14' stroke-width='.95'/><circle cx='86' cy='10' r='1.25' fill='%23b07a14'/><circle cx='114' cy='10' r='1.25' fill='%23b07a14'/></svg>") center top 3.6cqw / 26.25cqw auto no-repeat,
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20'><path d='M5 10 H80 M120 10 H195' stroke='%23b07a14' stroke-width='.95'/><path d='M100 3 L107 10 L100 17 L93 10 Z' fill='none' stroke='%23b07a14' stroke-width='.95'/><circle cx='86' cy='10' r='1.25' fill='%23b07a14'/><circle cx='114' cy='10' r='1.25' fill='%23b07a14'/></svg>") center bottom 3.6cqw / 26.25cqw auto no-repeat,
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.36  0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0.09 0'/></filter><rect width='100%25' height='100%25' filter='url(%23p)'/></svg>"),
+    linear-gradient(180deg, #faf4e4, #f0e5ca);
+  padding: 7.4cqw 5cqw 7.6cqw;
+  box-shadow: 0 0 0 .4cqw #0b1529, 0 0 0 .62cqw rgba(214, 178, 90, .6), 0 0 0 .9cqw rgba(11, 21, 41, .35), inset 0 .25cqw .6cqw rgba(70, 45, 10, .18); }
+.exlibris::before { content: ''; position: absolute; inset: 1.5cqw; pointer-events: none; border: max(1px, .2cqw) solid rgba(176, 122, 20, .75);
+  outline: max(1px, .1cqw) solid rgba(176, 122, 20, .45); outline-offset: .45cqw; }
+.exlibris::after { content: none; }   /* the ornaments are background layers of the plate now */
+.exlibris .t, .exlibris .n { position: relative; }
 
 /* page interior */
 .in { position: absolute; inset: 6.5cqh 8cqw 4.6cqh; display: flex; flex-direction: column; }
@@ -587,12 +655,132 @@ textarea.hand.multi { cursor: default; }
 .hd .nm svg { width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); flex: none; }
 .hd .dt { font-size: calc(var(--u) * 3.3); font-style: italic; color: var(--print-soft); }
 .hd .mt { font-family: var(--display); font-size: calc(var(--u) * 2.1); letter-spacing: .18em; color: var(--ochre); text-transform: uppercase; }
+/* "3 GEDANKEN · JE 30 SEKUNDEN" off on the day pages while the clock is off (Doc, 24.11.2026: "auskommentieren") */
+.p-morgen .hd .mt, .p-abend .hd .mt { display: none; }
+/* the rising sun a tick bigger, so it holds its own beside the moon (Doc, 24.11.2026) - scaled, the heading keeps its line */
+.p-morgen .hd .nm svg { transform: scale(1.2); transform-origin: 50% 72%; }
 .cardgap { height: 9cqh; flex: none; }
+/* the day pages (Doc, 24.11.2026): the first question further from the taped card, the writing lines a little closer, the date
+   smaller and without the year */
+.stage:not(.portrait) .p-morgen .cardgap, .stage:not(.portrait) .p-abend .cardgap { height: 13.45cqh; }   /* +16 px (Doc) */
+.p-morgen .q, .p-abend .q { margin-top: 2.7cqh; }
+.p-morgen textarea.hand, .p-abend textarea.hand { line-height: calc(var(--u) * 5.9 * var(--fz, 1)); height: calc(var(--u) * 5.9 * var(--fz, 1) * var(--rows, 2) + 2px);
+  background-size: 100% calc(var(--u) * 5.9 * var(--fz, 1)); }
+.stage:not(.typed) .p-morgen textarea.hand, .stage:not(.typed) .p-abend textarea.hand { font-size: calc(var(--u) * 5.1 * var(--fz, 1)); }
+@supports (width: round(1.5px, 1px)) {
+  .p-morgen textarea.hand, .p-abend textarea.hand { --lh: round(nearest, calc(var(--u) * 5.9 * var(--fz, 1)), 1px); line-height: var(--lh);
+    height: calc(var(--lh) * var(--rows, 2) + 2px); background-size: 100% var(--lh); }
+}
+.p-morgen .mic, .p-abend .mic { top: calc(var(--u) * 5.9 * var(--fz, 1) * .5 - var(--mic) * .5 - var(--u) * .5); }
+.p-morgen .hd .dt, .p-abend .hd .dt { font-size: calc(var(--u) * 2.6); }
+/* the quill like Doc's own (photo, 24.11.2026): a dark red feather with a red shaft in an ornate holder on a round base - in
+   gold, not the photo's silver (Doc: "den Fuß bitte nicht silbern ... sondern Gold"). It stands under the date without taking room (absolute, in the space above the first question); the right page's
+   leans left, the left page's - mirrored - right. Quiet while the back is empty; once a note is written it shines and sways
+   ("muss die Feder in irgendeiner Weise wabern und heller sein") */
+.p-morgen .hd, .p-abend .hd { position: relative; }
+/* flush with the text (Doc, 24.11.2026: "dass die rechtsbündig auch abschließt, beziehungsweise linksbündig"): the feather's
+   outermost point - not the box - meets the text edge; it leans out of its box by 21.9 % of the width on the left page and
+   29.3 % on the right (measured from the drawing), so the box moves in by that much at every size */
+.hd .quill { position: absolute; top: calc(100% + .4cqh + var(--u) * 1.1); left: 0; translate: 21.9% 0; }
+.hd.r .quill { left: auto; right: 0; translate: -29.3% 0; }
+.quill { width: calc(var(--u) * 4.6); height: calc(var(--u) * 7.36); padding: 0; border: 0; background: none; cursor: pointer;
+  opacity: .82; transition: opacity .2s, filter .2s; -webkit-tap-highlight-color: transparent; }
+.quill:hover { opacity: 1; }
+.quill svg { width: 100%; height: 100%; display: block; overflow: visible; }
+/* the foot stands straight; holder and feather lean on the ball joint above the socket, as the real one does (Doc, 24.11.2026):
+   to the right on the right page, to the left on the left page - a little more aslant since "ein bisschen schräger"; the left
+   page's is mirrored, so its feather too curves outwards */
+.quill .fe { transform-box: view-box; transform-origin: 21.5px 52.4px; transform: rotate(15deg); }
+.p-morgen .quill .fe { transform: rotate(-15deg) scaleX(-1); }
+.quill .ball { fill: url(#g-holder); stroke: #6b4f1a; stroke-width: .45; }
+/* the feather (#quill-feather, used once per quill): its parts take their colours from these properties */
+.quill { --qf-vane: url(#g-feather); --qf-barb: #b5433d; --qf-down: #c25a52; }
+.quill.has { --qf-vane: url(#g-feather-lit); --qf-barb: #e8766c; --qf-down: #e07a70; }
+.qf-vane { fill: var(--qf-vane, url(#g-feather)); }
+.qf-barbs { fill: none; stroke: var(--qf-barb, #b5433d); stroke-width: .2; stroke-linecap: round; opacity: .38; }
+.qf-down { fill: none; stroke: var(--qf-down, #c25a52); stroke-width: .22; stroke-linecap: round; opacity: .55; }
+.qf-split { fill: none; stroke: #f3d9c8; stroke-width: .22; stroke-linecap: round; opacity: .4; }
+.qf-shaft { fill: #cf3a33; }
+.qf-hl { fill: none; stroke: #ff9a8a; stroke-width: .14; opacity: .45; }
+.quill .crown, .quill .stem, .quill .base, .quill .socket { fill: url(#g-holder); stroke: #6b4f1a; stroke-width: .45; }
+.quill .band { stroke: #7a5a1e; stroke-width: .5; }
+.quill .base-top { fill: #f3dc95; stroke: #6b4f1a; stroke-width: .45; }
+.quill.has { opacity: 1; filter: drop-shadow(0 0 calc(var(--u) * .9) rgba(255, 248, 228, .95)); }
+.quill.has .fe { animation: quill-sway 2.8s ease-in-out infinite; }
+.p-morgen .quill.has .fe { animation-name: quill-sway-m; }
+/* it sways inwards only, so the feather never leaves the text edge */
+@keyframes quill-sway { 0%, 100% { transform: rotate(15deg); } 50% { transform: rotate(11deg); } }
+@keyframes quill-sway-m { 0%, 100% { transform: rotate(-15deg) scaleX(-1); } 50% { transform: rotate(-11deg) scaleX(-1); } }
+@media (prefers-reduced-motion: reduce) { .quill.has .fe { animation: none; } }
+.stage.portrait .quill { width: max(24px, calc(var(--u) * 4.15)); height: max(38.4px, calc(var(--u) * 6.64)); }
+/* turning the page over by the quill (Doc, 24.11.2026: "nach rechts raus sliden, aber gleichzeitig nach oben, wie als würdest
+   du ein Papier wirklich richtig umdrehen, in 3D"): a copy of the sheet (.tflip, made by turnNote) lifts off, slides out and up
+   while it turns over around its long axis, and lands with the other side up where it lay; the page itself shows only its bare
+   paper meanwhile, with the sheet's shadow on it. The right page goes out to the right, the left one - mirrored - to the left
+   (--d). Above ribbon, tabs and clasp, under the card of the day, which fades as the sheet lifts. */
+.tflip { --tf-t: 1.15s; --tf-x: 30%; --tf-y: -9%; --tf-z: 140px; position: absolute; z-index: 4; pointer-events: none; perspective: 2400px; }
+.stage.portrait .tflip { --tf-x: 14%; --tf-y: -7%; }
+.tflip .tf-sheet { position: absolute; inset: 0; transform-style: preserve-3d;
+  animation: tf-move var(--tf-t) both, tf-spin var(--tf-t) cubic-bezier(.45, .05, .55, .95) both; }
+.tflip .tf-face { position: absolute; inset: 0; display: block; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.tflip .tf-back { transform: rotateY(180deg); }
+/* out and up while lifting towards the eye, tilted a little - farthest out when the sheet stands on its edge, then gently down */
+@keyframes tf-move {
+  0% { translate: 0 0 0; rotate: 0deg; animation-timing-function: cubic-bezier(.3, .1, .45, 1); }
+  50% { translate: calc(var(--d) * var(--tf-x)) var(--tf-y) var(--tf-z); rotate: calc(var(--d) * -5deg); animation-timing-function: cubic-bezier(.5, 0, .3, 1); }
+  100% { translate: 0 0 0; rotate: 0deg; }
+}
+/* the turn itself: the edge at the fold rises towards the eye and goes over */
+@keyframes tf-spin { from { transform: rotateY(0deg); } to { transform: rotateY(calc(var(--d) * 180deg)); } }
+/* light: the front dims as it turns away, the back comes round out of the shade */
+.tflip .tf-face::after { content: ''; position: absolute; inset: 0; z-index: 10; pointer-events: none;
+  background: linear-gradient(90deg, rgba(50, 32, 12, .5), rgba(50, 32, 12, .2) 60%, rgba(255, 248, 230, .12));
+  animation: tf-shade-front var(--tf-t) linear both; }
+.tflip .tf-back::after { animation-name: tf-shade-back; }
+@keyframes tf-shade-front { 0% { opacity: 0; } 50%, 100% { opacity: 1; } }
+@keyframes tf-shade-back { 0%, 50% { opacity: 1; } 100% { opacity: 0; } }
+/* the lifted sheet's shadow on the paper beneath: follows it out, thin while the sheet stands on its edge */
+.tflip .tf-shadow { position: absolute; inset: 1%; border-radius: 1%; background: rgba(25, 15, 5, .6); filter: blur(1.4cqw); opacity: 0;
+  animation: tf-shadow var(--tf-t) ease-in-out both; }
+@keyframes tf-shadow {
+  0%, 100% { opacity: 0; transform: none; }
+  25%, 75% { opacity: .55; transform: translate(calc(var(--d) * 13%), -2%) scaleX(.72); }
+  50% { opacity: .22; transform: translate(calc(var(--d) * 24%), -6%) scaleX(.08); }
+}
+.pg.lifted > .in, .pg.lifted > .back-note { visibility: hidden; }
+/* the back: the same paper, a touch darker, with a faint show-through; the front's content hidden while it shows */
+.back-note { display: none; position: absolute; inset: 6.5cqh 8cqw 4.6cqh; flex-direction: column; }
+.pg.show-back > .in { visibility: hidden; }
+.pg.show-back > .back-note { display: flex; }
+.pg.show-back::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: rgba(120, 95, 55, .06); }
+.back-note .bn-hd { display: flex; align-items: center; justify-content: space-between; }
+/* on the right page the back's heading stands right, on the left page left (Doc, 24.11.2026) */
+.p-abend .back-note .bn-hd { flex-direction: row-reverse; }
+.p-abend .back-note .bn-t, .p-abend .back-note .bn-d { text-align: right; }
+.back-note .bn-quill { position: static; }
+.back-note .bn-k { font-family: var(--display); font-weight: 700; font-size: calc(var(--u) * 2.1); letter-spacing: .3em; color: var(--ochre); text-transform: uppercase; }
+.back-note .bn-quill { align-self: center; margin: 0; }
+.back-note .bn-t { margin-top: 1.4cqh; font-family: var(--script); font-size: calc(var(--u) * 5.2 * var(--sk)); line-height: 1.1; color: var(--ink); }
+.back-note .bn-d { margin: .4cqh 0 2.4cqh; font-size: calc(var(--u) * 2.6); font-style: italic; color: var(--print-soft); }
+.back-note textarea.hand { flex: 1; min-height: 0; height: auto; overflow-y: auto; }
+/* one line each, so both pages' feet stand at the same height; the saying ends flush with the lines (Doc, 24.11.2026) */
+.ft-say { font-family: var(--script); font-size: calc(var(--u) * 2.5 * var(--sk)); color: var(--print-soft); white-space: nowrap; text-align: right; }
+.ft-say i { font-family: var(--display); font-style: normal; font-size: calc(var(--u) * 1.5); letter-spacing: .14em; text-transform: uppercase; margin-left: .6em; }
 .stage.portrait .cardgap, .portrait-page .cardgap { height: 2.4cqh; }
 .q { display: grid; grid-template-columns: calc(var(--u) * 8.6) minmax(0, 1fr); column-gap: calc(var(--u) * 2.6); margin-top: 2.6cqh; }
+/* the 30-second clock is off for now (Doc, 24.11.2026: "die ablaufende Uhr setzt mich unter Druck ... kommentiert die mal
+   aus"; script: CLOCK = false): no ring, the question and its lines move into the ring's column, and a little more room
+   between the questions ("in Y ein bisschen gestreckter"). Back on: delete these three lines and set CLOCK = true. */
+.q .ring { display: none; }
+.q { grid-template-columns: minmax(0, 1fr); column-gap: 0; margin-top: 3.8cqh; }
+.q .q-t { margin-bottom: .5cqh; }
 .q-t { display: flex; align-items: baseline; gap: 1.2cqw; font-size: calc(var(--u) * 3.35); font-weight: 600; color: var(--print); line-height: 1.3; }
 /* the printed question in a calligraphic script (one weight only - never faux-bold it) */
 .q-t .tx { flex: 1; min-width: 0; font-family: var(--script); font-weight: 400; font-size: calc(var(--u) * 3.35 * var(--sk)); line-height: 1.12; color: #2a2620; }
+/* the day's six questions in ONE size that keeps each of them on one line (Doc, 24.11.2026: "die Fragen in einem Font, der so
+   groß ist, dass die nur eine Zeile in Anspruch nehmen"): --qk on the stage, measured by fitQuestions for the script and the
+   page width in use */
+.p-morgen .q-t .tx, .p-abend .q-t .tx { white-space: nowrap; overflow: visible; font-size: calc(var(--u) * 3.35 * var(--sk) * var(--qk, 1)); }
 /* "Grateful" as a small gold-foil stamp, like the lettering on the cover - no pill */
 .tag { display: inline-flex; align-items: center; gap: .55cqw; flex: none; white-space: nowrap;
   font-family: var(--display); font-weight: 900; font-size: calc(var(--u) * 2); letter-spacing: .16em; position: relative; top: calc(var(--u) * -.3);
@@ -604,7 +792,15 @@ textarea.hand.multi { cursor: default; }
 .mic { position: absolute; z-index: 2; right: 0; top: calc(var(--u) * 6.6 * var(--fz, 1) * .5 - var(--mic) * .5 - var(--u) * .5);
   width: var(--mic); height: var(--mic); border: 0; padding: 0; background: none; color: var(--print-soft); cursor: pointer; opacity: .8; }
 .mic svg { width: 100%; height: 100%; display: block; }
+/* the microphone on the left of the line and quieter (Doc, 24.11.2026: "linksbündig und etwas dezenter"): smaller, lighter,
+   the writing starts after it */
+.fld { --mic: calc(var(--u) * 4.1); }   /* the old microphone a touch bigger (Doc, 24.11.2026) */
+.mic { right: auto; left: 0; opacity: .62; }
+.mic:hover { opacity: 1; }
+.fld textarea.hand { padding-right: 0; padding-left: calc(var(--mic) + var(--u) * 1.4); }
 .mic.rec { color: var(--ypsi-ink); opacity: 1; animation: micpulse 1.2s ease-in-out infinite; }
+/* the old gold microphone glows red while it listens */
+.mic.rec svg { filter: drop-shadow(0 0 calc(var(--u) * .5) var(--ypsi-ink)); }
 @keyframes micpulse { 50% { opacity: .45; } }
 textarea.hand { display: block; width: 100%; resize: none; border: 0; outline: 0; padding: 0 0 0 .4cqw; margin: 0; background-color: transparent;
   font-family: var(--hand); font-weight: 500; font-size: calc(var(--u) * 5.5 * var(--fz, 1)); line-height: calc(var(--u) * 6.6 * var(--fz, 1)); color: var(--pen);
@@ -613,6 +809,15 @@ textarea.hand { display: block; width: 100%; resize: none; border: 0; outline: 0
   background-attachment: local; caret-color: var(--ypsi-ink); text-shadow: 0 0 .5px rgba(28, 58, 140, .35); }
 .fld textarea.hand { padding-right: calc(var(--mic) + var(--u) * .8); }
 /* long dictation: the text first shrinks (see fit()), then the field scrolls gently with a soft fade, no scrollbar */
+/* the writing lines thin and even like on the notes page (Doc, 24.11.2026: "da stehen zwei Zeilen, mach bitte beide Zeilen
+   dünn"): one lighter hairline per line, and line height and line spacing rounded to whole pixels together, so no line blurs
+   to two pixels and the text still sits on its lines */
+textarea.hand { background-image: linear-gradient(180deg, transparent calc(100% - 1px), rgba(60, 95, 150, .18) 0);
+  background-size: 100% calc(var(--u) * 6.6 * var(--fz, 1)); background-repeat: repeat-y; }
+@supports (width: round(1.5px, 1px)) {
+  textarea.hand { --lh: round(nearest, calc(var(--u) * 6.6 * var(--fz, 1)), 1px); line-height: var(--lh);
+    height: calc(var(--lh) * var(--rows, 2) + 2px); background-size: 100% var(--lh); }
+}
 textarea.hand.scrolls { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
 textarea.hand.scrolls::-webkit-scrollbar { display: none; }
 textarea.hand.more-b { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - var(--u) * 5), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - var(--u) * 5), transparent); }
@@ -668,6 +873,9 @@ textarea.hand:focus { background-color: rgba(245, 194, 66, .07); }
    touch smaller - Petit Formal runs wider than the other two scripts, so it gets a little more (Doc, 24.11.2026: "für alle
    Schriften testen": all three scripts, 1024-1920 px, one line) */
 .stage:not(.portrait) .habits { gap: 2.1cqw; }
+/* six habits: two rows of three, aligned in columns */
+.habits { display: grid; grid-template-columns: repeat(3, max-content); gap: .6cqh 2.6cqw; }
+.stage:not(.portrait) .habits { gap: .6cqh 2.1cqw; }
 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * var(--sk) * .94); }
 html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * var(--sk) * .86); }
 .ft .pn:hover { color: var(--ochre); }
@@ -681,18 +889,27 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 .hb i { position: relative; width: calc(var(--u) * 2.9); height: calc(var(--u) * 2.9); border-radius: 50%; display: inline-block; flex: none;
   border: max(1px, calc(var(--u) * .18)) solid #b8913a; background: radial-gradient(circle at 40% 35%, #fffaf0, #efe3c6);
   box-shadow: 0 0 0 max(.5px, calc(var(--u) * .1)) rgba(255, 250, 235, .9), 0 0 0 max(1px, calc(var(--u) * .22)) rgba(184, 145, 58, .45), inset 0 calc(var(--u) * .12) calc(var(--u) * .25) rgba(90, 65, 20, .28); }
-.hb.on i::before { content: ''; position: absolute; inset: -75% -85% -5% -20%; background: var(--tick) center / contain no-repeat; filter: drop-shadow(0 .4px .3px rgba(40, 60, 10, .35)); }
+/* done: a gold ball lies in the cup instead of a green tick (Doc, 24.11.2026: "einen goldenen, als wäre da eine goldene Kugel drüber") */
+.hb.on i::before { content: ''; position: absolute; inset: 8%; border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #fffbe2 0, #f7dc8a 18%, #d9ad4c 48%, #a6762a 78%, #6e4812 100%);
+  box-shadow: 0 calc(var(--u) * .12) calc(var(--u) * .3) rgba(70, 45, 10, .45), inset 0 calc(var(--u) * -.15) calc(var(--u) * .25) rgba(90, 55, 10, .35); }
 
 /* the saying: a card taped across the fold (spread) or its own page (phone) */
-.spruch { position: absolute; z-index: 5; left: 50%; top: 3.6cqw; width: 37cqw; transform: translateX(-50%) rotate(-1.3deg); padding: 1.7cqw 2.2cqw 1.4cqw; text-align: center;
-  background: #fffaf0 linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(230, 215, 180, .25)); color: var(--print);
-  box-shadow: 0 .5cqw 1.2cqw rgba(40, 25, 10, .35), 0 .1cqw .2cqw rgba(40, 25, 10, .3); border-radius: .25cqw;
+.spruch { position: absolute; z-index: 5; left: 50%; top: 3.6cqw; width: 37cqw; transform: translateX(-50%) rotate(-1.3deg); padding: 2.6cqw 2.5cqw 1.6cqw; text-align: center;
+  /* on handmade paper like the weekly thought (Doc, 24.11.2026: "auch Gedanke des Tages irgendwie Büttenpapier"); the shadow
+     follows the torn edge */
+  background: var(--deckle-wide) center / 100% 100% no-repeat; color: var(--print);
+  filter: drop-shadow(0 .45cqw .6cqw rgba(40, 25, 10, .33)) drop-shadow(0 .1cqw .12cqw rgba(40, 25, 10, .3));
   opacity: 0; pointer-events: none; transition: opacity .35s; }
-.stage.show-card .spruch { opacity: 1; }
-.spruch::before, .spruch::after { content: ''; position: absolute; top: -1cqw; width: 7cqw; height: 2.2cqw;
-  background: repeating-linear-gradient(90deg, rgba(245, 194, 66, .72) 0 .5cqw, rgba(250, 214, 120, .72) .5cqw 1cqw); box-shadow: 0 .1cqw .2cqw rgba(0, 0, 0, .15); }
-.spruch::before { left: -1.4cqw; transform: rotate(-24deg); }
-.spruch::after { right: -1.4cqw; transform: rotate(21deg); }
+.stage.show-card .spruch { opacity: 1; transition: opacity 1.6s ease .2s; }   /* fades in slowly (Doc, 24.11.2026) */
+/* the card belongs to the front of the pages: away while a page shows its back */
+.stage.note-open .spruch { opacity: 0; pointer-events: none; transition: opacity .35s; }
+/* held by a seal of bordeaux sealing wax with the gilt Grateful heart (darker wax, softer gold - Doc, 24.11.2026), over the fold and the ribbon - instead of the two strips of
+   tape, which did not suit the handmade paper (Doc, 24.11.2026: "Natürlich nehmen wir rotes Siegellack. Göttlich.") */
+.spruch::before { content: ''; position: absolute; left: 50%; top: -3.3cqw; width: 5.6cqw; height: 5.6cqw; transform: translateX(-50%) rotate(9deg);
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><radialGradient id='w' cx='.38' cy='.32' r='.75'><stop offset='0' stop-color='%239c2a36'/><stop offset='.45' stop-color='%236c1222'/><stop offset='.85' stop-color='%23460916'/><stop offset='1' stop-color='%2330050e'/></radialGradient><radialGradient id='p' cx='.6' cy='.66' r='.7'><stop offset='0' stop-color='%237a1828'/><stop offset='.7' stop-color='%235a0e1c'/><stop offset='1' stop-color='%233a0610'/></radialGradient><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ecd48e'/><stop offset='.35' stop-color='%23c99f45'/><stop offset='.7' stop-color='%239a7024'/><stop offset='1' stop-color='%23664610'/></linearGradient><linearGradient id='rim' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2322030a' stop-opacity='.8'/><stop offset='.5' stop-color='%2322030a' stop-opacity='0'/><stop offset='.5' stop-color='%23d98a96' stop-opacity='0'/><stop offset='1' stop-color='%23d98a96' stop-opacity='.42'/></linearGradient></defs><path d='M97.7 50C98 50.8 98 51.7 97.9 52.5C97.7 53.3 97.3 54.1 96.8 54.9C96.4 55.7 95.9 56.5 95.4 57.2C94.9 57.9 94.5 58.6 94 59.4C93.5 60.1 93.1 60.8 92.6 61.4C92.1 62.1 91.6 62.7 91.1 63.3C90.6 64 90 64.5 89.6 65.2C89.1 65.8 88.8 66.4 88.6 67.2C88.4 67.9 88.4 68.7 88.3 69.5C88.3 70.4 88.5 71.3 88.4 72.2C88.4 73 88.3 73.9 87.9 74.6C87.6 75.3 87 75.9 86.3 76.4C85.6 76.9 84.7 77.1 83.9 77.4C83 77.7 82.1 77.9 81.3 78.2C80.6 78.5 79.9 78.9 79.4 79.4C78.8 79.8 78.4 80.4 77.9 80.9C77.4 81.5 76.9 82.1 76.4 82.6C75.9 83.1 75.3 83.5 74.7 83.9C74 84.3 73.4 84.6 72.7 85C72.1 85.4 71.5 85.7 70.9 86.1C70.3 86.6 69.7 87.1 69.1 87.5C68.5 88 68 88.5 67.3 88.9C66.7 89.2 66 89.5 65.3 89.8C64.6 90 63.8 90 63.1 90.2C62.4 90.4 61.6 90.6 61 90.9C60.3 91.3 59.7 91.8 59 92.4C58.4 93 57.7 93.9 57 94.5C56.4 95.1 55.6 95.9 54.9 96.2C54.1 96.6 53.3 96.7 52.4 96.6C51.6 96.4 50.8 95.9 50 95.4C49.2 94.8 48.5 94 47.7 93.3C47 92.6 46.3 91.9 45.7 91.3C45 90.8 44.3 90.3 43.7 89.8C43.1 89.3 42.4 88.9 41.8 88.5C41.2 88.1 40.6 87.7 40 87.3C39.4 86.9 38.8 86.6 38.2 86.4C37.5 86.2 36.9 86.1 36.1 86.2C35.4 86.2 34.5 86.5 33.7 86.6C32.9 86.8 31.9 87.1 31.1 87.1C30.3 87.1 29.4 87.1 28.7 86.9C28 86.6 27.4 86.2 26.8 85.8C26.2 85.4 25.7 84.8 25 84.4C24.4 84 23.7 83.7 22.9 83.4C22.1 83.2 21.2 83.2 20.3 83C19.3 82.9 18.3 82.9 17.4 82.6C16.5 82.4 15.6 82.1 14.9 81.6C14.2 81.1 13.7 80.4 13.3 79.7C12.8 79 12.6 78.2 12.3 77.4C12 76.6 11.7 75.8 11.5 75C11.2 74.2 10.9 73.5 10.7 72.7C10.4 71.9 10.2 71.1 10.1 70.3C9.9 69.5 9.9 68.7 9.8 67.9C9.8 67.1 9.8 66.2 9.6 65.5C9.5 64.7 9.2 64.1 8.8 63.4C8.4 62.7 7.8 62.1 7.2 61.5C6.7 60.8 5.9 60.2 5.5 59.5C5 58.8 4.7 58 4.6 57.2C4.6 56.4 4.9 55.5 5.3 54.7C5.6 53.9 6.4 53 7 52.3C7.6 51.5 8.3 50.7 8.8 50C9.3 49.3 9.7 48.6 10 47.9C10.3 47.2 10.4 46.5 10.6 45.9C10.8 45.2 11 44.5 11.2 43.8C11.4 43.2 11.6 42.5 11.8 41.9C12.1 41.2 12.3 40.6 12.4 39.9C12.5 39.2 12.5 38.6 12.5 37.8C12.5 37.1 12.3 36.3 12.3 35.5C12.2 34.8 12.2 33.9 12.3 33.2C12.4 32.5 12.6 31.8 12.9 31.1C13.2 30.4 13.6 29.9 13.9 29.2C14.2 28.5 14.5 27.8 14.6 27C14.8 26.2 14.7 25.3 14.7 24.3C14.7 23.4 14.5 22.2 14.5 21.3C14.5 20.3 14.6 19.2 14.9 18.4C15.2 17.6 15.8 16.9 16.5 16.5C17.1 16 18.1 15.8 19 15.6C19.9 15.4 20.9 15.3 21.8 15.2C22.8 15.1 23.7 15.1 24.5 14.9C25.4 14.8 26.2 14.7 27 14.6C27.8 14.4 28.6 14.3 29.3 14.2C30.1 14.1 30.9 14.1 31.6 13.9C32.3 13.8 33 13.6 33.6 13.3C34.3 12.9 34.8 12.4 35.3 11.8C35.9 11.2 36.4 10.4 36.9 9.7C37.5 9.1 38 8.3 38.7 7.8C39.4 7.4 40.1 7.1 40.8 6.9C41.6 6.8 42.4 7 43.2 7.1C44 7.2 44.8 7.4 45.5 7.5C46.3 7.5 47 7.5 47.8 7.3C48.5 7.1 49.2 6.7 50 6.4C50.8 6.1 51.5 5.7 52.3 5.5C53.1 5.2 53.9 5.1 54.7 5.1C55.5 5.2 56.3 5.4 57 5.6C57.8 5.8 58.5 6.1 59.3 6.4C60 6.6 60.8 6.8 61.5 7.1C62.2 7.3 63 7.5 63.7 7.8C64.4 8.1 65.1 8.5 65.8 8.9C66.4 9.3 67 9.9 67.7 10.4C68.3 10.8 68.8 11.4 69.5 11.7C70.2 12 70.9 12.2 71.7 12.4C72.5 12.5 73.5 12.4 74.4 12.5C75.3 12.5 76.3 12.5 77.1 12.8C77.8 13 78.6 13.5 79.1 14.1C79.6 14.7 79.9 15.7 80.1 16.6C80.3 17.6 80.2 18.7 80.3 19.7C80.3 20.8 80.2 21.8 80.3 22.7C80.4 23.6 80.5 24.4 80.6 25.2C80.8 25.9 81.1 26.6 81.3 27.3C81.5 28 81.7 28.6 81.9 29.3C82.1 29.9 82.3 30.6 82.6 31.2C82.9 31.8 83.2 32.3 83.7 32.8C84.2 33.3 84.8 33.8 85.5 34.2C86.1 34.7 86.9 35.1 87.6 35.6C88.2 36.1 88.9 36.6 89.3 37.2C89.8 37.8 90 38.5 90.3 39.2C90.6 39.9 90.7 40.6 91 41.3C91.3 42 91.6 42.7 92.1 43.3C92.6 44 93.3 44.7 94 45.4C94.7 46.1 95.6 46.8 96.2 47.6C96.9 48.3 97.5 49.2 97.7 50Z' fill='url(%23w)'/><ellipse cx='34' cy='28' rx='15' ry='8' transform='rotate(-35 34 28)' fill='%23f0b6c0' opacity='.15'/><path d='M82.2 50C82.3 50.6 82.4 51.1 82.4 51.7C82.5 52.3 82.4 52.8 82.4 53.4C82.3 54 82.2 54.5 82 55.1C81.8 55.6 81.6 56.1 81.4 56.7C81.2 57.2 80.9 57.7 80.7 58.2C80.4 58.7 80.2 59.2 79.9 59.7C79.7 60.2 79.4 60.7 79.2 61.2C79 61.7 78.7 62.2 78.5 62.7C78.3 63.2 78 63.7 77.8 64.2C77.6 64.7 77.3 65.1 77 65.6C76.8 66.1 76.5 66.6 76.2 67C75.9 67.5 75.6 67.9 75.2 68.3C74.9 68.8 74.5 69.2 74.2 69.6C73.8 70 73.4 70.3 73 70.7C72.6 71.1 72.2 71.5 71.9 71.9C71.5 72.3 71.1 72.6 70.7 73C70.4 73.4 70 73.8 69.6 74.2C69.3 74.7 68.9 75.1 68.5 75.5C68.2 75.9 67.8 76.4 67.4 76.8C67 77.2 66.6 77.6 66.2 78C65.7 78.4 65.3 78.8 64.8 79.1C64.3 79.4 63.8 79.6 63.3 79.9C62.8 80.1 62.2 80.2 61.6 80.3C61.1 80.4 60.5 80.5 59.9 80.5C59.3 80.5 58.7 80.5 58.2 80.4C57.6 80.4 57 80.3 56.4 80.3C55.9 80.2 55.3 80.2 54.8 80.1C54.2 80.1 53.7 80.1 53.2 80.1C52.6 80.1 52.1 80.2 51.6 80.3C51.1 80.3 50.5 80.4 50 80.6C49.5 80.7 48.9 80.8 48.4 80.9C47.8 81 47.3 81.2 46.7 81.3C46.2 81.4 45.6 81.4 45 81.5C44.5 81.5 43.9 81.5 43.3 81.4C42.8 81.4 42.2 81.3 41.7 81.1C41.1 81 40.6 80.8 40.1 80.6C39.5 80.4 39 80.1 38.5 79.9C38 79.6 37.5 79.4 37 79.1C36.6 78.8 36.1 78.5 35.6 78.3C35.1 78 34.6 77.7 34.2 77.4C33.7 77.1 33.2 76.8 32.8 76.5C32.3 76.2 31.8 75.9 31.4 75.6C31 75.3 30.5 74.9 30.1 74.6C29.7 74.2 29.3 73.8 28.9 73.4C28.6 73 28.2 72.5 27.9 72.1C27.6 71.7 27.3 71.2 27 70.7C26.7 70.3 26.4 69.8 26.1 69.3C25.8 68.9 25.6 68.4 25.3 68C25 67.5 24.7 67.1 24.3 66.7C24 66.2 23.7 65.8 23.3 65.4C22.9 65 22.5 64.6 22.2 64.2C21.8 63.8 21.4 63.4 21 62.9C20.6 62.5 20.2 62 19.9 61.6C19.5 61.1 19.2 60.6 19 60.1C18.7 59.6 18.5 59 18.3 58.5C18.2 57.9 18.1 57.4 18 56.8C18 56.2 18 55.6 18.1 55.1C18.1 54.5 18.2 53.9 18.4 53.3C18.5 52.8 18.6 52.2 18.8 51.6C18.9 51.1 19.1 50.5 19.2 50C19.3 49.5 19.4 48.9 19.5 48.4C19.6 47.9 19.7 47.3 19.7 46.8C19.7 46.3 19.8 45.8 19.8 45.2C19.8 44.7 19.8 44.1 19.8 43.6C19.8 43 19.8 42.5 19.8 41.9C19.9 41.4 19.9 40.8 20 40.3C20.1 39.7 20.2 39.2 20.4 38.6C20.5 38.1 20.7 37.6 20.9 37.1C21.2 36.6 21.4 36.1 21.7 35.6C21.9 35.1 22.2 34.6 22.5 34.1C22.8 33.6 23.1 33.2 23.4 32.7C23.7 32.2 24 31.8 24.3 31.3C24.6 30.8 24.9 30.4 25.2 29.9C25.5 29.5 25.8 29 26.2 28.6C26.6 28.1 26.9 27.7 27.3 27.3C27.7 26.9 28.1 26.5 28.6 26.2C29 25.9 29.5 25.6 30 25.3C30.5 25 31 24.8 31.5 24.5C32 24.3 32.6 24.1 33.1 24C33.6 23.8 34.2 23.6 34.7 23.5C35.2 23.3 35.7 23.1 36.2 22.9C36.7 22.7 37.2 22.5 37.7 22.3C38.1 22.1 38.6 21.8 39.1 21.5C39.5 21.2 40 20.9 40.4 20.6C40.9 20.3 41.4 19.9 41.9 19.6C42.3 19.3 42.8 18.9 43.3 18.7C43.8 18.4 44.4 18.1 44.9 17.9C45.5 17.7 46 17.5 46.6 17.5C47.1 17.4 47.7 17.3 48.3 17.3C48.9 17.4 49.4 17.4 50 17.6C50.6 17.7 51.1 17.8 51.7 18C52.2 18.2 52.8 18.4 53.3 18.6C53.8 18.8 54.4 19 54.9 19.2C55.4 19.4 55.9 19.6 56.4 19.8C56.9 20 57.4 20.1 58 20.3C58.5 20.4 59 20.5 59.5 20.7C60 20.8 60.6 20.9 61.1 21.1C61.6 21.2 62.2 21.4 62.7 21.5C63.2 21.7 63.7 21.9 64.2 22.1C64.7 22.3 65.2 22.6 65.7 22.9C66.2 23.1 66.6 23.4 67.1 23.7C67.5 24 68 24.3 68.4 24.6C68.9 24.9 69.3 25.3 69.8 25.6C70.2 25.9 70.7 26.2 71.1 26.6C71.5 26.9 72 27.2 72.5 27.5C72.9 27.9 73.4 28.2 73.8 28.6C74.2 28.9 74.7 29.3 75.1 29.7C75.5 30.1 75.9 30.5 76.2 30.9C76.6 31.4 76.9 31.9 77.2 32.4C77.4 32.8 77.7 33.4 77.9 33.9C78 34.5 78.2 35 78.3 35.6C78.4 36.1 78.5 36.7 78.5 37.3C78.6 37.9 78.6 38.4 78.7 39C78.7 39.5 78.8 40.1 78.9 40.6C79 41.2 79 41.7 79.2 42.2C79.3 42.7 79.5 43.2 79.7 43.7C79.8 44.2 80.1 44.7 80.3 45.2C80.5 45.7 80.8 46.2 81 46.7C81.3 47.3 81.5 47.8 81.7 48.3C81.9 48.9 82.1 49.4 82.2 50Z' fill='url(%23p)'/><path d='M82.2 50C82.3 50.6 82.4 51.1 82.4 51.7C82.5 52.3 82.4 52.8 82.4 53.4C82.3 54 82.2 54.5 82 55.1C81.8 55.6 81.6 56.1 81.4 56.7C81.2 57.2 80.9 57.7 80.7 58.2C80.4 58.7 80.2 59.2 79.9 59.7C79.7 60.2 79.4 60.7 79.2 61.2C79 61.7 78.7 62.2 78.5 62.7C78.3 63.2 78 63.7 77.8 64.2C77.6 64.7 77.3 65.1 77 65.6C76.8 66.1 76.5 66.6 76.2 67C75.9 67.5 75.6 67.9 75.2 68.3C74.9 68.8 74.5 69.2 74.2 69.6C73.8 70 73.4 70.3 73 70.7C72.6 71.1 72.2 71.5 71.9 71.9C71.5 72.3 71.1 72.6 70.7 73C70.4 73.4 70 73.8 69.6 74.2C69.3 74.7 68.9 75.1 68.5 75.5C68.2 75.9 67.8 76.4 67.4 76.8C67 77.2 66.6 77.6 66.2 78C65.7 78.4 65.3 78.8 64.8 79.1C64.3 79.4 63.8 79.6 63.3 79.9C62.8 80.1 62.2 80.2 61.6 80.3C61.1 80.4 60.5 80.5 59.9 80.5C59.3 80.5 58.7 80.5 58.2 80.4C57.6 80.4 57 80.3 56.4 80.3C55.9 80.2 55.3 80.2 54.8 80.1C54.2 80.1 53.7 80.1 53.2 80.1C52.6 80.1 52.1 80.2 51.6 80.3C51.1 80.3 50.5 80.4 50 80.6C49.5 80.7 48.9 80.8 48.4 80.9C47.8 81 47.3 81.2 46.7 81.3C46.2 81.4 45.6 81.4 45 81.5C44.5 81.5 43.9 81.5 43.3 81.4C42.8 81.4 42.2 81.3 41.7 81.1C41.1 81 40.6 80.8 40.1 80.6C39.5 80.4 39 80.1 38.5 79.9C38 79.6 37.5 79.4 37 79.1C36.6 78.8 36.1 78.5 35.6 78.3C35.1 78 34.6 77.7 34.2 77.4C33.7 77.1 33.2 76.8 32.8 76.5C32.3 76.2 31.8 75.9 31.4 75.6C31 75.3 30.5 74.9 30.1 74.6C29.7 74.2 29.3 73.8 28.9 73.4C28.6 73 28.2 72.5 27.9 72.1C27.6 71.7 27.3 71.2 27 70.7C26.7 70.3 26.4 69.8 26.1 69.3C25.8 68.9 25.6 68.4 25.3 68C25 67.5 24.7 67.1 24.3 66.7C24 66.2 23.7 65.8 23.3 65.4C22.9 65 22.5 64.6 22.2 64.2C21.8 63.8 21.4 63.4 21 62.9C20.6 62.5 20.2 62 19.9 61.6C19.5 61.1 19.2 60.6 19 60.1C18.7 59.6 18.5 59 18.3 58.5C18.2 57.9 18.1 57.4 18 56.8C18 56.2 18 55.6 18.1 55.1C18.1 54.5 18.2 53.9 18.4 53.3C18.5 52.8 18.6 52.2 18.8 51.6C18.9 51.1 19.1 50.5 19.2 50C19.3 49.5 19.4 48.9 19.5 48.4C19.6 47.9 19.7 47.3 19.7 46.8C19.7 46.3 19.8 45.8 19.8 45.2C19.8 44.7 19.8 44.1 19.8 43.6C19.8 43 19.8 42.5 19.8 41.9C19.9 41.4 19.9 40.8 20 40.3C20.1 39.7 20.2 39.2 20.4 38.6C20.5 38.1 20.7 37.6 20.9 37.1C21.2 36.6 21.4 36.1 21.7 35.6C21.9 35.1 22.2 34.6 22.5 34.1C22.8 33.6 23.1 33.2 23.4 32.7C23.7 32.2 24 31.8 24.3 31.3C24.6 30.8 24.9 30.4 25.2 29.9C25.5 29.5 25.8 29 26.2 28.6C26.6 28.1 26.9 27.7 27.3 27.3C27.7 26.9 28.1 26.5 28.6 26.2C29 25.9 29.5 25.6 30 25.3C30.5 25 31 24.8 31.5 24.5C32 24.3 32.6 24.1 33.1 24C33.6 23.8 34.2 23.6 34.7 23.5C35.2 23.3 35.7 23.1 36.2 22.9C36.7 22.7 37.2 22.5 37.7 22.3C38.1 22.1 38.6 21.8 39.1 21.5C39.5 21.2 40 20.9 40.4 20.6C40.9 20.3 41.4 19.9 41.9 19.6C42.3 19.3 42.8 18.9 43.3 18.7C43.8 18.4 44.4 18.1 44.9 17.9C45.5 17.7 46 17.5 46.6 17.5C47.1 17.4 47.7 17.3 48.3 17.3C48.9 17.4 49.4 17.4 50 17.6C50.6 17.7 51.1 17.8 51.7 18C52.2 18.2 52.8 18.4 53.3 18.6C53.8 18.8 54.4 19 54.9 19.2C55.4 19.4 55.9 19.6 56.4 19.8C56.9 20 57.4 20.1 58 20.3C58.5 20.4 59 20.5 59.5 20.7C60 20.8 60.6 20.9 61.1 21.1C61.6 21.2 62.2 21.4 62.7 21.5C63.2 21.7 63.7 21.9 64.2 22.1C64.7 22.3 65.2 22.6 65.7 22.9C66.2 23.1 66.6 23.4 67.1 23.7C67.5 24 68 24.3 68.4 24.6C68.9 24.9 69.3 25.3 69.8 25.6C70.2 25.9 70.7 26.2 71.1 26.6C71.5 26.9 72 27.2 72.5 27.5C72.9 27.9 73.4 28.2 73.8 28.6C74.2 28.9 74.7 29.3 75.1 29.7C75.5 30.1 75.9 30.5 76.2 30.9C76.6 31.4 76.9 31.9 77.2 32.4C77.4 32.8 77.7 33.4 77.9 33.9C78 34.5 78.2 35 78.3 35.6C78.4 36.1 78.5 36.7 78.5 37.3C78.6 37.9 78.6 38.4 78.7 39C78.7 39.5 78.8 40.1 78.9 40.6C79 41.2 79 41.7 79.2 42.2C79.3 42.7 79.5 43.2 79.7 43.7C79.8 44.2 80.1 44.7 80.3 45.2C80.5 45.7 80.8 46.2 81 46.7C81.3 47.3 81.5 47.8 81.7 48.3C81.9 48.9 82.1 49.4 82.2 50Z' fill='none' stroke='url(%23rim)' stroke-width='2.2'/><circle cx='50' cy='50' r='25.5' fill='none' stroke='%232a040c' stroke-width='1.1' stroke-dasharray='.1 2.6' stroke-linecap='round' opacity='.8'/><g transform='translate(31.5 34) scale(.58)'><path d='M32 52 C14 40 4 30 4 18 C4 9 11 3 19 3 C25 3 29 6 32 11 C35 6 39 3 45 3 C53 3 60 9 60 18 C60 30 50 40 32 52 Z' fill='%2322030a' opacity='.6' transform='translate(1.6 2.2)'/><path d='M32 52 C14 40 4 30 4 18 C4 9 11 3 19 3 C25 3 29 6 32 11 C35 6 39 3 45 3 C53 3 60 9 60 18 C60 30 50 40 32 52 Z' fill='url(%23g)' stroke='%235e400e' stroke-width='1.6'/><path d='M14 14 C16 9 21 7.5 25 9' fill='none' stroke='%23fbefc4' stroke-width='2.4' stroke-linecap='round' opacity='.45'/></g></svg>") center / contain no-repeat;
+  filter: drop-shadow(0 .22cqw .25cqw rgba(45, 8, 4, .5)); }
+.spruch::after { content: none; }
 .spruch .k { display: block; font-family: var(--display); font-weight: 700; font-size: 1cqw; letter-spacing: .3em; color: var(--ochre); margin-bottom: .6cqw; }
 .spruch .s { display: block; font-size: 1.55cqw; line-height: 1.32; font-weight: 600; color: var(--ink); }
 .spruch .s em, .spr-page .s em, .gdw em { font-style: normal; color: var(--ypsi-ink); font-weight: 700; }
@@ -744,8 +961,14 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 /* weekly thought: the sheet as a real print glued in with four album corners (navy leather with a gold edge, like the cover),
    the saying beside it in the book's script; the big 1200 px sheet from R2, so it stays sharp at this size */
 .gdw { display: grid; grid-template-columns: 34% 1fr; gap: 5cqw; align-items: center; margin-top: .6cqh; }
-.gdw .photo { transform: rotate(-2deg); padding: 1.3cqw 1.3cqw 1.7cqw; background: #fffdf8;
-  box-shadow: 0 .6cqw 1.3cqw rgba(40, 25, 10, .3), 0 .12cqw .3cqw rgba(40, 25, 10, .3); }
+/* the print sits on a sheet of handmade paper (Doc, 24.11.2026: "Büttenpapier oder ausgefranstes Papier. Schöner."): warm
+   cream with fibres and a torn, deckled edge - one SVG painted behind the print (noise displaces the rectangle's edge, finer
+   noise lays the fibres in), the shadow follows the ragged outline */
+.gdw .photo { transform: rotate(-2deg); padding: 1.2cqw 1.2cqw 1.6cqw;
+  background: var(--deckle-tall) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 .45cqw .6cqw rgba(40, 25, 10, .32)) drop-shadow(0 .1cqw .12cqw rgba(40, 25, 10, .3)); }
+/* printed onto that paper: the sheet's white takes the paper's tone (multiply inside the shadowed group) */
+.gdw .photo img { mix-blend-mode: multiply; }
 .gdw .pc { position: absolute; inset: 0; pointer-events: none; }
 .gdw .photo::before, .gdw .photo::after, .gdw .pc::before, .gdw .pc::after { content: ''; position: absolute; z-index: 2; width: 4.6cqw; height: 4.6cqw;
   background: linear-gradient(135deg, #2b4170 0, #16233f 44%, #e2bd5c 44%, #a87b22 49%, transparent 49%);
@@ -769,6 +992,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 .toc-gear svg { width: 100%; height: 100%; display: block; }
 .toc-gear:hover { transform: rotate(30deg); }
 .in.toc .lbl { margin: 2cqh 0 .8cqh; }
+/* the settings page with more air between its parts (Doc, 24.11.2026: "den y noch ein bisschen Luft geben") */
+.p-set1 .in.toc .lbl { margin: 3.6cqh 0 1.5cqh; }
+.p-set1 .setp .set-note { margin-top: 4.6cqh; }
 .in.toc .toc-book { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 4cqw; }
 .in.toc .toc-book button { display: flex; align-items: baseline; gap: 1cqw; width: 100%; border: 0; background: none; padding: .45cqh 0; cursor: pointer; text-align: left; color: var(--ink);
   font: calc(var(--u) * 2.6) / 1.3 var(--read); }
@@ -777,6 +1003,8 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 .in.toc .toc-book button em { font-style: normal; font-family: var(--display); font-size: calc(var(--u) * 1.8); letter-spacing: .06em; color: var(--print-soft); white-space: nowrap; }
 .in.toc .toc-book button:hover span { color: var(--ypsi-ink); }
 .in.toc .toc-year { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4cqh 3cqw; }
+.in.toc .mon h4 button { border: 0; background: none; padding: 0; margin: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; }
+.in.toc .mon h4 button:hover { color: var(--ypsi-ink); }
 .in.toc .mon h4 { margin: 0 0 .5cqh; font-family: var(--display); font-weight: 700; font-size: calc(var(--u) * 1.75); letter-spacing: .18em; text-transform: uppercase; color: var(--ink); }
 .in.toc .mon .g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: calc(var(--u) * .2); }
 .in.toc .mon .g b { font: 700 calc(var(--u) * 1.2) / 1.6 var(--display); color: var(--print-soft); text-align: center; }
@@ -916,7 +1144,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 .tp .t2.yr { margin-top: -1.2cqh; font-weight: 700; letter-spacing: .4em; }
 .tp .t1 { font-family: 'Great Vibes', 'Pinyon Script', cursive; font-weight: 400; font-size: 15cqw; line-height: 1.1; letter-spacing: 0; margin-top: 3cqh; }
 .tp .t2 { font-family: var(--display); font-weight: 500; font-size: 2.6cqw; letter-spacing: .32em; padding-left: .32em; color: var(--ochre); }
-.tp svg { width: 34cqw; height: auto; margin: 1.2cqh 0 1.6cqh; }
+.tp svg { width: 34cqw; height: auto; margin: 1.2cqh 0 1.6cqh; flex: none; }   /* flex: none - the full column had squeezed them to 0 px */
 /* the plan of the book: Orbitron for the when, the book's script for the what (no Arial on the title page - Doc, 23.11.2026) */
 .tp-plan { margin: 0; display: grid; gap: 1.5cqh; }
 .tp-plan dt { font-family: var(--display); font-weight: 700; font-size: 2cqw; letter-spacing: .3em; padding-left: .3em; text-transform: uppercase; color: var(--ochre); }
@@ -926,11 +1154,35 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 .tp .sig .by { display: block; font-family: var(--script); font-size: calc(3cqw * var(--sk)); color: #2a2620; transform: rotate(3deg); margin-bottom: .4cqh; }
 /* "ein Claude-Buch von" (Doc, 24.11.2026: "weil ich das mit euch gemacht habe") a few px nearer the name, the © a few px up */
 .tp .sig .by { transform: translateY(.55cqh) rotate(3deg); }
-.tp .copy { margin-top: -1.55cqh; font-family: var(--display); font-weight: 500; font-size: 2cqw; letter-spacing: .25em; color: var(--print-soft); }
+/* in Orbitron like the © line (Doc, 24.11.2026: "ein Claude-Buch von bitte im Orbi, wie unten die 2026"), straight, small caps */
+.tp .sig .by { font-family: var(--display); font-weight: 500; font-size: 2cqw; letter-spacing: .25em; padding-left: .25em; text-transform: uppercase;
+  color: var(--print-soft); margin-bottom: 1.2cqh;
+  /* level, not tilted - it sits in the tilted signature, so it turns back by the signature's 3 degrees - and a bit lower
+     (Doc, 24.11.2026: "definitiv nicht schief und ein Stück weiter runter") */
+  transform: rotate(3deg) translateY(1.87cqh); }   /* +2 px (Doc) */
+.tp .copy { margin-top: -2.08cqh; font-family: var(--display); font-weight: 500; font-size: 2cqw; letter-spacing: .25em; color: var(--print-soft); }
 .tp .tp-plan { margin-top: -3cqh; }
 /* the signature block a little lower, nearer the foot of the page (Doc, 24.11.2026: "Stück weiter runter") - it hangs on
    margin-top: auto, so only it moves */
 .tp { bottom: 4.5cqh; }
+/* the whole title page a little higher (Doc, 24.11.2026: "Rück mal bitte alles ein Stück weiter hoch"): top and bottom by 3 cqh */
+.tp { top: 6cqh; bottom: 7.5cqh; }
+/* the signature block 6 px lower, the © 4 px up, "ein Claude-Buch von" 2 px lower (Doc, 24.11.2026; px at a 748 px page) */
+.tp { bottom: 5.9cqh; }
+/* from "Grateful" down to the new divider everything 10 px higher (Doc, 24.11.2026; px at a 748 px page) - the signature
+   hangs on margin-top: auto and stays where it is */
+.tp { top: 4.66cqh; }
+.tp svg.tp-end { margin: 1.4cqh 0 0; }
+/* with both dividers back (they had been squeezed to 0 px) the column ran over the page foot: a little less space between
+   its parts, so the signature sits where Doc placed it again */
+.tp { gap: 1.45cqh; }
+/* the two dividers finer and smaller (Doc, 24.11.2026: "subtiler, also dünner, kleiner"), and the lower one as close to
+   "dein Jahr in Worten" as the upper one is to MORGENS ("deutlich nach oben rücken, gleicher Abstand") */
+.tp svg { width: 26.25cqw; }   /* 5 % bigger (Doc) */
+.tp svg:not(.tp-end) { margin-bottom: calc(1.6cqh + .53cqh); }   /* 4 px more room (Doc) */
+.tp svg path { stroke-width: .95; }
+.tp svg circle { r: 1.25px; }
+.tp svg.tp-end { margin-top: calc(-1.45cqh + .2cqh + .53cqh); }   /* 4 px more room (Doc) */   /* and another 6 px lower (Doc, 24.11.2026: "sensationell gut ... noch 6 Pixel weiter") */
 .notes p { font-size: calc(var(--u) * 3.1); line-height: 1.45; color: var(--print); margin-top: 1.6cqh; }
 /* the imprint under "So geht's": small print, links in the book's ochre */
 .notes .imp { margin-top: 2.4cqh; }
@@ -945,6 +1197,10 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 .notes .imp a:hover { text-decoration: underline; }
 .notes p b { color: var(--ink); }
 .ruled { flex: 1; margin-top: 2cqh; background-image: repeating-linear-gradient(180deg, transparent 0 calc(var(--u) * 6.6 - 1px), rgba(60, 95, 150, .22) calc(var(--u) * 6.6 - 1px) calc(var(--u) * 6.6)); }
+/* thin, even note lines (Doc, 24.11.2026: "nur dünne Linie nehmen bei Notizen"): one hairline per line, lighter, and the
+   line spacing rounded to whole pixels - a fractional spacing let some lines blur to two pixels and look thicker */
+.ruled { background-image: linear-gradient(180deg, transparent calc(100% - 1px), rgba(60, 95, 150, .17) 0); background-size: 100% calc(var(--u) * 6.6); background-repeat: repeat-y; }
+@supports (width: round(1.5px, 1px)) { .ruled { background-size: 100% round(nearest, calc(var(--u) * 6.6), 1px); } }
 
 /* static spreads (mock-up 2 and the fallback) */
 .spread { position: relative; display: grid; grid-template-columns: 1fr 1fr; aspect-ratio: 1000 / 700; }
@@ -970,6 +1226,87 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   .card { padding: 12px 14px; }
 }
 @media (max-width: 460px) { .flow { grid-template-columns: minmax(0, 1fr); } }
+
+/* ===== Smartphones, short landscape screens, touch (Doc, 24.11.2026: "auf dem Phone ... gar nicht responsive") =====
+   The desktop look stays exactly as above. Phone upright: one page as wide as the screen. Phone sideways: the spread as wide
+   as the screen, the page scrolls up and down. Touch screens: tabs, gear and buttons a thumb can hit (at least 40 px). */
+/* full screen and home screen app: nothing under the camera hole, the notch or the gesture bar (the insets are 0 on a desktop,
+   so these are the old paddings there: 72 / 5% / 50 / 5%) */
+.stage { padding: calc(72px + env(safe-area-inset-top)) calc(5% + env(safe-area-inset-right)) calc(50px + env(safe-area-inset-bottom)) calc(5% + env(safe-area-inset-left)); }
+.stage .bookwrap { max-width: min(1000px, calc((100dvh - 150px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 1000 / 700)); }
+.stage.portrait .bookwrap { max-width: min(440px, calc((100dvh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 400 / 640)); }
+/* the book takes 90 % of the window, aspect kept (Doc, 24.11.2026: "mach es mal 90% des Fensters, keep aspect"): its whole
+   look - the boards (3.4 % wider, 2.1 % lower than the spread) and the open day's tab on top (40 px) - fits into 90 % of the
+   width and of the height, the 1000 px cap is gone. Not on an upright phone (one page) and not on a phone held sideways
+   (there the spread is as wide as the screen and the desk scrolls). */
+@media not all and (orientation: landscape) and (max-height: 500px) {
+  .stage:not(.portrait) { padding-top: calc(18px + env(safe-area-inset-top)); padding-bottom: env(safe-area-inset-bottom); }
+  .stage:not(.portrait) .bookwrap { max-width: none; width: min(86.5vw, calc((90dvh - 40px) / .721)); }
+}
+.toast { bottom: calc(22px + env(safe-area-inset-bottom)); }
+@media (max-width: 700px) {
+  .stage { padding: calc(64px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left)); }
+  .toast { bottom: calc(14px + env(safe-area-inset-bottom)); }
+}
+/* phone sideways: the spread takes the whole width (a height-bound spread was 340 px wide, its writing 8 px); the desk
+   scrolls up and down, so sheets, veil and note stay on the screen */
+@media (orientation: landscape) and (max-height: 500px) {
+  .stage { justify-content: flex-start; padding-top: calc(60px + env(safe-area-inset-top)); padding-bottom: calc(44px + env(safe-area-inset-bottom)); }
+  .stage .bookwrap { max-width: 1000px; }
+  .sheet, .veil, .toast { position: fixed; }
+  .sheet { max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+  .mqs { gap: 2cqh; }   /* the monthly check keeps its footer inside the margin */
+}
+/* the full screen switch: four gold corners on the wood, bottom right (thumb), sideways top right (the desk scrolls);
+   only on phones and touch screens - on a computer the key F does it, the desk keeps its look */
+.fs-btn { position: absolute; z-index: 6; right: calc(8px + env(safe-area-inset-right)); bottom: calc(8px + env(safe-area-inset-bottom)); width: 44px; height: 44px;
+  padding: 11px; border: 0; border-radius: 50%; background: rgba(20, 9, 3, .3); color: #ecc969; opacity: .72; cursor: pointer; display: none;
+  -webkit-tap-highlight-color: transparent; }
+.fs-btn:active { opacity: 1; }
+.fs-btn svg { width: 100%; height: 100%; display: block; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .75)); }
+.fs-btn .x, .stage.fs-on .fs-btn .o { display: none; }
+.stage.fs-on .fs-btn .x { display: block; }
+@media (orientation: landscape) and (max-height: 500px) { .fs-btn { top: calc(8px + env(safe-area-inset-top)); bottom: auto; } }
+/* the installed app opens full screen anyway (manifest): no switch there - unless the switch itself made it full screen */
+@media (display-mode: fullscreen), (display-mode: standalone) { .stage:not(.fs-on) .fs-btn { display: none !important; } }
+@media (pointer: coarse), (max-width: 700px), (max-height: 500px) {
+  .stage.fs-able .fs-btn { display: block; }
+  .stage.fs-able .toast { max-width: calc(100% - 128px); }
+  /* the tabs: 42 px high, the open day 48 (desktop 33 / 40) - same leather and gold, the writing a little lower */
+  .reg, .reg.l { top: -42px; }
+  #reg, #reg button, .reg.l button { height: 42px; }
+  #reg button.sel { height: 48px; }
+  .reg button { padding-top: 9px; }
+  /* the gear on the contents page: big enough for a thumb */
+  .toc-gear { width: max(44px, calc(var(--u) * 7.5)); height: max(44px, calc(var(--u) * 7.5)); }
+  /* typed entries (Arial) never below 16 px - Android zooms into smaller fields */
+  .stage.typed textarea.hand { font-size: max(16px, calc(var(--u) * 3.3 * max(var(--fz, 1), .8))); }
+}
+/* "INHALT" fits its narrow phone tab */
+.stage.portrait .reg.l button span { letter-spacing: .9px; }
+/* the monthly check on the phone: the circles across the whole line (a little bigger for the thumb), the questions a little
+   closer, so the sentence of the month and the footer stay on the page */
+.stage.portrait .scale { max-width: none; }
+.stage.portrait .mqs { gap: 1.2cqh; margin: 2.4cqh 0 1.2cqh; }
+/* the week page's five questions a little closer on the phone - its footer was cut off below the page */
+.stage.portrait .wq { margin-top: .9cqh; }
+/* the inside of the front board on the phone (with the plate "für …"): the board stands round the page like the cover */
+.stage.portrait .p-endpaper .board-in { inset: -2.4cqw -2.6cqw -3cqw -1.4cqw; border-radius: 0 .9cqw .9cqw 0; }
+/* the thought of the day on the phone: its own page between morning and evening ("in der Mitte"), no card over the page.
+   A sheet of Doc's own shows its picture; long sayings get smaller letters; going through the sayings (?spruch=) the
+   page also names the source and the day. */
+.spr-page { gap: 2.6cqh; }
+.spr-page .photo { width: 36cqw; }
+.spr-page.long .photo { width: 30cqw; }
+.spr-page.long .s { font-size: 5.4cqw; }
+.spr-page.longer .s { font-size: 4.8cqw; line-height: 1.3; }
+.spr-page .w { font-size: 3.4cqw; line-height: 1.35; }
+.spr-page .q, .spr-page .r { display: none; }
+.stage.review .spr-page .q:not(:empty) { display: block; font-size: 2.7cqw; line-height: 1.4; color: var(--print-soft); overflow-wrap: anywhere; }
+.spr-page .q a { color: var(--ochre); text-decoration: none; }
+.stage.review .spr-page .r { display: block; padding-top: 1.4cqh; border-top: 1px solid rgba(176, 122, 20, .3); font-family: var(--display); font-weight: 700;
+  font-size: 2.5cqw; letter-spacing: .25em; text-transform: uppercase; color: var(--ochre); }
 </style>
 </head>
 <body>
@@ -977,6 +1314,18 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 <!-- Shared SVG filters (ink, brush, pencil, watercolour) and the painted drawings, filled by script -->
 <svg class="sprite" aria-hidden="true" focusable="false">
   <defs>
+    <!-- the sun and moon of the day pages in gold foil and night blue (Doc, 24.11.2026: "den Mond und die Sonne ... ein
+         bisschen schöner machen") -->
+    <radialGradient id="g-sun" cx=".42" cy=".35" r=".75"><stop offset="0" stop-color="#fff2c2"/><stop offset=".45" stop-color="#f1cf6a"/><stop offset="1" stop-color="#c9952e"/></radialGradient>
+    <linearGradient id="g-sun-ray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d77c"/><stop offset="1" stop-color="#d9a640"/></linearGradient>
+    <!-- gold of the quill holder, the dark red of its feather -->
+    <linearGradient id="g-holder" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a5a1e"/><stop offset=".35" stop-color="#fbe7a6"/><stop offset=".6" stop-color="#d4ad55"/><stop offset="1" stop-color="#6e4f17"/></linearGradient>
+    <linearGradient id="g-feather" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a72a2a"/><stop offset=".55" stop-color="#781b1b"/><stop offset="1" stop-color="#521111"/></linearGradient>
+    <linearGradient id="g-feather-lit" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d84a46"/><stop offset=".55" stop-color="#a82a2a"/><stop offset="1" stop-color="#7a1c1c"/></linearGradient>
+    <linearGradient id="g-moon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a6cb0"/><stop offset=".55" stop-color="#2c4a86"/><stop offset="1" stop-color="#18284f"/></linearGradient>
+    <!-- the quill's feather, drawn once and used by every quill (Doc, 24.11.2026: "ein bisschen federiger"): a vane fringed by its
+         barbs, a few splits, soft down at the foot, a tapered shaft; its colours come in through custom properties (.quill.has lights it) -->
+    <g id="quill-feather"><path class="qf-down" d="M21.4 33.44C23.09 33.22 24.51 31.21 25.57 30.86M21.31 26.33C19.88 26.22 18.64 24.47 17.74 24.37M21.32 30.44C23.2 30.44 24.81 28.56 25.97 28.19M21.31 29.74C19.8 29.74 18.46 28.63 17.5 27.93M21.3 27.52C22.78 27.21 24.07 25.81 25 25M21.39 33.39C20.05 33.54 18.83 32.11 17.99 32.14M21.31 26.42C22.8 26.28 24.11 25.07 25.05 24.31M21.31 29.49C19.87 28.65 18.6 26.46 17.69 25.52M21.41 33.94C23.15 33.38 24.65 32.24 25.68 30.44M21.31 26.74C20.08 26.5 19.02 24.75 18.26 24.69M21.34 31.48C22.27 31.07 23.06 29.77 23.64 29.3M21.35 32.06C20.47 32.1 19.68 31.27 19.12 31.09M21.31 29.47C23.4 28.62 25.21 26.19 26.51 24.77M21.36 32.1C20.2 32.07 19.15 30.56 18.43 30.65M21.33 24.81C22.82 24.54 24.13 23.67 25.08 22.36M21.37 32.78C20.15 32.78 19.04 31.37 18.28 31.32M21.31 26.6C23.47 25.68 25.37 24.03 26.74 21.63M21.31 29.38C20.36 28.93 19.53 28.05 18.93 27.07M21.3 27.51C22.88 26.88 24.26 24.67 25.24 23.99M21.36 23.74C20.31 23.07 19.38 22.56 18.76 20.65M21.33 24.89C22.35 24.79 23.26 23.92 23.9 23.43M21.33 30.91C19.96 30.04 18.75 28.96 17.86 26.93M21.31 29.34C22.3 29.29 23.16 29.09 23.77 28.05M21.37 32.73C20.6 32.62 19.92 32.12 19.42 31.54M21.3 27.46C23.15 27.38 24.77 25.29 25.92 25.05M21.31 26.88C20.4 26.62 19.6 26.37 19.04 25.12M21.42 34.15C23.01 33.9 24.39 33.24 25.33 31.64M21.34 31.3C20.26 31.19 19.31 30.36 18.62 29.74M21.3 27.63C23.25 26.96 24.95 24.58 26.17 23.6M21.34 24.54C20.54 24.55 19.86 23.64 19.36 23.61M21.38 32.85C22.94 32.52 24.26 30.49 25.23 30.16M21.32 30.17C20.03 30.19 18.88 28.84 18.07 28.68M21.35 24.14C22.94 23.93 24.35 23.25 25.38 21.72M21.31 26.49C19.76 26.21 18.41 24.59 17.45 23.96M21.35 31.94C23.5 32.04 25.32 29.87 26.65 29.6M21.3 28.46C19.83 27.87 18.53 25.64 17.61 25.18M21.33 25.07C22.64 24.32 23.81 22.84 24.65 21.48M21.3 28.31C19.81 27.91 18.51 27.44 17.58 25.51M21.32 25.56C22.37 25.52 23.28 25.4 23.95 24.21M21.32 30.63C19.9 29.88 18.65 28.88 17.74 26.95M21.3 28.67C23.24 28.61 24.92 26.97 26.13 26.21M21.35 24.12C20.14 24.15 19.09 24.14 18.37 22.75M21.35 31.85C22.94 31.13 24.3 29.02 25.28 28.06M21.3 27.37C20.06 27.33 18.97 26.39 18.19 25.79M21.33 30.88C22.8 30.81 24.05 29.09 24.97 28.97M21.35 32C19.8 32.13 18.41 31.19 17.41 30.45"/><path class="qf-vane" d="M21.31 26.33C21.47 26.13 22.04 25.5 22.29 25.15C22.54 24.81 22.64 24.55 22.81 24.26C22.97 23.97 23.14 23.67 23.27 23.4C23.4 23.13 23.47 22.9 23.58 22.64C23.68 22.38 23.8 22.12 23.91 21.86C24.02 21.6 24.15 21.33 24.24 21.09C24.33 20.85 24.35 20.64 24.44 20.4C24.54 20.15 24.69 19.87 24.79 19.61C24.9 19.36 24.99 19.12 25.09 18.87C25.19 18.62 25.33 18.34 25.39 18.12C25.45 17.89 25.39 17.75 25.45 17.52C25.51 17.3 25.67 17.01 25.75 16.78C25.82 16.54 25.81 16.37 25.91 16.12C26.02 15.87 26.27 15.53 26.38 15.27C26.48 15.02 26.54 14.8 26.57 14.6C26.6 14.4 26.47 14.3 26.57 14.06C26.66 13.82 27 13.42 27.13 13.15C27.25 12.89 27.29 12.69 27.34 12.47C27.4 12.26 27.39 12.08 27.44 11.87C27.49 11.66 27.68 11.35 27.64 11.2C27.6 11.05 27.33 11.05 27.2 10.97C27.07 10.88 26.78 10.89 26.84 10.68C26.9 10.47 27.35 9.99 27.56 9.68C27.76 9.37 27.93 9.08 28.08 8.81C28.24 8.53 28.39 8.25 28.49 8.01C28.6 7.77 28.66 7.55 28.72 7.34C28.77 7.13 28.73 6.99 28.82 6.76C28.9 6.53 29.12 6.21 29.22 5.98C29.32 5.74 29.31 5.58 29.41 5.34C29.51 5.1 29.74 4.78 29.81 4.56C29.88 4.34 29.79 4.24 29.84 4.04C29.89 3.84 30.04 3.57 30.1 3.36C30.16 3.15 30.15 2.99 30.22 2.78C30.29 2.57 30.44 2.3 30.5 2.09C30.56 1.89 30.55 1.73 30.58 1.55C30.61 1.36 30.56 1.24 30.67 1C30.78 0.75 31.13 0.35 31.26 0.1C31.39 -0.15 31.4 -0.32 31.45 -0.51C31.49 -0.71 31.51 -0.88 31.54 -1.06C31.58 -1.24 31.64 -1.45 31.65 -1.61C31.66 -1.78 31.66 -1.94 31.6 -2.05C31.54 -2.17 31.45 -2.25 31.3 -2.31C31.15 -2.36 30.77 -2.24 30.72 -2.36C30.66 -2.47 30.69 -2.65 30.96 -2.99C31.23 -3.34 32.06 -4.08 32.31 -4.42C32.57 -4.75 32.4 -4.78 32.51 -5.01C32.61 -5.24 32.89 -5.59 32.94 -5.78C32.99 -5.96 32.75 -5.94 32.82 -6.14C32.88 -6.33 33.23 -6.73 33.33 -6.95C33.43 -7.17 33.46 -7.34 33.41 -7.45C33.36 -7.57 33.04 -7.49 33.03 -7.62C33.01 -7.75 33.16 -8 33.3 -8.25C33.44 -8.5 33.8 -8.91 33.87 -9.1C33.94 -9.3 33.68 -9.25 33.73 -9.43C33.78 -9.61 34.14 -10.02 34.17 -10.18C34.2 -10.35 33.98 -10.32 33.92 -10.42C33.86 -10.52 33.77 -10.59 33.83 -10.78C33.89 -10.96 34.17 -11.31 34.28 -11.52C34.38 -11.74 34.61 -12.05 34.45 -12.07C34.29 -12.09 33.57 -11.69 33.31 -11.64C33.06 -11.59 32.79 -11.52 32.9 -11.74C33.01 -11.96 33.68 -12.58 34 -12.95C34.32 -13.33 34.72 -13.75 34.84 -13.98C34.97 -14.21 34.83 -14.24 34.76 -14.31C34.68 -14.39 34.45 -14.35 34.4 -14.44C34.36 -14.54 34.49 -14.77 34.49 -14.9C34.49 -15.03 34.42 -15.1 34.4 -15.22C34.37 -15.33 34.3 -15.4 34.35 -15.56C34.4 -15.73 34.71 -16.09 34.71 -16.21C34.7 -16.33 34.35 -16.19 34.3 -16.28C34.25 -16.37 34.41 -16.61 34.39 -16.72C34.38 -16.83 34.28 -16.89 34.2 -16.95C34.12 -17.01 33.95 -17 33.91 -17.09C33.86 -17.18 34.01 -17.41 33.93 -17.47C33.84 -17.52 33.51 -17.39 33.39 -17.42C33.28 -17.45 33.37 -17.64 33.24 -17.66C33.11 -17.67 32.79 -17.55 32.6 -17.52C32.41 -17.49 32.66 -17.56 32.09 -17.48C31.51 -17.39 29.88 -17.14 29.17 -17C28.45 -16.85 28.08 -16.68 27.8 -16.59C27.53 -16.51 27.62 -16.52 27.52 -16.48C27.43 -16.45 27.32 -16.45 27.24 -16.37C27.16 -16.28 27.1 -16.08 27.02 -15.97C26.94 -15.87 26.85 -15.8 26.77 -15.71C26.68 -15.62 26.6 -15.52 26.52 -15.44C26.43 -15.35 26.33 -15.31 26.24 -15.22C26.16 -15.13 26.08 -15.02 26 -14.9C25.92 -14.79 25.84 -14.64 25.76 -14.53C25.68 -14.42 25.58 -14.36 25.5 -14.24C25.43 -14.12 25.35 -13.98 25.29 -13.82C25.22 -13.65 25.18 -13.43 25.11 -13.26C25.05 -13.08 25 -12.9 24.92 -12.76C24.85 -12.63 24.74 -12.59 24.67 -12.45C24.59 -12.31 24.54 -12.11 24.48 -11.94C24.42 -11.77 24.36 -11.6 24.3 -11.43C24.24 -11.26 24.19 -11.07 24.12 -10.92C24.05 -10.78 23.95 -10.71 23.88 -10.56C23.81 -10.4 23.76 -10.2 23.71 -10.02C23.66 -9.83 23.62 -9.62 23.56 -9.45C23.5 -9.28 23.44 -9.13 23.36 -9C23.28 -8.88 23.14 -8.87 23.08 -8.7C23.02 -8.53 23.05 -8.19 23 -8C22.95 -7.81 22.85 -7.72 22.79 -7.57C22.72 -7.43 22.64 -7.29 22.59 -7.11C22.53 -6.94 22.51 -6.71 22.47 -6.5C22.44 -6.29 22.41 -6.07 22.37 -5.86C22.33 -5.66 22.31 -5.43 22.24 -5.28C22.18 -5.12 22.05 -5.09 22 -4.91C21.95 -4.73 21.98 -4.41 21.94 -4.21C21.91 -4 21.85 -3.85 21.79 -3.68C21.73 -3.51 21.67 -3.37 21.61 -3.2C21.55 -3.04 21.48 -2.9 21.45 -2.7C21.41 -2.49 21.45 -2.17 21.42 -1.98C21.38 -1.78 21.26 -1.71 21.22 -1.52C21.19 -1.33 21.23 -1.01 21.19 -0.83C21.14 -0.64 20.99 -0.63 20.96 -0.43C20.93 -0.23 21.02 0.15 21.01 0.38C21 0.61 20.94 0.77 20.9 0.95C20.86 1.13 20.8 1.29 20.75 1.46C20.71 1.64 20.67 1.83 20.63 2.01C20.59 2.19 20.53 2.35 20.49 2.54C20.46 2.74 20.4 2.89 20.43 3.16C20.45 3.43 20.62 3.87 20.65 4.15C20.69 4.43 20.67 4.63 20.65 4.83C20.63 5.04 20.57 5.19 20.52 5.36C20.48 5.53 20.42 5.69 20.36 5.84C20.31 6 20.23 6.14 20.18 6.3C20.12 6.45 20.06 6.61 20.03 6.8C19.99 6.98 19.96 7.17 19.96 7.39C19.96 7.62 20.03 7.92 20.04 8.15C20.05 8.37 20.03 8.57 19.99 8.76C19.96 8.94 19.87 9.06 19.85 9.26C19.82 9.45 19.86 9.71 19.86 9.93C19.86 10.14 19.87 10.36 19.85 10.56C19.83 10.76 19.76 10.9 19.75 11.11C19.75 11.32 19.8 11.59 19.81 11.81C19.82 12.04 19.82 12.25 19.81 12.45C19.8 12.66 19.77 12.84 19.77 13.05C19.77 13.26 19.81 13.52 19.81 13.73C19.81 13.94 19.76 14.1 19.77 14.31C19.77 14.53 19.83 14.79 19.84 15.01C19.85 15.23 19.85 15.44 19.85 15.64C19.85 15.85 19.84 16.05 19.84 16.25C19.84 16.46 19.86 16.68 19.86 16.89C19.86 17.09 19.82 17.27 19.83 17.48C19.84 17.7 19.9 17.95 19.93 18.18C19.95 18.4 19.97 18.62 19.97 18.82C19.97 19.03 19.92 19.19 19.94 19.41C19.95 19.62 20.05 19.9 20.08 20.13C20.11 20.35 20.08 20.53 20.09 20.74C20.1 20.95 20.12 21.16 20.14 21.38C20.17 21.61 20.23 21.85 20.26 22.07C20.3 22.3 20.34 22.53 20.37 22.75C20.4 22.96 20.39 23.16 20.43 23.39C20.47 23.61 20.54 23.86 20.59 24.09C20.64 24.32 20.66 24.53 20.71 24.77C20.77 25 20.81 25.22 20.91 25.48C21.01 25.74 21.24 26.19 21.31 26.33Z"/><path class="qf-barbs" d="M21.31 26.33Q21.31 26.33 21.31 26.33M21.33 25.17Q22.2 24.38 22.9 24.2M21.35 24.02Q22.66 22.82 23.72 22.55M21.38 22.88Q23.07 21.33 24.42 20.98M21.43 21.74Q23.42 19.9 25.01 19.48M21.48 20.61Q23.8 18.46 25.64 17.96M21.53 19.48Q24.04 17.16 26.02 16.61M21.6 18.36Q24.45 15.71 26.68 15.08M21.68 17.25Q24.6 14.52 26.88 13.86M21.76 16.14Q25.11 13 27.7 12.24M21.85 15.03Q25.33 11.76 28.01 10.96M21.96 13.93Q24.9 11.16 27.15 10.47M22.06 12.84Q25.7 9.41 28.47 8.55M22.18 11.75Q26.14 8.01 29.14 7.06M22.31 10.67Q26.5 6.69 29.66 5.68M22.45 9.59Q26.93 5.33 30.28 4.24M22.59 8.52Q27.17 4.16 30.58 3.03M22.74 7.46Q27.49 2.93 31 1.75M22.9 6.4Q27.67 1.84 31.17 0.65M23.07 5.34Q28.22 0.41 31.98 -0.89M23.25 4.29Q28.43 -0.67 32.19 -1.99M23.44 3.25Q28.29 -1.41 31.8 -2.66M23.63 2.21Q28.17 -2.15 31.43 -3.33M23.84 1.18Q29.22 -4 33.06 -5.4M24.05 0.16Q29.51 -5.1 33.38 -6.54M24.27 -0.86Q29.98 -6.36 33.99 -7.88M24.5 -1.88Q30.01 -7.18 33.86 -8.66M24.73 -2.89Q30.38 -8.33 34.3 -9.85M24.98 -3.89Q30.61 -9.31 34.49 -10.84M25.24 -4.89Q30.95 -10.39 34.86 -11.95M25.5 -5.88Q30.45 -10.65 33.81 -12.01M25.77 -6.87Q31 -11.9 34.52 -13.34M26.05 -7.85Q31.6 -13.18 35.31 -14.73M26.34 -8.83Q31.54 -13.83 35.01 -15.28M26.64 -9.8Q31.58 -14.54 34.84 -15.93M26.94 -10.76Q31.67 -15.29 34.77 -16.63M27.26 -11.72Q31.73 -16.01 34.64 -17.28M27.58 -12.67Q31.68 -16.6 34.33 -17.77M27.91 -13.62Q31.36 -16.92 33.58 -17.91M28.25 -14.56Q30.74 -16.94 32.33 -17.66M21.32 25.75Q21.08 25.52 20.88 25.46M21.34 24.6Q20.9 24.17 20.54 24.06M21.37 23.45Q20.79 22.86 20.31 22.7M21.4 22.31Q20.68 21.54 20.06 21.32M21.45 21.18Q20.66 20.31 19.99 20.06M21.5 20.05Q20.62 19.04 19.87 18.75M21.57 18.92Q20.57 17.75 19.72 17.39M21.64 17.8Q20.61 16.54 19.72 16.15M21.72 16.69Q20.65 15.33 19.72 14.9M21.81 15.58Q20.67 14.09 19.69 13.61M21.9 14.48Q20.72 12.86 19.68 12.32M22.01 13.39Q20.74 11.58 19.61 10.97M22.12 12.29Q20.85 10.42 19.72 9.77M22.25 11.21Q20.99 9.28 19.85 8.6M22.38 10.13Q21.03 7.99 19.81 7.22M22.52 9.06Q21.22 6.91 20.03 6.12M22.66 7.99Q21.48 5.95 20.39 5.19M22.82 6.93Q21.63 4.78 20.52 3.97M22.99 5.87Q21.63 3.31 20.34 2.33M23.16 4.82Q21.85 2.25 20.6 1.25M23.34 3.77Q22.09 1.19 20.86 0.17M23.53 2.73Q22.28 0.03 21.04 -1.05M23.73 1.7Q22.5 -1.09 21.27 -2.21M23.94 0.67Q22.71 -2.26 21.46 -3.45M24.16 -0.35Q23 -3.25 21.8 -4.45M24.38 -1.37Q23.28 -4.3 22.11 -5.52M24.61 -2.38Q23.52 -5.46 22.33 -6.76M24.86 -3.39Q23.81 -6.51 22.65 -7.84M25.11 -4.39Q24.1 -7.6 22.95 -8.98M25.37 -5.39Q24.48 -8.4 23.45 -9.71M25.63 -6.38Q24.79 -9.47 23.77 -10.82M25.91 -7.36Q25.15 -10.37 24.2 -11.69M26.19 -8.34Q25.49 -11.37 24.57 -12.71M26.49 -9.31Q25.87 -12.21 25.03 -13.51M26.79 -10.28Q26.22 -13.18 25.42 -14.49M27.1 -11.24Q26.63 -13.93 25.92 -15.14M27.42 -12.2Q27.05 -14.57 26.46 -15.64M27.74 -13.15Q27.47 -15.21 26.98 -16.16M28.08 -14.09Q27.88 -15.84 27.49 -16.64"/><path class="qf-split" d="M23.82 12.6Q24.97 11.01 27.27 10.31M26.22 0.66Q27.98 -1.7 31.15 -2.84M28.26 -8.2Q30.13 -10.6 33.2 -11.85M21.96 6.65Q21.59 5.62 20.54 4.88"/><path class="qf-shaft" d="M20.94 36.03C20.93 35.7 20.89 34.74 20.87 34.09C20.85 33.45 20.84 32.81 20.83 32.18C20.82 31.54 20.81 30.9 20.8 30.27C20.8 29.64 20.8 29.01 20.8 28.38C20.81 27.76 20.81 27.13 20.82 26.51C20.83 25.89 20.85 25.27 20.87 24.65C20.89 24.03 20.91 23.42 20.93 22.81C20.96 22.19 20.99 21.58 21.02 20.98C21.05 20.37 21.09 19.76 21.13 19.16C21.17 18.56 21.21 17.96 21.26 17.36C21.31 16.76 21.36 16.17 21.41 15.57C21.47 14.98 21.53 14.39 21.59 13.8C21.65 13.22 21.72 12.63 21.79 12.05C21.86 11.46 21.93 10.88 22.01 10.31C22.09 9.73 22.17 9.15 22.25 8.58C22.33 8.01 22.42 7.44 22.51 6.87C22.61 6.3 22.7 5.74 22.8 5.17C22.9 4.61 23 4.05 23.11 3.49C23.22 2.93 23.33 2.38 23.44 1.82C23.55 1.27 23.67 0.72 23.79 0.17C23.91 -0.38 24.04 -0.92 24.17 -1.47C24.3 -2.01 24.43 -2.55 24.56 -3.09C24.7 -3.63 24.84 -4.16 24.98 -4.69C25.13 -5.23 25.27 -5.76 25.42 -6.29C25.58 -6.82 25.73 -7.34 25.89 -7.86C26.05 -8.39 26.21 -8.91 26.37 -9.43C26.54 -9.94 26.71 -10.46 26.88 -10.97C27.06 -11.49 27.23 -12 27.41 -12.5C27.59 -13.01 27.78 -13.52 27.97 -14.02C28.15 -14.52 28.45 -15.27 28.54 -15.52L28.66 -15.48C28.57 -15.23 28.3 -14.47 28.12 -13.96C27.95 -13.46 27.78 -12.95 27.61 -12.44C27.44 -11.93 27.28 -11.41 27.12 -10.9C26.96 -10.38 26.8 -9.86 26.64 -9.34C26.49 -8.82 26.34 -8.3 26.2 -7.77C26.05 -7.25 25.91 -6.72 25.77 -6.19C25.63 -5.66 25.49 -5.13 25.36 -4.6C25.23 -4.06 25.1 -3.53 24.98 -2.99C24.85 -2.45 24.73 -1.91 24.61 -1.36C24.5 -0.82 24.38 -0.28 24.27 0.27C24.16 0.82 24.06 1.37 23.96 1.92C23.85 2.48 23.75 3.03 23.66 3.59C23.56 4.15 23.47 4.71 23.38 5.27C23.3 5.83 23.21 6.4 23.13 6.96C23.05 7.53 22.97 8.1 22.9 8.67C22.83 9.24 22.76 9.82 22.69 10.39C22.62 10.97 22.56 11.55 22.5 12.13C22.44 12.71 22.39 13.29 22.34 13.88C22.29 14.46 22.24 15.05 22.19 15.64C22.15 16.23 22.11 16.82 22.07 17.42C22.04 18.01 22 18.61 21.97 19.21C21.94 19.81 21.92 20.41 21.9 21.02C21.87 21.62 21.85 22.23 21.84 22.84C21.82 23.44 21.81 24.06 21.8 24.67C21.8 25.28 21.79 25.9 21.79 26.52C21.79 27.14 21.8 27.76 21.8 28.38C21.81 29 21.82 29.63 21.83 30.26C21.85 30.89 21.87 31.52 21.89 32.15C21.91 32.78 21.93 33.42 21.96 34.05C21.99 34.69 22.04 35.65 22.06 35.97Z"/><path class="qf-hl" d="M21.34 31.21C21.33 30.43 21.29 28.06 21.31 26.51C21.32 24.96 21.36 23.43 21.42 21.91C21.48 20.39 21.56 18.88 21.67 17.39C21.77 15.9 21.9 14.42 22.05 12.96C22.2 11.5 22.38 10.06 22.58 8.62C22.77 7.19 22.99 5.78 23.24 4.38C23.48 2.98 23.74 1.59 24.03 0.22C24.32 -1.15 24.63 -2.5 24.97 -3.84C25.3 -5.18 25.66 -6.51 26.04 -7.82C26.42 -9.13 27.05 -11.06 27.25 -11.7"/></g>
     <!-- an old brass gear (settings) - drawn once, used in the sheets -->
 
           <radialGradient id="g-brass" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#f3dc9b"/><stop offset=".35" stop-color="#c9a254"/><stop offset=".75" stop-color="#8a6526"/><stop offset="1" stop-color="#5a3f14"/></radialGradient>
@@ -1028,6 +1377,10 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 <main class="page">
 
   <div class="stage" id="stage">
+    <!-- the night sky with its slowly turning stars (night scheme only) -->
+    <canvas class="sky" id="sky" aria-hidden="true"></canvas>
+    <!-- the birthday celebration over the book: sparklers or a rain of blossoms (script: fest) -->
+    <canvas class="fest" id="fest" aria-hidden="true"></canvas>
     <div class="bookwrap" id="bookwrap" style="--el: 0.9cqw; --er: 0.35cqw;">
       <div class="boards"></div>
       <div class="edge l"></div><div class="edge r"></div><div class="edge b"></div>
@@ -1056,6 +1409,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       <div class="sh-foot"><button class="sh-close" id="loginBtn">Anmelden</button></div>
     </div>
     <div class="toast" id="toast" aria-live="polite"></div>
+    <!-- full screen (phones and touch screens; on a computer the key F) -->
+    <button class="fs-btn" id="fsBtn" aria-label="Vollbild" title="Vollbild"><svg viewBox="0 0 24 24" aria-hidden="true">
+      <path class="o" d="M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6"/><path class="x" d="M9 3v6H3M21 9h-6V3M15 21v-6h6M3 15h6v6"/></svg></button>
   </div>
 
 </main>
@@ -1091,10 +1447,12 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       <div><dt>Morgens</dt><dd>drei Gedanken, je dreißig Sekunden</dd></div>
       <div><dt>In der Mitte</dt><dd>ein Gedanke für den Tag</dd></div>
       <div><dt>Abends</dt><dd>drei Gedanken, je dreißig Sekunden</dd></div>
-      <div><dt>Sonntags</dt><dd>deine Woche auf einer Doppelseite</dd></div>
+      <div><dt>Am Sonntag</dt><dd>deine Woche auf einer Doppelseite</dd></div>
       <div><dt>Einmal im Monat</dt><dd>der Monatsblick</dd></div>
-      <div><dt>Hinten</dt><dd>dein Jahr in Worten</dd></div>
+      <div><dt>Am Ende</dt><dd>dein Jahr in Worten</dd></div>
     </dl>
+    <!-- the same divider under the plan as above it (Doc, 24.11.2026) -->
+    <svg class="tp-end" viewBox="0 0 200 20" aria-hidden="true"><path d="M5 10 H80 M120 10 H195" stroke="#b07a14" stroke-width="1.2"/><path d="M100 3 L107 10 L100 17 L93 10 Z" fill="none" stroke="#b07a14" stroke-width="1.2"/><circle cx="86" cy="10" r="1.6" fill="#b07a14"/><circle cx="114" cy="10" r="1.6" fill="#b07a14"/></svg>
     <div class="sig"><span class="by">ein Claude-Buch von</span>Doc Alvers</div>
     <div class="copy">© 2026</div>
   </div></div>
@@ -1153,6 +1511,11 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       </div>
     <div class="lbl">Aussehen</div>
     <div class="seg" data-set="scheme"><button data-v="klassisch">Klassisch</button><button data-v="modern">Modern</button><button data-v="nacht">Nacht</button></div>
+    <!-- the reader's birthday: that day the book celebrates (Doc, 24.11.2026) - kept in this browser, or given in the link
+         (?geb=27.05&fest=blueten), never in the code -->
+    <div class="lbl">Dein Geburtstag</div>
+    <div class="geb"><select data-geb="d" aria-label="Tag"><option value="">Tag</option><option value="01">1.</option><option value="02">2.</option><option value="03">3.</option><option value="04">4.</option><option value="05">5.</option><option value="06">6.</option><option value="07">7.</option><option value="08">8.</option><option value="09">9.</option><option value="10">10.</option><option value="11">11.</option><option value="12">12.</option><option value="13">13.</option><option value="14">14.</option><option value="15">15.</option><option value="16">16.</option><option value="17">17.</option><option value="18">18.</option><option value="19">19.</option><option value="20">20.</option><option value="21">21.</option><option value="22">22.</option><option value="23">23.</option><option value="24">24.</option><option value="25">25.</option><option value="26">26.</option><option value="27">27.</option><option value="28">28.</option><option value="29">29.</option><option value="30">30.</option><option value="31">31.</option></select><select data-geb="m" aria-label="Monat"><option value="">Monat</option><option value="01">Januar</option><option value="02">Februar</option><option value="03">März</option><option value="04">April</option><option value="05">Mai</option><option value="06">Juni</option><option value="07">Juli</option><option value="08">August</option><option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Dezember</option></select></div>
+    <div class="seg" data-set="fest"><button data-v="funken">Wunderkerzen</button><button data-v="blueten">Blütenregen</button></div>
     <p class="set-note">Die Einstellungen merkt sich nur dieser Browser. Dein Dank-Satz steht in deinem Grateful-Konto; <span data-where>der Rest des Buchs vorerst nur in diesem Browser, bis die neue Tabelle angelegt ist.</span></p>
     <div class="ft"><span class="pn"></span><span>Einstellungen</span></div>
   </div></div>
@@ -1167,18 +1530,20 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       <div class="lbl">Tastatur <span>– noch einmal gedrückt: zurück zum Tag</span></div>
         <dl class="keys">
           <div><dt><kbd>←</kbd><kbd>→</kbd></dt><dd>umblättern</dd></div>
-          <div><dt><kbd>⇧</kbd><kbd>← →</kbd></dt><dd>eine Woche vor oder zurück</dd></div>
-          <div><dt><kbd>Ctrl</kbd><kbd>← →</kbd></dt><dd>ein Monat vor oder zurück (Mac: ⌥ ← →)</dd></div>
+          <div><dt><kbd>⇧</kbd><kbd>← →</kbd></dt><dd>Anfang der nächsten / vorigen Woche</dd></div>
+          <div><dt><kbd>Ctrl</kbd><kbd>← →</kbd></dt><dd>Anfang des nächsten / vorigen Monats (Mac: ⌥ ← →)</dd></div>
           <div><dt><kbd>I</kbd></dt><dd>Inhalt</dd></div>
           <div><dt><kbd>E</kbd></dt><dd>Einstellungen</dd></div>
           <div><dt><kbd>W</kbd></dt><dd>Woche</dd></div>
           <div><dt><kbd>M</kbd></dt><dd>Monatsblick</dd></div>
-          <div><dt><kbd>⇧</kbd><kbd>J</kbd></dt><dd>ein Monat: ⇧ + Anfangsbuchstabe (J: Januar, Juni, Juli)</dd></div>
-          <div><dt><kbd>C</kbd></dt><dd>Jahr in Worten</dd></div>
+          <div><dt><kbd>⇧</kbd><kbd>J</kbd></dt><dd>⇧ + Anfangsbuchstabe (J: Januar, Juni, Juli)</dd></div>
+          <div><dt><kbd>C</kbd></dt><dd>Dein Jahr in Worten</dd></div>
+          <div><dt><kbd>N</kbd></dt><dd>Notizen</dd></div>
           <div><dt><kbd>P</kbd></dt><dd>letzte Seite mit Impressum</dd></div>
           <div><dt><kbd>R</kbd></dt><dd>Rückseite</dd></div>
           <div><dt><kbd>S</kbd></dt><dd>Buch schließen</dd></div>
           <div><dt><kbd>1</kbd><kbd>2</kbd><kbd>Enter</kbd></dt><dd>Seite 12 aufschlagen (= 12. Januar)</dd></div>
+          <div><dt><kbd>X</kbd></dt><dd>Geburtstagsfeier ansehen</dd></div>
           <div><dt><kbd>F</kbd></dt><dd>Vollbild</dd></div>
           <div><dt><kbd>Esc</kbd></dt><dd>Bild schließen</dd></div>
         </dl>
@@ -1250,9 +1615,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     <div class="ib">
       <dl class="tp-plan ip">
         <div><dt>Morgens</dt><dd>wofür du dankbar bist, welcher kleine Schritt heute zählt, mit welcher Haltung du in den Tag gehst</dd></div>
-        <div><dt>In der Mitte</dt><dd>ein Gedanke für den Tag, montags der Gedanke der Woche</dd></div>
-        <div><dt>Abends</dt><dd>wem du den Tag leichter gemacht hast, was dein Lichtblick war, was du mitnimmst</dd></div>
-        <div><dt>Sonntags</dt><dd>deine Woche auf einer Doppelseite</dd></div>
+        <div><dt>In der Mitte</dt><dd>ein Gedanke für den Tag; den Gedanken der Woche zeigt die Wochenseite</dd></div>
+        <div><dt>Abends</dt><dd>wem du gutgetan hast, was dein Lichtblick war, was du mitnimmst</dd></div>
+        <div><dt>Am Sonntag</dt><dd>deine Woche auf einer Doppelseite</dd></div>
         <div><dt>Einmal im Monat</dt><dd>der Monatsblick: sechs Fragen von 1 bis 10, die Kurve zeigt, wohin du dich bewegst</dd></div>
       </dl>
       <ol class="ir">
@@ -1274,12 +1639,12 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       <div class="mt">6 Fragen · je 1 bis 10 · einmal im Monat</div>
     </div>
     <div class="mqs">
-      <div class="mq"><p class="q-t"><span class="tx">Wie glücklich war mein Monat?</span></p><div class="scale" data-q="0"></div></div>
-      <div class="mq"><p class="q-t"><span class="tx">Wie gelassen war ich?</span></p><div class="scale" data-q="1"></div></div>
-      <div class="mq"><p class="q-t"><span class="tx">Wie gut habe ich für mich gesorgt?</span></p><div class="scale" data-q="2"></div></div>
-      <div class="mq"><p class="q-t"><span class="tx">Wie nah war ich meinen Menschen?</span></p><div class="scale" data-q="3"></div></div>
-      <div class="mq"><p class="q-t"><span class="tx">Wie oft habe ich Gutes bemerkt?</span></p><div class="scale" data-q="4"></div></div>
-      <div class="mq"><p class="q-t"><span class="tx">Wie zufrieden bin ich mit mir?</span></p><div class="scale" data-q="5"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie glücklich war mein Monat&nbsp;…</span></p><div class="scale" data-q="0"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie gelassen war ich&nbsp;…</span></p><div class="scale" data-q="1"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie gut habe ich für mich gesorgt&nbsp;…</span></p><div class="scale" data-q="2"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie nah war ich meinen Menschen&nbsp;…</span></p><div class="scale" data-q="3"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie oft habe ich Gutes bemerkt&nbsp;…</span></p><div class="scale" data-q="4"></div></div>
+      <div class="mq"><p class="q-t"><span class="tx">Wie zufrieden bin ich mit mir&nbsp;…</span></p><div class="scale" data-q="5"></div></div>
     </div>
     <div class="q"><button class="ring" data-k="ms" aria-label="30-Sekunden-Uhr"></button><div>
       <p class="q-t"><span class="tx">Ein Satz zu diesem Monat:</span></p>
@@ -1309,53 +1674,79 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 <template id="tpl-morgen">
   <div class="pg paper"><div class="in">
     <div class="hd">
-      <div class="nm"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="24" r="8" fill="rgb(245,194,66)"/><path d="M4 32 H36" stroke="#b07a14" stroke-width="2" stroke-linecap="round"/><g stroke="rgb(245,194,66)" stroke-width="2.2" stroke-linecap="round"><path d="M20 8 V12"/><path d="M8.5 13 L11.3 15.8"/><path d="M31.5 13 L28.7 15.8"/><path d="M4 24 H8"/><path d="M32 24 H36"/></g></svg>MORGEN</div>
+      <div class="nm"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8.9 25.3 L2.2 23.2 L9.2 24.0 Z M10.8 20.6 L7.9 17.5 L11.6 19.6 Z M14.5 17.2 L12.0 10.6 L15.7 16.7 Z M19.3 15.8 L20.0 11.6 L20.7 15.8 Z M24.3 16.7 L28.0 10.6 L25.5 17.2 Z M28.4 19.6 L32.1 17.5 L29.2 20.6 Z M30.8 24.0 L37.8 23.2 L31.1 25.3 Z" fill="url(#g-sun-ray)"/><path d="M10.6 27 A9.4 9.4 0 0 1 29.4 27 Z" fill="url(#g-sun)"/><path d="M3 28.2 H37" stroke="#b07a14" stroke-width="1.5" stroke-linecap="round"/><path d="M10 31.6 H30 M15 35 H25" stroke="#d9b04e" stroke-width="1.1" stroke-linecap="round" opacity=".8"/></svg>MORGEN</div>
       <div class="dt">Sonntag, 22. November 2026</div>
+      <button class="quill" data-note="n1" aria-label="Rückseite: Notiz zum Morgen" title="Rückseite: Notiz zum Morgen"><svg viewBox="0 0 40 64" aria-hidden="true"><g class="fe"><use href="#quill-feather"/><path d="M18.7 36.2 C18.9 34.4 19.6 33.6 20.2 34.4 C20.6 32.6 21.4 32 22.1 32.2 C22.8 32.6 23 33.8 22.8 34.6 C23.6 33.8 24.6 34.4 24.2 36.4 Z" class="crown"/><path d="M19.9 36 L23.1 36 L22.6 52.5 L20.4 52.5 Z" class="stem"/><path d="M20.1 40 h2.8 M20.2 44 h2.6 M20.3 48 h2.4" class="band"/></g><path d="M11.2 57.6 v2.2 a10.3 3.2 0 0 0 20.6 0 v-2.2 Z" class="base"/><ellipse cx="21.5" cy="57.6" rx="10.3" ry="3.2" class="base-top"/><path d="M19.6 52.2 h3.8 v4.8 a1.9 .7 0 0 1 -3.8 0 Z" class="socket"/><circle cx="21.5" cy="52.4" r="1.9" class="ball"/></svg></button>
       <div class="mt">3 Gedanken · je 30 Sekunden</div>
     </div>
     <div class="cardgap"></div>
     <div class="q"><button class="ring" data-k="m1" aria-label="30-Sekunden-Uhr"></button><div>
       <p class="q-t"><span class="tx">Heute früh sage ich Danke für&nbsp;…</span><span class="tag"><svg viewBox="0 0 64 56" aria-hidden="true"><path d="M32 52 C14 40 4 30 4 18 C4 9 11 3 19 3 C25 3 29 6 32 11 C35 6 39 3 45 3 C53 3 60 9 60 18 C60 30 50 40 32 52 Z" fill="none" stroke="url(#g-foil-ring)" stroke-width="5"/></svg>GRATEFUL</span></p>
-      <div class="fld"><textarea class="hand" data-k="m1" rows="2" aria-label="Heute früh sage ich Danke für"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+      <div class="fld"><textarea class="hand" data-k="m1" rows="3" aria-label="Heute früh sage ich Danke für"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
     <div class="q"><button class="ring" data-k="m2" aria-label="30-Sekunden-Uhr"></button><div>
       <p class="q-t"><span class="tx">Mein kleiner Schritt, der heute zählt:</span></p>
-      <div class="fld"><textarea class="hand" data-k="m2" rows="2" aria-label="Mein kleiner Schritt, der heute zählt"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+      <div class="fld"><textarea class="hand" data-k="m2" rows="3" aria-label="Mein kleiner Schritt, der heute zählt"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
     <div class="q"><button class="ring" data-k="m3" aria-label="30-Sekunden-Uhr"></button><div>
       <p class="q-t"><span class="tx">Mit dieser Haltung gehe ich in den Tag:</span></p>
-      <div class="fld"><textarea class="hand" data-k="m3" rows="2" placeholder="tippen oder sprechen, die Uhr startet von selbst" aria-label="Mit dieser Haltung gehe ich in den Tag"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
-    <div class="ft"><span class="pn">326</span><span>Morgen · gespeichert ✎</span></div>
-  </div></div>
+      <div class="fld"><textarea class="hand" data-k="m3" rows="3" placeholder="tippen oder sprechen" aria-label="Mit dieser Haltung gehe ich in den Tag"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+    <!-- love, friendship, mindfulness on the morning page instead of the word "Morgen" (Doc, 24.11.2026) -->
+    <div class="ft"><span class="pn">326</span><span class="habits">
+      <button class="hb" data-h="4"><i></i>Liebe</button><button class="hb" data-h="5"><i></i>Freundschaft</button><button class="hb" data-h="3"><i></i>Achtsamkeit</button></span></div>
+  </div>
+    <!-- the back of this page: turned over by the quill, written only here (Doc, 24.11.2026: "dass die Seite umblättert und
+         man vermeintlich auf die Rückseite schreibt") -->
+    <div class="back-note" aria-hidden="true">
+      <div class="bn-hd"><span class="bn-k">Rückseite</span><button class="quill bn-quill" data-turn aria-label="Zurück zur Vorderseite" title="Zurück zur Vorderseite"><svg viewBox="0 0 40 64" aria-hidden="true"><g class="fe"><use href="#quill-feather"/><path d="M18.7 36.2 C18.9 34.4 19.6 33.6 20.2 34.4 C20.6 32.6 21.4 32 22.1 32.2 C22.8 32.6 23 33.8 22.8 34.6 C23.6 33.8 24.6 34.4 24.2 36.4 Z" class="crown"/><path d="M19.9 36 L23.1 36 L22.6 52.5 L20.4 52.5 Z" class="stem"/><path d="M20.1 40 h2.8 M20.2 44 h2.6 M20.3 48 h2.4" class="band"/></g><path d="M11.2 57.6 v2.2 a10.3 3.2 0 0 0 20.6 0 v-2.2 Z" class="base"/><ellipse cx="21.5" cy="57.6" rx="10.3" ry="3.2" class="base-top"/><path d="M19.6 52.2 h3.8 v4.8 a1.9 .7 0 0 1 -3.8 0 Z" class="socket"/><circle cx="21.5" cy="52.4" r="1.9" class="ball"/></svg></button></div>
+      <div class="bn-t">Notiz zum Morgen</div><div class="bn-d"></div>
+      <textarea class="hand" data-k="n1" rows="12" style="--rows: 12" placeholder="was dir noch einfällt …" aria-label="Notiz zum Morgen"></textarea>
+    </div>
+  </div>
 </template>
 
+<!-- phone only: the thought of the day as its own page between morning and evening (filled per day in personalise) -->
 <template id="tpl-spruch">
   <div class="pg paper"><div class="spr-page">
     <span class="k">GEDANKE DES TAGES</span>
-    <div class="photo"><img src="../svp/gdw/70.webp" alt="Gedanke der Woche Nr. 70"></div>
-    <span class="s">Wende dein Gesicht der <em>Sonne</em> zu,<br>dann fallen die Schatten hinter dich.</span>
-    <span class="w">Sprichwort der Māori · Nr. 70</span>
+    <div class="photo"><img alt="Gedanke der Woche"></div>
+    <span class="s"></span>
+    <span class="w"></span>
+    <span class="q"></span>
+    <span class="r"></span>
   </div></div>
 </template>
 
 <template id="tpl-abend">
   <div class="pg paper"><div class="in">
     <div class="hd r">
-      <div class="nm">ABEND<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M26 6 A14 14 0 1 0 34 28 A11 11 0 1 1 26 6 Z" fill="#2c4a86"/><circle cx="10" cy="10" r="1.4" fill="rgb(245,194,66)"/><circle cx="16" cy="5" r="1" fill="rgb(245,194,66)"/><circle cx="6" cy="19" r="1" fill="rgb(245,194,66)"/></svg></div>
+      <div class="nm">ABEND<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M27 5.5 A14.5 14.5 0 1 0 35 29 A11.5 11.5 0 1 1 27 5.5 Z" fill="url(#g-moon)" stroke="#b4862a" stroke-width=".7"/><path d="M9.5 6.3 L10.3 8.7 L12.7 9.5 L10.3 10.3 L9.5 12.7 L8.7 10.3 L6.3 9.5 L8.7 8.7 Z M16.5 2.6 L17.0 4.0 L18.4 4.5 L17.0 5.0 L16.5 6.4 L16.0 5.0 L14.6 4.5 L16.0 4.0 Z M5.5 17.8 L5.9 19.1 L7.2 19.5 L5.9 19.9 L5.5 21.2 L5.1 19.9 L3.8 19.5 L5.1 19.1 Z" fill="url(#g-sun)"/></svg></div>
       <div class="dt">Sonntag, 22. November 2026</div>
+      <button class="quill" data-note="n2" aria-label="Rückseite: Notiz zum Abend" title="Rückseite: Notiz zum Abend"><svg viewBox="0 0 40 64" aria-hidden="true"><g class="fe"><use href="#quill-feather"/><path d="M18.7 36.2 C18.9 34.4 19.6 33.6 20.2 34.4 C20.6 32.6 21.4 32 22.1 32.2 C22.8 32.6 23 33.8 22.8 34.6 C23.6 33.8 24.6 34.4 24.2 36.4 Z" class="crown"/><path d="M19.9 36 L23.1 36 L22.6 52.5 L20.4 52.5 Z" class="stem"/><path d="M20.1 40 h2.8 M20.2 44 h2.6 M20.3 48 h2.4" class="band"/></g><path d="M11.2 57.6 v2.2 a10.3 3.2 0 0 0 20.6 0 v-2.2 Z" class="base"/><ellipse cx="21.5" cy="57.6" rx="10.3" ry="3.2" class="base-top"/><path d="M19.6 52.2 h3.8 v4.8 a1.9 .7 0 0 1 -3.8 0 Z" class="socket"/><circle cx="21.5" cy="52.4" r="1.9" class="ball"/></svg></button>
       <div class="mt">3 Gedanken · je 30 Sekunden</div>
     </div>
     <div class="cardgap"></div>
     <div class="q"><button class="ring" data-k="e1" aria-label="30-Sekunden-Uhr"></button><div>
-      <p class="q-t"><span class="tx">Wem habe ich heute den Tag ein wenig leichter gemacht?</span></p>
-      <div class="fld"><textarea class="hand" data-k="e1" rows="2" aria-label="Wem habe ich heute den Tag leichter gemacht"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+      <!-- questions end in "…" instead of "?" (Doc, 24.11.2026); this one was "Wem habe ich heute den Tag ein wenig leichter gemacht?" -->
+      <p class="q-t"><span class="tx">Wem habe ich heute gutgetan&nbsp;…</span></p>
+      <div class="fld"><textarea class="hand" data-k="e1" rows="3" aria-label="Wem habe ich heute den Tag leichter gemacht"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
     <div class="q"><button class="ring" data-k="e2" aria-label="30-Sekunden-Uhr"></button><div>
       <p class="q-t"><span class="tx">Mein Lichtblick des Tages:</span></p>
-      <div class="fld"><textarea class="hand" data-k="e2" rows="2" aria-label="Mein Lichtblick des Tages"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+      <div class="fld"><textarea class="hand" data-k="e2" rows="3" aria-label="Mein Lichtblick des Tages"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
     <div class="q"><button class="ring" data-k="e3" aria-label="30-Sekunden-Uhr"></button><div>
-      <p class="q-t"><span class="tx">Was nehme ich aus heute mit, und was lasse ich hier?</span></p>
-      <div class="fld"><textarea class="hand" data-k="e3" rows="2"aria-label="Was nehme ich aus heute mit"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
-    <div class="ft r"><span class="pn">326</span><span class="habits"><b>HEUTE</b>
-      <button class="hb" data-h="0"><i></i>Bewegung</button><button class="hb on" data-h="1"><i></i>Lesen</button><button class="hb" data-h="2"><i></i>früh schlafen</button></span></div>
-  </div></div>
+      <p class="q-t"><span class="tx">Was nehme ich mit, was lasse ich hier&nbsp;…</span></p>
+      <div class="fld"><textarea class="hand" data-k="e3" rows="3"aria-label="Was nehme ich aus heute mit"></textarea><button class="mic" aria-label="Diktat"></button></div></div></div>
+    <!-- six things to keep in mind, no "HEUTE" any more (Doc, 24.11.2026: "nimm das Heute raus und mach noch 3 andere Sachen,
+         die man sich vornimmt - Achtsamkeit, Liebe, Freundschaft") -->
+    <div class="ft r"><span class="pn">326</span><span class="habits">
+      <button class="hb" data-h="0"><i></i>Bewegung</button><button class="hb on" data-h="1"><i></i>Lesen</button><button class="hb" data-h="2"><i></i>schlafen</button></span></div>
+  </div>
+    <!-- the back of this page: turned over by the quill, written only here (Doc, 24.11.2026: "dass die Seite umblättert und
+         man vermeintlich auf die Rückseite schreibt") -->
+    <div class="back-note" aria-hidden="true">
+      <div class="bn-hd"><span class="bn-k">Rückseite</span><button class="quill bn-quill" data-turn aria-label="Zurück zur Vorderseite" title="Zurück zur Vorderseite"><svg viewBox="0 0 40 64" aria-hidden="true"><g class="fe"><use href="#quill-feather"/><path d="M18.7 36.2 C18.9 34.4 19.6 33.6 20.2 34.4 C20.6 32.6 21.4 32 22.1 32.2 C22.8 32.6 23 33.8 22.8 34.6 C23.6 33.8 24.6 34.4 24.2 36.4 Z" class="crown"/><path d="M19.9 36 L23.1 36 L22.6 52.5 L20.4 52.5 Z" class="stem"/><path d="M20.1 40 h2.8 M20.2 44 h2.6 M20.3 48 h2.4" class="band"/></g><path d="M11.2 57.6 v2.2 a10.3 3.2 0 0 0 20.6 0 v-2.2 Z" class="base"/><ellipse cx="21.5" cy="57.6" rx="10.3" ry="3.2" class="base-top"/><path d="M19.6 52.2 h3.8 v4.8 a1.9 .7 0 0 1 -3.8 0 Z" class="socket"/><circle cx="21.5" cy="52.4" r="1.9" class="ball"/></svg></button></div>
+      <div class="bn-t">Notiz zum Abend</div><div class="bn-d"></div>
+      <textarea class="hand" data-k="n2" rows="12" style="--rows: 12" placeholder="was dir noch einfällt …" aria-label="Notiz zum Abend"></textarea>
+    </div>
+  </div>
 </template>
 
 <template id="tpl-wocheL">
@@ -1365,15 +1756,15 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       <div class="dt">16. bis 22. November 2026</div>
       <div class="mt">Sonntag · die Woche auf einen Blick</div>
     </div>
-    <div class="q wq"><button class="ring" data-k="w1" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Worauf bin ich diese Woche stolz?</span></p>
+    <div class="q wq"><button class="ring" data-k="w1" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Worauf bin ich diese Woche stolz&nbsp;…</span></p>
       <textarea class="hand" data-k="w1" rows="2" style="--rows: 2" aria-label="Worauf bin ich stolz"></textarea></div></div>
-    <div class="q wq"><button class="ring" data-k="w2" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Wer hat meine Woche heller gemacht, und weiß er es schon?</span></p>
+    <div class="q wq"><button class="ring" data-k="w2" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Wer hat meine Woche heller gemacht, und weiß er es schon&nbsp;…</span></p>
       <textarea class="hand" data-k="w2" rows="1" style="--rows: 1" aria-label="Wer hat meine Woche heller gemacht"></textarea></div></div>
-    <div class="q wq"><button class="ring" data-k="w3" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Was hat mir Kraft gegeben, was hat Kraft gekostet?</span></p>
+    <div class="q wq"><button class="ring" data-k="w3" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Was hat mir Kraft gegeben, was hat Kraft gekostet&nbsp;…</span></p>
       <textarea class="hand" data-k="w3" rows="1" style="--rows: 1" aria-label="Kraft gegeben, Kraft gekostet"></textarea></div></div>
-    <div class="q wq"><button class="ring" data-k="w4" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Worauf freue ich mich nächste Woche?</span></p>
+    <div class="q wq"><button class="ring" data-k="w4" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Worauf freue ich mich nächste Woche&nbsp;…</span></p>
       <textarea class="hand" data-k="w4" rows="1" style="--rows: 1" aria-label="Worauf freue ich mich"></textarea></div></div>
-    <div class="q wq"><button class="ring" data-k="w5" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Frage der Woche: Welche kleine Gewohnheit würde mir mein Ich in einem Jahr danken?</span></p>
+    <div class="q wq"><button class="ring" data-k="w5" aria-label="30-Sekunden-Uhr"></button><div><p class="q-t"><span class="tx">Frage der Woche: Welche kleine Gewohnheit würde mir mein Ich in einem Jahr danken&nbsp;…</span></p>
       <textarea class="hand" data-k="w5" rows="1" style="--rows: 1" placeholder="tippen oder sprechen" aria-label="Frage der Woche"></textarea></div></div>
     <div class="ft"><span class="pn">327</span><span>Woche 47 · Rückblick</span></div>
   </div></div>
@@ -1402,13 +1793,14 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   <div class="pg paper"><div class="in notes">
     <div class="hd"><div class="nm">NOTIZEN</div></div>
     <div class="ruled"></div>
-    <div class="ft"><span class="pn"></span><span>Notizen</span></div>
+    <!-- a line about writing things down instead of "Notizen" twice (Doc, 24.11.2026) -->
+    <div class="ft"><span class="pn"></span><span class="ft-say">Der kürzeste Bleistift ist länger als das längste Gedächtnis.</span></div>
   </div></div>
 </template>
 <template id="tpl-lines2">
   <div class="pg paper"><div class="in notes">
     <div class="ruled ruled-full"></div>
-    <div class="ft r"><span class="pn"></span><span>Notizen</span></div>
+    <div class="ft r"><span class="pn"></span><span class="ft-say">Ein Gedanke, aufgeschrieben, läuft nicht mehr weg.</span></div>
   </div></div>
 </template>
 
@@ -1426,11 +1818,19 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       <p>„Grateful – Das 3-Minuten-Tagebuch“ ist ein Buch von Dr. Michael R. Alvers (Doc Alvers), © 2026. Anbieter und Kontakt:
         <a href="https://docalvers.de/impressum.html" target="_blank" rel="noopener">docalvers.de/impressum</a> · Datenschutz:
         <a href="https://docalvers.de/datenschutz.html" target="_blank" rel="noopener">docalvers.de/datenschutz</a>.</p>
+      <!-- the credit to Claude / Anthropic, explicitly (Doc, 24.11.2026: "im Impressum noch mal ausdrücklich auf euch beziehen,
+           Anthropic bzw. Claude ordentlich zitieren") -->
+      <p>Ein Claude-Buch: Gestaltung, Programmierung und Recherche entstanden im Dialog mit Claude (Claude Opus 5.5 in Claude Code),
+        einem KI-Modell von Anthropic PBC, San Francisco –
+        <a href="https://www.anthropic.com/claude" target="_blank" rel="noopener">anthropic.com/claude</a>.
+        Idee, Auswahl und letzte Entscheidung: Dr. Michael R. Alvers.</p>
       <p>Deine Einträge liegen in deinem Konto; die Einstellungen merkt sich nur dieser Browser.</p>
       <p>Bilder: Arnold Böcklin, „Vita somnium breve“ (1888, Kunstmuseum Basel) und die Porträts der Persönlichkeiten, gemeinfrei,
-        über Wikimedia Commons · Holz: Poly Haven (CC0) · Schriften: Google Fonts (SIL Open Font License).</p>
+        über Wikimedia Commons · Holz: Poly Haven (CC0) · Spieluhren „Happy Birthday“: marianna-emma, „Guten Abend, gut’ Nacht“: Garuda1982, beide freesound.org (CC0) · Schriften: Google Fonts (SIL Open Font License).</p>
     </div>
-    <div class="ft"><span class="pn">365</span><span>So geht's · Impressum</span></div>
+    <!-- no page number here: 365 is the 31st of December (Doc, 24.11.2026) -->
+    <!-- no "So geht's · Impressum" down here (Doc, 24.11.2026) - his slogan instead, the back cover carries the other one -->
+    <div class="ft"><span class="pn"></span><span class="ft-say">The future was yesterday.</span></div>
   </div></div>
 </template>
 
@@ -1534,6 +1934,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     const at = k.indexOf('@');
     if (k.startsWith('m1@')) queueM1(k.slice(at + 1)); else { saveLocal(); markDirty(k); }
     if (/^[me][123]@/.test(k)) renderRegSoon();
+    if (/^n[12]@/.test(k)) $$('.quill[data-note="' + k + '"]').forEach(b => b.classList.toggle('has', !!String(vals[k] || '').trim()));
   }
 
   /* ---------- sayings: the weekly thoughts (gdw.json, Doc's sheets) and the wisdoms of the world (gdw-weisheiten.json) ---------- */
@@ -1572,7 +1973,12 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   /* text (may carry <em> red words and <br>) and the line with the author */
   const byLine = s => s && s.wer ? s.wer + (s.rolle ? ' · ' + s.rolle : '') : '';
   /* the weekly thought of the week starting on monday: Doc's own sheet that school week, else a wisdom, round the year */
+  /* the reader's birthday in this book's year (settings.geb 'DD.MM'), or '' */
+  const birthDay = () => { const m = /^(\d\d)\.(\d\d)$/.exec(settings.geb || ''); const d = m ? YEAR + '-' + m[2] + '-' + m[1] : ''; return DAYS.includes(d) ? d : ''; };
+  /* the last weekly thought of the year is Doc's slogan (Doc, 24.11.2026: "The future was yesterday als Gedanken der Woche") */
+  const lastMonday = () => DAYS.filter(d => dateOf(d).getDay() === 1).pop();
   function weekThought(monday) {
+    if (monday === lastMonday()) return { bild: '', card: 'The future<br>was yesterday.', html: 'The future was <em>yesterday</em>.', by: 'Doc Alvers', own: false };
     const own = GDW.find(g => abDate(g.ab) === monday);
     const pick = own || WEISHEIT.find(g => abDate(g.ab) === monday) || WEISHEIT[(isoWeek(monday) + 52) % Math.max(1, WEISHEIT.length)];
     if (!pick) return null;
@@ -1618,6 +2024,16 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       add({ html: s ? s.text : esc(g.titel || ''), by: 'Gedanke der Woche', nr: g.bild, quelle: '', own: true, zeit: '' });
     });
     const plan = DAYS.map(() => null), used = new Set();
+    /* 0. fixed days (Doc, 24.11.2026): his slogan on 1 January, Böcklin's motto on the reader's birthday */
+    const fix = (day, t) => { const i = DAYS.indexOf(day); if (i < 0) return; t.key = sayKey(t.html); plan[i] = t; used.add(t.key); };
+    fix(YEAR + '-01-01', { html: 'Think the <em>impossible</em>.', by: 'Doc Alvers', nr: 'Doc', quelle: '', zeit: '' });
+    const bd = birthDay();
+    /* ?gruss=…: a greeting of its own on the birthday's card instead of Böcklin's motto - only from the link, never in the code;
+       "|" breaks the line, _word_ is set in red (e.g. ?geb=25.11&tag=2026-11-25&gruss=Nachträglich alles Gute zum Geburtstag,|_Dr. X_!) */
+    const gruss = (() => { try { return (new URLSearchParams(location.search).get('gruss') || '').trim().slice(0, 160); } catch (e) { return ''; } })();
+    const grussHtml = gruss.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])).replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\s*\|\s*/g, '<br>');
+    if (bd) fix(bd, gruss ? { html: grussHtml, by: '', nr: 'Geburtstag', gruss: true, quelle: '', zeit: '' }
+      : { html: 'Vita somnium breve.<br>Das Leben ist ein kurzer <em>Traum</em>.', by: 'Arnold Böcklin · Gemälde, 1888', nr: 'Geburtstag', quelle: '', zeit: '' });
     /* 1. the weekly thought of each day's week (Monday to Sunday) - kept off that week's days */
     const weekKeys = new Map();
     const wkOf = day => {
@@ -1669,7 +2085,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   let remote = false;
   const dirty = new Set();
   let pushT = 0;
-  const SLOTS = { tag: ['m2', 'm3', 'e1', 'e2', 'e3'], woche: ['w1', 'w2', 'w3', 'w4', 'w5'], monat: ['ms'] };
+  const SLOTS = { tag: ['m2', 'm3', 'e1', 'e2', 'e3', 'n1', 'n2'], woche: ['w1', 'w2', 'w3', 'w4', 'w5'], monat: ['ms'] };
   function pageKeyOf(k) {
     const ref = k.split('@')[1] || '';
     if (/^\d{4}-\d{2}-\d{2}$/.test(ref)) return 'tag:' + ref;
@@ -1752,7 +2168,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 
   /* ---------- 30-second rings ---------- */
   const RING = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle class="trk" cx="20" cy="20" r="16"/><circle class="bar" cx="20" cy="20" r="16" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/><circle class="in2" cx="20" cy="20" r="13.4"/></svg><span class="sec">30</span>';
-  const MIC = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 11 a6 6 0 0 0 12 0 M12 17 v4 M9 21 h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  /* an old microphone in gold (Doc, 24.11.2026: "so ein altes Mikrofon"): a rounded head with the slots of its grille and a
+     bright middle rib, held in a yoke with two pivots, on a short neck and a round foot */
+  const MIC = '<svg viewBox="0 0 24 24" aria-hidden="true" class="mic-old"><path d="M5.6 7.4 v2.4 a6.4 6.4 0 0 0 12.8 0 v-2.4" fill="none" stroke="#6b4f1a" stroke-width="2" stroke-linecap="round"/><path d="M5.6 7.4 v2.4 a6.4 6.4 0 0 0 12.8 0 v-2.4" fill="none" stroke="url(#g-holder)" stroke-width="1.2" stroke-linecap="round"/><path d="M12 16.4 v4" stroke="#6b4f1a" stroke-width="2.2"/><path d="M12 16.4 v4" stroke="url(#g-holder)" stroke-width="1.4"/><ellipse cx="12" cy="21.4" rx="5.2" ry="1.5" fill="url(#g-holder)" stroke="#6b4f1a" stroke-width=".6"/><rect x="7.6" y="1.2" width="8.8" height="12.6" rx="4.4" fill="url(#g-holder)" stroke="#6b4f1a" stroke-width=".7"/><path d="M8.6 4.2 h6.8 M8.1 6.3 h7.8 M8 8.4 h8 M8.1 10.5 h7.8 M8.6 12.4 h6.8" stroke="#4a3310" stroke-width=".9" stroke-linecap="round" opacity=".75"/><path d="M12 1.9 v11.2" stroke="#fff1c2" stroke-width="1.1" stroke-linecap="round"/><circle cx="5.6" cy="8.2" r="1" fill="url(#g-holder)" stroke="#6b4f1a" stroke-width=".5"/><circle cx="18.4" cy="8.2" r="1" fill="url(#g-holder)" stroke="#6b4f1a" stroke-width=".5"/></svg>';
   const timers = {};
   let looping = false;
   function paintRing(k, frac, left) {
@@ -1763,6 +2181,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       r.classList.toggle('done', left <= 0);
     });
   }
+  /* the 30-second clock: off for now (Doc, 24.11.2026 - it put him under pressure); true brings typing, dictation and the
+     rings back (and remove the three CSS lines after .q) */
+  const CLOCK = false;
   function startTimer(k, restart) {
     if (timers[k] && !restart) return;
     timers[k] = { t0: performance.now(), buzzed: false };
@@ -1837,9 +2258,10 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     const lh = parseFloat(getComputedStyle(t).lineHeight) || 30;
     const need = Math.ceil((t.scrollHeight - 2) / lh);
     if (need <= cap) { t.style.setProperty('--rows', Math.max(base, need)); return; }
-    /* keep the box at its cap height and write smaller until the text fits */
-    const H = cap * lh;
-    for (let z = 1 - FZ_STEP; z >= FZ_MIN - 1e-6; z -= FZ_STEP) {
+    /* keep the box at its cap height and write smaller until the text fits - but the handwriting (5.5 of the 6.6 line pitch)
+       never below 16 px: on a phone Android would zoom into the field (a desktop page is big enough, FZ_MIN rules there) */
+    const H = cap * lh, zMin = Math.max(FZ_MIN, 16 / (lh * 5.5 / 6.6));
+    for (let z = 1 - FZ_STEP; z >= zMin - 1e-6; z -= FZ_STEP) {
       const zz = Math.round(z * 100) / 100;
       setFz(t, zz);
       const l2 = lh * zz, rows = Math.max(1, Math.floor(H / l2 + 1e-3));
@@ -1853,7 +2275,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
      the field that needs most gets the next line, so a single long entry may use all of it */
   function fitPage(pg) {
     if (!pg) return;
-    const fields = Array.from(pg.querySelectorAll('textarea.hand'));
+    const fields = Array.from(pg.querySelectorAll('textarea.hand')).filter(t => !t.closest('.back-note'));   /* the back's note keeps its own size */
     if (!fields.length || !fields[0].offsetParent) return;
     const inner = pg.querySelector('.in'), ft = inner && inner.querySelector('.ft');
     if (!ft) { fields.forEach(fit); return; }
@@ -1874,7 +2296,15 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     }
     fields.forEach((t, i) => { t._cap = base[i] + extra[i]; fit(t); if (t.classList.contains('scrolls')) { t.scrollTop = keep[i]; fades(t); } });
   }
-  const growAll = () => $$('.pg').forEach(fitPage);
+  /* one size for the day's questions so that the longest of them still fits its line (see .p-morgen .q-t .tx) */
+  function fitQuestions() {
+    const txs = $$('.p-morgen .q-t .tx, .p-abend .q-t .tx').filter(t => t.clientWidth > 0);
+    if (!txs.length) return;
+    stage.style.setProperty('--qk', '1');
+    const k = Math.min(1, ...txs.map(t => t.clientWidth / Math.max(1, t.scrollWidth)));
+    stage.style.setProperty('--qk', String(Math.max(.55, Math.floor(k * 100) / 100)));
+  }
+  const growAll = () => { fitQuestions(); $$('.pg').forEach(fitPage); };
   document.addEventListener('scroll', e => { const t = e.target; if (t.matches && t.matches('textarea.hand')) fades(t); }, true);
   function syncField(k, from) {
     $$('textarea[data-k="' + k + '"]').forEach(o => {
@@ -1894,7 +2324,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     const t = e.target; if (!t.matches || !t.matches('textarea[data-k]')) return;
     const k = t.dataset.k; vals[k] = t.value;
     syncField(k, t);
-    if (!done.has(k)) startTimer(k);
+    if (CLOCK && !done.has(k)) startTimer(k);
     afterChange(k);
   });
 
@@ -1924,7 +2354,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     if (t && t.readOnly) { toast('An diesem Tag stehen mehrere Einträge – die bearbeitest du in Grateful.'); return; }
     earKey = k;
     earBase = vals[k] ? vals[k].replace(/\s+$/, '') + ' ' : '';
-    done.delete(k); startTimer(k, true);
+    if (CLOCK) { done.delete(k); startTimer(k, true); }
     ear.start();
   }
 
@@ -2085,15 +2515,18 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     let s = '<g filter="url(#f-wc)">' + stain(x0 + 6 * dx, 100, 22, 78, '245,194,66', r, 10) + '</g>';
     s += D.map((d, i) => '<text x="' + (x0 + i * dx) + '" y="22" font-family="Arial" font-size="15" fill="#6d6250" text-anchor="middle">' + d + '</text>').join('');
     let marks = '';
+    /* six habits since 24.11.2026: the rows closer and the names smaller, so they still fit the box */
+    const many = rows.length > 3, y0 = many ? 44 : 62, dy = many ? 22.5 : 46, fs = many ? 21 : 27, cr = many ? 19 : 27;
     rows.forEach(([name, v], ri) => {
-      const y = 62 + ri * 46;
-      s += '<text x="6" y="' + (y + 8) + '" font-family="Caveat" font-weight="600" font-size="27" fill="' + INK.ink + '">' + esc(name) + '</text>';
+      const y = y0 + ri * dy;
+      s += '<text x="6" y="' + (y + (many ? 6 : 8)) + '" font-family="Caveat" font-weight="600" font-size="' + fs + '" fill="' + INK.ink + '">' + esc(name) + '</text>';
       if (window.rough) {
         const gen = rough.generator();
         v.forEach((on, i) => {
           const cx = x0 + i * dx;
-          marks += roughPaths(gen.circle(cx, y, 27, on
-            ? { stroke: INK.ink, strokeWidth: 1.3, roughness: 1.3, fill: 'rgba(121,158,49,.85)', fillStyle: 'hachure', hachureGap: 3.2, fillWeight: 1.2, seed: 100 + ri * 10 + i }
+          marks += roughPaths(gen.circle(cx, y, cr, on
+            /* done in gold, like the gold balls of the day pages (Doc, 24.11.2026: "kein grünes Check, sondern ... golden") */
+            ? { stroke: '#9a6f1c', strokeWidth: 1.3, roughness: 1.3, fill: 'rgba(214,166,58,.9)', fillStyle: 'hachure', hachureGap: 3.2, fillWeight: 1.2, seed: 100 + ri * 10 + i }
             : { stroke: INK.lead, strokeWidth: 1, roughness: 1.1, seed: 100 + ri * 10 + i }));
         });
       }
@@ -2199,13 +2632,17 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
      pages and each day's morning lands on a left page. Phone: single pages. About 870 pages - they start as empty shells and
      get their content only near the open spread (fillNear). */
   const HARD = new Set(['cover', 'endpaper', 'endpaper2', 'back']);
-  const LAZY = new Set(['morgen', 'abend', 'wocheL', 'wocheR', 'monatL', 'monatR']);
+  const LAZY = new Set(['morgen', 'spruch', 'abend', 'wocheL', 'wocheR', 'monatL', 'monatR']);
+  /* the pages of one day: morning, (phone: the thought of the day), evening */
+  const DAYPAGE = new Set(['morgen', 'spruch', 'abend']);
+  /* Phone (24.11.2026): the inside of the front board with the plate (?seite=innen&fuer=…) is a page of its own too, and the
+     thought of the day - on the desk a card taped across the fold - is the page between morning and evening. */
   function buildSeq(m) {
     const seq = [], add = (kind, key) => seq.push({ kind, key: key || '' });
-    add('cover'); if (m === 'desk') add('endpaper');
+    add('cover'); add('endpaper');
     add('title'); add('toc1'); add('toc2'); add('set1'); add('set2'); ['intro1', 'intro2', 'intro3', 'intro4'].forEach(k => add(k));
     DAYS.forEach((d, i) => {
-      add('morgen', d); add('abend', d);
+      add('morgen', d); if (m === 'phone') add('spruch', d); add('abend', d);
       const dt = dateOf(d), next = DAYS[i + 1];
       if (dt.getDay() === 0) { add('wocheL', d); add('wocheR', d); }
       if (!next || dateOf(next).getMonth() !== dt.getMonth()) { add('monatL', d.slice(0, 7)); add('monatR', d.slice(0, 7)); }
@@ -2228,7 +2665,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     const d = document.createElement('div');
     d.className = 'leaf p-' + spec.kind;
     if (HARD.has(spec.kind)) d.dataset.density = 'hard';
-    if (spec.kind === 'morgen' || spec.kind === 'abend') d.dataset.day = spec.key;
+    if (DAYPAGE.has(spec.kind)) d.dataset.day = spec.key;
     if (spec.kind === 'wocheL' || spec.kind === 'wocheR') d.dataset.week = spec.key;
     if (spec.kind === 'monatL' || spec.kind === 'monatR') d.dataset.month = spec.key;
     if (!LAZY.has(spec.kind)) fillShell(d, spec);
@@ -2256,18 +2693,22 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       setText(d, '[data-where]', remote ? 'der Rest des Buchs ebenfalls in deinem Konto.' : 'der Rest des Buchs vorerst nur in diesem Browser, bis die neue Tabelle angelegt ist.');
     }
     if (spec.kind === 'morgen' || spec.kind === 'abend') {
-      setText(d, '.hd .dt', longDate(k));
+      /* the date without the year, it is the book's year anyway (Doc, 24.11.2026) */
+      setText(d, '.hd .dt', longDate(k).replace(/ \d{4}$/, ''));
+      d.querySelectorAll('.quill[data-note]').forEach(b => { b.dataset.note = b.dataset.note.replace(/@.*$/, '') + '@' + k; b.classList.toggle('has', !!String(vals[b.dataset.note] || '').trim()); });
+      setText(d, '.bn-d', longDate(k).replace(/ \d{4}$/, ''));
       setText(d, '.ft .pn', String(dayNo(k)));
       rekey(d, k);
       if (spec.kind === 'morgen') {
-        setText(d, '.ft span:last-child', entries[k] && entries[k].length ? 'Morgen · gespeichert ✎' : 'Morgen');
         const t = d.querySelector('textarea[data-k^="m1@"]');
         if (t && entries[k] && entries[k].length > 1) { t.readOnly = true; t.title = 'Mehrere Einträge an diesem Tag – bearbeiten in Grateful'; t.classList.add('multi'); }
-      } else {
-        const hab = local.habits[k] || [];
-        d.querySelectorAll('.hb').forEach(b => { const n = +b.dataset.h; b.dataset.h = n + '@' + k; b.classList.toggle('on', !!hab[n]); });
       }
+      /* the habit ticks: three on the morning page, three on the evening page */
+      const hab = local.habits[k] || [];
+      d.querySelectorAll('.hb').forEach(b => { const n = +b.dataset.h; b.dataset.h = n + '@' + k; b.classList.toggle('on', !!hab[n]); });
       if (k > TODAY) d.classList.add('future');
+    } else if (spec.kind === 'spruch') {
+      fillThoughtPage(d, k);
     } else if (spec.kind === 'wocheL' || spec.kind === 'wocheR') {
       const days = weekDays(k), first = days[0], wk = isoWeek(k);
       const range = dateOf(first).getDate() + '.' + (first.slice(5, 7) !== k.slice(5, 7) ? ' ' + MONTHS[+first.slice(5, 7) - 1] : '') + ' bis ' + dateOf(k).getDate() + '. ' + MONTHS[+k.slice(5, 7) - 1] + ' ' + YEAR;
@@ -2281,7 +2722,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
         const lbls = d.querySelectorAll('.lbl');
         if (lbls[0]) lbls[0].textContent = 'Gewohnheiten · Woche ' + wk;
         const svgs = d.querySelectorAll('.svgbox svg');
-        if (svgs[0]) svgs[0].innerHTML = paintHabits(HABITS.map((name, n) => [name, Array.from({ length: 7 }, (_, j) => { const dd = addDays(k, j - 6); return dd.startsWith(YEAR + '-') && (local.habits[dd] || [])[n] ? 1 : 0; })]));
+        if (svgs[0]) svgs[0].innerHTML = paintHabits(HABIT_ORDER.map(n => [HABITS[n], Array.from({ length: 7 }, (_, j) => { const dd = addDays(k, j - 6); return dd.startsWith(YEAR + '-') && (local.habits[dd] || [])[n] ? 1 : 0; })]));
         const words = wordCounts(days).slice(0, 12);
         if (svgs[1]) svgs[1].innerHTML = words.length > 2 ? paintCloud(words, 500, MINI_H, { seed: dayNo(k), cx: 250, cy: 94, ax: 2.4, step: 0.8, m: 6, top: 4, bottom: 4, gutter: false, fsMax: 50, fsMin: 18, washes: 2, deco: false })
           : '<text x="250" y="96" font-family="Caveat" font-size="24" fill="#8a7b62" text-anchor="middle">' + (k > TODAY ? 'Diese Woche schreibst du noch.' : 'Diese Woche gibt es noch keine Wörter.') + '</text>';
@@ -2290,7 +2731,11 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
         const g = d.querySelector('.gdw');
         if (g && th) {
           const img = g.querySelector('img');
-          img.src = GDW_BASE + th.bild + '.webp'; img.onerror = function () { this.onerror = null; this.src = '../svp/gdw/' + th.bild + '.webp'; };
+          /* no sheet behind it (the slogan): a small navy card with the words in gold foil instead of the photo */
+          let sc = g.querySelector('.gdw-card'); if (sc) sc.remove();
+          img.style.display = th.card ? 'none' : '';
+          if (th.card) { sc = document.createElement('div'); sc.className = 'gdw-card'; sc.innerHTML = '<span class="foil">' + th.card + '</span>'; img.after(sc); }
+          else img.src = GDW_BASE + th.bild + '.webp'; if (!th.card) img.onerror = function () { this.onerror = null; this.src = '../svp/gdw/' + th.bild + '.webp'; };
           img.alt = 'Gedanke der Woche';
           const p = g.querySelector('p');
           p.innerHTML = (th.html || '<span class="nt">Das Blatt ohne Worte – das Bild spricht.</span>') + (th.by ? '<span class="src">' + esc(th.by) + '</span>' : '') + (th.own ? '<span class="nt">Dasselbe Blatt sehen ab Montag deine Klassen.</span>' : '');
@@ -2315,11 +2760,14 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     }
   }
   const GDW_BASE = 'https://pub-3679488924b04b6e9118c6684b8c23e1.r2.dev/';
-  const HABITS = ['Bewegung', 'Lesen', 'früh schlafen'];
+  /* the indices stay (stored ticks); the order on the pages and in the week chart: HABIT_ORDER (Doc, 24.11.2026) */
+  const HABITS = ['Bewegung', 'Lesen', 'schlafen', 'Achtsamkeit', 'Liebe', 'Freundschaft'];
+  const HABIT_ORDER = [0, 1, 2, 4, 5, 3];
 
 
   /* ---------- the flip book ---------- */
-  const stage = $('#stage'), host = $('#flipHost'), PHONE = matchMedia('(max-width: 700px)');
+  /* one page on an upright phone (or any very narrow window); a phone turned sideways gets the spread as wide as the screen */
+  const stage = $('#stage'), host = $('#flipHost'), PHONE = matchMedia('(max-width: 700px) and (orientation: portrait), (max-width: 480px)');
   let pf = null, mode = null, idx = 0, state = 'read';
   /* where the running flip goes: known for the buttons, guessed from the grabbed half for a drag.
      Closing the book takes the whole left (or right) stack with it, cover board included - so the bare
@@ -2336,13 +2784,6 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   function go(t) {
     if (!pf || t === idx) { chain = null; return; }
     fillNear(t);
-    if (mode === 'phone' && t < idx) {
-      /* StPageFlip 2.0.7 cannot turn back in portrait (flipPrev and flip() to an earlier page do nothing): a short fade instead */
-      chain = null; target = null;
-      stage.classList.add('fading');
-      setTimeout(() => { pf.turnToPage(t); idx = t; updateStage(); stage.classList.remove('fading'); setTimeout(growAll, 30); }, 170);
-      return;
-    }
     /* the same for the back board (key R): to it and away from it in two steps, via the spread before it */
     const last = SEQ[mode].length - 1, pre = last - (mode === 'desk' ? 2 : 1);
     if (idx === 0 && t > 1) { chain = t; t = stepTarget(false); }
@@ -2353,8 +2794,16 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     target = t;
     /* the day tabs slide together with the turning page, whatever started the turn (tab, contents, arrow keys) */
     const dest = SEQ[mode][chain !== null ? chain : t];
-    if (dest && (dest.kind === 'morgen' || dest.kind === 'abend') && dest.key !== regDay) { regDay = dest.key; renderReg(); }
+    if (dest && DAYPAGE.has(dest.kind) && dest.key !== regDay) { regDay = dest.key; renderReg(); }
     if (t === stepTarget(false)) pf.flipNext(); else if (t === stepTarget(true)) pf.flipPrev(); else pf.flip(t);
+    /* the phone turns back with the page curl now (gentleCorners); should the library still refuse a turn back there,
+       a short fade takes its place */
+    if (mode === 'phone' && t < idx && pf.getState() === 'read') {
+      const to = chain !== null ? chain : t;
+      chain = null; target = null;
+      stage.classList.add('fading');
+      setTimeout(() => { pf.turnToPage(to); idx = to; updateStage(); stage.classList.remove('fading'); setTimeout(growAll, 30); }, 170);
+    }
   }
   function updateStage() {
     const last = SEQ[mode].length - 1;
@@ -2362,10 +2811,14 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     stage.classList.toggle('closed-front', mode === 'desk' && (idx === 0 || (moving && target === 0)));
     stage.classList.toggle('closed-back', mode === 'desk' && (idx >= last || (moving && target >= last)));
     const here = SEQ[mode][idx] || {};
-    const onDay = here.kind === 'morgen' || here.kind === 'abend';
+    const onDay = DAYPAGE.has(here.kind);
+    /* the page the book was left on: kept each time it comes to rest - jumps (Shift/Ctrl + arrow, letters, contents) too, which
+       did not always end in a 'flip' of the library, so a reload opened an old page (Doc, 24.11.2026: "lädt immer auf der Seite
+       12. November") */
+    if (state === 'read' && chain === null) keepPage();
     if (onDay && here.key !== cardDay) setCard(here.key);
-    /* the phone shows the card only while going through the sayings (?spruch=…) */
-    stage.classList.toggle('show-card', (mode === 'desk' || !!REVIEW) && onDay && !!cardText && (state === 'read' || state === 'fold_corner'));
+    /* the phone has no card over its page: the thought of the day is the page between morning and evening */
+    stage.classList.toggle('show-card', mode === 'desk' && onDay && !!cardText && (state === 'read' || state === 'fold_corner'));
     /* the page block: the left side grows with the year, the right side shrinks */
     const frac = idx / Math.max(1, SEQ[mode].length - 1);
     $('#bookwrap').style.setProperty('--el', (0.2 + 0.8 * frac).toFixed(2) + 'cqw');
@@ -2373,6 +2826,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     /* the tabs follow the open day only once a turn has come to rest - while the page is still turning, the old spread is
        "open" for a moment and would pull the tabs back (that made them jump back and forth) */
     if (onDay && state === 'read' && chain === null && here.key !== regDay) { regDay = here.key; renderReg(); }
+    /* the reader's birthday: celebrate once each time the book comes to rest on that day */
+    const bday = birthDay();
+    if (state === 'read' && chain === null) { if (onDay && here.key === bday) { if (!festDone) { festDone = true; festStart(); } } else festDone = false; }
     /* phone: the single page is the cover or the back - no tabs on the closed book */
     stage.classList.toggle('cover-shown', mode === 'phone' && (idx === 0 || idx >= last));
     /* the flap closure stays: closed on the cover; it opens as soon as the cover moves (a click on it, a drag at the corner -
@@ -2384,6 +2840,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     $('#clasp').classList.toggle('open', (idx !== 0 && !shutting) || coverMoving || claspHold);
     $('#claspBtn').setAttribute('aria-label', idx === 0 ? 'Buch öffnen' : 'Buch schließen');
     stage.classList.toggle('flipping', state !== 'read');
+    stage.classList.toggle('peek', state === 'fold_corner');
     /* the ribbon never fades. On the closed front it lies under the cover (only the tail hangs out), on the closed back it
        is inside. A turning board switches it exactly when the board passes the spine - half way through the flip. */
     const ribRest = () => ribbon(idx === 0 || (mode === 'phone' && idx >= last), mode === 'desk' && idx >= last);
@@ -2430,6 +2887,47 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       const k = hinting ? 1 : HOVER_K;
       this.do(this.render.convertToPage({ x: cx + (t.x - cx) * k, y: cy + (t.y - cy) * k }));
     };
+    /* Turning back on the phone (Doc, 23.11.2026: "Zurückblättern per Finger geht nicht"): flipPrev "clicks" 10 px from the
+       left edge, and with disableFlipByClick the library only obeys a click on a corner - in portrait its corners are those
+       of the invisible left half, so every turn back was dropped. Our own turns (keys, tabs, swipes) skip that click test;
+       a real tap still has to hit a corner. */
+    const freeFlip = (fc, pt) => {
+      const s = book.getSettings(), was = s.disableFlipByClick;
+      s.disableFlipByClick = false;
+      try { fc.flip(pt); } finally { s.disableFlipByClick = was; }
+    };
+    fc.flipNext = function (c) { const r = this.render.getRect(); freeFlip(this, { x: r.left + 2 * r.pageWidth - 10, y: c === 'bottom' ? r.height - 2 : 1 }); };
+    fc.flipPrev = function (c) { const r = this.render.getRect(); freeFlip(this, { x: 10, y: c === 'bottom' ? r.height - 2 : 1 }); };
+    /* a page dragged by the finger on the phone: its spine is the screen's left edge, so the library's rule "turn once the
+       corner is past the spine" would need a drag off the screen. Here past the middle of the page is enough, both ways. */
+    const plainStop = fc.stopMove;
+    fc.stopMove = function () {
+      if (mode !== 'phone' || this.calc === null) return plainStop.call(this);
+      const p = this.calc.getPosition(), e = this.getBoundsRect(), y = this.calc.getCorner() === 'bottom' ? e.height : 0;
+      const turn = this.calc.getDirection() === 0 ? p.x <= e.pageWidth * 0.55 : p.x <= -e.pageWidth * 0.45;
+      this.animateFlippingTo(p, { x: turn ? -e.pageWidth : e.pageWidth, y }, turn);
+    };
+    /* quick swipes are ours (see the swipe handler): the library's own reacted only within 250 ms and never on the fields */
+    const ui = book.getUI && book.getUI();
+    if (ui) ui.swipeDistance = 1e9;
+  }
+  /* the page the book was left on, per browser (localStorage may be blocked - then it opens at today as before). Stored by
+     name ("morgen@2026-11-24", "wocheL@2026-11-22", "notes"), so it survives new pages and a switch between desk and phone;
+     a page only one of the two has falls back to its twin. */
+  const LAST_KEY = 'tagebuch-seite';
+  function keepPage() {
+    const p = SEQ[mode][idx]; if (!p) return;
+    try { localStorage.setItem(LAST_KEY, p.kind + (p.key ? '@' + p.key : '')); } catch (e) { }
+  }
+  function lastPage() {
+    let name = '';
+    try { name = localStorage.getItem(LAST_KEY) || ''; } catch (e) { }
+    if (!name) return -1;
+    const twin = { wolkeL: 'wolkeP', wolkeR: 'wolkeP', wolkeP: 'wolkeL', lines2: 'lines1', endpaper2: 'notes', set2: 'set1' };
+    const [kind, key] = name.split('@');
+    const tries = [name, twin[kind] || '', kind === 'spruch' ? 'morgen@' + key : '', kind === 'abend' || kind === 'morgen' ? (mode === 'desk' ? 'morgen@' : kind + '@') + key : ''];
+    for (const n of tries) { if (n && at(n) >= 0) return at(n); }
+    return -1;
   }
   function build() {
     mode = PHONE.matches ? 'phone' : 'desk';
@@ -2447,9 +2945,13 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     try { q = new URLSearchParams(location.search); } catch (e) { }
     const tag = q && q.get('tag'), seite = q && q.get('seite');
     let start = at('morgen@' + (tag && DAYS.includes(tag) ? tag : TODAY));
-    if (REVIEW) start = at('morgen@' + DAYS[reviewDay - 1]);   /* ?spruch=45: day 45, also after a switch desk <-> phone */
+    /* no page in the address: the page the book was left on in this browser (Doc, 24.11.2026: "Persistiere mal bitte die
+       Seite, auf der man das Buch verlassen hat") */
+    if (!tag && !seite && !REVIEW) { const last = lastPage(); if (last >= 0) start = last; }
+    /* ?spruch=45: day 45, also after a switch desk <-> phone (the phone opens that day's page of the thought) */
+    if (REVIEW) start = at((mode === 'phone' ? 'spruch@' : 'morgen@') + DAYS[reviewDay - 1]);
     if (seite === 'cover') start = 0;
-    if (seite === 'innen') start = mode === 'desk' ? 1 : 0;   /* the inside of the cover with the plate (für …) */
+    if (seite === 'innen') start = at('endpaper');   /* the inside of the cover with the plate (für …) */
     if (seite === 'woche') start = at('wocheL@' + sundayOf(TODAY));
     if (seite === 'monat') start = at('monatL@' + TODAY.slice(0, 7));
     if (seite === 'wolke') start = at(mode === 'desk' ? 'wolkeL' : 'wolkeP');
@@ -2460,7 +2962,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
           showCover: true, drawShadow: true, maxShadowOpacity: 0.6, flippingTime: 950, mobileScrollSupport: true, disableFlipByClick: true, startPage: start }
       : { width: 400, height: 640, size: 'stretch', minWidth: 5000, maxWidth: 2000, minHeight: 200, maxHeight: 3000, usePortrait: true,
           showCover: true, drawShadow: true, maxShadowOpacity: 0.55, flippingTime: 850, mobileScrollSupport: true, disableFlipByClick: true, startPage: start });
-    pf.on('flip', e => { idx = e.data; fillNear(idx); updateStage(); setTimeout(growAll, 30); const k = (SEQ[mode][idx] || {}).kind; if (k === 'toc1' || k === 'toc2') renderTocPages(); });
+    pf.on('flip', e => { $$('.tflip').forEach(x => x.remove()); $$('.pg.show-back, .pg.lifted').forEach(g => { g.classList.remove('show-back', 'turning', 'lifted'); }); stage.classList.remove('note-open'); idx = e.data; fillNear(idx); updateStage(); setTimeout(growAll, 30); const k = (SEQ[mode][idx] || {}).kind; if (k === 'toc1' || k === 'toc2') renderTocPages(); keepPage(); });
     pf.on('changeState', e => {
       state = e.data;
       if (state === 'read') {
@@ -2504,7 +3006,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
      a sheet or the veil, those events stop at window (capture) before the library sees them. Clicks are separate events
      and still work. */
   const blockFlip = e => {
-    const onUi = e.target && e.target.closest && e.target.closest('.reg, .sheet, .veil, .clasp, .ft .pn');
+    const onUi = e.target && e.target.closest && e.target.closest('.reg, .sheet, .veil, .fs-btn, .clasp, .ft .pn');
     if (onUi || !$('#veil').hidden) e.stopImmediatePropagation();
   };
   ['mousedown', 'mousemove', 'mouseup', 'touchstart', 'touchmove', 'touchend'].forEach(t => window.addEventListener(t, blockFlip, { capture: true, passive: true }));
@@ -2564,6 +3066,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     /* our own file, already cleaned to <em> and <br> */
     const card = $('#spruchCard'), w = card.querySelector('.w'), src = t && t.quelle ? t.quelle : '';
     card.querySelector('.s').innerHTML = cardText;
+    card.querySelector('.k').textContent = t && t.gruss ? 'ZUM GEBURTSTAG' : 'GEDANKE DES TAGES';
     w.textContent = t ? t.by : '';
     if (src) w.title = 'Quelle: ' + src; else w.removeAttribute('title');
     fitCard();
@@ -2571,13 +3074,36 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     /* going through the sayings: the source with its links, then day and number - and the address keeps the day */
     const n = dayNo(day);
     reviewDay = n;
-    card.querySelector('.q').innerHTML = src ? esc(src).replace(/https?:\/\/[^\s<>"]+[^\s<>".,;:)]/g, u => {
-      let host = u;
-      try { host = new URL(u.replace(/&amp;/g, '&')).hostname.replace(/^www\./, ''); } catch (e) { }
-      return '<a href="' + u + '" target="_blank" rel="noopener">' + host + ' ↗</a>';
-    }) : '';
-    setText(card, '.r', 'Tag ' + n + ' von ' + DAYS.length + (t ? ' · Nr. ' + t.nr : '') + (t && t.zeit ? ' · ' + ZEIT_NAME[t.zeit] : '') + (t && t.again ? ' · doppelt, wie Tag ' + t.again : ''));
+    card.querySelector('.q').innerHTML = srcLinks(src);
+    setText(card, '.r', reviewLine(n, t));
     try { const q = new URLSearchParams(location.search); q.set('spruch', String(n)); history.replaceState(null, '', '?' + q.toString() + location.hash); } catch (e) { }
+  }
+  /* the source of a saying, its links shortened to the host, and the line "Tag 45 von 365 · Nr. …" (going through the sayings) */
+  const srcLinks = src => src ? esc(src).replace(/https?:\/\/[^\s<>"]+[^\s<>".,;:)]/g, u => {
+    let host = u;
+    try { host = new URL(u.replace(/&amp;/g, '&')).hostname.replace(/^www\./, ''); } catch (e) { }
+    return '<a href="' + u + '" target="_blank" rel="noopener">' + host + ' ↗</a>';
+  }) : '';
+  const reviewLine = (n, t) => 'Tag ' + n + ' von ' + DAYS.length + (t ? ' · Nr. ' + t.nr : '') + (t && t.zeit ? ' · ' + ZEIT_NAME[t.zeit] : '') + (t && t.again ? ' · doppelt, wie Tag ' + t.again : '');
+  /* the phone's page of the thought of the day: the saying, its author, the picture when it is one of Doc's sheets
+     (sprueche.json / gdw.json; the sayings of the year have none) */
+  function fillThoughtPage(d, day) {
+    const box = d.querySelector('.spr-page'), t = dayThought(day);
+    if (!box) return;
+    const html = t ? t.html : '', len = html.replace(/<[^>]*>/g, '').length;
+    box.querySelector('.s').innerHTML = html;   /* our own files, already cleaned to <em> and <br> */
+    box.querySelector('.w').textContent = t ? t.by : '';
+    box.classList.toggle('long', len > 95);
+    box.classList.toggle('longer', len > 125);
+    const s = t && SPR[pad(t.nr)], sheet = !!t && (!!t.own || (!!s && sayKey(s.text) === t.key));
+    const ph = box.querySelector('.photo'), img = ph.querySelector('img');
+    ph.hidden = !sheet;
+    if (sheet) {
+      /* R2 first (sharp), then the local thumbnail; a sheet without any picture (101) just shows its words */
+      img.onerror = function () { this.onerror = () => { ph.hidden = true; }; this.src = '../svp/gdw/' + pad(t.nr) + '.webp'; };
+      img.src = GDW_BASE + pad(t.nr) + '.webp';
+    }
+    if (REVIEW) { box.querySelector('.q').innerHTML = srcLinks(t && t.quelle); box.querySelector('.r').textContent = reviewLine(dayNo(day), t); }
   }
 
   /* long sayings: the card grows a little wider and its letters a little smaller until it ends above the first question,
@@ -2603,6 +3129,58 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     $('#' + id).hidden = false; $('#veil').hidden = false;
     $('#' + id).scrollTop = 0;
   }
+  /* the quill turns the page over in place and back (Doc, 24.11.2026: "nach rechts raus sliden, aber gleichzeitig nach oben,
+     wie als würdest du ein Papier wirklich richtig umdrehen, in 3D"): a copy of the sheet with both its sides lifts off, slides
+     out and up while it turns over, and lands with the other side up (CSS .tflip); meanwhile the page shows its bare paper. On
+     the back is the note of that morning / evening (n1 / n2, kept with the day like the answers). */
+  const TURN_MS = 1150;
+  function turnNote(pg, toBack) {
+    if (!pg || pg.classList.contains('turning') || pg.classList.contains('show-back') === toBack) return;
+    const leaf = pg.closest('.leaf'), wrap = $('#bookwrap');
+    const settle = () => {
+      pg.classList.toggle('show-back', toBack);
+      pg.querySelector('.back-note').setAttribute('aria-hidden', String(!toBack));
+      stage.classList.toggle('note-open', !!$$('.pg.show-back').length);
+      if (toBack) { const t = pg.querySelector('.back-note textarea'); if (t) t.focus({ preventScroll: true }); }
+    };
+    if (!leaf || matchMedia('(prefers-reduced-motion: reduce)').matches) { settle(); return; }
+    /* one side of the sheet: the page with its front or its back up, in a bare copy of its leaf, so the page's own styles
+       (left / right page, morning / evening) still apply; the fields keep what is written in them */
+    const side = (back, cls) => {
+      const l = leaf.cloneNode(false), c = pg.cloneNode(true);
+      l.removeAttribute('style'); l.classList.add('tf-face', cls);
+      c.classList.remove('turning', 'lifted'); c.classList.toggle('show-back', back);
+      const from = pg.querySelectorAll('textarea, input'), to = c.querySelectorAll('textarea, input');
+      from.forEach((x, i) => { if (to[i]) { to[i].value = x.value; to[i].checked = x.checked; } });
+      c.querySelectorAll('[id]').forEach(x => x.removeAttribute('id'));
+      l.appendChild(c);
+      return l;
+    };
+    const r = pg.getBoundingClientRect(), w = wrap.getBoundingClientRect();
+    const fl = document.createElement('div'), shadow = document.createElement('div'), sheet = document.createElement('div');
+    fl.className = 'tflip'; fl.setAttribute('aria-hidden', 'true');
+    fl.style.cssText = 'left:' + (r.left - w.left) + 'px;top:' + (r.top - w.top) + 'px;width:' + r.width + 'px;height:' + r.height + 'px;--d:' + (pg.closest('.p-morgen') ? -1 : 1);
+    shadow.className = 'tf-shadow'; sheet.className = 'tf-sheet';
+    sheet.append(side(!toBack, 'tf-front'), side(toBack, 'tf-back'));
+    fl.append(shadow, sheet);
+    pg.classList.add('turning', 'lifted');
+    /* the card of the day belongs to the front: it goes as the sheet lifts (and comes back once the front has landed) */
+    if (toBack) stage.classList.add('note-open');
+    wrap.appendChild(fl);
+    let done = false;
+    const end = () => {
+      if (done) return; done = true;
+      if (fl.isConnected) { fl.remove(); settle(); }   /* gone already: the book was turned on meanwhile */
+      pg.classList.remove('turning', 'lifted');
+    };
+    sheet.addEventListener('animationend', e => { if (e.target === sheet && e.animationName === 'tf-spin') end(); });
+    setTimeout(end, TURN_MS * 2);   /* in case the animation never reports its end */
+  }
+  document.addEventListener('click', e => {
+    const q = e.target.closest && e.target.closest('.quill');
+    if (!q) return;
+    turnNote(q.closest('.pg'), !q.hasAttribute('data-turn'));
+  });
   /* the contents pages: filled again whenever the book opens them, so new entries show at once */
   function monthGrid(m) {
     let g = ['M', 'D', 'M', 'D', 'F', 'S', 'S'].map(x => '<b>' + x + '</b>').join('') + '<span></span>'.repeat((new Date(YEAR, m, 1).getDay() + 6) % 7);
@@ -2611,7 +3189,8 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       const cls = ((today ? 't ' : '') + (w ? 'w' : before ? 'e' : today ? '' : 'f')).trim();
       g += '<button class="' + cls + '" data-day="' + day + '" aria-label="' + d + '. ' + MONTHS[m] + '">' + d + '</button>';
     }
-    return '<div class="mon"><h4>' + MONTHS[m] + '</h4><div class="g">' + g + '</div></div>';
+    /* the month's name opens the month at its 1st (Doc, 24.11.2026: "wenn ich auf den Monat klicke, soll ich direkt zu dem Monat springen") */
+    return '<div class="mon"><h4><button data-page="morgen@' + YEAR + '-' + pad(m + 1) + '-01">' + MONTHS[m] + '</button></h4><div class="g">' + g + '</div></div>';
   }
   function renderTocPages() {
     const short = d => WD2[dateOf(d).getDay()] + ' ' + dateOf(d).getDate() + '.' + (dateOf(d).getMonth() + 1) + '.';
@@ -2688,6 +3267,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(t => window.addEventListener(t, e => { if (e.isTrusted) lastReal = Date.now(); }, { capture: true, passive: true }));
   function cornerHint() {
     if (hinting || !pf || state !== 'read' || document.hidden || !$('#veil').hidden) return;
+    if (festRaf) return;   /* not while the birthday show runs */
     if (Date.now() - lastReal < 7000) return;
     if (stage.classList.contains('closed-front') || stage.classList.contains('closed-back') || idx >= SEQ[mode].length - 1) return;
     const a = document.activeElement; if (a && a.matches && a.matches('textarea, input')) return;
@@ -2718,10 +3298,10 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   /* going through the sayings (?spruch=…): one day back or on, straight to that day's morning */
   function stepSaying(n) {
     const here = SEQ[mode][idx] || {};
-    const cur = here.kind === 'morgen' || here.kind === 'abend' ? DAYS.indexOf(here.key) : reviewDay - 1;
+    const cur = DAYPAGE.has(here.kind) ? DAYS.indexOf(here.key) : reviewDay - 1;
     const i = cur + n;
     if (i < 0 || i >= DAYS.length) { toast(i < 0 ? 'Das ist der erste Spruch des Jahres.' : 'Das war der letzte Spruch des Jahres.'); return; }
-    goPage('morgen@' + DAYS[i]);
+    goPage((mode === 'phone' ? 'spruch@' : 'morgen@') + DAYS[i]);
   }
 
   /* the arrows are gone: on a computer the arrow keys turn the pages, Escape closes a sheet */
@@ -2730,14 +3310,17 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     /* Escape in a field: out of it (which stops its running clock, see focusout); elsewhere it closes a sheet or the picture */
     if (e.key === 'Escape') {
       const a = document.activeElement;
-      if (a && a.matches && a.matches('textarea[data-k]')) { a.blur(); return; }
+      const open = $$('.pg.show-back').filter(g => g.offsetParent);
+      if (open.length) { open.forEach(g => turnNote(g, false)); return; }
+      if (a && a.matches && a.matches('textarea[data-k]') && !a.closest('.sheet')) { a.blur(); return; }
       closeTop(); return;
     }
     if (e.target.closest && e.target.closest('textarea, input, select, [contenteditable]')) return;
+    /* F = full screen (free: the book uses digits, Enter, the arrows and Escape; Cmd/Ctrl+F stays the browser's search) */
     /* Shift + a month's initial: that month's view - J January -> June -> July, M March -> May, A April -> August, pressed
        again. Shift, not Cmd/Ctrl: Cmd+J/F/M/A/S/O/N/D (Ctrl on Windows) are the browser's own - downloads, find, minimise,
        select all, save, open, new window, bookmark - and some cannot be taken at all (Doc, 24.11.2026: "cmd J-D für Monate").
-       Before any F key, so Shift+F is February, not full screen. */
+       Before the F key below, so Shift+F is February, not full screen. */
     const MON = { j: [1, 6, 7], f: [2], m: [3, 5], a: [4, 8], s: [9], o: [10], n: [11], d: [12] }[e.key.toLowerCase()];
     if (MON && e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
       e.preventDefault();
@@ -2746,9 +3329,19 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       goPage('monatL@' + YEAR + '-' + pad(MON[(at0 + 1) % MON.length]));
       return;
     }
+    if ((e.key === 'f' || e.key === 'F') && !e.metaKey && !e.ctrlKey && !e.altKey) { e.preventDefault(); toggleFs(); return; }
     if (!$('#veil').hidden || !pf || state !== 'read') return;
     const r = stage.getBoundingClientRect();
     if (r.bottom < 0 || r.top > innerHeight) return;   /* only while the book is on screen */
+    /* G = the birthday, and ?taste=h a key of its own for it (H for the one celebrated): a jump to that day - also from the
+       closed book - where the show starts as the page comes to rest; pressed on that day, it starts again. A secret for a
+       talk (Doc, 24.11.2026: "einen geheimen Tipp für irgendeine Taste ... H für Hansen oder G für Geburtstag") */
+    if (festKeys().includes(e.key.toLowerCase()) && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey && birthDay()) {
+      e.preventDefault();
+      const bd = birthDay(), here = SEQ[mode][idx] || {};
+      if (DAYPAGE.has(here.kind) && here.key === bd) festStart(); else { festDone = false; goPage('morgen@' + bd); }
+      return;
+    }
     /* typing a page number and Enter opens that page: "1 2 Enter" = page 12 = 12 January (the day pages carry the day of the year) */
     if (/^[0-9]$/.test(e.key)) {
       e.preventDefault();
@@ -2765,6 +3358,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       goPage('morgen@' + DAYS[n - 1]);
       return;
     }
+    /* X = the birthday celebration now, whatever day is open - to see it before the day comes (Doc, 24.11.2026: "gib mir mal auf
+       X, egal auf welchem Tag man ist, was ihr euch da ausgedacht habt") - sparklers or blossoms, as chosen in the settings */
+    if ((e.key === 'x' || e.key === 'X') && !e.metaKey && !e.ctrlKey && !e.altKey) { e.preventDefault(); festStart(); return; }
     /* I = the contents, like the Inhalt tab: a jump there, and pressed on the contents back to the open day (Doc, 24.11.2026:
        "mach i für Inhalt (jump)") */
     if ((e.key === 'i' || e.key === 'I') && !e.metaKey && !e.ctrlKey && !e.altKey) { e.preventDefault(); $('#tocBtn').click(); return; }
@@ -2780,7 +3376,8 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     const jump = !e.metaKey && !e.ctrlKey && !e.altKey && ({
       w: () => 'wocheL@' + sundayOf(regDay || TODAY), m: () => 'monatL@' + (regDay || TODAY).slice(0, 7),
       c: () => mode === 'desk' ? 'wolkeL' : 'wolkeP', r: () => 'back', s: () => 'cover',
-      p: () => 'notes' /* P = the last page with "So geht's" and the imprint (Doc, 24.11.2026) */ })[e.key.toLowerCase()];
+      p: () => 'notes' /* P = the last page with "So geht's" and the imprint (Doc, 24.11.2026) */,
+      n: () => 'lines1' /* N = the notes page (Doc, 24.11.2026) */ })[e.key.toLowerCase()];
     if (jump) {
       e.preventDefault();
       const name = jump(), t = at(name);
@@ -2789,18 +3386,17 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       return;
     }
     /* Shift + arrow: a week on or back, Ctrl + arrow (on a Mac Option, Ctrl + arrow switches the desktops there): a month -
-       from the open day to the same weekday / the same date, kept inside the year (Doc, 24.11.2026: "Shift-Pfeil-Links soll
+       to the start of that week / month, kept inside the year (Doc, 24.11.2026: "Shift-Pfeil-Links soll
        wochenweise blättern und Control-Pfeil-Links oder Rechts monatsweise"). Cmd + arrow stays the browser's back/forward. */
     if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.metaKey && (e.shiftKey || e.ctrlKey || e.altKey)) {
       e.preventDefault();
       const dir = e.key === 'ArrowRight' ? 1 : -1, here = SEQ[mode][idx] || {};
       const from = /^(morgen|spruch|abend)$/.test(here.kind) ? here.key : (regDay || TODAY);
+      /* always to the start: the Monday of the next / previous week, the 1st of the next / previous month (Doc, 24.11.2026:
+         "geh immer bitte zum Anfang der nächsten Woche oder der vorherigen Woche, genauso beim Monat") */
       let to;
-      if (e.shiftKey && !e.ctrlKey && !e.altKey) to = addDays(from, 7 * dir);
-      else {
-        const f = dateOf(from), y = f.getFullYear(), m = f.getMonth() + dir;
-        to = iso(new Date(y, m, Math.min(f.getDate(), new Date(y, m + 1, 0).getDate())));
-      }
+      if (e.shiftKey && !e.ctrlKey && !e.altKey) to = addDays(addDays(from, -((dateOf(from).getDay() + 6) % 7)), 7 * dir);
+      else { const f = dateOf(from); to = iso(new Date(f.getFullYear(), f.getMonth() + dir, 1)); }
       to = to < DAYS[0] ? DAYS[0] : to > DAYS[DAYS.length - 1] ? DAYS[DAYS.length - 1] : to;
       if (to !== from) goPage('morgen@' + to);
       return;
@@ -2810,17 +3406,444 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     if (e.key === 'ArrowLeft') { e.preventDefault(); go(stepTarget(true)); }
   });
 
+  /* Swipes (phone and touch screens): a quick sideways stroke anywhere on the book turns one page - to the left = on, to the
+     right = back - also over the writing fields and the card, where the library never sees the touch. Going through the
+     sayings it steps a day. A slow drag stays the library's page curl (released past the middle, it turns: gentleCorners).
+     Not while writing in a field, not on the tabs, not with a sheet open. */
+  let swipe = null;
+  window.addEventListener('touchstart', e => {
+    swipe = null;
+    const el = e.target;
+    if (!pf || e.touches.length !== 1 || !el.closest || !el.closest('#bookwrap') || el.closest('.reg, a') || !$('#veil').hidden) return;
+    if (el.closest('textarea') && el.closest('textarea') === document.activeElement) return;
+    swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
+  }, { capture: true, passive: true });
+  window.addEventListener('touchend', e => {
+    const s = swipe; swipe = null;
+    if (!s || !pf || state !== 'read' || !e.changedTouches.length) return;
+    const dx = e.changedTouches[0].clientX - s.x, dy = e.changedTouches[0].clientY - s.y;
+    if (Date.now() - s.t > 700 || Math.abs(dx) < 45 || Math.abs(dx) < 1.4 * Math.abs(dy)) return;
+    pf.isUserTouch = false;   /* the library's own release (it runs after this) must not turn a second time */
+    if (REVIEW) stepSaying(dx < 0 ? 1 : -1); else go(stepTarget(dx > 0));
+  }, { capture: true, passive: true });
+  window.addEventListener('touchcancel', () => { swipe = null; }, { capture: true, passive: true });
+
+  /* Full screen (Doc, 24.11.2026: "Wir brauchen fullscreen"): the switch bottom right on phones and touch screens, the key F
+     on a computer. Started from the home screen (manifest display: fullscreen) the book is full screen already - the CSS
+     (display-mode) hides the switch there. */
+  const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+  const fsCan = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  function toggleFs() {
+    if (!fsCan) return;
+    if (fsEl()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+    const d = document.documentElement, req = d.requestFullscreen || d.webkitRequestFullscreen;
+    try {
+      const p = req.call(d, { navigationUI: 'hide' });
+      if (p && p.catch) p.catch(() => toast('Vollbild geht in diesem Browser nicht.'));
+    } catch (err) { toast('Vollbild geht in diesem Browser nicht.'); }
+  }
+  function syncFs() {
+    const on = !!fsEl();
+    stage.classList.toggle('fs-on', on);
+    stage.classList.toggle('fs-able', fsCan);
+    const b = $('#fsBtn'); b.setAttribute('aria-label', on ? 'Vollbild beenden' : 'Vollbild'); b.title = on ? 'Vollbild beenden' : 'Vollbild';
+  }
+  $('#fsBtn').addEventListener('click', toggleFs);
+  document.addEventListener('fullscreenchange', syncFs);
+  document.addEventListener('webkitfullscreenchange', syncFs);
+  syncFs();
+
+  /* ---------- the night sky behind the book (night scheme; Doc, 24.11.2026: "einen Sternenhimmel dahinter mit sich bewegenden
+     Sternen" ... "lass die mal von hinten nach vorne kommen, als würde man so durchs Weltall fliegen" ... "noch ein paar mehr"):
+     a canvas under the book, a slow flight through space - the stars come from far behind the book towards the viewer,
+     growing and brightening as they near, and start afresh far away once they pass; each twinkles a little, now and then a
+     shooting star. It only runs while the night scheme is on
+     and the page is seen (about 30 frames a second); with reduced motion the sky stands still. ---------- */
+  const sky = $('#sky'), skyCtx = sky.getContext('2d'), skyCalm = matchMedia('(prefers-reduced-motion: reduce)');
+  let skyStars = [], skyRaf = 0, skyLast = 0, skyPrev = 0, skyW = 0, skyH = 0, skyDpr = 1, skyShoot = null, skyNextShoot = 0;
+  /* a star far away (z = 1) somewhere in the field of view; on the screen it sits at x / z, y / z from the centre */
+  const skyFar = st => { st.z = 1; st.x = (Math.random() - .5) * skyW * 1.1; st.y = (Math.random() - .5) * skyH * 1.1; };
+  const skyT0 = performance.now();
+  function skySize() {
+    skyDpr = Math.min(2, window.devicePixelRatio || 1);
+    skyW = stage.clientWidth; skyH = Math.max(stage.clientHeight, stage.scrollHeight);
+    sky.width = Math.round(skyW * skyDpr); sky.height = Math.round(skyH * skyDpr); sky.style.height = skyH + 'px';
+    /* more, smaller and slower (Doc, 24.11.2026: "viel zu schnell ... mehr, aber nicht groß") */
+    const n = Math.round(Math.min(3960, skyW * skyH / 509)), rnd = mulberry32(11);   /* 10 % more (Doc, 24.11.2026) */
+    skyStars = Array.from({ length: n }, () => {
+      const z = .06 + rnd() * .94;
+      /* spread over the screen at their depth, so the sky is full from the first frame */
+      return { z, x: (rnd() - .5) * skyW * 1.1 * z, y: (rnd() - .5) * skyH * 1.1 * z, s: .6 + rnd() * .8, v: .7 + rnd() * .6,
+        b: .45 + rnd() * .55, tw: .5 + rnd() * 2, ph: rnd() * 6.28, c: rnd() };
+    });
+  }
+  function skyDraw(now) {
+    skyRaf = 0;
+    if (!stage.classList.contains('sch-nacht') || document.hidden) return;
+    skyRaf = requestAnimationFrame(skyDraw);
+    if (now - skyLast < 33) return;
+    skyLast = now;
+    const calm = skyCalm.matches, t = (now - skyT0) / 1000, dt = skyPrev ? Math.min(.1, (now - skyPrev) / 1000) : 0;
+    skyPrev = now;
+    const cx = skyW / 2, cy = Math.min(skyH, innerHeight) / 2;
+    skyCtx.setTransform(skyDpr, 0, 0, skyDpr, 0, 0);
+    skyCtx.clearRect(0, 0, skyW, skyH);
+    for (const st of skyStars) {
+      /* the flight: depth shrinks by under 2 % a second */
+      if (!calm) st.z -= dt * .0051 * st.v;   /* 30 % of the last speed (Doc, 24.11.2026: "immer noch viel zu schnell") */
+      const x = cx + st.x / st.z, y = cy + st.y / st.z;
+      if (st.z < .03 || x < -8 || y < -8 || x > skyW + 8 || y > skyH + 8) { skyFar(st); continue; }
+      const near = 1 - st.z;
+      skyCtx.globalAlpha = Math.min(1, .1 + near * 1.2) * st.b * (calm ? 1 : .8 + .2 * Math.sin(t * st.tw + st.ph));
+      skyCtx.fillStyle = st.c < .12 ? '#ffe2b0' : st.c > .9 ? '#cddcff' : '#ffffff';
+      skyCtx.beginPath(); skyCtx.arc(x, y, .3 + near * near * 1.05 * st.s, 0, 6.2832); skyCtx.fill();
+    }
+    if (!calm) {
+      if (!skyShoot && now > skyNextShoot) {
+        if (skyNextShoot) skyShoot = { x: skyW * (.25 + Math.random() * .7), y: skyH * Math.random() * .35, t0: now };
+        skyNextShoot = now + 16000 + Math.random() * 24000;
+      }
+      if (skyShoot) {
+        const k = (now - skyShoot.t0) / 900;
+        if (k >= 1) skyShoot = null;
+        else {
+          const hx = skyShoot.x - .8 * k * 380, hy = skyShoot.y + .6 * k * 380, tx = hx + .8 * 150, ty = hy - .6 * 150;
+          const g = skyCtx.createLinearGradient(hx, hy, tx, ty);
+          g.addColorStop(0, 'rgba(255, 255, 255, ' + (1 - k).toFixed(2) + ')'); g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          skyCtx.globalAlpha = 1; skyCtx.strokeStyle = g; skyCtx.lineWidth = 1.4;
+          skyCtx.beginPath(); skyCtx.moveTo(hx, hy); skyCtx.lineTo(tx, ty); skyCtx.stroke();
+        }
+      }
+    }
+    skyCtx.globalAlpha = 1;
+  }
+  function skyRun() {
+    if (skyRaf || !stage.classList.contains('sch-nacht') || document.hidden) return;
+    if (!skyStars.length || Math.abs(stage.clientWidth - skyW) > 2) skySize();
+    skyRaf = requestAnimationFrame(skyDraw);
+  }
+  let skyRsz = 0;
+  window.addEventListener('resize', () => { clearTimeout(skyRsz); skyRsz = setTimeout(() => { if (stage.classList.contains('sch-nacht')) { skySize(); skyRun(); } }, 200); });
+  document.addEventListener('visibilitychange', skyRun);
+
+  /* ---------- the birthday (settings.geb): sparklers ("ein kleines Feuerwerk aus Wunderkerzenfeuer") dancing in a ring (about
+     20 seconds) or a rain of blossoms ("fotorealistische Blütchen", about eight) over the open book (Doc, 24.11.2026). A canvas above the book, no
+     clicks caught; with reduced motion nothing moves. ---------- */
+  const fest = $('#fest'), festCtx = fest.getContext('2d');
+  let festDone = false, festRaf = 0, festT0 = 0, festPrev = 0, festParts = [], festEmit = [], festDpr = 1, festRing = null, festGlints = [];
+  /* the sparklers' dance (Doc, 24.11.2026: "erst die Wunderkerzen erscheinen lassen und dann ... im Reigen tanzen ... Richtung
+     wechseln", "im Rhythmus flackern lassen. Groß, klein", "die ganze Seite müsste glitzern"): they light up one by one where
+     they stand, join in a ring round the middle of the spread, dance round in 3/4 time - the time of "Happy Birthday" - one
+     turn one way, one turn back (four bars each), flaring big on each bar's first beat and small on the other two with a
+     little hop, while gold glints twinkle all over the page. Then they go on in a line, weaving round the questions - a
+     slalom down the left page, over the fold at the foot, up the right page and back over the top - as long as nobody
+     touches anything; at the first click or key they do not fade but leave, one after the other, to the bottom right over
+     the page number and out of the picture: off on their way to next year (Doc, 24.11.2026). FEST_BEAT is one beat in
+     seconds, so the song can set the pace once we have it. */
+  const FEST_BEAT = 0.6, FEST_APPEAR = 1.6, FEST_GATHER = 2.2;
+  /* the song (Doc, 24.11.2026: "1!"): "Happy Birthday" on a real little music box - marianna-emma, freesound.org, CC0
+     (audio/happy-birthday-spieluhr.mp3). It plays while they dance: from 2.9 s of the file (before that only a click) to
+     18.2 s (then a click again), faded out over the last 0.4 s. FEST_NOTES are its notes, found by onset analysis of the
+     recording ([second in the file, loudness 0..1]): each sparkler flares with every note, big with the loud ones, small
+     with the soft ones - in time even when the browser keeps the sound back (then the dance runs on the same clock). */
+  const FEST_SONG = { src: 'audio/happy-birthday-spieluhr.mp3', from: 2.9, to: 18.2, fade: .4 };
+  const FEST_NOTES = [[2.98,0.53],[3.49,0.45],[3.62,0.49],[4.27,0.53],[4.86,0.49],[5.11,0.33],[5.47,0.67],[6.21,0.34],[6.7,0.64],[7.16,0.47],[7.33,0.86],[7.92,0.45],[8.61,0.95],[8.87,0.33],[9.29,0.94],[9.64,0.76],[9.79,0.6],[10.33,0.46],[10.66,0.92],[11.12,0.67],[11.3,1],[11.97,0.88],[12.61,1],[12.99,0.35],[13.29,0.74],[13.84,0.98],[14.41,0.82],[14.85,1],[15.49,0.81],[16.06,0.75],[16.68,0.67],[17.5,0.66],[18.04,0.59]];
+  /* the goodbye (Doc, 24.11.2026: "1 ist das Beste, aber die müssen dann auch noch so lange rumtanzen, bis das Lied zu Ende
+     ist. Dann, wenn der letzte raus ist, muss das Lied zu Ende sein."): Brahms' "Guten Abend, gut' Nacht" on a real music
+     box - Garuda1982, freesound.org, CC0, one round cut out of the long field recording (audio/abschied-wiegenlied-spieluhr.mp3,
+     0.5-13.8 s). It starts .8 s after the click while "Happy Birthday" fades; the sparklers dance on, then leave one per
+     beat, and the last one is gone exactly as it ends. FEST_BYE_NOTES are its notes for the flicker, like FEST_NOTES. */
+  const FEST_BYE = { src: 'audio/abschied-wiegenlied-spieluhr.mp3', from: .5, to: 13.8, fade: .5, delay: .8 };
+  const FEST_BYE_NOTES = [[0.78,0.66],[1.4,0.66],[1.6,0.59],[1.75,0.52],[2.11,0.39],[2.47,0.59],[2.64,0.34],[2.83,0.56],[3.02,0.49],[3.12,0.63],[3.55,0.59],[3.91,0.49],[4.64,0.61],[4.79,0.6],[5.07,0.69],[5.54,0.72],[5.71,0.7],[6.08,0.71],[6.47,0.33],[6.83,0.65],[7.0,0.61],[7.2,0.66],[7.55,0.66],[7.93,0.25],[8.09,1],[8.29,0.92],[8.66,0.87],[9.02,0.55],[9.21,0.51],[9.38,0.52],[9.65,0.63],[9.75,0.52],[10.11,0.45],[10.29,0.63],[10.48,0.54],[10.87,0.35],[11.22,0.61],[11.4,0.58],[11.6,0.82],[11.77,0.75],[11.97,0.26],[12.13,0.65],[12.33,0.61],[12.85,0.88]];
+  /* played through Web Audio from the decoded files: each starts exactly at its .from and ends at .to with a fade, and its
+     clock is exact - an audio element cannot jump to a cut where the server answers no byte ranges (the local one) */
+  let festAc = null, festSongOn = false, festSongBlocked = false;
+  const festTracks = {};
+  function festLoad(spec) {
+    if (!window.AudioContext) return null;
+    festAc = festAc || new AudioContext();
+    const k = festTracks[spec.src] || (festTracks[spec.src] = {});
+    if (k.buf || k.loading) return k.loading || null;
+    k.loading = fetch(spec.src).then(r => r.arrayBuffer()).then(b => festAc.decodeAudioData(b)).then(buf => { k.buf = buf; }).catch(() => { k.loading = null; });
+    return k.loading;
+  }
+  /* plays a track delay seconds from now, faded at its end; false while it is not loaded */
+  function festPlay(spec, delay) {
+    const k = festTracks[spec.src];
+    if (!k || !k.buf) return false;
+    festAc.resume();
+    const at = festAc.currentTime + delay, dur = spec.to - spec.from;
+    k.node = festAc.createBufferSource(); k.gain = festAc.createGain();
+    k.node.buffer = k.buf; k.node.connect(k.gain); k.gain.connect(festAc.destination);
+    k.gain.gain.setValueAtTime(1, at); k.gain.gain.setValueAtTime(1, at + dur - spec.fade); k.gain.gain.linearRampToValueAtTime(0, at + dur);
+    k.node.start(at, spec.from, dur + .05); k.t0 = at;
+    return true;
+  }
+  /* where a track is now (seconds in its file), or -1 */
+  function festTime(spec) {
+    const k = festTracks[spec.src];
+    if (!k || !k.node || !festAc) return -1;
+    const st = spec.from + festAc.currentTime - k.t0;
+    return st >= spec.from - .02 && st <= spec.to ? st : -1;
+  }
+  function festFade(spec, sec) {
+    const k = festTracks[spec.src];
+    if (!k || !k.node) return;
+    const now = festAc.currentTime;
+    k.gain.gain.cancelScheduledValues(now); k.gain.gain.setValueAtTime(k.gain.gain.value, now); k.gain.gain.linearRampToValueAtTime(0, now + sec);
+    try { k.node.stop(now + sec + .1); } catch (e) { }
+  }
+  /* a page nobody has clicked or typed on yet may not make a sound */
+  const festMayPlay = () => !navigator.userActivation || navigator.userActivation.hasBeenActive;
+  /* shown in a deck with a presenter view (V), the beamer's copy of the book only mirrors the presenter's clicks: it dances
+     along but stays silent, so the music box plays once (the deck marks that window: top.__deckReplica) - and it takes the
+     mirrored clicks as the clicks they stand for, so both copies restart and send the sparklers off together */
+  const festReplica = () => { try { return window.top !== window && window.top.__deckReplica === true; } catch (e) { return false; } };
+  let festSeenInput = false;
+  function festSongStart() {
+    festSongOn = true; festSongBlocked = false;
+    if (!(festReplica() ? festSeenInput : festMayPlay())) { festSongOn = false; festSongBlocked = true; return; }   /* waits for the first click (festLeave) */
+    if (festReplica()) return;   /* the beamer's copy: silent */
+    const go = () => { if (festSongOn && !festPlay(FEST_SONG, .06)) festSongOn = false; };
+    const k = festTracks[FEST_SONG.src];
+    if (k && k.buf) go(); else { const p = festLoad(FEST_SONG); if (p) p.then(go); else festSongOn = false; }
+  }
+  function festSongTime() { return festSongOn ? festTime(FEST_SONG) : -1; }
+  function festSongStop() { Object.values(festTracks).forEach(k => { if (k.node) { try { k.node.stop(); } catch (e) { } k.node = null; } }); festSongOn = false; }
+  const FEST_SLALOM_IN = 2.5, FEST_SPEED = .17 /* book widths a second */, FEST_GAP = .045 /* of the loop between two */, FEST_LEAVE = 2.8;
+  /* when sparkler i sets off after the click: one per beat, the last one out as the lullaby ends */
+  const festDepart = i => festLeaveT + FEST_BYE.delay + (FEST_BYE.to - FEST_BYE.from) - FEST_LEAVE - (festEmit.length - 1 - i) * FEST_BEAT;
+  const festDanceT = () => FEST_SONG.to - FEST_SONG.from;
+  const festEase = u => u <= 0 ? 0 : u >= 1 ? 1 : (1 - Math.cos(Math.PI * u)) / 2;
+  let festPath = null, festLeaveT = -1, festLeaveFrom = [];
+  /* the slalom: a closed curve (Catmull-Rom through points given in parts of the book) - right of each question on the left
+     page, left between them, the same up the right page - measured, so the sparklers keep an even pace and spacing */
+  function festBuildPath(R) {
+    const W = [[.5, .19], [.4, .29], [.08, .4], [.4, .5], [.08, .615], [.4, .715], [.27, .86], [.5, .9], [.7, .86], [.92, .72], [.58, .615], [.92, .5], [.58, .4], [.92, .29], [.72, .2]]
+      .map(([fx, fy]) => [R.bx + R.bw * fx, R.by + R.bh * fy]);
+    const pts = [], n = W.length;
+    for (let i = 0; i < n; i++) {
+      const p0 = W[(i - 1 + n) % n], p1 = W[i], p2 = W[(i + 1) % n], p3 = W[(i + 2) % n];
+      for (let k = 0; k < 24; k++) {
+        const u = k / 24, u2 = u * u, u3 = u2 * u;
+        pts.push([0, 1].map(j => .5 * (2 * p1[j] + (p2[j] - p0[j]) * u + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * u2 + (3 * p1[j] - p0[j] - 3 * p2[j] + p3[j]) * u3)));
+      }
+    }
+    const len = [0];
+    for (let i = 1; i <= pts.length; i++) { const a = pts[i - 1], b = pts[i % pts.length]; len.push(len[i - 1] + Math.hypot(b[0] - a[0], b[1] - a[1])); }
+    return { pts, len, L: len[len.length - 1] };
+  }
+  function festOnPath(dist) {
+    const P = festPath, s = ((dist % P.L) + P.L) % P.L;
+    let lo = 0, hi = P.len.length - 1;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (P.len[m] <= s) lo = m; else hi = m; }
+    const a = P.pts[lo], b = P.pts[hi % P.pts.length], k = (s - P.len[lo]) / ((P.len[hi] - P.len[lo]) || 1);
+    return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
+  }
+  /* the keys that jump to the birthday and start the show: G, and the one given by ?taste= (a single letter not taken) */
+  function festKeys() {
+    let k = '';
+    try { k = (new URLSearchParams(location.search).get('taste') || '').toLowerCase(); } catch (e) { }
+    return /^[a-z]$/.test(k) && !'iewmcrspnfx'.includes(k) ? ['g', k] : ['g'];
+  }
+  /* the first click or key ends the show: the sparklers set off (X itself starts it again) */
+  function festLeave(e) {
+    const seen = festSeenInput;
+    festSeenInput = true;
+    if (!festRaf || festLeaveT >= 0 || settings.fest === 'blueten' || !festEmit.length) return;
+    if (e.type === 'keydown' && (/^x$/i.test(e.key || '') || festKeys().includes((e.key || '').toLowerCase()))) return;   /* those start it */
+    /* the book opened on the birthday by itself, and the browser kept the song back until the first click: that click starts
+       the show once more, now with the song; the next one sends them off */
+    if (e.type === 'pointerdown' && festSongBlocked && (!festReplica() || !seen)) { festSongBlocked = false; festStart(); return; }
+    festLeaveT = (performance.now() - festT0) / 1000;
+    festFade(FEST_SONG, 1.2);
+    if (festMayPlay() && !festReplica()) festPlay(FEST_BYE, FEST_BYE.delay);
+  }
+  document.addEventListener('pointerdown', e => { festLastDown = performance.now(); festLeave(e); }, true);
+  /* a click that came without its pointerdown (the deck replaying the presenter's clicks in the beamer's copy) counts as one */
+  let festLastDown = -1e9;
+  document.addEventListener('click', e => { if (performance.now() - festLastDown > 800) festLeave({ type: 'pointerdown' }); }, true);
+  document.addEventListener('keydown', festLeave, true);
+  function festStart() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    festDpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = stage.clientWidth, H = Math.min(stage.clientHeight, innerHeight);
+    fest.width = Math.round(W * festDpr); fest.height = Math.round(H * festDpr);
+    fest.style.width = W + 'px'; fest.style.height = H + 'px';
+    const b = $('#bookwrap').getBoundingClientRect(), s = stage.getBoundingClientRect(), bx = b.left - s.left, by = b.top - s.top;
+    festParts = []; festT0 = performance.now(); festPrev = festT0;
+    /* sparklers: eleven glowing points drifting slowly over the whole spread, in three staggered rows down to the foot of the
+       pages (Doc, 24.11.2026: "noch ein paar mehr Wunderkerzen, auch unten noch") */
+    const SPARKS = [[.12, .2], [.37, .16], [.63, .22], [.88, .18], [.24, .48], [.5, .44], [.76, .5], [.1, .78], [.38, .82], [.64, .76], [.9, .8]];
+    festEmit = settings.fest === 'blueten' ? [] : SPARKS.map(([fx, fy], i) => ({ x0: bx + b.width * fx, y0: by + b.height * fy, ph: i * 1.7,
+      on: i * .13, slot: 6.2832 * i / SPARKS.length - 1.5708 }));
+    /* the ring: round the middle of the spread, as wide as the pages allow */
+    festRing = { cx: bx + b.width / 2, cy: by + b.height * .5, r: Math.min(b.width * .3, b.height * .36), bx, by, bw: b.width, bh: b.height };
+    festGlints = []; festPath = festBuildPath(festRing); festLeaveT = -1; festLeaveFrom = []; festSongStop(); festSongBlocked = false;
+    if (settings.fest !== 'blueten') { festLoad(FEST_SONG); festLoad(FEST_BYE); }
+    fest.classList.add('on');
+    cancelAnimationFrame(festRaf); festRaf = requestAnimationFrame(festDraw);
+  }
+  function petal(c, p) {
+    /* a cherry blossom petal: a soft rounded shape with a notch, shaded from a white base to pink, a fine crease, turning in 3D */
+    const r = p.r;
+    c.save(); c.translate(p.x, p.y); c.rotate(p.a); c.scale(1, Math.max(.12, Math.abs(Math.cos(p.f))));
+    c.shadowColor = 'rgba(80, 20, 40, .25)'; c.shadowBlur = r * .6; c.shadowOffsetY = r * .25;
+    const g = c.createRadialGradient(-r * .2, -r * .3, r * .1, 0, 0, r * 1.2);
+    g.addColorStop(0, p.c[0]); g.addColorStop(.55, p.c[1]); g.addColorStop(1, p.c[2]);
+    c.fillStyle = g;
+    c.beginPath();
+    c.moveTo(0, r);
+    c.bezierCurveTo(r * 1.15, r * .55, r * .95, -r * .9, r * .22, -r);
+    c.lineTo(0, -r * .72);
+    c.lineTo(-r * .22, -r);
+    c.bezierCurveTo(-r * .95, -r * .9, -r * 1.15, r * .55, 0, r);
+    c.fill();
+    c.shadowColor = 'transparent';
+    c.strokeStyle = 'rgba(190, 80, 110, .28)'; c.lineWidth = Math.max(.6, r * .06);
+    c.beginPath(); c.moveTo(0, r * .85); c.quadraticCurveTo(r * .08, 0, 0, -r * .6); c.stroke();
+    c.restore();
+  }
+  const PETALS = [['#fff7fa', '#fbd3df', '#f2a2b8'], ['#fffafc', '#f8c4d3', '#e98aa6'], ['#ffffff', '#fde6ee', '#f6b8ca'], ['#fff3f6', '#f5b1c4', '#dc6f90']];
+  function festDraw(now) {
+    const t = (now - festT0) / 1000, dt = Math.min(.05, (now - festPrev) / 1000); festPrev = now;
+    const W = fest.width / festDpr, H = fest.height / festDpr, c = festCtx;
+    c.setTransform(festDpr, 0, 0, festDpr, 0, 0);
+    c.clearRect(0, 0, W, H);
+    /* the blossoms fall for seven seconds; the sparklers dance until someone clicks, then until the last has left */
+    const live = settings.fest === 'blueten' ? t < 7 : festLeaveT < 0 || t < festDepart(festEmit.length - 1) + FEST_LEAVE + .1;
+    if (settings.fest === 'blueten') {
+      if (live) for (let k = 0; k < 3; k++) if (Math.random() < .85) festParts.push({ x: Math.random() * W, y: -20, vx: -10 + Math.random() * 20, vy: 40 + Math.random() * 50,
+        a: Math.random() * 6.28, va: -1.5 + Math.random() * 3, f: Math.random() * 6.28, vf: 1.5 + Math.random() * 3, sw: Math.random() * 6.28, r: 7 + Math.random() * 9,
+        c: PETALS[Math.floor(Math.random() * PETALS.length)] });
+      festParts = festParts.filter(p => p.y < H + 30);
+      for (const p of festParts) {
+        p.sw += dt * 1.3; p.x += (p.vx + Math.sin(p.sw) * 28) * dt; p.y += p.vy * dt; p.a += p.va * dt; p.f += p.vf * dt;
+        petal(c, p);
+      }
+    } else {
+      c.globalCompositeOperation = 'lighter';
+      /* where we are in the dance: d = seconds of dancing, the beat and how far into it, the ring's turn and size */
+      const R = festRing, t1 = FEST_APPEAR + FEST_GATHER, DT = festDanceT();
+      /* the song starts with the dance; while it plays, its own clock leads (so the flicker meets the notes) */
+      if (t >= t1 && !festSongOn && !festSongBlocked && festLeaveT < 0 && t < t1 + 1) festSongStart();
+      const songT = festSongTime();
+      const d = songT >= 0 ? songT - FEST_SONG.from : t - t1, dance = d >= 0 && d < DT, slalom = d >= DT;
+
+      /* the flicker: during the song with each of its notes (big with the loud ones), afterwards on a quiet 3/4 beat */
+      let beat = -1, bp = 0, acc = 0;
+      const byeT = festLeaveT >= 0 ? festTime(FEST_BYE) : -1;
+      if (byeT >= 0) {   /* the goodbye: with the lullaby's notes */
+        let k = -1; for (let j = 0; j < FEST_BYE_NOTES.length && FEST_BYE_NOTES[j][0] <= byeT; j++) k = j;
+        if (k >= 0) { beat = k; bp = (byeT - FEST_BYE_NOTES[k][0]) / FEST_BEAT; acc = .35 + .65 * FEST_BYE_NOTES[k][1]; }
+      } else if (dance) {
+        const st = FEST_SONG.from + d;
+        let k = -1; for (let j = 0; j < FEST_NOTES.length && FEST_NOTES[j][0] <= st; j++) k = j;
+        if (k >= 0) { beat = k; bp = (st - FEST_NOTES[k][0]) / FEST_BEAT; acc = .35 + .65 * FEST_NOTES[k][1]; }
+      } else if (slalom) { beat = Math.floor((d - DT) / FEST_BEAT); bp = (d - DT) / FEST_BEAT - beat; acc = beat % 3 === 0 ? .7 : .35; }
+      const beating = d >= 0 || byeT >= 0, pulse = beating ? .38 + acc * .62 * Math.exp(-3.4 * bp) : .7;
+      const half = DT / 2, turn = d <= 0 || d >= DT ? 0 : d < half ? 6.2832 * festEase(d / half) : 6.2832 * (1 - festEase((d - half) / half));
+      const gather = festEase((t - FEST_APPEAR) / FEST_GATHER), sIn = slalom ? festEase((d - DT) / FEST_SLALOM_IN) : 0;
+      const rr = R.r * (1 + .05 * Math.sin(d * 1.1));
+      /* the way out: down to the bottom right corner of the book, just over it, then out to the right and slightly upwards -
+         "es geht ja aufwärts" (Doc, 24.11.2026) */
+      const c1 = [R.bx + R.bw * .96, R.by + R.bh * .99], c2 = [R.bx + R.bw * 1.05, R.by + R.bh * 1.01], end = [R.bx + R.bw * 1.36, R.by + R.bh * .76];
+      festEmit.forEach((e, i) => {
+        if (t < e.on) return;
+        /* standing where it lit up (drifting a little), then gliding to its place in the ring, dancing round, then in the line */
+        const sx = e.x0 + Math.sin(t * .7 + e.ph) * 22, sy = e.y0 + Math.cos(t * .9 + e.ph) * 14;
+        const a = e.slot + turn, hop = beating ? -6 * acc * Math.sin(Math.PI * Math.min(1, bp * 1.6)) * (slalom ? .6 : 1) : 0;
+        const kx = R.cx + Math.cos(a) * rr, ky = R.cy + Math.sin(a) * rr * .82 + hop;
+        let x = sx + (kx - sx) * gather, y = sy + (ky - sy) * gather;
+        if (slalom) { const p = festOnPath(FEST_SPEED * R.bw * (d - DT) - i * FEST_GAP * festPath.L); x += (p[0] - x) * sIn; y += (p[1] + hop - y) * sIn; }
+        /* leaving: from where it is now over the bottom right corner and out, rising - the first in the line first */
+        if (festLeaveT >= 0) {
+          const u = (t - festDepart(i)) / FEST_LEAVE;
+          if (u >= 1) return;
+          if (u > 0) {
+            if (!festLeaveFrom[i]) festLeaveFrom[i] = [x, y];
+            const f0 = festLeaveFrom[i], k = u * u * (1.6 - .6 * u), m = 1 - k;
+            x = m * m * m * f0[0] + 3 * m * m * k * c1[0] + 3 * m * k * k * c2[0] + k * k * k * end[0];
+            y = m * m * m * f0[1] + 3 * m * m * k * c1[1] + 3 * m * k * k * c2[1] + k * k * k * end[1];
+          }
+        }
+        const lit = Math.min(1, (t - e.on) / .35);
+        if (live && lit > .02) {
+          const n = Math.round((beating ? 3 + 8 * pulse : 6) * lit), sp = beating ? .55 + .7 * pulse : 1;
+          for (let k = 0; k < n; k++) {
+            const aa = Math.random() * 6.28, v = (60 + Math.random() * 230) * sp;
+            festParts.push({ x, y, px: x, py: y, vx: Math.cos(aa) * v, vy: Math.sin(aa) * v, life: .25 + Math.random() * .6, age: 0 });
+          }
+          const gr = (beating ? 12 + 20 * pulse : 22) * lit;
+          const g = c.createRadialGradient(x, y, 0, x, y, gr);
+          g.addColorStop(0, 'rgba(255, 250, 225, .95)'); g.addColorStop(.3, 'rgba(255, 200, 90, .45)'); g.addColorStop(1, 'rgba(255, 150, 40, 0)');
+          c.fillStyle = g; c.beginPath(); c.arc(x, y, gr, 0, 6.2832); c.fill();
+        }
+      });
+      /* the glitter dies down while they leave */
+      const out = festLeaveT < 0 ? 0 : Math.min(1, Math.max(0, (t - festDepart(0)) / (festDepart(festEmit.length - 1) + FEST_LEAVE - festDepart(0))));
+      /* star glamour: gold and white glints twinkling all over the book, more of them on the first beat of each bar */
+      if (live && t > .4) {
+        const rate = (beating ? 26 + 40 * (acc > .8 ? Math.exp(-3 * bp) : 0) : 18) * (1 - out);
+        for (let k = 0; k < 4; k++) if (Math.random() < rate * dt / 4) festGlints.push({ x: R.bx - R.bw * .04 + Math.random() * R.bw * 1.08, y: R.by - R.bh * .03 + Math.random() * R.bh * 1.06,
+          s: 3 + Math.random() * 7, life: .5 + Math.random() * .8, age: 0, rot: Math.random() * .8, gold: Math.random() < .7 });
+      }
+      festGlints = festGlints.filter(g => g.age < g.life);
+      for (const g of festGlints) {
+        g.age += dt;
+        const k = Math.sin(Math.PI * g.age / g.life), s = g.s * (.4 + .6 * k), col = g.gold ? '255, 214, 120' : '255, 252, 240';
+        c.save(); c.translate(g.x, g.y); c.rotate(g.rot);
+        const gl = c.createRadialGradient(0, 0, 0, 0, 0, s * 1.4);
+        gl.addColorStop(0, 'rgba(' + col + ', ' + (.5 * k) + ')'); gl.addColorStop(1, 'rgba(' + col + ', 0)');
+        c.fillStyle = gl; c.beginPath(); c.arc(0, 0, s * 1.4, 0, 6.2832); c.fill();
+        c.fillStyle = 'rgba(' + col + ', ' + (.95 * k) + ')';
+        c.beginPath(); c.moveTo(0, -s * 2); c.lineTo(s * .18, 0); c.lineTo(0, s * 2); c.lineTo(-s * .18, 0); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-s * 1.4, 0); c.lineTo(0, s * .15); c.lineTo(s * 1.4, 0); c.lineTo(0, -s * .15); c.closePath(); c.fill();
+        c.restore();
+      }
+      festParts = festParts.filter(p => p.age < p.life);
+      for (const p of festParts) {
+        p.age += dt; p.px = p.x; p.py = p.y;
+        p.vx *= .985; p.vy = p.vy * .985 + 260 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+        const k = p.age / p.life;
+        /* white hot, then gold, then orange as it cools; now and then a spark splits (the crackle of a sparkler) */
+        c.strokeStyle = k < .3 ? 'rgba(255, 252, 235, ' + (1 - k) + ')' : k < .65 ? 'rgba(255, 210, 110, ' + (1 - k) + ')' : 'rgba(255, 140, 50, ' + (1 - k) + ')';
+        c.lineWidth = 1.2; c.beginPath(); c.moveTo(p.px, p.py); c.lineTo(p.x, p.y); c.stroke();
+        if (Math.random() < .015 && k < .5) for (let j = 0; j < 4; j++) { const a = Math.random() * 6.28, v = 40 + Math.random() * 80; festParts.push({ x: p.x, y: p.y, px: p.x, py: p.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: .15 + Math.random() * .25, age: 0 }); }
+      }
+      c.globalCompositeOperation = 'source-over';
+    }
+    if (live || festParts.length || festGlints.length) festRaf = requestAnimationFrame(festDraw);
+    else { festRaf = 0; fest.classList.remove('on'); c.clearRect(0, 0, W, H); }
+  }
+
   /* settings: kept per browser only (localStorage may be blocked - then the defaults stay) */
   const SET_KEY = 'tagebuch-einstellungen';
-  const settings = { hand: 'hand', script: '1', scheme: 'klassisch' };
+  /* night is the default look (Doc, 24.11.2026: "mache Nacht den Default-Modus, der ist cool"); a choice made here stays */
+  const settings = { hand: 'hand', script: '1', scheme: 'nacht', geb: '', fest: 'funken' };
   try { Object.assign(settings, JSON.parse(localStorage.getItem(SET_KEY) || '{}')); } catch (e) { }
+  /* ?geb=27.05&fest=blueten: the birthday and its celebration for a book given by link (like ?fuer=), not stored */
+  try { const q = new URLSearchParams(location.search), g = /^(\d\d)\.(\d\d)$/.exec(q.get('geb') || ''); if (g) settings.geb = g[1] + '.' + g[2]; if (/^(funken|blueten)$/.test(q.get('fest') || '')) settings.fest = q.get('fest'); } catch (e) { }
   try { const q = new URLSearchParams(location.search).get('schrift'); if (/^[123]$/.test(q || '')) settings.script = q; } catch (e) { }
   function applySettings() {
     stage.classList.toggle('typed', settings.hand === 'typed');
     ['1', '2', '3'].forEach(n => document.documentElement.classList.toggle('sf-' + n, settings.script === n));
     ['modern', 'nacht'].forEach(s => stage.classList.toggle('sch-' + s, settings.scheme === s));
+    skyRun();
     markSegs(document);
+    const [gd, gm] = (settings.geb || '.').split('.');
+    $$('select[data-geb="d"]').forEach(x => { x.value = gd || ''; });
+    $$('select[data-geb="m"]').forEach(x => { x.value = gm || ''; });
   }
+  /* the birthday selects (on the settings page and its copies): both set -> stored, the year plan and the card follow */
+  document.addEventListener('change', e => {
+    const x = e.target.closest && e.target.closest('select[data-geb]'); if (!x) return;
+    const box = x.closest('.geb'), d = box.querySelector('[data-geb="d"]').value, m = box.querySelector('[data-geb="m"]').value;
+    settings.geb = d && m ? d + '.' + m : '';
+    try { localStorage.setItem(SET_KEY, JSON.stringify(settings)); } catch (err) { }
+    PLAN = null; if (cardDay) setCard(cardDay);
+    applySettings();
+  });
   /* the choices on the settings page (and its copies while a page turns) */
   function markSegs(root) {
     root.querySelectorAll('.seg[data-set]').forEach(seg => seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', settings[seg.dataset.set] === b.dataset.v)));
@@ -2860,7 +3883,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     build();
     renderReg();
     renderTocPages();
-    if (REVIEW) toast('Sprüche durchblättern mit ← und →  ·  Tag ' + reviewDay + ' von ' + DAYS.length);
+    if (REVIEW) toast((matchMedia('(pointer: coarse)').matches ? 'Sprüche durchblättern: zur Seite wischen' : 'Sprüche durchblättern mit ← und →') + '  ·  Tag ' + reviewDay + ' von ' + DAYS.length);
   }
   $('#loginBtn').addEventListener('click', () => auth.loginDialog(start, 'Anmelden für dein Tagebuch'));
   if (auth && auth.hasSession()) start(); else $('#gate').hidden = false;
