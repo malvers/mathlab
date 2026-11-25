@@ -68,6 +68,7 @@ import org.vosk.android.StorageService;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.function.IntConsumer;
 
 /**
@@ -107,8 +108,11 @@ import java.util.function.IntConsumer;
  * - "Blutdruck" (Doc, 20.11.2026, where "Fasten" was): readings typed in by hand (Doc, 21.11.2026 - replacing the
  *   rule of 19.11. "no typing", for when the Omron does not send or in Spain without it): systolic, diastolic, pulse,
  *   date and time (now, changeable), a note; per person like the scale (the same switch). The list colours each
- *   reading by its ESH category and says where it came from ("Hand"; later "Omron" - the M400 Intelli IT, read over
- *   Bluetooth, BLE blood pressure service 0x1810). Swipe or long press deletes, with "Rückgängig" (Pressures).
+ *   reading by its ESH category and says where it came from ("Hand" or "Omron"). The Omron M400 Intelli IT (Doc,
+ *   24.11.2026): "Omron koppeln" once (its Bluetooth key held until "P" blinks), then while this tab is open its
+ *   readings come in by themselves over the open Bluetooth blood pressure standard (BpLink, Bpm): user 1 to Doc, user
+ *   2 to the second person, nothing from before the day of the first pairing, the monitor's clock set each time.
+ *   Swipe or long press deletes, with "Rückgängig" (Pressures).
  * - "Blutzucker" (Doc, 21.11.2026, the drop): readings typed in by hand - one number, its unit found by itself (below 35
  *   mmol/L, else mg/dL, a chip to override), date and time, when it was measured (nüchtern / vor dem Essen / nach dem
  *   Essen (2 h) / sonstige), a note; always shown in both units (his meter says mmol/L, he thinks in mg/dL). Fasting and
@@ -130,12 +134,14 @@ import java.util.function.IntConsumer;
  * values come from. All pages share one page margin (PAGE_SIDE).
  * Everything stays on the phone (Entries, Weighings, Profile in the app's preferences; no internet permission).
  */
-public class MainActivity extends Activity implements KeywordListener.Callback, ScaleLink.Callback {
+public class MainActivity extends Activity implements KeywordListener.Callback, ScaleLink.Callback, BpLink.Callback {
     // the colours of the chosen scheme (Palette: Blau / Grau / Hell), set in onCreate before the screen is built;
     // LAMBDA = lambda as text (Hell: the svp blue), the fills take theirs from pal
     private Palette pal;
     private int LAMBDA, UPSILON, PHI, TEXT, MUTED, CARD, BG;
     private static final int ASK_MIC = 1, ASK_BT = 2;
+    // the paired Omron's address and the first day whose readings count (only on this phone, never synced)
+    private static final String OMRON_ADDRESS = "omronAddress", OMRON_SINCE = "omronSince", OMRON_KEY = "omronKey";
     // TAB_FAST is the fasting view, opened from the settings (no tab of its own since 20.11.2026)
     private static final int TAB_WATCH = 0, TAB_SCALE = 1, TAB_FAST = 2, TAB_BP = 3, TAB_GLU = 4;
     private static final String FASTING_PAGE = "file:///android_asset/fasting/index.html";
@@ -179,6 +185,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private RecyclerView bpList;
     private BpAdapter bpAdapter;
     private TextView bpEmpty, bpTitle;
+    // the Omron M400 Intelli IT over Bluetooth (BpLink): its state line, "Omron koppeln", what the last transfer brought
+    private BpLink bp;
+    private TextView bpState;
+    private Button bpPair;
+    private String bpDoneText;
+    private int bpNew, bpNewOther, bpSkipped, bpNoTime;
+    private boolean bpJustPaired, pendingPair;
+    private BpLink.Status bpLast = BpLink.Status.IDLE;
     private final TextView[] bpPersonChips = new TextView[SLOTS.length];
     private View bpPersonRow;
     // blood glucose: both people's readings, the shown person's, and the tab's own person switch
@@ -295,6 +309,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         fasts = fastLists[person];
         kind = Entries.kindOrDefault(prefs.getString("kind", null));
         scale = new ScaleLink(this, this);
+        bp = new BpLink(this, this);
+        bp.setKey(omronKey());
+        bp.setPaired(prefs.getString(OMRON_ADDRESS, null));
         sync = new Sync(this, changed -> {
             if (changed) reloadFromSync();
         });
@@ -341,6 +358,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         sync.foreground(true);
         listenIfAllowed();
         updateScale();
+        updateBp();
         refresh();
         if (fastWeb != null) fastWeb.onResume();
         applyFastingChrome();   // the phone may have been turned while another app was in front
@@ -357,8 +375,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         sync.foreground(false);
         if (listener != null) listener.stop();
         scale.stop();
+        if (!bp.isPairing()) bp.stop();   // Android's "Koppeln?" question pauses DocFit - the pairing goes on
         refresh();
         refreshScale();
+        refreshBpState();
         if (fastWeb != null) fastWeb.onPause();
         ui.removeCallbacks(fastTick);
     }
@@ -368,6 +388,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         super.onDestroy();
         ui.removeCallbacksAndMessages(null);
         scale.stop();
+        bp.stop();
         if (listener != null) listener.stop();
         if (model != null) model.close();
         if (tone != null) tone.release();
@@ -676,6 +697,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
         listenIfAllowed();
         updateScale();
+        updateBp();
         refresh();
     }
 
@@ -820,17 +842,23 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                 ? "Dafür fragt Android gleich nach „Geräte in der Nähe“. Den Standort benutzt DocFit nicht."
                 : "Dafür fragt Android gleich nach dem Standort – das verlangt Android für die Bluetooth-Suche, "
                 + "DocFit benutzt ihn nicht.";
-        AlertDialog d = dialog("Waage per Bluetooth")
-                .setMessage("DocFit sucht deine Vitafit-Waage per Bluetooth und liest Gewicht und Körperwiderstand. "
+        boolean omron = tab == TAB_BP;
+        AlertDialog d = dialog(omron ? "Blutdruck per Bluetooth" : "Waage per Bluetooth")
+                .setMessage((omron ? "DocFit verbindet sich per Bluetooth mit deinem Omron und liest Blutdruck und Puls. "
+                        : "DocFit sucht deine Vitafit-Waage per Bluetooth und liest Gewicht und Körperwiderstand. ")
                         + what + " Alle Messungen bleiben auf diesem Smartphone.")
                 .setPositiveButton("Weiter", (x, w) -> requestPermissions(bluetoothPermissions(), ASK_BT))
                 .setNegativeButton("Nicht jetzt", (x, w) -> {
                     asking = false;
+                    pendingPair = false;
                     refreshScale();
+                    refreshBpState();
                 })
                 .setOnCancelListener(x -> {
                     asking = false;
+                    pendingPair = false;
                     refreshScale();
+                    refreshBpState();
                 })
                 .create();
         show(d);
@@ -1661,6 +1689,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         if (which == TAB_WATCH) listenIfAllowed();
         else if (listener != null) listener.stop();   // scale and fasting tab: voice control off
         updateScale();
+        updateBp();
         refresh();
     }
 
@@ -1916,9 +1945,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     /**
-     * The blood pressure tab, a placeholder until the Omron M400 Intelli IT arrives (Doc, 20.11.2026): the heading, one
-     * line on what will come, and the list's place with its empty line. Deliberately no field to type a value in (Doc,
-     * 19.11.2026: no typing in blood pressure) - the readings will come over Bluetooth only.
+     * The blood pressure tab: the person switch, "+ Messung eintragen" (Doc, 21.11.2026), "Omron koppeln" while no
+     * Omron is paired and the Omron's state line (Doc, 24.11.2026), then the list.
      */
     private View buildBpPage() {
         LinearLayout page = new LinearLayout(this);
@@ -1953,13 +1981,20 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp.topMargin = dp(16);
         page.addView(add, lp);
 
-        // the Omron, small (Doc, 21.11.2026): once it is here its readings come in by themselves
-        TextView hint = text("Später kommen die Werte vom Omron M400 Intelli IT per Bluetooth von selbst.", 12, MUTED,
-                false);
-        hint.setGravity(Gravity.CENTER);
+        // the Omron M400 Intelli IT (Doc, 24.11.2026): paired once from here, then its readings come in by themselves
+        bpPair = button("Omron koppeln", CARD);
+        bpPair.setTextColor(LAMBDA);
+        bpPair.setOnClickListener(v -> pairOmron());
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48));
+        lp.topMargin = dp(10);
+        page.addView(bpPair, lp);
+        bpState = text("", 13, MUTED, false);
+        bpState.setGravity(Gravity.CENTER);
+        bpState.setPadding(0, dp(4), 0, dp(4));
+        bpState.setOnClickListener(v -> onBpStateTapped());
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(8);
-        page.addView(hint, lp);
+        lp.topMargin = dp(6);
+        page.addView(bpState, lp);
 
         View head = sectionHead("MESSUNGEN", null, null);
         bpTitle = (TextView) ((ViewGroup) head).getChildAt(0);
@@ -1973,6 +2008,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         page.addView(listBox(bpList, bpEmpty), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         paintPersons();
         refreshBp();
+        refreshBpState();
         return page;
     }
 
@@ -1993,6 +2029,239 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             refreshBp();
         });
         refreshBp();
+    }
+
+    // ---------- the Omron ----------
+
+    /**
+     * The 16-byte key DocFit stores in the Omron when pairing (BpLink): random, made once on this phone and kept only in
+     * its settings - never in the code, never synced.
+     */
+    private byte[] omronKey() {
+        byte[] k = Bpm.unhex(prefs.getString(OMRON_KEY, null));
+        if (k != null && k.length == 16) return k;
+        k = new byte[16];
+        new java.security.SecureRandom().nextBytes(k);
+        prefs.edit().putString(OMRON_KEY, Bpm.hex(k)).apply();
+        return k;
+    }
+
+    private boolean omronPaired() {
+        return prefs.getString(OMRON_ADDRESS, null) != null;
+    }
+
+    /** The Omron is waited for only while the "Blutdruck" tab is open and DocFit is in front (like the scale). */
+    private void updateBp() {
+        if (bp == null) return;
+        if (!resumed || tab != TAB_BP) {
+            bp.stop();
+        } else if (!hasBluetoothPermission()) {
+            if (omronPaired() || pendingPair) askBluetooth(false);
+        } else {
+            bp.start();
+            if (pendingPair) {
+                pendingPair = false;
+                bp.pair();
+            }
+        }
+        refreshBpState();
+    }
+
+    /** "Omron koppeln": how to put the monitor into pairing mode, then the search. */
+    private void pairOmron() {
+        AlertDialog d = dialog("Omron koppeln")
+                .setMessage("Schalte das Omron aus. Dann halte seine Bluetooth-Taste 3 bis 5 Sekunden gedrückt, bis "
+                        + "„P“ blinkt, und tippe hier auf „Suchen“. Android fragt einmal, ob es koppeln darf – bitte "
+                        + "bestätigen.\n\nBeim ersten Koppeln übernimmt DocFit nur Messungen ab heute; ältere im "
+                        + "Gerät bleiben draußen.")
+                .setPositiveButton("Suchen", (x, w) -> {
+                    if (!hasBluetoothPermission()) {
+                        pendingPair = true;
+                        askBluetooth(true);
+                        return;
+                    }
+                    bp.start();
+                    bp.pair();
+                })
+                .setNegativeButton("Abbrechen", null)
+                .create();
+        show(d);
+    }
+
+    private void onBpStateTapped() {
+        if (tab != TAB_BP) return;
+        if (!hasBluetoothPermission()) {
+            askBluetooth(true);
+            return;
+        }
+        switch (bp.status()) {
+            case BLUETOOTH_OFF:
+                try {
+                    startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
+                } catch (SecurityException | ActivityNotFoundException e) {
+                    // then Doc switches Bluetooth on in the quick settings; BpLink notices it
+                }
+                break;
+            case PAIR_FAILED:
+            case BOND_LOST:
+                pairOmron();
+                break;
+            case PAIR_SEARCH:
+            case PAIRING:
+                break;
+            default:
+                if (omronPaired()) omronMenu();
+        }
+    }
+
+    /** A tap on the state line of a paired Omron: what to do when nothing comes, pair again, or forget it. */
+    private void omronMenu() {
+        AlertDialog d = dialog("Omron M400 Intelli IT")
+                .setMessage("Nach dem Messen kommen die Werte von selbst, solange dieser Reiter offen ist. Kommt "
+                        + "nichts, drück kurz die Bluetooth-Taste am Omron.\n\n„Entkoppeln“ vergisst das Omron in "
+                        + "DocFit; aus Android entfernst du es unter Einstellungen › Bluetooth.")
+                .setPositiveButton("Neu koppeln", (x, w) -> pairOmron())
+                .setNegativeButton("Entkoppeln", (x, w) -> {
+                    prefs.edit().remove(OMRON_ADDRESS).apply();
+                    bp.setPaired(null);
+                    bpDoneText = null;
+                    refreshBpState();
+                })
+                .create();
+        show(d);
+    }
+
+    @Override
+    public void onBpStatus(BpLink.Status status) {
+        if (status == BpLink.Status.LOADING && bpLast != BpLink.Status.LOADING) {   // a transfer begins
+            bpNew = 0;
+            bpNewOther = 0;
+            bpSkipped = 0;
+            bpNoTime = 0;
+        }
+        bpLast = status;
+        refreshBpState();
+    }
+
+    /** Paired: keep the address; the first pairing also fixes the first day whose readings count (Doc, 24.11.2026). */
+    @Override
+    public void onBpPaired(String address) {
+        SharedPreferences.Editor e = prefs.edit().putString(OMRON_ADDRESS, address);
+        if (!prefs.contains(OMRON_SINCE)) {
+            e.putLong(OMRON_SINCE, Bpm.startOfDay(System.currentTimeMillis(), TimeZone.getDefault()));
+        }
+        e.apply();
+        bpJustPaired = true;
+        refreshBpState();
+    }
+
+    /**
+     * A reading from the Omron: its time (moved by how far the monitor's clock was off), left out when it has no time
+     * of its own, when it is from before the day of the first pairing (e.g. the seller's) or already there, else stored with the monitor's user 1
+     * for Doc and user 2 for the second person, its warnings as the note.
+     */
+    @Override
+    public void onBpReading(Bpm.Measurement m, long clockLag) {
+        long now = System.currentTimeMillis();
+        // no time of its own (the monitor's clock was never set) or one in the future: left out - otherwise the old
+        // readings in the memory all arrive "now" (24.11.2026: 57 of them, the seller's among them, at 19:37)
+        if (Bpm.timeIsArrival(m, clockLag, now)) {
+            bpNoTime++;
+            return;
+        }
+        long t = Bpm.when(m, clockLag, now);
+        if (t < prefs.getLong(OMRON_SINCE, 0)) {
+            bpSkipped++;
+            return;
+        }
+        int slot = Bpm.person(m.user);
+        Pressures list = bpLists[slot];
+        if (list.has(t, m.sys, m.dia)) return;
+        int at = list.add(new Pressures.Reading(t, m.sys, m.dia, m.pulse, Pressures.OMRON, Bpm.note(m.status, false)));
+        if (slot == 0) bpNew++;
+        else bpNewOther++;
+        if (list == pressures && bpAdapter != null) {
+            bpAdapter.notifyItemInserted(at);
+            bpList.scrollToPosition(at);
+        }
+        refreshBp();
+    }
+
+    /** The Omron let go: what the transfer brought, in one line. */
+    @Override
+    public void onBpTransferDone() {
+        int n = bpNew + bpNewOther;
+        String s = bpJustPaired ? "Omron gekoppelt ✓"
+                : n == 0 ? "Omron: nichts Neues" : n == 1 ? "1 neue Messung vom Omron ✓" : n + " neue Messungen vom Omron ✓";
+        if (bpJustPaired && n > 0) s += " · " + n + " neu";
+        if (bpNewOther > 0) s += " (" + bpNewOther + " für " + names[1] + ")";
+        if (bpSkipped > 0) s += " · " + bpSkipped + " ältere übersprungen";
+        if (bpNoTime > 0) s += " · " + bpNoTime + " ohne Uhrzeit übersprungen";
+        bpDoneText = s;
+        bpJustPaired = false;
+        refreshBpState();
+    }
+
+    private void refreshBpState() {
+        if (bpState == null || bp == null) return;
+        boolean paired = omronPaired();
+        BpLink.Status st = bp.status();
+        String s;
+        int color;
+        if (!hasBluetoothPermission()) {
+            s = paired || pendingPair ? "Bluetooth nicht erlaubt – hier tippen" : "";
+            color = UPSILON;
+        } else if (!bp.isActive()) {
+            s = "";
+            color = MUTED;
+        } else {
+            switch (st) {
+                case BLUETOOTH_OFF:
+                    s = "Bluetooth ist aus – hier tippen zum Einschalten";
+                    color = UPSILON;
+                    break;
+                case NO_PERMISSION:
+                    s = "Bluetooth nicht erlaubt – hier tippen";
+                    color = UPSILON;
+                    break;
+                case PAIR_SEARCH:
+                    s = "Suche das Omron – „P“ muss blinken …";
+                    color = LAMBDA;
+                    break;
+                case PAIRING:
+                    s = "Omron gefunden – kopple … bitte am Smartphone bestätigen";
+                    color = LAMBDA;
+                    break;
+                case PAIR_FAILED:
+                    s = "Koppeln hat nicht geklappt – hier tippen für einen neuen Versuch";
+                    color = UPSILON;
+                    break;
+                case BOND_LOST:
+                    s = "Kopplung verloren – hier tippen und neu koppeln";
+                    color = UPSILON;
+                    break;
+                case WAITING:
+                    s = "Omron gekoppelt – nach dem Messen kommen die Werte von selbst";
+                    color = MUTED;
+                    break;
+                case LOADING:
+                    s = "Omron verbunden – lädt Messungen …";
+                    color = LAMBDA;
+                    break;
+                case DONE:
+                    s = bpDoneText != null ? bpDoneText : "Fertig ✓";
+                    color = PHI;
+                    break;
+                default:
+                    s = "";
+                    color = MUTED;
+            }
+        }
+        bpState.setText(s);
+        bpState.setTextColor(color);
+        bpState.setVisibility(s.isEmpty() ? View.GONE : View.VISIBLE);
+        boolean busy = st == BpLink.Status.PAIR_SEARCH || st == BpLink.Status.PAIRING;
+        bpPair.setVisibility(paired || busy && bp.isActive() ? View.GONE : View.VISIBLE);
     }
 
     /** The ESH category as a colour: optimal / normal green, high-normal orange, hypertension red. */
