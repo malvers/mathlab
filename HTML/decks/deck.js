@@ -815,6 +815,9 @@ addEventListener('keydown', e => {
 addEventListener('click', e => {
   // links (lab bar, picture credits) open - they do not turn the page as well
   if (e.target.closest('#hud') || e.target.closest('#nav') || e.target.closest('a') || e.target.closest('.play-big')) return;
+  // the LIVE key of a poster (deck-live.css .live-knopf): the next slide, exactly as the arrow - in a show from either
+  // window, the other follows (Doc, 24.11.2026: "LIVE ... auf die nächste Folie, was ich ja nicht schlecht finde")
+  if (e.target.closest('.live-knopf') && !document.documentElement.classList.contains('deck-edit')) { narr.stop(); next(); return; }
   if (e.target.closest('#pres')) return;             // the presenter view handles its own clicks
   const help = document.getElementById('help');     // a click beside the open help only closes it
   if (help && !help.hidden) { help.hidden = true; return; }
@@ -1177,7 +1180,9 @@ function bareLab(f) {
     const d = f.contentDocument;
     if (!d || !d.body) return;
     d.documentElement.style.background = d.body.style.background = 'transparent';
-    if (f.contentWindow.CPWide) f.contentWindow.CPWide(99);
+    // .kompakt: DOCPAD opens as it always does, compact, and Doc pulls it wide himself (Doc, 24.11.2026: "nicht
+    // ausgefahren ... die kleine Show mit den Tastaturen")
+    if (f.contentWindow.CPWide && !f.closest('.labframe.kompakt')) f.contentWindow.CPWide(99);
   } catch (e) { }                                     // a lab from elsewhere keeps its ground
 }
 // a lab on a slide scrolls with the start page's bar (index.html: thin, dark track, muted blue-grey thumb), not the
@@ -1209,6 +1214,32 @@ function labBar(f) {
 document.addEventListener('load', e => { bareLab(e.target); labBar(e.target); }, true);   // a frame's load does not bubble: caught on the way down
 document.querySelectorAll('.labframe.bare iframe').forEach(bareLab);
 document.querySelectorAll('.labframe iframe').forEach(labBar);
+// A lab that loaded while its slide was hidden (display:none) measured 0 x 0 and may have laid itself out at that size:
+// the Tagebuch's pages stayed dark until a reload (Doc, 24.11.2026: "irgendwas fehlt da noch ein Reset, dass das Labor
+// sofort sichtbar ist"; cyber-canvas.js heals itself since 28.09.2026, other pages do not). So the first time its slide
+// shows, such a frame loads once more, now at its real size. In a show the beamer reloads its labs for every slide
+// anyway (mirror.fresh) and the presenter makes its live copy fresh, so there nothing more happens here.
+if (!PRESENTER) {
+  const hiddenLoaded = new WeakSet();
+  const slideOf = f => f.closest && f.closest('section.slide');
+  const loadedHidden = f => {
+    const s = slideOf(f);
+    try { if (s && !s.classList.contains('on') && f.contentWindow.location.href !== 'about:blank') hiddenLoaded.add(f); } catch (e) { }
+  };
+  document.addEventListener('load', e => { if (e.target.tagName === 'IFRAME' && e.target.closest('.labframe')) loadedHidden(e.target); }, true);
+  document.querySelectorAll('.labframe iframe').forEach(f => {   // loaded before this line ran
+    try { if (f.contentDocument && f.contentDocument.readyState === 'complete') loadedHidden(f); } catch (e) { }
+  });
+  painted.push(() => {
+    if (window.__deckReplica) return;                // a show: mirror.fresh loads them as the presenter turns
+    const s = slides[si];
+    if (s) s.querySelectorAll('.labframe iframe').forEach(f => {
+      if (!hiddenLoaded.has(f)) return;
+      hiddenLoaded.delete(f);
+      try { f.contentWindow.location.reload(); } catch (e) { f.src = f.getAttribute('src'); }
+    });
+  });
+}
 // the footer triangles: one whole slide back or forth, shown fully built - no click steps
 (function () {
   const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
@@ -2285,7 +2316,7 @@ gestartet = true;
   const panel = document.getElementById('ask-panel');
   // The box's files come from here, so no deck page needs a new line. The version rides along: a browser still holding
   // an older copy of the box (from a lab - Pages keeps files 10 minutes) takes this one.
-  const SF_VERSION = '2026-11-24a';             // raise it with every change of the box or deck-solita.css
+  const SF_VERSION = '2026-11-24b';             // raise it with every change of the box or deck-solita.css
   function load(src, then) {
     const s = document.createElement('script');
     s.src = new URL(src, DECK_JS).href;
@@ -2755,6 +2786,30 @@ const link = (function () {
   let audOn = false, audWait = 0;                    // presenter: the beamer shows the overview (Cmd+O), waiting for its answer
   let frozen = false;                                // B: the beamer keeps its picture, the presenter goes on alone
   try { chan = new BroadcastChannel('deck:' + location.pathname); } catch (e) { }
+  // Solita in a module answers once in a show (Doc, 24.11.2026; js/solita-frage.js: echoKopie, fuehrung). The beamer's
+  // copies of the labs only replay: while a presenter view steers this window they ask nobody and stay silent. The
+  // presenter's live copy asks and speaks, and every change of its box goes over as lab-sf into the same box here.
+  if (PRESENTER) window.__deckSolitaLead = function (w, box) {
+    const frames = document.querySelectorAll('#pres .p-cur .slide.live iframe');
+    for (let k = 0; k < frames.length; k++) {
+      const path = framePath(frames[k].contentWindow, w);
+      if (path) { send({ t: 'lab-sf', si: si, k: k, path: path, html: box.html, zu: !!box.zu, busy: !!box.busy, st: box.st | 0 }); return; }
+    }
+  };
+  // __deckReplica: the general mark of the beamer's copies - any module may read it to stay silent (music, voices)
+  else Object.defineProperty(window, '__deckReplica', { configurable: true, get: function () { return linked; } });
+  function framePath(root, w) {                      // frame indices from a lab's window down to w (a deck as a module), or null
+    try {
+      if (root === w) return [];
+      for (let i = 0; i < root.frames.length; i++) { const p = framePath(root.frames[i], w); if (p) return [i].concat(p); }
+    } catch (e) { }
+    return null;
+  }
+  function labSf(m) {                                // beamer: the presenter's box into the same box of the same lab here
+    const f = slides[m.si] && slides[m.si].querySelectorAll('iframe')[m.k];
+    let w = f && f.contentWindow;
+    try { (m.path || []).forEach(function (i) { w = w && w.frames[i]; }); if (w && w.__sfEcho) w.__sfEcho(m); } catch (e) { }
+  }
 
   function send(m) {
     m.from = me; m.id = me + '.' + (++seq); m.p = PRESENTER;
@@ -2843,6 +2898,7 @@ const link = (function () {
     else if (m.t === 'jubel') feuerwerk(0.12, 0.12, 0.88, 0.5);                // the class cheered: the firework
     else if (m.t === 'zoom') hoverZoom.apply(m);                               // a picture under the presenter's mouse
     else if (m.t === 'ev') mirror.replay(m);
+    else if (m.t === 'lab-sf') labSf(m);                                     // Solita's box in a module, from the presenter
     else if (m.t === 'lab-fresh') mirror.fresh(m.si);                         // the presenter's labs of that slide are new
     else if (m.t === 'laser') laser.show(m);
     else if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); laser.mirrorOn(m.on); }   // L over there
