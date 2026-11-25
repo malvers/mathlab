@@ -284,7 +284,7 @@
             padding: 8px 10px;
             border-bottom: 1px solid var(--row-line);
             font-size: 0.92rem;
-            vertical-align: top;
+            vertical-align: middle;   /* text, points and fields on one centre line (Doc, 25.11.2026: "y zentriert") */
         }
 
         table.bm tbody tr:last-child td { border-bottom: 0; }
@@ -298,7 +298,7 @@
             padding-top: 11px;
         }
 
-        table.bm td.txt { font-weight: 300; line-height: 1.45; padding-top: 10px; }
+        table.bm td.txt { font-weight: 300; line-height: 1.45; }
 
         table.bm th.pts, table.bm td.pts {
             width: 6.5rem;
@@ -307,7 +307,7 @@
             font-variant-numeric: tabular-nums;
         }
 
-        table.bm td.pts { padding-top: 11px; font-weight: 400; }
+        table.bm td.pts { font-weight: 400; }
 
         table.bm td.pts .bonus {
             display: block;
@@ -1061,7 +1061,8 @@
                     const top = r.max + (r.bonus || 0);
                     const show = r.show || String(r.max || r.bonus || 0);
                     const isBonus = r.bonus && !r.max;
-                    const got = st.pts === undefined || st.pts === null ? '' : st.pts;
+                    /* whole points only, also for halves stored before 25.11.2026 */
+                    const got = st.pts === undefined || st.pts === null || st.pts === '' ? '' : String(Math.round(Number(st.pts)));
                     h += '<tr data-i="' + i + '">' +
                         '<td class="nr">' + nr +
                         (editing ? '<button type="button" class="bm-x" data-del="' + i + '" title="Kriterium entfernen">&#10005;</button>' : '') +
@@ -1129,7 +1130,7 @@
                     bonus += r.bonus || 0;
                     const st = state.rows[i + 1];
                     if (st && st.pts !== undefined && st.pts !== null && st.pts !== '') {
-                        const v = Number(st.pts);
+                        const v = Math.round(Number(st.pts));   // whole points only
                         if (isFinite(v)) { got += v; any = true; }
                     }
                 });
@@ -1143,7 +1144,7 @@
                 if (!st || !st.rows) return null;
                 let got = 0, any = false;
                 for (const nr in st.rows) {
-                    const v = Number(st.rows[nr] && st.rows[nr].pts);
+                    const v = Math.round(Number(st.rows[nr] && st.rows[nr].pts));   // whole points only
                     if (st.rows[nr] && st.rows[nr].pts !== null && st.rows[nr].pts !== '' && isFinite(v)) {
                         got += v; any = true;
                     }
@@ -1825,7 +1826,7 @@
                 publikum = { got: null, max: null, names: '' };
                 try {
                     const d = JSON.parse(await svpCrypto.open(rows[0].data_enc));
-                    if (typeof d.got === 'number') publikum.got = d.got;
+                    if (typeof d.got === 'number') publikum.got = Math.round(d.got);   // whole points only
                     if (typeof d.max === 'number') publikum.max = d.max;
                 } catch (e) { status('Bewertung des Teams nicht lesbar.', 'err'); }
                 try { publikum.names = await svpCrypto.open(rows[0].name_enc); } catch (e) { }
