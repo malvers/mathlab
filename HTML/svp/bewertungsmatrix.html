@@ -1082,7 +1082,7 @@
                               (isBonus ? '<span class="bonus">' + esc(sh.bonus) + '</span>' : '')) +
                         '</td>' +
                         '<td class="got" data-label="' + esc(sh.cols.got) + '">' +
-                        '<input type="number" inputmode="decimal" min="0" max="' + top + '" step="0.5" data-row="' + nr +
+                        '<input type="number" inputmode="numeric" min="0" max="' + top + '" step="1" data-row="' + nr +
                         '" value="' + esc(got) + '" aria-label="' + esc(sh.cols.got) + ' ' + nr + '"' +
                         (got !== '' && Number(got) > top ? ' class="over"' : '') + '></td>' +
                         '<td class="cmt" data-label="' + esc(sh.cols.cmt) + '">' +
@@ -1883,9 +1883,17 @@
                 if (inp.dataset.field === 'presenter') clockTick();
             });
 
+            /* no decimal separator in the points fields: whole points only (Doc, 25.11.2026) */
+            elTable.addEventListener('keydown', function (e) {
+                if (e.target.matches('input[data-row]') && (e.key === '.' || e.key === ',')) e.preventDefault();
+            });
+
             elTable.addEventListener('input', function (e) {
                 const t = e.target;
                 if (t.matches('input[data-row]')) {
+                    /* whole points only (Doc, 25.11.2026: "halbe Pkt verbieten") - a half typed or pasted in
+                       is rounded to the nearest whole point at once */
+                    if (t.value !== '' && !Number.isInteger(Number(t.value))) t.value = String(Math.round(Number(t.value)));
                     const nr = t.dataset.row;
                     const row = state.rows[nr] || (state.rows[nr] = {});
                     row.pts = t.value === '' ? null : t.value;
