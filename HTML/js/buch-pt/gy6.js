@@ -91,6 +91,19 @@ window.BuchPT && BuchPT.add('gy6', {
         'Leihzeit in h': 'Tempo de aluguer em h', 'Preis in €': 'Preço em €',
         'Wortform:': 'Por palavras:', 'Tabelle:': 'Tabela:', 'Gleichung:': 'Equação:',
         'Keine. Die Temperatur kann man nur messen, nicht ausrechnen.': 'Nenhuma. A temperatura só se pode medir, não calcular.',
+        // proportional6
+        'direkt proportional': 'diretamente proporcional', 'indirekt proportional': 'inversamente proporcional', 'keins von beiden': 'nenhuma das duas',
+        'Äpfel': 'Maçãs', 'Kuchen': 'Bolo', 'Taxi': 'Táxi', 'Beispiel': 'Exemplo',
+        'Masse in kg': 'Massa em kg', 'Personen': 'Pessoas', 'Stück pro Person': 'Fatias por pessoa', 'Strecke in km': 'Distância em km',
+        // dreisatz6 (the amounts with their unit, "4 Pumpen", and the arrows "↓ · 5" are rules below)
+        'Pumpen': 'Bombas', 'Hefte': 'Cadernos', 'Futter': 'Ração', 'Antwort:': 'Resposta:',
+        '3 kg Äpfel kosten 7,50 €. Wie viel kosten 5 kg?': '3 kg de maçãs custam 7,50 €. Quanto custam 5 kg?',
+        '4 Pumpen leeren ein Becken in 6 Stunden. Wie lange brauchen 3 Pumpen?': '4 bombas esvaziam um tanque em 6 horas. Quanto tempo levam 3 bombas?',
+        '5 Hefte kosten 4 €. Wie viel kosten 8 Hefte?': '5 cadernos custam 4 €. Quanto custam 8 cadernos?',
+        'Ein Futtervorrat reicht für 12 Kaninchen 10 Tage. Wie lange reicht er für 8 Kaninchen?': 'Uma reserva de ração chega para 12 coelhos durante 10 dias. Para quantos dias chega, se forem 8 coelhos?',
+        '5 kg Äpfel kosten 12,50 €.': '5 kg de maçãs custam 12,50 €.', '3 Pumpen brauchen 8 Stunden.': '3 bombas levam 8 horas.',
+        '8 Hefte kosten 6,40 €.': '8 cadernos custam 6,40 €.', 'Für 8 Kaninchen reicht das Futter 15 Tage.': 'Para 8 coelhos, a ração chega para 15 dias.',
+        'Schritt 1: Schreib auf, was du weißt.': 'Passo 1: escreve o que sabes.', 'Schritt 3: Rechne auf die gesuchte Menge hoch.': 'Passo 3: calcula o valor para a quantidade pedida.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -143,6 +156,21 @@ window.BuchPT && BuchPT.add('gy6', {
         ['Die gestrichelte Linie verbindet nur die Messpunkte. Was dazwischen geschah, weiß man nicht genau.',
             'A linha tracejada só une os pontos medidos. O que aconteceu entre eles não se sabe ao certo.'],
         ['Abgerechnet wird nur nach ganzen Stunden, darum gibt es nur einzelne Punkte.', 'Só se pagam horas inteiras, por isso há apenas pontos isolados.'],
+        // proportional6 (after the rule × for the product)
+        ['Graph der Zuordnung ', 'Gráfico da correspondência: '],
+        ['Äpfel: 1 kg kostet 2,50 €', 'Maçãs: 1 kg custa 2,50 €'], ['24 Stück Kuchen werden gerecht verteilt', '24 fatias de bolo são repartidas igualmente'],
+        ['Taxi: 3 € Grundgebühr und 2 € pro km', 'Táxi: 3 € de bandeirada e 2 € por km'], ['. Zieh den gelben Punkt.', '. Arrasta o ponto amarelo.'],
+        ['Der Quotient $y : x$ ist immer $2{,}5$: <b>direkt proportional</b>. Der Graph ist eine Gerade durch den Ursprung.',
+            'O quociente $y : x$ é sempre $2{,}5$: <b>proporcionalidade direta</b>. O gráfico é uma reta que passa pela origem.'],
+        ['Das Produkt $x \\times y$ ist immer $24$: <b>indirekt proportional</b>. Doppelt so viele Personen, halb so viel Kuchen.',
+            'O produto $x \\times y$ é sempre $24$: <b>proporcionalidade inversa</b>. O dobro das pessoas, metade do bolo.'],
+        ['Je mehr Kilometer, desto teurer. Aber der Quotient ändert sich: <b>nicht proportional</b>. Die Gerade geht nicht durch den Ursprung.',
+            'Quanto mais quilómetros, mais caro. Mas o quociente muda: <b>não proporcional</b>. A reta não passa pela origem.'],
+        // dreisatz6
+        ['Schritt 2: Rechne auf eins zurück. ', 'Passo 2: calcula o valor para uma unidade. '],
+        ['direkt proportional: Beide Seiten werden mit derselben Zahl gerechnet.', 'proporcionalidade direta: dos dois lados faz-se a conta com o mesmo número.'],
+        ['indirekt proportional: Rechts wird umgekehrt gerechnet. Aus „: 4“ links wird „· 4“ rechts.',
+            'proporcionalidade inversa: à direita faz-se a conta inversa. O «: 4» da esquerda passa a «× 4» à direita.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -180,5 +208,9 @@ window.BuchPT && BuchPT.add('gy6', {
         [/>(\d+) Versuche</g, (m, n) => '>' + n + (n === '1' ? ' experiência' : ' experiências') + '<'],
         // darstellung6: "Gewählt: Uhrzeit 12 → Temperatur 14."
         [/Gewählt: Uhrzeit /g, 'Gewählt: hora '], [/ → Temperatur /g, ' → temperatura '],
+        // dreisatz6: "4 Pumpen" → "4 bombas", "1 Kaninchen" → "1 coelho"; the arrows "↓ · 5" → "↓ × 5"
+        [/>([\d.,]+) (Pumpen|Hefte|Kaninchen|Tage)</g, (m, n, u) => '>' + n + ' ' +
+            ({ 'Pumpen': ['bomba', 'bombas'], 'Hefte': ['caderno', 'cadernos'], 'Kaninchen': ['coelho', 'coelhos'], 'Tage': ['dia', 'dias'] })[u][n === '1' ? 0 : 1] + '<'],
+        [/(↓ )· (?=\d)/g, '$1× '],
     ]
 });

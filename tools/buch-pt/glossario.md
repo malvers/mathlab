@@ -392,3 +392,8 @@ parts, so every later book that loads them gets it too):
 | Kopf / Zahl (Münze) | face nacional / face europeia | wie die anderen pt-Bücher; Kerrichs Münze (lb2-1): „cara" |
 | Reißzwecke · Strichliste | pionés · tabela de contagem | |
 | Namen in den Widgets | Lena Berg → Rita Costa, Tom Klein → Tiago Lopes, Lena Roth → Rita Silva, Max Vogel → Rui Gomes | pfeile6 |
+| direkt / indirekt proportional | diretamente / inversamente proporcionais · proporcionalidade direta / inversa | |
+| Quotientengleichheit · Produktgleichheit · Proportionalitätsfaktor | quociente constante · produto constante · constante de proporcionalidade | |
+| Dreisatz · auf eins zurückrechnen | regra de três simples · calcular o valor para uma unidade | |
+| Gerade durch den Ursprung | reta que passa pela origem | Punkte $(4, 6)$ |
+| Grundgebühr (Taxi) | bandeirada | |
