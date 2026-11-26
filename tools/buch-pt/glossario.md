@@ -422,3 +422,7 @@ parts, so every later book that loads them gets it too):
 | Ecken · Kanten · Flächen · Quader · Würfel | vértices · arestas · faces · paralelepípedo · cubo | |
 | Anteil · Kreisdiagramm · Kreisausschnitt | parte do todo (fração) · gráfico circular · setor circular | $1\,\%$ corresponde a $3{,}6^\circ$ (statt $\widehat{=}$) |
 | Flächenanteil · Volumenanteil | parte da área · parte do volume | |
+| Primzahl · zusammengesetzte Zahl · Primfaktorzerlegung · Faktorbaum | número primo · número composto · decomposição em fatores primos · árvore de fatores | |
+| ggT · kgV | m.d.c. · m.m.c. | auch im Widget (Regel), $\text{m.d.c.}(84, 360)$ |
+| Sieb des Eratosthenes · Quersumme · Teilbarkeitsregeln | crivo de Eratóstenes · soma dos algarismos · critérios de divisibilidade | |
+| Primzahlzwillinge · vollkommene / befreundete Zahlen · euklidischer Algorithmus | primos gémeos · números perfeitos / amigos · algoritmo de Euclides | |

@@ -164,6 +164,14 @@ window.BuchPT && BuchPT.add('gy6', {
         'Kreisdiagramm: Wie kommst du zur Schule?': 'Gráfico circular: como vens para a escola?',
         'Anteil': 'Fração', 'Winkel': 'Ângulo', 'zusammen': 'Total',
         'Umfrage in einer Klasse: Wie kommst du zur Schule?': 'Inquérito numa turma: como vens para a escola?',
+        // sieb6
+        'Nächste Primzahl': 'Próximo número primo', 'Alle Schritte': 'Todos os passos',
+        '1 ist keine Primzahl: Sie hat nur einen Teiler. Tipp auf „Nächste Primzahl“.': 'O 1 não é um número primo: só tem um divisor. Toca em «Próximo número primo».',
+        'Sieb des Eratosthenes: die Zahlen von 1 bis 100': 'Crivo de Eratóstenes: os números de 1 a 100',
+        'Vielfache von 2': 'múltiplos de 2', 'von 3': 'de 3', 'von 5': 'de 5', 'von 7': 'de 7',
+        // primfaktor6 (Portuguese m.d.c. and m.m.c., rules below)
+        'Zahl $a$': 'Número $a$', 'Zahl $b$': 'Número $b$',
+        'Gib für $a$ eine natürliche Zahl von 2 bis 9999 ein.': 'Escreve para $a$ um número natural de 2 a 9999.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -287,6 +295,14 @@ window.BuchPT && BuchPT.add('gy6', {
         ['Oberfläche $O = 2 \\times G + M', 'Área total $A = 2 \\times A_b + A_L'], ['Volumen $V = G \\times h', 'Volume $V = A_b \\times h'],
         // kreisdiagramm6
         ['Winkel = Anteil · 360°. ', 'Ângulo = fração × 360°. '], ['Eine Person entspricht hier $', 'Aqui, uma pessoa corresponde a $'],
+        // sieb6 (after the rule × for the product)
+        [' Kleinere Vielfache wie $', ' Múltiplos mais pequenos, como $'], ['$ waren schon weg.', '$, já estavam riscados.'],
+        // primfaktor6
+        ['$ ist eine <b>Primzahl</b>.', '$ é um <b>número primo</b>.'], ['Faktorbaum von ', 'Árvore de fatores de '],
+        ['Der ggT besteht aus den Primfaktoren, die in <b>beiden</b> Zerlegungen vorkommen. Das kgV enthält jeden Primfaktor so oft, wie er <b>höchstens</b> vorkommt. ',
+            'O m.d.c. é formado pelos fatores primos que aparecem nas <b>duas</b> decomposições. O m.m.c. contém cada fator primo tantas vezes quantas ele aparece, <b>no máximo</b>. '],
+        ['Damit kürzt man: $', 'Serve para simplificar: $'],
+        ['Die beiden Zahlen haben keinen gemeinsamen Teiler außer 1.', 'Os dois números não têm nenhum divisor comum além do 1.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -366,5 +382,13 @@ window.BuchPT && BuchPT.add('gy6', {
             ': duas bases e a superfície lateral formada por retângulos'],
         // kreisdiagramm6: the count column (the pupils) and the percent column, short so the table keeps "Ângulo" inside its box
         [/<th>Anzahl<\/th>/g, '<th>Alunos</th>'], [/<th>Prozent<\/th>/g, '<th>%</th>'],
+        // sieb6
+        [/Schon \$([^$]+)\$ ist größer als 100\. Alles, was noch übrig ist, ist eine Primzahl\. <b>Fertig: 25 Primzahlen bis 100\.<\/b>/g, (m, t) =>
+            'Já $' + t + '$ é maior do que 100. Tudo o que resta é número primo. <b>Pronto: 25 números primos até 100.</b>'],
+        [/Die \$(\d+)\$ ist nicht gestrichen, also eine Primzahl\. Gestrichen werden ihre Vielfachen ab \$([^$]+)\$: (\d+) Zahlen \(/g, (m, p, q, n) =>
+            'O $' + p + '$ não está riscado, portanto é um número primo. Riscam-se os seus múltiplos a partir de $' + q + '$: ' + n + (n === '1' ? ' número (' : ' números (')],
+        [/Gefunden: (\d+) Primzahlen\. Gestrichen: /g, (m, n) => 'Encontrados: ' + n + (n === '1' ? ' número primo' : ' números primos') + '. Riscados: '],
+        // primfaktor6: "ggT(360, 84) = 12" → "m.d.c.(360, 84) = 12", the same for kgV → m.m.c.
+        [/(<span class="g-(?:lam|cy)">)(ggT|kgV)(<\/span>)\$\((\d+), (\d+)\) = /g, (m, a, k, b, x, y) => a + (k === 'ggT' ? 'm.d.c.' : 'm.m.c.') + b + '$(' + x + ', ' + y + ') = '],
     ]
 });
