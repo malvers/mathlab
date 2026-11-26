@@ -52,7 +52,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '..', '..');
 const KEYCHAIN_SERVICE = 'doc-kalender-waechter';
-const FIELDS = ['title', 'starts_at', 'ends_at', 'all_day', 'location', 'notes', 'rrule', 'exdates', 'remind', 'color', 'source_uid', 'shared', 'together', 'reminder'];
+const FIELDS = ['title', 'starts_at', 'ends_at', 'all_day', 'location', 'notes', 'rrule', 'exdates', 'remind', 'color', 'source_uid', 'shared', 'together', 'reminder', 'private'];
 const REMINDER_SLOT = 15 * 60000;   // a reminder's ends_at when none is given (the page writes the same)
 const WEEKDAY = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 const DAY = 86400000;
@@ -191,6 +191,15 @@ function normalize(ev, i) {
         }
         out.reminder = ev.reminder;
     }
+    if (ev.private != null) {
+        if (typeof ev.private !== 'boolean') fail(what + ': private muss true oder false sein');
+        if (ev.private && (ev.shared || ev.together)) fail(what + ': private (nie für die geteilte Person) geht nicht mit shared/together');
+        out.private = ev.private;
+    }
+    // make-up dates (source_uid nachschreiben-*) are Doc's info only, the guest never needs them (Doc, 26.11.2026) -
+    // private unless Doc supervises himself; reminders and the guest's entries are left alone; "private": false wins
+    if (out.private === undefined && /^nachschreiben-/.test(out.source_uid || '') && !out.reminder && !out.shared && !out.together
+        && !/aufsicht\s+(dr\.\s*)?(alvers|mra)\b|meine aufsicht|nachschreibe-aufsicht/i.test(out.title + ' ' + (out.notes || ''))) out.private = true;
     return out;
 }
 
@@ -245,6 +254,7 @@ function describe(ev, i) {
     if (ev.together === true) lines.push('   Für: Doc und die geteilte Person gemeinsam (gold-türkis im Kalender)');
     else if (ev.shared === true) lines.push('   Für: die geteilte Person (türkis im Kalender)');
     if (ev.shared === false) lines.push('   Für: Doc (nicht die geteilte Person)');
+    if (ev.private === true) lines.push('   Privat: die geteilte Person sieht diesen Termin nie');
     if (ev.reminder === false) lines.push('   Art: Termin (keine Erinnerung mehr)');
     const remind = ev.remind || (ev.all_day ? [360] : [60, 15]);
     if (ev.shared === true || ev.together === true) lines.push('   Erinnerung: keine (' + (ev.together ? 'gemeinsamer Termin' : 'Termin der geteilten Person') + ')');
