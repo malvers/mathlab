@@ -148,6 +148,15 @@ window.BuchPT && BuchPT.add('gy6', {
             'O <b>quadrilátero</b> está lá em baixo: só precisa de quatro vértices e quatro lados, mais nada.',
         'Tipp auf ein Viereck im Haus. Was weiter unten steht, ist allgemeiner, was weiter oben steht, hat mehr Eigenschaften.':
             'Toca num quadrilátero da casa. O que está mais abaixo é mais geral, o que está mais acima tem mais propriedades.',
+        // prisma6 (Portuguese letters as js/buch-pt/vektoren.js: A_b area of the base, P_b perimeter of the base, A_L lateral area, A total area;
+        // German G, u, M, O - rules below, also in the two pictures)
+        'Dreiecksprisma': 'Prisma triangular', 'Quader': 'Paralelepípedo', 'Trapezprisma': 'Prisma trapezoidal', 'Sechseckprisma': 'Prisma hexagonal',
+        'Prisma': 'Prisma', 'Schrägbild': 'Perspetiva cavaleira', 'Netz': 'Planificação',
+        'Grundkante $a$': 'Aresta da base $a$', 'Höhe $h$ des Prismas': 'Altura $h$ do prisma',
+        'Kavalierperspektive: Die Grundfläche liegt vorn in wahrer Größe. Die Kanten nach hinten laufen unter $45^\\circ$ und sind halb so lang. Verdeckte Kanten sind gestrichelt.':
+            'Perspetiva cavaleira: a base fica à frente em verdadeira grandeza. As arestas que vão para trás fazem $45^\\circ$ e têm metade do comprimento. As arestas escondidas estão a tracejado.',
+        'Das Netz besteht aus den beiden Grundflächen und dem Mantel. Der Mantel ist ein Rechteck: so breit wie der Umfang $u$, so hoch wie $h$.':
+            'A planificação é formada pelas duas bases e pela superfície lateral. A superfície lateral é um retângulo: tão largo como o perímetro $P_b$ da base, tão alto como $h$.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -266,6 +275,9 @@ window.BuchPT && BuchPT.add('gy6', {
             'Uma cópia do trapézio roda em torno do ponto médio de um lado não paralelo. Juntos, os dois formam um paralelogramo de base $a + c$.'],
         ['Die vier Dreiecke im Drachen klappen nach außen. Sie füllen das Rechteck aus den beiden Diagonalen genau zur Hälfte.',
             'Os quatro triângulos do papagaio dobram-se para fora. Preenchem exatamente metade do retângulo formado pelas duas diagonais.'],
+        // prisma6 (after the rule × for the product; "Grundfläche $G" is a rule below)
+        ['$, Umfang der Grundfläche $u', '$, perímetro da base $P_b'], ['Mantel $M = u', 'Área lateral $A_L = P_b'],
+        ['Oberfläche $O = 2 \\times G + M', 'Área total $A = 2 \\times A_b + A_L'], ['Volumen $V = G \\times h', 'Volume $V = A_b \\times h'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -331,5 +343,17 @@ window.BuchPT && BuchPT.add('gy6', {
             const L = list.split(', ').map(x => { const k = x.replace(/^eine?s? /, ''); return N[k] ? 'um ' + N[k] : x; });
             return 'Todo o <b>' + (N[s] || s) + '</b> é também ' + (L.length > 1 ? L.slice(0, -1).join(', ') + ' e ' + L[L.length - 1] : L[0]) + '.</p>';
         }],
+        // prisma6: the first line of the results (a rule: js/buch-pt/vektoren.js has a phrase "Grundfläche $G = |…" of its own)
+        [/Grundfläche \$G (= |\\approx )/g, 'Área da base $$A_b $1'],
+        // prisma6: the letters in the two pictures (G → A_b, M → A_L, with a subscript), only inside the prism pictures
+        [/(aria-label="[^"]*(?:im Schrägbild: Grundfläche vorn in wahrer Größe|zwei Grundflächen und der Mantel aus Rechtecken)[^"]*"[\s\S]*?<\/svg>)/g, m =>
+            m.replace(/(<text class="g-area"[^>]*>)G(<\/text>)/g, '$1A<tspan dy="4" font-size="0.7em">b</tspan>$2')
+                .replace(/(<text class="g-area"[^>]*>)M(<\/text>)/g, '$1A<tspan dy="4" font-size="0.7em">L</tspan>$2')],
+        [/^(Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma) im Schrägbild: Grundfläche vorn in wahrer Größe, Tiefe unter 45 Grad und halb so lang$/, (m, s) =>
+            ({ 'Dreiecksprisma': 'Prisma triangular', 'Quader': 'Paralelepípedo', 'Trapezprisma': 'Prisma trapezoidal', 'Sechseckprisma': 'Prisma hexagonal' })[s] +
+            ' em perspetiva cavaleira: a base à frente em verdadeira grandeza, a profundidade a 45 graus e com metade do comprimento'],
+        [/^Netz des (Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma)s: zwei Grundflächen und der Mantel aus Rechtecken$/, (m, s) => 'Planificação do ' +
+            ({ 'Dreiecksprisma': 'prisma triangular', 'Quader': 'paralelepípedo', 'Trapezprisma': 'prisma trapezoidal', 'Sechseckprisma': 'prisma hexagonal' })[s] +
+            ': duas bases e a superfície lateral formada por retângulos'],
     ]
 });

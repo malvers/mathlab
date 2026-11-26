@@ -416,3 +416,7 @@ parts, so every later book that loads them gets it too):
 | unregelmäßig · gleichseitig · spitz-/recht-/stumpfwinklig | escaleno · equilátero · acutângulo / retângulo / obtusângulo | |
 | Satz von Pick $A = I + \tfrac{R}{2} - 1$ | teorema de Pick $A = I + \tfrac{F}{2} - 1$ | F = pontos na fronteira |
 | Winkel $\angle BAC$ | $B\hat{A}C$ | |
+| (gerades) Prisma · Grund-/Deckfläche · Mantel | prisma (reto) · base inferior / superior · superfície lateral | |
+| Grundfläche $G$ · Umfang $u$ · Mantel $M$ · Oberfläche $O$ · Volumen $V$ | $A_b$ · $P_b$ · $A_L$ · área total $A$ · $V$ | wie vektoren.js (mathe12-pt); auch in den Widget-Bildern (Regel) |
+| Schrägbild · Kavalierperspektive · Körpernetz | desenho em perspetiva · perspetiva cavaleira · planificação | |
+| Ecken · Kanten · Flächen · Quader · Würfel | vértices · arestas · faces · paralelepípedo · cubo | |
