@@ -334,7 +334,33 @@ Terms the book adds go here.
 
 ## mathegy12-pt (GY 12 Grundkurs, block pt-8)
 
-Terms the book adds go here.
+Die Begriffe, die GY 12 Grundkurs (`mathegy12-pt`, 22.11. und 26.11.2026) zu `mathe13-pt` und `mathe13lk-pt` dazubringt; wo der
+deutsche Text gleich ist, ist deren Übersetzung übernommen (Zeile für Zeile). Was die Widgets anders schreiben, biegen die Regeln im
+Block pt-8 von `vektoren.js` um (Norm eines indizierten Vektors $|\vec n_1| \to \|\vec n_1\|$, Presets von `winkel3d`).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Grundprobleme der beurteilenden Statistik | problemas fundamentais da estatística inferencial | |
+| Hochrechnung · Streuung (eines Schätzwerts) | extrapolação · dispersão | am Wahlabend: projeção |
+| Münze: Zahl / Wappen | face europeia / face nacional | wie pt-1 |
+| Skalarprodukt $\vec a \circ \vec b$ · Betrag $\lvert\vec a\rvert$ | produto escalar $\vec a \cdot \vec b$ · norma $\lVert\vec a\rVert$ | wie pt-2; die Randnotiz zur Schreibweise nennt $\circ$ als die deutsche |
+| Normalenform $(\vec x - \vec p) \circ \vec n = 0$ | equação normal | so schon in `kapitel.js` (pt-8); Koordinatenform = equação cartesiana, Achsenabschnittsform = equação segmentária |
+| Orthogonalitätsbedingung | condição de perpendicularidade | |
+| Spurpunkte (Ebene) · Spurdreieck | pontos de interseção com os eixos · triângulo cujos vértices são os pontos de interseção com os eixos | wie pt-3 (nicht „traços“, die bleiben den Geraden und Spurgeraden) |
+| Schnittwinkel | ângulo (de duas retas, de uma reta com um plano, de dois planos) | Kapiteltitel „Ângulos de interseção“ (pt-8) |
+| Innenwinkel an einer Kante · Nebenwinkel · Neigung(swinkel) | ângulo interno numa aresta · ângulo suplementar · inclinação | |
+| $\tan$ | $\operatorname{tg}$ | wie $\operatorname{sen}$ die Schreibweise der portugiesischen Schulen (so auch `mathe13lk-pt` lb7-2) |
+| Lotgerade · Lotfußpunkt · Abstandsformel · Hessesche Normalform | reta perpendicular · pé da perpendicular · fórmula da distância · forma normal de Hesse | wie pt-5 |
+| Lösungsplan | plano de resolução | |
+| Kugel (Abstand Mittelpunkt–Ebene) | superfície esférica | |
+| Abstandsfunktion · Minimalstelle | função distância · minimizante | |
+| spiegeln · Spiegelpunkt · Spiegelebene zu $A$, $B$ | determinar o simétrico · simétrico · plano mediador de $[AB]$ | Kapiteltitel „Distâncias mínimas e simetrias“ |
+| Einfallswinkel gleich Ausfallswinkel | ângulo de incidência igual ao ângulo de reflexão | Heron: Catóptrica |
+| Geradenschar · Büschel · Parallelenschar | família de retas · feixe de retas · família de retas paralelas | auch im Widget `geradenschar` |
+| berühren · Berührpunkt · Diskriminante | ser tangente · ponto de tangência · binómio discriminante | |
+| Satteldach · First · Dachfläche | telhado de duas águas · cumeeira · vertente (do telhado) | Widget-Preset „Dachfläche“ = Vertente de telhado |
+| Seked · Königselle · Handbreit | seked · côvado real · palmo | Cheops = Quéops |
+| Namen $g$, $h$, $E$ | bleiben | wie pt-5 und die Widgets |
 
 ## mathegy11-pt (GY 11 Grundkurs, block pt-9)
 

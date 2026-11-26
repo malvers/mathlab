@@ -71,6 +71,26 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-6 mathefos11-pt:
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
+        // titelbildgy12 (start page)
+        'Titelbild: eine Fläche unter einer Kurve mit Trapezen, ein Histogramm mit rotem Ablehnungsbereich, eine Gerade durch eine Ebene mit ihrem Schnittwinkel und dem Normalenvektor':
+            'Capa: uma área sob uma curva com trapézios, um histograma com a região de rejeição a vermelho, uma reta que atravessa um plano com o seu ângulo de interseção e o vetor normal',
+        // abstandmin (lb8-1): Abstandsfunktion = função distância, Lotfußpunkt = pé da perpendicular ('Parabel' is in funktionen.js, which the same pages load)
+        'Gerade': 'Reta', 'Wurzelkurve': 'Curva da raiz quadrada', 'Kurve:': 'Curva:',
+        'Zieh den Punkt P. Der Schieber bewegt Q auf der Kurve, unten wächst und schrumpft der Abstand d(x).':
+            'Arrasta o ponto P. O cursor move Q sobre a curva; em baixo, a distância d(x) aumenta e diminui.',
+        'Kurve, Punkt P und der Punkt Q auf der Kurve mit ihrem Abstand': 'Curva, ponto P e ponto Q sobre a curva, com a sua distância',
+        'Abstandsfunktion d(x) mit ihrem Minimum': 'Função distância d(x) com o seu mínimo', '$x$-Koordinate von $Q$': 'Abcissa de $Q$',
+        '$P$ liegt auf der Kurve, der Abstand ist $0$.': '$P$ pertence à curva; a distância é $0$.',
+        'Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.':
+            'O mínimo está num extremo do intervalo; aí, o segmento não tem de ser perpendicular à tangente.',
+        // geradenschar (lb8-2): Geradenschar = família de retas, Büschel = feixe de retas, berühren = ser tangente; the two fixed notes are
+        // whole labels and keep \mid in their keys (words are looked up before the point rules)
+        'Büschel': 'Feixe', 'Parallelen': 'Paralelas', 'Gerade und Parabel': 'Reta e parábola', 'Geradenschar': 'Família de retas',
+        'Geradenschar mit der hervorgehobenen Geraden für den gewählten Parameter': 'Família de retas com a reta do parâmetro escolhido em destaque',
+        'Alle Geraden gehen durch $(2 \\mid 1)$: Für $x = 2$ fällt $a$ heraus. Der Parameter ist die Steigung, eine Gerade fehlt aber: die senkrechte $x = 2$.':
+            'Todas as retas passam por $(2, 1)$: para $x = 2$, $a$ desaparece. O parâmetro é o declive, mas falta uma reta: a vertical $x = 2$.',
+        'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
+            'O declive é sempre $0{,}5$: as retas são paralelas e não têm nenhum ponto comum. O parâmetro desloca-as.',
         // book pt-9 mathegy11-pt:
     },
     phrase: [
@@ -170,6 +190,18 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-6 mathefos11-pt:
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
+        // abstandmin
+        ['Jetzt: $x = ', 'Agora: $x = '], ['$ · am kleinsten bei $x \\approx ', '$ · mínima em $x \\approx '],
+        ['$P$ liegt auf der Kurve, der Abstand ist $0$.', '$P$ pertence à curva; a distância é $0$.'],
+        ['Die kürzeste Strecke (grün) steht senkrecht auf der Tangente: Winkel $\\approx ', 'O segmento mais curto (verde) é perpendicular à tangente: ângulo $\\approx '],
+        ['^\\circ$. Deshalb heißt der Punkt auch Lotfußpunkt.', '^\\circ$. Por isso, o ponto também se chama pé da perpendicular.'],
+        ['Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.',
+            'O mínimo está num extremo do intervalo; aí, o segmento não tem de ser perpendicular à tangente.'],
+        // geradenschar
+        ['Schnitt mit $y = x^2 + 2$: $x^2 - ', 'Interseção com $y = x^2 + 2$: $x^2 - '], ['x + 1 = 0$, Diskriminante $a^2 - 4 = ', 'x + 1 = 0$, binómio discriminante $a^2 - 4 = '],
+        ['zwei Schnittpunkte.', 'dois pontos de interseção.'], ['kein gemeinsamer Punkt.', 'nenhum ponto comum.'],
+        ['genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ', 'exatamente um ponto: a reta é <b>tangente</b> à parábola em $x = '],
+        ['$. Das passiert für $a = \\pm 2$.', '$. Isto acontece para $a = \\pm 2$.'],
         // book pt-9 mathegy11-pt:
     ],
     rule: [
