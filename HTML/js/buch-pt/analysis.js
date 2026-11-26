@@ -79,6 +79,11 @@ window.BuchPT && BuchPT.add('analysis', {
         // titelbildfos12 (index): the cover of FOS 12
         'Titelbild: Exponentialkurve mit Hochpunkt, Wendetangente und Rechtecken darunter, eine Hyperbel mit Asymptoten und ein Parallelogramm im Raum mit seinem Vektorprodukt':
             'Capa: curva exponencial com máximo, tangente no ponto de inflexão e retângulos por baixo, uma hipérbole com assíntotas e um paralelogramo no espaço com o seu produto vetorial',
+        // bruchfunktion (lb4-1): the four examples, the degree buttons and the sliders
+        'Polstelle': 'Polo', 'Lücke': 'Buraco', 'ohne Vorzeichenwechsel': 'Sem mudança de sinal', 'schiefe Asymptote': 'Assíntota oblíqua',
+        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Gráfico de uma função racional com polos, buracos e assíntotas',
+        'Beispiele:': 'Exemplos:', 'Zähler:': 'Numerador:', 'Nenner:': 'Denominador:', 'Grad des Zählers': 'Grau do numerador', 'Grad des Nenners': 'Grau do denominador',
+        'Grad 0': 'Grau 0', 'Grad 1': 'Grau 1', 'Grad 2': 'Grau 2', 'Faktor $k$': 'Fator $k$',
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
     },
@@ -195,6 +200,18 @@ window.BuchPT && BuchPT.add('analysis', {
         ['wöchentlich', 'semanalmente'], ['täglich', 'diariamente'], ['stündlich', 'de hora a hora'], ['minütlich', 'de minuto a minuto'],
         ['Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2{,}718281\\ldots$ heran, aber nie darüber: $',
             'Quanto mais vezes os juros são creditados, mais o saldo se aproxima de $\\mathrm{e} = 2{,}718281\\ldots$, mas sem nunca o ultrapassar: $'],
+        // bruchfunktion (lb4-1); "Nullstellen: $x = " is longer than "Nullstellen: $" of parabelschar (funktionen), so the capital stays
+        ['Nullstelle des Zählers $', 'Zero do numerador $'], ['Nullstelle des Nenners $', 'Zero do denominador $'],
+        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'Depois de simplificar, já não há $x$ no denominador: o gráfico é '],
+        ['eine waagerechte Gerade', 'uma reta horizontal'], ['eine Gerade', 'uma reta'],
+        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Grau do numerador menor do que o do denominador: assíntota horizontal $y = 0$, o eixo $Ox$.'],
+        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Graus do numerador e do denominador iguais: assíntota horizontal $y = '],
+        ['$ (Quotient der Leitkoeffizienten).', '$ (quociente dos coeficientes dos termos de maior grau).'],
+        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Grau do numerador maior em 1: a divisão de polinómios dá $f(x) = '],
+        ['$, schiefe Asymptote $y = ', '$, assíntota oblíqua $y = '], ['Kürzen: $f(x) = ', 'Simplificando: $f(x) = '], ['$ für $x \\neq ', '$ para $x \\neq '],
+        ['$ · hebbare Lücken', '$ · descontinuidades removíveis'], ['$ · hebbare Lücke', '$ · descontinuidade removível'],
+        ['Nullstellen: $x = ', 'Zeros: $x = '], [' · Polstellen: ', ' · polos: '],
+        ['$ mit Vorzeichenwechsel', '$ com mudança de sinal'], ['$ ohne Vorzeichenwechsel', '$ sem mudança de sinal'], [' (senkrechte Asymptote)', ' (assíntota vertical)'],
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
     ],
@@ -218,6 +235,11 @@ window.BuchPT && BuchPT.add('analysis', {
         // efunktion, ganzrational: "Für $x \to -\infty$ geht $f(x) \to " - a rule, because a bare piece "Für $" would start earlier than the
         // long sentences of other widgets ("Für $a \le 0$ gibt es keine Extrempunkte: …" of schar)
         [/(^|\. |>)Für \$(x \\to [+-]\\infty)\$ geht \$f\(x\) \\to /g, (m, a, b) => a + 'Quando $' + b + '$, $f(x) \\to '],
+        // bruchfunktion: "… mit einem Loch.", "Nullstellen: keine", "Polstellen: keine"; the set of the domain "\{1; -2\}" → "\{1, -2\}"
+        // (a semicolon stays as soon as a number has a decimal comma, like the points)
+        [/ mit (Löchern|einem Loch)\./g, (m, w) => w === 'Löchern' ? ' com buracos.' : ' com um buraco.'],
+        [/Nullstellen: keine(?![a-zäöüß])/g, 'Zeros: nenhum'], [/Polstellen: keine(?![a-zäöüß])/g, 'polos: nenhum'],
+        [/(\\setminus \\\{)([^}]*)(\\\})/g, (m, a, b, c) => a + (/\{,\}|\d,\d/.test(b) ? b : b.replace(/; /g, ', ')) + c],
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
     ]
