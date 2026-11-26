@@ -59,6 +59,10 @@ window.BuchPT && BuchPT.add('vektoren', {
         // book pt-7 mathefos12-pt:
         // kreuzprodukt (the presets, the choice of area)
         'zwei Vektoren': 'dois vetores', 'Dachfläche': 'Vertente de telhado', 'in der x-y-Ebene': 'no plano xOy', 'Dreieck': 'Triângulo', 'Welche Fläche?': 'Que área?',
+        // zentralprojektion (wb3)
+        'Abstand des Auges $a$': 'Distância do olho $a$', 'Fluchtlinien zeigen': 'Mostrar as linhas de fuga', 'Horizont': 'Horizonte',
+        'Zieh den Fluchtpunkt V. Er liegt auf dem Horizont in Augenhöhe.': 'Arrasta o ponto de fuga V. Está sobre a linha do horizonte, à altura dos olhos.',
+        'Zentralprojektion eines Quaders und einer Pfostenreihe mit Fluchtpunkt': 'Projeção central de um paralelepípedo e de uma fila de postes, com o ponto de fuga',
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
     },
@@ -151,6 +155,14 @@ window.BuchPT && BuchPT.add('vektoren', {
         ['Parallelogramm: $A = |\\vec{u} \\times \\vec{v}| = ', 'Paralelogramo: $A = \\|\\vec{u} \\times \\vec{v}\\| = '],
         ['Dreieck: $A = \\tfrac12\\,|\\vec{u} \\times \\vec{v}| = \\tfrac12 \\cdot ', 'Triângulo: $A = \\tfrac12\\,\\|\\vec{u} \\times \\vec{v}\\| = \\tfrac12 \\cdot '],
         [' Flächeneinheiten', ' unidades de área'],
+        // zentralprojektion (wb3)
+        ['Fluchtpunkt $V(', 'Ponto de fuga $V('], [')$ · Bildebene vor dem Quader, Auge im Abstand $a = ', ')$ · plano do quadro à frente do paralelepípedo, olho à distância $a = '],
+        ['$ davor', '$ à frente dele'],
+        ['Alle Kanten, die in die Tiefe laufen, treffen sich in $V$. Kanten parallel zur Bildebene bleiben parallel und behalten ihr Verhältnis.',
+            'Todas as arestas que vão para o fundo encontram-se em $V$. As arestas paralelas ao plano do quadro continuam paralelas e mantêm as suas proporções.'],
+        ['Ein Pfosten in der Tiefe $z$ erscheint mit dem Faktor $\\dfrac{a}{a + z}$: bei $z = 8$ also $\\dfrac{',
+            'Um poste à profundidade $z$ aparece reduzido pelo fator $\\dfrac{a}{a + z}$: para $z = 8$, portanto, $\\dfrac{'],
+        ['$ so hoch wie vorn.', '$ da altura que tem à frente.'],
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
     ],
