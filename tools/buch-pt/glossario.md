@@ -420,3 +420,5 @@ parts, so every later book that loads them gets it too):
 | Grundfläche $G$ · Umfang $u$ · Mantel $M$ · Oberfläche $O$ · Volumen $V$ | $A_b$ · $P_b$ · $A_L$ · área total $A$ · $V$ | wie vektoren.js (mathe12-pt); auch in den Widget-Bildern (Regel) |
 | Schrägbild · Kavalierperspektive · Körpernetz | desenho em perspetiva · perspetiva cavaleira · planificação | |
 | Ecken · Kanten · Flächen · Quader · Würfel | vértices · arestas · faces · paralelepípedo · cubo | |
+| Anteil · Kreisdiagramm · Kreisausschnitt | parte do todo (fração) · gráfico circular · setor circular | $1\,\%$ corresponde a $3{,}6^\circ$ (statt $\widehat{=}$) |
+| Flächenanteil · Volumenanteil | parte da área · parte do volume | |

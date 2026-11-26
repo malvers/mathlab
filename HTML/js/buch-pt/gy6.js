@@ -157,6 +157,13 @@ window.BuchPT && BuchPT.add('gy6', {
             'Perspetiva cavaleira: a base fica à frente em verdadeira grandeza. As arestas que vão para trás fazem $45^\\circ$ e têm metade do comprimento. As arestas escondidas estão a tracejado.',
         'Das Netz besteht aus den beiden Grundflächen und dem Mantel. Der Mantel ist ein Rechteck: so breit wie der Umfang $u$, so hoch wie $h$.':
             'A planificação é formada pelas duas bases e pela superfície lateral. A superfície lateral é um retângulo: tão largo como o perímetro $P_b$ da base, tão alto como $h$.',
+        // kreisdiagramm6 (the columns "Anzahl" and "Prozent" are rules below: short heads keep the table inside its box)
+        'zu Fuß': 'A pé', 'Fahrrad': 'Bicicleta', 'Bus oder Bahn': 'Autocarro ou comboio', 'Auto': 'Carro',
+        'zu Fuß kleiner': 'A pé: diminuir', 'zu Fuß größer': 'A pé: aumentar', 'Fahrrad kleiner': 'Bicicleta: diminuir', 'Fahrrad größer': 'Bicicleta: aumentar',
+        'Bus oder Bahn kleiner': 'Autocarro ou comboio: diminuir', 'Bus oder Bahn größer': 'Autocarro ou comboio: aumentar', 'Auto kleiner': 'Carro: diminuir', 'Auto größer': 'Carro: aumentar',
+        'Kreisdiagramm: Wie kommst du zur Schule?': 'Gráfico circular: como vens para a escola?',
+        'Anteil': 'Fração', 'Winkel': 'Ângulo', 'zusammen': 'Total',
+        'Umfrage in einer Klasse: Wie kommst du zur Schule?': 'Inquérito numa turma: como vens para a escola?',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -278,6 +285,8 @@ window.BuchPT && BuchPT.add('gy6', {
         // prisma6 (after the rule × for the product; "Grundfläche $G" is a rule below)
         ['$, Umfang der Grundfläche $u', '$, perímetro da base $P_b'], ['Mantel $M = u', 'Área lateral $A_L = P_b'],
         ['Oberfläche $O = 2 \\times G + M', 'Área total $A = 2 \\times A_b + A_L'], ['Volumen $V = G \\times h', 'Volume $V = A_b \\times h'],
+        // kreisdiagramm6
+        ['Winkel = Anteil · 360°. ', 'Ângulo = fração × 360°. '], ['Eine Person entspricht hier $', 'Aqui, uma pessoa corresponde a $'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -355,5 +364,7 @@ window.BuchPT && BuchPT.add('gy6', {
         [/^Netz des (Dreiecksprisma|Quader|Trapezprisma|Sechseckprisma)s: zwei Grundflächen und der Mantel aus Rechtecken$/, (m, s) => 'Planificação do ' +
             ({ 'Dreiecksprisma': 'prisma triangular', 'Quader': 'paralelepípedo', 'Trapezprisma': 'prisma trapezoidal', 'Sechseckprisma': 'prisma hexagonal' })[s] +
             ': duas bases e a superfície lateral formada por retângulos'],
+        // kreisdiagramm6: the count column (the pupils) and the percent column, short so the table keeps "Ângulo" inside its box
+        [/<th>Anzahl<\/th>/g, '<th>Alunos</th>'], [/<th>Prozent<\/th>/g, '<th>%</th>'],
     ]
 });
