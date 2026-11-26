@@ -71,7 +71,7 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-6 mathefos11-pt:
         // book pt-7 mathefos12-pt:
         // efunktion (lb2-1, lb4-2): the three views, the slider of the interest and the same words in the sentence below it
-        'Welche Basis?': 'Que base?', 'Zinseszins': 'Juros compostos', 'Was wird gezeigt?': 'O que é mostrado?',
+        'Welche Basis?': 'Que base?', 'Zinseszins': 'Juros compostos', 'Was wird gezeigt?': 'O que é mostrado?', 'a = e setzen': 'Pôr a = e',
         'Exponentialfunktionen und die Eulersche Zahl e': 'Funções exponenciais e o número de Neper e',
         'im Exponenten $b$': 'No expoente $b$', 'Verschiebung $c$': 'Translação $c$', 'Verzinsung': 'Juros creditados',
         'jährlich': 'anualmente', 'halbjährlich': 'semestralmente', 'vierteljährlich': 'trimestralmente', 'monatlich': 'mensalmente',
