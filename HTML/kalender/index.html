@@ -373,6 +373,10 @@
         button.icon.nav-step { justify-self: center; align-self: end; width: 30px; height: 32px; border-radius: 8px; }
         button.icon.nav-step svg { width: 22px; height: 22px; }
         .wk-head .nav-step { margin-bottom: 8px; }
+        /* hour zoom: a small + and - in the corner above the hour column; out of the grid flow, so the arrow and the day names stay put */
+        .wk-head { position: relative; }
+        .wk-zoom { position: absolute; left: 1px; top: 0; display: flex; gap: 2px; z-index: 2; }
+        button.icon.wk-zoom-btn { flex: 0 0 16px; width: 16px; height: 16px; border-radius: 5px; font: 700 13px/1 Orbitron, sans-serif; color: var(--muted); }
         .wk-dayname {
             padding: 4px 0 8px; text-align: center; cursor: pointer; border: 0; background: transparent; color: var(--text);
             font: 700 12px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase;
@@ -1686,7 +1690,9 @@
                 const h0 = 0, H = 24;   // the whole day; fitWeek opens the box at 8:00
                 shownOcc = new Map();
                 let html = '<div class="wk-head">' + STEP_BTN(-1) + days.map(d =>
-                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}${isHoliday(d) ? ' holiday' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${dayName(d.getDay())}<b>${d.getDate()}</b></button>`).join('') + STEP_BTN(1) + '</div>';
+                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}${isHoliday(d) ? ' holiday' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${dayName(d.getDay())}<b>${d.getDate()}</b></button>`).join('') + STEP_BTN(1) +
+                    '<div class="wk-zoom"><button type="button" class="icon wk-zoom-btn" data-zoom="-1" title="Stunden kleiner" aria-label="Stunden kleiner">&minus;</button>' +
+                    '<button type="button" class="icon wk-zoom-btn" data-zoom="1" title="Stunden größer" aria-label="Stunden größer">+</button></div></div>';
                 if (allday.length) {
                     html += WK_SEP + '<div class="wk-allday"><div></div>' + days.map(d => {
                         const here = allday.filter(o => o.start < K.addDays(d, 1) && o.end > d);
@@ -1750,6 +1756,19 @@
             const TRI = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path class="tri" d="${d < 0 ? 'M15 6.2v11.6L6.4 12z' : 'M9 6.2v11.6L17.6 12z'}"/></svg>`;
             // back / forward beside the day names of the week and the month, the same as the header's
             const STEP_BTN = d => `<button type="button" class="icon nav-step" data-step="${d}" aria-label="${view === 'week' ? (d < 0 ? 'Vorige Woche' : 'Nächste Woche') : (d < 0 ? 'Voriger Monat' : 'Nächster Monat')}">${TRI(d)}</button>`;
+            // zoom factor on top of the fitted hour height (+ / - in the corner of the week head), kept across reloads
+            const WK_ZOOM_KEY = 'doccal.wkzoom', WK_ZOOM_MIN = 0.4, WK_ZOOM_MAX = 4, WK_ZOOM_STEP = 1.25, WK_HOUR_MIN = 22, WK_HOUR_MAX = 200;
+            let wkZoom = 1;
+            try { const z = parseFloat(localStorage.getItem(WK_ZOOM_KEY)); if (z >= WK_ZOOM_MIN && z <= WK_ZOOM_MAX) wkZoom = z; } catch (e) { }
+            const clampHour = h => Math.min(WK_HOUR_MAX, Math.max(WK_HOUR_MIN, Math.round(h)));
+            let wkFitted = 44;   // the hour the screen would need without zoom
+            function setWkZoom(dir) {
+                const z = Math.min(WK_ZOOM_MAX, Math.max(WK_ZOOM_MIN, wkZoom * (dir > 0 ? WK_ZOOM_STEP : 1 / WK_ZOOM_STEP)));
+                if (clampHour(wkFitted * z) === clampHour(wkFitted * wkZoom)) return;
+                wkZoom = z;
+                try { localStorage.setItem(WK_ZOOM_KEY, String(z)); } catch (e) { }
+                fitWeek();   // wkTop stays, so the hour at the top of the box stays too
+            }
             let wkTop = WK_FROM;   // the hour whose line sits WK_LABEL below the top of the box
             function fitWeek() {
                 const box = $('wk').querySelector('.wk-body');
@@ -1758,7 +1777,13 @@
                 const room = Math.floor(innerHeight - (box.getBoundingClientRect().top + scrollY) - 14);   // 14 = card padding + border + air
                 // a status line coming and going in the header changes the box, not the size of the hours
                 const st = $('status').offsetHeight + (parseFloat(getComputedStyle($('status')).marginTop) || 0);
-                const hour = Math.max(22, Math.floor((room + st - WK_LABEL - padB) / (WK_TO - WK_FROM)));
+                wkFitted = Math.max(WK_HOUR_MIN, Math.floor((room + st - WK_LABEL - padB) / (WK_TO - WK_FROM)));
+                const hour = clampHour(wkFitted * wkZoom);
+                // dim a button once its next step would not change the hour any more
+                $('wk').querySelectorAll('.wk-zoom-btn').forEach(b => {
+                    const z = wkZoom * (Number(b.dataset.zoom) > 0 ? WK_ZOOM_STEP : 1 / WK_ZOOM_STEP);
+                    b.disabled = z > WK_ZOOM_MAX * 1.0001 || z < WK_ZOOM_MIN / 1.0001 || clampHour(wkFitted * z) === hour;
+                });
                 $('wk').style.setProperty('--hour', hour + 'px');
                 box.style.height = Math.max(room, 4 * hour) + 'px';
                 box.scrollTop = Math.max(0, wkTop * hour - WK_LABEL);
@@ -3260,6 +3285,8 @@
                     if (e.target.closest('a.svp-pill')) return;   // the lesson's SVP: the link opens, not the row's info box
                     const stp = e.target.closest('[data-step]');
                     if (stp) { step(Number(stp.dataset.step)); return; }
+                    const zm = e.target.closest('[data-zoom]');
+                    if (zm) { setWkZoom(Number(zm.dataset.zoom)); return; }
                     const add = e.target.closest('[data-add]');
                     if (add) { openEditor({ day: dateOf(add.dataset.add) }); return; }
                     const hit = e.target.closest('[data-key]');
