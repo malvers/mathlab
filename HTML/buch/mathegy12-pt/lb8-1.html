@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática GY 12 · Capítulo 8.1 · Distâncias mínimas e simetrias | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Função distância, ponto e reta, ponto e curva, simetria em relação a um ponto e a um plano, caminhos mais curtos. Capítulo 8.1 do manual interativo Matemática · Gymnasium 12: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · GYMNASIUM 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO 8.1 · ÁREA DE APRENDIZAGEM 8</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 8.1 · ÁREA DE APRENDIZAGEM 8 · FEVEREIRO</p>
+            <h1>Distâncias mínimas e simetrias</h1>
+            <p class="b-hero-lead">Aqui encontram-se a análise e a geometria. Quão perto passa um navio do farol? Que ponto de uma curva está mais perto de um ponto dado?
+                Escreves uma <b>função distância</b> e determinas o seu mínimo com a derivada. Depois determinas <b>simétricos</b> de pontos em relação a planos, desvias raios de luz
+                e encontras caminhos mais curtos com um truque de simetria.</p>
+            <div class="b-chips"><span class="b-chip">8 AULAS</span><span class="b-chip">2 UNIDADES</span><span class="b-chip">2 WIDGETS</span><span class="b-chip">1 LABORATÓRIO</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^2"]' data-labels='["f"]' data-lat="[1.7]" data-x="-2.6,2.6" data-y="-0.6,4" data-pts="[[0,2],[1.2247,1.5],[-1.2247,1.5]]" data-h="240" data-aria="A parábola y = x², um ponto do eixo Oy e os dois pontos da curva mais próximos dele"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a escrever uma <b>função distância</b> e a determinar o seu mínimo com a derivada</li>
+                <li>a calcular a distância de um ponto a uma <b>reta</b> e a uma <b>curva</b> e a interpretar o resultado como perpendicular</li>
+                <li>a determinar o <b>simétrico</b> de um ponto em relação a <b>planos</b>, a pontos e a retas, e o plano mediador de dois pontos</li>
+                <li>a usar simetrias para <b>raios de luz</b> e <b>caminhos mais curtos</b></li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="2" data-ph="t ="><p class="b-q-text">Onde tem $h(t) = 3t^2 - 12t + 14$ o seu mínimo?</p><div class="b-sol"><p>$h'(t) = 6t - 12 = 0$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="d ="><p class="b-q-text">Qual é a distância entre $(1, 1)$ e $(4, 5)$?</p><div class="b-sol"><p>$\sqrt{9 + 16}$</p></div></div>
+            <div class="b-q" data-ans="-1" data-ph="t ="><p class="b-q-text">Perpendicular de $P(4, 3, 2)$ sobre $2x + y + 2z = 6$: que parâmetro corresponde ao pé da perpendicular?</p><div class="b-sol"><p>$15 + 9t = 6$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Uma função tem um mínimo em $x_0$. Então é certo que …</p><div class="b-mc"><button>$f(x_0) = 0$</button><button>$f''(x_0) = 0$</button><button>$f'(x_0) = 0$ (se $x_0$ for um ponto interior)</button></div><div class="b-sol"><p>Condição necessária</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">O MAIS PERTO POSSÍVEL</div>
+            <div class="b-text"><p>O ponto $P(0, 2)$ está acima do vértice da parábola $y = x^2$.</p>
+                <ul><li>O vértice é o ponto da curva mais próximo de $P$? Experimentem alguns pontos $(x, x^2)$.</li><li>Escrevam uma função $d(x)$ para a distância e esbocem-na.</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">O RUMO DO NAVIO</div>
+            <div class="b-text"><p>Um navio parte de $(0, 0)$ e, em cada hora, avança $3$ km para leste e $4$ km para norte. Há um farol em $(10, 0)$.</p>
+                <ul><li>Onde está o navio ao fim de $t$ horas? A que distância está então do farol?</li><li>Quando está mais perto dele?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">O TRUQUE DA SIMETRIA</div>
+            <div class="b-text"><p>Um cão em $A$ tem de correr primeiro até ao rio, que é retilíneo, e depois até à sua tigela em $B$; ambos estão do mesmo lado do rio.</p>
+                <ul><li>Em que ponto da margem deve beber para que o caminho seja o mais curto possível? Experimentem em papel.</li><li>Determinem o simétrico de $A$ em relação à margem. O que observam?</li></ul></div>
+            <a class="b-lab" data-lab="vektoren" href="../../vektoren.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">VEKTOREN</span><span class="b-lab-what">Cálculo vetorial em 11 capítulos</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Distâncias mínimas" data-toc-k="1" data-toc-short="1 Distâncias mínimas">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">1</span>Distâncias mínimas no plano e no espaço</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>O vértice da parábola $y = x^2$ é o ponto mais próximo de $P(0, 2)$? Está à distância $2$. Mas o ponto $(1, 1)$ da curva está só à distância $\sqrt{1 + 1} \approx 1{,}41$.
+                Para encontrar o ponto realmente mais próximo, escreve-se a distância como função da abcissa $x$ e procura-se o seu mínimo.</p></div></div>
+            <div class="b-text"><p>Para um ponto da curva $Q(x, f(x))$, tem-se $d(x) = \sqrt{(x - x_P)^2 + (f(x) - y_P)^2}$. Como a raiz quadrada é estritamente crescente, $d(x)^2$ tem o mesmo minimizante,
+                e, sem a raiz, deriva-se muito mais facilmente. O mesmo numa reta do espaço: cada ponto da reta corresponde a um parâmetro $t$, e a distância passa a ser uma função de $t$.</p>
+                <p>No minimizante, o segmento de ligação é <b>perpendicular</b> à reta ou à tangente à curva: o ponto mais próximo é o <b>pé da perpendicular</b>.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · DISTÂNCIAS MÍNIMAS</div>
+                <div class="b-text">
+                    <p>1. Escrever a <b>função distância</b>: $d(t)^2 = \|\overrightarrow{PQ_t}\|^2$ para o ponto $Q_t$ da reta ou da curva.</p>
+                    <p>2. Derivar $d^2$, resolver $\big(d^2\big)' = 0$, verificar o mínimo (também nos extremos do intervalo).</p>
+                    <p>3. $d_{\min} = \sqrt{d(t_0)^2}$. Controlo: $\overrightarrow{PQ_{t_0}}$ é perpendicular ao vetor diretor ou à tangente.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Função distância quadrática:</b> nas retas, $d(t)^2$ é uma parábola em $t$ com a concavidade voltada para cima. O seu vértice é o mínimo; nem sequer é preciso a derivada.</p>
+            <p class="b-note"><b>Objetos em movimento:</b> se os dois pontos dependem do tempo, $d(t)$ é a distância no instante $t$. O mínimo indica quão perto passam um do outro e quando.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · O PONTO MAIS PRÓXIMO</div>
+        <p class="b-help" style="margin:0 0 12px">Em cima, a curva e o ponto $P$; em baixo, a função distância $d(x)$. Move $Q$ com o cursor, arrasta $P$ para outro sítio e muda de curva. A verde, a tracejado: o segmento mais curto.</p>
+        <div data-widget="abstandmin"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · PONTO E RETA NO ESPAÇO</div>
+            <div class="b-text"><p>A que distância está $P(1, 2, 3)$ da reta $g\colon \vec x = t \cdot (1, 1, 1)$?</p></div>
+            <div class="b-sol"><p>$d(t)^2 = (t - 1)^2 + (t - 2)^2 + (t - 3)^2 = 3t^2 - 12t + 14$, vértice em $t = 2$: $d^2 = 2$.</p>
+                <p><span class="b-res">$d = \sqrt2$</span>, pé da perpendicular $F(2, 2, 2)$. Verificação: $\overrightarrow{PF} = (1, 0, -1)$, $\cdot\,(1, 1, 1) = 0$ ✔</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · PONTO E PARÁBOLA</div>
+            <div class="b-text"><p>Que pontos da parábola $y = x^2$ estão mais perto de $P(0, 2)$?</p></div>
+            <div class="b-sol"><p>$d(x)^2 = x^2 + (x^2 - 2)^2 = x^4 - 3x^2 + 4$, derivada $4x^3 - 6x = 0$: $x = 0$ ou $x^2 = 1{,}5$.</p>
+                <p>$d(0)^2 = 4$, $d(\pm\sqrt{1{,}5})^2 = 1{,}75$: <span class="b-res">$(\pm\sqrt{1{,}5}; 1{,}5)$ com $d \approx 1{,}32$</span>. O vértice é um máximo relativo de $d$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A que distância está a origem da reta $y = 2x + 1$? Indica também o pé da perpendicular.</p></div>
+            <div class="b-sol"><p>$d(x)^2 = x^2 + (2x + 1)^2 = 5x^2 + 4x + 1$, vértice em $x = -0{,}4$: $F(-0{,}4; 0{,}2)$, $d = \tfrac{1}{\sqrt5} \approx 0{,}45$.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>A que distância está a) $P(3, 0, 0)$ do eixo $Oy$, b) $Q(2, 3, 1)$ do eixo $Ox$?</p></div>
+            <div class="b-sol"><p>a) $3$ &nbsp; b) pé da perpendicular $(2, 0, 0)$, $d = \sqrt{9 + 1} = \sqrt{10} \approx 3{,}16$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Dois pontos movem-se: $A_t(t, 0, 0)$ e $B_t(0, 6 - t, 0)$. Quando e quão perto passam um do outro?</p></div>
+            <div class="b-sol"><p>$d(t)^2 = t^2 + (6 - t)^2$, mínimo em $t = 3$: $d = \sqrt{18} = 3\sqrt2 \approx 4{,}24$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Um navio parte de $(0, 0)$ e, em cada hora, desloca-se $(3, 4)$ km. Quando está mais perto do farol $L(10, 0)$, e a que distância?</p></div>
+            <div class="b-sol"><p>$d(t)^2 = (3t - 10)^2 + (4t)^2 = 25t^2 - 60t + 100$, vértice em $t = 1{,}2$: ao fim de $72$ min, $d = \sqrt{64} = 8$ km.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Que ponto do gráfico de $f(x) = \sqrt{x}$ está mais perto de $(2{,}5; 0)$? Mostra que, nesse ponto, o segmento de ligação é perpendicular à tangente.</p></div>
+            <div class="b-sol"><p>$d(x)^2 = (x - 2{,}5)^2 + x = x^2 - 4x + 6{,}25$, mínimo em $x = 2$: $(2, \sqrt2)$, $d = 1{,}5$. Declive da tangente $\tfrac{1}{2\sqrt2}$, declive do segmento $\tfrac{\sqrt2}{-0{,}5} = -2\sqrt2$; produto $-1$ ✔</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="1,41" data-tol="0.01" data-ph="d ≈"><p class="b-q-text">Distância de $(1, 2, 3)$ à reta $t \cdot (1, 1, 1)$, com duas casas decimais?</p><div class="b-sol"><p>$\sqrt2$</p></div></div>
+        <div class="b-q" data-ans="8" data-ph="km"><p class="b-q-text">Quão perto do farol passa o navio do exercício 4?</p><div class="b-sol"><p>$d^2 = 64$</p></div></div>
+        <div class="b-q" data-ans="1,5" data-ph="d ="><p class="b-q-text">Menor distância de $(2{,}5; 0)$ ao gráfico de $\sqrt{x}$?</p><div class="b-sol"><p>$d^2 = 2{,}25$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Simetrias" data-toc-k="2" data-toc-short="2 Simetrias">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">2</span>Simétrico de um ponto em relação a um plano</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A tua imagem no espelho está tão longe atrás do espelho como tu estás à frente dele, e a linha que te une à tua imagem é perpendicular ao espelho.
+                É exatamente assim que se determina o simétrico de um ponto $P$ em relação a um plano $E$: o pé da perpendicular $F$ é o <b>ponto médio</b> entre $P$ e o seu simétrico $P'$.</p></div></div>
+            <div class="b-text"><p>Determina-se, portanto, como no capítulo 7.3, o pé da perpendicular com a reta perpendicular e percorre-se duas vezes, a partir de $P$, o caminho até $F$. No parâmetro da reta perpendicular, isto significa:
+                $F$ corresponde a $t_0$, $P'$ a $2t_0$. Um raio de luz é desviado por um espelho de modo que a componente da sua direção perpendicular ao espelho muda de sinal.
+                E quem procura o caminho mais curto de $A$ até $B$ passando por um plano determina o simétrico de $A$: o segmento de reta de $A'$ até $B$ mostra o caminho.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · SIMÉTRICO EM RELAÇÃO A UM PLANO</div>
+                <div class="b-text">
+                    <p>1. Intersetar a reta perpendicular $\vec x = \vec p + t \cdot \vec n$ com $E$: parâmetro $t_0$, pé da perpendicular $F$.</p>
+                    <p>2. <b>Simétrico:</b> $\overrightarrow{OP'} = \overrightarrow{OP} + 2\,\overrightarrow{PF} = \vec p + 2t_0 \cdot \vec n$. Verificação: $F$ é o ponto médio de $[PP']$.</p>
+                    <p><b>Em relação ao ponto $Z$:</b> $\overrightarrow{OP'} = 2\,\overrightarrow{OZ} - \overrightarrow{OP}$ · <b>Plano mediador</b> de $[AB]$: vetor normal $\overrightarrow{AB}$, passa pelo ponto médio de $[AB]$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Planos coordenados:</b> em relação a $z = 0$, só $z$ muda de sinal: $(x, y, z) \to (x, y, -z)$. Em relação a $x = y$, trocam-se $x$ e $y$.</p>
+            <p class="b-note"><b>Duas simetrias</b> em relação ao mesmo plano levam de volta ao ponto de partida. Os pontos do plano ficam onde estão.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · PERPENDICULAR E SIMÉTRICO</div>
+        <p class="b-help" style="margin:0 0 12px">Liga o simétrico $P'$. Altera o ponto e o plano: $F$ é sempre o ponto médio entre $P$ e $P'$.</p>
+        <div data-widget="lot3d"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · SIMÉTRICO DE UM PONTO</div>
+            <div class="b-text"><p>Determina o simétrico de $P(3, 4, 5)$ em relação ao plano $E\colon x + y + z = 3$.</p></div>
+            <div class="b-sol"><p>Reta perpendicular $(3 + t, 4 + t, 5 + t)$: $12 + 3t = 3$, $t_0 = -3$, logo $F(0, 1, 2)$.</p>
+                <p>$P' = P + 2t_0 \cdot \vec n$: <span class="b-res">$P'(-3, -2, -1)$</span>. Verificação: o ponto médio de $P$ e $P'$ é $(0, 1, 2) = F$ ✔</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · CAMINHO MAIS CURTO PASSANDO POR UM PLANO</div>
+            <div class="b-text"><p>Um raio de luz deve ir de $A(0, 0, 1)$ até $B(4, 0, 3)$, refletido num espelho no plano $z = 0$. Onde atinge o espelho e qual é o comprimento do seu percurso?</p></div>
+            <div class="b-sol"><p>Simétrico $A'(0, 0, -1)$. Cada caminho que passa pelo espelho tem o mesmo comprimento que o caminho de $A'$ até $B$; o mais curto é o segmento de reta.</p>
+                <p>$A'B\colon (0, 0, -1) + s(4, 0, 4)$ atinge $z = 0$ em $s = \tfrac14$: <span class="b-res">$(1, 0, 0)$, percurso $\|\overrightarrow{A'B}\| = 4\sqrt2 \approx 5{,}66$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina o simétrico de $P(1, 2, 3)$ a) em relação ao plano $z = 0$ &nbsp; b) em relação ao plano $x = 0$ &nbsp; c) em relação à origem &nbsp; d) em relação ao ponto $Z(2, 2, 2)$.</p></div>
+            <div class="b-sol"><p>a) $(1, 2, -3)$ &nbsp; b) $(-1, 2, 3)$ &nbsp; c) $(-1, -2, -3)$ &nbsp; d) $(3, 2, 1)$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina o simétrico da origem em relação ao plano $2x + y + 2z = 9$.</p></div>
+            <div class="b-sol"><p>Reta perpendicular $t \cdot (2, 1, 2)$: $9t = 9$, $t_0 = 1$, $F(2, 1, 2)$, $P'(4, 2, 4)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Em relação a que plano se tem de determinar o simétrico de $A(1, 2, 3)$ para obter $B(3, 4, 1)$?</p></div>
+            <div class="b-sol"><p>Vetor normal $\overrightarrow{AB} = (2, 2, -2)$, mais curto $(1, 1, -1)$, ponto médio $(2, 3, 2)$: $x + y - z = 3$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Um raio de luz com a direção $(1, 0, 0)$ atinge um espelho no plano $x + y = 2$. Em que direção continua?</p></div>
+            <div class="b-hint"><p>Ao vetor diretor $\vec v$ subtrai-se o dobro da componente na direção do vetor normal unitário $\vec n_0$: $\vec v' = \vec v - 2(\vec v \cdot \vec n_0)\,\vec n_0$.</p></div>
+            <div class="b-sol"><p>$\vec n_0 = \tfrac{1}{\sqrt2}(1, 1, 0)$, $\vec v \cdot \vec n_0 = \tfrac{1}{\sqrt2}$: $\vec v' = (1, 0, 0) - (1, 1, 0) = (0, -1, 0)$. O raio é desviado $90^\circ$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Uma bola de bilhar está em $A(1, 2)$ e deve, depois de bater na tabela $y = 0$, atingir a bola em $B(5, 3)$. Onde tem de bater na tabela e qual é o comprimento do seu percurso?</p></div>
+            <div class="b-sol"><p>$A'(1, -2)$; o segmento $[A'B]$ atinge $y = 0$ em $(2{,}6; 0)$. Percurso $\|\overrightarrow{A'B}\| = \sqrt{16 + 25} = \sqrt{41} \approx 6{,}40$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="-3" data-ph="x ="><p class="b-q-text">Determina-se o simétrico de $P(3, 4, 5)$ em relação a $x + y + z = 3$. Qual é a abcissa de $P'$?</p><div class="b-sol"><p>$3 + 2 \cdot (-3)$</p></div></div>
+        <div class="b-q" data-ans="5,66" data-tol="0.01" data-ph="Comprimento"><p class="b-q-text">Comprimento do percurso mais curto da luz no exemplo 4, com duas casas decimais?</p><div class="b-sol"><p>$4\sqrt2$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">Na simetria em relação a um plano, o pé da perpendicular $F$ é …</p><div class="b-mc"><button>o ponto médio de $P$ e $P'$.</button><button>igual a $P'$.</button><button>a origem.</button></div><div class="b-sol"><p>$\overrightarrow{OP'} = \overrightarrow{OP} + 2\overrightarrow{PF}$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina o simétrico de $P(1, 3, 5)$ em relação ao plano $x = y$.</p></div>
+            <div class="b-sol"><p>Trocar $x$ e $y$: $(3, 1, 5)$. Pé da perpendicular $(2, 2, 5)$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar com o capítulo 7.3:</b> a origem está à distância $3$ de $2x + y + 2z = 9$. A que distância está do seu simétrico? Verifica com o exercício 7.</p></div>
+            <div class="b-sol"><p>O dobro da distância: $6$. $\|(4, 2, 4)\| = \sqrt{36} = 6$ ✔</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina a reta simétrica de $g\colon \vec x = (0, 0, 2) + t(1, 0, 1)$ em relação ao plano $z = 0$.</p></div>
+            <div class="b-sol"><p>Determinar os simétricos de dois pontos, $(0, 0, 2) \to (0, 0, -2)$ e $(1, 0, 3) \to (1, 0, -3)$: $g'\colon \vec x = (0, 0, -2) + t(1, 0, -1)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A que distância está $P(4, 0, 0)$ da reta que passa por $O$ e tem o vetor diretor $(1, 1, 0)$? Determina o simétrico de $P$ em relação a esta reta.</p></div>
+            <div class="b-sol"><p>$d(t)^2 = (t - 4)^2 + t^2$, mínimo em $t = 2$: $F(2, 2, 0)$, $d = 2\sqrt2$. Simétrico $2F - P = (0, 4, 0)$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: a luz segue o caminho mais curto" data-toc-k="X" data-toc-short="Heron">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">HISTÓRIA</span></div>
+    <h2>A luz segue o caminho mais curto</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Porque é que, num espelho, «o ângulo de incidência é igual ao ângulo de reflexão»? Heron de Alexandria deu já no século I uma resposta, que verificaste no exemplo 4:
+                na sua <i>Catóptrica</i>, um livro sobre espelhos, mostrou que a lei da reflexão resulta de uma única hipótese. O percurso da luz desde o objeto, passando pelo espelho,
+                até ao olho é o <b>mais curto possível</b>. O truque da simetria torna isso logo visível: o caminho mais curto de $A'$ até $B$ é o segmento de reta, e aí os dois ângulos são iguais.</p>
+            <p>Mais de 1500 anos depois, Pierre de Fermat generalizou a ideia. Numa carta de 1 de janeiro de 1662, admitiu que a luz escolhe o caminho de <b>menor tempo</b>.
+                Assim explicou também a refração da luz na passagem do ar para a água. Este princípio de Fermat continua a ser um dos fundamentos da ótica.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> Wikipédia (em inglês), artigo «Fermat's principle»; sobre a época de Heron e a Catóptrica: MacTutor History of Mathematics, biografia «Heron of Alexandria».</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>FUNÇÃO DISTÂNCIA</h4><p>minimizar $d(t)^2$, a raiz só no fim</p></div>
+        <div><p>$P(1, 2, 3)$, $g\colon t(1, 1, 1)$: $d = \sqrt2$</p></div></div>
+    <div class="b-rueck"><div><h4>PONTO E CURVA</h4><p>$d(x)^2 = (x - x_P)^2 + (f(x) - y_P)^2$</p></div>
+        <div><p>$P(0, 2)$, $y = x^2$: $d \approx 1{,}32$</p></div></div>
+    <div class="b-rueck"><div><h4>PERPENDICULAR</h4><p>No mínimo, $[PQ]$ é perpendicular à reta ou à tangente.</p></div>
+        <div><p>$\sqrt{x}$ e $(2{,}5; 0)$: declives $\tfrac{1}{2\sqrt2}$ e $-2\sqrt2$</p></div></div>
+    <div class="b-rueck"><div><h4>SIMÉTRICO</h4><p>$\overrightarrow{OP'} = \vec p + 2t_0 \vec n$, $F$ é o ponto médio</p></div>
+        <div><p>$(3, 4, 5)$ em relação a $x + y + z = 3$: $(-3, -2, -1)$</p></div></div>
+    <div class="b-rueck"><div><h4>CAMINHO MAIS CURTO</h4><p>simétrico de $A$, segmento $[A'B]$</p></div>
+        <div><p>por $z = 0$: percurso $4\sqrt2$, ponto $(1, 0, 0)$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SEM CALCULADORA</div>
+            <div class="b-q" data-ans="3" data-ph="t ="><p class="b-q-text">Quando passam $A_t(t, 0, 0)$ e $B_t(0, 6 - t, 0)$ mais perto um do outro?</p><div class="b-sol"><p>Vértice de $2t^2 - 12t + 36$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="z ="><p class="b-q-text">Simétrico de $O$ em relação a $2x + y + 2z = 9$: cota da imagem?</p><div class="b-sol"><p>$P'(4, 2, 4)$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Porque é que se minimiza $d^2$ em vez de $d$?</p><div class="b-mc"><button>$d^2$ é sempre menor.</button><button>Mesmo minimizante, mas mais fácil de derivar.</button><button>Porque $d$ pode ser negativo.</button></div><div class="b-sol"><p>A raiz quadrada é estritamente crescente.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · COM CALCULADORA</div>
+            <div class="b-q" data-ans="1,32" data-tol="0.01" data-ph="d ≈"><p class="b-q-text">Menor distância de $P(0, 2)$ à parábola $y = x^2$?</p><div class="b-sol"><p>$\sqrt{1{,}75}$</p></div></div>
+            <div class="b-q" data-ans="2,6" data-ph="x ="><p class="b-q-text">Bilhar do exercício 10: para que valor de $x$ bate a bola na tabela?</p><div class="b-sol"><p>Intersetar o segmento $[A'B]$ com $y = 0$</p></div></div>
+            <div class="b-q" data-ans="2,83" data-tol="0.01" data-ph="d ≈"><p class="b-q-text">Distância de $(4, 0, 0)$ à reta $t(1, 1, 0)$?</p><div class="b-sol"><p>$2\sqrt2$</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy12-extremale-abstaende.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">EXTREMALE ABSTÄNDE</span><span class="b-lab-what">Ponto e reta, ponto e curva, objetos em movimento</span></span></a>
+        <a class="b-lab" href="../../mathetestgy12-spiegelung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SPIEGELUNG</span><span class="b-lab-what">Pontos, planos, raios de luz, caminhos mais curtos</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Gymnasium, 12.º ano, Grundkurs · Área de aprendizagem 8 segundo o programa de Matemática do Gymnasium da Saxónia.</p>
+    <p>Todos os textos, exercícios e figuras são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-pt/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-pt/analysis.js"></script>
+<script src="../../js/buch-vektoren.js"></script>
+<script src="../../js/buch-pt/vektoren.js"></script>
+</body>
+</html>

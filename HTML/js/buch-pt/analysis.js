@@ -74,6 +74,15 @@ window.BuchPT && BuchPT.add('analysis', {
         // titelbildgy12 (start page)
         'Titelbild: eine Fläche unter einer Kurve mit Trapezen, ein Histogramm mit rotem Ablehnungsbereich, eine Gerade durch eine Ebene mit ihrem Schnittwinkel und dem Normalenvektor':
             'Capa: uma área sob uma curva com trapézios, um histograma com a região de rejeição a vermelho, uma reta que atravessa um plano com o seu ângulo de interseção e o vetor normal',
+        // abstandmin (lb8-1): Abstandsfunktion = função distância, Lotfußpunkt = pé da perpendicular ('Parabel' is in funktionen.js, which the same pages load)
+        'Gerade': 'Reta', 'Wurzelkurve': 'Curva da raiz quadrada', 'Kurve:': 'Curva:',
+        'Zieh den Punkt P. Der Schieber bewegt Q auf der Kurve, unten wächst und schrumpft der Abstand d(x).':
+            'Arrasta o ponto P. O cursor move Q sobre a curva; em baixo, a distância d(x) aumenta e diminui.',
+        'Kurve, Punkt P und der Punkt Q auf der Kurve mit ihrem Abstand': 'Curva, ponto P e ponto Q sobre a curva, com a sua distância',
+        'Abstandsfunktion d(x) mit ihrem Minimum': 'Função distância d(x) com o seu mínimo', '$x$-Koordinate von $Q$': 'Abcissa de $Q$',
+        '$P$ liegt auf der Kurve, der Abstand ist $0$.': '$P$ pertence à curva; a distância é $0$.',
+        'Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.':
+            'O mínimo está num extremo do intervalo; aí, o segmento não tem de ser perpendicular à tangente.',
         // book pt-9 mathegy11-pt:
     },
     phrase: [
@@ -173,6 +182,13 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-6 mathefos11-pt:
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
+        // abstandmin
+        ['Jetzt: $x = ', 'Agora: $x = '], ['$ · am kleinsten bei $x \\approx ', '$ · mínima em $x \\approx '],
+        ['$P$ liegt auf der Kurve, der Abstand ist $0$.', '$P$ pertence à curva; a distância é $0$.'],
+        ['Die kürzeste Strecke (grün) steht senkrecht auf der Tangente: Winkel $\\approx ', 'O segmento mais curto (verde) é perpendicular à tangente: ângulo $\\approx '],
+        ['^\\circ$. Deshalb heißt der Punkt auch Lotfußpunkt.', '^\\circ$. Por isso, o ponto também se chama pé da perpendicular.'],
+        ['Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.',
+            'O mínimo está num extremo do intervalo; aí, o segmento não tem de ser perpendicular à tangente.'],
         // book pt-9 mathegy11-pt:
     ],
     rule: [
