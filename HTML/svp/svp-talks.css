@@ -793,6 +793,36 @@ body:has(.vt-list) header.page-head { margin-bottom: 10px; }
     .vt-topic { min-height: 0; }
 }
 
+/* Phones: the talk time no longer squeezes in beside the title - there it pushed the title down to
+   one word per line, lay over it and stuck out of the card (up to 76 px at 320 px, a sideways scroll).
+   It goes UNDER the title, in the title's column; the date keeps its place in front (Doc, 18.09.2026).
+   A word longer than the column is hyphenated, as a last resort broken (Marie, 26.11.2026). */
+@media (max-width: 560px) {
+    .vt-title {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        column-gap: 0;
+        row-gap: 2px;
+    }
+    /* the gap as a margin: a card without a date then has no empty gap in front of its title */
+    .vt-title .vt-date { grid-column: 1; grid-row: 1; margin-right: 10px; }
+    .vt-title-text {
+        grid-column: 2;
+        grid-row: 1;
+        min-width: 0;
+        hyphens: auto;
+        overflow-wrap: anywhere;
+    }
+    .vt-time { grid-column: 2; grid-row: 2; }
+}
+
+/* Too narrow even for "16 min Rede · 8 min Fragen" in the title's column: one under the other,
+   without the dot between them. */
+@media (max-width: 374px) {
+    .vt-time { flex-direction: column; align-items: flex-start; gap: 0; }
+    .vt-time-frage::before { content: none; }
+}
+
 @media print {
     .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-more-box, .vt-status,
     .vt-menu, .vt-grade, .vt-grade-lbl, .vt-grades, .vt-add, .vt-fundus, .vt-date.empty,
