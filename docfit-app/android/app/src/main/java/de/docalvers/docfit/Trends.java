@@ -104,7 +104,7 @@ final class Trends {
         return out;
     }
 
-    /** The newest value as shown in a card's head ("78,1 kg"); "–" without any. */
+    /** The newest value as shown in a card's head ("80,0 kg"); "–" without any. */
     static String latest(List<History.Point> oldestFirst, int decimals, String unit) {
         if (oldestFirst.isEmpty()) return "–";
         double v = oldestFirst.get(oldestFirst.size() - 1).value;

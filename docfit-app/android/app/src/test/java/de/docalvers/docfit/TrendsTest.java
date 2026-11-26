@@ -97,9 +97,9 @@ public class TrendsTest {
     public void newestValueAsText() {
         List<History.Point> pts = new ArrayList<>();
         assertEquals("–", Trends.latest(pts, 1, "kg"));
-        pts.add(new History.Point(T - DAY, 79.45));
-        pts.add(new History.Point(T, 78.1));
-        assertEquals("78,1 kg", Trends.latest(pts, 1, "kg"));
+        pts.add(new History.Point(T - DAY, 81.25));
+        pts.add(new History.Point(T, 80.0));
+        assertEquals("80,0 kg", Trends.latest(pts, 1, "kg"));
         assertTrue(Trends.latest(pts, 0, "").matches("\\d+"));
     }
 }
