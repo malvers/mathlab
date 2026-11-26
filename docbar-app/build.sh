@@ -32,6 +32,9 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
+# Weekly Claude usage reader, run by DocBar every 60 s (before signing: the seal covers Resources).
+cp claude-usage.mjs "$APP/Contents/Resources/"
+
 codesign --force --sign - "$APP" >/dev/null 2>&1 || true
 
 echo "built: $APP"
