@@ -28,6 +28,13 @@ window.BuchPT && BuchPT.add('gy11', {
         'Eine Figur wird mit einer Drehmatrix um den Ursprung gedreht': 'Uma figura é rodada em torno da origem com uma matriz de rotação',
         'Drehwinkel $\\varphi$': 'Ângulo de rotação $\\varphi$',
         // book pt-9 mathegy11-pt:
+        // newton (wb2): Newton-Verfahren = método de Newton, Startwert = valor inicial
+        'Newton-Verfahren: Tangenten führen zur Nullstelle': 'Método de Newton: as tangentes levam ao zero',
+        'Nächster Schritt': 'Próximo passo',
+        'Die Folge läuft weg: anderer Startwert.': 'A sucessão afasta-se: escolhe outro valor inicial.',
+        // titelbildgy11 (the cover of the start page)
+        'Titelbild: Sekanten, die sich einer Tangente nähern, Tangenten des Newton-Verfahrens auf dem Weg zu einer Nullstelle, eine Ebene, die von einer Geraden durchstoßen wird, und die Balken einer Binomialverteilung':
+            'Capa: secantes que se aproximam de uma tangente, as tangentes do método de Newton a caminho de um zero, um plano atravessado por uma reta e as barras de uma distribuição binomial',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11/*)
@@ -45,6 +52,11 @@ window.BuchPT && BuchPT.add('gy11', {
         // drehmatrix
         ['$ · Gedreht wird um den Ursprung gegen den Uhrzeigersinn.', '$ · A rotação é feita em torno da origem, no sentido contrário ao dos ponteiros do relógio.'],
         // book pt-9 mathegy11-pt:
+        // newton
+        ['Bei $x_{', 'Em $x_{'],
+        ["}$ ist $f'(x) = 0$: Die Tangente ist waagerecht, das Verfahren bricht ab.", "}$ tem-se $f'(x) = 0$: a tangente é horizontal e o método para."],
+        ['$. Iteration: $x_{n+1}', '$. Iteração: $x_{n+1}'],
+        ['$. Den Startwert verschiebst du mit dem weißen Punkt auf der $x$-Achse.', '$. O valor inicial desloca-se com o ponto branco no eixo $Ox$.'],
     ],
     rule: [
         // pt0: notation of the module, for every book

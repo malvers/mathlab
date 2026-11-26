@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática GY 11 · Capítulo 1.2 · Taxas de variação e derivada | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Secante e tangente, taxa média e taxa instantânea de variação, função derivada. Capítulo 1.2 do manual interativo Matemática · Gymnasium 11: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO 1.2 · ÁREA DE APRENDIZAGEM 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 1.2 · ÁREA DE APRENDIZAGEM 1 · SETEMBRO</p>
+            <h1>Taxas de variação e derivada</h1>
+            <p class="b-hero-lead">A que velocidade vai uma pedra em queda exatamente dois segundos depois de a largarmos? Quão depressa sobe a temperatura às 14 horas? Com um cronómetro mede-se sempre
+                apenas valores médios num intervalo de tempo. Se o intervalo de tempo tender para zero, a taxa média passa a <b>taxa de variação instantânea</b>, a secante passa a <b>tangente</b>.
+                Esta ideia de Newton e de Leibniz chama-se <b>derivada</b>.</p>
+            <div class="b-chips"><span class="b-chip">8 AULAS</span><span class="b-chip">2 UNIDADES</span><span class="b-chip">2 LABORATÓRIOS</span><span class="b-chip">HISTÓRIA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["5*x^2","20*x-15","20*x-20"]' data-labels='["s(t)","Secante","Tangente"]' data-lat="[3.6,0.9,3.3]" data-x="0,4" data-y="0,80" data-pts="[[1,5],[3,45],[2,20]]" data-xl="t em s" data-yl="s em m" data-h="240" data-aria="Curva distância-tempo de uma pedra em queda, com uma secante e uma tangente"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a interpretar a <b>razão incremental</b> como declive da secante e como taxa média de variação</li>
+                <li>a compreender a <b>derivada num ponto</b> como declive da tangente e como taxa de variação instantânea</li>
+                <li>a calcular derivadas com a passagem ao limite $h \to 0$</li>
+                <li>a obter a <b>função derivada</b> de $f(x) = x^2$ pela definição</li>
+                <li>a esboçar, a partir de um gráfico, o gráfico da derivada</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="3" data-ph="m ="><p class="b-q-text">Qual é o declive da reta que passa por $(1, 2)$ e $(4, 11)$?</p><div class="b-sol"><p>$m = \dfrac{11 - 2}{4 - 1} = 3$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Quanto dá $(x + h)^2$?</p><div class="b-mc"><button>$x^2 + h^2$</button><button>$x^2 + xh + h^2$</button><button>$x^2 + 2xh + h^2$</button></div><div class="b-sol"><p>Quadrado de uma soma (caso notável).</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="Limite"><p class="b-q-text">Determina $\lim\limits_{h \to 0} (4 + h)$.</p><div class="b-sol"><p>4</p></div></div>
+            <div class="b-q" data-ans="60" data-ph="km/h"><p class="b-q-text">Um comboio percorre 90 km em 1,5 horas. Qual é a sua velocidade média?</p><div class="b-sol"><p>60 km/h</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">A PEDRA EM QUEDA</div>
+            <div class="b-text"><p>Uma pedra cai segundo $s(t) = 5t^2$ ($s$ em m, $t$ em s).</p>
+                <ul><li>Calculem a velocidade média entre $t = 2$ e $t = 3$, depois $2{,}1$, depois $2{,}01$.</li><li>Que velocidade tem a pedra exatamente em $t = 2$?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">O DECLIVE DA PARÁBOLA</div>
+            <div class="b-text"><p>Com uma régua, tracem tangentes à parábola $y = x^2$ em $x = -2$, $-1$, $0$, $1$, $2$ e meçam os seus declives.</p>
+                <ul><li>Representem os declives em função de $x$. Que padrão veem?</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">INCLINAÇÃO NO TERRENO</div>
+            <div class="b-text"><p>Um sinal de trânsito indica «subida de 12 %».</p>
+                <ul><li>O que significa isso como declive? A estrada tem a mesma inclinação em todo o lado?</li></ul></div>
+            <a class="b-lab" data-lab="steigung" href="../../steigung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">DECLIVE</span><span class="b-lab-what">Triângulo de declive e declive (em alemão)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Da secante à tangente" data-toc-k="1" data-toc-short="1 Tangente">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">1</span>Da secante à tangente</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Entre $t = 2$ e $t = 3$ a distância percorrida pela pedra passa de 20 m para 45 m, ou seja, em média $\dfrac{45 - 20}{1} = 25$ m/s.
+                Entre 2 e 2,1 são $\dfrac{22{,}05 - 20}{0{,}1} = 20{,}5$ m/s, entre 2 e 2,01 já são $20{,}05$ m/s. Em geral, com o intervalo de tempo $h$:
+                $\dfrac{5(2 + h)^2 - 20}{h} = \dfrac{20h + 5h^2}{h} = 20 + 5h$. Quando $h \to 0$ fica a <b>velocidade instantânea</b> de 20 m/s.</p></div></div>
+            <div class="b-text"><p>Geometricamente, cada valor médio é o declive de uma <b>secante</b> que passa por dois pontos do gráfico. Se o segundo ponto se aproximar cada vez mais, a secante roda até se tornar a <b>tangente</b>.
+                O declive da tangente é a taxa de variação instantânea.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · RAZÃO INCREMENTAL E DERIVADA NUM PONTO</div>
+                <div class="b-text">
+                    <p><b>Razão incremental</b> (taxa média de variação, declive da secante): $\dfrac{f(x_0 + h) - f(x_0)}{h}$, em $[a, b]$ também $\dfrac{f(b) - f(a)}{b - a}$.</p>
+                    <p><b>Derivada num ponto</b> (taxa de variação instantânea, declive da tangente): $$f'(x_0) = \lim_{h \to 0} \frac{f(x_0 + h) - f(x_0)}{h}$$</p>
+                    <p>Se este limite existir, $f$ diz-se <b>derivável</b> no ponto $x_0$, e $f'(x_0)$ é a <b>derivada</b> de $f$ no ponto $x_0$.</p>
+                    <p>A <b>tangente</b> no ponto $P(x_0, f(x_0))$ tem a equação $t(x) = f'(x_0)\,(x - x_0) + f(x_0)$.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Unidades:</b> a taxa de variação tem a unidade «unidade de $y$ por unidade de $x$»: m/s, °C/h, € por peça.</p>
+            <p class="b-note"><b>Notações:</b> $f'(x_0)$ segundo Lagrange, $\dfrac{dy}{dx}$ segundo Leibniz, $\dot{s}$ segundo Newton, sobretudo na física para derivadas em ordem ao tempo.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · A SECANTE TORNA-SE TANGENTE</div>
+        <p class="b-help" style="margin:0 0 12px">Desloca o ponto $Q$ em direção a $P$. A razão incremental aproxima-se do declive da tangente.</p>
+        <div data-widget="sekante"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · COM O MÉTODO DO h</div>
+            <div class="b-text"><p>Determina a derivada de $f(x) = x^3$ no ponto $x_0 = 1$.</p></div>
+            <div class="b-sol"><p>$(1 + h)^3 = 1 + 3h + 3h^2 + h^3$, logo $\dfrac{(1 + h)^3 - 1}{h} = 3 + 3h + h^2$.</p>
+                <p>Quando $h \to 0$: <span class="b-res">$f'(1) = 3$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · EQUAÇÃO DA TANGENTE</div>
+            <div class="b-text"><p>Determina a tangente ao gráfico de $f(x) = x^2$ no ponto $P(1, 1)$.</p></div>
+            <div class="b-sol"><p>$\dfrac{(1 + h)^2 - 1}{h} = 2 + h \to 2$, logo $f'(1) = 2$.</p>
+                <p>$t(x) = 2(x - 1) + 1$: <span class="b-res">$t(x) = 2x - 1$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina a taxa média de variação: a) $f(x) = x^2$ em $[1, 3]$ &nbsp; b) $f(x) = x^3$ em $[0, 2]$ &nbsp; c) $f(x) = \sqrt{x}$ em $[1, 4]$ &nbsp; d) $f(x) = \dfrac{1}{x}$ em $[1, 2]$</p></div>
+            <div class="b-sol"><p>a) 4 &nbsp; b) 4 &nbsp; c) $\dfrac{1}{3}$ &nbsp; d) $-\dfrac{1}{2}$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Às 6 horas o termómetro marca 12 °C, às 10 horas 20 °C. Determina a taxa média de variação com a unidade. O que diz ela sobre a temperatura às 8 horas?</p></div>
+            <div class="b-sol"><p>2 °C por hora. Sobre as 8 horas não diz nada de certo; só com uma subida uniforme seriam 16 °C.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina com o método do $h$ a taxa de variação instantânea de $f(x) = x^2$ em $x_0 = -2$ e de $g(x) = 3x + 1$ em $x_0 = 5$.</p></div>
+            <div class="b-sol"><p>$\dfrac{(-2 + h)^2 - 4}{h} = -4 + h \to -4$. Em $g$ a razão incremental é sempre 3, logo $g'(5) = 3$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Uma bola voa segundo $h(t) = 20t - 5t^2$ ($h$ em m, $t$ em s). A que velocidade sobe em $t = 1$? Quando está mais alta?</p></div>
+            <div class="b-hint"><p>No ponto mais alto, a velocidade instantânea é zero.</p></div>
+            <div class="b-sol"><p>$\dfrac{h(1 + k) - h(1)}{k} = 10 - 5k \to 10$ m/s. Em geral, a derivada é $20 - 10t$, que se anula em $t = 2$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Mostra que, na parábola $f(x) = x^2$, a secante que passa pelos pontos de abcissas $a$ e $b$ é paralela à tangente no ponto de abcissa $\dfrac{a + b}{2}$.</p></div>
+            <div class="b-sol"><p>Declive da secante $\dfrac{b^2 - a^2}{b - a} = a + b$. Declive da tangente no ponto médio: $2 \cdot \dfrac{a + b}{2} = a + b$. Iguais, logo paralelas.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="20" data-ph="m/s"><p class="b-q-text">Velocidade média da pedra $s(t) = 5t^2$ entre $t = 1$ e $t = 3$?</p><div class="b-sol"><p>$\dfrac{45 - 5}{2} = 20$ m/s</p></div></div>
+        <div class="b-q" data-ans="6" data-ph="Declive"><p class="b-q-text">A razão incremental de $f(x) = x^2$ em $x_0 = 3$ é $6 + h$. Quanto vale $f'(3)$?</p><div class="b-sol"><p>6</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">O que indica geometricamente a derivada num ponto?</p><div class="b-mc"><button>o declive de uma secante</button><button>o declive da tangente</button><button>o valor da função</button></div><div class="b-sol"><p>O limite dos declives das secantes.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="A função derivada" data-toc-k="2" data-toc-short="2 f′">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">2</span>A função derivada</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>As tangentes à parábola $y = x^2$ em $x = -2$, $-1$, $0$, $1$, $2$ têm os declives $-4$, $-2$, $0$, $2$, $4$. O padrão: declive $= 2x$.
+                Pode demonstrar-se de uma só vez para cada $x$:
+                $\dfrac{(x + h)^2 - x^2}{h} = \dfrac{2xh + h^2}{h} = 2x + h \to 2x$.</p></div></div>
+            <div class="b-text"><p>Se a cada $x$ associarmos o declive $f'(x)$, obtemos uma nova função, a <b>função derivada</b> $f'$. O seu gráfico mostra num relance
+                onde $f$ é crescente ($f' > 0$), onde $f$ é decrescente ($f' < 0$) e onde a tangente é horizontal ($f' = 0$).</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · FUNÇÃO DERIVADA</div>
+                <div class="b-text">
+                    <p>A função $f': x \mapsto f'(x)$ chama-se <b>função derivada</b> (abreviadamente: derivada) de $f$. Calcular a derivada chama-se <b>derivar</b>.</p>
+                    <p>Pela definição: $(x^2)' = 2x$ · $(x^3)' = 3x^2$ · $(mx + b)' = m$ · $(c)' = 0$ · $\left(\tfrac{1}{x}\right)' = -\tfrac{1}{x^2}$</p>
+                    <p><b>Esboçar o gráfico de $f'$:</b> máximos e mínimos de $f$ → zeros de $f'$. Onde $f$ é crescente, $f'$ fica acima do eixo $Ox$; onde $f$ é decrescente, abaixo.</p>
+                    <p>Num <b>ponto anguloso</b> (por exemplo $|x|$ em 0), $f$ não é derivável.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Deslocar não muda nada:</b> $x^2$ e $x^2 + 5$ têm a mesma derivada $2x$, porque uma translação para cima não altera nenhum declive.</p>
+            <p class="b-note"><b>Pensar ao contrário:</b> que função tem a derivada $4x^3$? Por exemplo $x^4$. Esta inversão da derivação volta a aparecer no capítulo 1.3 e no 12.º ano.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · NASCE O GRÁFICO DA DERIVADA</div>
+        <p class="b-help" style="margin:0 0 12px">Arrasta o ponto ao longo do gráfico de $f$. O seu declive é marcado, ponto a ponto, como gráfico de $f'$.</p>
+        <div data-widget="ableitungsgraph"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · PELA DEFINIÇÃO</div>
+            <div class="b-text"><p>Determina a função derivada de $f(x) = \dfrac{1}{x}$.</p></div>
+            <div class="b-sol"><p>$\dfrac{\frac{1}{x + h} - \frac{1}{x}}{h} = \dfrac{x - (x + h)}{h \cdot x(x + h)} = -\dfrac{1}{x(x + h)}$.</p>
+                <p>Quando $h \to 0$: <span class="b-res">$f'(x) = -\dfrac{1}{x^2}$</span>, negativa nos dois ramos.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · ESBOÇAR O GRÁFICO DE f′</div>
+            <div class="b-text"><p>$f$ é uma função de terceiro grau com um máximo relativo em $x = -1$ e um mínimo relativo em $x = 1$. Esboça $f'$.</p></div>
+            <div class="b-sol"><p>Zeros de $f'$ em $-1$ e $1$. Entre eles $f$ é decrescente: $f' < 0$. Fora deles $f$ é crescente: $f' > 0$.</p>
+                <p><span class="b-res">$f'$ é uma parábola com a concavidade voltada para cima</span> e com os zeros $-1$ e $1$, por exemplo $f'(x) = 3x^2 - 3$ para $f(x) = x^3 - 3x$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina com $f'(x) = 2x$: a) o declive da parábola $y = x^2$ em $x = 3$ &nbsp; b) o ponto onde o declive é 4 &nbsp; c) o ponto onde a tangente é paralela a $y = -6x + 1$.</p></div>
+            <div class="b-sol"><p>a) 6 &nbsp; b) $x = 2$, ponto $(2, 4)$ &nbsp; c) $2x = -6$, logo $x = -3$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina a tangente ao gráfico de $f(x) = x^2$ em $x_0 = -1$.</p></div>
+            <div class="b-sol"><p>$f(-1) = 1$, $f'(-1) = -2$: $t(x) = -2(x + 1) + 1 = -2x - 1$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deriva $f(x) = x^3$ pela definição. A razão incremental é $3x^2 + 3xh + h^2$.</p></div>
+            <div class="b-sol"><p>Quando $h \to 0$, $3xh$ e $h^2$ desaparecem: $f'(x) = 3x^2$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>O gráfico de $f'$ é a reta horizontal $y = 3$. O que sabes sobre $f$? E se $f'$ for uma reta crescente que passa por $(2, 0)$?</p></div>
+            <div class="b-sol"><p>$f$ é uma reta de declive 3. No segundo caso, $f$ é uma parábola com a concavidade voltada para cima e vértice em $x = 2$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Justifica, com os limites laterais da razão incremental, que $f(x) = |x|$ não é derivável no ponto 0.</p></div>
+            <div class="b-sol"><p>$\dfrac{|h|}{h} = 1$ para $h > 0$ e $-1$ para $h < 0$. Os limites laterais são diferentes, não há tangente.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="6" data-ph="Declive"><p class="b-q-text">Qual é o declive de $f(x) = x^2$ em $x = 3$?</p><div class="b-sol"><p>$f'(3) = 6$</p></div></div>
+        <div class="b-q" data-ans="-3" data-ph="x ="><p class="b-q-text">Em que ponto tem $f(x) = x^2$ o declive $-6$?</p><div class="b-sol"><p>$2x = -6$</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">$f$ tem em $x_0$ um máximo relativo. O que se passa com $f'$?</p><div class="b-mc"><button>zero com mudança de sinal de mais para menos</button><button>zero com mudança de sinal de menos para mais</button><button>máximo relativo</button></div><div class="b-sol"><p>Primeiro $f$ é crescente, depois decrescente.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Os custos de uma produção são $K(x) = 0{,}5x^2 + 10$ (em €). Quanto aumentam, em média, entre 10 e 20 peças? E exatamente nas 10 peças?</p></div>
+            <div class="b-sol"><p>$\dfrac{210 - 60}{10} = 15$ € por peça. Instantânea: $K'(x) = x$, ou seja, 10 € por peça.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar com o capítulo 1.1:</b> explica por que razão não se pode calcular a derivada num ponto substituindo simplesmente $h = 0$.</p></div>
+            <div class="b-sol"><p>Para $h = 0$ obtém-se $\dfrac{0}{0}$. É preciso primeiro simplificar e só depois calcular o limite, tal como nas lacunas do capítulo 1.1.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Um carro anda durante uma hora à velocidade média de 80 km/h. O que é certo e o que não é?</p></div>
+            <div class="b-sol"><p>Certo: 80 km numa hora. Não é certo: a velocidade num determinado instante. Mas, nalgum momento, o velocímetro marca exatamente 80 km/h, desde que o carro não dê saltos.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A taxa média de variação de $f$ em $[a, b]$ é 0. Daí resulta que $f$ é constante nesse intervalo? Dá um contraexemplo.</p></div>
+            <div class="b-sol"><p>Não. $f(x) = x^2$ em $[-1, 1]$: $f(-1) = f(1)$, mas pelo meio $f$ decresce e cresce.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: Newton contra Leibniz" data-toc-k="X" data-toc-short="Newton–Leibniz">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">HISTÓRIA</span></div>
+    <h2>Newton contra Leibniz</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Isaac Newton desenvolveu o seu «cálculo das fluxões» já em 1665 e 1666, em Cambridge, e escreveu-o em pormenor por volta de 1671, mas não o publicou.
+                Gottfried Wilhelm Leibniz encontrou o seu próprio caminho e publicou-o em outubro de 1684 na revista de Leipzig «Acta Eruditorum», com o título «Nova Methodus pro Maximis et Minimis»,
+                um novo método para máximos e mínimos.</p>
+            <p>Daí nasceu uma das mais amargas disputas de prioridade da história da ciência. Hoje há consenso: Newton chegou primeiro, Leibniz encontrou o seu método de forma independente e publicou primeiro.
+                Impôs-se sobretudo a notação de Leibniz: $\dfrac{dy}{dx}$ para a derivada e o símbolo $\int$ para o integral.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fontes:</b> G. W. Leibniz, «Nova Methodus pro Maximis et Minimis», Acta Eruditorum, outubro de 1684, pp. 467–473. O escrito de Newton sobre as fluxões, de 1671, só foi publicado depois da sua morte, em inglês, em 1736, na tradução de John Colson.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>TAXA MÉDIA DE VARIAÇÃO</h4><p>Razão incremental, declive da secante.</p></div>
+        <div><p>$x^2$ em $[1, 3]$: $\dfrac{9 - 1}{2} = 4$</p></div></div>
+    <div class="b-rueck"><div><h4>TAXA DE VARIAÇÃO INSTANTÂNEA</h4><p>Derivada num ponto $f'(x_0) = \lim\limits_{h \to 0} \dfrac{f(x_0 + h) - f(x_0)}{h}$, declive da tangente.</p></div>
+        <div><p>$5t^2$ em $t = 2$: $20 + 5h \to 20$</p></div></div>
+    <div class="b-rueck"><div><h4>TANGENTE</h4><p>$t(x) = f'(x_0)(x - x_0) + f(x_0)$</p></div>
+        <div><p>$x^2$ em 1: $t(x) = 2x - 1$</p></div></div>
+    <div class="b-rueck"><div><h4>FUNÇÃO DERIVADA</h4><p>Associar a cada ponto o declive.</p></div>
+        <div><p>$(x^2)' = 2x$, $(x^3)' = 3x^2$, $\left(\tfrac{1}{x}\right)' = -\tfrac{1}{x^2}$</p></div></div>
+    <div class="b-rueck"><div><h4>GRÁFICO DE f′</h4><p>Extremos de $f$ → zeros de $f'$; $f$ crescente ↔ $f' > 0$.</p></div>
+        <div><p>Cúbica com máximo e mínimo → parábola</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SEM CALCULADORA</div>
+            <div class="b-q" data-ans="5" data-ph="Taxa"><p class="b-q-text">Taxa média de variação de $f(x) = x^2 + 1$ em $[1, 4]$?</p><div class="b-sol"><p>$\dfrac{17 - 2}{3} = 5$</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="f′(1) ="><p class="b-q-text">Determina $f'(1)$ para $f(x) = x^3$.</p><div class="b-sol"><p>$3 + 3h + h^2 \to 3$</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Que reta é tangente a $y = x^2$ em $(1, 1)$?</p><div class="b-mc"><button>$y = x$</button><button>$y = 2x + 1$</button><button>$y = 2x - 1$</button></div><div class="b-sol"><p>Declive 2 e passa por $(1, 1)$.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · COM CALCULADORA</div>
+            <div class="b-q" data-ans="10" data-ph="m/s"><p class="b-q-text">A que velocidade sobe a bola $h(t) = 20t - 5t^2$ em $t = 1$?</p><div class="b-sol"><p>10 m/s</p></div></div>
+            <div class="b-q" data-ans="15" data-ph="€ por peça"><p class="b-q-text">Variação média dos custos $K(x) = 0{,}5x^2 + 10$ entre 10 e 20 peças?</p><div class="b-sol"><p>15</p></div></div>
+            <div class="b-q" data-ans="-0,25" data-ph="f′(2) ="><p class="b-q-text">Determina $f'(2)$ para $f(x) = \dfrac{1}{x}$.</p><div class="b-sol"><p>$-\dfrac{1}{4}$</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-aenderungsraten.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TAXAS DE VARIAÇÃO</span><span class="b-lab-what">Secante, tangente, método do h, 20 exercícios</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-ableitungsfunktion.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">A FUNÇÃO DERIVADA</span><span class="b-lab-what">Derivada pela definição, gráfico de f′, 20 exercícios</span></span></a>
+        <a class="b-lab" data-lab="differentiallabor" href="../../differentiallabor.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">LABORATÓRIO DIFERENCIAL</span><span class="b-lab-what">Explorar derivadas</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Gymnasium 11.º ano, Grundkurs · área de aprendizagem 1 segundo o programa de Matemática do Gymnasium da Saxónia · edição portuguesa.</p>
+    <p>Todos os textos, exercícios e figuras são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-pt/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-pt/analysis.js"></script>
+</body>
+</html>

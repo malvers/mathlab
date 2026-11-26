@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática GY 11 · Capítulo 1.5 · Funções à medida | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Funções a partir de condições, problemas de otimização, regressão. Capítulo 1.5 do manual interativo Matemática · Gymnasium 11: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · GYMNASIUM 11</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO 1.5 · ÁREA DE APRENDIZAGEM 1</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 1.5 · ÁREA DE APRENDIZAGEM 1 · DEZEMBRO · JANEIRO</p>
+            <h1>Funções à medida</h1>
+            <p class="b-hero-lead">Um escorrega deve começar e acabar na horizontal, uma ponte deve atravessar um rio num arco elegante, uma caixa feita com pouco cartão deve levar o máximo possível.
+                Agora inverte-se a pergunta: em vez de estudar uma função dada, <b>constróis</b> a função adequada a partir de condições,
+                procuras o <b>ótimo</b> e encontras, com a <b>regressão</b>, o melhor modelo para uns valores medidos.</p>
+            <div class="b-chips"><span class="b-chip">12 AULAS</span><span class="b-chip">3 UNIDADES</span><span class="b-chip">1 LAB</span><span class="b-chip">HISTÓRIA</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["x^3/8-0.75*x^2+4"]' data-labels='["Escorrega"]' data-lat="[2.2]" data-x="-0.5,4.6" data-y="-0.6,4.8" data-pts="[[0,4],[4,0],[2,2]]" data-xl="x em m" data-yl="y em m" data-h="240" data-aria="Perfil de um escorrega, horizontal em cima e em baixo, com um ponto de inflexão a meio"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a traduzir propriedades de um gráfico em <b>condições</b> e a determinar funções polinomiais com um sistema de equações</li>
+                <li>sem calculadora até três incógnitas, com o CAS também mais</li>
+                <li>a resolver <b>problemas de otimização</b> com função objetivo, condição de ligação e domínio</li>
+                <li>a determinar expressões de funções através de <b>regressão</b> e a avaliar a qualidade de um modelo</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="12" data-ph="f′(2) ="><p class="b-q-text">Determina $f'(2)$ para $f(x) = x^3$.</p><div class="b-sol"><p>$3 \cdot 4 = 12$</p></div></div>
+            <div class="b-q" data-ans="1" data-ph="a ="><p class="b-q-text">Resolve $a + b = 2$, $2a + b = 3$. Quanto vale $a$?</p><div class="b-sol"><p>Subtraindo: $a = 1$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">O que se verifica num máximo relativo de uma função diferenciável?</p><div class="b-mc"><button>$f(x) = 0$</button><button>$f'(x) = 0$</button><button>$f''(x) = 0$</button></div><div class="b-sol"><p>Tangente horizontal.</p></div></div>
+            <div class="b-q" data-ans="25" data-ph="cm²"><p class="b-q-text">Qual é a área de um quadrado com perímetro 20 cm?</p><div class="b-sol"><p>Lado 5 cm, área 25 cm²</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">O ESCORREGA PERFEITO</div>
+            <div class="b-text"><p>Um escorrega começa a 4 m de altura e acaba 4 m mais à frente, no chão; em cima e em baixo deve ser horizontal, para se entrar e sair sem solavancos.</p>
+                <ul><li>Chega uma parábola? Quantas condições têm, de quantas incógnitas precisam?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">A MAIOR CAIXA</div>
+            <div class="b-text"><p>De um cartão de 12 cm × 12 cm recortam quadrados nos cantos e dobram as abas para cima.</p>
+                <ul><li>Construam caixas com 1, 2, 3, 4 cm de altura e calculem o volume. Qual é a maior?</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">MEDIÇÕES COM TENDÊNCIA</div>
+            <div class="b-text"><p>Uma chávena de café arrefece. Medem a temperatura de 5 em 5 minutos.</p>
+                <ul><li>Que tipo de função se ajusta: afim, quadrática, exponencial? Como se reconhece?</li></ul></div>
+            <a class="b-lab" data-lab="ausgleichsgerade" href="../../ausgleichsgerade.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">RETA DE REGRESSÃO</span><span class="b-lab-what">A melhor reta por pontos medidos (em alemão)</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Funções a partir de condições" data-toc-k="1" data-toc-short="1 Condições">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">1</span>Funções polinomiais a partir de condições</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Uma parábola tem só três incógnitas, mas o escorrega dá quatro condições: $f(0) = 4$, $f'(0) = 0$, $f(4) = 0$, $f'(4) = 0$.
+                Precisa-se, portanto, de uma função de terceiro grau $f(x) = ax^3 + bx^2 + cx + d$. As duas primeiras condições dão logo $d = 4$ e $c = 0$.
+                Das outras duas: $64a + 16b + 4 = 0$ e $48a + 8b = 0$, logo $b = -6a$, $-32a + 4 = 0$: $a = \tfrac{1}{8}$, $b = -\tfrac{3}{4}$.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · FUNÇÕES A PARTIR DE CONDIÇÕES</div>
+                <div class="b-text">
+                    <p>Uma função polinomial de grau $n$ tem $n + 1$ coeficientes; precisa-se de $n + 1$ condições independentes.</p>
+                    <p>Ponto $P(x_0, y_0)$: $f(x_0) = y_0$ · extremo em $x_0$: $f'(x_0) = 0$ · ponto de inflexão em $x_0$: $f''(x_0) = 0$ · declive $m$ em $x_0$: $f'(x_0) = m$ · tangente ao eixo $Ox$: $f(x_0) = 0$ e $f'(x_0) = 0$.</p>
+                    <p><b>A simetria poupa incógnitas:</b> simétrica em relação à origem: só potências ímpares; simétrica em relação ao eixo $Oy$: só potências pares.</p>
+                    <p>O sistema de equações lineares que se obtém resolve-se com o método de Gauss-Jordan (capítulo 2), a partir de quatro incógnitas com o CAS. No fim: verificar todas as condições.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sem bicos:</b> dois troços de curva ligam-se sem bico quando o valor da função e o declive coincidem no ponto de junção.</p>
+            <p class="b-note"><b>Condições a menos</b> dão uma família inteira de funções; condições a mais, que se contradizem, não dão nenhuma.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · FUNÇÃO A PARTIR DE CONDIÇÕES</div>
+        <p class="b-help" style="margin:0 0 12px">Escolhe o tipo de condições e arrasta os pontos. O widget escreve o sistema de equações e mostra a solução.</p>
+        <div data-widget="steckbrief"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · TRÊS PONTOS</div>
+            <div class="b-text"><p>Uma parábola passa por $(1, 2)$, $(-1, 6)$ e $(2, 3)$.</p></div>
+            <div class="b-sol"><p>$a + b + c = 2$, $a - b + c = 6$, $4a + 2b + c = 3$. Primeira menos segunda: $2b = -4$, $b = -2$.</p>
+                <p>$a + c = 4$ e $4a + c = 7$: $a = 1$, $c = 3$. <span class="b-res">$f(x) = x^2 - 2x + 3$</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · COM SIMETRIA</div>
+            <div class="b-text"><p>Uma função de terceiro grau é simétrica em relação à origem e tem o máximo relativo $M(1, 2)$.</p></div>
+            <div class="b-sol"><p>Forma $f(x) = ax^3 + cx$: $f(1) = a + c = 2$, $f'(1) = 3a + c = 0$.</p>
+                <p>$2a = -2$: <span class="b-res">$f(x) = -x^3 + 3x$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Traduz em equações para $f(x) = ax^3 + bx^2 + cx + d$: a) O gráfico passa pela origem. b) Em $x = 2$ há um extremo. c) $I(1, 3)$ é ponto de inflexão.</p></div>
+            <div class="b-sol"><p>a) $d = 0$ &nbsp; b) $12a + 4b + c = 0$ &nbsp; c) $a + b + c + d = 3$ e $6a + 2b = 0$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Determina a parábola que passa por $(0, 3)$, $(1, 0)$ e $(3, 0)$, bem como a parábola de vértice $V(2, 1)$ que passa por $(0, 5)$.</p></div>
+            <div class="b-sol"><p>$x^2 - 4x + 3$ e $(x - 2)^2 + 1 = x^2 - 4x + 5$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>O arco de uma ponte tem 40 m de vão e 10 m de altura a meio. Determina uma parábola adequada. Que altura tem o arco a 5 m da base?</p></div>
+            <div class="b-sol"><p>$f(x) = -\tfrac{1}{40}x^2 + 10$ com $x \in [-20,\,20]$. Em $x = 15$: $f(15) = 4{,}375$ m.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Uma função de terceiro grau tem os zeros 0, 1 e 2 e passa por $(3, 6)$. Determina-a escrevendo-a como produto de fatores lineares.</p></div>
+            <div class="b-sol"><p>$f(x) = a \cdot x(x - 1)(x - 2)$ com $6a = 6$: $f(x) = x(x - 1)(x - 2)$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Uma função de quarto grau é simétrica em relação ao eixo $Oy$, tem em $x = 1$ um mínimo relativo com $f(1) = 0$ e interseta o eixo $Oy$ em 1. Determina-a e verifica as condições com o CAS.</p></div>
+            <div class="b-sol"><p>Forma $ax^4 + cx^2 + e$: $e = 1$, $a + c + 1 = 0$, $4a + 2c = 0$, logo $c = -2a$, $-a + 1 = 0$: $f(x) = x^4 - 2x^2 + 1 = (x^2 - 1)^2$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="0,125" data-ph="a ="><p class="b-q-text">Qual é o coeficiente $a$ da função do escorrega?</p><div class="b-sol"><p>$a = \tfrac{1}{8}$</p></div></div>
+        <div class="b-q" data-ans="4" data-ph="Número"><p class="b-q-text">De quantas condições precisa uma função de terceiro grau?</p><div class="b-sol"><p>4</p></div></div>
+        <div class="b-q" data-mc="2"><p class="b-q-text">Que condição corresponde a «ponto de inflexão em $x = 0$»?</p><div class="b-mc"><button>$f(0) = 0$</button><button>$f'(0) = 0$</button><button>$f''(0) = 0$</button></div><div class="b-sol"><p>Condição necessária para um ponto de inflexão.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Problemas de otimização" data-toc-k="2" data-toc-short="2 Ótimo">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">2</span>Problemas de otimização</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>A caixa feita com o cartão de 12 cm e abas de altura $x$ tem o volume $V(x) = x(12 - 2x)^2$. Faz sentido $0 < x < 6$.
+                De $V'(x) = (12 - 2x)(12 - 6x) = 0$ resulta, no domínio, $x = 2$. Nas extremidades $V = 0$, logo $x = 2$ dá o máximo:
+                $V(2) = 2 \cdot 8^2 = 128$ cm³.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · PLANO DE RESOLUÇÃO DE PROBLEMAS DE OTIMIZAÇÃO</div>
+                <div class="b-text">
+                    <p>1. Esboço, dar nome às variáveis. 2. <b>Função objetivo</b>: a grandeza que deve ser máxima ou mínima.</p>
+                    <p>3. <b>Condição de ligação</b>: relaciona as variáveis, para que a função objetivo dependa só de uma.</p>
+                    <p>4. <b>Domínio</b> a partir do contexto. 5. Extremo com $f' = 0$ e a condição suficiente, comparar os <b>valores nas extremidades</b>.</p>
+                    <p>6. Resposta: todas as grandezas pedidas, com unidades.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Resultados típicos:</b> com perímetro fixo, o quadrado tem a maior área; com soma das arestas fixa, o cubo tem o maior volume. As soluções simétricas são muitas vezes ótimas.</p>
+            <p class="b-note"><b>Com o CAS</b> pode-se representar a função objetivo e ler o máximo. Mas é preciso justificá-lo na mesma.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · OTIMIZAR</div>
+        <p class="b-help" style="margin:0 0 12px">Caixa, lata ou vedação: desloca a variável e observa a função objetivo. Onde fica o ótimo, e o que diz $f' = 0$?</p>
+        <div data-widget="optimieren"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · VEDAÇÃO JUNTO AO MURO</div>
+            <div class="b-text"><p>Com 40 m de rede quer-se vedar, junto a um muro, um canteiro retangular (três lados com rede). Qual é a maior área possível?</p></div>
+            <div class="b-sol"><p>Condição de ligação $x + 2y = 40$, função objetivo $A(y) = (40 - 2y)\,y$ para $0 < y < 20$.</p>
+                <p>$A'(y) = 40 - 4y = 0 \Rightarrow y = 10$, $x = 20$: <span class="b-res">$A = 200$ m²</span>.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · RETÂNGULO SOB UMA PARÁBOLA</div>
+            <div class="b-text"><p>Sob $f(x) = 9 - x^2$ está um retângulo com vértices $(\pm u, 0)$ e $(\pm u, f(u))$. Quando é máxima a sua área?</p></div>
+            <div class="b-sol"><p>$A(u) = 2u(9 - u^2) = 18u - 2u^3$, $A'(u) = 18 - 6u^2 = 0 \Rightarrow u = \sqrt{3}$.</p>
+                <p><span class="b-res">$A = 12\sqrt{3} \approx 20{,}8$</span> unidades de área; $A''(u) = -12u < 0$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dois números positivos têm soma 10. Qual é o maior produto possível? Dois números diferem de 8: qual é o menor produto possível?</p></div>
+            <div class="b-sol"><p>25 (com 5 e 5); $-16$ (com $-4$ e $4$)</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Um lucro é descrito por $G(x) = -2x^2 + 120x - 1000$. Para que quantidade é máximo?</p></div>
+            <div class="b-sol"><p>$G'(x) = -4x + 120 = 0$: 30 peças, $G(30) = 800$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Uma chapa com 30 cm de largura é dobrada numa caleira de secção retangular. Que altura devem ter as abas para escoar o máximo de água possível?</p></div>
+            <div class="b-sol"><p>$A(x) = x(30 - 2x)$, máximo em $x = 7{,}5$ cm, $A = 112{,}5$ cm².</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Um paralelepípedo de base quadrada tem a soma dos comprimentos das arestas igual a 48 cm. Determina o maior volume.</p></div>
+            <div class="b-sol"><p>$8a + 4h = 48$, $V(a) = a^2(12 - 2a)$, $V'(a) = 24a - 6a^2 = 0$: $a = 4$, $h = 4$, $V = 64$ cm³.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Uma lata deve levar 1 litro. Para que raio se gasta menos chapa? Mostra que, nesse caso, a altura e o diâmetro são iguais.</p></div>
+            <div class="b-hint"><p>$h = \dfrac{1000}{\pi r^2}$, $O(r) = 2\pi r^2 + \dfrac{2000}{r}$.</p></div>
+            <div class="b-sol"><p>$O'(r) = 4\pi r - \dfrac{2000}{r^2} = 0 \Rightarrow r^3 = \dfrac{500}{\pi}$, $r \approx 5{,}42$ cm. Então $h = \dfrac{1000}{\pi r^2} = 2r$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="128" data-ph="cm³"><p class="b-q-text">Maior volume da caixa feita com o cartão de 12 cm?</p><div class="b-sol"><p>128 cm³</p></div></div>
+        <div class="b-q" data-ans="200" data-ph="m²"><p class="b-q-text">Maior área do canteiro com 40 m de rede junto ao muro?</p><div class="b-sol"><p>200 m²</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Porque se verificam os valores nas extremidades?</p><div class="b-mc"><button>porque aí $f' = 0$</button><button>porque o extremo absoluto pode estar na extremidade</button><button>porque a função objetivo aí não está definida</button></div><div class="b-sol"><p>$f' = 0$ só encontra extremos relativos no interior.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Regressão" data-toc-k="3" data-toc-short="3 Regressão">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 3</span><span class="b-band-sub">COM CAS · 4 AULAS</span></div>
+    <h2><span class="b-no">3</span>Expressões de funções por regressão</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Valores medidos reais nunca estão exatamente sobre uma curva. Em vez de forçar uma função que passe por todos os pontos, procura-se uma função de um tipo escolhido
+                que se ajuste <b>no conjunto o melhor possível</b>. O CAS fá-lo com o <b>método dos mínimos quadrados</b>: escolhe os parâmetros de modo que a soma dos quadrados dos desvios
+                (resíduos) seja a menor possível. Mas o tipo de função tens de ser tu a escolher e a justificar.</p></div></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · REGRESSÃO</div>
+                <div class="b-text">
+                    <p><b>Escolher o tipo:</b> diferenças iguais → afim · diferenças das diferenças iguais → quadrática · quocientes iguais → exponencial · periódica → seno · aproximação a um valor limite → crescimento limitado.</p>
+                    <p><b>Resíduo:</b> valor medido menos valor do modelo. A regressão torna mínima a soma dos quadrados dos resíduos.</p>
+                    <p><b>Coeficiente de determinação</b> $r^2$ entre 0 e 1: quanto mais perto de 1, melhor o modelo descreve os dados.</p>
+                    <p><b>Limites:</b> um modelo só vale na zona dos dados; previsões muito fora dela (extrapolação) são arriscadas.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sobreajustamento:</b> por 5 pontos passa sempre uma função de quarto grau. Mas ela segue cada oscilação das medições e oscila loucamente entre eles. Um bom modelo mostra a tendência.</p>
+            <p class="b-note"><b>Com o CAS:</b> introduzir os valores medidos em duas listas, escolher o tipo de regressão, ler a equação e $r^2$, desenhar o modelo juntamente com os pontos.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · REGRESSÃO</div>
+        <p class="b-help" style="margin:0 0 12px">Escolhe regressão linear, quadrática ou exponencial e arrasta os pontos medidos. Como mudam a equação e a qualidade do ajuste?</p>
+        <div data-widget="regression"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 5 · RECONHECER O TIPO</div>
+            <div class="b-text"><p>Uma população conta 200, 240, 288 em anos consecutivos. Que modelo se ajusta?</p></div>
+            <div class="b-sol"><p>$\dfrac{240}{200} = \dfrac{288}{240} = 1{,}2$: quocientes iguais, logo exponencial.</p>
+                <p><span class="b-res">$N(t) = 200 \cdot 1{,}2^t$</span>, crescimento de 20 % por ano.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 6 · ARREFECIMENTO</div>
+            <div class="b-text"><p>Café numa sala a 20 °C: que tipo de modelo se ajusta, e porque é que um simples $a \cdot e^{-kt}$ está errado?</p></div>
+            <div class="b-sol"><p>A temperatura aproxima-se de 20 °C, não de 0 °C. Logo $T(t) = 20 + a \cdot e^{-kt}$.</p>
+                <p><span class="b-res">Regressão com os valores $T - 20$</span> e depois voltar a somar 20.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Que função se ajusta exatamente? a) $(1, 3)$, $(2, 5)$, $(3, 7)$ &nbsp; b) $(0, 2)$, $(1, 6)$, $(2, 18)$ &nbsp; c) $(0, 1)$, $(1, 2)$, $(2, 5)$, $(3, 10)$</p></div>
+            <div class="b-sol"><p>a) $y = 2x + 1$ &nbsp; b) $y = 2 \cdot 3^x$ &nbsp; c) $y = x^2 + 1$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Uma regressão dá $y = 1{,}5x + 2$ com $r^2 = 0{,}98$. O que prevê o modelo para $x = 10$? O que significa $r^2$?</p></div>
+            <div class="b-sol"><p>17; os dados estão muito perto da reta.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Um decaimento é descrito por $N(t) = 100 \cdot 0{,}5^{\frac{t}{8}}$ ($t$ em dias). Determina o período de semidesintegração e $N(24)$.</p></div>
+            <div class="b-sol"><p>8 dias; $N(24) = 100 \cdot 0{,}5^3 = 12{,}5$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Uma criança cresce dos 2 aos 10 anos de forma quase linear, 6 cm por ano. Porque é que o modelo não serve para a altura aos 40 anos?</p></div>
+            <div class="b-sol"><p>Extrapolação: o crescimento para. O modelo linear prevê mais de 2,5 m.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Valores medidos: $t$ em min: 0, 5, 10, 15, 20; $T$ em °C: 85, 62, 46, 36, 29. Determina com o CAS um modelo $T(t) = 20 + a \cdot e^{-kt}$ e estima quando o café está a 25 °C.</p></div>
+            <div class="b-hint"><p>Regressão exponencial com os valores $T - 20$: 65, 42, 26, 16, 9.</p></div>
+            <div class="b-sol"><p>Aproximadamente $T(t) \approx 20 + 65e^{-0{,}1t}$. $65e^{-0{,}1t} = 5$ dá $t \approx 26$ minutos.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="48" data-ph="y ="><p class="b-q-text">Que valor dá $y = 3 \cdot 2^x$ para $x = 4$?</p><div class="b-sol"><p>48</p></div></div>
+        <div class="b-q" data-ans="20" data-ph="%"><p class="b-q-text">Em que percentagem cresce por ano a população 200, 240, 288?</p><div class="b-sol"><p>20 %</p></div></div>
+        <div class="b-q" data-mc="0"><p class="b-q-text">O que é um resíduo?</p><div class="b-mc"><button>valor medido menos valor do modelo</button><button>o valor inicial do modelo</button><button>o declive da reta de regressão</button></div><div class="b-sol"><p>O desvio num ponto.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>$f(x) = ax^2 + bx + c$ satisfaz $f(0) = 2$, $f'(0) = 3$ e $f(1) = 4$. Determina $f$.</p></div>
+            <div class="b-sol"><p>$c = 2$, $b = 3$, $a + 5 = 4$: $f(x) = -x^2 + 3x + 2$.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar com o capítulo 1.4:</b> mostra que a função do escorrega $f(x) = \tfrac{1}{8}x^3 - \tfrac{3}{4}x^2 + 4$ tem em $x = 2$ o seu ponto mais íngreme. Qual é aí a inclinação do escorrega?</p></div>
+            <div class="b-sol"><p>$f''(x) = \tfrac{3}{4}x - \tfrac{3}{2} = 0$ em $x = 2$; $f'(2) = 1{,}5 - 3 = -1{,}5$: descida de 150 %, cerca de 56°.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>A um preço de $p(x) = 100 - 2x$ € por peça vendem-se $x$ peças. Para que quantidade é máxima a receita?</p></div>
+            <div class="b-sol"><p>$E(x) = x(100 - 2x)$, máximo em $x = 25$, $E = 1250$ €.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Duas estradas, $y = 0$ para $x \leq 0$ e $y = x - 4$ para $x \geq 4$, devem ser ligadas sem bicos entre $x = 0$ e $x = 4$ por uma parábola. Determina-a.</p></div>
+            <div class="b-sol"><p>$f(0) = 0$, $f'(0) = 0$, $f(4) = 0$, $f'(4) = 1$: quatro condições, uma parábola não chega. Com $ax^3 + bx^2$: $64a + 16b = 0$, $48a + 8b = 1$: $a = \tfrac{1}{16}$, $b = -\tfrac{1}{4}$.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: Gauss reencontra um planeta" data-toc-k="X" data-toc-short="Ceres">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">ASTRONOMIA E HISTÓRIA</span></div>
+    <h2>Gauss reencontra um planeta</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>A 1 de janeiro de 1801, o astrónomo Giuseppe Piazzi descobriu em Palermo um novo corpo celeste, o planeta anão Ceres. Conseguiu segui-lo durante cerca de 40 dias,
+                depois Ceres desapareceu no brilho do Sol. A partir das poucas e imprecisas observações, Carl Friedrich Gauss, então com 24 anos, calculou a órbita com tal precisão
+                que Ceres foi reencontrado no fim de 1801 quase exatamente onde ele o tinha previsto.</p>
+            <p>Uma das suas ferramentas era o <b>método dos mínimos quadrados</b>: escolher a órbita de modo que a soma dos quadrados dos desvios em relação às medições seja mínima.
+                Mas quem o publicou primeiro, em 1805, foi Adrien-Marie Legendre, em Paris. Gauss descreveu-o em 1809 e escreveu que já o usava desde 1795. Daí nasceu uma disputa de prioridade.
+                Todas as regressões no CAS assentam ainda hoje nesta ideia.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fontes:</b> A.-M. Legendre, «Nouvelles méthodes pour la détermination des orbites des comètes», Paris 1805, apêndice. C. F. Gauss, «Theoria motus corporum coelestium», Hamburgo 1809.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>CONDIÇÕES</h4><p>Ponto → $f$, extremo → $f' = 0$, ponto de inflexão → $f'' = 0$; o grau $n$ precisa de $n + 1$ condições.</p></div>
+        <div><p>Escorrega: $\tfrac{1}{8}x^3 - \tfrac{3}{4}x^2 + 4$</p></div></div>
+    <div class="b-rueck"><div><h4>SIMETRIA</h4><p>Simétrica em relação à origem: só potências ímpares; em relação ao eixo $Oy$: só pares.</p></div>
+        <div><p>$M(1, 2)$: $-x^3 + 3x$</p></div></div>
+    <div class="b-rueck"><div><h4>PROBLEMAS DE OTIMIZAÇÃO</h4><p>Função objetivo, condição de ligação, domínio, $f' = 0$, extremidades.</p></div>
+        <div><p>Caixa: $x = 2$, $V = 128$ cm³</p></div></div>
+    <div class="b-rueck"><div><h4>REGRESSÃO</h4><p>Escolher o tipo com justificação, mínimos quadrados, interpretar $r^2$.</p></div>
+        <div><p>200, 240, 288: $200 \cdot 1{,}2^t$</p></div></div>
+    <div class="b-rueck"><div><h4>LIMITES</h4><p>Os modelos só valem na zona dos dados; nada de sobreajustamento.</p></div>
+        <div><p>Crescimento de uma criança</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SEM CALCULADORA</div>
+            <div class="b-q" data-ans="-2" data-ph="b ="><p class="b-q-text">Parábola que passa por $(1, 2)$, $(-1, 6)$, $(2, 3)$: quanto vale $b$?</p><div class="b-sol"><p>$f(x) = x^2 - 2x + 3$</p></div></div>
+            <div class="b-q" data-ans="81" data-ph="cm²"><p class="b-q-text">Maior área de um retângulo com perímetro 36 cm?</p><div class="b-sol"><p>Quadrado de lado 9 cm</p></div></div>
+            <div class="b-q" data-mc="2"><p class="b-q-text">Que forma corresponde a «simétrica em relação à origem, terceiro grau»?</p><div class="b-mc"><button>$ax^3 + bx^2$</button><button>$ax^3 + d$</button><button>$ax^3 + cx$</button></div><div class="b-sol"><p>Só potências ímpares.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · COM CALCULADORA</div>
+            <div class="b-q" data-ans="5,42" data-tol="0.01" data-ph="cm"><p class="b-q-text">Raio da lata de 1 litro que gasta menos chapa (duas casas decimais)?</p><div class="b-sol"><p>$\sqrt[3]{\tfrac{500}{\pi}} \approx 5{,}42$</p></div></div>
+            <div class="b-q" data-ans="12,5" data-tol="0.01" data-ph="N(24)"><p class="b-q-text">$N(t) = 100 \cdot 0{,}5^{t/8}$: quanto vale $N(24)$?</p><div class="b-sol"><p>12,5</p></div></div>
+            <div class="b-q" data-ans="1250" data-ph="€"><p class="b-q-text">Maior receita com $p(x) = 100 - 2x$?</p><div class="b-sol"><p>1250 €</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestgy11-steckbrief.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FUNÇÕES A PARTIR DE CONDIÇÕES</span><span class="b-lab-what">Traduzir condições, sistemas de equações, 20 exercícios</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-extremwertprobleme.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">PROBLEMAS DE OTIMIZAÇÃO</span><span class="b-lab-what">Função objetivo e condição de ligação, 20 exercícios</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-regression.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REGRESSÃO</span><span class="b-lab-what">Tipo de modelo, qualidade, limites, 20 exercícios</span></span></a>
+        <a class="b-lab" href="../../mathetestgy11-ka1.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TESTE DE AVALIAÇÃO 11/I</span><span class="b-lab-what">Cálculo diferencial e matrizes misturados, 20 exercícios</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Gymnasium 11.º ano, Grundkurs · área de aprendizagem 1 segundo o programa de Matemática do Gymnasium da Saxónia · edição portuguesa.</p>
+    <p>Todos os textos, exercícios e figuras são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-pt/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-pt/analysis.js"></script>
+</body>
+</html>
