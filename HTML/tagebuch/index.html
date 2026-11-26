@@ -1191,6 +1191,14 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 .in.toc .mon .g button.f { color: rgba(109, 98, 80, .45); }
 .in.toc .mon .g button.t { color: var(--ink); font-weight: 700; box-shadow: inset 0 0 0 max(1.5px, calc(var(--u) * .3)) #c99a35; }
 .in.toc .mon .g button:hover { background-color: rgba(245, 194, 66, .35); }
+/* a personal day in the calendar (Oct 31 in the books it is meant for): a gold coin with its number engraved, glowing up
+   and down gently (Doc, 26.11.2026: "der 31. Oktober definitiv Gold sein und schön sein. Und blinken. Vorsichtig blinken.") */
+.mon .g button.own, .in.toc .mon .g button.own { color: #4a3006; font-weight: 700; text-shadow: 0 1px 0 rgba(255, 244, 205, .7);
+  background: radial-gradient(circle at 35% 30%, #fff1b8 0, #f0c95a 30%, #c8901f 62%, #8a5c12 74%, transparent 77%);
+  animation: own-glow 2.6s ease-in-out infinite; }
+@keyframes own-glow { 0%, 100% { filter: brightness(1) drop-shadow(0 0 0 rgba(245, 194, 66, 0)); }
+  50% { filter: brightness(1.22) drop-shadow(0 0 .35em rgba(245, 194, 66, .85)); } }
+@media (prefers-reduced-motion: reduce) { .mon .g button.own, .in.toc .mon .g button.own { animation: none; } }
 .in.toc .toc-stat { margin-top: 1.6cqh; font-family: var(--script); font-size: calc(var(--u) * 3.6 * var(--sk)); line-height: 1.15; color: var(--ink); text-align: center; }
 .in.toc .toc-note { margin-top: 2.2cqh; font-size: calc(var(--u) * 2.1); font-style: italic; color: var(--print-soft); text-align: center; line-height: 1.4; }
 /* the motto plate: a raised cream label in a double gold frame with diamond ornaments, Latin in the script, the translation
@@ -3447,7 +3455,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     let g = ['M', 'D', 'M', 'D', 'F', 'S', 'S'].map(x => '<b>' + x + '</b>').join('') + '<span></span>'.repeat((new Date(YEAR, m, 1).getDay() + 6) % 7);
     for (let d = 1, nd = new Date(YEAR, m + 1, 0).getDate(); d <= nd; d++) {
       const day = YEAR + '-' + pad(m + 1) + '-' + pad(d), today = day === TODAY, before = day < TODAY, w = written(day);
-      const cls = ((today ? 't ' : '') + (w ? 'w' : before ? 'e' : today ? '' : 'f')).trim();
+      /* a personal day this book unlocks (Oct 31): gold, blinking gently (.own) */
+      let own = false; try { own = day.slice(5) === '10-31' && OWN.has('streichhoelzer'); } catch (e) { }   /* OWN is set further down */
+      const cls = ((today ? 't ' : '') + (own ? 'own ' : '') + (w ? 'w' : before ? 'e' : today ? '' : 'f')).trim();
       g += '<button class="' + cls + '" data-day="' + day + '" aria-label="' + d + '. ' + MONTHS[m] + '">' + d + '</button>';
     }
     /* the month's name opens the month at its 1st (Doc, 24.11.2026: "wenn ich auf den Monat klicke, soll ich direkt zu dem Monat springen") */
