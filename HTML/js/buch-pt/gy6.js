@@ -104,6 +104,30 @@ window.BuchPT && BuchPT.add('gy6', {
         '5 kg Äpfel kosten 12,50 €.': '5 kg de maçãs custam 12,50 €.', '3 Pumpen brauchen 8 Stunden.': '3 bombas levam 8 horas.',
         '8 Hefte kosten 6,40 €.': '8 cadernos custam 6,40 €.', 'Für 8 Kaninchen reicht das Futter 15 Tage.': 'Para 8 coelhos, a ração chega para 15 dias.',
         'Schritt 1: Schreib auf, was du weißt.': 'Passo 1: escreve o que sabes.', 'Schritt 3: Rechne auf die gesuchte Menge hoch.': 'Passo 3: calcula o valor para a quantidade pedida.',
+        // winkelsumme6
+        'Dreieck': 'Triângulo', 'Beweisfigur': 'Figura da demonstração', 'Ansicht': 'Vista',
+        'Dreieck mit seinen Innenwinkeln': 'Triângulo com os seus ângulos internos',
+        'Dreieck mit seinen Innenwinkeln und der Parallelen durch C': 'Triângulo com os seus ângulos internos e a paralela que passa por C',
+        'Zieh an den Ecken. Die Winkel ändern sich, ihre Summe bleibt. Die Werte sind auf ganze Grad gerundet.':
+            'Arrasta os vértices. Os ângulos mudam, a soma fica. Os valores estão arredondados ao grau.',
+        // konstruktion6: the Portuguese criteria LLL, LAL, ALA (L lado, A ângulo); LLA = two sides and the angle opposite the larger one (German SsW)
+        'sss': 'LLL', 'sws': 'LAL', 'wsw': 'ALA', 'SsW': 'LLA', 'www': 'AAA', 'Gegeben': 'Dados',
+        'Seite $a$': 'Lado $a$', 'Seite $b$': 'Lado $b$', 'Seite $c$': 'Lado $c$',
+        'Winkel $\\alpha$': 'Ângulo $\\alpha$', 'Winkel $\\beta$': 'Ângulo $\\beta$', 'Seite $a$ gegenüber $\\alpha$': 'Lado $a$ oposto a $\\alpha$',
+        'Genau ein Dreieck.': 'Exatamente um triângulo.', 'Kein Dreieck.': 'Nenhum triângulo.', 'Zwei Dreiecke.': 'Dois triângulos.',
+        'Unendlich viele Dreiecke.': 'Infinitos triângulos.',
+        'Die Kreise um $A$ mit $r = b$ und um $B$ mit $r = a$ schneiden sich oberhalb von $c$ in genau einem Punkt.':
+            'As circunferências de centro $A$ e raio $r = b$ e de centro $B$ e raio $r = a$ cortam-se acima de $c$ num só ponto.',
+        'Auf dem Schenkel von $\\alpha$ trägt man $b$ ab. Der Endpunkt ist $C$.': 'Sobre o lado do ângulo $\\alpha$ marca-se o comprimento $b$. A extremidade é $C$.',
+        'Der Kreis um $B$ schneidet den Schenkel zweimal. Die Angaben legen das Dreieck nicht fest.':
+            'A circunferência de centro $B$ corta duas vezes o lado do ângulo. Os dados não definem o triângulo.',
+        'Die gegenüberliegende Seite $a$ ist die größere: $a \\geq c$.': 'O lado oposto $a$ é o maior: $a \\geq c$.',
+        'Der Kreis berührt den Schenkel nur.': 'A circunferência só toca o lado do ângulo.',
+        'Der Kreis um $B$ erreicht den Schenkel nicht.': 'A circunferência de centro $B$ não chega ao lado do ângulo.',
+        'Alle haben dieselbe Form, aber verschiedene Größen. Drei Winkel legen kein Dreieck fest.':
+            'Todos têm a mesma forma, mas tamanhos diferentes. Três ângulos não definem um triângulo.',
+        'Den dritten Winkel kennt man ohnehin: $\\gamma = 180^\\circ - \\alpha - \\beta$. Es fehlt eine Länge.':
+            'O terceiro ângulo já se conhece de qualquer forma: $\\gamma = 180^\\circ - \\alpha - \\beta$. Falta um comprimento.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -171,6 +195,24 @@ window.BuchPT && BuchPT.add('gy6', {
         ['direkt proportional: Beide Seiten werden mit derselben Zahl gerechnet.', 'proporcionalidade direta: dos dois lados faz-se a conta com o mesmo número.'],
         ['indirekt proportional: Rechts wird umgekehrt gerechnet. Aus „: 4“ links wird „· 4“ rechts.',
             'proporcionalidade inversa: à direita faz-se a conta inversa. O «: 4» da esquerda passa a «× 4» à direita.'],
+        // winkelsumme6 (the segment \overline{AB} of the German book: the line AB in Portuguese)
+        ['Die gestrichelte Linie ist parallel zu $\\overline{AB}$. $\\alpha\'$ und $\\alpha$ sind Wechselwinkel an Parallelen, also gleich groß. Ebenso $\\beta\'$ und $\\beta$. ',
+            'A linha tracejada é paralela à reta $AB$. $\\alpha\'$ e $\\alpha$ são ângulos alternos internos formados por retas paralelas, portanto têm a mesma amplitude. O mesmo acontece com $\\beta\'$ e $\\beta$. '],
+        ['Zusammen mit $\\gamma$ bilden $\\alpha\'$ und $\\beta\'$ einen gestreckten Winkel: $180^\\circ$.', 'Juntamente com $\\gamma$, $\\alpha\'$ e $\\beta\'$ formam um ângulo raso: $180^\\circ$.'],
+        // konstruktion6: the criteria, the sentences with a computed number
+        ['<b>Kongruenzsatz sss:</b> Wenn zwei Dreiecke in allen drei Seiten übereinstimmen, dann sind sie kongruent.',
+            '<b>Critério LLL:</b> se dois triângulos têm os três lados iguais, então são geometricamente iguais.'],
+        ['<b>Kongruenzsatz sws:</b> Wenn zwei Dreiecke in zwei Seiten und dem eingeschlossenen Winkel übereinstimmen, dann sind sie kongruent.',
+            '<b>Critério LAL:</b> se dois triângulos têm iguais dois lados e o ângulo por eles formado, então são geometricamente iguais.'],
+        ['<b>Kongruenzsatz wsw:</b> Wenn zwei Dreiecke in einer Seite und den beiden anliegenden Winkeln übereinstimmen, dann sind sie kongruent.',
+            '<b>Critério ALA:</b> se dois triângulos têm iguais um lado e os dois ângulos adjacentes a esse lado, então são geometricamente iguais.'],
+        ['<b>Kongruenzsatz SsW:</b> Wenn zwei Dreiecke in zwei Seiten und dem Winkel übereinstimmen, der der <b>größeren</b> Seite gegenüberliegt, dann sind sie kongruent.',
+            '<b>Critério LLA:</b> se dois triângulos têm iguais dois lados e o ângulo oposto ao <b>maior</b> desses lados, então são geometricamente iguais.'],
+        ['Die freien Schenkel der Winkel schneiden sich in $C$. ', 'Os lados livres dos ângulos cortam-se em $C$. '],
+        ['. Für $\\gamma$ bleibt nichts übrig, die Schenkel laufen auseinander.', '. Para $\\gamma$ não sobra nada: os lados dos ângulos afastam-se um do outro.'],
+        ['$\\alpha + \\beta$ ist schon $', '$\\alpha + \\beta$ já é $'],
+        ['Die Kreise berühren sich nur auf der längsten Seite.', 'As circunferências só se tocam sobre o lado maior.'],
+        ['Die Kreise treffen sich nicht.', 'As circunferências não se cortam.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -212,5 +254,8 @@ window.BuchPT && BuchPT.add('gy6', {
         [/>([\d.,]+) (Pumpen|Hefte|Kaninchen|Tage)</g, (m, n, u) => '>' + n + ' ' +
             ({ 'Pumpen': ['bomba', 'bombas'], 'Hefte': ['caderno', 'cadernos'], 'Kaninchen': ['coelho', 'coelhos'], 'Tage': ['dia', 'dias'] })[u][n === '1' ? 0 : 1] + '<'],
         [/(↓ )· (?=\d)/g, '$1× '],
+        // konstruktion6: the sentence with the two lengths, the picture's aria label
+        [/Die beiden kürzeren Seiten sind zusammen ([\d,]+) cm lang, die längste ([\d,]+) cm\. /g, 'Os dois lados mais curtos medem juntos $1 cm, o mais comprido $2 cm. '],
+        [/^Konstruktion aus (sss|sws|wsw|SsW|www)$/, (m, k) => 'Construção a partir de ' + ({ sss: 'LLL', sws: 'LAL', wsw: 'ALA', SsW: 'LLA', www: 'AAA' })[k]],
     ]
 });

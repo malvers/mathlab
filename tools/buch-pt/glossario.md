@@ -397,3 +397,10 @@ parts, so every later book that loads them gets it too):
 | Dreisatz · auf eins zurückrechnen | regra de três simples · calcular o valor para uma unidade | |
 | Gerade durch den Ursprung | reta que passa pela origem | Punkte $(4, 6)$ |
 | Grundgebühr (Taxi) | bandeirada | |
+| Innenwinkelsatz · Außenwinkel | teorema da soma dos ângulos internos · ângulo externo | |
+| Wechselwinkel · Nebenwinkel · gestreckter Winkel | ângulos alternos internos · ângulos suplementares · ângulo raso | |
+| Definition · Satz · Wenn-dann · Voraussetzung · Behauptung · Beweis | definição · teorema · «se …, então …» · hipótese · tese · demonstração | |
+| kongruent · Kongruenzsätze sss, sws, wsw, SsW, www | geometricamente iguais · critérios de igualdade LLL, LAL, ALA, LLA, AAA | L lado, A ângulo |
+| Strecke $\overline{AB}$ · Gerade $AB$ · Dreieck $ABC$ | segmento $[AB]$ (Länge $\overline{AB}$) · reta $AB$ · triângulo $[ABC]$ | |
+| Planfigur · Konstruktionsbeschreibung · Zirkel, Geodreieck | esboço · descrição da construção · compasso, régua e transferidor | |
+| Schenkel (eines Winkels) · Kreis um $B$ mit $r$ | lado do ângulo · circunferência de centro $B$ e raio $r$ | |
