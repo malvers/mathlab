@@ -15,7 +15,8 @@ ends before the edge; variant B .karte (no fade) for dark pictures. 18:28: Jacqu
 18:32: DocPad embedded live in its slide (the central .labframe.bare, as in mathe11-linear) and "Zählen in
 Papua-Neuguinea" with Maya and Babylon as side links. 18:35: the gratitude book (Ada's /tagebuch/) after DocBib - its
 button opens a birthday view (an empty page with a card).
-Order: greeting, title, buzzer, quiz (+ Mission Control), evaluation, bridge, plan, Frag Solita, book, DocBib, DocPad, Vorrechnen,
+Order: greeting, title, Motivation, Drei Zahlen (Doc, 26.11.2026: "beiden Folien bitte hinter 4" - right after the
+title), quiz (+ Mission Control), evaluation, bridge, buzzer, plan, Frag Solita, book, DocBib, DocPad, Vorrechnen,
 Atomorbitale, Jacquard, Zählen in Papua-Neuguinea, numbers, "First HMTL", Tagebuch (19:22: the finale), survey.
 Every live scene since 19:05 is two slides: the poster, then the page itself as a live module.
 
@@ -202,6 +203,41 @@ d.summary("Titel: Was geht?! Was eine einzelne Lehrkraft mit KI heute bauen kann
           "BGY am 25.11.2026; erst ein Quiz mit dem Kollegium, dann wird alles live gezeigt, die Folien sind nur der "
           "Rahmen.")
 
+# ------------------------------------------------------------- Motivation ---
+# Doc, 26.11.2026: "eine Überschriftsfolie wie 7 ... mit Motivation", then "beiden Folien bitte hinter 4" - right after
+# the title, built like the bridge "Und jetzt: Was geht?!" (merksatz, orange bar, the line at 44 px), without its kicker
+# and its second line. 0:00 in the time plan: a heading, the next click brings the three numbers.
+d._slide("merksatz", '%s<div class="quote-bar"></div>'
+         '<p class="satz" style="top:186px;font:44px/1.2 %s">Motivation</p>' % (cue(
+             "0:00", "Überschrift Motivation, dann Pfeil rechts: die drei Zahlen."), ARIAL))
+
+
+# ---------------------------------------------------- Drei Zahlen (Noten-Soll) ---
+# Doc, 25.11.2026 06:25: "die, wo die steht ... und blende die da ein, dass ich eben diese 1600 Noten vergeben muss" -
+# slide 3 of decks/noten-soll-2026-27.html, taken from that deck's HTML at every build (it is the master since Doc edited
+# it in the browser; tools/pptx/noten_soll_svg.py drew it), so its figure, words and numbers stay exactly Doc's. Only
+# totals, no names, no grades. Its words come in on clicks, the Noten column last.
+# Doc, 26.11.2026: moved from after the wall of numbers to right after the title and "Motivation".
+def drei_zahlen():
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "HTML", "decks",
+                            "noten-soll-2026-27.html"), encoding="utf-8").read()
+    m = re.search(r'<section class="slide content"><h3>Drei Zahlen.*?</section>', src, re.S)
+    assert m, "slide 'Drei Zahlen' not found in noten-soll-2026-27.html"
+    sec = m.group(0)
+    body = sec[len('<section class="slide content">'):sec.index('<p class="foot">')]
+    assert re.search(r'1\.309.1\.633', body) and 'Noten' in body, "the Noten numbers changed in noten-soll-2026-27.html"
+    def stufe(mm):                                   # left 24 = first column, 620 = third, 284 = the Noten (last)
+        left = float(re.search(r'left:([\d.]+)px', mm.group(0)).group(1))
+        g = 0 if left < 150 else 1 if left > 450 else 2
+        return mm.group(0).replace('<p class="fl"', '<p class="fl step kommt" data-g="%d"' % g, 1)
+    return re.sub(r'<p class="fl" style="[^"]*">', stufe, body)
+
+
+d._slide("content", cue("0:30", "Drei Klicks: Leistungserhebungen, Notenempfänger, zuletzt die Noten: 1.309 bis 1.633 "
+                                "Noten in diesem Schuljahr - so viele muss ich vergeben.") + drei_zahlen())
+d.summary("Drei Zahlen für 12 Klassen (Mathe 11 und Info 11): 61 bis 77 Leistungserhebungen, 237 Notenempfänger, "
+          "1.309 bis 1.633 Noten im Schuljahr.")
+
 # ------------------------------------------- the quiz: Die Klasse im Blick ---
 qr = segno.make(QUIZ_URL, error="m", micro=False).svg_inline(border=0, omitsize=True, dark="#000050")
 qr = qr.replace("<svg ", '<svg role="img" aria-label="QR-Code zum Quiz" ', 1)
@@ -238,14 +274,15 @@ d.summary("Die Auswertung des Quiz: Einzelleistungen unter den Zettel-Codes (ohn
           "Frage, live, alle 5 Sekunden aktualisiert.")
 
 # --------------------------------------------------------------- bridge ---
+# Doc, 26.11.2026: "Was geht sonst noch?!" (was: "Und jetzt: Was geht?!")
 d._slide("merksatz", '%s<div class="quote-bar"></div>'
          '<p class="label" style="top:150px">Das war: Die Klasse im Blick</p>'
-         '<p class="satz" style="top:186px;font:44px/1.2 %s">Und jetzt: Was geht?!</p>'
+         '<p class="satz" style="top:186px;font:44px/1.2 %s">Und jetzt: Was geht sonst noch?!</p>'
          '<p class="satz" style="top:270px;font:24px/1.35 %s;color:var(--body)">Ein ganz normaler Schultag – '
          'alles live, kein Screenshot.</p>' % (cue("0:15", "Überleitung: Das habt ihr eben erlebt. Jetzt "
                                                                     "zeige ich, was sonst noch geht."), ARIAL, ARIAL))
-d.summary("Überleitung: Nach dem Quiz (Die Klasse im Blick) beginnt die Show Was geht?! - ein ganz normaler Schultag, "
-          "alles live gezeigt.")
+d.summary("Überleitung: Nach dem Quiz (Die Klasse im Blick) kommt, was sonst noch geht - Was geht sonst noch?!: ein "
+          "ganz normaler Schultag, alles live gezeigt.")
 
 # ------------------------------------------------- the buzzer ("Verstanden?") ---
 # the central buzzer slide every lesson deck has (vorspann/buzzer.html, filled by deck.js) - Doc, 24.11.2026 18:05:
@@ -442,30 +479,7 @@ d.summary("Die Zahlenwand, gezählt am 24.11.2026: 234 Tage seit dem 05.04.2026,
           "1,5 Millionen Zeilen Code, 103 Labore und Werkzeuge in 9 Sprachen, 24 Lehrbücher in 131 Ausgaben, 4.567 "
           "Buchaufgaben, 229 Decks mit 4.463 Folien, 821 Vorrechnen-Aufgaben, 11.655 Quizfragen.")
 
-# ---------------------------------------------------- Drei Zahlen (Noten-Soll) ---
-# Doc, 25.11.2026 06:25: "die, wo die steht ... und blende die da ein, dass ich eben diese 1600 Noten vergeben muss" -
-# slide 3 of decks/noten-soll-2026-27.html, taken from that deck's HTML at every build (it is the master since Doc edited
-# it in the browser; tools/pptx/noten_soll_svg.py drew it), so its figure, words and numbers stay exactly Doc's. Only
-# totals, no names, no grades. Its words come in on clicks, the Noten column last.
-def drei_zahlen():
-    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "HTML", "decks",
-                            "noten-soll-2026-27.html"), encoding="utf-8").read()
-    m = re.search(r'<section class="slide content"><h3>Drei Zahlen.*?</section>', src, re.S)
-    assert m, "slide 'Drei Zahlen' not found in noten-soll-2026-27.html"
-    sec = m.group(0)
-    body = sec[len('<section class="slide content">'):sec.index('<p class="foot">')]
-    assert re.search(r'1\.309.1\.633', body) and 'Noten' in body, "the Noten numbers changed in noten-soll-2026-27.html"
-    def stufe(mm):                                   # left 24 = first column, 620 = third, 284 = the Noten (last)
-        left = float(re.search(r'left:([\d.]+)px', mm.group(0)).group(1))
-        g = 0 if left < 150 else 1 if left > 450 else 2
-        return mm.group(0).replace('<p class="fl"', '<p class="fl step kommt" data-g="%d"' % g, 1)
-    return re.sub(r'<p class="fl" style="[^"]*">', stufe, body)
-
-
-d._slide("content", cue("0:30", "Drei Klicks: Leistungserhebungen, Notenempfänger, zuletzt die Noten: 1.309 bis 1.633 "
-                                "Noten in diesem Schuljahr - so viele muss ich vergeben.") + drei_zahlen())
-d.summary("Drei Zahlen für 12 Klassen (Mathe 11 und Info 11): 61 bis 77 Leistungserhebungen, 237 Notenempfänger, "
-          "1.309 bis 1.633 Noten im Schuljahr.")
+# (Drei Zahlen stood here until 26.11.2026 - now right after the title and "Motivation", see there)
 
 # -------------------------------------------------------------- the end ---
 d._slide("merksatz", '%s<div class="quote-bar"></div>'
