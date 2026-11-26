@@ -330,7 +330,39 @@ mit Praktikum, Fachhochschulreife ≈ Zugang zu den institutos politécnicos). A
 
 ## mathefos12-pt (FOS 12, block pt-7)
 
-Terms the book adds go here.
+Block pt-7 (Alan, 22.–26.11.2026). Wie FOS 11: die Fachoberschule und die Fachhochschulreife bleiben deutsch und werden auf
+der Startseite erklärt. Prüfungskapitel `k: 'E'` (Exame), Wahlbereich `k: 'O'` (Área opcional). Lab- und Testnamen sind in
+diesem Buch übersetzt (anders als in GY 6), die Tests bleiben deutsch: „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Links auf FOS 11 gehen
+auf `mathefos11-pt`. data-ph mit großem Anfangsbuchstaben („Número“, „Área“, „Valor“). Fußzeile: „Matemática, Fachoberschule,
+12.º ano · Área de aprendizagem N segundo o programa de Matemática da Fachoberschule da Saxónia.“
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Punkt $P(3 \mid 3 \mid 3)$ · Vektor $(1 \mid 2 \mid 2)$ | $P(3, 3, 3)$ · $(1, 2, 2)$ | Vektoren im Text als Zeilen; mit Dezimalkomma Semikolon: $F(5{,}4; 3; 1{,}2)$ |
+| $\vec{AB}$ · $\lvert\vec{a}\rvert$ · $\vec{a} \circ \vec{b}$ | $\overrightarrow{AB}$ · $\lVert\vec{a}\rVert$ · $\vec{a} \cdot \vec{b}$ | |
+| Parametergleichung $\vec{x} = \ldots$ | $(x, y, z) = (1, 0, 2) + t\,(2, 1, -1)$ | |
+| Koordinatengleichung · Normalenvektor · Vektorprodukt | equação cartesiana · vetor normal · produto vetorial | Spurpunkte = pontos de interseção com os planos coordenados / com os eixos |
+| Lotfußpunkt · Lotgerade · Abstand Punkt–Ebene | pé da perpendicular · reta perpendicular · distância de um ponto a um plano | |
+| Hochpunkt / Tiefpunkt $H$, $T$ · Wendepunkt $W$ | máximo / mínimo relativo (ohne Buchstaben) · ponto de inflexão $I$ | „máximo relativo em $(1, 2)$“ |
+| $\tan$, $\tan^{-1}$ | $\operatorname{tg}$, $\operatorname{tg}^{-1}$ | |
+| Schnitt- / Berührpunkt | ponto de interseção / de tangência | berühren = tocar |
+| Funktionenschar · Ortskurve · Fallunterscheidung | família de funções · lugar geométrico · discussão de casos | Scheitel $S$ → vértice $V$ |
+| Steckbriefaufgabe · Ansatz · Probe | determinar uma função a partir de condições · forma geral · verificação | knickfrei = sem dobras |
+| Extremalaufgabe · Hauptbedingung · Nebenbedingung · Zielfunktion | problema de otimização · condição principal · condição · função objetivo | Randwerte = valores nos extremos do intervalo |
+| Dose · Gehege · Blech | lata · cercado · chapa | wie im Widget `optimieren` (vedar, Muro) |
+| Unter- / Obersumme · orientierter Flächeninhalt | soma inferior / superior · área orientada | Zuflussrate = caudal |
+| gebrochenrationale Funktion $\tfrac{Z(x)}{N(x)}$ | função racional $\tfrac{p(x)}{q(x)}$ | Definitionslücke = ponto fora do domínio |
+| Polstelle (mit / ohne Vorzeichenwechsel) · hebbare Lücke · Loch | polo (com / sem mudança de sinal) · descontinuidade removível · buraco | wie im Widget `bruchfunktion` |
+| senkrechte / waagerechte / schiefe Asymptote | assíntota vertical / horizontal / oblíqua | Polynomdivision = divisão de polinómios |
+| Produkt- / Quotientenregel | regra do produto / regra do quociente | |
+| Wertebereich $W = (0;\ 2]$ | contradomínio $D'_f = ]0, 2]$ | offene Intervalle nach außen: $]-\infty, 1[$ |
+| Eulersche Zahl · natürlicher Logarithmus | número de Neper $\mathrm{e}$ · logaritmo natural $\ln$ | Exponentenvergleich = comparação de expoentes |
+| Wachstum / Zerfall / begrenztes Wachstum | crescimento / decaimento / crescimento limitado | Verdopplungszeit = tempo de duplicação, Halbwertszeit = meia-vida |
+| Gewinnschwelle · Gewinngrenze · Gewinnmaximum · Grenzkosten | limiar de rendibilidade · limite do lucro · lucro máximo · custo marginal | wie im Widget `gewinn` |
+| abschnittsweise definierte Funktion · Übergangsstelle · Knick | função definida por ramos · ponto de ligação · dobra / ponto anguloso | |
+| Regression · Bestimmtheitsmaß | regressão · coeficiente de determinação $R^2$ | GeoGebra-Befehle englisch (Derivative, Solve, If, FitPoly …), „aceites em todas as línguas“ |
+| Zentralprojektion · Fluchtpunkt · Bildebene | projeção central · ponto de fuga · plano do quadro | |
+| Prüfungsaufgabe · Teilaufgabe · Folgefehler | exercício de exame · alínea · erro que se arrasta | Gebiet = tema |
 
 ## mathegy12-pt (GY 12 Grundkurs, block pt-8)
 
