@@ -70,6 +70,20 @@ window.BuchPT && BuchPT.add('analysis', {
         'Bei diesem Preis wird nie Gewinn gemacht.': 'A este preço nunca há lucro.', 'Kein positives Gewinnmaximum.': 'Não há lucro máximo positivo.',
         // book pt-6 mathefos11-pt:
         // book pt-7 mathefos12-pt:
+        // efunktion (lb2-1, lb4-2): the three views, the slider of the interest and the same words in the sentence below it
+        'Welche Basis?': 'Que base?', 'Zinseszins': 'Juros compostos', 'Was wird gezeigt?': 'O que é mostrado?', 'a = e setzen': 'Pôr a = e',
+        'Exponentialfunktionen und die Eulersche Zahl e': 'Funções exponenciais e o número de Neper e',
+        'im Exponenten $b$': 'No expoente $b$', 'Verschiebung $c$': 'Translação $c$', 'Verzinsung': 'Juros creditados',
+        'jährlich': 'anualmente', 'halbjährlich': 'semestralmente', 'vierteljährlich': 'trimestralmente', 'monatlich': 'mensalmente',
+        'wöchentlich': 'semanalmente', 'täglich': 'diariamente', 'stündlich': 'de hora a hora', 'minütlich': 'de minuto a minuto',
+        // titelbildfos12 (index): the cover of FOS 12
+        'Titelbild: Exponentialkurve mit Hochpunkt, Wendetangente und Rechtecken darunter, eine Hyperbel mit Asymptoten und ein Parallelogramm im Raum mit seinem Vektorprodukt':
+            'Capa: curva exponencial com máximo, tangente no ponto de inflexão e retângulos por baixo, uma hipérbole com assíntotas e um paralelogramo no espaço com o seu produto vetorial',
+        // bruchfunktion (lb4-1): the four examples, the degree buttons and the sliders
+        'Polstelle': 'Polo', 'Lücke': 'Buraco', 'ohne Vorzeichenwechsel': 'Sem mudança de sinal', 'schiefe Asymptote': 'Assíntota oblíqua',
+        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Gráfico de uma função racional com polos, buracos e assíntotas',
+        'Beispiele:': 'Exemplos:', 'Zähler:': 'Numerador:', 'Nenner:': 'Denominador:', 'Grad des Zählers': 'Grau do numerador', 'Grad des Nenners': 'Grau do denominador',
+        'Grad 0': 'Grau 0', 'Grad 1': 'Grau 1', 'Grad 2': 'Grau 2', 'Faktor $k$': 'Fator $k$',
         // book pt-8 mathegy12-pt:
         // titelbildgy12 (start page)
         'Titelbild: eine Fläche unter einer Kurve mit Trapezen, ein Histogramm mit rotem Ablehnungsbereich, eine Gerade durch eine Ebene mit ihrem Schnittwinkel und dem Normalenvektor':
@@ -194,6 +208,35 @@ window.BuchPT && BuchPT.add('analysis', {
         ['Gewinn ab $x \\approx ', 'Lucro a partir de $x \\approx '], ['Gewinnmaximum: $G\'(x) = 0$ bei $x \\approx ', 'Lucro máximo: $G\'(x) = 0$ em $x \\approx '], ['$ Stück, $G \\approx ', '$ unidades, $G \\approx '],
         // book pt-6 mathefos11-pt:
         // book pt-7 mathefos12-pt:
+        // efunktion (the engine has already turned the point (0 \mid 1) into (0, 1): the point rules run before the pieces)
+        [' · Steigung in $(0, 1)$: $', ' · declive em $(0, 1)$: $'],
+        ['<b>Treffer:</b> Bei $a = \\mathrm{e} \\approx 2{,}71828$ ist die Steigung genau $1$ und $f\'(x) = f(x)$: Die Graphen von $f$ und $f\'$ liegen aufeinander.',
+            '<b>Acertaste!</b> Para $a = \\mathrm{e} \\approx 2{,}71828$, o declive é exatamente $1$ e $f\'(x) = f(x)$: os gráficos de $f$ e de $f\'$ sobrepõem-se.'],
+        ['Die Ableitung ist $f\'(x) = ', 'A derivada é $f\'(x) = '],
+        [' \\cdot f(x)$, ein Vielfaches von $f$. Für welche Basis ist der Faktor genau $1$?', ' \\cdot f(x)$, um múltiplo de $f$. Para que base é o fator exatamente $1$?'],
+        [' · Mit $a = 0$ oder $b = 0$ ist $f$ konstant.', ' · Com $a = 0$ ou $b = 0$, $f$ é constante.'],
+        ['Schnittpunkt mit der $y$-Achse: $', 'Interseção com o eixo $Oy$: $'], [' · Nullstelle: ', ' · zero: '],
+        ['keine, denn $\\mathrm{e}^{bx} > 0$ kann nicht $', 'nenhum, porque $\\mathrm{e}^{bx} > 0$ não pode ser $'], ['$ sein', '$'],
+        ['$: waagerechte Asymptote $y = ', '$: assíntota horizontal $y = '],
+        ['$f$ ist überall streng monoton ', '$f$ é estritamente '], [', weil $f\'(x)$ immer ', ' em todo o domínio, porque $f\'(x)$ é sempre '],
+        ['positiv ist.', 'positiva.'], ['negativ ist.', 'negativa.'],
+        ['Ein Euro, 100 % Zinsen im Jahr, ', 'Um euro, juros de 100 % ao ano, creditados '], [' verzinst: ', ': '], [' verzinst: 1-mal $\\tfrac{100\\,\\%}{', ': 1 vez $\\tfrac{100\\,\\%}{'], ['-mal $\\tfrac{100\\,\\%}{', ' vezes $\\tfrac{100\\,\\%}{'],
+        ['halbjährlich', 'semestralmente'], ['vierteljährlich', 'trimestralmente'], ['jährlich', 'anualmente'], ['monatlich', 'mensalmente'],
+        ['wöchentlich', 'semanalmente'], ['täglich', 'diariamente'], ['stündlich', 'de hora a hora'], ['minütlich', 'de minuto a minuto'],
+        ['Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2{,}718281\\ldots$ heran, aber nie darüber: $',
+            'Quanto mais vezes os juros são creditados, mais o saldo se aproxima de $\\mathrm{e} = 2{,}718281\\ldots$, mas sem nunca o ultrapassar: $'],
+        // bruchfunktion (lb4-1); "Nullstellen: $x = " is longer than "Nullstellen: $" of parabelschar (funktionen), so the capital stays
+        ['Nullstelle des Zählers $', 'Zero do numerador $'], ['Nullstelle des Nenners $', 'Zero do denominador $'],
+        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'Depois de simplificar, já não há $x$ no denominador: o gráfico é '],
+        ['eine waagerechte Gerade', 'uma reta horizontal'], ['eine Gerade', 'uma reta'],
+        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Grau do numerador menor do que o do denominador: assíntota horizontal $y = 0$, o eixo $Ox$.'],
+        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Graus do numerador e do denominador iguais: assíntota horizontal $y = '],
+        ['$ (Quotient der Leitkoeffizienten).', '$ (quociente dos coeficientes dos termos de maior grau).'],
+        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Grau do numerador maior em 1: a divisão de polinómios dá $f(x) = '],
+        ['$, schiefe Asymptote $y = ', '$, assíntota oblíqua $y = '], ['Kürzen: $f(x) = ', 'Simplificando: $f(x) = '], ['$ für $x \\neq ', '$ para $x \\neq '],
+        ['$ · hebbare Lücken', '$ · descontinuidades removíveis'], ['$ · hebbare Lücke', '$ · descontinuidade removível'],
+        ['Nullstellen: $x = ', 'Zeros: $x = '], [' · Polstellen: ', ' · polos: '],
+        ['$ mit Vorzeichenwechsel', '$ com mudança de sinal'], ['$ ohne Vorzeichenwechsel', '$ sem mudança de sinal'], [' (senkrechte Asymptote)', ' (assíntota vertical)'],
         // book pt-8 mathegy12-pt:
         // abstandmin
         ['Jetzt: $x = ', 'Agora: $x = '], ['$ · am kleinsten bei $x \\approx ', '$ · mínima em $x \\approx '],
@@ -238,6 +281,14 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-5 mathe13lk-pt:
         // book pt-6 mathefos11-pt:
         // book pt-7 mathefos12-pt:
+        // efunktion, ganzrational: "Für $x \to -\infty$ geht $f(x) \to " - a rule, because a bare piece "Für $" would start earlier than the
+        // long sentences of other widgets ("Für $a \le 0$ gibt es keine Extrempunkte: …" of schar)
+        [/(^|\. |>)Für \$(x \\to [+-]\\infty)\$ geht \$f\(x\) \\to /g, (m, a, b) => a + 'Quando $' + b + '$, $f(x) \\to '],
+        // bruchfunktion: "… mit einem Loch.", "Nullstellen: keine", "Polstellen: keine"; the set of the domain "\{1; -2\}" → "\{1, -2\}"
+        // (a semicolon stays as soon as a number has a decimal comma, like the points)
+        [/ mit (Löchern|einem Loch)\./g, (m, w) => w === 'Löchern' ? ' com buracos.' : ' com um buraco.'],
+        [/Nullstellen: keine(?![a-zäöüß])/g, 'Zeros: nenhum'], [/Polstellen: keine(?![a-zäöüß])/g, 'polos: nenhum'],
+        [/(\\setminus \\\{)([^}]*)(\\\})/g, (m, a, b, c) => a + (/\{,\}|\d,\d/.test(b) ? b : b.replace(/; /g, ', ')) + c],
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
         // bruchfunktion (lb1-4): "… mit einem Loch.", "Nullstellen: keine", "Polstellen: keine"; the set of the domain "\{1; -2\}" → "\{1, -2\}"

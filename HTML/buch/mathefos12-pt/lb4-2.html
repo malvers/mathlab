@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática FOS 12 · Capítulo 4.2 · Funções exponenciais de base e | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="O número e, equações exponenciais, derivar com a regra da cadeia e do produto, crescimento. Capítulo 4.2 do manual interativo Matemática · Fachoberschule 12: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · FACHOBERSCHULE 12</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO 4.2 · ÁREA DE APRENDIZAGEM 4</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO 4.2 · ÁREA DE APRENDIZAGEM 4 · ABRIL</p>
+            <h1>Funções exponenciais de base e</h1>
+            <p class="b-hero-lead">Há exatamente uma função exponencial que é a sua própria derivada: $\mathrm{e}^x$. Com ela descrevem-se crescimento e decaimento, o café a arrefecer,
+                os medicamentos no sangue e a idade de um achado arqueológico. Ficas a conhecer o <b>número de Neper e</b>, resolves equações exponenciais, derivas com a <b>regra da cadeia e a regra do produto</b>
+                e estudas completamente funções como $x \cdot \mathrm{e}^{-x}$. No fim, junta-se toda a análise.</p>
+            <div class="b-chips"><span class="b-chip">13 AULAS</span><span class="b-chip">3 UNIDADES</span><span class="b-chip">TESTE DE AVALIAÇÃO 3</span><span class="b-chip">1 LAB</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="graph" data-fns='["exp(x)","x+1"]' data-labels='["eˣ","Tangente"]' data-lat="[1.55,-2.2]" data-x="-3,2.5" data-y="-1.5,6" data-pts="[[0,1]]" data-h="240" data-aria="Gráfico da função exponencial com a tangente de declive 1 no ponto (0, 1)"></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a descrever o número $\mathrm{e}$ e o andamento de $\mathrm{e}^{ax + b}$, indicando as assíntotas</li>
+                <li>a resolver <b>equações exponenciais</b> por comparação de expoentes e com o logaritmo</li>
+                <li>a derivar funções exponenciais com a <b>regra da cadeia e a regra do produto</b> e a estudar funções $p(x) \cdot \mathrm{e}^{ax + b}$</li>
+                <li>a modelar <b>crescimento</b>, <b>decaimento</b> e <b>saturação</b>, a determinar primitivas e a calcular áreas</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="1" data-ph="Número"><p class="b-q-text">Quanto vale $2^0$?</p><div class="b-sol"><p>Qualquer número elevado a 0 dá 1.</p></div></div>
+            <div class="b-q" data-ans="3" data-ph="x ="><p class="b-q-text">Resolve $2^x = 8$.</p><div class="b-sol"><p>$8 = 2^3$</p></div></div>
+            <div class="b-q" data-ans="6" data-ph="f′(0) ="><p class="b-q-text">$f(x) = (3x + 1)^2$: quanto vale $f'(0)$?</p><div class="b-sol"><p>$2(3x + 1) \cdot 3$ em 0</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Qual fica maior para $x$ muito grande?</p><div class="b-mc"><button>$x^{10}$</button><button>$2^x$</button><button>as duas igualmente</button></div><div class="b-sol"><p>O crescimento exponencial ultrapassa qualquer potência.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">A BASE ESPECIAL</div>
+            <div class="b-text"><p>Desenhem com a calculadora gráfica $y = 2^x$ e $y = 3^x$ e determinem, em cada caso, o declive no ponto $(0, 1)$.</p>
+                <ul><li>Um declive é menor do que 1, o outro é maior. O que se conclui?</li><li>Procurem, por tentativas, a base para a qual o declive é exatamente 1.</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">O CAFÉ ARREFECE</div>
+            <div class="b-text"><p>Meçam de cinco em cinco minutos a temperatura de uma chávena de água quente na sala.</p>
+                <ul><li>Calculem, em cada caso, a diferença em relação à temperatura ambiente. O que acontece a essa diferença?</li><li>A água chega alguma vez a ficar mais fria do que a sala?</li></ul></div>
+            <span class="b-pair">→ Unidade 3</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">CRESCIMENTO SEM FIM?</div>
+            <div class="b-text"><p>Uma cultura de bactérias duplica a cada 20 minutos.</p>
+                <ul><li>Em quantas bactérias se transforma uma só em 24 horas?</li><li>Porque é que, na natureza, isto não pode continuar assim por muito tempo? O que trava?</li></ul></div>
+            <a class="b-lab" data-lab="infektionssimulation" href="../../infektionssimulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">SIMULAÇÃO DE UMA EPIDEMIA</span><span class="b-lab-what">Exponencial e limitado</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="O número e e as funções exponenciais" data-toc-k="1" data-toc-short="1 O número e">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">1</span>O número e, funções exponenciais e equações exponenciais</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>O declive de $a^x$ no ponto $(0, 1)$ é $\lim\limits_{h \to 0} \tfrac{a^h - 1}{h}$: para $a = 2$, cerca de 0,693; para $a = 3$, cerca de 1,099.
+                Entre as duas há exatamente uma base com declive 1, o <b>número de Neper</b> $\mathrm{e} = 2{,}71828\ldots$ Para ele tem-se, em todo o lado, $(\mathrm{e}^x)' = \mathrm{e}^x$.</p></div></div>
+            <div class="b-text"><p>A <b>função exponencial natural</b> $f(x) = \mathrm{e}^x$ é sempre positiva, sempre crescente e, à esquerda, aproxima-se do eixo $Ox$. Translações, dilatações e reflexões
+                dão as funções $a \cdot \mathrm{e}^{bx} + c$. A sua inversa é o <b>logaritmo natural</b> $\ln$, com que se resolvem equações exponenciais.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · A FUNÇÃO EXPONENCIAL</div>
+                <div class="b-text">
+                    <p>$\mathrm{e} = \lim\limits_{n \to +\infty} \left(1 + \tfrac1n\right)^n \approx 2{,}71828$ · $(\mathrm{e}^x)' = \mathrm{e}^x$ · $\mathrm{e}^x > 0$ para todo o $x$ · $\mathrm{e}^0 = 1$</p>
+                    <p>$f(x) = a \cdot \mathrm{e}^{bx} + c$: <b>assíntota</b> horizontal $y = c$ (à esquerda para $b > 0$, à direita para $b < 0$), ordenada na origem $a + c$</p>
+                    <p><b>Comparação de expoentes:</b> $\mathrm{e}^u = \mathrm{e}^v \iff u = v$ · <b>logaritmo:</b> $\mathrm{e}^u = c \iff u = \ln c$ para $c > 0$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sem solução:</b> como $\mathrm{e}^u$ é sempre positivo, $\mathrm{e}^u = 0$ e $\mathrm{e}^u = -2$ não têm solução.</p>
+            <p class="b-note"><b>Na calculadora gráfica:</b> $\mathrm{e}^x$ e $\ln$ estão quase sempre na mesma tecla. $\ln 1 = 0$, $\ln \mathrm{e} = 1$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · QUE BASE TEM DECLIVE 1?</div>
+        <p class="b-help" style="margin:0 0 12px">Altera a base $a$ até a tangente em $(0, 1)$ ter declive 1. Então o gráfico tracejado de $f'$ fica exatamente sobre $f$. Em cima podes mudar para as funções $a \cdot \mathrm{e}^{bx} + c$.</p>
+        <div data-widget="efunktion"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · COMPARAÇÃO DE EXPOENTES</div>
+            <div class="b-text"><p>Resolve $3\,\mathrm{e}^{2x - 1} - 3 = 0$.</p></div>
+            <div class="b-sol"><p>$\mathrm{e}^{2x - 1} = 1 = \mathrm{e}^0$, portanto $2x - 1 = 0$.</p>
+                <p><span class="b-res">$x = 0{,}5$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · INTERSEÇÕES COM OS EIXOS E ASSÍNTOTA</div>
+            <div class="b-text"><p>Estuda $f(x) = 2\,\mathrm{e}^{-x} - 4$ quanto às interseções com os eixos e às assíntotas.</p></div>
+            <div class="b-sol"><p>$f(0) = 2 - 4 = -2$. Zero: $\mathrm{e}^{-x} = 2$, $-x = \ln 2$, portanto $x = -\ln 2 \approx -0{,}69$.</p>
+                <p>Quando $x \to +\infty$, $\mathrm{e}^{-x} \to 0$: <span class="b-res">assíntota $y = -4$</span>.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Resolve: a) $\mathrm{e}^{x - 2} = 1$ &nbsp; b) $\mathrm{e}^{3x} = \mathrm{e}^6$ &nbsp; c) $\mathrm{e}^{x^2} = \mathrm{e}^4$</p></div>
+            <div class="b-sol"><p>a) $x = 2$ &nbsp; b) $x = 2$ &nbsp; c) $x = \pm 2$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Descreve a monotonia, a assíntota e o contradomínio: a) $\mathrm{e}^{2x}$ &nbsp; b) $\mathrm{e}^{-x} + 1$ &nbsp; c) $-\mathrm{e}^x$</p></div>
+            <div class="b-sol"><p>a) crescente, $y = 0$ à esquerda, $D'_f = ]0, +\infty[$ &nbsp; b) decrescente, $y = 1$ à direita, $D'_f = ]1, +\infty[$ &nbsp; c) decrescente, $y = 0$ à esquerda, $D'_f = ]-\infty, 0[$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Calcula os pontos de interseção de $f(x) = \mathrm{e}^x - 2$ com os eixos coordenados.</p></div>
+            <div class="b-sol"><p>$(0, -1)$ e $(\ln 2, 0) \approx (0{,}69; 0)$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Resolve $\mathrm{e}^{2x} - 3\,\mathrm{e}^x + 2 = 0$.</p></div>
+            <div class="b-hint"><p>Faz a mudança de variável $z = \mathrm{e}^x$; então $\mathrm{e}^{2x} = z^2$.</p></div>
+            <div class="b-sol"><p>$z^2 - 3z + 2 = 0$: $z = 1$ ou $z = 2$, portanto <span class="b-res">$x = 0$ ou $x = \ln 2$</span>.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Onde se intersetam os gráficos de $f(x) = \mathrm{e}^{2x}$ e $g(x) = 2\,\mathrm{e}^x$?</p></div>
+            <div class="b-sol"><p>$\mathrm{e}^{2x} = 2\,\mathrm{e}^x$; dividindo por $\mathrm{e}^x$ (nunca nulo): $\mathrm{e}^x = 2$, <span class="b-res">ponto $(\ln 2, 4)$</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="0,5" data-ph="x ="><p class="b-q-text">Resolve $3\,\mathrm{e}^{2x - 1} - 3 = 0$.</p><div class="b-sol"><p>$2x - 1 = 0$</p></div></div>
+        <div class="b-q" data-ans="-4" data-ph="y ="><p class="b-q-text">Qual é a assíntota horizontal de $2\,\mathrm{e}^{-x} - 4$?</p><div class="b-sol"><p>$y = -4$</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">A equação $\mathrm{e}^x = -2$ tem …</p><div class="b-mc"><button>uma solução.</button><button>nenhuma solução.</button><button>duas soluções.</button></div><div class="b-sol"><p>$\mathrm{e}^x$ é sempre positivo.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Derivar funções exponenciais" data-toc-k="2" data-toc-short="2 Derivar">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">2</span>Derivar com a regra da cadeia e a regra do produto</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Regra da cadeia: $\left(\mathrm{e}^{3x}\right)' = \mathrm{e}^{3x} \cdot 3$; a função exterior mantém-se e a derivada da interior entra como fator.
+                Regra do produto: $\left(x \cdot \mathrm{e}^{-x}\right)' = 1 \cdot \mathrm{e}^{-x} + x \cdot (-\mathrm{e}^{-x}) = (1 - x)\,\mathrm{e}^{-x}$. Pondo em evidência, vê-se logo: a derivada só se anula em $x = 1$.</p></div></div>
+            <div class="b-text"><p>Funções da forma $p(x) \cdot \mathrm{e}^{ax + b}$, com um polinómio $p$, derivam-se com a regra do produto, pondo depois o fator exponencial em evidência.
+                Como $\mathrm{e}^{ax + b}$ nunca se anula, é o parêntese à frente que decide os zeros, os extremos e os pontos de inflexão.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · DERIVAR FUNÇÕES EXPONENCIAIS</div>
+                <div class="b-text">
+                    <p>$\left(\mathrm{e}^{ax + b}\right)' = a \cdot \mathrm{e}^{ax + b}$ (regra da cadeia)</p>
+                    <p>$\left(p(x) \cdot \mathrm{e}^{ax + b}\right)' = \big(p'(x) + a \cdot p(x)\big) \cdot \mathrm{e}^{ax + b}$ (regra do produto, com o fator em evidência)</p>
+                    <p>$p(x) \cdot \mathrm{e}^{ax + b} = 0 \iff p(x) = 0$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Pôr sempre em evidência:</b> $2x\,\mathrm{e}^x + x^2\,\mathrm{e}^x = (x^2 + 2x)\,\mathrm{e}^x$. Assim fica um polinómio vezes um fator que nunca se anula.</p>
+            <p class="b-note"><b>Verificação:</b> calcular na calculadora gráfica a derivada num ponto, numericamente, e comparar com a tua expressão.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · A · E ELEVADO A BX MAIS C</div>
+        <p class="b-help" style="margin:0 0 12px">Altera $a$, $b$ e $c$. Por baixo do gráfico aparecem a derivada, as interseções com os eixos, a assíntota e a monotonia. Quando é que a função é crescente e quando é decrescente?</p>
+        <div data-widget="efunktion" data-mode="graph"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · REGRA DA CADEIA</div>
+            <div class="b-text"><p>Deriva $f(x) = 5\,\mathrm{e}^{-0{,}2x}$ e calcula $f'(0)$.</p></div>
+            <div class="b-sol"><p>$f'(x) = 5 \cdot (-0{,}2)\,\mathrm{e}^{-0{,}2x} = -\mathrm{e}^{-0{,}2x}$</p>
+                <p><span class="b-res">$f'(0) = -1$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · REGRA DO PRODUTO</div>
+            <div class="b-text"><p>Deriva $f(x) = (x^2 - 1)\,\mathrm{e}^x$ e determina onde a tangente é horizontal.</p></div>
+            <div class="b-sol"><p>$f'(x) = 2x\,\mathrm{e}^x + (x^2 - 1)\,\mathrm{e}^x = (x^2 + 2x - 1)\,\mathrm{e}^x$</p>
+                <p>$x^2 + 2x - 1 = 0$: <span class="b-res">$x = -1 \pm \sqrt2$</span>, ou seja, cerca de $0{,}41$ e $-2{,}41$.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Deriva: a) $\mathrm{e}^{4x}$ &nbsp; b) $3\,\mathrm{e}^{-x}$ &nbsp; c) $\mathrm{e}^{2x + 1} - x^2$</p></div>
+            <div class="b-sol"><p>a) $4\,\mathrm{e}^{4x}$ &nbsp; b) $-3\,\mathrm{e}^{-x}$ &nbsp; c) $2\,\mathrm{e}^{2x + 1} - 2x$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Escreve as equações das tangentes a $f(x) = \mathrm{e}^x$ em $x_0 = 0$ e em $x_0 = 1$. O que notas na segunda?</p></div>
+            <div class="b-sol"><p>$y = x + 1$ e $y = \mathrm{e}(x - 1) + \mathrm{e} = \mathrm{e}\,x$: a segunda passa na origem.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Deriva e põe em evidência: a) $x\,\mathrm{e}^x$ &nbsp; b) $x^2\,\mathrm{e}^{-x}$</p></div>
+            <div class="b-sol"><p>a) $(x + 1)\,\mathrm{e}^x$ &nbsp; b) $(2x - x^2)\,\mathrm{e}^{-x}$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina $f'$ e $f''$ para $f(x) = x\,\mathrm{e}^{-x}$.</p></div>
+            <div class="b-sol"><p>$f'(x) = (1 - x)\,\mathrm{e}^{-x}$, $f''(x) = -\mathrm{e}^{-x} - (1 - x)\,\mathrm{e}^{-x} = (x - 2)\,\mathrm{e}^{-x}$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>a) Para que valor de $a$ tem $\mathrm{e}^{ax}$ declive 3 em 0? &nbsp; b) Em que ponto tem o gráfico de $\mathrm{e}^{2x}$ declive 4?</p></div>
+            <div class="b-sol"><p>a) $a \cdot \mathrm{e}^0 = a = 3$ &nbsp; b) $2\,\mathrm{e}^{2x} = 4$, $\mathrm{e}^{2x} = 2$, $x = \tfrac12 \ln 2 \approx 0{,}35$: <span class="b-res">$(0{,}35; 2)$</span></p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="4" data-ph="f′(0) ="><p class="b-q-text">$f(x) = \mathrm{e}^{4x}$: quanto vale $f'(0)$?</p><div class="b-sol"><p>$4\,\mathrm{e}^0$</p></div></div>
+        <div class="b-q" data-ans="-1" data-ph="f′(0) ="><p class="b-q-text">$f(x) = 5\,\mathrm{e}^{-0{,}2x}$: quanto vale $f'(0)$?</p><div class="b-sol"><p>$-\mathrm{e}^0$</p></div></div>
+        <div class="b-q" data-ans="1" data-ph="f′(0) ="><p class="b-q-text">$f(x) = x\,\mathrm{e}^{-x}$: quanto vale $f'(0)$?</p><div class="b-sol"><p>$(1 - 0)\,\mathrm{e}^0$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le3" data-kind="le" data-toc="Estudar, crescimento, áreas" data-toc-k="3" data-toc-short="3 Aplicações">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 3</span><span class="b-band-sub">5 AULAS</span></div>
+    <h2><span class="b-no">3</span>Estudar curvas, modelar crescimento, calcular áreas</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Um café arrefece segundo $T(t) = 20 + 70\,\mathrm{e}^{-0{,}1t}$ ($T$ em °C, $t$ em minutos). Começa a 90 °C e aproxima-se da temperatura ambiente de 20 °C, a assíntota.
+                Fica bebível a 50 °C quando $70\,\mathrm{e}^{-0{,}1t} = 30$, ou seja, ao fim de $t = 10 \ln\tfrac73 \approx 8{,}5$ minutos. No início arrefece $T'(0) = -7$ °C por minuto.</p></div></div>
+            <div class="b-text"><p>As funções exponenciais descrevem processos em que uma grandeza muda pelo mesmo fator em cada intervalo de tempo: crescimento ilimitado, decaimento e, quando há um limite,
+                crescimento limitado. Em funções como $x\,\mathrm{e}^{-x}$, no fim ganha sempre o fator exponencial contra o polinómio.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · APLICAÇÕES E INTEGRAIS</div>
+                <div class="b-text">
+                    <p><b>Crescimento e decaimento:</b> $N(t) = N_0 \cdot \mathrm{e}^{kt}$, $k > 0$ crescimento, $k < 0$ decaimento · tempo de duplicação ou meia-vida $T = \dfrac{\ln 2}{|k|}$</p>
+                    <p><b>Crescimento limitado:</b> $S(t) = G - (G - S_0) \cdot \mathrm{e}^{-kt}$, com o limite $G$ como assíntota</p>
+                    <p><b>Comportamento no infinito:</b> $x^n \cdot \mathrm{e}^{-x} \to 0$ quando $x \to +\infty$; a função exponencial ganha a qualquer potência.</p>
+                    <p><b>Primitiva:</b> $\displaystyle\int \mathrm{e}^{ax + b}\,\mathrm{d}x = \frac1a\,\mathrm{e}^{ax + b} + C$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Sem primitiva:</b> para $x\,\mathrm{e}^{-x}$ não conheces diretamente a primitiva. Pode verificar-se uma primitiva dada derivando-a, ou pôr a calculadora gráfica a integrar.</p>
+            <p class="b-note"><b>O teste de avaliação 3</b> avalia as áreas de aprendizagem 3 e 4 no formato do exame. As páginas de revisão em baixo ajudam na preparação.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">FIGURA · X VEZES E ELEVADO A MENOS X</div>
+        <p class="b-help" style="margin:0 0 12px">$f(x) = x\,\mathrm{e}^{-x}$ (amarelo) com o máximo em $x = 1$ e o ponto de inflexão em $x = 2$, e ainda $f'$ (azul-claro). À direita, $f$ aproxima-se do eixo $Ox$.</p>
+        <div data-widget="graph" data-fns='["x*exp(-x)","(1-x)*exp(-x)"]' data-labels='["f","f′"]' data-lat="[4.6,-0.6]" data-x="-1,7" data-y="-1.3,1.2" data-pts="[[1,0.3679],[2,0.2707],[0,0]]" data-h="260" data-aria="Gráfico de x vezes e elevado a menos x com o máximo, o ponto de inflexão e a derivada"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 5 · ESTUDO COMPLETO</div>
+            <div class="b-text"><p>Estuda $f(x) = x\,\mathrm{e}^{-x}$.</p></div>
+            <div class="b-sol"><p>Zero 0. Quando $x \to +\infty$: $f(x) \to 0$, assíntota $y = 0$; quando $x \to -\infty$: $f(x) \to -\infty$. $f'(x) = (1 - x)\,\mathrm{e}^{-x}$, $f''(x) = (x - 2)\,\mathrm{e}^{-x}$.</p>
+                <p><span class="b-res">máximo relativo $\left(1, \tfrac{1}{\mathrm{e}}\right) \approx (1; 0{,}37)$, $I\!\left(2, \tfrac{2}{\mathrm{e}^2}\right) \approx (2; 0{,}27)$</span>, contradomínio $\left]-\infty, \tfrac1{\mathrm{e}}\right]$.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 6 · ÁREA POR BAIXO DE UMA FUNÇÃO EXPONENCIAL</div>
+            <div class="b-text"><p>Calcula a área por baixo de $f(x) = \mathrm{e}^{0{,}5x}$ em $[0, 2]$.</p></div>
+            <div class="b-sol"><p>Primitiva $F(x) = 2\,\mathrm{e}^{0{,}5x}$.</p>
+                <p>$F(2) - F(0) = 2\mathrm{e} - 2$: <span class="b-res">$A \approx 3{,}44$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula: a) $\int \mathrm{e}^{3x}\,\mathrm{d}x$ &nbsp; b) $\int_0^1 \mathrm{e}^x\,\mathrm{d}x$</p></div>
+            <div class="b-sol"><p>a) $\tfrac13\,\mathrm{e}^{3x} + C$ &nbsp; b) $\mathrm{e} - 1 \approx 1{,}72$</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Uma cultura de bactérias cresce segundo $N(t) = 500\,\mathrm{e}^{0{,}4t}$ ($t$ em horas). Quantas bactérias há ao fim de 5 horas? Qual é o tempo de duplicação?</p></div>
+            <div class="b-sol"><p>$N(5) = 500\,\mathrm{e}^2 \approx 3695$. Tempo de duplicação $\tfrac{\ln 2}{0{,}4} \approx 1{,}73$ h, pouco menos de 1 h 44 min.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>O café do início da unidade: a que temperatura está ao fim de 10 minutos? A que ritmo arrefece nesse momento?</p></div>
+            <div class="b-sol"><p>$T(10) = 20 + \tfrac{70}{\mathrm{e}} \approx 45{,}8$ °C, $T'(10) = -7\,\mathrm{e}^{-1} \approx -2{,}6$ °C por minuto.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Mostra, derivando, que $F(x) = -(x + 1)\,\mathrm{e}^{-x}$ é uma primitiva de $x\,\mathrm{e}^{-x}$. Calcula com ela a área por baixo de $f$ em $[0, 2]$.</p></div>
+            <div class="b-sol"><p>$F'(x) = -\mathrm{e}^{-x} + (x + 1)\,\mathrm{e}^{-x} = x\,\mathrm{e}^{-x}$ ✔. $F(2) - F(0) = -3\,\mathrm{e}^{-2} + 1 \approx 0{,}59$.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Depois de se tomar um medicamento, a concentração no sangue é $c(t) = 10t\,\mathrm{e}^{-0{,}5t}$ (em mg/l, $t$ em horas). Quando é máxima?
+            Quando diminui mais depressa, e a que ritmo?</p></div>
+            <div class="b-sol"><p>$c'(t) = 10(1 - 0{,}5t)\,\mathrm{e}^{-0{,}5t}$: máximo em $t = 2$, $c(2) = \tfrac{20}{\mathrm{e}} \approx 7{,}36$ mg/l. $c''(t) = 10(0{,}25t - 1)\,\mathrm{e}^{-0{,}5t}$: ponto de inflexão em $t = 4$,
+                <span class="b-res">$c'(4) \approx -1{,}35$ mg/l por hora</span>.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le3">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="0,37" data-ph="y ="><p class="b-q-text">Qual é a ordenada do máximo relativo de $x\,\mathrm{e}^{-x}$, com duas casas decimais?</p><div class="b-sol"><p>$\tfrac1{\mathrm{e}} \approx 0{,}368$</p></div></div>
+        <div class="b-q" data-ans="1,72" data-tol="0.01" data-ph="Valor"><p class="b-q-text">Calcula $\int_0^1 \mathrm{e}^x\,\mathrm{d}x$ com duas casas decimais.</p><div class="b-sol"><p>$\mathrm{e} - 1$</p></div></div>
+        <div class="b-q" data-ans="2" data-ph="Horas"><p class="b-q-text">$c(t) = 10t\,\mathrm{e}^{-0{,}5t}$: ao fim de quantas horas é máxima a concentração?</p><div class="b-sol"><p>$1 - 0{,}5t = 0$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span><span class="b-band-sub">FECHO DA ÁREA 4 · ANÁLISE VARIADA</span></div>
+    <div class="b-tasks" data-start="16">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Resolve $\mathrm{e}^{2x - 4} = 1$.</p></div>
+            <div class="b-sol"><p>$2x - 4 = 0$: $x = 2$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar com o capítulo 2.4:</b> um retângulo tem um vértice na origem, dois lados sobre os eixos e o vértice oposto sobre o gráfico de $y = \mathrm{e}^{-x}$, com $x > 0$. Quando é que a sua área é máxima?</p></div>
+            <div class="b-sol"><p>$A(u) = u\,\mathrm{e}^{-u}$, $A'(u) = (1 - u)\,\mathrm{e}^{-u} = 0$: $u = 1$, $A = \tfrac1{\mathrm{e}} \approx 0{,}37$. É exatamente o exemplo 5.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Compara $\mathrm{e}^x$ e $x^5$ para $x = 10$ e $x = 20$. A partir de que valor é $\mathrm{e}^x$ definitivamente maior? Usa a calculadora gráfica.</p></div>
+            <div class="b-sol"><p>Em 10: $22\,026$ contra $100\,000$. Em 20: cerca de $4{,}9 \cdot 10^8$ contra $3{,}2 \cdot 10^6$. A partir de $x \approx 12{,}7$, $\mathrm{e}^x$ fica à frente para sempre.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Um girassol cresce segundo $h(t) = 300 - 290\,\mathrm{e}^{-0{,}05t}$ ($h$ em cm, $t$ em dias). Que altura tem no início e que altura máxima pode ter? Quando atinge 1,50 m e a que ritmo cresce no início?</p></div>
+            <div class="b-sol"><p>$h(0) = 10$ cm, limite 300 cm. $290\,\mathrm{e}^{-0{,}05t} = 150$: $t = 20 \ln\tfrac{290}{150} \approx 13{,}2$ dias. $h'(0) = 290 \cdot 0{,}05 = 14{,}5$ cm por dia.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: radiocarbono" data-toc-k="X" data-toc-short="C-14">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">ARQUEOLOGIA E QUÍMICA</span></div>
+    <h2>Que idade tem a madeira? O método do radiocarbono</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Na atmosfera, a radiação cósmica produz continuamente carbono radioativo C-14. As plantas e os animais absorvem-no enquanto vivem. Depois, decai sem que chegue carbono novo:
+                $N(t) = N_0 \cdot \mathrm{e}^{-kt}$, com uma meia-vida de cerca de 5730 anos, ou seja, $k = \tfrac{\ln 2}{5730} \approx 0{,}000121$ por ano.</p>
+            <p>Se um pedaço de madeira só tem um quarto do C-14 original, passaram duas meias-vidas: cerca de 11 460 anos. Ao fim de 10 000 anos restam ainda $\mathrm{e}^{-k \cdot 10\,000} \approx 29{,}8\,\%$.
+                Por este método, o químico Willard F. Libby recebeu o Prémio Nobel em 1960.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> Prémio Nobel da Química de 1960 atribuído a W. F. Libby «pelo seu método de utilização do carbono-14 para a datação …», nobelprize.org; meia-vida de 5730 ± 40 anos: H. Godwin, Nature 195 (1962), p. 984.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>O NÚMERO E</h4><p>$\mathrm{e} \approx 2{,}718$, a base com $(\mathrm{e}^x)' = \mathrm{e}^x$</p></div>
+        <div><p>Tangente em $(0, 1)$: $y = x + 1$</p></div></div>
+    <div class="b-rueck"><div><h4>EQUAÇÕES</h4><p>Comparação de expoentes ou logaritmo, atenção a $\mathrm{e}^u > 0$</p></div>
+        <div><p>$3\,\mathrm{e}^{2x - 1} = 3$: $x = 0{,}5$</p></div></div>
+    <div class="b-rueck"><div><h4>DERIVAR</h4><p>$(\mathrm{e}^{ax + b})' = a\,\mathrm{e}^{ax + b}$, produtos com a regra do produto, depois pôr em evidência</p></div>
+        <div><p>$(x\,\mathrm{e}^{-x})' = (1 - x)\,\mathrm{e}^{-x}$</p></div></div>
+    <div class="b-rueck"><div><h4>MODELOS</h4><p>$N_0\,\mathrm{e}^{kt}$ para crescimento e decaimento, $G - (G - S_0)\,\mathrm{e}^{-kt}$ para crescimento limitado</p></div>
+        <div><p>Café: $20 + 70\,\mathrm{e}^{-0{,}1t}$</p></div></div>
+    <div class="b-rueck"><div><h4>INTEGRAL</h4><p>$\int \mathrm{e}^{ax + b}\,\mathrm{d}x = \tfrac1a\,\mathrm{e}^{ax + b} + C$</p></div>
+        <div><p>$\int_0^2 \mathrm{e}^{0{,}5x}\,\mathrm{d}x = 2\mathrm{e} - 2$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SEM CALCULADORA</div>
+            <div class="b-q" data-ans="2" data-ph="x ="><p class="b-q-text">Resolve $\mathrm{e}^{x - 2} = 1$.</p><div class="b-sol"><p>$x - 2 = 0$</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="f′(0) ="><p class="b-q-text">$f(x) = \mathrm{e}^{4x}$: quanto vale $f'(0)$?</p><div class="b-sol"><p>$4$</p></div></div>
+            <div class="b-q" data-mc="1"><p class="b-q-text">Qual é a assíntota de $\mathrm{e}^{-x} + 1$?</p><div class="b-mc"><button>$y = 0$</button><button>$y = 1$</button><button>$x = 1$</button></div><div class="b-sol"><p>Quando $x \to +\infty$, $\mathrm{e}^{-x} \to 0$.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · COM CALCULADORA</div>
+            <div class="b-q" data-ans="8,47" data-tol="0.01" data-ph="Minutos"><p class="b-q-text">Café $T(t) = 20 + 70\,\mathrm{e}^{-0{,}1t}$: ao fim de quantos minutos está a 50 °C, com duas casas decimais?</p><div class="b-sol"><p>$10 \ln\tfrac73$</p></div></div>
+            <div class="b-q" data-ans="29,8" data-tol="0.1" data-ph="%"><p class="b-q-text">Que percentagem de C-14 resta ao fim de 10 000 anos (meia-vida 5730 anos), com uma casa decimal?</p><div class="b-sol"><p>$0{,}5^{10\,000/5730} \approx 0{,}298$</p></div></div>
+            <div class="b-q" data-ans="7,36" data-tol="0.01" data-ph="mg/l"><p class="b-q-text">Concentração máxima de $c(t) = 10t\,\mathrm{e}^{-0{,}5t}$, com duas casas decimais?</p><div class="b-sol"><p>$c(2) = \tfrac{20}{\mathrm{e}}$</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" href="../../mathetestfos12-e-funktion1.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FUNÇÕES EXPONENCIAIS I</span><span class="b-lab-what">Andamento, assíntota, equações exponenciais</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-e-funktion2.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FUNÇÕES EXPONENCIAIS II</span><span class="b-lab-what">Regra da cadeia e regra do produto, crescimento</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-e-funktion3.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FUNÇÕES EXPONENCIAIS III</span><span class="b-lab-what">Extremos, pontos de inflexão, áreas</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-analysis-wiederholung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">REVISÃO DE ANÁLISE</span><span class="b-lab-what">Exercícios variados no formato do exame</span></span></a>
+        <a class="b-lab" href="../../mathetestfos12-ka3.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">TESTE DE AVALIAÇÃO 3</span><span class="b-lab-what">Pré-exame das áreas de aprendizagem 3 e 4</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Fachoberschule, 12.º ano · Área de aprendizagem 4 segundo o programa de Matemática da Fachoberschule da Saxónia.</p>
+    <p>Todos os textos, exercícios e ilustrações são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-funktionen.js"></script>
+<script src="../../js/buch-pt/funktionen.js"></script>
+<script src="../../js/buch-analysis.js"></script>
+<script src="../../js/buch-pt/analysis.js"></script>
+<script src="../../js/buch-integral.js"></script>
+<script src="../../js/buch-pt/integral.js"></script>
+</body>
+</html>

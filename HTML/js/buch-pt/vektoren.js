@@ -57,6 +57,12 @@ window.BuchPT && BuchPT.add('vektoren', {
         'Der Normalenvektor darf nicht der Nullvektor sein.': 'O vetor normal não pode ser o vetor nulo.',
         '$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.': '$t = 0$: o ponto $P$ pertence ao plano; a sua distância é $0$.',
         // book pt-7 mathefos12-pt:
+        // kreuzprodukt (the presets, the choice of area)
+        'zwei Vektoren': 'dois vetores', 'Dachfläche': 'Vertente de telhado', 'in der x-y-Ebene': 'no plano xOy', 'Dreieck': 'Triângulo', 'Welche Fläche?': 'Que área?',
+        // zentralprojektion (wb3)
+        'Abstand des Auges $a$': 'Distância do olho $a$', 'Fluchtlinien zeigen': 'Mostrar as linhas de fuga', 'Horizont': 'Horizonte',
+        'Zieh den Fluchtpunkt V. Er liegt auf dem Horizont in Augenhöhe.': 'Arrasta o ponto de fuga V. Está sobre a linha do horizonte, à altura dos olhos.',
+        'Zentralprojektion eines Quaders und einer Pfostenreihe mit Fluchtpunkt': 'Projeção central de um paralelepípedo e de uma fila de postes, com o ponto de fuga',
         // book pt-8 mathegy12-pt:
         // kreuzprodukt (lb7-1): Flächeneinheiten = unidades de área; the preset "parallel" keeps the word of pt-2 (colineares)
         'zwei Vektoren': 'dois vetores', 'Dachfläche': 'Vertente de telhado', 'in der x-y-Ebene': 'no plano xOy', 'Dreieck': 'Triângulo', 'Welche Fläche?': 'Que área?',
@@ -148,6 +154,22 @@ window.BuchPT && BuchPT.add('vektoren', {
         ['$ · Lotfußpunkt $F(', '$ · pé da perpendicular $F('], ['Abstand: $', 'Distância: $'], ['$ · ohne Lotfußpunkt: $\\dfrac{|', '$ · sem o pé da perpendicular: $\\dfrac{|'],
         ['Spiegelpunkt: $t$ verdoppeln, $', 'Simétrico: duplicar $t$, $'], ['$, also $P\'(', '$, logo $P\'('],
         // book pt-7 mathefos12-pt:
+        // kreuzprodukt (norma with double bars as in the other pt books)
+        ['$\\vec{u}$ und $\\vec{v}$ sind parallel: Das Vektorprodukt ist der Nullvektor, sie spannen keine Fläche auf.',
+            '$\\vec{u}$ e $\\vec{v}$ são colineares: o produto vetorial é o vetor nulo e não definem nenhuma área.'],
+        ['$: Das Vektorprodukt steht senkrecht auf beiden Vektoren', '$: o produto vetorial é perpendicular aos dois vetores'],
+        [' (im Bild verkürzt gezeichnet)', ' (na figura, desenhado mais curto)'],
+        ['Parallelogramm: $A = |\\vec{u} \\times \\vec{v}| = ', 'Paralelogramo: $A = \\|\\vec{u} \\times \\vec{v}\\| = '],
+        ['Dreieck: $A = \\tfrac12\\,|\\vec{u} \\times \\vec{v}| = \\tfrac12 \\cdot ', 'Triângulo: $A = \\tfrac12\\,\\|\\vec{u} \\times \\vec{v}\\| = \\tfrac12 \\cdot '],
+        [' Flächeneinheiten', ' unidades de área'],
+        // zentralprojektion (wb3)
+        ['Fluchtpunkt $V(', 'Ponto de fuga $V('], [')$ · Bildebene vor dem Quader, Auge im Abstand $a = ', ')$ · plano do quadro à frente do paralelepípedo, olho à distância $a = '],
+        ['$ davor', '$ à frente dele'],
+        ['Alle Kanten, die in die Tiefe laufen, treffen sich in $V$. Kanten parallel zur Bildebene bleiben parallel und behalten ihr Verhältnis.',
+            'Todas as arestas que vão para o fundo encontram-se em $V$. As arestas paralelas ao plano do quadro continuam paralelas e mantêm as suas proporções.'],
+        ['Ein Pfosten in der Tiefe $z$ erscheint mit dem Faktor $\\dfrac{a}{a + z}$: bei $z = 8$ also $\\dfrac{',
+            'Um poste à profundidade $z$ aparece reduzido pelo fator $\\dfrac{a}{a + z}$: para $z = 8$, portanto, $\\dfrac{'],
+        ['$ so hoch wie vorn.', '$ da altura que tem à frente.'],
         // book pt-8 mathegy12-pt:
         // kreuzprodukt: the norm of u × v with double bars (the norm rule of pt-2 reads a single \vec only)
         ['$\\vec{u}$ und $\\vec{v}$ sind parallel: Das Vektorprodukt ist der Nullvektor, sie spannen keine Fläche auf.',
