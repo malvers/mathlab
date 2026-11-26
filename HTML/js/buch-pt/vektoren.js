@@ -58,6 +58,8 @@ window.BuchPT && BuchPT.add('vektoren', {
         '$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.': '$t = 0$: o ponto $P$ pertence ao plano; a sua distância é $0$.',
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
+        // kreuzprodukt (lb7-1): Flächeneinheiten = unidades de área; the preset "parallel" keeps the word of pt-2 (colineares)
+        'zwei Vektoren': 'dois vetores', 'Dachfläche': 'Vertente de telhado', 'in der x-y-Ebene': 'no plano xOy', 'Dreieck': 'Triângulo', 'Welche Fläche?': 'Que área?',
         // book pt-9 mathegy11-pt:
     },
     phrase: [
@@ -142,6 +144,13 @@ window.BuchPT && BuchPT.add('vektoren', {
         ['Spiegelpunkt: $t$ verdoppeln, $', 'Simétrico: duplicar $t$, $'], ['$, also $P\'(', '$, logo $P\'('],
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
+        // kreuzprodukt: the norm of u × v with double bars (the norm rule of pt-2 reads a single \vec only)
+        ['$\\vec{u}$ und $\\vec{v}$ sind parallel: Das Vektorprodukt ist der Nullvektor, sie spannen keine Fläche auf.',
+            '$\\vec{u}$ e $\\vec{v}$ são colineares: o produto vetorial é o vetor nulo e não definem nenhuma área.'],
+        ['Probe: $', 'Verificação: $'], ['$: Das Vektorprodukt steht senkrecht auf beiden Vektoren', '$: o produto vetorial é perpendicular aos dois vetores'],
+        [' (im Bild verkürzt gezeichnet)', ' (na figura, desenhado mais curto)'],
+        ['Dreieck: $A = \\tfrac12\\,|\\vec{u} \\times \\vec{v}| = \\tfrac12 \\cdot ', 'Triângulo: $A = \\tfrac12\\,\\|\\vec{u} \\times \\vec{v}\\| = \\tfrac12 \\cdot '],
+        ['Parallelogramm: $A = |\\vec{u} \\times \\vec{v}| = ', 'Paralelogramo: $A = \\|\\vec{u} \\times \\vec{v}\\| = '], [' Flächeneinheiten', ' unidades de área'],
         // book pt-9 mathegy11-pt:
     ],
     rule: [
