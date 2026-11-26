@@ -346,10 +346,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Old when the last attempt failed or the last good reading is over 5 minutes old (e.g. right after a start).
     private var usageStale: Bool { usageFailed || usage.map { Date().timeIntervalSince($0.at) > 300 } ?? true }
 
+    /// The percentage DocBar shows: the CLI's value + 1, capped at 100. The CLI's /usage text rounds DOWN, while
+    /// Claude's interactive /usage rounds UP, and the CLI gives no fraction to round ourselves - so the CLI always
+    /// reads one point lower than what Doc sees (26.11.2026: CLI 0 -> /usage 1 right after the reset, CLI 1 -> 2 at
+    /// 12:58). The capsule text, its colour thresholds, the tooltip and the menu line all use this value; the stored
+    /// reading stays the CLI's own number.
+    private func shownPct(_ u: Usage) -> Int { min(100, Int(u.pct.rounded(.up)) + 1) }
+
     /// "Woche 97 % · Reset So 21:00", plus the age of an old value.
     private var usageLine: String? {
         guard let u = usage else { return nil }
-        var line = "Woche \(Int(u.pct.rounded(.up))) %"
+        var line = "Woche \(shownPct(u)) %"
         if !u.reset.isEmpty { line += " · Reset \(u.reset)" }
         if usageStale {
             let min = Int(Date().timeIntervalSince(u.at) / 60)
@@ -413,7 +420,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// capsule marks an old value (the age is in the tooltip). Returns the image and whether it may stay a template.
     private func withUsage(_ icon: NSImage?, iconTemplate: Bool, ink: NSColor) -> (NSImage?, Bool) {
         guard let icon = icon, let u = usage else { return (icon, iconTemplate) }
-        let pct = Int(u.pct.rounded(.up))
+        let pct = shownPct(u)   // CLI + 1, see shownPct
         let stale = usageStale
         let fill: NSColor = pct >= 98 ? Style.softRed : pct >= 90 ? Style.softOrange : Style.softGreen
         let template = false   // the run is always coloured
@@ -632,7 +639,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let bar = button.effectiveAppearance.bestMatch(from: [.aqua, .vibrantLight, .darkAqua, .vibrantDark])
         let tip = usageLine
         if button.toolTip != tip { button.toolTip = tip }
-        let usageKey = usage.map { "\(Int($0.pct.rounded(.up)))-\(usageStale)" } ?? ""
+        let usageKey = usage.map { "\(shownPct($0))-\(usageStale)" } ?? ""
         let key = "\(alerting)-\(here)-\(other)-\(bar?.rawValue ?? "")-\(usageKey)"
         guard key != iconKey else { return }
         iconKey = key
