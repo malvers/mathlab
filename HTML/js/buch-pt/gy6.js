@@ -71,6 +71,26 @@ window.BuchPT && BuchPT.add('gy6', {
         'Passt.': 'Serve.', 'Passt nicht.': 'Não serve.',
         'Probe: Einsetzen ergibt eine wahre Aussage.': 'Verificação: ao substituir, obtém-se uma afirmação verdadeira.',
         'Die linke Seite ist zu klein.': 'O membro da esquerda é demasiado pequeno.', 'Die linke Seite ist zu groß.': 'O membro da esquerda é demasiado grande.',
+        // pfeile6: Portuguese names for the pupils (the rules below name them in the reasons too), não unívoca / unívoca / biunívoca
+        'Schüler → Vorname': 'Aluno → nome próprio', 'Vorname → Schüler': 'Nome próprio → aluno', 'Schüler → Sitzplatz': 'Aluno → lugar',
+        'Zahl → Teiler': 'Número → divisores', 'Zahl → Doppeltes': 'Número → dobro', 'Zahl → Rest bei : 3': 'Número → resto da divisão por 3',
+        'Lena Berg': 'Rita Costa', 'Tom Klein': 'Tiago Lopes', 'Lena Roth': 'Rita Silva', 'Max Vogel': 'Rui Gomes', 'Lena': 'Rita', 'Max': 'Rui', 'Tom': 'Tiago',
+        'Zuordnung': 'Correspondência', 'Platz 1': 'Lugar 1', 'Platz 2': 'Lugar 2', 'Platz 3': 'Lugar 3', 'Platz 4': 'Lugar 4',
+        'Welche Art von Zuordnung ist das?': 'Que tipo de correspondência é esta?',
+        'mehrdeutig': 'não unívoca', 'eindeutig': 'unívoca', 'eineindeutig': 'biunívoca',
+        'Richtig:': 'Certo:', 'Nicht ganz.': 'Não exatamente.',
+        // zufall6 (the die and the coin side "Zahl" are rules below: "Würfel" is also the cube, "Zahl" also a number; Kopf/Zahl of a
+        // euro coin = face nacional / face europeia, as in the other pt books)
+        'Münze': 'Moeda', 'Glücksrad': 'Roleta', 'Versuch': 'Experiência', 'Kopf': 'Face nacional', 'Rot': 'Vermelha', 'Blau': 'Azul',
+        '1-mal': '1 vez', '10-mal': '10 vezes', '100-mal': '100 vezes', 'Löschen': 'Apagar',
+        'Säulendiagramm der relativen Häufigkeiten': 'Gráfico de barras das frequências relativas',
+        'absolut': 'absoluta', 'relativ': 'relativa', 'in %': 'em %',
+        // darstellung6
+        'Kerze': 'Vela', 'Temperatur': 'Temperatura', 'Fahrradverleih': 'Aluguer de bicicletas', 'Zeile wählen': 'Escolher uma coluna',
+        'Zeit in h': 'Tempo em h', 'Höhe in cm': 'Altura em cm', 'Uhrzeit': 'Hora', 'Temperatur in °C': 'Temperatura em °C',
+        'Leihzeit in h': 'Tempo de aluguer em h', 'Preis in €': 'Preço em €',
+        'Wortform:': 'Por palavras:', 'Tabelle:': 'Tabela:', 'Gleichung:': 'Equação:',
+        'Keine. Die Temperatur kann man nur messen, nicht ausrechnen.': 'Nenhuma. A temperatura só se pode medir, não calcular.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -99,6 +119,30 @@ window.BuchPT && BuchPT.add('gy6', {
         ['Fertig. Ohne Ausklammern: $', 'Pronto. Sem pôr em evidência: $'], ['$, mehr Arbeit.', '$, dá mais trabalho.'],
         // probieren6: "$x = 2$: $… = …$, und $… < …$"
         [', und $', ', e $'], ['Es passen: ', 'Servem: '], ['Bisher passt keiner.', 'Por enquanto, nenhum serve.'],
+        // pfeile6: the labels inside the picture's aria label, the reasons
+        ['Pfeildarstellung: ', 'Diagrama de setas: '],
+        ['Schüler → Vorname', 'aluno → nome próprio'], ['Vorname → Schüler', 'nome próprio → aluno'], ['Schüler → Sitzplatz', 'aluno → lugar'],
+        ['Zahl → Teiler', 'número → divisores'], ['Zahl → Doppeltes', 'número → dobro'], ['Zahl → Rest bei : 3', 'número → resto da divisão por 3'],
+        ['Von jedem Element links geht genau ein Pfeil aus, und rechts kommt bei jedem genau ein Pfeil an. Auch rückwärts ist die Zuordnung eindeutig.',
+            'De cada elemento da esquerda parte exatamente uma seta, e a cada elemento da direita chega exatamente uma. Também no sentido inverso a correspondência é unívoca.'],
+        ['Von jedem Element links geht genau ein Pfeil aus. ', 'De cada elemento da esquerda parte exatamente uma seta. '],
+        ['<b>mehrdeutig:</b> von einem Element gehen mehrere Pfeile aus. <b>eindeutig:</b> von jedem genau einer. <b>eineindeutig:</b> eindeutig, und auch rückwärts eindeutig.',
+            '<b>não unívoca:</b> de um elemento partem várias setas. <b>unívoca:</b> de cada um parte exatamente uma. <b>biunívoca:</b> unívoca, e também unívoca no sentido inverso.'],
+        // zufall6
+        ['Relative Häufigkeit = absolute Häufigkeit : Anzahl der Versuche. Die gestrichelte Linie zeigt die Chance',
+            'Frequência relativa = frequência absoluta : número de experiências. A linha tracejada mostra a probabilidade'],
+        [' (Rot ist das halbe Rad, Blau ein Drittel, Grün ein Sechstel)', ' (o vermelho é metade da roleta, o azul um terço, o verde um sexto)'],
+        ['. Je mehr Versuche, desto näher kommen die Säulen meistens heran.', '. Quanto mais experiências, mais perto ficam geralmente as barras.'],
+        // darstellung6
+        ['Eine Kerze ist 20 cm hoch. Jede Stunde brennt sie 2,5 cm herunter.', 'Uma vela tem 20 cm de altura. Em cada hora gasta 2,5 cm.'],
+        ['An einem Herbsttag wird alle zwei Stunden die Temperatur gemessen.', 'Num dia de outono mede-se a temperatura de duas em duas horas.'],
+        ['Ein Fahrrad kostet 3 € pro Stunde Leihzeit.', 'O aluguer de uma bicicleta custa 3 € por hora.'],
+        ['Diagramm: ', 'Gráfico: '], ['Gewählt: ', 'Escolhido: '],
+        ['Die Kerze brennt gleichmäßig, auch zwischen den vollen Stunden. Darum darf man die Punkte mit einer Linie verbinden.',
+            'A vela arde de forma regular, também entre as horas certas. Por isso podem unir-se os pontos com uma linha.'],
+        ['Die gestrichelte Linie verbindet nur die Messpunkte. Was dazwischen geschah, weiß man nicht genau.',
+            'A linha tracejada só une os pontos medidos. O que aconteceu entre eles não se sabe ao certo.'],
+        ['Abgerechnet wird nur nach ganzen Stunden, darum gibt es nur einzelne Punkte.', 'Só se pagam horas inteiras, por isso há apenas pontos isolados.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -123,5 +167,18 @@ window.BuchPT && BuchPT.add('gy6', {
         [/Gesucht sind alle Zahlen, für die die linke Seite (kleiner|größer) als (\$[^$]*\$) ist\./g, (m, r, x) =>
             'Procuram-se todos os números para os quais o membro da esquerda é ' + (r === 'kleiner' ? 'menor' : 'maior') + ' do que ' + x + '.'],
         [/Geprüft: (\d+) von (\d+) Werten\. /g, (m, a, b) => (a === '1' ? 'Valor testado: 1 de ' : 'Valores testados: ' + a + ' de ') + b + '. '],
+        // pfeile6: the type and the reasons, with the Portuguese names of the pupils
+        [/Die Zuordnung ist (mehrdeutig|eindeutig, aber nicht eineindeutig|eineindeutig)\. /g, (m, k) => 'A correspondência é ' +
+            ({ 'mehrdeutig': 'não unívoca', 'eindeutig, aber nicht eineindeutig': 'unívoca, mas não biunívoca', 'eineindeutig': 'biunívoca' })[k] + '. '],
+        [/Von „([^“]+)“ gehen (\d+) Pfeile aus\./g, (m, x, n) => 'De «' + ({ 'Lena': 'Rita', 'Max': 'Rui', 'Tom': 'Tiago' }[x] || x) + '» partem ' + n + ' setas.'],
+        [/Bei „([^“]+)“ kommen aber (\d+) Pfeile an, rückwärts ist die Zuordnung also nicht eindeutig\./g, (m, x, n) =>
+            'Mas ' + (/^\d/.test(x) ? 'ao «' + x : ({ 'Lena': 'à «Rita', 'Max': 'ao «Rui', 'Tom': 'ao «Tiago' }[x] || 'a «' + x)) + '» chegam ' + n +
+            ' setas, portanto, no sentido inverso, a correspondência não é unívoca.'],
+        // zufall6: the die (the cube of other books has the same word), the coin side "Zahl", the number of trials
+        [/(data-v="wuerfel">)(?:Würfel|\u0003\d+\u0004)(<\/button><button type="button" data-v="rad">)/g, '$1Dado$2'],
+        [/(<td>|<text class="d-num"[^>]*>)Zahl(<\/)/g, '$1Face europeia$2'],
+        [/>(\d+) Versuche</g, (m, n) => '>' + n + (n === '1' ? ' experiência' : ' experiências') + '<'],
+        // darstellung6: "Gewählt: Uhrzeit 12 → Temperatur 14."
+        [/Gewählt: Uhrzeit /g, 'Gewählt: hora '], [/ → Temperatur /g, ' → temperatura '],
     ]
 });

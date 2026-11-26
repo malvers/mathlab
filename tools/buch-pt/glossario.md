@@ -385,3 +385,10 @@ parts, so every later book that loads them gets it too):
 | Lösungsplan · Sachaufgabe | plano de resolução · problema | |
 | linke Seite (einer Gleichung) | membro da esquerda | |
 | Murmeln | berlindes | |
+| Zuordnung · Pfeildarstellung | correspondência · diagrama de setas | |
+| mehrdeutig · eindeutig · eineindeutig | não unívoca · unívoca · biunívoca | |
+| Wortform · Tabelle · Diagramm · Gleichung | por palavras · tabela · gráfico · equação | |
+| absolute / relative Häufigkeit · Zufallsversuch · Umfrage | frequência absoluta / relativa · experiência aleatória · inquérito | „Chance" = probabilidade |
+| Kopf / Zahl (Münze) | face nacional / face europeia | wie die anderen pt-Bücher; Kerrichs Münze (lb2-1): „cara" |
+| Reißzwecke · Strichliste | pionés · tabela de contagem | |
+| Namen in den Widgets | Lena Berg → Rita Costa, Tom Klein → Tiago Lopes, Lena Roth → Rita Silva, Max Vogel → Rui Gomes | pfeile6 |
