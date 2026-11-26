@@ -132,6 +132,22 @@ window.BuchPT && BuchPT.add('gy6', {
         'Dreieck aus drei Stäben': 'Triângulo formado por três paus', 'Die Stäbe ergeben kein Dreieck': 'Os paus não formam um triângulo',
         // linien6 (Portuguese letters: O for the circumcentre, G for the centroid; rules below)
         'Mittelsenkrechten': 'Mediatrizes', 'Winkelhalbierende': 'Bissetrizes', 'Höhen': 'Alturas', 'Seitenhalbierende': 'Medianas', 'Linien': 'Retas',
+        // flaeche6 (Portuguese letters: the base b of the parallelogram and the triangle, German g; rules below)
+        'Parallelogramm': 'Paralelogramo', 'Trapez': 'Trapézio', 'Drachenviereck': 'Papagaio', 'Figur': 'Figura',
+        'Zerlegen und verschieben': 'Decompor e deslocar', 'Grundseite $g$': 'Base $b$', 'Höhe $h$': 'Altura $h$',
+        'Diagonale $e$': 'Diagonal $e$', 'Diagonale $f$': 'Diagonal $f$',
+        // vierecke6 ("gleichschenkliges" / "Trapez" in two lines: a rule below puts them in Portuguese order; every Portuguese name is masculine)
+        'Quadrat': 'Quadrado', 'Rechteck': 'Retângulo', 'Raute': 'Losango', 'Viereck': 'Quadrilátero',
+        'gleichschenkliges Trapez': 'Trapézio isósceles', 'Haus der Vierecke': 'Casa dos quadriláteros',
+        'parallele Seiten': 'lados paralelos', 'gleich lange Seiten': 'lados iguais', 'rechte Winkel': 'ângulos retos', 'Symmetrieachsen': 'eixos de simetria',
+        'Diagonalen halbieren sich': 'diagonais bissetam-se', 'Diagonalen senkrecht': 'diagonais perpendiculares', 'Diagonalen gleich lang': 'diagonais iguais',
+        '2 Paare': '2 pares', '1 Paar': '1 par', 'alle vier': 'os quatro', 'je zwei gegenüber': 'os opostos, dois a dois', 'keine nötig': 'não obrigatório',
+        'keins nötig': 'não obrigatório', 'die beiden Schenkel': 'os dois lados não paralelos', 'je zwei benachbarte': 'os consecutivos, dois a dois',
+        'nur eine die andere': 'uma bisseta a outra', 'mindestens 1': 'pelo menos 1', 'ja': 'sim', 'nein': 'não',
+        'Das <b>Viereck</b> steht ganz unten: Es braucht nur vier Ecken und vier Seiten, sonst nichts.':
+            'O <b>quadrilátero</b> está lá em baixo: só precisa de quatro vértices e quatro lados, mais nada.',
+        'Tipp auf ein Viereck im Haus. Was weiter unten steht, ist allgemeiner, was weiter oben steht, hat mehr Eigenschaften.':
+            'Toca num quadrilátero da casa. O que está mais abaixo é mais geral, o que está mais acima tem mais propriedades.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -241,6 +257,15 @@ window.BuchPT && BuchPT.add('gy6', {
         [' Beim rechtwinkligen Dreieck ist $H$ die Ecke mit dem rechten Winkel.', ' No triângulo retângulo, $H$ é o vértice do ângulo reto.'],
         ['Eine Seitenhalbierende verbindet eine Ecke mit der Mitte der gegenüberliegenden Seite. Ihr Schnittpunkt $S$ ist der Schwerpunkt: Ein Dreieck aus Pappe kann man dort auf einer Nadelspitze balancieren.',
             'Uma mediana une um vértice ao ponto médio do lado oposto. O seu ponto de interseção $G$ é o baricentro: um triângulo de cartão pode equilibrar-se aí na ponta de uma agulha.'],
+        // flaeche6 (after the rule × for the product)
+        ['Das abgeschnittene Dreieck rückt nach rechts. Aus dem Parallelogramm wird ein Rechteck mit derselben Grundseite und derselben Höhe.',
+            'O triângulo cortado desliza para a direita. O paralelogramo passa a ser um retângulo com a mesma base e a mesma altura.'],
+        ['Eine Kopie des Dreiecks dreht sich um die Mitte einer Seite. Zusammen ergeben beide ein Parallelogramm. Das Dreieck ist die Hälfte davon.',
+            'Uma cópia do triângulo roda em torno do ponto médio de um lado. Juntos, os dois formam um paralelogramo. O triângulo é metade dele.'],
+        ['Eine Kopie des Trapezes dreht sich um die Mitte eines Schenkels. Zusammen ergeben beide ein Parallelogramm mit der Grundseite $a + c$.',
+            'Uma cópia do trapézio roda em torno do ponto médio de um lado não paralelo. Juntos, os dois formam um paralelogramo de base $a + c$.'],
+        ['Die vier Dreiecke im Drachen klappen nach außen. Sie füllen das Rechteck aus den beiden Diagonalen genau zur Hälfte.',
+            'Os quatro triângulos do papagaio dobram-se para fora. Preenchem exatamente metade do retângulo formado pelas duas diagonais.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -293,5 +318,18 @@ window.BuchPT && BuchPT.add('gy6', {
         [/ · Schnittpunkt \$([UIHS])\$: (Umkreismittelpunkt|Inkreismittelpunkt|Höhenschnittpunkt|Schwerpunkt)/g, (m, p, w) => ' · ponto de interseção $' +
             ({ U: 'O', I: 'I', H: 'H', S: 'G' })[p] + '$: ' + ({ 'Umkreismittelpunkt': 'circuncentro', 'Inkreismittelpunkt': 'incentro',
                 'Höhenschnittpunkt': 'ortocentro', 'Schwerpunkt': 'baricentro' })[w]],
+        // flaeche6: the base b (German g) in the formulas, the aria label of the picture
+        [/\$A = (\\tfrac12 \\times )?g \\times h = /g, '$$A = $1b \\times h = '],
+        [/^(Parallelogramm|Dreieck|Trapez|Drachenviereck): zerlegen und verschieben$/, (m, s) =>
+            ({ 'Parallelogramm': 'Paralelogramo', 'Dreieck': 'Triângulo', 'Trapez': 'Trapézio', 'Drachenviereck': 'Papagaio' })[s] + ': decompor e deslocar'],
+        // vierecke6: the two-line label "gleichschenkliges / Trapez" (the second line may already be a translated label)
+        [/(<text class="g6-nodetxt"[^>]*>)gleichschenkliges(<\/text>[^<]*<text class="g6-nodetxt"[^>]*>)(?:Trapez|\u0003\d+\u0004)(<\/text>)/g, '$1Trapézio$2isósceles$3'],
+        // vierecke6: "Jedes <b>Quadrat</b> ist auch ein Rechteck, eine Raute, …" - every Portuguese name is masculine ("todo o", "um")
+        [/Jede[s]? <b>([^<]+)<\/b> ist auch ([^<]+)\.<\/p>/g, (m, s, list) => {
+            const N = { 'Quadrat': 'quadrado', 'Rechteck': 'retângulo', 'Raute': 'losango', 'Parallelogramm': 'paralelogramo', 'gleichschenkliges Trapez': 'trapézio isósceles',
+                'gleichschenklige Trapez': 'trapézio isósceles', 'Drachenviereck': 'papagaio', 'Trapez': 'trapézio', 'Viereck': 'quadrilátero' };
+            const L = list.split(', ').map(x => { const k = x.replace(/^eine?s? /, ''); return N[k] ? 'um ' + N[k] : x; });
+            return 'Todo o <b>' + (N[s] || s) + '</b> é também ' + (L.length > 1 ? L.slice(0, -1).join(', ') + ' e ' + L[L.length - 1] : L[0]) + '.</p>';
+        }],
     ]
 });

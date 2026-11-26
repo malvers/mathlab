@@ -409,3 +409,10 @@ parts, so every later book that loads them gets it too):
 | Mittelsenkrechte · Winkelhalbierende · Höhe · Seitenhalbierende | mediatriz · bissetriz · altura · mediana | |
 | Umkreis(mittelpunkt) $U$ · Inkreis(mittelpunkt) $I$ · Höhenschnittpunkt $H$ · Schwerpunkt $S$ | circunferência circunscrita, circuncentro $O$ · circunferência inscrita, incentro $I$ · ortocentro $H$ · baricentro $G$ | Buchstaben O und G auch im Widget (Regel) |
 | Euler-Gerade | reta de Euler | |
+| Grundseite $g$ · Höhe $h$ · Umfang $u$ | base $b$ · altura $h$ · perímetro $P$ | auch im Widget (Regel $A = b \times h$) |
+| Parallelogramm · Trapez · Drachenviereck · Raute | paralelogramo · trapézio · papagaio · losango | Trapez: Seiten $a$, $c$ bleiben (wie im Widget) |
+| zerlegen · ergänzen · Rückführprinzip · zusammengesetzte Figur | decompor · completar · princípio da redução · figura composta | |
+| Haus der Vierecke · Systematisieren | casa dos quadriláteros · classificar | alle Namen männlich: „todo o …, um …" |
+| unregelmäßig · gleichseitig · spitz-/recht-/stumpfwinklig | escaleno · equilátero · acutângulo / retângulo / obtusângulo | |
+| Satz von Pick $A = I + \tfrac{R}{2} - 1$ | teorema de Pick $A = I + \tfrac{F}{2} - 1$ | F = pontos na fronteira |
+| Winkel $\angle BAC$ | $B\hat{A}C$ | |
