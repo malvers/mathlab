@@ -404,3 +404,8 @@ parts, so every later book that loads them gets it too):
 | Strecke $\overline{AB}$ · Gerade $AB$ · Dreieck $ABC$ | segmento $[AB]$ (Länge $\overline{AB}$) · reta $AB$ · triângulo $[ABC]$ | |
 | Planfigur · Konstruktionsbeschreibung · Zirkel, Geodreieck | esboço · descrição da construção · compasso, régua e transferidor | |
 | Schenkel (eines Winkels) · Kreis um $B$ mit $r$ | lado do ângulo · circunferência de centro $B$ e raio $r$ | |
+| gleichschenklig · Schenkel · Basis · Basiswinkelsatz | isósceles · lados iguais · base · teorema dos ângulos da base | Spitze = vértice oposto à base |
+| Seiten-Winkel-Beziehung · Dreiecksungleichung | relação entre lados e ângulos · desigualdade triangular | |
+| Mittelsenkrechte · Winkelhalbierende · Höhe · Seitenhalbierende | mediatriz · bissetriz · altura · mediana | |
+| Umkreis(mittelpunkt) $U$ · Inkreis(mittelpunkt) $I$ · Höhenschnittpunkt $H$ · Schwerpunkt $S$ | circunferência circunscrita, circuncentro $O$ · circunferência inscrita, incentro $I$ · ortocentro $H$ · baricentro $G$ | Buchstaben O und G auch im Widget (Regel) |
+| Euler-Gerade | reta de Euler | |

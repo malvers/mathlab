@@ -128,6 +128,10 @@ window.BuchPT && BuchPT.add('gy6', {
             'Todos têm a mesma forma, mas tamanhos diferentes. Três ângulos não definem um triângulo.',
         'Den dritten Winkel kennt man ohnehin: $\\gamma = 180^\\circ - \\alpha - \\beta$. Es fehlt eine Länge.':
             'O terceiro ângulo já se conhece de qualquer forma: $\\gamma = 180^\\circ - \\alpha - \\beta$. Falta um comprimento.',
+        // seitenwinkel6
+        'Dreieck aus drei Stäben': 'Triângulo formado por três paus', 'Die Stäbe ergeben kein Dreieck': 'Os paus não formam um triângulo',
+        // linien6 (Portuguese letters: O for the circumcentre, G for the centroid; rules below)
+        'Mittelsenkrechten': 'Mediatrizes', 'Winkelhalbierende': 'Bissetrizes', 'Höhen': 'Alturas', 'Seitenhalbierende': 'Medianas', 'Linien': 'Retas',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -213,6 +217,30 @@ window.BuchPT && BuchPT.add('gy6', {
         ['$\\alpha + \\beta$ ist schon $', '$\\alpha + \\beta$ já é $'],
         ['Die Kreise berühren sich nur auf der längsten Seite.', 'As circunferências só se tocam sobre o lado maior.'],
         ['Die Kreise treffen sich nicht.', 'As circunferências não se cortam.'],
+        // seitenwinkel6
+        ['Alle Seiten gleich lang: alle Winkel $60^\\circ$. ', 'Todos os lados iguais: todos os ângulos com $60^\\circ$. '],
+        ['Zwei Seiten sind gleich lang: Das Dreieck ist gleichschenklig, und die Basiswinkel sind gleich groß.',
+            'Dois lados são iguais: o triângulo é isósceles, e os ângulos da base têm a mesma amplitude.'],
+        ['Die beiden kürzeren Stäbe sind zusammen genau so lang wie der längste: Sie liegen flach auf ihm. Das ist kein Dreieck.',
+            'Os dois paus mais curtos, juntos, têm exatamente o comprimento do mais comprido: ficam deitados sobre ele. Isto não é um triângulo.'],
+        ['Die beiden kürzeren Stäbe reichen nicht bis zueinander, egal wie man sie dreht.', 'Os dois paus mais curtos não chegam um ao outro, rode-se como se rodar.'],
+        [' <b>Dreiecksungleichung:</b> Zwei Seiten zusammen müssen immer länger sein als die dritte.', ' <b>Desigualdade triangular:</b> dois lados juntos têm de ser sempre maiores do que o terceiro.'],
+        // linien6: the aria label and the explanations (O and G as in Portuguese schools)
+        ['Dreieck mit seinen Mittelsenkrechten', 'Triângulo com as suas mediatrizes'], ['Dreieck mit seinen Winkelhalbierende', 'Triângulo com as suas bissetrizes'],
+        ['Dreieck mit seinen Höhen', 'Triângulo com as suas alturas'], ['Dreieck mit seinen Seitenhalbierende', 'Triângulo com as suas medianas'],
+        ['Jeder Punkt der Mittelsenkrechten ist von den beiden Ecken gleich weit entfernt. Ihr Schnittpunkt $U$ ist von <b>allen drei Ecken</b> gleich weit entfernt: der Mittelpunkt des Umkreises.',
+            'Cada ponto de uma mediatriz está à mesma distância dos dois vértices. O seu ponto de interseção $O$ está à mesma distância dos <b>três vértices</b>: é o centro da circunferência circunscrita.'],
+        [' Bei einem stumpfwinkligen Dreieck liegt $U$ außerhalb.', ' Num triângulo obtusângulo, $O$ fica no exterior.'],
+        [' Beim rechtwinkligen Dreieck liegt $U$ genau auf der längsten Seite.', ' No triângulo retângulo, $O$ fica exatamente sobre o lado maior.'],
+        [' Bei einem spitzwinkligen Dreieck liegt $U$ innen.', ' Num triângulo acutângulo, $O$ fica no interior.'],
+        ['Jeder Punkt einer Winkelhalbierenden ist von den beiden Schenkeln gleich weit entfernt. Ihr Schnittpunkt $I$ ist von <b>allen drei Seiten</b> gleich weit entfernt: der Mittelpunkt des Inkreises. Er liegt immer innen.',
+            'Cada ponto de uma bissetriz está à mesma distância dos dois lados do ângulo. O seu ponto de interseção $I$ está à mesma distância dos <b>três lados</b>: é o centro da circunferência inscrita. Fica sempre no interior.'],
+        ['Eine Höhe ist das Lot von einer Ecke auf die gegenüberliegende Seite. Die drei Höhen schneiden sich in einem Punkt $H$.',
+            'Uma altura é a perpendicular traçada de um vértice para o lado oposto. As três alturas cortam-se num ponto $H$.'],
+        [' Beim stumpfwinkligen Dreieck liegt $H$ außerhalb: Man muss die Seiten verlängern (gestrichelt).', ' No triângulo obtusângulo, $H$ fica no exterior: é preciso prolongar os lados (a tracejado).'],
+        [' Beim rechtwinkligen Dreieck ist $H$ die Ecke mit dem rechten Winkel.', ' No triângulo retângulo, $H$ é o vértice do ângulo reto.'],
+        ['Eine Seitenhalbierende verbindet eine Ecke mit der Mitte der gegenüberliegenden Seite. Ihr Schnittpunkt $S$ ist der Schwerpunkt: Ein Dreieck aus Pappe kann man dort auf einer Nadelspitze balancieren.',
+            'Uma mediana une um vértice ao ponto médio do lado oposto. O seu ponto de interseção $G$ é o baricentro: um triângulo de cartão pode equilibrar-se aí na ponta de uma agulha.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -257,5 +285,13 @@ window.BuchPT && BuchPT.add('gy6', {
         // konstruktion6: the sentence with the two lengths, the picture's aria label
         [/Die beiden kürzeren Seiten sind zusammen ([\d,]+) cm lang, die längste ([\d,]+) cm\. /g, 'Os dois lados mais curtos medem juntos $1 cm, o mais comprido $2 cm. '],
         [/^Konstruktion aus (sss|sws|wsw|SsW|www)$/, (m, k) => 'Construção a partir de ' + ({ sss: 'LLL', sws: 'LAL', wsw: 'ALA', SsW: 'LLA', www: 'AAA' })[k]],
+        // seitenwinkel6: the largest angle lies opposite the longest side
+        [/Der <span class="g-lam">längsten Seite \$([abc])\$<\/span> liegt der <span class="g-lam">größte Winkel \$(\\[a-z]+)\$<\/span> gegenüber, der <span class="g-cy">kürzesten \$([abc])\$<\/span> der kleinste\. /g,
+            (m, s1, w, s2) => 'Ao <span class="g-lam">lado maior $' + s1 + '$</span> opõe-se o <span class="g-lam">ângulo maior $' + w + '$</span>, ao <span class="g-cy">lado menor $' + s2 + '$</span> o ângulo menor. '],
+        // linien6: the Portuguese letters of the points (O circumcentre, G centroid), the line under the buttons
+        [/(r="5.5" fill="#F5C242"\/><text class="g-pt"[^>]*>)([US])(<\/text>)/g, (m, a, p, b) => a + (p === 'U' ? 'O' : 'G') + b],
+        [/ · Schnittpunkt \$([UIHS])\$: (Umkreismittelpunkt|Inkreismittelpunkt|Höhenschnittpunkt|Schwerpunkt)/g, (m, p, w) => ' · ponto de interseção $' +
+            ({ U: 'O', I: 'I', H: 'H', S: 'G' })[p] + '$: ' + ({ 'Umkreismittelpunkt': 'circuncentro', 'Inkreismittelpunkt': 'incentro',
+                'Höhenschnittpunkt': 'ortocentro', 'Schwerpunkt': 'baricentro' })[w]],
     ]
 });
