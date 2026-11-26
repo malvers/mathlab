@@ -58,7 +58,7 @@ window.BuchPT && BuchPT.add('vektoren', {
         '$t = 0$: Der Punkt $P$ liegt selbst in der Ebene, sein Abstand ist $0$.': '$t = 0$: o ponto $P$ pertence ao plano; a sua distância é $0$.',
         // book pt-7 mathefos12-pt:
         // kreuzprodukt (the presets, the choice of area)
-        'zwei Vektoren': 'dois vetores', 'Dachfläche': 'vertente do telhado', 'in der x-y-Ebene': 'no plano xOy', 'Dreieck': 'Triângulo', 'Welche Fläche?': 'Que área?',
+        'zwei Vektoren': 'dois vetores', 'Dachfläche': 'Vertente de telhado', 'in der x-y-Ebene': 'no plano xOy', 'Dreieck': 'Triângulo', 'Welche Fläche?': 'Que área?',
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
     },
@@ -145,7 +145,7 @@ window.BuchPT && BuchPT.add('vektoren', {
         // book pt-7 mathefos12-pt:
         // kreuzprodukt (norma with double bars as in the other pt books)
         ['$\\vec{u}$ und $\\vec{v}$ sind parallel: Das Vektorprodukt ist der Nullvektor, sie spannen keine Fläche auf.',
-            '$\\vec{u}$ e $\\vec{v}$ são colineares: o produto vetorial é o vetor nulo, não definem nenhuma área.'],
+            '$\\vec{u}$ e $\\vec{v}$ são colineares: o produto vetorial é o vetor nulo e não definem nenhuma área.'],
         ['$: Das Vektorprodukt steht senkrecht auf beiden Vektoren', '$: o produto vetorial é perpendicular aos dois vetores'],
         [' (im Bild verkürzt gezeichnet)', ' (na figura, desenhado mais curto)'],
         ['Parallelogramm: $A = |\\vec{u} \\times \\vec{v}| = ', 'Paralelogramo: $A = \\|\\vec{u} \\times \\vec{v}\\| = '],
