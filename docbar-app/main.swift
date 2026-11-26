@@ -22,6 +22,12 @@ private enum Style {
     static let warnInk = NSColor(red: 25 / 255, green: 52 / 255, blue: 130 / 255, alpha: 1)
     static let hereGreen = NSColor(red: 121 / 255, green: 158 / 255, blue: 49 / 255, alpha: 1)
     static let alertRed = NSColor(red: 176 / 255, green: 36 / 255, blue: 24 / 255, alpha: 1)
+    // Soft tones for the usage capsule (Doc, 26.11.2026: "Lindgrün, Lindorange", a red set apart from the D's red):
+    // the palette colours mixed with white - phi and Upsilon half and half, lambda 45 % white. Ink-blue digits read
+    // 6.8:1, 8.5:1 and 4.5:1 on them.
+    static let softGreen = NSColor(red: 188 / 255, green: 207 / 255, blue: 152 / 255, alpha: 1)
+    static let softOrange = NSColor(red: 250 / 255, green: 221 / 255, blue: 151 / 255, alpha: 1)
+    static let softRed = NSColor(red: 216 / 255, green: 146 / 255, blue: 140 / 255, alpha: 1)
     static let font = NSFont.systemFont(ofSize: 13)
     static let nameFont = NSFont.systemFont(ofSize: 13, weight: .semibold)
     static let subFont = NSFont.systemFont(ofSize: 11)
@@ -401,19 +407,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// The D and the usage as ONE capsule (Doc, 26.11.2026): the D's circle is its rounded left end, the capsule
-    /// runs on to the right, as high as the circle, with "NN %" in it - green (phi) below 90 %, orange (lambda) from
-    /// 90 %, both with ink-blue digits, red with white digits from 98 % (Doc: red next to a red disc, "egal, machen
-    /// wir so, erstmal"). Always as wide as "88 %", so it never jumps. The circle keeps every state it has; a faded
+    /// runs on to the right, as high as the circle, with "NN %" in ink blue - soft green below 90 %, soft orange from
+    /// 90 %, a soft red from 98 % that stays apart from the red disc (Style.soft*). Always as wide as "88 %", so it
+    /// never jumps. The circle keeps every state it has; a faded
     /// capsule marks an old value (the age is in the tooltip). Returns the image and whether it may stay a template.
     private func withUsage(_ icon: NSImage?, iconTemplate: Bool, ink: NSColor) -> (NSImage?, Bool) {
         guard let icon = icon, let u = usage else { return (icon, iconTemplate) }
         let pct = Int(u.pct.rounded(.up))
         let stale = usageStale
-        let fill: NSColor = pct >= 98 ? Style.alertRed : pct >= 90 ? Style.warnYellow : Style.hereGreen
+        let fill: NSColor = pct >= 98 ? Style.softRed : pct >= 90 ? Style.softOrange : Style.softGreen
         let template = false   // the run is always coloured
         let alpha: CGFloat = stale ? 0.5 : 1
         let back = fill.withAlphaComponent(alpha)
-        let color: NSColor = pct >= 98 ? .white : Style.warnInk
+        let color = Style.warnInk
         let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .bold)
         let text = NSAttributedString(string: "\(pct) %",
                                       attributes: [.font: font, .foregroundColor: color.withAlphaComponent(alpha)])
