@@ -369,3 +369,86 @@ Terms the book adds go here (the new module `exponential.js`, its pt0 part inclu
 ## mathegy6-pt (GY 6, block pt-10)
 
 Terms the book adds go here (the new modules `geometrie.js` and `gy6.js`, their pt0 parts included).
+
+Portuguese school notation of the 2.º ciclo (6.º ano), set by this book for `geometrie.js` and `gy6.js` (rules in their pt0
+parts, so every later book that loads them gets it too):
+
+- **× for the product** (rule `\cdot` → `\times` in `geometrie.js` pt0): $8 = 2 \times 2 \times 2$. A phrase key with a
+  product is therefore written with `\times`.
+- **The period in brackets**, as Portuguese schools write it: $0{,}(3)$, $0{,}1(6)$ instead of the German bar
+  (rule `\overline{digits}` → `(digits)` in `gy6.js` pt0; a segment `\overline{AB}` is never touched).
+- **ℕ starts at 1 in Portugal**: the German $\mathbb{N}$ (with 0) is written $\mathbb{N}_0$, the German $\mathbb{Q}^+$
+  (gebrochene Zahlen, with 0) is $\mathbb{Q}_0^+$, "os números racionais não negativos" (rules in `gy6.js` pt0, also for the
+  SVG labels ℕ₀, ℚ₀⁺). The text says once that the German school counts 0 as natural.
+- Letters from Portuguese words: the set of divisors $D_{12}$ (divisores; German $T_{12}$, Teiler).
+- Division stays `:` ($3 : 4$), percent `30 %`, the decimal comma as in German.
+- The calculator sign is **CALC** (as in the other pt editions), German TR.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| gebrochene Zahlen, $\mathbb{Q}^+$ | números racionais não negativos, $\mathbb{Q}_0^+$ | |
+| natürliche Zahlen (mit 0), $\mathbb{N}$ | números naturais e o zero, $\mathbb{N}_0$ | |
+| Bruch · Zähler · Nenner | fração · numerador · denominador | |
+| gekürzter Bruch · kürzen | fração irredutível · simplificar | |
+| erweitern | escrever uma fração equivalente, multiplicar os dois termos por … | "amplificar" is avoided |
+| gleichnamig machen | reduzir ao mesmo denominador | |
+| Stammbruch | fração unitária | |
+| Dezimalzahl | número decimal | |
+| endliche / periodische Dezimalzahl · Periode | dízima finita / dízima infinita periódica · período | |
+| Prozent | percentagem | |
+| Menge · Element · Teilmenge | conjunto · elemento · subconjunto | |
+| Mengendiagramm | diagrama de Venn | |
+| Zahlbereich | conjunto numérico | |
+| Teiler · Vielfache | divisores · múltiplos | |
+| Zahlenstrahl | reta numérica | |
+| Elfmeter | penálti | |
+| Vorrangregeln · Punkt vor Strich | prioridade das operações · multiplicações e divisões antes de adições e subtrações | |
+| Rechengesetze · Vertauschen, Verbinden, Verteilen | propriedades das operações · comutativa, associativa, distributiva | „trocar a ordem, agrupar, distribuir" |
+| ausklammern | pôr em evidência | |
+| Gleichung · Ungleichung · Variable | equação · inequação · variável | |
+| Umkehraufgabe · Rückwärtsrechnen · Probieren | operação inversa · calcular para trás · experimentar | |
+| Probe | verificação | |
+| Lösungsplan · Sachaufgabe | plano de resolução · problema | |
+| linke Seite (einer Gleichung) | membro da esquerda | |
+| Murmeln | berlindes | |
+| Zuordnung · Pfeildarstellung | correspondência · diagrama de setas | |
+| mehrdeutig · eindeutig · eineindeutig | não unívoca · unívoca · biunívoca | |
+| Wortform · Tabelle · Diagramm · Gleichung | por palavras · tabela · gráfico · equação | |
+| absolute / relative Häufigkeit · Zufallsversuch · Umfrage | frequência absoluta / relativa · experiência aleatória · inquérito | „Chance" = probabilidade |
+| Kopf / Zahl (Münze) | face nacional / face europeia | wie die anderen pt-Bücher; Kerrichs Münze (lb2-1): „cara" |
+| Reißzwecke · Strichliste | pionés · tabela de contagem | |
+| Namen in den Widgets | Lena Berg → Rita Costa, Tom Klein → Tiago Lopes, Lena Roth → Rita Silva, Max Vogel → Rui Gomes | pfeile6 |
+| direkt / indirekt proportional | diretamente / inversamente proporcionais · proporcionalidade direta / inversa | |
+| Quotientengleichheit · Produktgleichheit · Proportionalitätsfaktor | quociente constante · produto constante · constante de proporcionalidade | |
+| Dreisatz · auf eins zurückrechnen | regra de três simples · calcular o valor para uma unidade | |
+| Gerade durch den Ursprung | reta que passa pela origem | Punkte $(4, 6)$ |
+| Grundgebühr (Taxi) | bandeirada | |
+| Innenwinkelsatz · Außenwinkel | teorema da soma dos ângulos internos · ângulo externo | |
+| Wechselwinkel · Nebenwinkel · gestreckter Winkel | ângulos alternos internos · ângulos suplementares · ângulo raso | |
+| Definition · Satz · Wenn-dann · Voraussetzung · Behauptung · Beweis | definição · teorema · «se …, então …» · hipótese · tese · demonstração | |
+| kongruent · Kongruenzsätze sss, sws, wsw, SsW, www | geometricamente iguais · critérios de igualdade LLL, LAL, ALA, LLA, AAA | L lado, A ângulo |
+| Strecke $\overline{AB}$ · Gerade $AB$ · Dreieck $ABC$ | segmento $[AB]$ (Länge $\overline{AB}$) · reta $AB$ · triângulo $[ABC]$ | |
+| Planfigur · Konstruktionsbeschreibung · Zirkel, Geodreieck | esboço · descrição da construção · compasso, régua e transferidor | |
+| Schenkel (eines Winkels) · Kreis um $B$ mit $r$ | lado do ângulo · circunferência de centro $B$ e raio $r$ | |
+| gleichschenklig · Schenkel · Basis · Basiswinkelsatz | isósceles · lados iguais · base · teorema dos ângulos da base | Spitze = vértice oposto à base |
+| Seiten-Winkel-Beziehung · Dreiecksungleichung | relação entre lados e ângulos · desigualdade triangular | |
+| Mittelsenkrechte · Winkelhalbierende · Höhe · Seitenhalbierende | mediatriz · bissetriz · altura · mediana | |
+| Umkreis(mittelpunkt) $U$ · Inkreis(mittelpunkt) $I$ · Höhenschnittpunkt $H$ · Schwerpunkt $S$ | circunferência circunscrita, circuncentro $O$ · circunferência inscrita, incentro $I$ · ortocentro $H$ · baricentro $G$ | Buchstaben O und G auch im Widget (Regel) |
+| Euler-Gerade | reta de Euler | |
+| Grundseite $g$ · Höhe $h$ · Umfang $u$ | base $b$ · altura $h$ · perímetro $P$ | auch im Widget (Regel $A = b \times h$) |
+| Parallelogramm · Trapez · Drachenviereck · Raute | paralelogramo · trapézio · papagaio · losango | Trapez: Seiten $a$, $c$ bleiben (wie im Widget) |
+| zerlegen · ergänzen · Rückführprinzip · zusammengesetzte Figur | decompor · completar · princípio da redução · figura composta | |
+| Haus der Vierecke · Systematisieren | casa dos quadriláteros · classificar | alle Namen männlich: „todo o …, um …" |
+| unregelmäßig · gleichseitig · spitz-/recht-/stumpfwinklig | escaleno · equilátero · acutângulo / retângulo / obtusângulo | |
+| Satz von Pick $A = I + \tfrac{R}{2} - 1$ | teorema de Pick $A = I + \tfrac{F}{2} - 1$ | F = pontos na fronteira |
+| Winkel $\angle BAC$ | $B\hat{A}C$ | |
+| (gerades) Prisma · Grund-/Deckfläche · Mantel | prisma (reto) · base inferior / superior · superfície lateral | |
+| Grundfläche $G$ · Umfang $u$ · Mantel $M$ · Oberfläche $O$ · Volumen $V$ | $A_b$ · $P_b$ · $A_L$ · área total $A$ · $V$ | wie vektoren.js (mathe12-pt); auch in den Widget-Bildern (Regel) |
+| Schrägbild · Kavalierperspektive · Körpernetz | desenho em perspetiva · perspetiva cavaleira · planificação | |
+| Ecken · Kanten · Flächen · Quader · Würfel | vértices · arestas · faces · paralelepípedo · cubo | |
+| Anteil · Kreisdiagramm · Kreisausschnitt | parte do todo (fração) · gráfico circular · setor circular | $1\,\%$ corresponde a $3{,}6^\circ$ (statt $\widehat{=}$) |
+| Flächenanteil · Volumenanteil | parte da área · parte do volume | |
+| Primzahl · zusammengesetzte Zahl · Primfaktorzerlegung · Faktorbaum | número primo · número composto · decomposição em fatores primos · árvore de fatores | |
+| ggT · kgV | m.d.c. · m.m.c. | auch im Widget (Regel), $\text{m.d.c.}(84, 360)$ |
+| Sieb des Eratosthenes · Quersumme · Teilbarkeitsregeln | crivo de Eratóstenes · soma dos algarismos · critérios de divisibilidade | |
+| Primzahlzwillinge · vollkommene / befreundete Zahlen · euklidischer Algorithmus | primos gémeos · números perfeitos / amigos · algoritmo de Euclides | |

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática GY 6 · Capítulo O · Números primos | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Crivo de Eratóstenes, decomposição em fatores primos, infinitos números primos, criptografia. Capítulo O do manual interativo Matemática · Gymnasium 6: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · GYMNASIUM 6</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">ÁREA OPCIONAL</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">ÁREA OPCIONAL 3 · MAIO · JUNHO</p>
+            <h1>Números primos</h1>
+            <p class="b-hero-lead">2, 3, 5, 7, 11, 13: estes números não se podem dividir por nenhum outro a não ser por 1 e por eles próprios. Todos os outros números naturais são feitos a partir deles,
+                como uma casa feita de tijolos. Há mais de 2000 anos que as pessoas pensam neles. Algumas perguntas continuam até hoje sem resposta, e sem números primos não haveria pagamentos seguros na internet.</p>
+            <div class="b-chips"><span class="b-chip">8 AULAS</span><span class="b-chip">2 UNIDADES</span><span class="b-chip">2 LABS</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="sieb6" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>a distinguir <b>números primos</b> e <b>números compostos</b></li>
+                <li>a encontrar números primos com o <b>crivo de Eratóstenes</b></li>
+                <li>a decompor números em <b>fatores primos</b> e a determinar assim o m.d.c. e o m.m.c.</li>
+                <li>a compreender porque é que <b>não há um número primo maior do que todos</b></li>
+                <li>a conhecer os primos gémeos, os números perfeitos e os números amigos</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="6" data-ph="quantidade"><p class="b-q-text">Quantos divisores tem o número 12?</p><div class="b-sol"><p>$1, 2, 3, 4, 6, 12$</p></div></div>
+            <div class="b-q" data-ans="2" data-ph="quantidade"><p class="b-q-text">Quantos divisores tem o número 13?</p><div class="b-sol"><p>Só $1$ e $13$.</p></div></div>
+            <div class="b-q" data-ans="4" data-ph="número"><p class="b-q-text">Qual é o máximo divisor comum de 8 e 12?</p><div class="b-sol"><p>Divisores de 8: 1, 2, 4, 8. De 12: 1, 2, 3, 4, 6, 12. O maior comum: 4.</p></div></div>
+            <div class="b-q" data-ans="24" data-ph="número"><p class="b-q-text">Qual é o mínimo múltiplo comum de 8 e 12?</p><div class="b-sol"><p>Múltiplos de 12: 12, 24, … e 24 é divisível por 8.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">FORMAR RETÂNGULOS</div>
+            <div class="b-text"><p>Peguem em 12 peças quadradas e formem todos os retângulos completamente preenchidos: 1 por 12, 2 por 6, 3 por 4.</p>
+                <ul><li>Experimentem com todas as quantidades de 2 a 20. Com que números só há uma única fila comprida?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">ISTO ACABA?</div>
+            <div class="b-text"><p>Escrevam todos os números primos até 100. Contem quantos há entre 1 e 25, 26 e 50, 51 e 75, 76 e 100.</p>
+                <ul><li>Ficam mais raros? Pode ser que a certa altura acabem por completo?</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Números primos e fatores primos" data-toc-k="1" data-toc-short="1 Números primos">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">1</span>Números primos e fatores primos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Com 12 peças há três retângulos, com 13 peças só uma única fila comprida. O 13 só tem dois divisores: 1 e 13.
+                Números destes chamam-se <b>números primos</b>. O 12, pelo contrário, é feito de números mais pequenos: $12 = 2 \times 2 \times 3$.</p></div></div>
+            <div class="b-text"><p>Um <b>número primo</b> é um número natural com exatamente dois divisores: o 1 e ele próprio. O 1 não é primo, só tem um divisor.
+                Qualquer outro número maior do que 1 chama-se <b>composto</b>.</p>
+                <p>Todo o número composto se pode escrever como produto de números primos, e de uma só maneira (a menos da ordem). É a <b>decomposição em fatores primos</b>.
+                    A forma mais simples de a encontrar é com uma <b>árvore de fatores</b>: separar sempre o menor número primo que divide o número.</p>
+                <p>Ajudam os <b>critérios de divisibilidade</b>. Um número é divisível por 2 se o último algarismo for par; por 5 se terminar em 0 ou 5;
+                    por 3 (ou 9) se a <b>soma dos seus algarismos</b> for divisível por 3 (ou 9); por 4 se o número formado pelos dois últimos algarismos for divisível por 4.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · NÚMEROS PRIMOS</div>
+                <div class="b-text">
+                    <p><b>Número primo:</b> exatamente dois divisores. Os primeiros são $2, 3, 5, 7, 11, 13, 17, 19, 23, 29$. O 2 é o único par.</p>
+                    <p><b>Crivo de Eratóstenes:</b> risca o 1. O menor número não riscado é primo; risca todos os seus múltiplos. Repete.</p>
+                    <p><b>Decomposição em fatores primos:</b> $360 = 2 \times 2 \times 2 \times 3 \times 3 \times 5 = 2^3 \times 3^2 \times 5$</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Atalho no crivo:</b> até 100 só é preciso riscar os múltiplos de 2, 3, 5 e 7. Porque $11 \times 11 = 121$ já é maior do que 100.</p>
+            <p class="b-note"><b>91 é primo?</b> Parece, mas não é: $91 = 7 \times 13$.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · O CRIVO DE ERATÓSTENES</div>
+        <p class="b-help" style="margin:0 0 12px">Toca em «Próximo número primo». Cada cor risca os múltiplos de um número primo. Porque é que cada cor só começa no quadrado do número primo?</p>
+        <div data-widget="sieb6"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · ÁRVORE DE FATORES, M.D.C. E M.M.C.</div>
+        <p class="b-help" style="margin:0 0 12px">Escreve dois números. À esquerda cresce a árvore de fatores do primeiro número, à direita estão as duas decomposições com o m.d.c. e o m.m.c.</p>
+        <div data-widget="primfaktor6"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · PRIMO OU NÃO?</div>
+            <div class="b-text"><p>221 é um número primo?</p></div>
+            <div class="b-sol"><p>Só se testam os números primos cujo quadrado é, no máximo, 221: 2, 3, 5, 7, 11, 13 (porque $17 \times 17 = 289$).
+                2: ímpar. 3: soma dos algarismos 5. 5: termina em 1. 7: $7 \times 31 = 217$, resto 4. 11: $11 \times 20 = 220$, resto 1. 13: $13 \times 17 = 221$!</p>
+                <p><span class="b-res">$221 = 13 \times 17$, não é primo</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · SIMPLIFICAR COM FATORES PRIMOS</div>
+            <div class="b-text"><p>Simplifica $\tfrac{84}{360}$ até obteres uma fração irredutível.</p></div>
+            <div class="b-sol"><p>$84 = 2^2 \times 3 \times 7$, $360 = 2^3 \times 3^2 \times 5$. Em comum: $2^2 \times 3 = 12$, que é o m.d.c.</p>
+                <p><span class="b-res">$\tfrac{84}{360} = \tfrac{7}{30}$</span></p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Primo ou composto? Justifica. a) 51 &nbsp; b) 53 &nbsp; c) 57 &nbsp; d) 87 &nbsp; e) 97</p></div>
+            <div class="b-hint"><p>Usa a soma dos algarismos para a divisibilidade por 3.</p></div>
+            <div class="b-sol"><p>a) $3 \times 17$ &nbsp; b) primo &nbsp; c) $3 \times 19$ &nbsp; d) $3 \times 29$ &nbsp; e) primo</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Decompõe em fatores primos: a) 48 &nbsp; b) 90 &nbsp; c) 126 &nbsp; d) 1000 &nbsp; e) 1001</p></div>
+            <div class="b-sol"><p>a) $2^4 \times 3$ &nbsp; b) $2 \times 3^2 \times 5$ &nbsp; c) $2 \times 3^2 \times 7$ &nbsp; d) $2^3 \times 5^3$ &nbsp; e) $7 \times 11 \times 13$</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina o m.d.c. e o m.m.c. com os fatores primos: a) 24 e 36 &nbsp; b) 45 e 75 &nbsp; c) 14 e 15</p></div>
+            <div class="b-sol"><p>a) $24 = 2^3 \times 3$, $36 = 2^2 \times 3^2$: m.d.c. 12, m.m.c. 72 &nbsp; b) $45 = 3^2 \times 5$, $75 = 3 \times 5^2$: m.d.c. 15, m.m.c. 225 &nbsp; c) m.d.c. 1, m.m.c. 210</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar com o capítulo 1.2:</b> calcula $\tfrac{5}{24} + \tfrac{7}{36}$. O menor denominador comum encontra-se com o m.m.c.</p></div>
+            <div class="b-sol"><p>m.m.c.$(24, 36) = 72$. $\tfrac{15}{72} + \tfrac{14}{72} = \tfrac{29}{72}$</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Que números têm exatamente três divisores? Encontra todos até 100.</p></div>
+            <div class="b-hint"><p>Observa o 4, o 9 e o 25.</p></div>
+            <div class="b-sol"><p>Os quadrados dos números primos: 4, 9, 25, 49. Os seus divisores são $1$, $p$ e $p^2$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="25" data-ph="quantidade"><p class="b-q-text">Quantos números primos há até 100?</p><div class="b-sol"><p>25. Experimenta com o crivo.</p></div></div>
+        <div class="b-q" data-ans="13" data-ph="número"><p class="b-q-text">$91 = 7 \times x$. Que número primo é $x$?</p><div class="b-sol"><p>$91 : 7 = 13$</p></div></div>
+        <div class="b-q" data-ans="12" data-ph="m.d.c."><p class="b-q-text">Qual é o m.d.c. de 84 e 360?</p><div class="b-sol"><p>$2^2 \times 3 = 12$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Não há um número primo maior do que todos" data-toc-k="2" data-toc-short="2 Infinitos">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">2</span>Não há um número primo maior do que todos</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Até 25 há 9 números primos, entre 76 e 100 já só há 4. Ficam mais raros. Acabam a certa altura?
+                Não. Euclides demonstrou-o há mais de 2000 anos, com uma ideia espantosamente curta.</p></div></div>
+            <div class="b-text"><p><b>A ideia de Euclides:</b> pega numa lista qualquer de números primos, por exemplo 2, 3, 5, 7. Multiplica-os todos e adiciona 1: $2 \times 3 \times 5 \times 7 + 1 = 211$.
+                Dividindo 211 por 2, 3, 5 ou 7, o resto é sempre 1. Portanto, 211 tem um fator primo que <b>não</b> está na lista. (Aqui o próprio 211 é primo.)
+                Isto funciona com qualquer lista. Por isso nenhuma lista está completa, e há infinitos números primos.</p>
+                <p>Atenção: o novo número não tem de ser primo. $2 \times 3 \times 5 \times 7 \times 11 \times 13 + 1 = 30\,031 = 59 \times 509$. Mas também 59 e 509 não estavam na lista.</p>
+                <p>Muitos tentaram encontrar uma <b>fórmula</b> que só desse números primos. Leonhard Euler encontrou $n^2 + n + 41$: para $n = 0, 1, 2, \ldots, 39$ só dá números primos.
+                    Mas para $n = 40$ obtém-se $1681 = 41 \times 41$. Uma fórmula para todos os números primos ainda ninguém encontrou.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · INFINITOS NÚMEROS PRIMOS</div>
+                <div class="b-text">
+                    <p><b>Teorema (Euclides):</b> não há um número primo maior do que todos.</p>
+                    <p><b>Ideia da demonstração:</b> para qualquer lista de números primos, (o produto de todos) $+ 1$ não é divisível por nenhum deles. Os seus fatores primos são portanto números primos novos.</p>
+                    <p><b>Primos gémeos</b> são números primos com diferença 2: $(3, 5)$, $(5, 7)$, $(11, 13)$, $(17, 19)$ … Se há infinitos, ninguém sabe.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Números perfeitos</b> são iguais à soma dos seus divisores próprios: $6 = 1 + 2 + 3$, $28 = 1 + 2 + 4 + 7 + 14$.</p>
+            <p class="b-note"><b>Números amigos:</b> os divisores próprios de 220 somam 284, os de 284 somam 220.</p>
+            <p class="b-note"><b>Números primos na internet:</b> multiplicar dois números primos grandes é fácil. A partir do produto, voltar a encontrar os dois é extremamente difícil. É nisso que assenta o método RSA (1977), com que se cifram dados.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · VERIFICAR O NÚMERO DE EUCLIDES</div>
+        <p class="b-help" style="margin:0 0 12px">$2310 = 2 \times 3 \times 5 \times 7 \times 11$ e, ao lado, $2311$. Os dois têm algum divisor comum? Experimenta também $210$ e $211$.</p>
+        <div data-widget="primfaktor6" data-a="2310" data-b="2311"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · O ALGORITMO DE EUCLIDES</div>
+            <div class="b-text"><p>Determina o m.d.c. de 84 e 360 sem fatores primos: divide com resto até não haver resto.</p></div>
+            <div class="b-sol"><p>$360 = 4 \times 84 + 24$ · $84 = 3 \times 24 + 12$ · $24 = 2 \times 12 + 0$. O último divisor é o m.d.c.</p>
+                <p><span class="b-res">m.d.c.$(84, 360) = 12$</span>. Este algoritmo programa-se facilmente.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · NÚMEROS AMIGOS</div>
+            <div class="b-text"><p>Verifica que 220 e 284 são números amigos.</p></div>
+            <div class="b-sol"><p>Divisores de 220 sem o 220: $1 + 2 + 4 + 5 + 10 + 11 + 20 + 22 + 44 + 55 + 110 = 284$.</p>
+                <p>Divisores de 284 sem o 284: $1 + 2 + 4 + 71 + 142 =$ <span class="b-res">$220$</span> ✓</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Encontra todos os primos gémeos menores do que 100.</p></div>
+            <div class="b-sol"><p>$(3, 5)$, $(5, 7)$, $(11, 13)$, $(17, 19)$, $(29, 31)$, $(41, 43)$, $(59, 61)$, $(71, 73)$: oito pares.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Calcula $n^2 + n + 41$ para $n = 0, 1, 2, 3, 4$. São números primos? Verifica também $n = 40$ e $n = 41$.</p></div>
+            <div class="b-sol"><p>41, 43, 47, 53, 61: todos primos. $n = 40$: $1681 = 41^2$. $n = 41$: $1763 = 41 \times 43$. A fórmula falha.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Mostra que 28 é um número perfeito. O 12 é perfeito? E o 8?</p></div>
+            <div class="b-sol"><p>$1 + 2 + 4 + 7 + 14 = 28$ ✓. No 12: $1 + 2 + 3 + 4 + 6 = 16$, demasiado. No 8: $1 + 2 + 4 = 7$, pouco.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Determina com o algoritmo de Euclides: a) m.d.c.$(48, 180)$ &nbsp; b) m.d.c.$(91, 119)$</p></div>
+            <div class="b-sol"><p>a) $180 = 3 \times 48 + 36$, $48 = 1 \times 36 + 12$, $36 = 3 \times 12$: m.d.c. 12 &nbsp; b) $119 = 1 \times 91 + 28$, $91 = 3 \times 28 + 7$, $28 = 4 \times 7$: m.d.c. 7</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>A demonstração de Euclides com a lista 3, 5: $3 \times 5 + 1 = 16$. O 16 não é primo. Isso contradiz a demonstração?</p></div>
+            <div class="b-hint"><p>Que fatores primos tem o 16? Estão na lista?</p></div>
+            <div class="b-sol"><p>Não. $16 = 2^4$, e o 2 não estava na lista. A demonstração só diz: há um fator primo que não está na lista. Aqui é o 2.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="211" data-ph="número"><p class="b-q-text">Quanto é $2 \times 3 \times 5 \times 7 + 1$?</p><div class="b-sol"><p>$210 + 1 = 211$</p></div></div>
+        <div class="b-q" data-ans="1681" data-ph="número"><p class="b-q-text">Quanto dá $n^2 + n + 41$ para $n = 40$?</p><div class="b-sol"><p>$1600 + 40 + 41 = 1681 = 41^2$</p></div></div>
+        <div class="b-q" data-ans="8" data-ph="quantidade"><p class="b-q-text">Quantos pares de primos gémeos há abaixo de 100?</p><div class="b-sol"><p>Oito pares.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Dois autocarros partem juntos às 8:00. O autocarro A volta a passar de 12 em 12 minutos, o autocarro B de 18 em 18 minutos. Quando voltam a partir ao mesmo tempo?</p></div>
+            <div class="b-sol"><p>m.m.c.$(12, 18) = 36$. Às 8:36.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p><b>Relacionar com o capítulo 1.1:</b> que frações $\tfrac{1}{n}$, com $n$ de 2 a 50, dão dízimas finitas? Usa os fatores primos dos denominadores.</p></div>
+            <div class="b-sol"><p>Só os denominadores feitos de fatores 2 e 5: 2, 4, 5, 8, 10, 16, 20, 25, 32, 40, 50.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Quer-se formar um retângulo com 72 mosaicos quadrados iguais. Quantos retângulos diferentes há? Qual é o mais parecido com um quadrado?</p></div>
+            <div class="b-sol"><p>Divisores de 72: 1, 2, 3, 4, 6, 8, 9, 12, 18, 24, 36, 72. Portanto 6 retângulos: 1 × 72, 2 × 36, 3 × 24, 4 × 18, 6 × 12, 8 × 9. O mais quadrado: 8 × 9.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>As cigarras norte-americanas do género <i>Magicicada</i> só saem da terra de 13 em 13 ou de 17 em 17 anos. Os investigadores supõem que os ciclos de números primos as protegem de inimigos que são frequentes de 2 em 2, de 3 em 3 ou de 4 em 4 anos. Quantas vezes, em 60 anos, uma cigarra de 12 anos encontra um inimigo de 4 anos, e quantas vezes uma cigarra de 13 anos?</p></div>
+            <div class="b-hint"><p>Os anos em comum são múltiplos comuns.</p></div>
+            <div class="b-sol"><p>Cigarra de 12 anos: m.m.c.$(12, 4) = 12$, portanto nos anos 12, 24, 36, 48, 60: cinco vezes. Cigarra de 13 anos: m.m.c.$(13, 4) = 52$, portanto só uma vez. Se é mesmo essa a razão, ainda não está esclarecido.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: O maior número primo conhecido" data-toc-k="X" data-toc-short="Recorde">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">INVESTIGAÇÃO HOJE</span></div>
+    <h2>O maior número primo conhecido</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Há infinitos números primos, mas claro que não se conhecem todos. O maior conhecido é $2^{136\,279\,841} - 1$. Tem <b>41 024 320 algarismos</b>.
+                Foi encontrado a 12 de outubro de 2024 pelo norte-americano <b>Luke Durant</b>. Participava no projeto GIMPS, em que muitas pessoas põem os seus computadores a procurar números primos em conjunto.
+                Para isso usou muitos processadores gráficos alugados em centros de dados.</p>
+            <p>Os números da forma $2^p - 1$ chamam-se <b>números de Mersenne</b>, por causa do monge francês Marin Mersenne. Para eles há um teste especialmente rápido, por isso quase todos os números primos recorde têm esta forma.
+                No outono de 2026, ainda ninguém tinha encontrado um maior.</p>
+            <p><b>Verifica:</b> numa página de livro cabem cerca de 3000 algarismos. Quantas páginas seriam precisas para imprimir o número? E quantos livros com 500 páginas cada?</p>
+            <div class="b-sol"><p>$41\,024\,320 : 3000 \approx 13\,700$ páginas, ou seja, cerca de 27 livros grossos.</p></div>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fontes:</b> GIMPS, «Mersenne Prime Discovery – 2^136279841−1 is Prime!», mersenne.org (outubro de 2024). Euclides, Elementos, livro IX, proposição 20 (infinitos números primos).</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>NÚMERO PRIMO</h4><p>exatamente dois divisores, o 1 não é primo</p></div>
+        <div><p>$2, 3, 5, 7, 11, 13, \ldots$</p></div></div>
+    <div class="b-rueck"><div><h4>CRIVO</h4><p>o menor número que resta é primo, riscar os seus múltiplos</p></div>
+        <div><p>até 100: 25 números primos</p></div></div>
+    <div class="b-rueck"><div><h4>FATORES PRIMOS</h4><p>cada número, de forma única, como produto de números primos · daí o m.d.c. e o m.m.c.</p></div>
+        <div><p>$360 = 2^3 \times 3^2 \times 5$</p></div></div>
+    <div class="b-rueck"><div><h4>EUCLIDES</h4><p>produto de uma lista mais 1: fatores primos novos, portanto não há um número primo maior do que todos</p></div>
+        <div><p>$2 \times 3 \times 5 \times 7 + 1 = 211$</p></div></div>
+    <div class="b-rueck"><div><h4>PERGUNTAS EM ABERTO</h4><p>Fórmula dos números primos? Infinitos primos gémeos?</p></div>
+        <div><p>$n^2 + n + 41$ falha para $n = 40$</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · NÚMEROS PRIMOS</div>
+            <div class="b-q" data-ans="17" data-ph="número"><p class="b-q-text">$221 = 13 \times x$. Quanto vale $x$?</p><div class="b-sol"><p>$221 : 13 = 17$</p></div></div>
+            <div class="b-q" data-ans="5" data-ph="quantidade"><p class="b-q-text">Quantos fatores primos (contando as repetições) tem $48 = 2^4 \times 3$?</p><div class="b-sol"><p>$2, 2, 2, 2, 3$: cinco.</p></div></div>
+            <div class="b-q" data-ans="97" data-ph="número"><p class="b-q-text">Qual é o maior número primo menor do que 100?</p><div class="b-sol"><p>97</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · M.D.C., M.M.C. E MAIS</div>
+            <div class="b-q" data-ans="72" data-ph="m.m.c."><p class="b-q-text">m.m.c. de 24 e 36?</p><div class="b-sol"><p>$2^3 \times 3^2 = 72$</p></div></div>
+            <div class="b-q" data-ans="7" data-ph="m.d.c."><p class="b-q-text">m.d.c. de 91 e 119?</p><div class="b-sol"><p>Algoritmo de Euclides: 7</p></div></div>
+            <div class="b-q" data-ans="28" data-ph="número"><p class="b-q-text">Qual é o segundo menor número perfeito?</p><div class="b-sol"><p>$28 = 1 + 2 + 4 + 7 + 14$</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="kreisteilung" href="../../kreisteilung.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">KREISTEILUNG</span><span class="b-lab-what">Como a fórmula dos primos: um padrão que de repente se quebra</span></span></a>
+        <a class="b-lab" data-lab="collatz" href="../../collatz.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">COLLATZ</span><span class="b-lab-what">Mais um enigma de números por resolver</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Gymnasium 6.º ano · área opcional 3, segundo o programa de Matemática do Gymnasium da Saxónia.</p>
+    <p>Todos os textos, exercícios e figuras são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-pt/geometrie.js"></script>
+<script src="../../js/buch-gy6.js"></script>
+<script src="../../js/buch-pt/gy6.js"></script>
+</body>
+</html>
