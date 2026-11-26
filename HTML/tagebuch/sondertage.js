@@ -33,22 +33,70 @@ function hash(a, b, c) {
   return ((h ^ (h >>> 15)) >>> 0) / 4294967296;
 }
 const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; };
+/* slot i of a recurring element at time t: period P, start delay d -> { k: the cycle, a: age in it, u: a / P } or null before
+   it starts; every cycle takes its values from hash(seed, i, k) - the same in every copy, nothing piles up */
+const slot = (t, P, d) => { const q = t - d; if (q < 0) return null; const k = Math.floor(q / P); return { k, a: q - k * P, u: (q - k * P) / P }; };
+/* a soft round sprite (snow, glow) */
+function softDot(rgb, size = 48, core = .25) {
+  const c = canvas(size, size), x = c.getContext('2d'), r = size / 2, g = x.createRadialGradient(r, r, 0, r, r, r);
+  g.addColorStop(0, `rgba(${rgb},1)`); g.addColorStop(core, `rgba(${rgb},.85)`); g.addColorStop(1, `rgba(${rgb},0)`);
+  x.fillStyle = g; x.fillRect(0, 0, size, size);
+  return c;
+}
+/* gentle snow over the whole canvas: n flakes in three depths, each falling, swaying and drifting; endless by slots */
+function snowfall(seed, n, opt = {}) {
+  const spr = softDot('255,255,255', 48, .35), speed = opt.speed || 1, tint = opt.alpha == null ? .9 : opt.alpha;
+  return (ctx, t, B, A, u) => {
+    const W = B.W, H = B.H;
+    for (let i = 0; i < n; i++) {
+      const z = hash(seed, 400, i), P = (9 + 9 * (1 - z)) / speed, s = slot(t, P, -hash(seed, 401, i) * P);
+      const h1 = hash(seed + s.k, 402, i), h2 = hash(seed + s.k, 403, i);
+      const y = -20 + s.u * (H + 40), x = h1 * W + Math.sin(t * (.4 + h2 * .5) + i) * (12 + 18 * z) * u + s.u * 40 * u * (h2 - .3);
+      const d = (1.2 + 3.4 * z) * u + 1;
+      ctx.globalAlpha = A * tint * (.3 + .55 * z) * Math.min(1, s.u * 12, (1 - s.u) * 12);
+      ctx.drawImage(spr, x - d, y - d, 2 * d, 2 * d);
+    }
+    ctx.globalAlpha = 1;
+  };
+}
 
 const KINDS = { '10-31': 'match', '12-31': 'fireworks' };
 /** which special day a date is: 'fireworks' (Dec 31), 'match' (Oct 31) or '' */
+/** shared helpers for the scene modules in sondertage/ */
+export const util = { TAU, clamp, smooth, mix, rng, hash, canvas, slot, softDot, snowfall, glowSprite: (rgb, size) => glowSprite(rgb, size), governor: q => governor(q) };
+
 export function sondertagFor(iso) {
   const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(iso || '');
   return m ? KINDS[m[2] + '-' + m[3]] || '' : '';
 }
 
-/** a scene for a special day */
+/* the scenes of the other special days, one small module each in sondertage/ - only the day's own is loaded. The keys are
+   the ones of the book's day list (sonderKey in index.html), the music hangs on the same keys */
+const SCENES = ['neujahr', 'fruehling', 'sommer', 'herbst', 'winter', 'pi', 'mai', 'einheit', 'martin', 'nikolaus', 'heiligabend', 'stephanstag'];
+const ALIAS = { silvester: 'fireworks', streichhoelzer: 'match' };
+
+/** a scene for a special day: the key of the day list (or 'fireworks' / 'match'). opts.layer: only a small extra layer
+    (a day that falls on a Sunday of Advent keeps the wreath) - for 'nikolaus' and 'heiligabend' */
 export function createSondertag(kind, opts = {}) {
+  kind = ALIAS[kind] || kind;
   const box = opts.box || { x: 0, y: 0, w: 800, h: 560, W: 800, H: 560 };
   const seed = (opts.seed == null ? 20261231 : opts.seed) >>> 0;
   const q = opts.quality == null || opts.quality === 'auto' ? autoQuality() : clamp(opts.quality | 0, 0, 2);
   if (kind === 'fireworks') return fireworksScene(box, seed, q, opts);
   if (kind === 'match') return matchScene(box, seed, q, opts);
-  return null;
+  if (!SCENES.includes(kind)) return null;
+  /* the clock runs from the call; until the scene's module is there, nothing is drawn - every copy lands on the same moment */
+  let real = null, B = box, dead = false;
+  import(new URL('./sondertage/' + kind + '.js', import.meta.url).href)
+    .then(m => { if (!dead) real = m.create({ box: B, seed, quality: q, layer: !!opts.layer, veil: opts.veil }); })
+    .catch(e => console.warn('sondertage:', kind, e && e.message));
+  return {
+    kind,
+    draw(ctx, t, alpha) { if (real) real.draw(ctx, t, alpha); },
+    resize(b) { B = b; if (real) real.resize(b); },
+    destroy() { dead = true; if (real) real.destroy(); real = null; },
+    get quality() { return real && real.quality != null ? real.quality : q; }
+  };
 }
 
 /* a first guess from the device; the governor steps down from there when frames run long */
@@ -563,7 +611,8 @@ void main() {
   a += blue * 0.22 * (1.0 - a);
   /* a soft warm halo */
   float amp = max(uAmp.x, uAmp.y);
-  float halo = exp(-(dx * dx * 2.2 + (hy - 0.4) * (hy - 0.4) * 0.9)) * 0.16 * amp;
+  /* feathered to nothing before the early-out above and the sides of the region: no visible edge anywhere */
+  float halo = exp(-(dx * dx * 2.2 + (hy - 0.4) * (hy - 0.4) * 0.9)) * 0.16 * amp * smoothstep(-0.5, 0.05, hy) * (1.0 - smoothstep(1.1, 1.6, abs(dx)));
   col += vec3(1.0, 0.5, 0.16) * halo * (1.0 - a);
   a += halo * 0.35 * (1.0 - a);
   /* smoke: thin filaments rising above the tip, meandering and spreading */
@@ -680,6 +729,20 @@ function emberTexture(w, h, seed) {
   return c;
 }
 
+/* a small golden heart (the rain of hearts on Oct 31): a warm gold gradient, a darker rim, a light on the upper left lobe;
+   back = the darker gold of its back as it tumbles */
+function heartSprite(size, back) {
+  const c = canvas(size, size), x = c.getContext('2d'), s = size * .92;
+  x.translate(size / 2, size / 2 + size * .06); x.scale(s, s);
+  const path = () => { x.beginPath(); x.moveTo(0, .34); x.bezierCurveTo(-.62, -.04, -.4, -.62, 0, -.26); x.bezierCurveTo(.4, -.62, .62, -.04, 0, .34); x.closePath(); };
+  const g = x.createLinearGradient(-.4, -.45, .35, .35);
+  if (back) { g.addColorStop(0, '#d9a93e'); g.addColorStop(.55, '#a8761f'); g.addColorStop(1, '#6e4a10'); }
+  else { g.addColorStop(0, '#fff2b8'); g.addColorStop(.35, '#f2c94e'); g.addColorStop(.75, '#c8901f'); g.addColorStop(1, '#8a5c12'); }
+  path(); x.fillStyle = g; x.fill();
+  x.lineWidth = .035; x.strokeStyle = back ? 'rgba(70,44,6,.7)' : 'rgba(110,70,10,.65)'; x.stroke();
+  if (!back) { const h = x.createRadialGradient(-.2, -.3, 0, -.2, -.3, .2); h.addColorStop(0, 'rgba(255,255,240,.9)'); h.addColorStop(1, 'rgba(255,255,240,0)'); x.fillStyle = h; x.fillRect(-.5, -.6, 1, 1); }
+  return c;
+}
 function matchScene(box, seed, q0, opts) {
   let B = box, dpr = 0;
   const gov = governor(q0), tmp = [0, 0];
@@ -688,6 +751,7 @@ function matchScene(box, seed, q0, opts) {
   const heads = [headTexture(96, 128, seed ^ 1, false), headTexture(96, 128, seed ^ 2, false)];
   const chars = [headTexture(96, 128, seed ^ 3, true), headTexture(96, 128, seed ^ 4, true)], embers = [emberTexture(96, 128, seed ^ 5), emberTexture(96, 128, seed ^ 6)];
   const spark = glowSprite('255,170,70', 32), sparkW = glowSprite('255,236,190', 32);
+  const heartF = heartSprite(48, false), heartB = heartSprite(48, true), glint = glowSprite('255,236,190', 32);
   const charJag = Array.from({ length: 24 }, (_, i) => hash(seed, 31, i) - .5);
   let textImg = null, textKey = '';
   const FONT = '"Great Vibes", "Pinyon Script", cursive', TEXT = 'it’s a match';
@@ -696,10 +760,14 @@ function matchScene(box, seed, q0, opts) {
   /* poses: [time, x (U from the middle), y (U from the heads' line), angle (rad, + = the stick's foot to the left)] */
   const R0 = opts.gl === false ? null : flameGL();
   if (R0) { const { cv, gl } = R0; cv.width = cv.height = 8; gl.viewport(0, 0, 8, 8); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3); }
+  /* after the strike they settle very close together, almost touching, at slightly different heights - the left one about
+     a tenth of the stick higher and nearly upright, the right one leaning in */
   const KEY = [
-    [[0, -.62, .8, .95], [.3, -.62, .8, .95], [1.55, -.075, .025, .38], [1.98, -.072, .02, .37], [2.12, -.06, .012, .33], [2.95, -.05, 0, .3]],
-    [[0, .62, .8, -.95], [.45, .62, .8, -.95], [1.65, .07, -.03, -.42], [1.9, .035, -.062, -.44], [2.12, -.105, .05, -.3], [2.4, -.02, .02, -.3], [3, .05, 0, -.3]]
+    [[0, -.62, .8, .95], [.3, -.62, .8, .95], [1.55, -.075, .025, .38], [1.98, -.072, .02, .37], [2.12, -.06, .012, .33], [2.95, -.021, -.046, .07]],
+    [[0, .62, .8, -.95], [.45, .62, .8, -.95], [1.65, .07, -.03, -.42], [1.9, .035, -.062, -.44], [2.12, -.105, .05, -.3], [2.4, -.01, .02, -.28], [3, .021, 0, -.28]]
   ];
+  /* right match a little smaller (stick, head and flame) */
+  const SIZE = [1, .87];
   const pose = (k, t, out) => {
     const K = KEY[k];
     let i = 0;
@@ -715,12 +783,15 @@ function matchScene(box, seed, q0, opts) {
 
   const lay = () => {
     const U = Math.min(B.h, B.w * 1.25), L = .46 * U, th = L * .052;
-    return { U, cx: B.x + B.w / 2, yh: B.y + B.h * .5 - .15 * U, L, th, hw: th * .86, hl: th * 2.4, H: .2 * U };
+    /* ym, mx: the heads' line and middle - the matches and their flame stand a little low and a little left of the fold,
+       the text below their feet a little to the right */
+    const yh = B.y + B.h * .5 - .15 * U;
+    return { U, cx: B.x + B.w / 2, mx: B.x + B.w * (.5 - .01), yh, ym: yh + .09 * B.h, L, th, hw: th * .86, hl: th * 2.4, H: .2 * U };
   };
   const flick = t => 1 + .05 * Math.sin(t * 11.3) + .035 * Math.sin(t * 17.7 + 1.3) + .025 * Math.sin(t * 29.1 + .7);
   const ampOf = dt => dt <= 0 ? 0 : dt < .1 ? 1.6 * dt / .1 : dt < .55 ? mix(1.6, .6, smooth(.1, .55, dt)) : mix(.6, 1, smooth(.55, 3.2, dt));
   /* the head and its stick in world coordinates */
-  const place = (k, t, G, out) => { pose(k, t, out); out[0] = G.cx + out[0] * G.U; out[1] = G.yh + out[1] * G.U; return out; };
+  const place = (k, t, G, out) => { pose(k, t, out); out[0] = G.mx + out[0] * G.U; out[1] = G.ym + out[1] * G.U; return out; };
 
   const woodFor = G => {
     const w = Math.max(8, Math.round(G.th * dpr)), h = Math.max(64, Math.round((G.L + G.hl * .1) * dpr)), key = w + 'x' + h;
@@ -759,6 +830,7 @@ function matchScene(box, seed, q0, opts) {
     const charHead = smooth(0, 2.6, burn), fl = flick(t + k * 1.7);
     ctx.save();
     ctx.translate(P[0], P[1]); ctx.rotate(P[2]);
+    if (SIZE[k] !== 1) ctx.scale(SIZE[k], SIZE[k]);
     ctx.globalAlpha = A;
     /* the shadow on the page */
     ctx.save();
@@ -875,8 +947,8 @@ function matchScene(box, seed, q0, opts) {
   }
 
   /* the text, rendered once in the book's script, gold */
-  function textImage(G, t) {
-    const size = Math.round(G.U * .095 * dpr);
+  function textImage(cssSize, t) {
+    const size = Math.round(cssSize * dpr);
     if (size === textKey) return textImg;
     if (document.fonts && document.fonts.check && !document.fonts.check(`${size}px ${FONT}`) && t < TI + 8) return null;
     const m = canvas(10, 10).getContext('2d');
@@ -885,6 +957,9 @@ function matchScene(box, seed, q0, opts) {
     x.font = `${size}px ${FONT}`; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
     const g = x.createLinearGradient(0, h * .2, 0, h * .8);
     g.addColorStop(0, '#fbe7a6'); g.addColorStop(.5, '#e2bd5c'); g.addColorStop(1, '#a8761c');
+    /* a soft dark halo first, so the letters stay clear over whatever is printed on the page below them */
+    x.shadowColor = 'rgba(12,8,4,.9)'; x.shadowBlur = size * .3; x.fillStyle = 'rgba(12,8,4,.85)';
+    x.fillText(TEXT, w / 2, h * .68); x.fillText(TEXT, w / 2, h * .68);
     x.shadowColor = 'rgba(255,170,70,.55)'; x.shadowBlur = size * .18;
     x.fillStyle = g; x.fillText(TEXT, w / 2, h * .68);
     x.shadowColor = 'transparent'; x.lineWidth = Math.max(1, size * .012); x.strokeStyle = 'rgba(90,50,10,.35)'; x.strokeText(TEXT, w / 2, h * .68);
@@ -919,7 +994,7 @@ function matchScene(box, seed, q0, opts) {
     const ampA = ampOf(t - TI), ampB = ampOf(t - TI2), fl = flick(t), lit = Math.max(ampA, ampB);
     const merge = smooth(TI + 1.1, TI + 4.2, t), light = clamp(lit, 0, 1.3) * fl;
     /* the flame bases: just above the head, along the stick */
-    const base = (P, k) => { const ti = k ? TI2 : TI, burn = t - ti, c = burn > 1.2 ? .17 * G.L * (1 - Math.exp(-(burn - 1.2) / 14)) * .4 : 0, d = -G.hl * .3 + c; return [P[0] - Math.sin(P[2]) * d, P[1] + Math.cos(P[2]) * d]; };
+    const base = (P, k) => { const ti = k ? TI2 : TI, burn = t - ti, c = burn > 1.2 ? .17 * G.L * (1 - Math.exp(-(burn - 1.2) / 14)) * .4 : 0, d = (-G.hl * .3 + c) * SIZE[k]; return [P[0] - Math.sin(P[2]) * d, P[1] + Math.cos(P[2]) * d]; };
     const fa = base(pa, 0), fb = base(pb, 1);
     const mx = (fa[0] + fb[0]) / 2, my = (fa[1] + fb[1]) / 2;
     ctx.save(); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
@@ -958,7 +1033,7 @@ function matchScene(box, seed, q0, opts) {
         gl.viewport(0, 0, cw, ch); gl.clear(gl.COLOR_BUFFER_BIT);
         gl.uniform2f(u.uRes, rw, rh);
         gl.uniform2f(u.uA, fa[0] - rx, fa[1] - ry); gl.uniform2f(u.uB, fb[0] - rx, fb[1] - ry);
-        gl.uniform2f(u.uAmp, ampA * (.97 + .06 * fl), ampB * (.97 + .06 * flick(t + 2.1)));
+        gl.uniform2f(u.uAmp, ampA * SIZE[0] * (.97 + .06 * fl), ampB * SIZE[1] * (.97 + .06 * flick(t + 2.1)));
         gl.uniform2f(u.uPuff, Math.max(0, puffAge), puff);
         gl.uniform1f(u.uH, G.H); gl.uniform1f(u.uMerge, merge); gl.uniform1f(u.uT, t % 512);
         gl.uniform1f(u.uSmoke, smoke); gl.uniform1f(u.uFlare, flare);
@@ -966,14 +1041,20 @@ function matchScene(box, seed, q0, opts) {
         ctx.globalAlpha = A;
         ctx.drawImage(cv, rx, ry, rw, rh);
         ctx.globalAlpha = 1;
-      } else drawFlame2D(ctx, fa, fb, G, [ampA, ampB], merge, A, t);
+      } else drawFlame2D(ctx, fa, fb, G, [ampA * SIZE[0], ampB * SIZE[1]], merge, A, t);
     }
     /* "it's a match", written in from the left */
     const tw = smooth(TI + 3.6, TI + 6.2, t);
     if (tw > 0) {
-      const img = textImage(G, t);
+      /* free below the feet of the matches at rest, with a little air, and inside the page: smaller only if the page ends
+         first. The script's letters reach about .85 of the font size above the baseline and .1 below it; the image holds
+         the baseline at 1.156 of the size from its top */
+      let foot = 0;
+      for (let k = 0; k < 2; k++) { const K = KEY[k][KEY[k].length - 1]; foot = Math.max(foot, G.ym + K[2] * U + (G.L * Math.cos(K[3]) + G.th * .5 * Math.abs(Math.sin(K[3]))) * SIZE[k]); }
+      const top = foot + .03 * B.h, size = clamp((B.y + B.h * .975 - top) / .95, U * .055, U * .095);
+      const img = textImage(size, t);
       if (img) {
-        const x = G.cx - img.w / 2, y = G.yh + .53 * U - img.h * .68, edge = img.w * .12, rev = tw * (img.w + edge);
+        const x = clamp(G.cx - img.w / 2 + B.w * .015, B.x + B.w * .02, B.x + B.w * .98 - img.w), y = top - .306 * size, edge = img.w * .12, rev = tw * (img.w + edge);
         ctx.save();
         ctx.beginPath(); ctx.rect(x, y, Math.max(0, rev - edge), img.h); ctx.clip();
         ctx.globalAlpha = A; ctx.drawImage(img.c, x, y, img.w, img.h);
@@ -984,6 +1065,28 @@ function matchScene(box, seed, q0, opts) {
           ctx.globalAlpha = A * .45; ctx.drawImage(img.c, x, y, img.w, img.h); ctx.restore();
         }
       }
+    }
+    /* golden hearts raining (Doc, 26.11.2026: "da müssen da noch irgendwie goldene Herzen regnen. Ganz viele. Kleine.") -
+       from the moment the words begin, endless: many small hearts fall from above through the whole picture, each from its
+       own moment, swaying and tumbling (the width turns with the spin, front gold and back darker, a glint as one faces the
+       light); nearer ones larger and faster */
+    const HT = TI + 3.6;
+    if (t > HT) {
+      const NH = gov.q === 0 ? 80 : gov.q === 1 ? 130 : 180, W = B.W, H = B.H, hu = U / 1000;
+      ctx.globalCompositeOperation = 'source-over';
+      for (let i = 0; i < NH; i++) {
+        const z = hash(seed, 71, i), P = 5.5 + 6.5 * (1 - z), sl = slot(t, P, HT + hash(seed, 72, i) * P);
+        if (!sl) continue;
+        const h = j => hash(seed + sl.k * 13, j, i);
+        const y = -24 + sl.u * (H + 48), x = h(1) * W + Math.sin(t * (.5 + .6 * h(2)) + i) * (12 + 24 * z) * hu * 1.4;
+        const sz = ((3.5 + 6 * z) * hu * 1.4 + 2.5) * (.85 + .3 * h(6)), spin = Math.cos(t * (1.1 + 2.1 * h(3)) + h(4) * TAU), rot = Math.sin(t * (.6 + .8 * h(5)) + i) * .5;
+        const a = A * (.62 + .38 * z) * Math.min(1, sl.u * 14, (1 - sl.u) * 10);
+        ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(.18 + .82 * Math.abs(spin), 1);
+        ctx.globalAlpha = a; ctx.drawImage(spin >= 0 ? heartF : heartB, -sz, -sz, 2 * sz, 2 * sz);
+        ctx.restore();
+        if (spin > .96 && z > .4) { const gs = sz * 1.3; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a * (spin - .96) / .04 * .8; ctx.drawImage(glint, x - gs * .55, y - gs * .75, gs, gs); ctx.globalCompositeOperation = 'source-over'; }
+      }
+      ctx.globalAlpha = 1;
     }
     ctx.restore();
   }
