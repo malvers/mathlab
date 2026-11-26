@@ -451,10 +451,25 @@
         }
     };
 
+    // ---- counted sets (Entries.java, 26.11.2026) -------------------------------------------------------------------
+
+    /**
+     * Dumbbells and Legs count repetitions instead of time: such a docfit_run row is one set - reps, weight_kg (for
+     * dumbbells ONE dumbbell; null = without), move ('Curls', 'Lateral Raises'), duration_ms 0.
+     */
+    const Sets = {
+        COUNTED: ['Dumbbells', 'Legs'],
+        isSet: r => r.reps > 0,
+        /** "5 kg", "2,5 kg", "2,25 kg" (Entries.kgText) */
+        kg: w => String(+(+w).toFixed(2)).replace('.', ',') + ' kg',
+        /** "12 ×", with a weight "12 × 5 kg" (Entries.setText) */
+        text: r => r.reps + ' ×' + (r.weight_kg > 0 ? ' ' + Sets.kg(r.weight_kg) : '')
+    };
+
     const api = {
         Times, Profile, isMeasured, gallagher, implausible, bodyOf, body, limits, fatScore, word, bmiWord, scoreOf, score,
-        scoreColor, Scale, Ranges, Girths, Pressures, CATEGORIES, Glucose, Fasting, ScaleTexts, fmt, tenth, nextUp,
-        HINTS: { HINT_PROFILE, HINT_FAT, HINT_IMPLAUSIBLE }, KINDS: ['Planks', 'Two Balls']
+        scoreColor, Scale, Ranges, Girths, Pressures, CATEGORIES, Glucose, Fasting, ScaleTexts, Sets, fmt, tenth, nextUp,
+        HINTS: { HINT_PROFILE, HINT_FAT, HINT_IMPLAUSIBLE }, KINDS: ['Planks', 'Balls', 'Dumbbells', 'Legs']
     };
     root.DocFitCore = api;
     if (typeof module !== 'undefined' && module.exports) module.exports = api;

@@ -7,8 +7,8 @@ import java.util.Locale;
 /**
  * The data of the "Verlauf" tab (Doc, 26.11.2026: "ein Tab mit den Verlaufsdaten ... für die laufenden Werte" - next to
  * the fasting view): the chosen stretch of time (4 weeks, 3 months, 1 year, everything) and one series per value -
- * the blood pressure (systolic, diastolic), the pulse, the fasting blood glucose and the stopwatch times per exercise;
- * the scale values come from History.series. All series oldest first, as HistoryChart draws them. Pure Java, tested in
+ * the blood pressure (systolic, diastolic), the pulse, the fasting blood glucose, the stopwatch times per exercise and
+ * the repetitions per set of the counted exercises, per move (Doc, 26.11.2026); the scale values come from History.series. All series oldest first, as HistoryChart draws them. Pure Java, tested in
  * TrendsTest.
  */
 final class Trends {
@@ -54,13 +54,53 @@ final class Trends {
         return out;
     }
 
-    /** The stopwatch times of one exercise in seconds, oldest first. */
+    /** The stopwatch times of one exercise in seconds, oldest first (its counted sets are no times). */
     static List<History.Point> runs(List<Entries.Entry> newestFirst, String kind) {
         List<History.Point> out = new ArrayList<>();
         for (int i = newestFirst.size() - 1; i >= 0; i--) {
             Entries.Entry e = newestFirst.get(i);
-            if (kind.equals(e.kind)) out.add(new History.Point(e.start, e.duration / 1000.0));
+            if (kind.equals(e.kind) && !e.isCounted()) out.add(new History.Point(e.start, e.duration / 1000.0));
         }
+        return out;
+    }
+
+    /** The counted sets of one exercise made as {@code move} ("" = without a move), oldest first. */
+    static List<Entries.Entry> sets(List<Entries.Entry> newestFirst, String kind, String move) {
+        List<Entries.Entry> out = new ArrayList<>();
+        for (int i = newestFirst.size() - 1; i >= 0; i--) {
+            Entries.Entry e = newestFirst.get(i);
+            if (e.isCounted() && kind.equals(e.kind) && e.move.equals(move)) out.add(e);
+        }
+        return out;
+    }
+
+    /**
+     * The moves the sets of an exercise were made as - one card each: the exercise's own moves in their order first,
+     * then any other (a name from before a rename, "" for sets without a move). Only moves with a set.
+     */
+    static List<String> setMoves(List<Entries.Entry> newestFirst, String kind) {
+        List<String> seen = new ArrayList<>();
+        for (int i = newestFirst.size() - 1; i >= 0; i--) {
+            Entries.Entry e = newestFirst.get(i);
+            if (e.isCounted() && kind.equals(e.kind) && !seen.contains(e.move)) seen.add(e.move);
+        }
+        List<String> out = new ArrayList<>();
+        for (String m : Entries.moves(kind)) if (seen.contains(m)) out.add(m);
+        for (String m : seen) if (!out.contains(m)) out.add(m);
+        return out;
+    }
+
+    /** The sets from {@code from} on. */
+    static List<Entries.Entry> setsSince(List<Entries.Entry> oldestFirst, long from) {
+        List<Entries.Entry> out = new ArrayList<>();
+        for (Entries.Entry e : oldestFirst) if (e.start >= from) out.add(e);
+        return out;
+    }
+
+    /** The repetitions of sets as points, in their order. */
+    static List<History.Point> reps(List<Entries.Entry> sets) {
+        List<History.Point> out = new ArrayList<>();
+        for (Entries.Entry e : sets) out.add(new History.Point(e.start, e.reps));
         return out;
     }
 

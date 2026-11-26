@@ -274,6 +274,72 @@ public class SyncPlanTest {
     }
 
     @Test
+    public void setsTravelWithRepsWeightAndMove() throws Exception {
+        Map<String, SyncRows.Row> local = new TreeMap<>();
+        SyncRows.runs("[{\"start\":" + T2 + ",\"duration\":0,\"kind\":\"Dumbbells\",\"reps\":12,\"kg\":2.5,"
+                + "\"move\":\"Curls\"},{\"start\":" + T1 + ",\"duration\":61000,\"kind\":\"Planks\"}]", local);
+        SyncRows.Row set = local.get(String.valueOf(T2)), time = local.get(String.valueOf(T1));
+        assertEquals(12, set.num("reps"));
+        assertEquals(250, set.num("weight_kg"));             // held in hundredths
+        assertEquals("Curls", set.str("move"));
+        assertTrue(SyncRows.valid(set));                      // duration 0 is fine for a set
+        assertNull(time.f.get("reps"));
+        assertNull(time.f.get("weight_kg"));
+        assertNull(time.f.get("move"));
+        JSONObject w = set.wire(null);
+        assertEquals(2.5, w.getDouble("weight_kg"), 0);       // travels as kg
+        assertEquals(12, w.getInt("reps"));
+        assertTrue(time.wire(null).isNull("reps"));            // a time sends the columns empty
+        // back from the server (numeric weight as a number) and from the remembered text: the same row
+        assertEquals(set.canon(), SyncRows.fromDb(SyncRows.RUN, w).canon());
+        assertEquals(set.canon(), SyncRows.fromCanon(SyncRows.RUN, set.canon()).canon());
+        JSONObject asText = new JSONObject(w.toString()).put("weight_kg", "2.50");   // numeric could come as text
+        assertEquals(250, SyncRows.fromDb(SyncRows.RUN, asText).num("weight_kg"));
+        // into the app's list
+        Map<String, SyncRows.Row> put = new TreeMap<>();
+        put.put(set.key, SyncRows.fromDb(SyncRows.RUN, w));
+        Entries.Entry e = Entries.parse(SyncRows.applyRuns("[]", put, new HashSet<>())).get(0);
+        assertEquals(12, e.reps);
+        assertEquals(2.5, e.kg, 0);
+        assertEquals("Curls", e.move);
+        assertEquals("Dumbbells", e.kind);
+    }
+
+    @Test
+    public void aRowFromBeforeTheSetsReadsAsATimeAndIsNotSentAgain() throws Exception {
+        // the canonical text a time was remembered with before the columns existed
+        String before = "{\"duration_ms\":61000,\"kind\":\"Planks\",\"started_at\":" + T1 + "}";
+        Map<String, SyncRows.Row> local = new TreeMap<>();
+        SyncRows.runs("[{\"start\":" + T1 + ",\"duration\":61000,\"kind\":\"Planks\"}]", local);
+        assertEquals(before, local.get(String.valueOf(T1)).canon());
+        Map<String, String> synced = new HashMap<>();
+        synced.put(String.valueOf(T1), before);
+        assertEquals(0, SyncPlan.push(SyncRows.RUN, local, synced).size());   // nothing goes up again
+        // a server row without the new columns (as before the migration) reads as the same time
+        JSONObject old = new JSONObject().put("started_at", SyncRows.iso(T1)).put("duration_ms", 61000)
+                .put("kind", "Planks").put("deleted_at", JSONObject.NULL);
+        SyncRows.Row r = SyncRows.fromDb(SyncRows.RUN, old);
+        assertEquals(before, r.canon());
+        Map<String, SyncRows.Row> put = new TreeMap<>();
+        put.put(r.key, r);
+        JSONArray a = new JSONArray(SyncRows.applyRuns("[]", put, new HashSet<>()));
+        assertEquals(3, a.getJSONObject(0).length());   // start, duration, kind - as before
+        assertFalse(a.getJSONObject(0).has("reps"));
+    }
+
+    @Test
+    public void setsTheDatabaseWouldRefuseAreNotSent() {
+        assertFalse(SyncRows.valid(SyncRows.row(SyncRows.RUN, false, "started_at", T1, "duration_ms", 0, "kind", "Legs",
+                "reps", 1001)));
+        assertFalse(SyncRows.valid(SyncRows.row(SyncRows.RUN, false, "started_at", T1, "duration_ms", 0, "kind", "Legs",
+                "reps", 12, "weight_kg", 30_001L)));
+        assertFalse(SyncRows.valid(SyncRows.row(SyncRows.RUN, false, "started_at", T1, "duration_ms", 0, "kind", "Legs",
+                "reps", 12, "move", "0123456789012345678901234567890")));   // 31 characters
+        assertTrue(SyncRows.valid(SyncRows.row(SyncRows.RUN, false, "started_at", T1, "duration_ms", 0, "kind", "Legs",
+                "reps", 1000, "weight_kg", 30_000L, "move", "012345678901234567890123456789")));
+    }
+
+    @Test
     public void canonicalTextIsTheSameWhateverTheOrder() throws Exception {
         SyncRows.Row a = SyncRows.row(SyncRows.RUN, false, "kind", "Planks", "started_at", T1, "duration_ms", 1000);
         SyncRows.Row b = SyncRows.fromCanon(SyncRows.RUN, a.canon());

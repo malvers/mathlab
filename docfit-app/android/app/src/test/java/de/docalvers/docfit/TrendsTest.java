@@ -67,6 +67,33 @@ public class TrendsTest {
     }
 
     @Test
+    public void setsAreNoTimesAndCountPerMove() {
+        List<Entries.Entry> newestFirst = new ArrayList<>();
+        newestFirst.add(new Entries.Entry(T, 0, "Dumbbells", 10, 4, "Lateral Raises"));
+        newestFirst.add(new Entries.Entry(T - DAY, 0, "Dumbbells", 12, 5, "Curls"));
+        newestFirst.add(new Entries.Entry(T - 2 * DAY, 41_000, "Dumbbells"));   // a time from before it counted
+        newestFirst.add(new Entries.Entry(T - 3 * DAY, 0, "Dumbbells", 9, 5, "Curls"));
+        newestFirst.add(new Entries.Entry(T - 4 * DAY, 0, "Dumbbells", 7, 3, "Rows"));   // a name from before a rename
+        newestFirst.add(new Entries.Entry(T - 5 * DAY, 0, "Legs", 15, 0, ""));
+        // the times only: the sets are no times
+        assertEquals(1, Trends.runs(newestFirst, "Dumbbells").size());
+        assertEquals(41, Trends.runs(newestFirst, "Dumbbells").get(0).value, 1e-9);
+        assertTrue(Trends.runs(newestFirst, "Legs").isEmpty());
+        // one card per move: its own moves in their order first, then others
+        assertEquals(java.util.Arrays.asList("Curls", "Lateral Raises", "Rows"), Trends.setMoves(newestFirst, "Dumbbells"));
+        assertEquals(java.util.Arrays.asList(""), Trends.setMoves(newestFirst, "Legs"));
+        assertTrue(Trends.setMoves(newestFirst, "Planks").isEmpty());
+        List<Entries.Entry> curls = Trends.sets(newestFirst, "Dumbbells", "Curls");
+        assertEquals(2, curls.size());
+        List<History.Point> reps = Trends.reps(curls);
+        assertEquals(9, reps.get(0).value, 0);          // oldest first
+        assertEquals(12, reps.get(1).value, 0);
+        assertEquals(T - DAY, reps.get(1).time);
+        assertEquals(1, Trends.setsSince(curls, T - 2 * DAY).size());
+        assertEquals("12 × 5 kg", Entries.setText(curls.get(curls.size() - 1)));
+    }
+
+    @Test
     public void newestValueAsText() {
         List<History.Point> pts = new ArrayList<>();
         assertEquals("–", Trends.latest(pts, 1, "kg"));

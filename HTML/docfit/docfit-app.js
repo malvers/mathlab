@@ -149,16 +149,21 @@
         for (const r of list) {
             const li = document.createElement('li');
             li.className = 'row';
-            // the exercise as plain text in front of the start time (Doc, 21.11.2026: no colour in the list)
+            // the exercise as plain text in front of the start time (Doc, 21.11.2026: no colour in the list); a counted
+            // set (Dumbbells, Legs) as on the phone: its move (or exercise) and weight before the time, "12 ×" right
+            const set = C.Sets.isSet(r);
             const start = 'Start ' + C.Times.clock(r.started_at) + ' Uhr';
-            const sub = (r.kind ? esc(r.kind) + ' · ' : '') + start;
+            const sub = set
+                ? esc(r.move || r.kind) + (r.weight_kg > 0 ? ' · ' + C.Sets.kg(r.weight_kg) : '') + ' · ' + C.Times.clock(r.started_at) + ' Uhr'
+                : (r.kind ? esc(r.kind) + ' · ' : '') + start;
+            const num = set ? r.reps + ' ×' : C.Times.duration(r.duration_ms);
             li.innerHTML = `<div class="when"><b>${C.Times.day(r.started_at)}</b><span>${sub}</span></div>`
-                + `<div class="num">${C.Times.duration(r.duration_ms)}</div>`
+                + `<div class="num">${num}</div>`
                 + `<button type="button" class="x" aria-label="Löschen">${X}</button>`;
             li.querySelector('.x').onclick = () => {
                 const gone = D.remove('run', r.started_at);
                 if (last && last.start === r.started_at) { last = null; ls.set(LS.last, null); }
-                offerUndo('Gelöscht: ' + C.Times.duration(r.duration_ms), () => D.put('run', gone));
+                offerUndo('Gelöscht: ' + (set ? C.Sets.text(r) : C.Times.duration(r.duration_ms)), () => D.put('run', gone));
             };
             box.appendChild(li);
         }

@@ -89,6 +89,11 @@ import java.util.function.IntConsumer;
  *   is for (Doc, 20.11.2026: two "Rubriken", "Planks" and "Two Balls"): one of two chips, the last choice remembered
  *   ("kind"); a stopped time takes the chip chosen at that moment (it may still be switched while the clock runs), and
  *   the list shows it in front of the start time. Voice control is the same for both.
+ *   Counted exercises (Doc, 26.11.2026: "Bei Dumbbells und Legs müssen wir Repeats zählen. Nicht die Zeit." - "Klar
+ *   brauchen wir auch das Gewicht."): with Dumbbells or Legs chosen the stopwatch gives way to the repetitions (big,
+ *   with – and +, a tap types them) and the weight (– / + in 0.5 kg, a tap types it; for dumbbells ONE dumbbell, 0 =
+ *   without), "Eintragen" in place of the command stores the set with the time of now; Dumbbells shows its moves
+ *   (Curls, Lateral Raises) as a second chip row. No voice control for a set. A running clock is never left for them.
  * - "Waage": while it is open the phone looks for the scale (ScaleLink). A state line says what happens ("Stell dich
  *   auf die Waage …", connecting, measuring, done), the last weigh-in stands big with fat, water, muscle and BMI
  *   (BodyComposition, from the profile Doc enters under "Profil"), waist and hip typed in by hand with their ratios
@@ -261,6 +266,25 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     // a time selected in ZEITEN (its start, 0 = none) and the line under the chips that says so
     private long pickedRun;
     private TextView pickHint;
+    // a short note in the pickHint line ("Erst die Uhr stoppen"), gone after a moment
+    private String hintNote;
+    private final Runnable endNote = () -> {
+        hintNote = null;
+        paintKinds();
+    };
+    // counted exercises (Doc, 26.11.2026): the move chips under the exercise chips (built for the exercise in
+    // moveRowKind), the next set's repetitions and weight with their – / +, and "Eintragen" in place of the command;
+    // the stopwatch's Start / Stopp / Reset row steps aside meanwhile
+    private LinearLayout moveRow;
+    private String moveRowKind;
+    private TextView[] moveChips = new TextView[0];
+    private View countBox, watchButtons;
+    private DigitsView repsView, kgView;
+    private TextView kgLabel;
+    private Button enterBtn;
+    private int reps;
+    private double kg;
+    private boolean shownCounting;
     private DigitsView resWeight;
     // the tiles under the weight: value, range bar and reference line (Ranges)
     private Tile tFat, tWater, tMuscle, tBmi, tWaist, tWhtr, tHip, tWhr;
@@ -694,9 +718,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
     }
 
-    /** Voice control runs only while DocFit is in front with the "Stoppuhr" tab shown. */
+    /** Voice control runs only while DocFit is in front with the "Stoppuhr" tab shown - and not for a counted set. */
     private void listenIfAllowed() {
-        if (!resumed || tab != TAB_WATCH || listener == null || listener.isRunning()) return;
+        if (!resumed || tab != TAB_WATCH || listener == null || listener.isRunning() || counting()) return;
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             if (!askedMic && !asking) {   // one permission question at a time, Android drops a second one
                 askedMic = true;
@@ -727,7 +751,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     @Override
     public void onCommand(Commands.Kind kind, long wallMillis) {
         long now = System.currentTimeMillis();
-        if (tab != TAB_WATCH || now - lastChange < DEBOUNCE_MS) return;   // never from the scale tab
+        if (tab != TAB_WATCH || now - lastChange < DEBOUNCE_MS || counting()) return;   // never from the scale tab
         if (kind == Commands.Kind.START && runStart == 0) start(Math.max(now - 3000, Math.min(wallMillis, now)));
         else if (kind == Commands.Kind.STOP && runStart != 0) stop(Math.max(runStart, Math.min(wallMillis, now)));
     }
@@ -788,6 +812,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     private void refresh() {
+        paintMode();
+        paintKinds();
         boolean running = runStart != 0;
         // the command to say next instead of a state word (Doc, 20.11.2026: "schreiben nur hin, ohne
         // Anführungszeichen, DocFit Start. Und wenn es läuft, DocFit Stopp") - exactly the words Commands listens for
@@ -811,8 +837,225 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         // no word and no sign for listening (Doc, 20.11.2026: "‚hört zu' braucht man nicht", then "den Kreis bitte
         // wegmachen"); only a problem says what it is
         ear.setText(earProblem == null ? "" : earProblem);
-        ear.setVisibility(earProblem == null ? View.GONE : View.VISIBLE);
+        ear.setVisibility(earProblem == null || counting() ? View.GONE : View.VISIBLE);
         empty.setVisibility(entries.size() == 0 ? View.VISIBLE : View.GONE);
+    }
+
+    // ---------- counted exercises (Doc, 26.11.2026) ----------
+
+    /** Repetitions instead of the stopwatch: a counted exercise chosen and no time running (a running one stays). */
+    private boolean counting() {
+        return runStart == 0 && Entries.counted(kind);
+    }
+
+    /** The move of the next set: the remembered one of the chosen exercise, else its first ("" without moves). */
+    private String move() {
+        return Entries.moveOrDefault(kind, prefs.getString("move:" + kind, null));
+    }
+
+    private String setKey() {
+        return "set:" + kind + ":" + move();
+    }
+
+    /** Stopwatch or repetitions: which parts show, and the microphone off for a set (as on the other tabs). */
+    private void paintMode() {
+        if (countBox == null) return;
+        boolean count = counting();
+        state.setVisibility(count ? View.GONE : View.VISIBLE);
+        enterBtn.setVisibility(count ? View.VISIBLE : View.GONE);
+        timer.setVisibility(count ? View.GONE : View.VISIBLE);
+        watchButtons.setVisibility(count ? View.GONE : View.VISIBLE);
+        countBox.setVisibility(count ? View.VISIBLE : View.GONE);
+        if (count == shownCounting) return;
+        shownCounting = count;
+        if (count) {
+            if (listener != null) listener.stop();
+        } else {
+            listenIfAllowed();
+        }
+    }
+
+    /**
+     * The next set's repetitions and weight: as last set for this exercise and move (kept on every change, so a number
+     * set and not yet entered stays), else as its newest set in the list, else 10 without weight.
+     */
+    private void loadSet() {
+        String key = setKey();
+        Entries.Entry last = Entries.lastSet(entries.all(), kind, move());
+        reps = prefs.getInt(key + ":reps", last != null ? last.reps : 10);
+        reps = Math.max(1, Math.min(reps, Entries.MAX_REPS));
+        kg = prefs.contains(key + ":kg") ? Entries.roundKg(prefs.getFloat(key + ":kg", 0f)) : last != null ? last.kg : 0;
+        paintSet();
+    }
+
+    private void keepSet() {
+        prefs.edit().putInt(setKey() + ":reps", reps).putFloat(setKey() + ":kg", (float) kg).apply();
+        paintSet();
+    }
+
+    private void paintSet() {
+        if (repsView == null) return;
+        repsView.setText(String.valueOf(reps));
+        kgView.setText(kg > 0 ? Entries.kgText(kg) : "ohne Gewicht");
+        kgView.setTextColor(kg > 0 ? TEXT : MUTED);
+        kgLabel.setText(Entries.weightLabel(kind));
+    }
+
+    private void stepReps(int by) {
+        reps = Math.max(1, Math.min(reps + by, Entries.MAX_REPS));
+        keepSet();
+    }
+
+    private void stepKg(double by) {
+        kg = Math.max(0, Math.min(Entries.roundKg(kg + by), Entries.MAX_KG));
+        keepSet();
+    }
+
+    /** "Eintragen": the set with the time of now on top of the list. */
+    private void enterSet() {
+        if (!counting()) return;
+        long now = System.currentTimeMillis();
+        while (entries.indexOf(now) >= 0) now++;   // the moment is the key: never over another entry
+        entries.addNewest(new Entries.Entry(now, 0, kind, reps, kg, move()));
+        adapter.notifyItemInserted(0);
+        list.scrollToPosition(0);
+        keepSet();
+        confirm(true);
+        refresh();
+    }
+
+    /** A tap on the repetitions: typed on the number pad (Doc: "Muss ich also irgendwie per Hand eingeben"). */
+    private void typeReps() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(24), dp(4), dp(24), dp(8));
+        EditText e = numberField(box, "WIEDERHOLUNGEN", String.valueOf(reps), 4);
+        e.setSelectAllOnFocus(true);
+        AlertDialog d = dialog("Wiederholungen").setView(box)
+                .setPositiveButton("OK", null)   // set below, so a wrong entry keeps the dialog open
+                .setNegativeButton("Abbrechen", null).create();
+        e.requestFocus();
+        Window win = d.getWindow();
+        if (win != null) win.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        show(d);
+        Button ok = d.getButton(DialogInterface.BUTTON_POSITIVE);
+        e.setOnEditorActionListener((v, id, ev) -> ok.performClick());
+        ok.setOnClickListener(v -> {
+            int n = number(e);
+            if (n < 1 || n > Entries.MAX_REPS) {
+                e.setError("1 bis " + Entries.MAX_REPS);
+                return;
+            }
+            reps = n;
+            keepSet();
+            d.dismiss();
+        });
+    }
+
+    /** A tap on the weight: typed with a decimal comma; empty = without weight. */
+    private void typeKg() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(24), dp(4), dp(24), dp(8));
+        EditText e = numberField(box, Entries.weightLabel(kind) + " IN KG", kg > 0 ? Entries.kgNumber(kg) : "", 6);
+        e.setKeyListener(DigitsKeyListener.getInstance("0123456789,."));
+        e.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);   // number pad, with ","
+        e.setHint("z. B. 5 oder 2,5");
+        e.setHintTextColor(MUTED);
+        e.setSelectAllOnFocus(true);
+        box.addView(text("leer = ohne Gewicht", 12, MUTED, false));
+        AlertDialog d = dialog("Gewicht").setView(box)
+                .setPositiveButton("OK", null)
+                .setNegativeButton("Abbrechen", null).create();
+        e.requestFocus();
+        Window win = d.getWindow();
+        if (win != null) win.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        show(d);
+        Button ok = d.getButton(DialogInterface.BUTTON_POSITIVE);
+        e.setOnEditorActionListener((v, id, ev) -> ok.performClick());
+        ok.setOnClickListener(v -> {
+            double typed = Entries.parseKg(e.getText().toString());
+            if (typed < 0) {
+                e.setError("0 bis " + Entries.kgNumber(Entries.MAX_KG) + " kg, z. B. 2,5");
+                return;
+            }
+            kg = typed;
+            keepSet();
+            d.dismiss();
+        });
+    }
+
+    /** A short note in the line under the chips for a moment. */
+    private void note(String s) {
+        hintNote = s;
+        ui.removeCallbacks(endNote);
+        ui.postDelayed(endNote, 2500);
+        paintKinds();
+    }
+
+    /** The exercises a time (timed) or a set (counted) may go to, for the note on a dimmed chip: "Planks / Balls". */
+    private static String kindsOf(boolean counted) {
+        List<String> out = new ArrayList<>();
+        for (String k : Entries.KINDS) if (Entries.counted(k) == counted) out.add(k);
+        return String.join(" / ", out);
+    }
+
+    /**
+     * A move chip: with a set selected in ZEITEN it changes that set's move, with "Rückgängig"; otherwise it chooses
+     * the move of the next set (remembered per exercise).
+     */
+    private void chooseMove(String m) {
+        int at = pickedRun == 0 ? -1 : entries.indexOf(pickedRun);
+        if (at >= 0) {
+            Entries.Entry old = entries.get(at);
+            pickedRun = 0;
+            if (!m.equals(old.move)) {
+                entries.replace(at, Entries.withMove(old, m));
+                offerUndo(Times.day(old.start) + " → " + m, () -> {
+                    int i = entries.indexOf(old.start);
+                    if (i >= 0) {
+                        entries.replace(i, old);
+                        adapter.notifyItemChanged(i);
+                    }
+                });
+            }
+            adapter.notifyDataSetChanged();
+            paintKinds();
+            return;
+        }
+        if (m.equals(move())) return;
+        prefs.edit().putString("move:" + kind, m).apply();
+        loadSet();
+        paintKinds();
+    }
+
+    /** The move chips of {@code k} (built anew when the exercise changes), the shown move green; none = no row. */
+    private void paintMoves(String k, String shownMove) {
+        if (moveRow == null) return;
+        if (!k.equals(moveRowKind)) {
+            moveRowKind = k;
+            moveRow.removeAllViews();
+            String[] ms = Entries.moves(k);
+            moveChips = new TextView[ms.length];
+            for (int i = 0; i < ms.length; i++) {
+                String m = ms[i];
+                // the same chips as the exercises above: one size, one line, each as wide as its name needs
+                TextView c = text(m, 13, TEXT, true);
+                c.setGravity(Gravity.CENTER);
+                c.setSingleLine(true);
+                c.setIncludeFontPadding(false);
+                c.setPadding(dp(4), 0, dp(4), 0);
+                c.setOnClickListener(v -> chooseMove(m));
+                moveChips[i] = c;
+                float need = c.getPaint().measureText(m) + dp(18);
+                LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), need);
+                cp.leftMargin = i == 0 ? 0 : dp(5);
+                cp.rightMargin = i == ms.length - 1 ? 0 : dp(5);
+                moveRow.addView(c, cp);
+            }
+        }
+        moveRow.setVisibility(moveChips.length == 0 ? View.GONE : View.VISIBLE);
+        for (TextView c : moveChips) paintPick(c, c.getText().toString().equals(shownMove));
     }
 
     // ---------- the scale ----------
@@ -1874,6 +2117,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         int at = pickedRun == 0 ? -1 : entries.indexOf(pickedRun);
         if (at >= 0) {
             Entries.Entry old = entries.get(at);
+            if (!k.equals(old.kind) && !Entries.canMove(old, k)) {   // a time never becomes a set, nor a set a time
+                note((old.isCounted() ? "Wiederholungen nur zu " : "Zeiten nur zu ") + kindsOf(old.isCounted()));
+                return;
+            }
             pickedRun = 0;
             if (!k.equals(old.kind)) {
                 entries.replace(at, Entries.withKind(old, k));
@@ -1891,9 +2138,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
         pickedRun = 0;
         if (k.equals(kind)) return;
+        if (runStart != 0 && Entries.counted(k)) {   // never lose a running time (Doc, 26.11.2026)
+            note("Erst die Uhr stoppen");
+            return;
+        }
         kind = k;
         prefs.edit().putString("kind", k).apply();
-        paintKinds();
+        loadSet();
+        refresh();
     }
 
     /** A tap on a time in ZEITEN selects it (the chips then show and change its exercise); a second tap lets go. */
@@ -1908,17 +2160,60 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private void paintKinds() {
         int at = pickedRun == 0 ? -1 : entries.indexOf(pickedRun);
         if (at < 0) pickedRun = 0;
+        Entries.Entry picked = at >= 0 ? entries.get(at) : null;
         // with a time selected the chips show ITS exercise; otherwise the one for the next time
-        String shown = at >= 0 ? entries.get(at).kind : kind;
+        String shown = picked != null ? picked.kind : kind;
+        boolean running = runStart != 0;
         for (int i = 0; i < kindChips.length; i++) {
+            if (kindChips[i] == null) continue;
+            String k = Entries.KINDS[i];
             // the second row is green, the top row orange (Doc, 21.11.2026): the chosen exercise phi green, the other a
             // neutral grey outline - both alike, no colour of their own
-            if (kindChips[i] != null) paintPick(kindChips[i], Entries.KINDS[i].equals(shown));
+            paintPick(kindChips[i], k.equals(shown));
+            // dimmed: where the selected entry cannot go (a time to a counted exercise, a set to a timed one), and the
+            // counted exercises while the clock runs
+            boolean off = picked != null ? !k.equals(shown) && !Entries.canMove(picked, k) : running && Entries.counted(k);
+            kindChips[i].setAlpha(off ? 0.35f : 1f);
         }
+        // the move chips: of the selected set, else of the exercise of the next set (none while a time runs)
+        String moveKind = picked != null ? (picked.isCounted() ? picked.kind : "") : counting() ? kind : "";
+        paintMoves(moveKind, picked != null ? picked.move : move());
         if (pickHint != null) {
-            pickHint.setText(at >= 0 ? Times.day(entries.get(at).start) + " ausgewählt – oben die Übung tippen" : "");
-            pickHint.setVisibility(at >= 0 ? View.VISIBLE : View.GONE);
+            String h = hintNote != null ? hintNote
+                    : picked != null ? Times.day(picked.start) + " ausgewählt – oben die Übung tippen" : "";
+            pickHint.setText(h);
+            pickHint.setVisibility(h.isEmpty() ? View.GONE : View.VISIBLE);
         }
+    }
+
+    /**
+     * A number between a big "–" and "+" (finger-sized, the quiet style of "Reset"): the repetitions and the weight of
+     * a counted exercise.
+     */
+    private LinearLayout stepRow(DigitsView value, int heightDp, int buttonDp, String less, String more,
+                                 Runnable down, Runnable up) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setBaselineAligned(false);
+        Button minus = button("–", CARD), plus = button("+", CARD);
+        for (Button b : new Button[]{minus, plus}) {
+            b.setTextColor(LAMBDA);
+            b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 28);
+            b.setPadding(0, 0, 0, 0);
+            b.setIncludeFontPadding(false);
+        }
+        minus.setContentDescription(less);
+        plus.setContentDescription(more);
+        minus.setOnClickListener(v -> down.run());
+        plus.setOnClickListener(v -> up.run());
+        row.addView(minus, new LinearLayout.LayoutParams(dp(72), dp(buttonDp)));
+        LinearLayout.LayoutParams vp = new LinearLayout.LayoutParams(0, dp(heightDp), 1f);
+        vp.leftMargin = dp(8);
+        vp.rightMargin = dp(8);
+        row.addView(value, vp);
+        row.addView(plus, new LinearLayout.LayoutParams(dp(72), dp(buttonDp)));
+        return row;
     }
 
     private View buildWatchPage() {
@@ -1930,14 +2225,17 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         kinds.setOrientation(LinearLayout.HORIZONTAL);
         for (int i = 0; i < Entries.KINDS.length; i++) {
             String k = Entries.KINDS[i];
-            TextView c = text(k, 15, TEXT, true);
+            // four exercises in one row since 26.11.2026: one size, one line, each chip as wide as its name needs
+            // (as the stretches on the Verlauf tab - at Doc's font size 1.3 equal quarters would break "Dumbbells")
+            TextView c = text(k, 13, TEXT, true);
             c.setGravity(Gravity.CENTER);
-            c.setMaxLines(1);
-            c.setPadding(dp(8), 0, dp(8), 0);
-            c.setAutoSizeTextTypeUniformWithConfiguration(10, 15, 1, TypedValue.COMPLEX_UNIT_SP);
+            c.setSingleLine(true);
+            c.setIncludeFontPadding(false);
+            c.setPadding(dp(4), 0, dp(4), 0);
             c.setOnClickListener(v -> chooseKind(k));
             kindChips[i] = c;
-            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(40), 1f);
+            float need = c.getPaint().measureText(k) + dp(18);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(40), need);
             cp.leftMargin = i == 0 ? 0 : dp(5);
             cp.rightMargin = i == Entries.KINDS.length - 1 ? 0 : dp(5);
             kinds.addView(c, cp);
@@ -1945,6 +2243,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(16);
         page.addView(kinds, lp);
+        // the moves of a counted exercise (Dumbbells: Curls, Lateral Raises) in a second row, only where it has some
+        moveRow = new LinearLayout(this);
+        moveRow.setOrientation(LinearLayout.HORIZONTAL);
+        moveRow.setVisibility(View.GONE);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        page.addView(moveRow, lp);
         pickHint = text("", 12, LAMBDA, false);
         pickHint.setGravity(Gravity.CENTER);
         pickHint.setVisibility(View.GONE);
@@ -1960,6 +2265,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(24);
         page.addView(state, lp);
+        // a counted exercise: "Eintragen" in the command's place stores the set shown below
+        enterBtn = button("Eintragen", PHI);
+        enterBtn.setMaxLines(1);
+        enterBtn.setOnClickListener(v -> enterSet());
+        enterBtn.setVisibility(View.GONE);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56));
+        lp.topMargin = dp(20);
+        page.addView(enterBtn, lp);
 
         // only when the microphone is missing or the recognizer failed
         ear = text("", 14, UPSILON, false);
@@ -1977,6 +2290,31 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(28);
         page.addView(timer, lp);
+
+        // a counted exercise instead of the stopwatch: the repetitions big in the idle stopwatch's ink between – and +,
+        // below the weight in steps of 0.5 kg; a tap on a number types it
+        LinearLayout count = new LinearLayout(this);
+        count.setOrientation(LinearLayout.VERTICAL);
+        count.setVisibility(View.GONE);
+        countBox = count;
+        TextView repsLabel = smallLabel("WIEDERHOLUNGEN");
+        repsLabel.setGravity(Gravity.CENTER);
+        count.addView(repsLabel, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        repsView = new DigitsView(this, orbitron, 80, pal.idleInk);
+        repsView.setOnClickListener(v -> typeReps());
+        count.addView(stepRow(repsView, 96, 72, "Eine Wiederholung weniger", "Eine Wiederholung mehr",
+                () -> stepReps(-1), () -> stepReps(1)), topParams(4));
+        kgLabel = smallLabel("GEWICHT");
+        kgLabel.setGravity(Gravity.CENTER);
+        count.addView(kgLabel, topParams(14));
+        kgView = new DigitsView(this, orbitron, 26, TEXT);
+        kgView.setOnClickListener(v -> typeKg());
+        count.addView(stepRow(kgView, 56, 56, "Ein halbes Kilo weniger", "Ein halbes Kilo mehr",
+                () -> stepKg(-0.5), () -> stepKg(0.5)), topParams(4));
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(20);
+        page.addView(count, lp);
+        loadSet();
 
         // no hint line under the stopwatch: the command stands above it (Doc, 20.11.2026: "das ist doppelt")
         LinearLayout row = new LinearLayout(this);
@@ -2006,6 +2344,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(32);
         page.addView(row, lp);
+        watchButtons = row;
 
         page.addView(sectionHead("ZEITEN", null, null), headParams());
 
@@ -2016,7 +2355,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             LastRun before = last;
             last = last.afterDelete(gone);   // the time on the display goes with its row
             saveLast();
-            offerUndo("Gelöscht: " + Times.duration(gone.duration), () -> {
+            offerUndo("Gelöscht: " + (gone.isCounted() ? Entries.setText(gone) : Times.duration(gone.duration)), () -> {
                 entries.insert(pos, gone);
                 adapter.notifyItemInserted(Math.min(pos, entries.size() - 1));
                 last = last.afterUndo(gone, before, runStart != 0);
@@ -2584,9 +2923,19 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             List<Entries.Entry> runs = new ArrayList<>();
             for (int i = 0; i < entries.size(); i++) runs.add(entries.get(i));
             for (String k : Entries.KINDS) {
-                List<History.Point> pts = Trends.since(Trends.runs(runs, k), from);
-                histCard(k + " · Sekunden", pts, null, null, new ArrayList<>(), 0,
-                        pts.isEmpty() ? "–" : Trends.clock(pts.get(pts.size() - 1).value));
+                List<History.Point> ever = Trends.runs(runs, k);
+                if (!ever.isEmpty()) {   // an exercise never timed gets no card yet
+                    List<History.Point> pts = Trends.since(ever, from);
+                    histCard(k + " · Sekunden", pts, null, null, new ArrayList<>(), 0,
+                            pts.isEmpty() ? "–" : Trends.clock(pts.get(pts.size() - 1).value));
+                }
+                // a counted exercise: the repetitions per set, one card per move (Dumbbells: Curls, Lateral Raises),
+                // the newest set with its weight on top ("12 × 5 kg"); a move without a set gets no card yet
+                for (String m : Trends.setMoves(runs, k)) {
+                    List<Entries.Entry> sets = Trends.setsSince(Trends.sets(runs, k, m), from);
+                    histCard(m.isEmpty() ? k : m, Trends.reps(sets), null, null, new ArrayList<>(), 0,
+                            sets.isEmpty() ? "–" : Entries.setText(sets.get(sets.size() - 1)));
+                }
             }
         }
     }
@@ -3663,6 +4012,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             if (e.start == pickedRun) bg.setStroke(dp(2), LAMBDA);   // the selected time
             r.itemView.setBackground(bg);
             r.day.setText(Times.day(e.start));
+            if (e.isCounted()) {
+                // a set: its move (or the exercise) and the weight in front of the time it was entered, "12 ×" right
+                r.sub.setText((e.move.isEmpty() ? e.kind : e.move) + (e.kg > 0 ? " · " + Entries.kgText(e.kg) : "")
+                        + " · " + Times.clock(e.start) + " Uhr");
+                r.value.setText(e.reps + " ×");
+                return;
+            }
             // the exercise in front of the start time, as plain text; times from before there were exercises as they were
             r.sub.setText((e.kind.isEmpty() ? "" : e.kind + " · ") + "Start " + Times.clock(e.start) + " Uhr");
             r.value.setText(Times.duration(e.duration));
