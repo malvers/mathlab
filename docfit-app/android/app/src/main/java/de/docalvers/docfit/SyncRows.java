@@ -29,6 +29,12 @@ import java.util.TreeMap;
  * Only what the app stores travels: weight in 10 g, resistance (0 = not measured; an old 65535 goes as 0), waist and
  * hip in mm (none = null), the exercise of a time exactly as the app names it, a reading's pulse (0 = none = null),
  * source and note. Body values are computed when shown, on the phone and on the web alike.
+ *
+ * A set of a counted exercise (Dumbbells, Legs - 20261126_docfit_run_reps.sql) is a docfit_run row with duration 0 and
+ * its repetitions, weight and move; a time has all three null. The weight travels as kg (numeric) but is held in the
+ * row in hundredths of a kilogram (a Long like every other number here), so rows stay exact and comparable. Columns
+ * added after the first sync (LATE) are left out of the canonical text while empty: every row synced before keeps its
+ * text and is not sent again.
  */
 final class SyncRows {
     static final String PROFILE = "docfit_profile", WEIGHING = "docfit_weighing", RUN = "docfit_run", BP = "docfit_bp";
@@ -43,11 +49,16 @@ final class SyncRows {
     static {
         COLUMNS.put(PROFILE, new String[]{"person", "name", "height_cm", "birth_year", "sex", "active"});
         COLUMNS.put(WEIGHING, new String[]{"measured_at", "person", "centi_kg", "ohm", "waist_mm", "hip_mm"});
-        COLUMNS.put(RUN, new String[]{"started_at", "duration_ms", "kind"});
+        COLUMNS.put(RUN, new String[]{"started_at", "duration_ms", "kind", "reps", "weight_kg", "move"});
         COLUMNS.put(BP, new String[]{"measured_at", "person", "sys", "dia", "pulse", "source", "note"});
         COLUMNS.put(GLUCOSE, new String[]{"measured_at", "person", "mg_dl", "context", "source", "note"});
         COLUMNS.put(FAST, new String[]{"fast_id", "person", "started_at", "ended_at", "planned_days", "note"});
     }
+
+    /** Columns added after rows were synced (26.11.2026): out of the canonical text while null, see the class comment. */
+    private static final Set<String> LATE = new HashSet<>(Arrays.asList("reps", "weight_kg", "move"));
+    /** Columns sent as kg with decimals but held as hundredths (Long). */
+    private static final Set<String> CENTI = new HashSet<>(Arrays.asList("weight_kg"));
 
     private SyncRows() {
     }
@@ -93,9 +104,10 @@ final class SyncRows {
         String canon() {
             StringBuilder b = new StringBuilder("{");
             for (Map.Entry<String, Object> e : f.entrySet()) {
+                Object v = e.getValue();
+                if (v == null && LATE.contains(e.getKey())) continue;   // as before the column existed
                 if (b.length() > 1) b.append(',');
                 b.append(JSONObject.quote(e.getKey())).append(':');
-                Object v = e.getValue();
                 if (v == null) b.append("null");
                 else if (v instanceof String) b.append(JSONObject.quote((String) v));
                 else b.append(v);
@@ -109,6 +121,7 @@ final class SyncRows {
             for (String c : columns(table)) {
                 Object v = f.get(c);
                 if (v != null && isTime(c)) v = iso((Long) v);
+                else if (v != null && CENTI.contains(c)) v = (Long) v / 100.0;   // 250 -> 2.5 (kg)
                 o.put(c, v == null ? JSONObject.NULL : v);
             }
             o.put("deleted_at", deletedAtMs == null ? JSONObject.NULL : iso(deletedAtMs));
@@ -139,6 +152,8 @@ final class SyncRows {
                 f.put(c, null);
             } else if (isTime(c)) {
                 f.put(c, ms(String.valueOf(v)));
+            } else if (CENTI.contains(c)) {
+                f.put(c, centi(v));
             } else if (v instanceof Number) {
                 f.put(c, ((Number) v).longValue());
             } else if (v instanceof Boolean) {
@@ -164,6 +179,16 @@ final class SyncRows {
         return new Row(table, f, false);
     }
 
+    /** kg as the database sends it (a number, or numeric as text) -> hundredths; null when it is no number. */
+    private static Long centi(Object kg) {
+        try {
+            double d = kg instanceof Number ? ((Number) kg).doubleValue() : Double.parseDouble(String.valueOf(kg));
+            return Double.isNaN(d) ? null : Math.round(d * 100);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     static String iso(long ms) {
         return Instant.ofEpochMilli(ms).toString();
     }
@@ -175,10 +200,13 @@ final class SyncRows {
 
     // ---- from the app's lists to rows ------------------------------------------------------------------------------
 
-    /** The stopped times (Entries' stored text) as rows of docfit_run. */
+    /** The stopped times and counted sets (Entries' stored text) as rows of docfit_run; a time without reps/weight/move. */
     static void runs(String entriesJson, Map<String, Row> into) {
         for (Entries.Entry e : Entries.parse(entriesJson == null ? "[]" : entriesJson)) {
-            Row r = row(RUN, false, "started_at", e.start, "duration_ms", e.duration, "kind", e.kind);
+            Row r = row(RUN, false, "started_at", e.start, "duration_ms", e.duration, "kind", e.kind,
+                    "reps", e.reps > 0 ? (Object) (long) e.reps : null,
+                    "weight_kg", e.kg > 0 ? (Object) Math.round(e.kg * 100) : null,
+                    "move", e.move.isEmpty() ? null : e.move);
             into.put(r.key, r);
         }
     }
@@ -293,7 +321,9 @@ final class SyncRows {
                         && in(r, "waist_mm", 500, 2000, true) && in(r, "hip_mm", 500, 2000, true);
             case RUN:
                 return r.num("started_at") > 0 && in(r, "duration_ms", 0, 86_400_000L, false)
-                        && r.str("kind") != null && r.str("kind").length() <= 30;
+                        && r.str("kind") != null && r.str("kind").length() <= 30
+                        && in(r, "reps", 0, Entries.MAX_REPS, true) && in(r, "weight_kg", 0, 30_000, true)
+                        && (r.str("move") == null || r.str("move").length() <= 30);
             case BP:
                 return r.num("measured_at") > 0 && in(r, "person", 0, 9, false) && in(r, "sys", 50, 260, false)
                         && in(r, "dia", 30, 160, false) && in(r, "pulse", 25, 220, true)
@@ -337,8 +367,9 @@ final class SyncRows {
             String k = String.valueOf(e.start);
             if (!put.containsKey(k) && !remove.contains(k)) list.add(e);
         }
-        for (Row r : put.values()) {
-            list.add(new Entries.Entry(r.num("started_at"), r.num("duration_ms"), r.str("kind")));
+        for (Row r : put.values()) {   // a row from before the counted sets (no reps, weight, move) reads as a time
+            list.add(new Entries.Entry(r.num("started_at"), r.num("duration_ms"), r.str("kind"), (int) r.num("reps"),
+                    r.num("weight_kg") / 100.0, r.str("move")));
         }
         Collections.sort(list, (a, b) -> Long.compare(b.start, a.start));
         return Entries.format(list);

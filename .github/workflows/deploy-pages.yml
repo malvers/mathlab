@@ -7,11 +7,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      simulate_hang:
-        description: "Test the retry: the first deploy gives up at its first status check, as if Pages hung"
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -25,11 +20,19 @@ concurrency:
   # later". Flipping this to true (1814ad2, 2026-07-05) caused exactly that on 2026-07-06 — reverted (Doc).
   cancel-in-progress: false
 
+# Two jobs, like GitHub's own Pages starter workflows (Doc 2026-11-22: "GitHub bitte umbauen lassen"):
+# - build assembles the site and uploads it as the "github-pages" artifact,
+# - deploy only hands that artifact to Pages.
+# Why: with upload and deploy in ONE job, deploy-pages sometimes looked for the artifact a split second after
+# it was finalized and found none ("No artifacts named github-pages", 4 times on 21./22.11.2026, a known
+# GitHub race, actions/deploy-pages#451). In its own job the lookup comes seconds later. And when Pages hangs
+# in "syncing_files" (deploy-pages gives up after 10 min), "Re-run failed jobs" now re-runs only deploy with
+# the artifact already uploaded - a re-run of the old single job uploaded a second artifact and then failed
+# on "Multiple artifacts named github-pages".
+# The custom auto-retry (01107822, 18311f32a) is gone: the Pages API only accepts the commit SHA as
+# pages_build_version, so its fresh deployments always got 404 and it never deployed anything (10 of 10).
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -94,83 +97,16 @@ jobs:
         with:
           path: _site
 
-      # Auto-retry (Doc, 2026-11-07: "Ja, bau das bitte so", the idea parked since 2026-07-06). Pages now and
-      # then hangs in "syncing_files" until deploy-pages gives up after 10 min ("Timeout reached, aborting!",
-      # 3 of 21 deploys on 06./07.11.2026) - GitHub's side: the same artifact synced in 13 s an hour before.
-      # Instead of failing and mailing Doc, wait and deploy the same artifact again, up to two times.
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      # Waits up to 10 min (deploy-pages' maximum). If Pages hangs in "syncing_files" that long, the run
+      # fails; "Re-run failed jobs" then deploys the same artifact again (it is kept for a day), or the
+      # next push deploys the whole site anyway.
       - name: Deploy to GitHub Pages
         id: deployment
-        continue-on-error: true
         uses: actions/deploy-pages@v5
-        with:
-          # Normally the 10-min maximum. The manual test switch (Run workflow → simulate_hang) makes it give
-          # up and cancel at its first status check, which is exactly what a hang ends in.
-          timeout: ${{ github.event.inputs.simulate_hang == 'true' && '1' || '600000' }}
-
-      # The first version of this retry (01107822) ran deploy-pages again and never worked: deploy-pages
-      # always names the deployment after the commit SHA, so the retry re-attached to the deployment it had
-      # just cancelled, saw an empty status for 10 min and failed (c7c66b46, 2026-11-07: 35 min, mail anyway).
-      # So the retries talk to the Pages API directly, with a build version of their own per attempt.
-      - name: Deploy to GitHub Pages (retry with a fresh deployment)
-        id: deployment_retry
-        if: steps.deployment.outcome == 'failure'
-        uses: actions/github-script@v8
-        env:
-          ARTIFACT_ID: ${{ steps.upload.outputs.artifact_id }}
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-            const FINAL = ['deployment_failed', 'deployment_content_failed', 'deployment_cancelled', 'deployment_lost'];
-            const WAITS = [60, 120]; // seconds before retry 1 and retry 2
-            const LIMIT = 10 * 60 * 1000; // same 10 min as deploy-pages
-
-            for (let n = 1; n <= WAITS.length; n++) {
-              core.info(`Waiting ${WAITS[n - 1]} s before retry ${n} ...`);
-              await sleep(WAITS[n - 1] * 1000);
-
-              // Unique per run, run attempt and retry, so it never meets an earlier deployment
-              const version = `${context.sha}-${context.runId}-${process.env.GITHUB_RUN_ATTEMPT}-${n}`;
-              let deployment;
-              try {
-                const { data } = await github.request('POST /repos/{owner}/{repo}/pages/deployments', {
-                  owner, repo,
-                  artifact_id: Number(process.env.ARTIFACT_ID),
-                  pages_build_version: version,
-                  oidc_token: await core.getIDToken()
-                });
-                deployment = data;
-              } catch (error) {
-                core.warning(`Retry ${n}: could not create the deployment (${error.status ?? ''} ${error.message})`);
-                continue;
-              }
-              const id = deployment.id || deployment.status_url?.split('/').pop() || version;
-              core.info(`Retry ${n}: created deployment ${id}`);
-
-              const start = Date.now();
-              let status = '';
-              while (Date.now() - start < LIMIT) {
-                await sleep(10000);
-                let now;
-                try {
-                  ({ data: { status: now } } = await github.request('GET /repos/{owner}/{repo}/pages/deployments/{id}', { owner, repo, id }));
-                } catch (error) {
-                  now = `unreadable (${error.status ?? error.message})`;
-                }
-                if (now !== status) core.info(`Current status: ${now}`);
-                status = now;
-                if (status === 'succeed' || FINAL.includes(status)) break;
-              }
-
-              if (status === 'succeed') {
-                core.setOutput('page_url', deployment.page_url);
-                core.info(`Deployed on retry ${n}: ${deployment.page_url}`);
-                return;
-              }
-              if (!FINAL.includes(status)) {
-                await github.request('POST /repos/{owner}/{repo}/pages/deployments/{id}/cancel', { owner, repo, id })
-                  .catch(error => core.warning(`Retry ${n}: cancel failed (${error.status ?? error.message})`));
-              }
-              core.warning(`Retry ${n} failed, last status: "${status}"`);
-            }
-            core.setFailed('Pages deployment failed on the first try and on both retries');

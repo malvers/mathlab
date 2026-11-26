@@ -86,6 +86,7 @@ const WOCHEN = {
     'ka1':                      [45, 'Wiederholung · Klassenarbeit 1'],
     'quadratisch':              [46, 'Beschleunigte Bewegung · quadratische Funktionen'],
     'quadratische-gleichungen': [47, 'Quadratische Gleichungen · ohne Hilfsmittel'],
+    'loesungsmengen-wdh':       [48, 'Lösungsmengen · Wiederholung'],     // Doc, 23.11.2026, before the week's models
     'quadratisch-anwendung':    [48, 'Quadratische Modelle · Anwendungen'],
     'sinus1':                   [49, 'Periodische Vorgänge · Sinus am Einheitskreis'],
     'sinus2':                   [50, 'Periodische Vorgänge · Amplitude und Periode'],

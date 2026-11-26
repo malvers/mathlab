@@ -87,6 +87,9 @@
                     try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) { }
                     const gvoice = (window.solitaTtsVoice ? window.solitaTtsVoice() : (localStorage.getItem(GVOICE_KEY) || 'de-DE-Studio-C'));
                     const gLang = (window.solitaTtsLangCode ? window.solitaTtsLangCode() : 'de-DE');
+                    // a number that ends a sentence as a number, "Seite 20." -> "zwanzig", not "zwanzigste" (Doc,
+                    // 24.11.2026): the rule of js/solita-karaoke.js, which solita.html loads before this file; German only
+                    if (window.SolitaKaraoke && window.SolitaKaraoke.satzendZahlen && /^de/i.test(gLang)) clean = window.SolitaKaraoke.satzendZahlen(clean);
                     fetch(TTS_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },

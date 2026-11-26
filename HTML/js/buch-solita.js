@@ -16,7 +16,7 @@
     if (!top || document.querySelector('.b-solita') || document.body.classList.contains('b-print')) return;
 
     // the version rides along with every file of the box: Pages keeps files 10 minutes, an older copy must not win
-    const V = '2026-10-09e';
+    const V = '2026-11-22a';
     const url = p => new URL(p + '?v=' + V, ME).href;
     function css(p) {
         const l = document.createElement('link');
@@ -241,7 +241,7 @@
 
         // The line stands in the header beside her picture when there is room, the answers hang under it; on a narrow
         // screen (the phone) the line goes into the card under the header, above the answers.
-        const LINE_MAX = 460, LINE_MIN = 200, GAP = 8;
+        const LINE_MAX = 460, LINE_MIN = 200, GAP = 8, INDENT = 12;   // INDENT: her picture this far right of the header's gap
         let inline = false;
         function move(to) {                               // moving a focused field blurs it - keep typing
             const typing = document.activeElement === sf.feld();
@@ -259,10 +259,12 @@
             line.style.width = lw + 'px';
             move(inline ? line : sfRoot);
             ask.classList.toggle('offen', offen);
-            // her group in the middle of the page where there is room, never over the brand or the book's title
+            // her group close to the brand, the free room to its right - no longer in the middle of the page (Doc, 22.11.2026:
+            // "Solita noch weiter nach links schieben - zwischen 'Doc Alvers Mathe-Labor' und Solita ist viel Platz", the room
+            // goes to "erhältlich bei Amazon" beside "PDF"); never over the brand or the book's title
             const w = AV + (lw ? GAP + lw : 0);
             const slack = Math.max(0, (a.width - w) / 2);
-            const shift = Math.round(Math.max(-slack, Math.min(slack, innerWidth / 2 - (a.left + a.width / 2))));
+            const shift = Math.round(Math.min(INDENT, 2 * slack) - slack);
             inner.style.transform = 'translateX(' + shift + 'px)';
             // the answers: under the line in the header, or the whole card on a narrow screen
             panel.classList.toggle('unten', offen && !inline);

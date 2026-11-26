@@ -758,6 +758,23 @@ html.deck-edit .flug-kopie{display:none}
   html:not(.deck-edit) :not(.ov-thumb) > .slide .dtable tr.step.now > :first-child::after{content:"";position:absolute;
     left:-20px;top:calc(50% - 7px);width:11px;height:14px;background:var(--tri) no-repeat;pointer-events:none;
     animation:step-now .25s ease-out}
+  /* OFF on the board only (Doc, 23.11.2026: first "lass die einzelnen Schritte bitte generell erscheinen ohne rote Box
+     und Dreieck", then "die roten Boxen nur beim Vorrechnen raus!"): in decks/tafel.html - recognised by its working
+     area .tf-rechnung, the page has no class of its own - a step simply appears: no triangle, no red box, no outline
+     round a card or a table row; a bullet line keeps its bullet. Every other deck keeps the marks above */
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide .step.now::after,
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide p.line.step.now::after,
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide p.col.l1.step.now::after,
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide .dtable tr.step.now > :first-child::before,
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide .dtable tr.step.now > :first-child::after{display:none}
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide p.line.step.key-point.now::after{display:block;border-color:transparent}
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide p.line.step.now:not(.l1):not(.l2)::before{position:static;width:7px;height:7px;margin:0 13px 0 -20px;
+    background:var(--ink);animation:none}
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide p.line.l1.step.now::before{position:static;width:6px;height:6px;margin:0 14px 0 -20px;background:var(--green);animation:none}
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide p.line.l2.step.now::before{position:static;width:6px;height:6px;margin:0 14px 0 -20px;background:#4A79C9;animation:none}
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide p.col.l1.step.now::before{left:0;top:.55em;width:7px;height:7px;background:var(--ink);animation:none}
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide .card.right p.col.l1.step.now::before{background:var(--green)}
+  html:not(.deck-edit):has(.tf-rechnung) :not(.ov-thumb) > .slide .card.now{outline:none;animation:none}
 }
 
 /* --- HUD ---------------------------------------------------------------- */
@@ -996,6 +1013,18 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #pres .p-aud .p-aud-ico{display:grid}
 #pres .p-aud svg{width:1.35em;height:1.35em}
 @media (max-width:700px){#pres .p-aud .p-aud-txt{display:none}#pres .p-aud{padding:4px 9px}}   /* narrow: the icon alone */
+/* B: the beamer is frozen (deck.js freezeToggle) - the wall keeps its picture while this view goes on. λ orange like the
+   pill beside it, but pulsing, and the current slide framed in it: what Doc sees here is not on the wall */
+#pres .p-freeze{display:flex;align-items:center;gap:7px;padding:4px 14px 4px 9px;border-radius:999px;font:inherit;
+  font-size:.6em;font-weight:700;letter-spacing:.06em;white-space:nowrap;background:rgb(245,194,66);color:#0b1a33;opacity:1;
+  animation:p-freeze 1.6s ease-in-out infinite}
+#pres .p-freeze[hidden]{display:none}
+#pres .p-freeze:hover{color:#0b1a33;filter:brightness(1.08)}
+#pres .p-freeze svg{width:1.35em;height:1.35em}
+#pres.frozen .p-cur .p-frame{outline:3px solid rgb(245,194,66);outline-offset:3px}
+@keyframes p-freeze{0%,100%{box-shadow:0 0 0 0 rgba(245,194,66,.75)}50%{box-shadow:0 0 0 8px rgba(245,194,66,0)}}
+@media (prefers-reduced-motion:reduce){#pres .p-freeze{animation:none}}
+@media (max-width:700px){#pres .p-freeze .p-freeze-txt{display:none}#pres .p-freeze{padding:4px 9px}}   /* narrow: the icon alone */
 /* the class's buzzer feedback between running time and clock (Doc, 10.11.2026, deck.js presBuzzer): pills in the
    colours of the teacher's side - "nicht verstanden" and "zu langsam" orange, "zu schnell" red - only while > 0;
    all quiet: just the code, dim */
@@ -1067,6 +1096,30 @@ html.laser-on .p-cur .p-fit{cursor:none}
 /* caption under a preview (Doc, 16.09.2026: "Nächste Folie: ##" / "Übernächste Folie: ##"), like the count under the slide */
 .p-cap{min-height:1.5em;margin:6px 0 0;text-align:center;color:#B8C6DF;
   font-family:Raleway,system-ui,sans-serif;font-size:clamp(13px,1.2vw,17px)}
+/* the board's real picture (t, deck-spiegel.js: "Tafel live" where the slide after next was) stands in a monitor, so it
+   is unmistakable that this is exactly what the class sees (Doc, 23.11.2026: "irgendwie ein Fernsehrahmen oder so").
+   All of it is drawn around the picture - shadows for bezel, chin and rim, the slot's two pseudo elements for the LIVE
+   badge on the chin and the stand - so the picture keeps the size and place fitAll gives it and nothing covers it; only
+   the caption moves down below the foot. Bezel and rim in the colours of the .smartphone frame on the slides. */
+#pres .p-after.tafel{--tv-b:clamp(6px,.5vw,10px);--tv-chin:clamp(18px,1.45vw,27px);--tv-foot:clamp(10px,.85vw,16px)}
+#pres .p-after.tafel .p-fit{position:relative}
+#pres .p-after.tafel .p-frame{border-radius:3px;background:#000;
+  box-shadow:0 0 0 1px #000,                                                            /* the screen's edge */
+    0 0 0 var(--tv-b) #0B0F17,0 calc(var(--tv-chin) - var(--tv-b)) 0 var(--tv-b) #0B0F17,   /* bezel, chin below */
+    0 0 0 calc(var(--tv-b) + 1px) #3B4456,
+    0 calc(var(--tv-chin) - var(--tv-b)) 0 calc(var(--tv-b) + 1px) #3B4456,              /* the rim around both */
+    0 calc(var(--tv-chin) / 2 + 6px) 26px 2px rgba(0,0,0,.5)}
+/* the badge in the middle of the chin: a red pill, a white dot, LIVE */
+#pres .p-after.tafel .p-fit::after{content:'Live';position:absolute;left:50%;top:calc(100% + var(--tv-chin) / 2);
+  transform:translate(-50%,-50%);padding:.3em .6em .3em 1.5em;border-radius:999px;pointer-events:none;white-space:nowrap;
+  background:radial-gradient(circle at .78em 50%,#fff 0 .24em,transparent .29em) #B02418;color:#fff;
+  font:700 calc(var(--tv-chin) * .44)/1 Orbitron,system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+/* the stand: a neck from under the chin, widening into a flat foot with a lit edge */
+#pres .p-after.tafel .p-fit::before{content:'';position:absolute;left:50%;top:calc(100% + var(--tv-chin));
+  width:clamp(84px,8vw,150px);height:var(--tv-foot);transform:translateX(-50%);pointer-events:none;
+  background:linear-gradient(#0B0F17,#2A3242 56%,#5A6580 56% calc(56% + 1px),#262E3D calc(56% + 1px),#151A24);
+  clip-path:polygon(41% 0,59% 0,61% 56%,91% 56%,100% 100%,0 100%,9% 56%,39% 56%)}
+#pres .p-after.tafel .p-cap{margin-top:calc(var(--tv-chin) + var(--tv-foot) + 6px)}
 .p-strip{grid-area:strip;display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding:4px 4px 8px;
   position:relative;z-index:1;align-items:flex-end;   /* JS lends it room above for the dock magnification */
   scrollbar-width:thin;scrollbar-color:#7E8FB5 transparent}
@@ -1382,7 +1435,7 @@ html.laser-on .p-cur .p-fit{cursor:none}
    Seiten im Mathebuch jeweils"): two white fields like the survey's - left the week's exercises from the SVP in
    phi-green with the QR of the first set, right the textbook in lambda-orange: cover, chapter, Lerneinheit with its
    printed page, the chapter's practice/test/solutions pages. Nothing in it is editable text (deck_edit.py SELECTOR). */
-.verweise-box{position:absolute;left:72px;top:138px;width:816px;height:352px;display:grid;grid-template-columns:1.2fr 1fr;
+.verweise-box{position:absolute;left:72px;top:138px;width:816px;height:352px;display:grid;grid-template-columns:1fr 1fr;
   gap:22px}
 .vw-karte{min-width:0;min-height:0;display:flex;flex-direction:column;padding:16px 18px 14px;border-radius:16px;background:#fff;
   box-shadow:0 6px 28px rgba(14,36,78,.18);overflow:hidden}

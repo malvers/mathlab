@@ -300,6 +300,57 @@ final class Weighings {
         return -1;
     }
 
+    /**
+     * The hip of the newest weigh-in that has one, in mm, 0 if none has - the hip changes little, so the waist and hip
+     * dialog offers the last one again (Doc, 23.11.2026: "defaultmäßig beim Hüftumfang ... einsetzen"). One person's
+     * list only, so each person gets her own last hip; the value comes from the phone's list, never from the code.
+     */
+    static int lastHipMm(List<Weighing> newestFirst) {
+        for (Weighing w : newestFirst) if (w.hasHip()) return w.hipMm;
+        return 0;
+    }
+
+    /** What the hip field of weigh-in {@code w} starts with: its own hip, else the last one entered, else none (0). */
+    static int hipForField(Weighing w, List<Weighing> newestFirst) {
+        return w.hasHip() ? w.hipMm : lastHipMm(newestFirst);
+    }
+
+    /** {@link #hipForField(Weighing, List)} for this list. */
+    int hipForField(Weighing w) {
+        return hipForField(w, list);
+    }
+
+    /**
+     * Which row the scale card shows (Doc, 23.11.2026: "wenn es nur klickt, würde ich gerne oben die Werte sehen, die
+     * zu dem Eintrag gehören"): the weigh-in picked by its moment ({@code picked}, found by time, not by row - a new
+     * weigh-in or a sync may move it), the newest (0) when none is picked or the picked one is gone.
+     */
+    static int shownIndex(List<Weighing> newestFirst, long picked) {
+        if (picked == 0) return 0;
+        for (int i = 0; i < newestFirst.size(); i++) if (newestFirst.get(i).time == picked) return i;
+        return 0;
+    }
+
+    /**
+     * What a tap on row {@code tapped} picks: that weigh-in's moment; a tap on the newest, on the one already picked
+     * or on a row that is not there brings the card back to the newest (0).
+     */
+    static long pickAfterTap(List<Weighing> newestFirst, long picked, int tapped) {
+        if (tapped <= 0 || tapped >= newestFirst.size()) return 0;
+        long t = newestFirst.get(tapped).time;
+        return t == picked ? 0 : t;
+    }
+
+    /** {@link #shownIndex(List, long)} for this list. */
+    int shownIndex(long picked) {
+        return shownIndex(list, picked);
+    }
+
+    /** {@link #pickAfterTap(List, long, int)} for this list. */
+    long pickAfterTap(long picked, int tapped) {
+        return pickAfterTap(list, picked, tapped);
+    }
+
     /** The newest weigh-in with a measured resistance, or null - for "Messmethode" in the settings. */
     Weighing newestMeasured() {
         for (Weighing w : list) if (w.hasResistance()) return w;

@@ -82,7 +82,8 @@
         @media (max-width: 480px) { .top { padding-left: 8px; padding-right: 8px; } }
         .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
         .bar #micBtn { order: 1; }
-        .bar #text { order: 2; flex: 1 1 0; }
+        /* the search field takes the entry field's place while the search is on (same order, same flex at every width) */
+        .bar #text, .bar .search-field { order: 2; flex: 1 1 0; }
         /* "Heute" right before "Tag" (Doc, 19.11.2026: "vor 'Tag' machen, weil das Suchfeld ist ja eh ziemlich groß") -
            on wide screens directly left of the views, on the phone at the end of the first row: the entry field gives up the room */
         .bar #todayBtn { order: 3; }
@@ -103,7 +104,7 @@
             /* the views and the period join the bar itself: one row with the views before the gear, the period under it in
                the middle of a row of its own - beside the entry field it only fits from 1260px */
             .bar { flex-wrap: wrap; }
-            .bar #text { flex: 1 1 200px; }
+            .bar #text, .bar .search-field { flex: 1 1 200px; }
             .bar .row2 { display: contents; }
             .row2 .views { flex: 0 0 330px; order: 4; }
             .row2 .nav { order: 6; }
@@ -116,9 +117,14 @@
                it (measured head-less). A guest who may only read has no field and no mic: there the margin alone (less the
                search) puts the period in the middle */
             .bar { flex-wrap: nowrap; }
-            .row2 .nav { order: 2; flex: 0 0 var(--nav-w); margin-right: auto; }
-            .bar:has(> .row2 > .nav:not([hidden])) #text { flex: 0 1 calc(50% - var(--nav-w) / 2 - 2 * var(--ctl) - 24px); }
+            /* it grows into the room up to the people button: the thought of the week stands in the middle of it */
+            .row2 .nav { order: 2; flex: 1 0 var(--nav-w); }
+            .bar:has(> .row2 > .nav:not([hidden])) #text,
+            .bar:has(> .row2 > .nav:not([hidden])) .search-field { flex: 0 1 calc(50% - var(--nav-w) / 2 - 2 * var(--ctl) - 24px); }
             .bar:has(> #text[hidden]) .row2 .nav { margin-left: calc(50% - var(--nav-w) / 2 - var(--ctl) - 8px); }
+            /* that guest searching: the field fills the margin instead (no mic before it, so one control and gap less) */
+            .bar.searching:has(> #text[hidden]) .row2 .nav { margin-left: 0; }
+            .bar.searching:has(> #text[hidden]):has(> .row2 > .nav:not([hidden])) .search-field { flex: 0 1 calc(50% - var(--nav-w) / 2 - var(--ctl) - 16px); }
         }
         .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -220,7 +226,70 @@
            with its month in full ("20.–26. September" is 196px at 15px), a week across two months takes the short form
            where the full one does not fit (renderWeek: "30. Nov –6. Dez") */
         :root { --nav-box: 222px; --nav-gap: 4px; --nav-w: calc(2 * var(--ctl) + 2 * var(--nav-gap) + var(--nav-box)); }
-        .nav { display: flex; align-items: center; gap: var(--nav-gap); }
+        /* and the thought of the week after them (Doc, 23.11.2026: "zwischen dem Rechts-Chevron und den People, genau in der
+           Mitte, zentriert, machen wir den Gedanken der Woche hin"): a grid. Where back, period and forward have a row of
+           their own (up to 1259px) an empty column on the left, as wide as the thought's on the right, keeps them in the
+           middle as before; from 1260px the thought's column is what the bar leaves up to the people button. On the
+           phone that column is 32px - room for the pill with the picture alone (the words go below 180px, see .gdw) */
+        :root { --gdw-min: 32px; }
+        .nav {
+            display: grid; align-items: center; gap: var(--nav-gap);
+            grid-template-columns: minmax(var(--gdw-min), 1fr) var(--ctl) var(--nav-box) var(--ctl) minmax(var(--gdw-min), 1fr);
+            grid-template-areas: "sp prev per next gdw";
+        }
+        /* below 398px the period gives up what the pill needs (214px at 390px, 184px at 360px; where a month no longer
+           fits, renderWeek writes it short) */
+        @media (max-width: 397px) { .nav { grid-template-columns: var(--gdw-min) var(--ctl) minmax(0, 1fr) var(--ctl) var(--gdw-min); } }
+        #prevBtn { grid-area: prev; }
+        #nextBtn { grid-area: next; }
+        .nav .period { grid-area: per; }
+        @media (min-width: 1260px) {
+            /* at least the picture: between 1260 and about 1320px the entry field gives up the room for it, the period
+               stands up to 16px further left of the middle there (measured head-less) */
+            .row2 .nav { grid-template-columns: var(--ctl) var(--nav-box) var(--ctl) minmax(var(--gdw-min), 1fr); grid-template-areas: "prev per next gdw"; }
+        }
+        /* back / forward are filled triangles with round corners (TRI; Doc, 23.11.2026: "schöne Dreiecke und nicht nur
+           diese Chevrons") - stroke in the fill's colour rounds the corners */
+        svg .tri { stroke: currentColor; stroke-width: 2.2px; stroke-linejoin: round; }
+        /* the thought in the header: a pill like the header's other controls - one control high, the period's line and
+           corners - with the sheet as a small page (round corners, no circle) and its words on one line, centred in its
+           column (Doc, 23.11.2026: "die Pille oben nicht Kreis"). A size container: where the column gets narrow (phone,
+           a crowded bar) only the pill with the picture stays */
+        .gdw {
+            grid-area: gdw; justify-self: stretch; min-width: 0; height: var(--ctl); padding: 0; border: 0; background: transparent;
+            color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden;
+            container-type: inline-size;
+        }
+        .gdw-in {
+            display: inline-flex; align-items: center; gap: 9px; min-width: 0; max-width: 100%; height: 100%; padding: 0 12px 0 4px;
+            border: 1px solid var(--line); border-radius: 10px;
+        }
+        .gdw:hover .gdw-in { background: rgba(var(--tint), .1); }
+        .gdw:focus-visible { outline: none; }
+        .gdw:focus-visible .gdw-in { outline: 2px solid var(--lambda); outline-offset: -2px; }
+        .gdw-img { flex: none; height: 30px; width: auto; aspect-ratio: 200 / 289; border-radius: 4px; object-fit: cover; background: rgb(255, 255, 255); }
+        .gdw-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 15px/1.3 Arial, Helvetica, sans-serif; }
+        @container (max-width: 180px) {
+            .gdw-txt { display: none; }
+            .gdw-in { padding: 0 4px; }
+        }
+        /* the thought whole: the sheet as large as the window allows (Doc, 23.11.2026: "Bitte größer"). No words and no
+           button bar under it any more (Doc, 24.11.2026: "Lass rausnehmen, bitte" - the ◀ Schließen ▶ bar - and "auch den
+           Spruch drüber ... genau nochmal das Gleiche": the sheet carries the words itself); it closes with the drawn X top
+           right (.dlg-x), Escape or a tap beside it, and goes through the weeks with the arrow keys or a swipe sideways.
+           fitGdw sizes the sheet and with it the dialog: up to 92% of the window's height and 900px wide, on the phone
+           nearly the whole screen */
+        #gdwDlg { padding: 12px; }
+        /* .dlg.gdw-dlg: over the general .dlg further down (420px wide, 20px padding) */
+        .dlg.gdw-dlg { width: auto; max-width: none; max-height: calc(100dvh - 12px); overflow: auto; padding: 16px; text-align: center; }
+        /* title and date stay centred and keep clear of the X on both sides */
+        .gdw-dlg .ed-title { margin-bottom: 2px; padding: 0 calc(var(--ctl) + 4px); }
+        .gdw-when { margin: 0 0 10px; padding: 0 calc(var(--ctl) + 4px); font: 500 11px/1.5 Orbitron, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: pre-line; }
+        /* the frame shows the printed part of the sheet, without its empty white margins (trimGdw); the page inside is
+           placed by fitGdw */
+        .gdw-sheet { position: relative; margin: 0 auto; width: 300px; aspect-ratio: 200 / 289; overflow: hidden; border-radius: 6px; background: rgb(255, 255, 255); }
+        .gdw-big { position: absolute; left: 0; top: 0; display: block; width: 100%; height: 100%; max-width: none; }
+        @media (max-width: 560px) { #gdwDlg { padding: 6px; } .dlg.gdw-dlg { padding: 12px; } }
         .nav .period {
             flex: 0 1 var(--nav-box); min-width: 0; height: var(--ctl); padding: 0 10px; border: 1px solid var(--line); border-radius: 10px;
             display: flex; flex-direction: column; justify-content: center;   /* the two lines in the middle of the box */
@@ -281,6 +350,20 @@
         .ev-meta { font: 14px/1.4 Raleway, sans-serif; color: var(--muted); overflow-wrap: anywhere; }
         .ev-meta svg { width: 14px; height: 14px; fill: currentColor; vertical-align: -2px; margin-right: 2px; }
         .more { display: block; margin: 0 auto 12px; }
+        /* the lesson's Stoffverteilungsplan in one tap (svpPill): one control high like all the others (--ctl), the tap
+           area 48px all round (the ::after), in λ - gold, dark blue in Hell */
+        a.svp-pill {
+            position: relative; flex: none; display: inline-flex; align-items: center; gap: 6px; height: var(--ctl); padding: 0 12px;
+            border: 1px solid var(--lambda); border-radius: 10px; color: var(--text); text-decoration: none; white-space: nowrap;
+            font: 700 12px Orbitron, sans-serif; letter-spacing: .08em;
+        }
+        a.svp-pill svg { width: 18px; height: 18px; fill: var(--lambda); flex: none; }
+        a.svp-pill::after { content: ''; position: absolute; inset: -5px; }
+        a.svp-pill:hover { background: rgba(var(--tint), .12); }
+        a.svp-pill:focus-visible { outline: 2px solid var(--lambda); outline-offset: 2px; }
+        ul.evs li.has-svp { grid-template-columns: 62px minmax(0, 1fr) auto; }
+        ul.evs li.has-svp > .svp-pill { align-self: center; }
+        .hero-top .svp-pill { margin-left: auto; }
 
         /* ---------- Woche ---------- */
         .wk { padding: 8px 0 10px 0; }   /* the table a little to the left, some air on the right (Doc, 07.11.2026) */
@@ -470,6 +553,18 @@
             width: 100%; max-width: 420px; max-height: calc(100dvh - 32px); overflow: auto; padding: 20px; border-radius: 14px;
             background: var(--card); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
         }
+        /* the close button top right of a dialog, for every dialog that takes one (<button class="dlg-x"> as the
+           dialog's child): a drawn X - two strokes with round ends, no letter (Doc, 24.11.2026: "oben rechts ein schönes
+           X, kein Buchstaben") - in a box one control high like the header's buttons; λ on hover, in every scheme */
+        .dlg:has(> .dlg-x) { position: relative; }
+        .dlg-x {
+            position: absolute; top: 8px; right: 8px; z-index: 1; width: var(--ctl); height: var(--ctl); padding: 0;
+            display: grid; place-items: center; border-radius: 10px; cursor: pointer;
+            background: var(--card); color: var(--text); border: 1px solid var(--line);
+        }
+        .dlg-x svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+        .dlg-x:hover { color: var(--lambda); border-color: var(--lambda); }
+        .dlg-x:focus-visible { outline: 2px solid var(--lambda); outline-offset: 0; }
         .dlg p.msg { margin: 0 0 18px; font: 17px/1.45 Raleway, sans-serif; color: var(--text); white-space: pre-line; }
         .dlg-btns { display: flex; gap: 10px; flex-wrap: wrap; }
         .dlg-btns button, .dlg-btns a {
@@ -550,8 +645,10 @@
         .bar:has(> #text[hidden]) .filter-pop { left: 0; right: auto; }
 
         /* ---------- search (Doc, 22.11.2026: the calendar had none) ----------
-           The magnifier opens a panel under the header like the settings: field, then the hits by month, the past folded
-           away. Body text Arial, headings and dates Orbitron (Doc, 21.11.2026: "für die Fließtexte ... Arial") */
+           The magnifier turns the entry row into the search field - same place, same size (Doc, 22.11.2026: "die Zeile, wo
+           drin steht 'Neuer Termin', zum Suchfeld wird und alles darunter dann erscheint"): the hits by month hang right
+           under it, the past folded away. The entry field only steps aside, so its draft is back as it was when the search
+           closes. Body text Arial, headings and dates Orbitron (Doc, 21.11.2026: "für die Fließtexte ... Arial") */
         /* the button: up to 899px at the end of the views row - on the phone the entry field keeps the room for its whole
            "Neuer Termin" (at 390px it has 172px and the words need 150, a fifth icon in that row would leave 124); from
            900px right behind the entry field (order 2 like it, later in the page), so before the people button - from
@@ -559,29 +656,54 @@
            right of the period it would have pushed the period up to 60px out of the middle */
         .row2 .search-btn { margin-left: auto; }
         @media (min-width: 900px) { .row2 .search-btn { order: 2; margin-left: 0; } }
+        /* on: pressed like the open gear, rim and glass in λ - tapped again it closes the search */
+        .search-btn[aria-expanded="true"] { border-color: var(--lambda); color: var(--lambda); }
+        /* the row while searching: the entry field steps aside (no [hidden] - that means "a guest who may only read" to the
+           layout rules above), the search field stands in its place */
+        .bar.searching > #text { display: none; }
+        .search-field { position: relative; min-width: 0; height: var(--ctl); }
+        .search-field > svg { position: absolute; left: 9px; top: 50%; width: 18px; height: 18px; margin-top: -9px; fill: var(--muted); pointer-events: none; }
+        /* the entry field's look (input.new), the room for the magnifier left and the ✕ right; Arial like all body text */
+        .search-field input.new {
+            width: 100%; height: 100%; padding: 0 36px 0 32px; font-family: Arial, Helvetica, sans-serif;
+            -webkit-appearance: none; appearance: none;
+        }
+        .search-field input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }   /* the own ✕ closes */
+        /* calm while searching, no λ ring (Doc, 22.11.2026: "Die Suchzeile ist im Suchmodus zu hart umrandet. Und wenn,
+           dann müssten beide Boxen gleich sein") - the field keeps the entry row's resting line, the hit box below has the
+           very same line, radius and background */
+        .search-field input.new:focus { outline: none; border-color: var(--line); }
+        /* ✕ inside the field: leaves the search (on the phone the hits cover the magnifier in the views row) */
+        .search-x {
+            position: absolute; right: 5px; top: 50%; width: 30px; height: 30px; margin-top: -15px; padding: 0; border: 0;
+            border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center;
+        }
+        .search-x svg { width: 20px; height: 20px; fill: currentColor; }
+        .search-x:hover { color: var(--text); background: rgba(var(--tint), .14); }
+        .search-x:focus-visible { outline: 2px solid var(--lambda); outline-offset: 0; color: var(--text); }
+        /* small phones: the field has 142px at 360px - magnifier and ✕ a little tighter, so the whole "Suchen …" fits
+           (78px of 83, measured head-less; before 72) */
+        @media (max-width: 380px) {
+            .search-field > svg { left: 7px; width: 16px; height: 16px; margin-top: -8px; }
+            .search-field input.new { padding: 0 30px 0 27px; }
+            .search-x { right: 3px; width: 26px; }
+            .search-x svg { width: 18px; height: 18px; }
+        }
+        /* the hits: right under the search field, at least 400px wide (the whole width on the phone) - left, top, width and
+           height set by placeSearch() from where the field stands. Its box is the field's (input.new): same background,
+           line and radius (Doc, 22.11.2026: "Die sieht anders aus als die Suchzeile. Rundere Ecken.") */
         .search-pop {
-            position: absolute; top: calc(100% + 6px); right: 16px; z-index: 5; width: min(520px, calc(100% - 32px));
-            display: flex; flex-direction: column; padding: 12px 12px 4px; border-radius: 14px;
-            background: var(--card); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
-            max-height: calc(100dvh - 100% - 18px);   /* like the settings: never below the window, the list scrolls inside */
+            position: absolute; top: var(--sp-top, calc(100% + 6px)); left: var(--sp-left, 16px); z-index: 5; width: var(--sp-w, min(520px, calc(100% - 32px)));
+            display: flex; flex-direction: column; padding: 4px 12px 4px; border-radius: 10px;
+            background: var(--bg); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
+            max-height: var(--sp-h, calc(100dvh - 100% - 18px));   /* never below the window, the list scrolls inside */
             font-family: Arial, Helvetica, sans-serif;
         }
-        @media (max-width: 599px) { .search-pop { left: 8px; right: 8px; width: auto; } }
-        .search-row { flex: none; display: flex; gap: 8px; }
-        .search-field { position: relative; flex: 1 1 auto; min-width: 0; }
-        .search-field svg { position: absolute; left: 10px; top: 50%; width: 20px; height: 20px; margin-top: -10px; fill: var(--muted); pointer-events: none; }
-        .search-field input {
-            width: 100%; height: var(--ctl); background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
-            padding: 0 12px 0 38px; font: 17px Arial, Helvetica, sans-serif; -webkit-appearance: none; appearance: none;
-        }
-        .search-field input::placeholder { color: var(--muted); }
-        .search-field input:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
-        .search-field input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }   /* ✕ beside it closes */
-        .search-sum { flex: none; margin: 8px 2px 2px; font: 14px/1.4 Arial, Helvetica, sans-serif; color: var(--muted); }
+        .search-sum { flex: none; margin: 6px 2px 2px; font: 14px/1.4 Arial, Helvetica, sans-serif; color: var(--muted); }
         .search-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin: 0 -6px; padding: 0 6px 8px; }
         .search-list:empty { display: none; }
         .sr-month {
-            position: sticky; top: 0; z-index: 1; margin: 0; padding: 10px 4px 6px; background: var(--card);
+            position: sticky; top: 0; z-index: 1; margin: 0; padding: 10px 4px 6px; background: var(--bg);   /* the box's */
             font: 700 11px Orbitron, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
         }
         ul.sr { list-style: none; margin: 0; padding: 0; }
@@ -636,6 +758,11 @@
             background: rgb(var(--c)) content-box;
         }
         .colors button[aria-checked="true"] { border-color: rgb(var(--c)); padding: 3px; }
+        /* colour 8, the lesson colour (Doc, 24.11.2026: "auch die Stundenfarbe mit reinpacken"): the swatch looks like a
+           lesson tile - the scheme's tint, quiet over the card, with its rim - not like one more full colour */
+        .colors button.cl {
+            background: radial-gradient(closest-side, rgba(var(--tint), .22) calc(100% - 2px), rgba(var(--tint), .75) calc(100% - 1.5px) 100%, transparent 100%) content-box;
+        }
         .ed-note { margin: -4px 0 12px; font: 14px/1.4 Raleway, sans-serif; color: var(--muted); }
         /* the appointment editor tighter and a little smaller (Doc, 19.11.2026: "alles in Y ein bisschen enger und
            wahrscheinlich auch kleiner"): less air between the rows, smaller words, switches and chips - every target
@@ -656,7 +783,11 @@
         .ed #remindRow { margin-top: 4px; }
         .ed .chips { gap: 6px; }
         .ed .chips button { padding: 0 10px; font-size: 11px; }
-        .ed .colors { flex-wrap: wrap; gap: 6px; }
+        /* eight swatches since the lesson colour (24.11.2026): always one row - a little closer on the phone, and on the
+           smallest ones (360px) each gives up a few pixels instead of one dropping to a row of its own */
+        .ed .colors { flex-wrap: nowrap; align-items: center; gap: 6px; }
+        .ed .colors button { flex: 0 1 var(--ctl); min-width: 0; height: auto; aspect-ratio: 1; }
+        @media (max-width: 420px) { .ed .colors { gap: 4px; } }
         .ed .ed-note { margin: 0 0 8px; font-size: 13px; }
         .ed .ed-note:empty { display: none; }
         .ed .dlg-btns { gap: 8px; }
@@ -692,6 +823,66 @@
             border-color: rgba(var(--c-green), .55);
         }
         .day.holiday .day-head .pill { --c: var(--c-green); --on: var(--ink-navy); }
+
+        /* ---------- reminders (calendar_event.reminder, 20261122_calendar_reminder.sql) ----------
+           A nudge, not busy time (Doc, 22.11.2026: "da müssten wir irgendwie ein extra Item haben für Erinnerung"; then
+           "rot mit weißer Schrift"): Υ red with white text in every scheme (6.5:1), a bell and the word "Erinnerung", only
+           the start time - and its own round shape, so it never reads as a red appointment (colour 1, square corners).
+           colorOf() gives 'r' for every reminder, whatever colour the row carries. */
+        .cr { --c: var(--c-red); --on: var(--ink-light); }
+        .rem-tag {
+            display: inline-flex; align-items: center; gap: 4px; font: 700 10px/1.2 Orbitron, sans-serif; letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+        .rem-tag svg { width: 12px; height: 12px; fill: currentColor; flex: none; }
+        /* the day list: the time and a bell on the left, the body a red card */
+        ul.evs li.cr .t small svg { width: 14px; height: 14px; fill: rgb(var(--c-red)); vertical-align: -2px; }
+        ul.evs li.cr .ev-body { background: rgb(var(--c-red)); color: var(--ink-light); border-left: 0; border-radius: 10px; padding: 6px 12px 7px; min-height: 0; }
+        ul.evs li.cr .ev-body .rem-tag { opacity: .9; margin-bottom: 2px; }
+        ul.evs li.cr .ev-meta, ul.evs li.cr .ev-meta .note { color: var(--ink-light); opacity: .88; }
+        /* "Als Nächstes": the pill says "Erinnerung" with its bell, solid red in every scheme */
+        .hero .pill.rem-pill { display: inline-flex; align-items: center; gap: 6px; background: rgb(var(--c-red)); border-color: rgb(var(--c-red)); color: var(--ink-light); }
+        .hero .pill.rem-pill svg { width: 14px; height: 14px; fill: currentColor; }
+        /* the week: a round red marker at its time (a fixed small height, never a block of time) */
+        .wk-ev.cr { border-radius: 999px; padding-left: 7px; padding-right: 8px; display: flex; align-items: center; gap: 3px; }
+        .wk-ev.cr svg { width: 11px; height: 11px; fill: currentColor; flex: none; }
+        .wk-ev.cr .rem-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .wk-ev.cr small { display: inline; margin-right: 3px; }
+        /* the month: a round red chip with the bell; on the phone a red diamond instead of a dot */
+        .chip.cr { border-radius: 999px; }
+        .chip.cr svg { width: 10px; height: 10px; fill: currentColor; vertical-align: -1px; margin-right: 3px; }
+        @media (max-width: 640px) {
+            .mo-cell .chip.cr { border-radius: 1px; transform: rotate(45deg) scale(.9); }
+            .mo-cell .chip svg { display: none; }
+        }
+        /* search hits: the red bar, and the word as a small red badge */
+        .sr-meta .rem-tag { padding: 1px 6px; border-radius: 999px; background: rgb(var(--c-red)); color: var(--ink-light); vertical-align: 1px; }
+        .sr-meta .rem-tag svg { width: 10px; height: 10px; }
+        /* the editor's switch */
+        .rem-switch { display: inline-flex; align-items: center; gap: 6px; }
+        .rem-switch svg { width: 18px; height: 18px; fill: rgb(var(--c-red)); flex: none; }
+
+        /* ---------- hover preview (Doc, 22.11.2026): with a real pointer an entry shows time, title, place and the start
+           of its notes after a short pause, without a click; touch devices never see it (no hover there) ---------- */
+        .pv {
+            position: fixed; z-index: 30; left: 0; top: 0; width: max-content; max-width: min(340px, calc(100vw - 16px));
+            padding: 10px 12px 11px; border-radius: 10px; background: var(--card); color: var(--text);
+            border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow); pointer-events: none;
+            font: 13px/1.4 Arial, Helvetica, sans-serif; opacity: 0; transition: opacity .12s ease;
+        }
+        .pv.on { opacity: 1; }
+        .pv-when { display: flex; align-items: center; gap: 6px; margin: 0 0 4px; font: 700 11px/1.3 Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+        .pv-when i { width: 10px; height: 10px; border-radius: 3px; background: rgb(var(--c)); flex: none; }
+        .pv.cw .pv-when i { background: var(--both); }
+        .pv-title { margin: 0; font: 600 15px/1.35 Arial, Helvetica, sans-serif; overflow-wrap: anywhere; }
+        .pv-meta { margin: 3px 0 0; color: var(--muted); overflow-wrap: anywhere; }
+        .pv-meta svg { width: 13px; height: 13px; fill: currentColor; vertical-align: -2px; margin-right: 2px; }
+        .pv-note {
+            margin: 6px 0 0; padding-top: 6px; border-top: 1px solid var(--line); white-space: pre-line; overflow-wrap: anywhere;
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden;
+        }
+        .pv .rem-tag { padding: 2px 7px; border-radius: 999px; background: rgb(var(--c-red)); color: var(--ink-light); }
+        @media (hover: none) { .pv { display: none !important; } }
         .ed-note:empty { display: none; }
         /* sharing with one guest (20261119_calendar_share.sql): the section under the gear and the one-time QR code */
         .share-btns { display: flex; gap: 8px; }
@@ -742,6 +933,13 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
             </button>
             <input class="new" id="text" type="text" enterkeyhint="go" autocomplete="off" placeholder="Neuer Termin …" aria-label="Neuer Termin, zum Beispiel morgen 18 Uhr Essen">
+            <!-- the search field: in the entry field's place while the search is on (showSearch); the hits under it in
+                 #searchPop. Material Icons "search" and "close" (Apache 2.0) -->
+            <div class="search-field" id="searchField" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                <input class="new" id="searchInput" type="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Suchen …" aria-label="Termine suchen: Titel, Ort, Notiz" aria-controls="searchList">
+                <button class="search-x" id="searchClose" type="button" aria-label="Suche schließen" title="Suche schließen (Esc)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+            </div>
             <!-- gear: Material Icons "settings" (Apache 2.0) -->
             <button class="icon gear" id="gearBtn" type="button" aria-label="Einstellungen" aria-expanded="false" aria-controls="settings">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
@@ -767,14 +965,17 @@
                 </div>
                 <!-- search: up to 899px at the end of this row, from 900px in the bar right behind the entry field (CSS order);
                      Material Icons "search" (Apache 2.0) -->
-                <button class="icon search-btn" id="searchBtn" type="button" aria-label="Suchen" aria-expanded="false" aria-controls="searchPop" aria-keyshortcuts="/ Meta+F Control+F">
+                <button class="icon search-btn" id="searchBtn" type="button" aria-label="Suchen" aria-expanded="false" aria-controls="searchField searchPop" aria-keyshortcuts="/ Meta+F Control+F">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                 </button>
                 <div class="nav" id="nav" hidden>
-                    <!-- Material Icons "chevron_left" / "chevron_right" (Apache 2.0) -->
-                    <button class="icon" id="prevBtn" type="button" aria-label="Zurück"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+                    <!-- the arrows are triangles drawn by TRI (init), the same as beside the day names of week and month -->
+                    <button class="icon" id="prevBtn" type="button" aria-label="Zurück"></button>
                     <span class="period" id="period" aria-live="polite" title="Zurück zu heute"></span>
-                    <button class="icon" id="nextBtn" type="button" aria-label="Weiter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
+                    <button class="icon" id="nextBtn" type="button" aria-label="Weiter"></button>
+                    <!-- the thought of the week shown, between the forward arrow and the people button (renderGdw); a tap
+                         opens it whole in #gdwDlg -->
+                    <button class="gdw" id="gdwBtn" type="button" hidden><span class="gdw-in"><img class="gdw-img" id="gdwImg" alt=""><span class="gdw-txt" id="gdwTxt"></span></span></button>
                 </div>
             </div>
         </div>
@@ -836,16 +1037,9 @@
                 <button class="wide" id="guestForget" type="button">Zugang hier entfernen</button>
             </div>
         </div>
-        <!-- the search: live over title, place and notes; the hits by month, tap = go there (filled by runSearch) -->
-        <div class="search-pop" id="searchPop" role="dialog" aria-label="Termine suchen" hidden>
-            <div class="search-row">
-                <label class="search-field">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                    <input id="searchInput" type="search" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Titel, Ort, Notiz …" aria-label="Termine suchen" aria-controls="searchList">
-                </label>
-                <!-- Material Icons "close" (Apache 2.0) -->
-                <button class="icon" id="searchClose" type="button" aria-label="Suche schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
-            </div>
+        <!-- the search's hits, right under the search field in the bar: live over title, place and notes, by month, tap =
+             go there (filled by runSearch, placed by placeSearch) -->
+        <div class="search-pop" id="searchPop" role="region" aria-label="Suchergebnisse" hidden>
             <p class="search-sum" id="searchSum" role="status"></p>
             <div class="search-list" id="searchList"></div>
         </div>
@@ -882,6 +1076,11 @@
         <form class="dlg ed" id="edForm" role="dialog" aria-modal="true" aria-labelledby="edTitle" novalidate>
             <p class="ed-title" id="edTitle">Neuer Termin</p>
             <label class="fld"><span>Was</span><input id="fTitle" type="text" autocomplete="off" enterkeyhint="done"></label>
+            <!-- a reminder instead of an appointment: a point in time, red with a bell (calendar_event.reminder - only once
+                 the column exists, Doc's own entries only). Material Icons "notifications" (Apache 2.0) -->
+            <div class="fld" id="remRow" hidden>
+                <label class="switch"><input id="fReminder" type="checkbox"><i></i><span class="rem-switch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>Erinnerung – kein Termin, nur ein Zeitpunkt</span></label>
+            </div>
             <div class="two">
                 <label class="fld"><span>Tag</span><input id="fDate" type="date"></label>
                 <div class="fld"><span class="fld-label">&nbsp;</span>
@@ -935,6 +1134,8 @@
                     <button type="button" class="c5" role="radio" data-color="5" aria-label="Violett"></button>
                     <button type="button" class="c4" role="radio" data-color="4" aria-label="Blau"></button>
                     <button type="button" class="c3" role="radio" data-color="3" aria-label="Grün"></button>
+                    <!-- 8 = the lesson colour: the entry looks like the timetable's lessons (needs 20261124_calendar_lesson_color.sql) -->
+                    <button type="button" class="cl" role="radio" data-color="8" aria-label="Stundenfarbe – wie der Unterricht" title="Stundenfarbe – wie der Unterricht"></button>
                 </div>
             </div>
             <p class="ed-note" id="edNote"></p>
@@ -970,8 +1171,20 @@
         </div>
     </div>
 
+    <!-- the thought of the week, whole: the sheet alone, the X top right; arrow keys / a swipe go through the weeks (openGdw) -->
+    <div class="dlg-back" id="gdwDlg" hidden>
+        <div class="dlg gdw-dlg" role="dialog" aria-modal="true" aria-labelledby="gdwTitle">
+            <button type="button" class="dlg-x" id="gdwClose" aria-label="Schließen" title="Schließen (Esc)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button>
+            <p class="ed-title" id="gdwTitle">Gedanke der Woche</p>
+            <p class="gdw-when" id="gdwWhen"></p>
+            <div class="gdw-sheet" id="gdwSheet"><img class="gdw-big" id="gdwBig" alt=""></div>
+        </div>
+    </div>
+
     <!-- S4: filled right before printing in the guest's view (Woche drucken) -->
     <div id="printWeek"></div>
+    <!-- the hover preview of an entry (filled and placed by showPreview; only with a real pointer) -->
+    <div class="pv" id="preview" role="tooltip" hidden></div>
 
     <script>
         (() => {
@@ -1033,6 +1246,16 @@
             const ICON_PLACE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>';
             const ICON_REPEAT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>';
             const ICON_ADD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+            // Material Icons (Apache 2.0): "notifications" - a reminder
+            const ICON_BELL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>';
+            /* reminders (calendar_event.reminder, 20261122_calendar_reminder.sql): a point in time, not busy time - drawn red
+               with a bell and the word "Erinnerung", with its start time only. ends_at keeps a short slot (REM_SLOT) just
+               for the reminder watcher's dialog; the week draws it REM_H minutes high whatever it says */
+            const REM_SLOT = 15 * 60000, REM_H = 24;
+            const isRem = ev => !!(ev && ev.reminder && !ev.lesson && !ev.holiday);
+            const REM_TAG = `<span class="rem-tag">${ICON_BELL}Erinnerung</span>`;
+            // "Erinnerung: Bögen drucken" under the word "Erinnerung" reads twice - the display drops the prefix
+            const remTitle = t => String(t || '').replace(/^\s*Erinnerung\s*[:–-]\s*/i, '') || String(t || '');
             // Material Icons (Apache 2.0): "menu_book" - the lesson's Stoffverteilungsplan
             const ICON_PLAN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg>';
 
@@ -1050,17 +1273,21 @@
             let share = null;          // the first row of calendar_share, without the hash: { id, label, show_*, can_write, active }
             let shareCols = null;      // calendar_event has private / shared_by: null = not probed yet
             let togetherCol = null;    // calendar_event has together (20261119d_calendar_together.sql): null = not probed yet
+            let reminderCol = null;    // calendar_event has reminder (20261122_calendar_reminder.sql): null = not probed yet
             let busy = 0;             // writes in flight - a reload now could bring back the old state
             let view = 'agenda';       // 'agenda' | 'week' | 'month'
             let anchor = K.startOfDay(new Date());   // the day the week or month view shows
             let selDay = K.startOfDay(new Date());   // the chosen day in the month view
             let agendaDays = AGENDA_DAYS;
 
-            const COLORS = [1, 2, 3, 4, 5, 6, 7];   // calendar_event.color (20261119c_calendar_colors.sql): red, gold, green, blue, violet, orange, pink
+            const COLORS = [1, 2, 3, 4, 5, 6, 7, 8];   // calendar_event.color (20261119c_calendar_colors.sql): red, gold, green, blue, violet, orange, pink; 8 (20261124_calendar_lesson_color.sql) below
+            // colour 8 = the lesson colour (Doc, 24.11.2026: "auch die Stundenfarbe"): an appointment of Doc's drawn exactly
+            // like the timetable's lessons - class cl, the scheme's tint - but still his own row (editable, Solita reminds)
+            const LESSON_COLOR = 8;
             const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             // a joint appointment (Doc's and the guest's): a guest row with together - in the guest's view one of their own
             const isJoint = ev => !!(ev && ev.together && (GUEST ? ev.kind === 'own' : ev.shared_by));
-            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : isJoint(ev) ? 'w' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : COLORS.includes(ev.color) ? ev.color : 2);   // 'l' -> class cl, 'h' -> ch, 's' -> cs (the guest's turquoise), 'w' -> cw (joint: gold and turquoise)
+            const colorOf = ev => (ev.holiday ? 'h' : ev.lesson ? 'l' : isRem(ev) ? 'r' : isJoint(ev) ? 'w' : ev.kind ? (GUEST_COLOR[ev.kind] || 2) : ev.shared_by ? 's' : ev.color === LESSON_COLOR ? 'l' : COLORS.includes(ev.color) ? ev.color : 2);   // 'l' -> class cl (a lesson, or colour 8), 'h' -> ch, 'r' -> cr (a reminder: red, whatever its colour), 's' -> cs (the guest's turquoise), 'w' -> cw (joint: gold and turquoise)
             // the guest's name lives only in the database (calendar_share.label); one share for now, so its label names
             // every shared_by row
             const guestName = () => (share && share.label) || 'Gast';
@@ -1136,7 +1363,22 @@
             /* the appointments - with private / shared_by only where the probe found them; a 400 for them (never expected
                after a good probe) falls back to the plain columns, so the list always loads */
             async function loadEvents() {
-                const q = cols => send(`calendar_event?select=${cols}&order=starts_at.asc&limit=5000`);
+                // reminders: only once 20261122 ran (probed on its own, it needs none of the others); a 400 for the column
+                // (never expected after a good probe) drops it, so the list always loads
+                if (reminderCol === null) {
+                    reminderCol = await send('calendar_event?select=reminder&limit=1')
+                        .then(() => true, e => (e.message === 'HTTP 400' ? false : null));
+                }
+                const get = cols => send(`calendar_event?select=${cols}&order=starts_at.asc&limit=5000`);
+                const q = async cols => {
+                    if (!reminderCol) return get(cols);
+                    try { return await get(cols + ',reminder'); } catch (e) {
+                        if (e.message !== 'HTTP 400') throw e;
+                        const rows = await get(cols);   // still 400: another column is at fault, the cascade below handles it
+                        reminderCol = false;
+                        return rows;
+                    }
+                };
                 if (shareCols === null) {
                     shareCols = await send('calendar_event?select=private,shared_by&limit=1')
                         .then(() => true, e => (e.message === 'HTTP 400' ? false : null));   // no answer: ask again next time
@@ -1203,7 +1445,7 @@
                 items = []; lessons = []; guestShare = null;
                 try { localStorage.removeItem(GUEST_CACHE_KEY); localStorage.setItem(GUEST_GONE_KEY, '1'); } catch (e) { }
                 closeEditor();
-                $('dlg').hidden = $('qrDlg').hidden = $('settings').hidden = true;
+                $('dlg').hidden = $('qrDlg').hidden = $('settings').hidden = $('gdwDlg').hidden = true;
                 $('entry').hidden = $('main').hidden = true;
                 $('guestGate').hidden = false;
             }
@@ -1235,8 +1477,11 @@
                     .then(r => (r.ok ? r.json() : null))
                     .then(m => {
                         if (!m || !Array.isArray(m.pages)) return;
+                        const fresh = JSON.stringify(m), had = JSON.stringify(svpMap);
                         svpMap = m;
-                        try { localStorage.setItem(SVP_MAP_KEY, JSON.stringify(m)); } catch (e) { }
+                        try { localStorage.setItem(SVP_MAP_KEY, fresh); } catch (e) { }
+                        // a first visit (nothing kept yet) or a changed map: the SVP buttons show at once, not with the next tick
+                        if (fresh !== had && !$('main').hidden && $('ed').hidden) render();
                     })
                     .catch(() => { });
             }
@@ -1245,6 +1490,15 @@
                 const p = K.svpPlanPath(l, svpMap);
                 return p ? SVP_ORIGIN + p : null;
             }
+            /* the same link as one tap, without the info box first (Doc, 23.11.2026: "Bitte auch bauen, dass ich im
+               Phone-Kalender auf den SVP komme"): a button "SVP" on the lesson's row in the day lists (Tag, the month's
+               chosen day) and on the "Als Nächstes" card - every width, the phone's too. A link: a new tab on the Mac,
+               the browser from the phone app. The week's narrow cards keep the info box with its "Stoffverteilungsplan"
+               button. Never in the guest's view (Doc's school tool, behind his login); no plan, no button (coaching, IA) */
+            const svpPill = l => {
+                const u = !GUEST && l ? svpUrl(l) : null;
+                return u ? `<a class="svp-pill" href="${esc(u)}" target="_blank" rel="noopener" title="Stoffverteilungsplan – diese Woche" aria-label="Stoffverteilungsplan ${esc(K.lessonTitle(l))}">${ICON_PLAN}SVP</a>` : '';
+            };
 
             /* the lessons in [from, to) as occurrences like the appointments' (key "L|id"; ev.lesson = the row) */
             function lessonOccs(from, to) {
@@ -1309,6 +1563,7 @@
             }
             /* "in 14 Min", "in 2 Std 10 Min", "morgen", "in 5 Tagen" */
             function countdown(occ, now) {
+                if (occ.start <= now && isRem(occ.ev)) return 'jetzt';   // a reminder has no running time
                 if (occ.start <= now) {
                     const left = Math.max(1, Math.round((occ.end - now) / 60000));
                     return 'läuft · noch ' + (left < 60 ? left + ' Min' : Math.floor(left / 60) + ' Std' + (left % 60 ? ' ' + (left % 60) + ' Min' : ''));
@@ -1328,7 +1583,7 @@
                     const last = K.addDays(occ.end, -1);
                     return K.sameDay(occ.start, last) ? 'ganztägig' : 'bis ' + dayLabel(last);
                 }
-                return K.hhmm(occ.start) + '–' + K.hhmm(occ.end);
+                return isRem(occ.ev) ? K.hhmm(occ.start) : K.hhmm(occ.start) + '–' + K.hhmm(occ.end);   // a reminder: its moment only
             }
 
             /* ---------- Agenda ---------- */
@@ -1345,26 +1600,29 @@
                     return;
                 }
                 hero.classList.add('c' + colorOf(next.ev));
+                const rem = isRem(next.ev);
                 const running = next.start <= now;
                 // the bar fills over the last 3 hours before the start, and while it runs over its length
                 const pct = running ? (now - next.start) / (next.end - next.start) : 1 - Math.min(1, (next.start - now) / (3 * 3600000));
                 const rel = relDay(next.start);
                 const meta = [rel || longDay(next.start), timeText(next)];
                 hero.innerHTML =
-                    `<div class="hero-top"><span class="pill">${running ? 'Läuft gerade' : 'Als Nächstes'}</span></div>` +
+                    `<div class="hero-top">${rem ? `<span class="pill rem-pill">${ICON_BELL}Erinnerung</span>` : `<span class="pill">${running ? 'Läuft gerade' : 'Als Nächstes'}</span>`}${svpPill(next.ev.lesson)}</div>` +
                     `<p class="hero-count">${esc(countdown(next, now))}</p>` +
-                    `<div class="hero-title">${esc(next.ev.title)}</div>` +
+                    `<div class="hero-title">${esc(rem ? remTitle(next.ev.title) : next.ev.title)}</div>` +
                     `<div class="hero-meta">${esc(meta.join(' · '))}</div>` +
                     (next.ev.location ? `<div class="hero-meta">${ICON_PLACE.replace('<svg', '<svg style="width:14px;height:14px;fill:currentColor;vertical-align:-2px"')} ${esc(next.ev.location)}</div>` : '') +
                     `<div class="hero-bar"><i style="width:${Math.round(Math.max(0, Math.min(1, pct)) * 100)}%"></i></div>`;
-                hero.onclick = () => openOcc(next);
+                hero.onclick = e => { if (!e.target.closest('a.svp-pill')) openOcc(next); };   // the SVP button is a link of its own
             }
 
             const evRow = (occ, now) => {
-                const past = occ.end <= now, cur = occ.start <= now && occ.end > now;
+                const rem = isRem(occ.ev);
+                const past = occ.end <= now, cur = !rem && occ.start <= now && occ.end > now;
                 const last = K.addDays(occ.end, -1);
                 const t = occ.ev.all_day
                     ? `<div class="t"><span class="allday">${K.sameDay(occ.start, last) ? 'ganz-<br>tägig' : 'bis<br>' + last.getDate() + '.' + (last.getMonth() + 1) + '.'}</span></div>`
+                    : rem ? `<div class="t"><b>${K.hhmm(occ.start)}</b><small>${ICON_BELL}</small></div>`   // a moment: no end time
                     : `<div class="t"><b>${K.hhmm(occ.start)}</b><small>${K.hhmm(occ.end)}</small></div>`;
                 const meta = [];
                 if (occ.ev.location) meta.push(ICON_PLACE + esc(occ.ev.location));
@@ -1373,8 +1631,9 @@
                 // Untis notes stand out (cancelled, substitution, "nicht im Haus"); a coaching block's note is just its slots
                 if (l && l.code === 'cancelled') meta.push(`<span class="note">${esc('fällt aus' + (l.note ? ' – ' + l.note : ''))}</span>`);
                 else if (l && l.note) meta.push(/^coaching/i.test(l.subject) ? esc(l.note) : `<span class="note">${esc(l.note)}</span>`);
-                return `<li class="c${colorOf(occ.ev)}${past ? ' past' : ''}${cur ? ' now' : ''}${isOff(occ) ? ' off' : ''}" data-key="${esc(occ.key)}">${t}` +
-                    `<div class="ev-body"><div class="ev-title">${esc(occ.ev.title)}${srcMark(occ.ev)}</div>${meta.length ? `<div class="ev-meta">${meta.join(' · ')}</div>` : ''}</div></li>`;
+                const svp = svpPill(l);
+                return `<li class="c${colorOf(occ.ev)}${past ? ' past' : ''}${cur ? ' now' : ''}${isOff(occ) ? ' off' : ''}${svp ? ' has-svp' : ''}" data-key="${esc(occ.key)}">${t}` +
+                    `<div class="ev-body">${rem ? REM_TAG : ''}<div class="ev-title">${esc(rem ? remTitle(occ.ev.title) : occ.ev.title)}${srcMark(occ.ev)}</div>${meta.length ? `<div class="ev-meta">${meta.join(' · ')}</div>` : ''}</div>${svp}</li>`;
             };
 
             let shownOcc = new Map();   // key -> occurrence, for taps on rows
@@ -1432,7 +1691,7 @@
                     html += WK_SEP + '<div class="wk-allday"><div></div>' + days.map(d => {
                         const here = allday.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                         here.forEach(o => shownOcc.set(o.key, o));
-                        return (isHoliday(d) ? '<div class="holiday">' : '<div>') + here.map(o => `<button type="button" class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}" title="${esc(o.ev.title)}">${esc(o.ev.title)}</button>`).join('') + '</div>';
+                        return (isHoliday(d) ? '<div class="holiday">' : '<div>') + here.map(o => `<button type="button" class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}">${esc(o.ev.title)}</button>`).join('') + '</div>';
                     }).join('') + '</div>';
                 }
                 html += WK_SEP + '<div class="wk-frame"><div class="wk-lines" aria-hidden="true"><div></div>' +
@@ -1444,7 +1703,7 @@
                         const s = Math.max(+o.start, +d), e = Math.min(+o.end, +dEnd);
                         const sm = (new Date(s).getHours() - h0) * 60 + new Date(s).getMinutes();
                         const em = e === +dEnd ? (24 - h0) * 60 : (new Date(e).getHours() - h0) * 60 + new Date(e).getMinutes();
-                        return { o, sm, em: Math.max(em, sm + 20) };
+                        return { o, sm, em: isRem(o.ev) ? sm + REM_H : Math.max(em, sm + 20) };   // a reminder: a small marker, not a span of time
                     }).sort((a, b) => a.sm - b.sm || b.em - a.em);
                     // side by side when they overlap: each one gets the first free lane of its cluster
                     const lanesEnd = [];
@@ -1465,8 +1724,11 @@
                         shownOcc.set(x.o.key, x.o);
                         const top = `calc(var(--hour) * ${x.sm / 60})`, height = `calc(var(--hour) * ${(x.em - x.sm) / 60} - 2px)`;
                         const left = (x.lane / x.lanes * 100).toFixed(2), width = (100 / x.lanes).toFixed(2);
-                        col += `<div class="wk-ev c${colorOf(x.o.ev)}${x.o.end <= now ? ' past' : ''}${isOff(x.o) ? ' off' : ''}${x.em - x.sm <= 30 ? ' short' : ''}" data-key="${esc(x.o.key)}" style="top:${top};height:${height};left:calc(${left}% + 1px);width:calc(${width}% - 2px)" title="${esc(K.hhmm(x.o.start) + '–' + K.hhmm(x.o.end) + ' ' + x.o.ev.title)}">` +
-                            `<small>${K.hhmm(x.o.start)}–${K.hhmm(x.o.end)}${srcMark(x.o.ev)}</small>${esc(x.o.ev.title)}</div>`;
+                        // no title tooltip: with a real pointer the hover preview shows all of it (showPreview)
+                        const rem = isRem(x.o.ev);
+                        col += `<div class="wk-ev c${colorOf(x.o.ev)}${x.o.end <= now ? ' past' : ''}${isOff(x.o) ? ' off' : ''}${x.em - x.sm <= 30 ? ' short' : ''}" data-key="${esc(x.o.key)}" style="top:${top};height:${height};left:calc(${left}% + 1px);width:calc(${width}% - 2px)"${rem ? ' aria-label="Erinnerung ' + esc(K.hhmm(x.o.start) + ' ' + x.o.ev.title) + '"' : ''}>` +
+                            (rem ? `${ICON_BELL}<span class="rem-txt"><small>${K.hhmm(x.o.start)}</small>${esc(remTitle(x.o.ev.title))}</span></div>`
+                                : `<small>${K.hhmm(x.o.start)}–${K.hhmm(x.o.end)}${srcMark(x.o.ev)}</small>${esc(x.o.ev.title)}</div>`);
                     }
                     if (K.sameDay(d, now)) {
                         const nm = (now.getHours() - h0) * 60 + now.getMinutes();
@@ -1482,9 +1744,12 @@
                at 8:00 and then stays where Doc scrolled it, through the half-minute redraws and other weeks */
             const WK_FROM = 8, WK_TO = 21, WK_LABEL = 10;   // WK_LABEL: px kept above the top hour line for its label
             const WK_SEP = '<div class="wk-sep"><i></i></div>';
+            /* back (d < 0) / forward: a filled triangle with round corners (Doc, 23.11.2026: "schöne Dreiecke und nicht nur
+               diese Chevrons") - the one drawing for every arrow of the page: the header's, the ones beside the day names of
+               week and month. Its centre of mass sits on the middle of the box (x = 12) */
+            const TRI = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path class="tri" d="${d < 0 ? 'M15 6.2v11.6L6.4 12z' : 'M9 6.2v11.6L17.6 12z'}"/></svg>`;
             // back / forward beside the day names of the week and the month, the same as the header's
-            // (Material Icons "chevron_left" / "chevron_right")
-            const STEP_BTN = d => `<button type="button" class="icon nav-step" data-step="${d}" aria-label="${view === 'week' ? (d < 0 ? 'Vorige Woche' : 'Nächste Woche') : (d < 0 ? 'Voriger Monat' : 'Nächster Monat')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d < 0 ? 'M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z' : 'M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z'}"/></svg></button>`;
+            const STEP_BTN = d => `<button type="button" class="icon nav-step" data-step="${d}" aria-label="${view === 'week' ? (d < 0 ? 'Vorige Woche' : 'Nächste Woche') : (d < 0 ? 'Voriger Monat' : 'Nächster Monat')}">${TRI(d)}</button>`;
             let wkTop = WK_FROM;   // the hour whose line sits WK_LABEL below the top of the box
             function fitWeek() {
                 const box = $('wk').querySelector('.wk-body');
@@ -1518,16 +1783,181 @@
                     const school = lessonOccs(d, K.addDays(d, 1)).some(o => !isOff(o));   // one quiet mark for the lessons
                     const cls = (d.getMonth() !== first.getMonth() ? ' out' : '') + (K.sameDay(d, now) ? ' today' : '') + (K.sameDay(d, selDay) ? ' sel' : '') + (isHoliday(d) ? ' holiday' : '');
                     const nApp = here.filter(o => !o.ev.holiday).length;   // the holiday is named, not counted as an appointment
+                    here.slice(0, 3).forEach(o => shownOcc.set(o.key, o));   // for the hover preview (the chips take no taps)
                     html += `<button type="button" class="mo-cell${cls}" data-day="${K.ymd(d)}" aria-label="${esc(longDay(d))}${isHoliday(d) ? ', ' + esc(K.holidayOf(d)) : ''}${nApp ? ', ' + nApp + ' Termin' + (nApp > 1 ? 'e' : '') : ''}${school ? ', ' + LESSON_WORD : ''}">` +
                         `<span class="n">${d.getDate()}</span><span class="evs">` +
                         // data-key only for the search's outline - the chips take no taps (pointer-events: none), the cell does
-                        here.slice(0, 3).map(o => `<span class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}">${esc((o.ev.all_day ? '' : K.hhmm(o.start) + ' ') + o.ev.title)}</span>`).join('') +
+                        here.slice(0, 3).map(o => isRem(o.ev)
+                            ? `<span class="chip cr" data-key="${esc(o.key)}">${ICON_BELL}${esc(K.hhmm(o.start) + ' ' + remTitle(o.ev.title))}</span>`
+                            : `<span class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}">${esc((o.ev.all_day ? '' : K.hhmm(o.start) + ' ') + o.ev.title)}</span>`).join('') +
                         (here.length > 3 ? `<span class="plus">+${here.length - 3}</span>` : '') +
                         (school ? `<span class="chip cl">${LESSON_WORD}</span>` : '') + '</span></button>';
                 }
                 $('mo').innerHTML = html + '</div>';
                 // the chosen day's appointments below the month
                 $('moDay').innerHTML = dayBox(selDay, occsIn(selDay, K.addDays(selDay, 1)), now, true);
+            }
+
+            /* ---------- the thought of the week (Doc, 23.11.2026: "Die Gedanken der Woche aus dem Stoffverteilungsplan möchte
+               ich gerne auch im Kalender haben - in meinem Kalender, dem Kalender für uns beide") ----------
+               The school weeks' thoughts are the Stoffverteilungsplan's own: svp/gdw.json, keyed by school week, each with
+               the Monday it starts on - read only, the set the plan pages show. kalender/gdw-kalender.json adds one for each
+               holiday week (sheets from the reserve; Doc: "wenn Gedanken der Woche fehlen, wie in den Ferien, müssen wir die
+               irgendwie kreativ ergänzen") and the words of the sheets whose school-week entry has none or only their
+               beginning. Keyed by the Monday, not the calendar week: KW 48 comes again next year with another thought.
+               Both files are public (the guest's page reads them too); the last good map stays for offline use. The small
+               picture comes from svp/gdw/, the whole page from R2 (tools/gdw_publish.mjs), as in svp-plan-gdw.js */
+            const GDW_KEY = 'kalender-gdw';
+            const GDW_BIG = 'https://pub-3679488924b04b6e9118c6684b8c23e1.r2.dev/';
+            let gdw = null;          // Monday (yyyy-mm-dd) -> { bild, titel, gross, sw } or, for a holiday week, { bild, titel, ferien }
+            let gdwOpen = null;      // the Monday whose thought the dialog shows
+            function loadGdw() {
+                const get = p => fetch(SVP_ORIGIN + p, { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null));
+                return Promise.all([get('/svp/gdw.json'), get('/kalender/gdw-kalender.json').catch(() => null)])
+                    .then(([school, extra]) => {
+                        if (!school) return;
+                        const words = (extra && extra.texte) || {};
+                        const map = {};
+                        for (const sw of Object.keys(school)) {
+                            const e = school[sw], m = /^(\d\d)\.(\d\d)\.(\d\d)$/.exec(e.ab || '');   // "23.11.26"
+                            if (m) map[`20${m[3]}-${m[2]}-${m[1]}`] = { bild: e.bild, titel: words[e.bild] || e.titel || '', gross: e.gross || '', sw: +sw };
+                        }
+                        for (const [mon, e] of Object.entries((extra && extra.ferien) || {})) {
+                            if (!map[mon] && e && e.bild) map[mon] = { bild: e.bild, titel: e.titel || words[e.bild] || '', ferien: e.anlass || 'Ferien' };
+                        }
+                        gdw = map;
+                        try { localStorage.setItem(GDW_KEY, JSON.stringify(map)); } catch (e) { }
+                        renderGdw();
+                    })
+                    .catch(() => { });   // offline: the kept map, or no thought
+            }
+            // the week whose thought the header shows: the week on screen, in the month the chosen day's week
+            const gdwMonday = () => mondayOf(view === 'month' ? selDay : view === 'week' ? anchor : new Date());
+            const gdwThumb = e => SVP_ORIGIN + '/svp/gdw/' + e.bild + '.webp';
+            const gdwHead = e => (e.gross ? 'Große Weisheit vor den ' + e.gross : 'Gedanke der Woche');   // gross is the whole word ("Weihnachtsferien")
+            const gdwQuote = e => (e.titel ? '„' + e.titel + '“' : '');
+            function renderGdw() {
+                const key = K.ymd(gdwMonday()), e = gdw && gdw[key], b = $('gdwBtn');
+                b.hidden = !e;
+                if (!e) { b.dataset.sig = ''; return; }
+                const sig = key + '|' + e.bild + '|' + e.titel;
+                if (b.dataset.sig === sig) return;   // the half-minute redraws leave it alone
+                b.dataset.sig = sig;
+                $('gdwImg').src = gdwThumb(e);
+                trimGdw(e);   // ready before the dialog is opened
+                $('gdwTxt').textContent = gdwQuote(e) || gdwHead(e);
+                const say = gdwHead(e) + (e.ferien ? ' · ' + e.ferien : '') + (e.titel ? ': ' + e.titel : '');
+                b.title = say + ' (antippen)';
+                b.setAttribute('aria-label', say);
+            }
+            function openGdw(key) {
+                const e = gdw && gdw[key];
+                if (!e) return;
+                gdwOpen = key;
+                const [y, m, d] = key.split('-').map(Number), mon = new Date(y, m - 1, d), sun = K.addDays(mon, 6);
+                const span = mon.getDate() + '.' + (mon.getMonth() !== sun.getMonth() ? ' ' + K.MONTH_LONG[mon.getMonth()] + ' ' : '') + '–' +
+                    sun.getDate() + '. ' + K.MONTH_LONG[sun.getMonth()] + ' ' + sun.getFullYear();
+                $('gdwTitle').textContent = gdwHead(e);
+                $('gdwWhen').textContent = 'KW ' + K.isoWeek(mon) + ' · ' + span + '\n' + (e.ferien || e.sw + '. Schulwoche');
+                // the small picture at once, the whole page as soon as it is there
+                const img = $('gdwBig'), big = GDW_BIG + e.bild + '.webp';
+                img.src = gdwThumb(e);
+                img.alt = e.titel || gdwHead(e);
+                const pre = new Image();
+                pre.onload = () => { if (gdwOpen === key) img.src = big; };
+                pre.src = big;
+                trimGdw(e);
+                [-1, 1].forEach(d => { const k = gdwNear(key, d); if (k) trimGdw(gdw[k]); });   // the arrows' next sheets too
+                if ($('gdwDlg').hidden) { $('gdwDlg').hidden = false; $('gdwClose').focus(); }
+                fitGdw();
+            }
+            /* the printed part of a sheet: most sheets are a page with white margins around a photo or the words, and the
+               dialog shows them without that empty paper, so the print itself gets the room (Doc, 23.11.2026: "Bitte größer";
+               on the screenshot white above and below). Measured once per sheet on the small picture (200 px wide): the box
+               of everything that is not white, plus 3% paper round it. A picture the browser may not read (no CORS) or
+               one that is white all over: the whole sheet */
+            const GDW_FULL = { x: 0, y: 0, w: 1, h: 1 };
+            const gdwTrim = new Map();   // picture number -> { x, y, w, h } as fractions of the sheet; null while measuring
+            function trimGdw(e) {
+                if (!e || gdwTrim.has(e.bild)) return;
+                gdwTrim.set(e.bild, null);
+                const im = new Image();
+                im.crossOrigin = 'anonymous';
+                im.onload = () => {
+                    let t = null;
+                    try {
+                        const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas');
+                        c.width = W; c.height = H;
+                        const g = c.getContext('2d');
+                        g.drawImage(im, 0, 0);
+                        const px = g.getImageData(0, 0, W, H).data;
+                        let x0 = W, y0 = H, x1 = -1, y1 = -1;
+                        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+                            const i = (y * W + x) * 4;
+                            if (px[i] < 236 || px[i + 1] < 236 || px[i + 2] < 236) {
+                                if (x < x0) x0 = x;
+                                if (x > x1) x1 = x;
+                                if (y < y0) y0 = y;
+                                if (y > y1) y1 = y;
+                            }
+                        }
+                        if (x1 > x0 && y1 > y0) {
+                            const m = Math.round(W * 0.03);
+                            x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(W - 1, x1 + m); y1 = Math.min(H - 1, y1 + m);
+                            t = { x: x0 / W, y: y0 / H, w: (x1 - x0 + 1) / W, h: (y1 - y0 + 1) / H };
+                        }
+                    } catch (err) { t = null; }
+                    gdwTrim.set(e.bild, t || GDW_FULL);
+                    if (gdwOpen && gdw && gdw[gdwOpen] && gdw[gdwOpen].bild === e.bild) fitGdw();
+                };
+                im.onerror = () => gdwTrim.set(e.bild, GDW_FULL);
+                im.src = gdwThumb(e);
+            }
+            /* the sheet as large as it goes (Doc, 23.11.2026: "Bitte größer"): as wide as the dialog may be (900px, or the
+               window less its margin) and as high as 92% of the window leaves beside title, date, words and buttons. Twice,
+               because the words wrap anew once the dialog has its width. Again when a picture arrives or the window changes */
+            function fitGdw() {
+                const back = $('gdwDlg');
+                if (back.hidden) return;
+                const dlg = back.firstElementChild, img = $('gdwBig'), sheet = $('gdwSheet');
+                const full = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 200 / 289;
+                const t = (gdwOpen && gdw && gdw[gdwOpen] && gdwTrim.get(gdw[gdwOpen].bild)) || GDW_FULL;
+                const ratio = full * t.w / t.h;   // width : height of the printed part
+                const bs = getComputedStyle(back), ds = getComputedStyle(dlg), px = v => parseFloat(v) || 0;
+                const room = innerWidth - px(bs.paddingLeft) - px(bs.paddingRight);
+                const padX = px(ds.paddingLeft) + px(ds.paddingRight) + px(ds.borderLeftWidth) + px(ds.borderRightWidth);
+                const maxW = Math.min(900, room) - padX;
+                const maxH = Math.min(innerHeight * 0.92, innerHeight - px(bs.paddingTop) - px(bs.paddingBottom));
+                for (let i = 0; i < 2; i++) {
+                    const rest = dlg.offsetHeight - sheet.offsetHeight;
+                    const w = Math.floor(Math.max(120, Math.min((maxH - rest) * ratio, maxW))), h = Math.floor(w / ratio);
+                    sheet.style.width = w + 'px';
+                    sheet.style.height = h + 'px';
+                    sheet.style.aspectRatio = 'auto';
+                    // the whole page, as large as the printed part needs it, shifted so that part fills the frame
+                    const pw = w / t.w, ph = h / t.h;
+                    img.style.width = pw + 'px';
+                    img.style.height = ph + 'px';
+                    img.style.left = -t.x * pw + 'px';
+                    img.style.top = -t.y * ph + 'px';
+                    dlg.style.width = Math.min(room, Math.max(w + padX, 300)) + 'px';
+                }
+            }
+            // the week before / after that has a thought (every week of the school year has one, so it is the next week)
+            function gdwNear(key, dir) {
+                const keys = Object.keys(gdw || {}).sort(), i = keys.indexOf(key);
+                return i < 0 ? null : keys[i + dir] || null;
+            }
+            function stepGdw(dir) {
+                const k = gdwOpen && gdwNear(gdwOpen, dir);
+                if (k) openGdw(k);
+            }
+            function closeGdw() {
+                if ($('gdwDlg').hidden) return;
+                $('gdwDlg').hidden = true;
+                $('gdwBig').src = '';        // the full page need not stay in memory
+                gdwOpen = null;
+                if (!$('gdwBtn').hidden && !$('nav').hidden) $('gdwBtn').focus({ preventScroll: true });
             }
 
             function render() {
@@ -1542,11 +1972,13 @@
                 if (view === 'agenda') renderAgenda(now);
                 else if (view === 'week') renderWeek(now);
                 else renderMonth(now);
+                renderGdw();
                 renderSetting();
                 renderShare();
                 renderGuest();
                 renderFilter();
                 markHit(false);
+                refreshPreview();
             }
             /* the people button and its two checks */
             function renderFilter() {
@@ -1947,7 +2379,8 @@
                 const row = h => {
                     const o = h.o, ev = o.ev, [ft, fl, fn] = h.f.parts;
                     const last = K.addDays(o.end, -1);
-                    const meta = [ev.all_day ? (K.sameDay(o.start, last) ? 'ganztägig' : 'bis ' + esc(dayLabel(last))) : K.hhmm(o.start) + '–' + K.hhmm(o.end)];
+                    const meta = isRem(ev) ? [REM_TAG + ' ' + K.hhmm(o.start)]   // a reminder: the word and its moment
+                        : [ev.all_day ? (K.sameDay(o.start, last) ? 'ganztägig' : 'bis ' + esc(dayLabel(last))) : K.hhmm(o.start) + '–' + K.hhmm(o.end)];
                     if (ev.location) meta.push(ICON_PLACE + marked(fl, words));
                     if (ev.rrule) meta.push(ICON_REPEAT + 'Serie');
                     if (isOff(o)) meta.push('fällt aus');
@@ -1981,16 +2414,46 @@
                 const only = filterAll() ? '' : ' – gezeigt: nur ' + (filter.me ? meName() : otherName());
                 sum.textContent = (hits.length ? hits.length + ' Treffer' : 'keine Treffer') + only;
             }
+            /* on: the entry row becomes the search field, the hits open under it; off: "Neuer Termin" is back with its draft
+               (the entry field was only set aside). focusBack (Esc, ✕): with a mouse into the entry field again, else to
+               the magnifier - on the phone nothing gets the focus, so the keyboard goes */
             function showSearch(on, focusBack) {
-                $('searchPop').hidden = !on;
+                const was = !$('searchPop').hidden;
+                $('searchPop').hidden = $('searchField').hidden = !on;
+                $('entry').querySelector('.bar').classList.toggle('searching', on);
                 $('searchBtn').setAttribute('aria-expanded', String(on));
+                $('searchBtn').setAttribute('aria-label', on ? 'Suche schließen' : 'Suchen');
                 if (on) {
                     showSettings(false);
                     showFilter(false);
                     runSearch();   // the last query again, with what is loaded now
+                    placeSearch();
                     $('searchInput').focus();
                     $('searchInput').select();   // typing replaces it
-                } else if (focusBack) $('searchBtn').focus();
+                    return;
+                }
+                if (!was || !focusBack) return;
+                if (!$('text').hidden && matchMedia('(pointer: fine)').matches) {
+                    const t = $('text');
+                    t.focus();
+                    t.setSelectionRange(t.value.length, t.value.length);
+                } else if (!matchMedia('(pointer: coarse)').matches) $('searchBtn').focus();
+            }
+            /* the hits right under the search field: as far left as it, as wide as it but at least 400px (on the phone
+               the whole width), as high as the window - or the part the on-screen keyboard leaves - allows */
+            function placeSearch() {
+                const pop = $('searchPop');
+                if (pop.hidden) return;
+                const head = $('entry'), hr = head.getBoundingClientRect(), fr = $('searchField').getBoundingClientRect();
+                const gut = parseFloat(getComputedStyle(head).paddingLeft) || 8;
+                const room = hr.width - 2 * gut;
+                const w = hr.width < 600 ? room : Math.min(room, Math.max(fr.width, 400));
+                const left = Math.min(Math.max(fr.left - hr.left, gut), hr.width - gut - w);
+                const vv = window.visualViewport, bottom = vv ? vv.offsetTop + vv.height : innerHeight;
+                pop.style.setProperty('--sp-left', left + 'px');
+                pop.style.setProperty('--sp-w', w + 'px');
+                pop.style.setProperty('--sp-top', (fr.bottom - hr.top + 6) + 'px');
+                pop.style.setProperty('--sp-h', Math.max(160, bottom - fr.bottom - 6 - 12) + 'px');
             }
 
             /* a hit tapped: its day in the view at hand - "Tag" lists from today on, so an earlier one shows in its week
@@ -2028,6 +2491,100 @@
                 }
                 const el = els.find(x => x.tagName === 'LI') || els[0];
                 el.scrollIntoView({ block: view === 'agenda' ? 'center' : 'nearest', behavior: 'smooth' });
+            }
+
+            /* ---------- hover preview (Doc, 22.11.2026) ----------
+               With a real pointer an entry shows time, title, place and the first lines of its notes after PV_DELAY, without a
+               click; the next entry swaps it at once, a short grace keeps it from flickering across the gaps; a click still
+               opens the editor. Keyboard focus on an entry shows it at once. Touch devices never get it (no hover there; the
+               CSS hides it too). It never takes the pointer itself (pointer-events: none) and stays inside the window. */
+            const PV_DELAY = 300, PV_GRACE = 120, PV_GAP = 8;
+            const canHover = matchMedia('(hover: hover) and (pointer: fine)');
+            let pvKey = null, pvPending = null, pvTimer = 0, pvHideTimer = 0, pvX = -1, pvY = -1;
+            const pvKeep = () => { clearTimeout(pvHideTimer); pvHideTimer = 0; };   // a pending hide called off
+            /* the entry element under the pointer, or null - the month's chips take no pointer events (the cell takes the
+               tap), so there the chip is found by its box */
+            function entryAt(target, x, y) {
+                if (!target || !target.closest) return null;
+                const cell = target.closest('.mo-cell');
+                const el = cell ? [...cell.querySelectorAll('.chip[data-key]')].find(c => {
+                    const r = c.getBoundingClientRect();
+                    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+                }) : target.closest('[data-key]');
+                return el && shownOcc.has(el.dataset.key) ? el : null;
+            }
+            function previewHtml(occ) {
+                const ev = occ.ev, rem = isRem(ev), l = ev.lesson;
+                const when = (relDay(occ.start) || dayLabel(occ.start)) + ' · ' + timeText(occ);
+                const meta = [];
+                if (ev.location) meta.push(ICON_PLACE + esc(ev.location));
+                if (ev.rrule) meta.push(ICON_REPEAT + 'wiederholt sich');
+                if (l && l.code === 'cancelled') meta.push('fällt aus');
+                const note = String((l ? l.note : ev.notes) || '').trim();
+                return `<p class="pv-when">${rem ? REM_TAG : '<i></i>'}<span>${esc(when)}</span></p>` +
+                    `<p class="pv-title">${esc(rem ? remTitle(ev.title) : ev.title)}</p>` +
+                    (meta.length ? `<p class="pv-meta">${meta.join(' · ')}</p>` : '') +
+                    (note ? `<p class="pv-note">${esc(note.slice(0, 500))}</p>` : '');
+            }
+            /* beside the entry (right, else left); a wide one (a row of the day list) below it at the pointer, else above */
+            function placePreview(el, atPointer) {
+                const pv = $('preview'), r = el.getBoundingClientRect(), w = pv.offsetWidth, h = pv.offsetHeight;
+                const vw = document.documentElement.clientWidth, vh = innerHeight;
+                let x, y;
+                if (r.right + PV_GAP + w <= vw - PV_GAP) { x = r.right + PV_GAP; y = r.top; }
+                else if (r.left - PV_GAP - w >= PV_GAP) { x = r.left - PV_GAP - w; y = r.top; }
+                else {
+                    x = atPointer && pvX >= 0 ? pvX + 12 : r.left;
+                    y = r.bottom + PV_GAP + h <= vh - PV_GAP ? r.bottom + PV_GAP : r.top - PV_GAP - h;
+                }
+                x = Math.min(Math.max(x, PV_GAP), vw - w - PV_GAP);
+                y = Math.min(Math.max(y, PV_GAP), vh - h - PV_GAP);
+                pv.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+            }
+            function showPreview(el, atPointer) {
+                const occ = shownOcc.get(el.dataset.key);
+                if (!occ || !el.isConnected) { hidePreview(); return; }
+                clearTimeout(pvTimer);
+                pvKeep();
+                pvPending = null;
+                const pv = $('preview');
+                pv.className = 'pv c' + colorOf(occ.ev) + (pvKey ? ' on' : '');
+                pv.innerHTML = previewHtml(occ);
+                pv.hidden = false;
+                placePreview(el, atPointer);
+                pvKey = el.dataset.key;
+                requestAnimationFrame(() => { if (pvKey) pv.classList.add('on'); });
+            }
+            function hidePreview() {
+                clearTimeout(pvTimer);
+                pvKeep();
+                pvKey = pvPending = null;
+                const pv = $('preview');
+                pv.classList.remove('on');
+                pv.hidden = true;
+            }
+            function previewMove(e) {
+                if (!canHover.matches || e.pointerType === 'touch') return;
+                pvX = e.clientX; pvY = e.clientY;
+                const el = entryAt(e.target, pvX, pvY), key = el ? el.dataset.key : null;
+                if (key && key === pvKey) { pvKeep(); return; }   // still on the one shown
+                if (!key) {   // between entries: wait a moment before it goes, the next one may follow at once
+                    clearTimeout(pvTimer);
+                    pvPending = null;
+                    if (pvKey && !pvHideTimer) pvHideTimer = setTimeout(() => { pvHideTimer = 0; hidePreview(); }, PV_GRACE);
+                    return;
+                }
+                if (pvKey) { showPreview(el, true); return; }   // one is open: the next one at once
+                if (key === pvPending) return;                  // already waiting for this one
+                clearTimeout(pvTimer);
+                pvPending = key;
+                pvTimer = setTimeout(() => showPreview(el, true), PV_DELAY);
+            }
+            /* after a redraw the entries are new elements: keep the preview on the one still under the pointer */
+            function refreshPreview() {
+                if (!pvKey) return;
+                const el = pvX >= 0 ? entryAt(document.elementFromPoint(pvX, pvY), pvX, pvY) : null;
+                if (el && el.dataset.key === pvKey) placePreview(el, true); else hidePreview();
             }
 
             /* ---------- question dialog: buttons [{ label, cls, value }] -> the value of the tapped one (Escape: null) ----------
@@ -2074,7 +2631,7 @@
             const CAL_FN = auth.DB_URL + '/functions/v1/calendar';
             const appPass = () => { try { return localStorage.getItem('dev_access') || ''; } catch (e) { return ''; } };
             function syncGoogle() {
-                $('googleRow').hidden = !edState || !edState.googleOk || !!$('fRepeat').value || guestOn();   // single appointments of Doc's only
+                $('googleRow').hidden = !edState || !edState.googleOk || !!$('fRepeat').value || guestOn() || remOn();   // single appointments of Doc's only, no reminders
                 $('fPass').hidden = $('googleRow').hidden || !$('fGoogle').checked || !!appPass();
             }
             async function toGoogle(row, f) {
@@ -2138,6 +2695,7 @@
             /* open for a new appointment ({ draft: parseQuick result } or { day }) or for an existing one ({ occ }) */
             function openEditor(o) {
                 if (GUEST && !guestCanWrite()) { status('Eintragen ist gerade aus.', 'err'); return; }
+                hidePreview();
                 $('settings').hidden = true;
                 const occ = o.occ || null;
                 const ev = occ ? occ.ev : null;
@@ -2162,6 +2720,11 @@
                 $('fWhoOther').checked = GUEST ? joint : guest;
                 $('fPrivate').checked = !!(ev && ev.private);
                 $('privText').textContent = share ? 'privat – ' + share.label + ' sieht ihn nicht' : 'privat – wird nie geteilt';
+                // a reminder instead of an appointment: Doc's own entries only, once the column exists, never a mirrored or a
+                // guest's one; typed as "Erinnerung …" / "erinnere mich …" a new one starts as a reminder
+                edState.whoShown = !$('forGuestRow').hidden;
+                edState.remOk = !!reminderCol && !GUEST && !(ev && (feedOf(ev) || guest));
+                $('fReminder').checked = ev ? isRem(ev) : /^\s*erinner/i.test((o.draft && o.draft.title) || '');
                 $('edDel').hidden = !ev;
                 let start, end, allDay;
                 if (ev) {
@@ -2188,6 +2751,7 @@
                     $('fLoc').value = '';
                     $('fNotes').value = '';
                     (allDay ? K.DEFAULT_REMIND_ALLDAY : K.DEFAULT_REMIND).forEach(m => edState.remind.add(m));
+                    if (edState.remOk && $('fReminder').checked) { edState.remind = new Set([0]); allDay = false; }   // rings at its moment
                 }
                 $('fAllDay').checked = allDay;
                 $('fDate').value = K.ymd(start);
@@ -2234,7 +2798,39 @@
                     : (joint ? 'Neuer gemeinsamer Termin' : 'Neuer Termin');
                 $('edNote').textContent = [on ? 'Solita erinnert nicht an ' + (joint ? 'gemeinsame Termine.' : 'Termine von ' + guestName() + '.') : '',
                     ev && ev.rrule ? 'Wiederholt sich – Änderungen gelten für alle Termine der Reihe.' : ''].filter(Boolean).join(' ');
+                applyRem();
                 syncGoogle();
+            }
+            /* the reminder switch and what it sets aside while on: all-day and the end (a reminder is a moment), the colour
+               (always red), Google and "Wessen Termin?" (Doc's own) - it shows only while the entry is not the guest's */
+            const remOn = () => !$('remRow').hidden && $('fReminder').checked;
+            function applyRem() {
+                const st = edState;
+                if (!st) return;
+                $('remRow').hidden = !st.remOk || (st.whoShown && $('fWhoOther').checked);
+                const on = remOn();
+                $('forGuestRow').hidden = !st.whoShown || on;
+                $('fAllDay').closest('.fld').hidden = on;
+                if (on && $('fAllDay').checked) { $('fAllDay').checked = false; syncAllDay(); }
+                $('fEnd').closest('.fld').hidden = on;
+                $('fStart').previousElementSibling.textContent = on ? 'Uhrzeit' : 'Beginn';
+                if (on) {
+                    $('colorRow').hidden = true;
+                    $('edTitle').textContent = st.ev ? 'Erinnerung' : 'Neue Erinnerung';
+                }
+            }
+            function reminderChanged() {
+                const st = edState;
+                if (!st) return;
+                // a new one: a reminder rings at its moment, an appointment 60 and 15 minutes before - unless Doc chose already
+                if (!st.ev) {
+                    const cur = [...st.remind].sort((a, b) => b - a).join(',');
+                    if ($('fReminder').checked && cur === K.DEFAULT_REMIND.join(',')) st.remind = new Set([0]);
+                    else if (!$('fReminder').checked && cur === '0') st.remind = new Set(K.DEFAULT_REMIND);
+                }
+                syncGuest();
+                syncAllDay();
+                renderRemind();
             }
 
             /* the form -> a row for calendar_event, or a message what is missing */
@@ -2255,6 +2851,8 @@
                     e = $('fEnd').value ? at(day, $('fEnd').value) : new Date(+s + 3600000);
                     if (e <= s) e = K.addDays(e, 1);   // over midnight
                 }
+                const rem = remOn();
+                if (rem) e = new Date(+s + REM_SLOT);   // a moment - the short slot only for the watcher's dialog
                 const choices = remindChoices(allDay);
                 const rmin = [...edState.remind].filter(m => choices.some(([x]) => x === m)).sort((a, b) => b - a);
                 const row = {
@@ -2263,6 +2861,7 @@
                     location: $('fLoc').value.trim() || null, notes: $('fNotes').value.trim() || null,
                     rrule: $('fRepeat').value || null, remind: rmin, color: edState.color
                 };
+                if (reminderCol && !GUEST) row.reminder = rem;   // only once the column exists (a guest's entry: never)
                 if (shareCols && !$('privRow').hidden) row.private = $('fPrivate').checked;   // only once the column exists
                 if (!GUEST && !$('forGuestRow').hidden) {   // given to the guest (an entry of theirs keeps its share), joint, or taken back
                     row.shared_by = $('fWhoOther').checked ? (edState.ev && edState.ev.shared_by) || share.id : null;
@@ -2504,6 +3103,9 @@
                     try { svpMap = JSON.parse(localStorage.getItem(SVP_MAP_KEY)) || null; } catch (e) { svpMap = null; }
                     loadSvpMap();   // once per visit - the map changes with the school year, not by the minute
                 }
+                // the thoughts of the week: Doc's view and the guest's alike, the kept map first, then the fresh one
+                try { gdw = JSON.parse(localStorage.getItem(GDW_KEY)) || null; } catch (e) { gdw = null; }
+                loadGdw();
                 try { $('text').value = localStorage.getItem(DRAFT_KEY) || ''; } catch (e) { }
                 try { view = localStorage.getItem(VIEW_KEY) || 'agenda'; } catch (e) { }
                 setView(view);
@@ -2555,10 +3157,15 @@
                 document.addEventListener('pointerdown', e => {
                     if (!$('settings').hidden && !e.target.closest('#settings, #gearBtn')) showSettings(false);
                     if (!$('filterPop').hidden && !e.target.closest('#filterWrap')) showFilter(false);
-                    if (!$('searchPop').hidden && !e.target.closest('#searchPop, #searchBtn')) showSearch(false);
+                    // a tap beside field and hits closes the search - also the mic's, which then dictates a new appointment
+                    if (!$('searchPop').hidden && !e.target.closest('#searchPop, #searchField, #searchBtn')) showSearch(false);
                 });
                 // the search: live while typing (a short pause first), Enter / arrow down into the hits, Esc closes
                 $('searchBtn').title = 'Suchen (Taste / oder ' + (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘F' : 'Strg+F') + ')';
+                // the hits follow the field: another window size, the field's width (period shown or not), the keyboard
+                if (window.ResizeObserver) new ResizeObserver(placeSearch).observe($('searchField'));
+                addEventListener('resize', placeSearch);
+                if (window.visualViewport) visualViewport.addEventListener('resize', placeSearch);
                 $('searchBtn').onclick = () => showSearch($('searchPop').hidden);
                 $('searchClose').onclick = () => showSearch(false, true);
                 $('searchInput').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 120); });
@@ -2601,14 +3208,56 @@
                 $('text').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); quick(); } });
                 $('micBtn').onclick = dictate;
                 $('views').onclick = e => { const b = e.target.closest('button'); if (b) setView(b.dataset.view); };
+                $('prevBtn').innerHTML = TRI(-1);
+                $('nextBtn').innerHTML = TRI(1);
                 $('prevBtn').onclick = () => step(-1);
                 $('nextBtn').onclick = () => step(1);
+                // the thought of the week: a tap opens it whole; in the dialog the arrow keys or a swipe sideways go through
+                // the weeks without moving the calendar, the X, Escape or a tap beside it closes. While it is open the keys
+                // are its own - taken in the capture phase, before the calendar's arrows, T / W / M and "/" see them
+                $('gdwBtn').onclick = () => openGdw(K.ymd(gdwMonday()));
+                $('gdwClose').onclick = closeGdw;
+                $('gdwDlg').addEventListener('pointerdown', e => { if (e.target === $('gdwDlg')) closeGdw(); });
+                // swipe on the sheet (touch has no arrow keys, and the ◀ ▶ buttons are gone): left = the week after
+                let gx = null, gy = 0;
+                $('gdwDlg').addEventListener('touchstart', e => { if (e.touches.length === 1) { gx = e.touches[0].clientX; gy = e.touches[0].clientY; } }, { passive: true });
+                $('gdwDlg').addEventListener('touchend', e => {
+                    if (gx === null) return;
+                    const dx = e.changedTouches[0].clientX - gx, dy = e.changedTouches[0].clientY - gy;
+                    gx = null;
+                    if (Math.abs(dx) > 60 && Math.abs(dy) < 50) stepGdw(dx < 0 ? 1 : -1);
+                }, { passive: true });
+                $('gdwBig').addEventListener('load', fitGdw);
+                addEventListener('resize', fitGdw);
+                document.addEventListener('keydown', e => {
+                    if ($('gdwDlg').hidden) return;
+                    e.stopPropagation();
+                    if (e.key === 'Escape') { e.preventDefault(); closeGdw(); }
+                    else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey && !e.ctrlKey && !e.metaKey) {
+                        e.preventDefault();
+                        stepGdw(e.key === 'ArrowRight' ? 1 : -1);
+                    }
+                }, true);
                 $('todayBtn').onclick = goToday;
                 $('period').onclick = goToday;
                 $('moreBtn').onclick = () => { agendaDays += 120; render(); };
 
+                // the hover preview: follows the pointer over the views, goes with a press, a scroll, Escape or leaving them
+                $('main').addEventListener('pointermove', previewMove);
+                $('main').addEventListener('pointerleave', () => { if (pvKey && !pvHideTimer) pvHideTimer = setTimeout(() => { pvHideTimer = 0; hidePreview(); }, PV_GRACE); });
+                document.addEventListener('pointerdown', hidePreview, true);
+                document.addEventListener('scroll', () => { if (pvKey || pvPending) hidePreview(); }, true);
+                document.addEventListener('keydown', e => { if (e.key === 'Escape' && pvKey) hidePreview(); }, true);
+                window.addEventListener('blur', hidePreview);
+                // keyboard focus on an entry (the week's all-day chips) shows it at once
+                $('main').addEventListener('focusin', e => {
+                    const el = e.target.closest && e.target.closest('[data-key]');
+                    if (el && el.matches(':focus-visible') && shownOcc.has(el.dataset.key)) { pvX = pvY = -1; showPreview(el, false); }
+                });
+                $('main').addEventListener('focusout', () => { if (pvKey && pvX < 0) hidePreview(); });
                 // taps in the views: an appointment opens it, a "+" or an empty place in the week starts a new one there
                 $('main').addEventListener('click', e => {
+                    if (e.target.closest('a.svp-pill')) return;   // the lesson's SVP: the link opens, not the row's info box
                     const stp = e.target.closest('[data-step]');
                     if (stp) { step(Number(stp.dataset.step)); return; }
                     const add = e.target.closest('[data-add]');
@@ -2650,6 +3299,7 @@
                 $('fRepeat').addEventListener('change', syncGoogle);
                 $('fGoogle').onchange = syncGoogle;
                 $('fWhoMe').onchange = $('fWhoOther').onchange = whoChanged;
+                $('fReminder').onchange = reminderChanged;
                 $('fAllDay').onchange = () => {
                     // switching changes which reminders fit: take the defaults of the new kind
                     edState.remind = new Set($('fAllDay').checked ? K.DEFAULT_REMIND_ALLDAY : K.DEFAULT_REMIND);

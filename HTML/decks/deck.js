@@ -207,6 +207,20 @@ if (PRESENTER) document.documentElement.classList.add('presenter');
 // how the help and the titles write Cmd+O, the class's overview: Cmd on a Mac, Ctrl elsewhere (both work everywhere)
 const MAC_KEYS = /Mac|iPhone|iPad/.test(navigator.platform);
 const AUD_KEY = MAC_KEYS ? '⌘O' : 'Strg+O';
+// "Beamer eingefroren" (link below): one key in both windows of a show. F for Freeze; fullscreen moved to V for
+// Vollbild (Doc, 23.11.2026: "V für Vollbild und F für Freeze")
+const FREEZE_KEY = 'F';
+const freezeKey = e => !e.metaKey && !e.ctrlKey && !e.altKey && String(e.key).toUpperCase() === FREEZE_KEY;
+// While the beamer window is frozen its own keys change its picture no more than the presenter's messages do. Window
+// capture, registered before every other key listener of the deck, so none of them sees the key; the arrows go on to
+// the presenter view, where Doc works meanwhile. F itself, Esc (the end of the show), Cmd/Ctrl/Alt (a reload) and a
+// text being typed pass.
+addEventListener('keydown', function (e) {
+  if (!window.DeckLink || !DeckLink.held() || freezeKey(e) || e.key === 'Escape' || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if (/^(Arrow|Page)/.test(e.key)) DeckLink.nav(e.key, e.shiftKey);
+}, true);
 // the title slide's night runs live in the beamer window only (deck-flow.js, Doc 18.09.2026) - the presenter keeps
 // the still picture from deck.css: one WebGL scene is enough. Offline or without WebGL the picture simply stays.
 if (!PRESENTER && document.querySelector('.slide.title'))
@@ -760,6 +774,16 @@ const jeopardy = (function () {
       if (i >= n) { clearInterval(t); end(); }
     }, 40);
   }
+  // A slide with data-jeopardy plays the think music while it stands and stops it when left (Doc, 25.11.2026: the survey
+  // of "Was geht?!") - only in the window that plays (in a show the beamer, the presenter stays silent), only where the
+  // file is (Doc's Mac). Music started by J stays J's business.
+  let auto = false;
+  painted.push(function () {
+    if (PRESENTER || !LOCAL || document.documentElement.classList.contains('deck-edit')) return;
+    const want = !!(slides[si] && slides[si].hasAttribute('data-jeopardy'));
+    if (want && !on) { auto = true; start(); }
+    else if (!want && on && auto) { auto = false; stop(); }
+  });
   return {
     available: LOCAL || YOUTUBE,                       // the help shows J only where it can play
     toggle: function () {
@@ -793,7 +817,7 @@ addEventListener('keydown', e => {
   else if (k === 'Home') { si = Math.max(0, seek(0, 1)); step = 0; paint(); }
   else if (k === 'End') { si = Math.max(0, seek(slides.length - 1, -1)); step = groups(slides[si]); paint(); }
   else if (k === 'a' || k === 'A') { narr.stop(); step = groups(slides[si]); paint(); }   // everything on this slide in (Doc, 17.09.2026)
-  else if (k === 'f' || k === 'F') { full(); }
+  else if (k === 'v' || k === 'V') { full(); }            // V for Vollbild - F freezes the beamer (FREEZE_KEY)
   else if ((k === 'j' || k === 'J') && !(e.target.closest && e.target.closest('input, textarea, select, [contenteditable]'))) {
     jeopardy.toggle(); e.preventDefault();            // the think music (Doc, 12.11.2026)
   }
@@ -801,6 +825,9 @@ addEventListener('keydown', e => {
 addEventListener('click', e => {
   // links (lab bar, picture credits) open - they do not turn the page as well
   if (e.target.closest('#hud') || e.target.closest('#nav') || e.target.closest('a') || e.target.closest('.play-big')) return;
+  // the LIVE key of a poster (deck-live.css .live-knopf): the next slide, exactly as the arrow - in a show from either
+  // window, the other follows (Doc, 24.11.2026: "LIVE ... auf die nächste Folie, was ich ja nicht schlecht finde")
+  if (e.target.closest('.live-knopf') && !document.documentElement.classList.contains('deck-edit')) { narr.stop(); next(); return; }
   if (e.target.closest('#pres')) return;             // the presenter view handles its own clicks
   const help = document.getElementById('help');     // a click beside the open help only closes it
   if (help && !help.hidden) { help.hidden = true; return; }
@@ -1163,7 +1190,9 @@ function bareLab(f) {
     const d = f.contentDocument;
     if (!d || !d.body) return;
     d.documentElement.style.background = d.body.style.background = 'transparent';
-    if (f.contentWindow.CPWide) f.contentWindow.CPWide(99);
+    // .kompakt: DOCPAD opens as it always does, compact, and Doc pulls it wide himself (Doc, 24.11.2026: "nicht
+    // ausgefahren ... die kleine Show mit den Tastaturen")
+    if (f.contentWindow.CPWide && !f.closest('.labframe.kompakt')) f.contentWindow.CPWide(99);
   } catch (e) { }                                     // a lab from elsewhere keeps its ground
 }
 // a lab on a slide scrolls with the start page's bar (index.html: thin, dark track, muted blue-grey thumb), not the
@@ -1195,6 +1224,55 @@ function labBar(f) {
 document.addEventListener('load', e => { bareLab(e.target); labBar(e.target); }, true);   // a frame's load does not bubble: caught on the way down
 document.querySelectorAll('.labframe.bare iframe').forEach(bareLab);
 document.querySelectorAll('.labframe iframe').forEach(labBar);
+// A lab that loaded while its slide was hidden (display:none) measured 0 x 0 and may have laid itself out at that size:
+// the Tagebuch's pages stayed dark until a reload (Doc, 24.11.2026: "irgendwas fehlt da noch ein Reset, dass das Labor
+// sofort sichtbar ist"; cyber-canvas.js heals itself since 28.09.2026, other pages do not). So the first time its slide
+// shows, such a frame loads once more, now at its real size. In a show the beamer reloads its labs for every slide
+// anyway (mirror.fresh) and the presenter makes its live copy fresh, so there nothing more happens here.
+if (!PRESENTER) {
+  const hiddenLoaded = new WeakSet();
+  const slideOf = f => f.closest && f.closest('section.slide');
+  const loadedHidden = f => {
+    const s = slideOf(f);
+    try { if (s && !s.classList.contains('on') && f.contentWindow.location.href !== 'about:blank') hiddenLoaded.add(f); } catch (e) { }
+  };
+  document.addEventListener('load', e => { if (e.target.tagName === 'IFRAME' && e.target.closest('.labframe')) loadedHidden(e.target); }, true);
+  document.querySelectorAll('.labframe iframe').forEach(f => {   // loaded before this line ran
+    try { if (f.contentDocument && f.contentDocument.readyState === 'complete') loadedHidden(f); } catch (e) { }
+  });
+  // ... and it stays out of sight until the new load has laid itself out, then fades in: the page laid out at 0 x 0 showed
+  // for a moment as a squeezed strip before the reload (Doc, 25.11.2026, the Tagebuch: "Das sieht wirklich doof aus").
+  // In a show the beamer's frames reload for every slide (mirror.fresh, on the presenter's word) - there, too, a frame
+  // is hidden from the moment its slide shows until that load. A frame that loads nothing more shows after 3 s anyway.
+  function untilLoaded(f) {
+    let done = false, timer = 0;
+    const show = () => {
+      if (done) return;
+      done = true; clearTimeout(timer); f.removeEventListener('load', show);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        f.style.visibility = '';
+        try { f.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' }); } catch (e) { }
+      }));
+    };
+    f.style.visibility = 'hidden';
+    f.addEventListener('load', show);
+    timer = setTimeout(show, 3000);
+  }
+  let lastSlide = -1;
+  painted.push(() => {
+    const s = slides[si];
+    if (!s || si === lastSlide) return;               // a click on the same slide changes nothing here
+    lastSlide = si;
+    const show = !!window.__deckReplica;              // a show: mirror.fresh loads them as the presenter turns
+    s.querySelectorAll('.labframe iframe').forEach(f => {
+      if (show) { hiddenLoaded.delete(f); untilLoaded(f); return; }
+      if (!hiddenLoaded.has(f)) return;
+      hiddenLoaded.delete(f);
+      untilLoaded(f);
+      try { f.contentWindow.location.reload(); } catch (e) { f.src = f.getAttribute('src'); }
+    });
+  });
+}
 // the footer triangles: one whole slide back or forth, shown fully built - no click steps
 (function () {
   const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
@@ -1295,7 +1373,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
       [K(['1', '7', 'Enter']), 'Zu Folie 17 springen'],
       [K(['O']) + hint('Overview'), 'Übersicht aller Folien'],
       [K([MAC_KEYS ? 'Cmd' : 'Strg', 'O']), 'Übersicht fürs Publikum – mit Referentenansicht nur auf dem Beamer, deine Ansicht bleibt'],
-      [K(['F']) + hint('Fullscreen'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
+      [K(['V']) + hint('Vollbild'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
       ...(jeopardy.available ? [[K(['J']) + hint('Jeopardy'), 'Jeopardy-Musik, 30 s – noch einmal J beendet sie']] : []),
       null,
       [K(['Leertaste', '/', 'P']), 'Während Solita erklärt: Pause / weiter – ein Pfeil springt, sie spricht dort weiter' + pic],
@@ -1310,6 +1388,7 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
         'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt'],
         ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
       [K(['L']), 'Laserpointer an / aus – auch der Knopf rechts neben H'],
+      [K([FREEZE_KEY]) + hint('Freeze'), 'Beamer einfrieren: das Bild an der Wand bleibt stehen, du blätterst in der Referentenansicht weiter – noch einmal ' + FREEZE_KEY + ': der Beamer springt dorthin, wo du bist'],
       [K(['T']) + hint('Tafel'), 'Rückspiegel: die Tafel live in der Referentenansicht statt der übernächsten Folie – Chrome fragt beim Start'],
       [K(['N']) + hint('Natur'), 'Naturbild hinter den Folien wechseln – nach dem letzten wieder ohne'],
       null,
@@ -1571,8 +1650,9 @@ document.querySelectorAll('.labframe iframe').forEach(labBar);
     if (!ov.hidden) {                                  // nothing underneath moves meanwhile
       if (e.key === 'Escape') close();
       // E is the one key that still gets through: edit mode switches on with the overview open, which is
-      // exactly where slides are moved and hidden (Doc, 21.09.2026: "kann ich E auch im OV drücken?")
-      if (e.key === 'e' || e.key === 'E') return;
+      // exactly where slides are moved and hidden (Doc, 21.09.2026: "kann ich E auch im OV drücken?").
+      // F too: freezing the beamer is what one wants before looking for a slide here
+      if (e.key === 'e' || e.key === 'E' || freezeKey(e)) return;
       e.preventDefault(); e.stopImmediatePropagation();
     }
   }, true);
@@ -1613,8 +1693,8 @@ function paintFull(){
     + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>'
     + (SCREEN_KNOWN && !PRESENTER ? '<span class="scr-dot ' + (ext ? 'ext' : 'one') + '" title="Bildschirme prüfen"></span>' : '');
   fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)'
-    : !PRESENTER && ext ? 'Bildschirm erweitert – Präsentieren: Beamer + Referentenansicht (f)'
-    : SCREEN_KNOWN ? 'Nur ein Bildschirm – gespiegelt? Cmd F1 / Win P erweitert – Vollbild (f)' : 'Vollbild (f)';
+    : !PRESENTER && ext ? 'Bildschirm erweitert – Präsentieren: Beamer + Referentenansicht (v)'
+    : SCREEN_KNOWN ? 'Nur ein Bildschirm – gespiegelt? Cmd F1 / Win P erweitert – Vollbild (v)' : 'Vollbild (v)';
 }
 // Cmd F1 flips isExtended while the page is open: repaint at once ('change' on screen), with a slow poll
 // as a net where the event does not fire
@@ -1631,15 +1711,10 @@ fullBtn.addEventListener('click', function (e) {
   e.preventDefault(); e.stopPropagation();          // the dot does not send the deck into fullscreen
   paintFull();
   const say = screen.isExtended
-    ? 'Bildschirm ist erweitert – f startet Beamer und Referentenansicht'
-    : 'Nur ein Bildschirm. Am Mac Cmd F1, an Windows Win P – dann f';
+    ? 'Bildschirm ist erweitert – v startet Beamer und Referentenansicht'
+    : 'Nur ein Bildschirm. Am Mac Cmd F1, an Windows Win P – dann v';
   if (window.DeckNote) DeckNote(say);
-  screenProbe().then(function (m) {
-    const txt = say + '\n\n' + m;
-    const done = ok => { if (window.DeckNote) DeckNote(txt + '\n' + (ok ? '(kopiert)' : '(nicht kopiert – bitte abfotografieren)'), 30000, 'probe'); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => done(true), () => done(false));
-    else done(false);
-  });
+  // the measuring box (screenProbe: "Messwerte", copied to the clipboard) is off - Doc, 23.11.2026: "Bitte wegmachen"
 }, true);
 // Measuring for a three-colour dot (Doc, 27.09.2026: red = no second screen, yellow = there but mirrored, green =
 // extended). Mirrored and alone both look like ONE screen to the browser - maybe the resolution or the screen's
@@ -2274,7 +2349,7 @@ gestartet = true;
   const panel = document.getElementById('ask-panel');
   // The box's files come from here, so no deck page needs a new line. The version rides along: a browser still holding
   // an older copy of the box (from a lab - Pages keeps files 10 minutes) takes this one.
-  const SF_VERSION = '2026-10-09a';             // raise it with every change of the box or deck-solita.css
+  const SF_VERSION = '2026-11-24b';             // raise it with every change of the box or deck-solita.css
   function load(src, then) {
     const s = document.createElement('script');
     s.src = new URL(src, DECK_JS).href;
@@ -2742,7 +2817,32 @@ const link = (function () {
   let presFull = false;                              // presenter: has been fullscreen in this show
   let best = -1;                                     // presenter: rank of the best answer to its hello
   let audOn = false, audWait = 0;                    // presenter: the beamer shows the overview (Cmd+O), waiting for its answer
+  let frozen = false;                                // B: the beamer keeps its picture, the presenter goes on alone
   try { chan = new BroadcastChannel('deck:' + location.pathname); } catch (e) { }
+  // Solita in a module answers once in a show (Doc, 24.11.2026; js/solita-frage.js: echoKopie, fuehrung). The beamer's
+  // copies of the labs only replay: while a presenter view steers this window they ask nobody and stay silent. The
+  // presenter's live copy asks and speaks, and every change of its box goes over as lab-sf into the same box here.
+  if (PRESENTER) window.__deckSolitaLead = function (w, box) {
+    const frames = document.querySelectorAll('#pres .p-cur .slide.live iframe');
+    for (let k = 0; k < frames.length; k++) {
+      const path = framePath(frames[k].contentWindow, w);
+      if (path) { send({ t: 'lab-sf', si: si, k: k, path: path, html: box.html, zu: !!box.zu, busy: !!box.busy, st: box.st | 0 }); return; }
+    }
+  };
+  // __deckReplica: the general mark of the beamer's copies - any module may read it to stay silent (music, voices)
+  else Object.defineProperty(window, '__deckReplica', { configurable: true, get: function () { return linked; } });
+  function framePath(root, w) {                      // frame indices from a lab's window down to w (a deck as a module), or null
+    try {
+      if (root === w) return [];
+      for (let i = 0; i < root.frames.length; i++) { const p = framePath(root.frames[i], w); if (p) return [i].concat(p); }
+    } catch (e) { }
+    return null;
+  }
+  function labSf(m) {                                // beamer: the presenter's box into the same box of the same lab here
+    const f = slides[m.si] && slides[m.si].querySelectorAll('iframe')[m.k];
+    let w = f && f.contentWindow;
+    try { (m.path || []).forEach(function (i) { w = w && w.frames[i]; }); if (w && w.__sfEcho) w.__sfEcho(m); } catch (e) { }
+  }
 
   function send(m) {
     m.from = me; m.id = me + '.' + (++seq); m.p = PRESENTER;
@@ -2752,10 +2852,10 @@ const link = (function () {
       if (w && w !== window && !w.closed) try { w.postMessage({ deckLink: m }, to); } catch (e) { }
     });
   }
-  function apply(m) {
+  function apply(m, force) {                         // force: paint even where it stands (ink held back while frozen)
     const n = Math.max(0, Math.min(slides.length - 1, m.si | 0));
     const st = Math.max(0, Math.min(groups(slides[n]), m.step | 0));
-    if (n === si && st === step) return;
+    if (n === si && st === step && !force) return;
     if (!PRESENTER) narr.stop();                     // turned on the laptop = turned by hand
     applying = true; sentSi = n; sentStep = st;
     si = n; step = st; paint();
@@ -2775,7 +2875,17 @@ const link = (function () {
       if (m.t === 'ask-out') { if (window.DeckAsk) DeckAsk.shown(m); return; }   // the beamer's answer box, mirrored
       if (m.t === 'ani') { aniApply(m); return; }    // Start / Pause / Stop pressed on the board
       if (m.t === 'ov-on') { audShow(!!m.on); return; }   // the beamer's overview opened or closed
-      if (m.t === 'here') send({ t: 'go', si: si, step: step, to: m.from });   // the beamer window reloaded
+      // B pressed on the beamer: the badge here follows; let go there, it asks where we stand
+      if (m.t === 'freeze') { freezeSet(!!m.on); if (!m.on) send(thaw()); return; }
+      if (m.t === 'nav') {                           // an arrow on the frozen beamer: it turns here
+        const d = /Right|Down/.test(m.key) ? 1 : -1;
+        if (m.sh && /^Arrow(Left|Right)$/.test(m.key)) jump(d); else if (d > 0) next(); else prev();
+        return;
+      }
+      if (m.t === 'here') {                          // the beamer window reloaded: its new page follows again
+        if (frozen) freezeToggle();
+        send({ t: 'go', si: si, step: step, to: m.from });
+      }
       else if (m.t === 'go') {
         // answers to our hello: the window that opened us beats a fullscreen one beats any other tab
         if (m.rank !== undefined) { if (m.rank < best) return; best = m.rank; }
@@ -2787,6 +2897,7 @@ const link = (function () {
     if (m.t === 'hello') {                           // a presenter (re)opened: tell it where we stand
       if (!mine && document.visibilityState !== 'visible') return;   // a tab in the background stays out
       linked = true;
+      freezeSet(false);                              // a new presenter view knows nothing of a freeze: it starts here
       send({ t: 'go', si: si, step: step, rank: (mine ? 2 : 0) + (fsOn() ? 1 : 0) });
       if (window.DeckAsk) DeckAsk.sync();            // and the answer box as it stands
       if (window.DeckOverview && DeckOverview.isOpen()) send({ t: 'ov-on', on: true });   // and an overview the class sees
@@ -2795,8 +2906,14 @@ const link = (function () {
     if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }   // hidden in the presenter
     if (m.t === 'go' && m.to === me) linked = true;  // the presenter answered our 'here'
     if (!linked) return;
-    if (m.t === 'bye') { if (!mine) linked = false; laser.show(m); }
+    if (m.t === 'freeze') { freezeSet(!!m.on); if (!m.on && m.si !== undefined) catchUp(m); return; }
+    // The freeze gate: while frozen nothing the presenter sends reaches the picture - no turn, no click, no laser, no
+    // box, no lab, no music, no Solita. Only the presenter leaving (bye: closed or reloaded) and the end of the show
+    // still count; both let go of the freeze.
+    if (frozen && m.t !== 'bye' && m.t !== 'end') return;
+    if (m.t === 'bye') { freezeSet(false); if (!mine) linked = false; laser.show(m); }
     else if (m.t === 'end') {                        // Esc in the presenter window ended the show
+      freezeSet(false);
       showing = false; linked = false; mine = false; laser.show(m);
       if (fsOn()) fsExit();
     }
@@ -2814,6 +2931,7 @@ const link = (function () {
     else if (m.t === 'jubel') feuerwerk(0.12, 0.12, 0.88, 0.5);                // the class cheered: the firework
     else if (m.t === 'zoom') hoverZoom.apply(m);                               // a picture under the presenter's mouse
     else if (m.t === 'ev') mirror.replay(m);
+    else if (m.t === 'lab-sf') labSf(m);                                     // Solita's box in a module, from the presenter
     else if (m.t === 'lab-fresh') mirror.fresh(m.si);                         // the presenter's labs of that slide are new
     else if (m.t === 'laser') laser.show(m);
     else if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); laser.mirrorOn(m.on); }   // L over there
@@ -2844,6 +2962,8 @@ const link = (function () {
   function audToggle() {
     const O = window.DeckOverview;
     if (!O) return;
+    // the frozen beamer shows nothing new, the class's overview neither - said here, the wall stays clean
+    if (frozen) { if (PRESENTER) toast('Beamer eingefroren – erst ' + FREEZE_KEY + ' gibt ihn frei'); return; }
     if (!PRESENTER) { if (O.isOpen()) O.close(); else O.open(); return; }
     const want = !audOn;
     send({ t: 'aud-ov', on: want });
@@ -2886,6 +3006,48 @@ const link = (function () {
   }
   document.addEventListener('load', function (e) { if (e.target.tagName === 'IFRAME') audFrame(e.target); }, true);
   document.querySelectorAll('iframe').forEach(audFrame);
+
+  // "Beamer eingefroren" (Doc, 23.11.2026, at the Epson: its Freeze holds the wall, but the Mac goes on sending, so
+  // "Tafel live" showed what the wall did not): B in either window of a show. The beamer window keeps its picture - the
+  // freeze gate in receive() drops what the presenter sends, the key gate at the top of this file its own keys - while
+  // Doc goes on in the presenter view, whose bar says so in λ orange (the beamer itself shows nothing). B again: the
+  // beamer jumps to where the presenter stands, as if it had followed all along. The real picture now freezes, so the
+  // mirror (deck-spiegel.js) shows what the wall shows.
+  function freezeSet(on) {
+    frozen = on;
+    if (PRESENTER) {
+      const r = document.getElementById('pres'), b = r && r.querySelector('.p-freeze');
+      if (r) r.classList.toggle('frozen', on);
+      if (b) b.hidden = !on;
+    } else if (on && narr.playing) narr.stop();     // her voice turns the slides on: it pauses with the picture
+  }
+  function freezeToggle() {
+    // a deck window without a presenter view has nobody to go on in
+    if (!PRESENTER && !frozen && (!linked || (mine && (!peer || peer.closed)))) {
+      toast('Einfrieren (' + FREEZE_KEY + ') gibt es nur mit Referentenansicht – Vollbild und Präsentieren jetzt mit V');
+      return;
+    }
+    freezeSet(!frozen);
+    // let go in the presenter: where it stands goes along; on the beamer the presenter answers with it (receive)
+    send(frozen || !PRESENTER ? { t: 'freeze', on: frozen } : thaw());
+  }
+  function thaw() {                                  // presenter: what the beamer needs to catch up
+    const box = document.querySelector('#pres .p-cur .pop:not([hidden])'), lz = laser.state();
+    return { t: 'freeze', on: false, si: si, step: step, box: box ? box.dataset.popId || '' : '', lz: lz.on, at: lz.at };
+  }
+  function catchUp(m) {                              // beamer: as if it had followed all along
+    hoverZoom.apply({});                             // what the presenter's mouse showed back then is long gone
+    hoverTail.apply({ si: si, f: null });
+    apply(m, true);                                  // painted even on the same slide: the ink written meanwhile shows
+    popApply(m);
+    if (m.at) laser.show({ x: +m.at.x, y: +m.at.y });
+    laser.mirrorOn(!!m.lz);
+  }
+  addEventListener('keydown', function (e) {
+    if (!freezeKey(e) || e.repeat) return;
+    if (e.target && e.target.closest && e.target.closest('#ask, #linkgo, input, textarea, select, [contenteditable]')) return;
+    e.preventDefault(); freezeToggle();
+  });
 
   // Labs and 3D dice mirrored (Doc, 16.09.2026: "ideal wäre ich bediene die und LG auch ... same for Lab").
   // The same lab runs in both windows; everything done in the presenter's live slide - pointer, mouse, wheel,
@@ -3274,7 +3436,8 @@ const link = (function () {
     });
     cursor();                                        // no dot yet: the arrow stays
     window.DeckLaser = function () { return { on: on, want: want, sent: sent, raf: raf, dot: !!dot }; };   // debug
-    return { move: move, show: show, toggle: toggle, mirrorOn: mirrorOn };
+    return { move: move, show: show, toggle: toggle, mirrorOn: mirrorOn,
+             state: function () { return { on: on, at: at }; } };   // for a beamer that was frozen (thaw)
   })();
 
   window.DeckNote = toast;                            // the deck's one message box, also for the screen badge
@@ -3355,6 +3518,7 @@ const link = (function () {
   painted.push(function () {
     if (view) view.render();
     if (applying || !linked || (si === sentSi && step === sentStep)) return;
+    if (frozen && !PRESENTER) return;                // a frozen beamer pulls nobody along
     sentSi = si; sentStep = step;
     send({ t: 'go', si: si, step: step });
   });
@@ -3382,6 +3546,7 @@ const link = (function () {
     if (window.DeckSpiegel && DeckSpiegel.dropped()) return;
     if (Date.now() - showAt < 1500) return;
     showing = false;
+    freezeSet(false);
     send({ t: 'end' });
     linked = false; mine = false; peer = null;
   });
@@ -3636,6 +3801,10 @@ const link = (function () {
       // Cmd+O: the overview stands on the beamer - this says so, a click closes it there (audToggle)
       + '<button type="button" class="p-aud" hidden title="Übersicht beim Publikum schließen (' + AUD_KEY + ' / Esc)">'
       + '<span class="p-aud-ico"></span><span class="p-aud-txt">Übersicht beim Publikum</span></button>'
+      // B: the beamer is frozen - never forgotten, a click gives it free (freezeToggle)
+      + '<button type="button" class="p-freeze" hidden title="Beamer eingefroren – Klick oder ' + FREEZE_KEY + ' gibt ihn frei">'
+      + svg('<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="m9.5 3.5 2.5 2.5 2.5-2.5M9.5 20.5l2.5-2.5 2.5 2.5"/>')
+      + '<span class="p-freeze-txt">Beamer eingefroren</span></button>'
       + '<span class="p-buzz" hidden></span>'       // the class's buzzer feedback (presBuzzer)
       + '<span class="p-clock" title="Uhrzeit"></span>'
       + '<button type="button" class="p-end-btn" title="Präsentation beenden (Esc)" aria-label="Präsentation beenden">'
@@ -3865,6 +4034,7 @@ const link = (function () {
     if (ovBtn) q('.p-aud-ico').innerHTML = ovBtn.innerHTML;   // the same grid icon in the pill
     q('.p-aud').onclick = function () { audToggle(); };
     if (audOn) q('.p-aud').hidden = false;
+    q('.p-freeze').onclick = function () { freezeToggle(); };
     q('.p-prev').onclick = function () { prev(); };
     q('.p-next').onclick = function () { next(); };
     // a click on the slide no longer goes on, as on the beamer (Doc, 30.10.2026) - the buttons and arrow keys do
@@ -3914,6 +4084,8 @@ const link = (function () {
   }
   soloBuzzer();                                      // the class's taps in the plain deck window (no presenter view)
   return { present: present, send: send,
+           held: function () { return frozen && !PRESENTER; },   // this is the beamer window and it is frozen (B)
+           nav: function (key, sh) { send({ t: 'nav', key: key, sh: !!sh }); },   // its arrows, for the presenter
            music: function (on) { if (linked) send({ t: 'jeopardy-on', on: !!on }); },   // the beamer's J music, for the presenter
            // the overview opened or closed in this window: the presenter view hears it if this is its beamer
            ov: function (on) { if (!PRESENTER && linked) send({ t: 'ov-on', on: !!on }); },

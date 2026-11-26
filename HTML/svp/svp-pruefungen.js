@@ -4,7 +4,8 @@
 // The Stoffverteilungsplan stays the only source, nothing is kept twice. A test is a row with a button
 // (row.redBtn), or a row whose unit column says KA, KL or LK and whose topic names the test. Its date: in
 // termin mode the group's own appointment (svp-termine.js), otherwise the class's first day of that calendar
-// week, or the day the button names (redBtn.am = 'YYYY-MM-DD').
+// week, or the day the button names (redBtn.am = 'YYYY-MM-DD'). redBtn.um = 'HH:MM' next to am pins it to the
+// class's lesson starting then on that day, whatever its subject - a test written in another subject's period.
 // The appointments come from svp_untis, which only Doc's account can read - without a login there are no pills.
 // Needs svp-auth.js, svp-termine.js and svp-timetable.js.
 (function (global) {
@@ -83,6 +84,7 @@
 
     const TEST_WORD = /klausur|klassenarbeit|leistungs(test|kontrolle|nachweis|erhebung)/i;
     const pills = new Map();        // date|start|subject|group -> { short, title, ... }
+    const ANY = '*';                // subject of a pill pinned by redBtn.um: any lesson starting then
 
     const keyOf = (date, start, subject, classes) =>
         [date, start, subject, svpTermine.groupKey(classes)].join('|');
@@ -111,6 +113,7 @@
             title: cfg.label,
             cfg,
             on: cfg.am && cfg.am.replace(/-/g, ''),
+            at: cfg.am && cfg.um ? String(cfg.um) : '',
             list: cfg.src || cfg.title || cfg.label,
         };
     }
@@ -139,7 +142,10 @@
         for (const row of rows) {
             const test = testOf(row), week = untis.weeks[row.kw];
             if (!test || !week) continue;
-            for (const days of svpTermine.termine({ weeks: { [row.kw]: week } }).values()) {
+            for (const [klasse, days] of svpTermine.termine({ weeks: { [row.kw]: week } })) {
+                /* redBtn.um: the lesson of the class starting then, of any subject (Doc, 23.11.2026: the Mathe
+                   Leistungstest BGY26 moved into the Informatik double period on Tue 24.11. 08:00) */
+                if (test.on && test.at) { mark({ date: test.on, start: test.at, subject: ANY, klasse }, test); continue; }
                 const day = test.on ? days.find(d => d[0].date === test.on) : days[0];
                 (day || []).forEach(e => mark(e, test));
             }
@@ -173,7 +179,8 @@
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     function pill(l) {
         for (const p of l.parts || [l]) {
-            const test = pills.get(keyOf(p.date, SvpTimetable.hhmm(p.startTime), p.subject, p.classes));
+            const start = SvpTimetable.hhmm(p.startTime);
+            const test = pills.get(keyOf(p.date, start, p.subject, p.classes)) || pills.get(keyOf(p.date, start, ANY, p.classes));
             if (test) {
                 return '<span class="tt-pruef ' + test.short.toLowerCase() + '" title="' + esc(test.title) + '">'
                     + '<span class="tt-pruef-long">' + WORD[test.short] + '</span>'

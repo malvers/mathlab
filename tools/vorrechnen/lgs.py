@@ -1,8 +1,10 @@
 # Systems of linear equations and matrix expressions for pruef.py: a system "{\begin{cases}..\end{cases}}", an augmented
 # matrix "\left(\begin{array}{cc|c}..\end{array}\right)", a matrix equation "A\cdot v=b", the result "x=3\quad y=2" (or
-# with a parameter t), "L=\{\}". Two systems are equal when every solution of one solves the other.
+# with a parameter t), "L=\{\}", the set of a pair "L=\{(3\mid 2)\}" (with a parameter "L=\{(2+t\mid t)\},\ t\in\mathbb{R}"),
+# a row without unknowns ("0=3": no solution, "0=0": no condition). Two systems are equal when every solution of one
+# solves the other.
 import re
-from sympy import Matrix, Symbol, linsolve, EmptySet, simplify, symbols, FiniteSet, expand, Rational
+from sympy import Matrix, S, Symbol, linsolve, EmptySet, simplify, symbols, FiniteSet, expand, Rational
 from sympy.parsing.latex import parse_latex
 
 def _parse(tex, parse):
@@ -50,10 +52,20 @@ def gleichungen(tex, vars_, parse):
     m = re.fullmatch(r'[A-Z](?:_\{?\w+\}?)?\s*(?:\\left)?\((.*?)(?:\\right)?\)', t)
     if m and '\\mid' in m.group(1):
         return [v - parse(c) for v, c in zip(vars_, m.group(1).split('\\mid'))]
+    # the solution set of a pair (Doc, 23.11.2026: Lösungsmengen), "L=\{(3\mid 2)\}", with a parameter
+    # "L=\{(2+t\mid t)\},\ t\in\mathbb{R}": the coordinates in the order of the unknowns
+    m = re.fullmatch(r'L\s*=\s*\\\{\s*(?:\\left)?\((.*?)(?:\\right)?\)\s*\\\}(?:\s*,\s*(?:\\[ ,;])?\s*t\s*\\in\s*\\mathbb\{R\})?', t)
+    if m and '\\mid' in m.group(1):
+        return [v - parse(c) for v, c in zip(vars_, m.group(1).split('\\mid'))]
     out = []
     for s in re.split(r'\\quad|\\qquad|\;|,\\ ', t):
         if s.strip():
             e = parse(s)
+            if e in (S.true, S.false):
+                # a row without unknowns: "0=3" - no solution at all; "0=0" - no condition (pruef.py checks it is right there)
+                if e == S.false:
+                    return None
+                continue
             out.append(expand(e.lhs - e.rhs))
     return out
 

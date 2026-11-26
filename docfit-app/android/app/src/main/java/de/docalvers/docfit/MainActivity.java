@@ -33,6 +33,7 @@ import android.app.TimePickerDialog;
 import android.text.InputType;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.method.DigitsKeyListener;
 import android.util.TypedValue;
@@ -67,6 +68,7 @@ import org.vosk.android.StorageService;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.function.IntConsumer;
 
 /**
@@ -87,29 +89,43 @@ import java.util.function.IntConsumer;
  *   is for (Doc, 20.11.2026: two "Rubriken", "Planks" and "Two Balls"): one of two chips, the last choice remembered
  *   ("kind"); a stopped time takes the chip chosen at that moment (it may still be switched while the clock runs), and
  *   the list shows it in front of the start time. Voice control is the same for both.
+ *   Counted exercises (Doc, 26.11.2026: "Bei Dumbbells und Legs müssen wir Repeats zählen. Nicht die Zeit." - "Klar
+ *   brauchen wir auch das Gewicht."): with Dumbbells or Legs chosen the stopwatch gives way to the repetitions (big,
+ *   with – and +, a tap types them) and the weight (– / + in 0.5 kg, a tap types it; for dumbbells ONE dumbbell, 0 =
+ *   without), "Eintragen" in place of the command stores the set with the time of now; Dumbbells shows its moves
+ *   (Curls, Lateral Raises) as a second chip row. No voice control for a set. A running clock is never left for them.
  * - "Waage": while it is open the phone looks for the scale (ScaleLink). A state line says what happens ("Stell dich
  *   auf die Waage …", connecting, measuring, done), the last weigh-in stands big with fat, water, muscle and BMI
  *   (BodyComposition, from the profile Doc enters under "Profil"), waist and hip typed in by hand with their ratios
  *   (Girths), a fitness score 1-10 with what the values mean (FitnessScore, ScoreBar), and the list of weigh-ins
- *   below, swipe to delete, tap to enter waist and hip. Scrolling the list up pushes the big card away until a compact
+ *   below, swipe to delete; a tap shows that weigh-in in the card (again, or on the newest: back to the newest), a long
+ *   press enters waist and hip (Doc, 23.11.2026). Scrolling the list up pushes the big card away until a compact
  *   bar is left (CollapsingHeader: date and weight, fat, fitness - or the state of a running weigh-in).
  *   Two people use the scale (Doc, 20.11.2026): Doc and a second person, each with her own profile, list, tiles and
  *   girths (Profile / Weighings slot "" and "2"; her name only in the phone's preferences). A result goes to the one
  *   whose newest weight is within 5 kg (the nearer of both; Weighings.whose), near neither DocFit asks "Doc oder …?"
  *   with "Keiner" to drop it. A switch on top of the tab shows the other person; DocFit opens on Doc, and the view
- *   follows a result to its person. A long press on a weigh-in moves it to the other person, if the guess was wrong.
+ *   follows a result to its person. "Zu …" in a weigh-in's waist and hip dialog moves it to the other person, if the
+ *   guess was wrong (until 23.11.2026 the long press did).
  *   Under the gear, "Personen": each one on or off ("profileOn" / "profile2On"); off = out of the switch and of the
  *   assignment, her data stays. With one on there is no switch and every result is hers - still asked when it is
  *   more than 5 kg from her newest ("Ist das …?"). At least one stays on.
  * - "Blutdruck" (Doc, 20.11.2026, where "Fasten" was): readings typed in by hand (Doc, 21.11.2026 - replacing the
  *   rule of 19.11. "no typing", for when the Omron does not send or in Spain without it): systolic, diastolic, pulse,
  *   date and time (now, changeable), a note; per person like the scale (the same switch). The list colours each
- *   reading by its ESH category and says where it came from ("Hand"; later "Omron" - the M400 Intelli IT, read over
- *   Bluetooth, BLE blood pressure service 0x1810). Swipe or long press deletes, with "Rückgängig" (Pressures).
+ *   reading by its ESH category and says where it came from ("Hand" or "Omron"). The Omron M400 Intelli IT (Doc,
+ *   24.11.2026): "Omron koppeln" once (its Bluetooth key held until "P" blinks), then while this tab is open its
+ *   readings come in by themselves over the open Bluetooth blood pressure standard (BpLink, Bpm): user 1 to Doc, user
+ *   2 to the second person, nothing from before the day of the first pairing, the monitor's clock set each time.
+ *   Swipe or long press deletes, with "Rückgängig" (Pressures).
  * - "Blutzucker" (Doc, 21.11.2026, the drop): readings typed in by hand - one number, its unit found by itself (below 35
  *   mmol/L, else mg/dL, a chip to override), date and time, when it was measured (nüchtern / vor dem Essen / nach dem
  *   Essen (2 h) / sonstige), a note; always shown in both units (his meter says mmol/L, he thinks in mg/dL). Fasting and
  *   two hours after a meal are coloured by their limits. Per person like the scale; long press deletes (Glucoses).
+ * - "Verlauf" (Doc, 26.11.2026): the course of the running values - Gewicht, Körperfett, Bauch, Blutdruck (Sys/Dia),
+ *   Puls, Blutzucker nüchtern, the stopwatch times per exercise - over 4 weeks, 3 months, 1 year or everything, per
+ *   person (Trends, HistoryChart). In the stopwatch's ZEITEN a tap selects a time; the exercise chips then move it to
+ *   another exercise, with "Rückgängig" (Doc, 26.11.2026).
  * - Fastenmodus (Doc, 21.11.2026): in the fasting view "Fasten starten" (planned 5 / 7 days / own, start now or
  *   earlier), a running fast shows a slim banner on top ("Fasten · Tag 3 von 5 · 62 h", "Beenden"). A fast is a time
  *   range (Fasts): every measurement in it belongs to it by its time, also after start or end are changed. It stands
@@ -127,14 +143,21 @@ import java.util.function.IntConsumer;
  * values come from. All pages share one page margin (PAGE_SIDE).
  * Everything stays on the phone (Entries, Weighings, Profile in the app's preferences; no internet permission).
  */
-public class MainActivity extends Activity implements KeywordListener.Callback, ScaleLink.Callback {
+public class MainActivity extends Activity implements KeywordListener.Callback, ScaleLink.Callback, BpLink.Callback {
     // the colours of the chosen scheme (Palette: Blau / Grau / Hell), set in onCreate before the screen is built;
     // LAMBDA = lambda as text (Hell: the svp blue), the fills take theirs from pal
     private Palette pal;
     private int LAMBDA, UPSILON, PHI, TEXT, MUTED, CARD, BG;
     private static final int ASK_MIC = 1, ASK_BT = 2;
+    // the paired Omron's address and the first day whose readings count (only on this phone, never synced)
+    private static final String OMRON_ADDRESS = "omronAddress", OMRON_SINCE = "omronSince", OMRON_KEY = "omronKey",
+            OMRON_CLOCK = "omronClockSet", OMRON_CLOCK_OFFSET = "omronClockOffset", OMRON_CLOCK_NEEDED = "omronClockNeeded";
+    // the Omron's clock is set rarely (BpLink: a clock transmission makes the monitor keep that connection's readings
+    // for the next one): when a reading had no time (batteries out), when summer/winter time changed since, or after
+    // 30 days (drift)
+    private static final long OMRON_CLOCK_EVERY_MS = 30L * 24 * 3_600_000L;
     // TAB_FAST is the fasting view, opened from the settings (no tab of its own since 20.11.2026)
-    private static final int TAB_WATCH = 0, TAB_SCALE = 1, TAB_FAST = 2, TAB_BP = 3, TAB_GLU = 4;
+    private static final int TAB_WATCH = 0, TAB_SCALE = 1, TAB_FAST = 2, TAB_BP = 3, TAB_GLU = 4, TAB_HIST = 5;
     private static final String FASTING_PAGE = "file:///android_asset/fasting/index.html";
     private static final long DEBOUNCE_MS = 1500;   // one word must not start and at once stop again
     private static final long UNDO_MS = 5000;
@@ -150,7 +173,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private TextView state, ear, empty, undoText;
     private DigitsView timer;
     private Button startBtn, stopBtn, resetBtn;
-    private View undoBar, watchPage, scalePage, bpPage, gluPage;
+    private View undoBar, watchPage, scalePage, bpPage, gluPage, histPage;
+    // the "Verlauf" tab (Doc, 26.11.2026): its cards, the stretch of time (Trends.RANGE_WORDS) and the person switch
+    private LinearLayout histCards;
+    private final TextView[] histRangeChips = new TextView[Trends.RANGE_WORDS.length];
+    private final TextView[] histPersonChips = new TextView[SLOTS.length];
+    private View histPersonRow;
+    private int histRange;
     private RecyclerView list;
     private WatchAdapter adapter;
     private Model model;
@@ -176,6 +205,14 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private RecyclerView bpList;
     private BpAdapter bpAdapter;
     private TextView bpEmpty, bpTitle;
+    // the Omron M400 Intelli IT over Bluetooth (BpLink): its state line, "Omron koppeln", what the last transfer brought
+    private BpLink bp;
+    private TextView bpState;
+    private Button bpPair;
+    private String bpDoneText;
+    private int bpNew, bpNewOther, bpSkipped, bpNoTime;
+    private boolean bpJustPaired, pendingPair, bpClockNow;
+    private BpLink.Status bpLast = BpLink.Status.IDLE;
     private final TextView[] bpPersonChips = new TextView[SLOTS.length];
     private View bpPersonRow;
     // blood glucose: both people's readings, the shown person's, and the tab's own person switch
@@ -207,6 +244,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private View personRow;
     private int person;
     private Weighings weighings;
+    /** the weigh-in the scale card shows, by its moment (Weighings.shownIndex); 0 = the newest */
+    private long pickedWeighing;
     private Profile profile;
     private ScaleLink scale;
     // the private Supabase tables, so the web page /docfit/ shows the same (Sync, SyncPanel; offline first)
@@ -217,13 +256,35 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     // remembered, so the scale's repeats of it (the resistance comes a moment later) are not stored either
     private Weighings.Weighing pendingWeigh, rejectedWeigh;
     private AlertDialog askDialog;
-    private ImageView tabWatch, tabScale, tabBp, tabGlu;
+    private ImageView tabWatch, tabScale, tabBp, tabGlu, tabHist;
     private TextView scaleState, resWhen, resNote, scaleEmpty;
     // the tab the fasting view was opened from - Back at the page's start returns there
     private int backTab = TAB_WATCH;
     // the exercise a stopped time is filed under (Entries.KINDS) and its chips on the stopwatch tab
     private String kind;
     private final TextView[] kindChips = new TextView[Entries.KINDS.length];
+    // a time selected in ZEITEN (its start, 0 = none) and the line under the chips that says so
+    private long pickedRun;
+    private TextView pickHint;
+    // a short note in the pickHint line ("Erst die Uhr stoppen"), gone after a moment
+    private String hintNote;
+    private final Runnable endNote = () -> {
+        hintNote = null;
+        paintKinds();
+    };
+    // counted exercises (Doc, 26.11.2026): the move chips under the exercise chips (built for the exercise in
+    // moveRowKind), the next set's repetitions and weight with their – / +, and "Eintragen" in place of the command;
+    // the stopwatch's Start / Stopp / Reset row steps aside meanwhile
+    private LinearLayout moveRow;
+    private String moveRowKind;
+    private TextView[] moveChips = new TextView[0];
+    private View countBox, watchButtons;
+    private DigitsView repsView, kgView;
+    private TextView kgLabel;
+    private Button enterBtn;
+    private int reps;
+    private double kg;
+    private boolean shownCounting;
     private DigitsView resWeight;
     // the tiles under the weight: value, range bar and reference line (Ranges)
     private Tile tFat, tWater, tMuscle, tBmi, tWaist, tWhtr, tHip, tWhr;
@@ -290,6 +351,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         fasts = fastLists[person];
         kind = Entries.kindOrDefault(prefs.getString("kind", null));
         scale = new ScaleLink(this, this);
+        bp = new BpLink(this, this);
+        bp.setKey(omronKey());
+        bp.setClockDue(omronClockDue());
+        bp.setPaired(prefs.getString(OMRON_ADDRESS, null));
         sync = new Sync(this, changed -> {
             if (changed) reloadFromSync();
         });
@@ -307,7 +372,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         setContentView(build());
         int savedTab = prefs.getInt("tab", TAB_WATCH);
         showTab(savedTab == TAB_SCALE || savedTab == TAB_FAST || savedTab == TAB_BP
-                || savedTab == TAB_GLU ? savedTab : TAB_WATCH);
+                || savedTab == TAB_GLU || savedTab == TAB_HIST ? savedTab : TAB_WATCH);
         refresh();
         if (runStart != 0) ui.post(tick);
         try {
@@ -336,7 +401,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         sync.foreground(true);
         listenIfAllowed();
         updateScale();
+        updateBp();
         refresh();
+        if (tab == TAB_HIST) refreshHist();
         if (fastWeb != null) fastWeb.onResume();
         applyFastingChrome();   // the phone may have been turned while another app was in front
         refreshFast();
@@ -352,8 +419,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         sync.foreground(false);
         if (listener != null) listener.stop();
         scale.stop();
+        if (!bp.isPairing()) bp.stop();   // Android's "Koppeln?" question pauses DocFit - the pairing goes on
         refresh();
         refreshScale();
+        refreshBpState();
         if (fastWeb != null) fastWeb.onPause();
         ui.removeCallbacks(fastTick);
     }
@@ -363,6 +432,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         super.onDestroy();
         ui.removeCallbacksAndMessages(null);
         scale.stop();
+        bp.stop();
         if (listener != null) listener.stop();
         if (model != null) model.close();
         if (tone != null) tone.release();
@@ -403,6 +473,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         refreshBp();
         refreshGlu();
         refreshFast();   // a fast started or ended on the web: banner and fasting page
+        if (tab == TAB_HIST) refreshHist();
     }
 
     /** Page, status bar and navigation bar in the scheme's ground; dark system icons on Hell. */
@@ -647,9 +718,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
     }
 
-    /** Voice control runs only while DocFit is in front with the "Stoppuhr" tab shown. */
+    /** Voice control runs only while DocFit is in front with the "Stoppuhr" tab shown - and not for a counted set. */
     private void listenIfAllowed() {
-        if (!resumed || tab != TAB_WATCH || listener == null || listener.isRunning()) return;
+        if (!resumed || tab != TAB_WATCH || listener == null || listener.isRunning() || counting()) return;
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             if (!askedMic && !asking) {   // one permission question at a time, Android drops a second one
                 askedMic = true;
@@ -671,6 +742,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
         listenIfAllowed();
         updateScale();
+        updateBp();
         refresh();
     }
 
@@ -679,7 +751,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     @Override
     public void onCommand(Commands.Kind kind, long wallMillis) {
         long now = System.currentTimeMillis();
-        if (tab != TAB_WATCH || now - lastChange < DEBOUNCE_MS) return;   // never from the scale tab
+        if (tab != TAB_WATCH || now - lastChange < DEBOUNCE_MS || counting()) return;   // never from the scale tab
         if (kind == Commands.Kind.START && runStart == 0) start(Math.max(now - 3000, Math.min(wallMillis, now)));
         else if (kind == Commands.Kind.STOP && runStart != 0) stop(Math.max(runStart, Math.min(wallMillis, now)));
     }
@@ -740,16 +812,21 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     private void refresh() {
+        paintMode();
+        paintKinds();
         boolean running = runStart != 0;
         // the command to say next instead of a state word (Doc, 20.11.2026: "schreiben nur hin, ohne
         // Anführungszeichen, DocFit Start. Und wenn es läuft, DocFit Stopp") - exactly the words Commands listens for
         state.setText(running ? "DocFit Stopp" : "DocFit Start");
-        // "DocFit Stopp" in the red of the running stopwatch, not orange (Doc, 20.11.2026: "entscheide du")
-        state.setTextColor(running ? pal.alarm : PHI);
-        if (!running) timer.setText(Times.duration(last.shown() ? last.duration : 0));
-        // ready green, running red, stopped orange - never grey (Doc, 20.11.2026: "wenn das Ding bereit ist, machen wir
-        // die Zahlen ... grün", "Wenn die Stoppuhr läuft, ist die grau ... wir machen die rot")
-        timer.setTextColor(running ? pal.alarm : last.shown() ? LAMBDA : PHI);
+        // the same ink ready and running (Doc, 23.11.2026: "Macht DocFit Start/Stopp weiß bitte.")
+        state.setTextColor(pal.commandInk);
+        String shown = Times.duration(last.shown() ? last.duration : 0);
+        if (!running) timer.setText(shown);
+        // 00:00 pal.idleInk, running pal.runInk, a stopped time orange - never grey (Doc, 20.11.2026: "Wenn die
+        // Stoppuhr läuft, ist die grau ... wir machen die rot"; 23.11.2026 cyan as a trial: "die Stoppuhr bitte mal in
+        // Cyan probieren", and "Wenn da steht 00:00, mach das bitte fast weiß", in Hell "Anthrazit")
+        boolean zero = shown.equals(Times.duration(0));
+        timer.setTextColor(running ? pal.runInk : zero ? pal.idleInk : LAMBDA);
         boolean canReset = LastRun.canReset(running, last);
         startBtn.setEnabled(!running);
         stopBtn.setEnabled(running);
@@ -760,8 +837,225 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         // no word and no sign for listening (Doc, 20.11.2026: "‚hört zu' braucht man nicht", then "den Kreis bitte
         // wegmachen"); only a problem says what it is
         ear.setText(earProblem == null ? "" : earProblem);
-        ear.setVisibility(earProblem == null ? View.GONE : View.VISIBLE);
+        ear.setVisibility(earProblem == null || counting() ? View.GONE : View.VISIBLE);
         empty.setVisibility(entries.size() == 0 ? View.VISIBLE : View.GONE);
+    }
+
+    // ---------- counted exercises (Doc, 26.11.2026) ----------
+
+    /** Repetitions instead of the stopwatch: a counted exercise chosen and no time running (a running one stays). */
+    private boolean counting() {
+        return runStart == 0 && Entries.counted(kind);
+    }
+
+    /** The move of the next set: the remembered one of the chosen exercise, else its first ("" without moves). */
+    private String move() {
+        return Entries.moveOrDefault(kind, prefs.getString("move:" + kind, null));
+    }
+
+    private String setKey() {
+        return "set:" + kind + ":" + move();
+    }
+
+    /** Stopwatch or repetitions: which parts show, and the microphone off for a set (as on the other tabs). */
+    private void paintMode() {
+        if (countBox == null) return;
+        boolean count = counting();
+        state.setVisibility(count ? View.GONE : View.VISIBLE);
+        enterBtn.setVisibility(count ? View.VISIBLE : View.GONE);
+        timer.setVisibility(count ? View.GONE : View.VISIBLE);
+        watchButtons.setVisibility(count ? View.GONE : View.VISIBLE);
+        countBox.setVisibility(count ? View.VISIBLE : View.GONE);
+        if (count == shownCounting) return;
+        shownCounting = count;
+        if (count) {
+            if (listener != null) listener.stop();
+        } else {
+            listenIfAllowed();
+        }
+    }
+
+    /**
+     * The next set's repetitions and weight: as last set for this exercise and move (kept on every change, so a number
+     * set and not yet entered stays), else as its newest set in the list, else 10 without weight.
+     */
+    private void loadSet() {
+        String key = setKey();
+        Entries.Entry last = Entries.lastSet(entries.all(), kind, move());
+        reps = prefs.getInt(key + ":reps", last != null ? last.reps : 10);
+        reps = Math.max(1, Math.min(reps, Entries.MAX_REPS));
+        kg = prefs.contains(key + ":kg") ? Entries.roundKg(prefs.getFloat(key + ":kg", 0f)) : last != null ? last.kg : 0;
+        paintSet();
+    }
+
+    private void keepSet() {
+        prefs.edit().putInt(setKey() + ":reps", reps).putFloat(setKey() + ":kg", (float) kg).apply();
+        paintSet();
+    }
+
+    private void paintSet() {
+        if (repsView == null) return;
+        repsView.setText(String.valueOf(reps));
+        kgView.setText(kg > 0 ? Entries.kgText(kg) : "ohne Gewicht");
+        kgView.setTextColor(kg > 0 ? TEXT : MUTED);
+        kgLabel.setText(Entries.weightLabel(kind));
+    }
+
+    private void stepReps(int by) {
+        reps = Math.max(1, Math.min(reps + by, Entries.MAX_REPS));
+        keepSet();
+    }
+
+    private void stepKg(double by) {
+        kg = Math.max(0, Math.min(Entries.roundKg(kg + by), Entries.MAX_KG));
+        keepSet();
+    }
+
+    /** "Eintragen": the set with the time of now on top of the list. */
+    private void enterSet() {
+        if (!counting()) return;
+        long now = System.currentTimeMillis();
+        while (entries.indexOf(now) >= 0) now++;   // the moment is the key: never over another entry
+        entries.addNewest(new Entries.Entry(now, 0, kind, reps, kg, move()));
+        adapter.notifyItemInserted(0);
+        list.scrollToPosition(0);
+        keepSet();
+        confirm(true);
+        refresh();
+    }
+
+    /** A tap on the repetitions: typed on the number pad (Doc: "Muss ich also irgendwie per Hand eingeben"). */
+    private void typeReps() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(24), dp(4), dp(24), dp(8));
+        EditText e = numberField(box, "WIEDERHOLUNGEN", String.valueOf(reps), 4);
+        e.setSelectAllOnFocus(true);
+        AlertDialog d = dialog("Wiederholungen").setView(box)
+                .setPositiveButton("OK", null)   // set below, so a wrong entry keeps the dialog open
+                .setNegativeButton("Abbrechen", null).create();
+        e.requestFocus();
+        Window win = d.getWindow();
+        if (win != null) win.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        show(d);
+        Button ok = d.getButton(DialogInterface.BUTTON_POSITIVE);
+        e.setOnEditorActionListener((v, id, ev) -> ok.performClick());
+        ok.setOnClickListener(v -> {
+            int n = number(e);
+            if (n < 1 || n > Entries.MAX_REPS) {
+                e.setError("1 bis " + Entries.MAX_REPS);
+                return;
+            }
+            reps = n;
+            keepSet();
+            d.dismiss();
+        });
+    }
+
+    /** A tap on the weight: typed with a decimal comma; empty = without weight. */
+    private void typeKg() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(24), dp(4), dp(24), dp(8));
+        EditText e = numberField(box, Entries.weightLabel(kind) + " IN KG", kg > 0 ? Entries.kgNumber(kg) : "", 6);
+        e.setKeyListener(DigitsKeyListener.getInstance("0123456789,."));
+        e.setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);   // number pad, with ","
+        e.setHint("z. B. 5 oder 2,5");
+        e.setHintTextColor(MUTED);
+        e.setSelectAllOnFocus(true);
+        box.addView(text("leer = ohne Gewicht", 12, MUTED, false));
+        AlertDialog d = dialog("Gewicht").setView(box)
+                .setPositiveButton("OK", null)
+                .setNegativeButton("Abbrechen", null).create();
+        e.requestFocus();
+        Window win = d.getWindow();
+        if (win != null) win.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        show(d);
+        Button ok = d.getButton(DialogInterface.BUTTON_POSITIVE);
+        e.setOnEditorActionListener((v, id, ev) -> ok.performClick());
+        ok.setOnClickListener(v -> {
+            double typed = Entries.parseKg(e.getText().toString());
+            if (typed < 0) {
+                e.setError("0 bis " + Entries.kgNumber(Entries.MAX_KG) + " kg, z. B. 2,5");
+                return;
+            }
+            kg = typed;
+            keepSet();
+            d.dismiss();
+        });
+    }
+
+    /** A short note in the line under the chips for a moment. */
+    private void note(String s) {
+        hintNote = s;
+        ui.removeCallbacks(endNote);
+        ui.postDelayed(endNote, 2500);
+        paintKinds();
+    }
+
+    /** The exercises a time (timed) or a set (counted) may go to, for the note on a dimmed chip: "Planks / Balls". */
+    private static String kindsOf(boolean counted) {
+        List<String> out = new ArrayList<>();
+        for (String k : Entries.KINDS) if (Entries.counted(k) == counted) out.add(k);
+        return String.join(" / ", out);
+    }
+
+    /**
+     * A move chip: with a set selected in ZEITEN it changes that set's move, with "Rückgängig"; otherwise it chooses
+     * the move of the next set (remembered per exercise).
+     */
+    private void chooseMove(String m) {
+        int at = pickedRun == 0 ? -1 : entries.indexOf(pickedRun);
+        if (at >= 0) {
+            Entries.Entry old = entries.get(at);
+            pickedRun = 0;
+            if (!m.equals(old.move)) {
+                entries.replace(at, Entries.withMove(old, m));
+                offerUndo(Times.day(old.start) + " → " + m, () -> {
+                    int i = entries.indexOf(old.start);
+                    if (i >= 0) {
+                        entries.replace(i, old);
+                        adapter.notifyItemChanged(i);
+                    }
+                });
+            }
+            adapter.notifyDataSetChanged();
+            paintKinds();
+            return;
+        }
+        if (m.equals(move())) return;
+        prefs.edit().putString("move:" + kind, m).apply();
+        loadSet();
+        paintKinds();
+    }
+
+    /** The move chips of {@code k} (built anew when the exercise changes), the shown move green; none = no row. */
+    private void paintMoves(String k, String shownMove) {
+        if (moveRow == null) return;
+        if (!k.equals(moveRowKind)) {
+            moveRowKind = k;
+            moveRow.removeAllViews();
+            String[] ms = Entries.moves(k);
+            moveChips = new TextView[ms.length];
+            for (int i = 0; i < ms.length; i++) {
+                String m = ms[i];
+                // the same chips as the exercises above: one size, one line, each as wide as its name needs
+                TextView c = text(m, 13, TEXT, true);
+                c.setGravity(Gravity.CENTER);
+                c.setSingleLine(true);
+                c.setIncludeFontPadding(false);
+                c.setPadding(dp(4), 0, dp(4), 0);
+                c.setOnClickListener(v -> chooseMove(m));
+                moveChips[i] = c;
+                float need = c.getPaint().measureText(m) + dp(18);
+                LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), need);
+                cp.leftMargin = i == 0 ? 0 : dp(5);
+                cp.rightMargin = i == ms.length - 1 ? 0 : dp(5);
+                moveRow.addView(c, cp);
+            }
+        }
+        moveRow.setVisibility(moveChips.length == 0 ? View.GONE : View.VISIBLE);
+        for (TextView c : moveChips) paintPick(c, c.getText().toString().equals(shownMove));
     }
 
     // ---------- the scale ----------
@@ -812,17 +1106,23 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                 ? "Dafür fragt Android gleich nach „Geräte in der Nähe“. Den Standort benutzt DocFit nicht."
                 : "Dafür fragt Android gleich nach dem Standort – das verlangt Android für die Bluetooth-Suche, "
                 + "DocFit benutzt ihn nicht.";
-        AlertDialog d = dialog("Waage per Bluetooth")
-                .setMessage("DocFit sucht deine Vitafit-Waage per Bluetooth und liest Gewicht und Körperwiderstand. "
+        boolean omron = tab == TAB_BP;
+        AlertDialog d = dialog(omron ? "Blutdruck per Bluetooth" : "Waage per Bluetooth")
+                .setMessage((omron ? "DocFit verbindet sich per Bluetooth mit deinem Omron und liest Blutdruck und Puls. "
+                        : "DocFit sucht deine Vitafit-Waage per Bluetooth und liest Gewicht und Körperwiderstand. ")
                         + what + " Alle Messungen bleiben auf diesem Smartphone.")
                 .setPositiveButton("Weiter", (x, w) -> requestPermissions(bluetoothPermissions(), ASK_BT))
                 .setNegativeButton("Nicht jetzt", (x, w) -> {
                     asking = false;
+                    pendingPair = false;
                     refreshScale();
+                    refreshBpState();
                 })
                 .setOnCancelListener(x -> {
                     asking = false;
+                    pendingPair = false;
                     refreshScale();
+                    refreshBpState();
                 })
                 .create();
         show(d);
@@ -966,9 +1266,11 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         if (tab == TAB_FAST) reloadFastPage();
         undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
         ui.removeCallbacks(hideUndo);
+        pickedWeighing = 0;                 // and so does a picked weigh-in: the other person starts at her newest
         paintPersons();
         if (scaleAdapter != null) scaleAdapter.notifyDataSetChanged();
         refreshScale();
+        if (tab == TAB_HIST) refreshHist();
     }
 
     private void paintPersons() {
@@ -994,6 +1296,12 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
         if (gluPersonRow != null) gluPersonRow.setVisibility(Weighings.countOn(on) > 1 ? View.VISIBLE : View.GONE);
         if (gluTitle != null) gluTitle.setText("MESSUNGEN · " + names[person].toUpperCase(java.util.Locale.GERMAN));
+        for (int i = 0; i < histPersonChips.length; i++) {
+            if (histPersonChips[i] == null) continue;
+            paintGreen(histPersonChips[i], i == person);
+            histPersonChips[i].setVisibility(on[i] ? View.VISIBLE : View.GONE);
+        }
+        if (histPersonRow != null) histPersonRow.setVisibility(Weighings.countOn(on) > 1 ? View.VISIBLE : View.GONE);
     }
 
     /** "Personen" in the settings: a person on or off; the last one on stays on. Her data is never touched. */
@@ -1009,7 +1317,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         return true;
     }
 
-    /** Long press on a weigh-in: move it to the other person (a wrong guess by weight), with "Rückgängig". */
+    /**
+     * "Zu …" in a weigh-in's waist and hip dialog (the long press until 23.11.2026): move it to the other person (a wrong
+     * guess by weight), with "Rückgängig".
+     */
     private void moveWeighing(int pos) {
         if (pos < 0 || pos >= weighings.size()) return;
         int from = person, to = 1 - person;
@@ -1041,6 +1352,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     /** A result into a person's list (or completing her newest weigh-in), and the tab shows that person. */
     private void store(Weighings.Weighing w, int who) {
         showPerson(who);
+        if (pickedWeighing != 0) {   // a result from the scale always shows the newest again, no row framed
+            pickedWeighing = 0;
+            scaleAdapter.notifyDataSetChanged();
+        }
         Weighings.Added added = weighings.add(w);
         switch (added) {
             case NEW:
@@ -1128,7 +1443,9 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             compactFit.setText("–");
             compactFit.setTextColor(MUTED);
         } else {
-            Weighings.Weighing last = weighings.get(0);
+            // the newest - or the weigh-in tapped in the list (Doc, 23.11.2026: "wenn es nur klickt, würde ich gerne
+            // oben die Werte sehen, die zu dem Eintrag gehören"); the pill above says from when
+            Weighings.Weighing last = weighings.get(shownWeighing());
             BodyComposition bc = BodyComposition.of(last, profile);
             FitnessScore fit = FitnessScore.of(last, profile);
             resWeight.setText(Times.kg(last.kg()));
@@ -1215,11 +1532,11 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
         /**
          * A tap: the detail sheet with explanation and course (Doc, 20.11.2026); an empty Bauch / Hüfte tile goes
-         * straight to the entry, the filled ones have "Ändern" in their sheet.
+         * straight to the entry, the filled ones have "Ändern" in their sheet - always for the weigh-in on the card.
          */
         void tapped() {
             if (weighings.size() == 0) return;
-            if (offering && TileInfo.typedIn(key)) editGirths(0);
+            if (offering && TileInfo.typedIn(key)) editGirths(shownWeighing());
             else openInfo(key);
         }
 
@@ -1349,10 +1666,35 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         });
     }
 
+    /** The row of the weigh-in the scale card shows: the picked one, else the newest (0). */
+    private int shownWeighing() {
+        return weighings.shownIndex(pickedWeighing);
+    }
+
+    /**
+     * A tap on a weigh-in in MESSUNGEN: the card shows its values (Doc, 23.11.2026: "wenn es nur klickt, würde ich
+     * gerne oben die Werte sehen, die zu dem Eintrag gehören"); the picked one again, or the newest, brings the newest
+     * back. A card pushed away comes down, so the values are in sight.
+     */
+    private void pickWeighing(int pos) {
+        if (pos < 0 || pos >= weighings.size()) return;
+        int before = shownWeighing();
+        pickedWeighing = weighings.pickAfterTap(pickedWeighing, pos);
+        int after = shownWeighing();
+        scaleAdapter.notifyItemChanged(before);
+        if (after != before) scaleAdapter.notifyItemChanged(after);
+        refreshScale();
+        scaleHead.setOpen(true, true);
+    }
+
     /**
      * Waist and hip for one weigh-in (Doc, 20.11.2026: "Zum Eingeben brauchen wir noch irgendwo ein Feld für
      * Bauchumfang", "ja, bitte auch ein Feld für Hüftumfang"): cm with one decimal, either field may stay empty. Opened
-     * by a tap on a row of MESSUNGEN, or on BAUCH / HÜFTE for the newest weigh-in. Stored with that weigh-in only.
+     * by a long press on a row of MESSUNGEN (Doc, 23.11.2026: "Das müssen wir auf langes Klicken machen"), or on BAUCH /
+     * HÜFTE for the weigh-in on the card. Stored with that weigh-in only. "Zu …" moves the weigh-in to the other person
+     * (the long press did that before), if she is switched on.
+     * A weigh-in without a hip gets this person's last hip in the field (Doc, 23.11.2026: "defaultmäßig beim Hüftumfang
+     * ... einsetzen"), selected on focus so a new value simply types over it; emptied, the weigh-in keeps no hip.
      */
     private void editGirths(int pos) {
         if (pos < 0 || pos >= weighings.size()) return;
@@ -1364,7 +1706,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                 + "leer lassen, was nicht gemessen ist.", 14, MUTED, false));
         EditText waist = cmField(box, "BAUCHUMFANG IN CM", w.waistMm);
         box.addView(text("in der Mitte zwischen unterster Rippe und Beckenkamm, nach dem Ausatmen", 12, MUTED, false));
-        EditText hip = cmField(box, "HÜFTUMFANG IN CM", w.hipMm);
+        EditText hip = cmField(box, "HÜFTUMFANG IN CM", weighings.hipForField(w));
+        if (!w.hasHip()) hip.setSelectAllOnFocus(true);
         box.addView(text("an der breitesten Stelle des Gesäßes", 12, MUTED, false));
         // and the same as a sketch (Doc, 20.11.2026: "mach bitte ein Bild drunter, so eine Art Skizze")
         GirthSketch sketch = new GirthSketch(this, orbitron, MUTED, LAMBDA, PHI, "Bauch", "Hüfte");
@@ -1373,11 +1716,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         box.addView(sketch, sp);
         ScrollView scroll = new ScrollView(this);
         scroll.addView(box);
-        AlertDialog d = dialog("Bauch und Hüfte")
+        AlertDialog.Builder db = dialog("Bauch und Hüfte")
                 .setView(scroll)
                 .setPositiveButton("Speichern", null)   // set below, so a wrong entry keeps the dialog open
-                .setNegativeButton("Abbrechen", null)
-                .create();
+                .setNegativeButton("Abbrechen", null);
+        int other = 1 - person;
+        if (on[other]) db.setNeutralButton("Zu " + names[other], (x, y) -> moveWeighing(weighings.indexOf(w.time)));
+        AlertDialog d = db.create();
         waist.requestFocus();
         Window win = d.getWindow();
         if (win != null) win.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -1594,12 +1939,19 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     private void showTab(int which) {
         if (which == TAB_FAST && tab != TAB_FAST) backTab = tab;
+        if (which != TAB_WATCH && pickedRun != 0) {
+            pickedRun = 0;
+            if (adapter != null) adapter.notifyDataSetChanged();
+            paintKinds();
+        }
         tab = which;
         prefs.edit().putInt("tab", which).apply();
         watchPage.setVisibility(which == TAB_WATCH ? View.VISIBLE : View.GONE);
         scalePage.setVisibility(which == TAB_SCALE ? View.VISIBLE : View.GONE);
         bpPage.setVisibility(which == TAB_BP ? View.VISIBLE : View.GONE);
         gluPage.setVisibility(which == TAB_GLU ? View.VISIBLE : View.GONE);
+        histPage.setVisibility(which == TAB_HIST ? View.VISIBLE : View.GONE);
+        if (which == TAB_HIST) refreshHist();
         fastPage.setVisibility(which == TAB_FAST ? View.VISIBLE : View.GONE);
         if (which == TAB_FAST) {
             openFasting();
@@ -1610,11 +1962,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         paintTab(tabScale, which == TAB_SCALE);
         paintTab(tabBp, which == TAB_BP);
         paintTab(tabGlu, which == TAB_GLU);
+        paintTab(tabHist, which == TAB_HIST);
         undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
         ui.removeCallbacks(hideUndo);
         if (which == TAB_WATCH) listenIfAllowed();
         else if (listener != null) listener.stop();   // scale and fasting tab: voice control off
         updateScale();
+        updateBp();
         refresh();
     }
 
@@ -1671,9 +2025,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         tabScale = tabIcon(R.drawable.ic_tab_scale, "Waage", v -> showTab(TAB_SCALE));
         tabBp = tabIcon(R.drawable.ic_tab_heart, "Blutdruck", v -> showTab(TAB_BP));
         tabGlu = tabIcon(R.drawable.ic_tab_drop, "Blutzucker", v -> showTab(TAB_GLU));
+        tabHist = tabIcon(R.drawable.ic_tab_chart, "Verlauf", v -> showTab(TAB_HIST));
         ImageView gear = tabIcon(R.drawable.ic_tab_settings, "Einstellungen", v -> openSettings());
         paintTab(gear, false);   // the gear opens a dialog, it is never "the shown tab"
-        for (ImageView t : new ImageView[]{tabWatch, tabScale, tabBp, tabGlu, gear}) {
+        for (ImageView t : new ImageView[]{tabWatch, tabScale, tabBp, tabGlu, tabHist, gear}) {
             tabs.addView(t, new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f));
         }
         col.addView(tabs, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -1687,6 +2042,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         pages.addView(bpPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         gluPage = buildGluPage();
         pages.addView(gluPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        histPage = buildHistPage();
+        pages.addView(histPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         fastPage = new FrameLayout(this);
         fastPage.setBackgroundColor(BG);
         LinearLayout fastCol = new LinearLayout(this);
@@ -1751,19 +2108,112 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     /** The exercise chip tapped: remembered, and the time stopped next is filed under it. */
+    /**
+     * An exercise chip: with a time selected in ZEITEN it moves that time to this exercise (Doc, 26.11.2026: "den Wert
+     * selektieren und oben die Tasten drücken, bringt den in die andere Kategorie"), with "Rückgängig"; otherwise it
+     * chooses the exercise of the next time.
+     */
     private void chooseKind(String k) {
+        int at = pickedRun == 0 ? -1 : entries.indexOf(pickedRun);
+        if (at >= 0) {
+            Entries.Entry old = entries.get(at);
+            if (!k.equals(old.kind) && !Entries.canMove(old, k)) {   // a time never becomes a set, nor a set a time
+                note((old.isCounted() ? "Wiederholungen nur zu " : "Zeiten nur zu ") + kindsOf(old.isCounted()));
+                return;
+            }
+            pickedRun = 0;
+            if (!k.equals(old.kind)) {
+                entries.replace(at, Entries.withKind(old, k));
+                offerUndo(Times.day(old.start) + " → " + k, () -> {
+                    int i = entries.indexOf(old.start);
+                    if (i >= 0) {
+                        entries.replace(i, old);
+                        adapter.notifyItemChanged(i);
+                    }
+                });
+            }
+            adapter.notifyDataSetChanged();
+            paintKinds();
+            return;
+        }
+        pickedRun = 0;
         if (k.equals(kind)) return;
+        if (runStart != 0 && Entries.counted(k)) {   // never lose a running time (Doc, 26.11.2026)
+            note("Erst die Uhr stoppen");
+            return;
+        }
         kind = k;
         prefs.edit().putString("kind", k).apply();
+        loadSet();
+        refresh();
+    }
+
+    /** A tap on a time in ZEITEN selects it (the chips then show and change its exercise); a second tap lets go. */
+    private void pickRun(int pos) {
+        if (pos < 0 || pos >= entries.size()) return;
+        long start = entries.get(pos).start;
+        pickedRun = pickedRun == start ? 0 : start;
+        adapter.notifyDataSetChanged();
         paintKinds();
     }
 
     private void paintKinds() {
+        int at = pickedRun == 0 ? -1 : entries.indexOf(pickedRun);
+        if (at < 0) pickedRun = 0;
+        Entries.Entry picked = at >= 0 ? entries.get(at) : null;
+        // with a time selected the chips show ITS exercise; otherwise the one for the next time
+        String shown = picked != null ? picked.kind : kind;
+        boolean running = runStart != 0;
         for (int i = 0; i < kindChips.length; i++) {
+            if (kindChips[i] == null) continue;
+            String k = Entries.KINDS[i];
             // the second row is green, the top row orange (Doc, 21.11.2026): the chosen exercise phi green, the other a
             // neutral grey outline - both alike, no colour of their own
-            if (kindChips[i] != null) paintPick(kindChips[i], Entries.KINDS[i].equals(kind));
+            paintPick(kindChips[i], k.equals(shown));
+            // dimmed: where the selected entry cannot go (a time to a counted exercise, a set to a timed one), and the
+            // counted exercises while the clock runs
+            boolean off = picked != null ? !k.equals(shown) && !Entries.canMove(picked, k) : running && Entries.counted(k);
+            kindChips[i].setAlpha(off ? 0.35f : 1f);
         }
+        // the move chips: of the selected set, else of the exercise of the next set (none while a time runs)
+        String moveKind = picked != null ? (picked.isCounted() ? picked.kind : "") : counting() ? kind : "";
+        paintMoves(moveKind, picked != null ? picked.move : move());
+        if (pickHint != null) {
+            String h = hintNote != null ? hintNote
+                    : picked != null ? Times.day(picked.start) + " ausgewählt – oben die Übung tippen" : "";
+            pickHint.setText(h);
+            pickHint.setVisibility(h.isEmpty() ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    /**
+     * A number between a big "–" and "+" (finger-sized, the quiet style of "Reset"): the repetitions and the weight of
+     * a counted exercise.
+     */
+    private LinearLayout stepRow(DigitsView value, int heightDp, int buttonDp, String less, String more,
+                                 Runnable down, Runnable up) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setBaselineAligned(false);
+        Button minus = button("–", CARD), plus = button("+", CARD);
+        for (Button b : new Button[]{minus, plus}) {
+            b.setTextColor(LAMBDA);
+            b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 28);
+            b.setPadding(0, 0, 0, 0);
+            b.setIncludeFontPadding(false);
+        }
+        minus.setContentDescription(less);
+        plus.setContentDescription(more);
+        minus.setOnClickListener(v -> down.run());
+        plus.setOnClickListener(v -> up.run());
+        row.addView(minus, new LinearLayout.LayoutParams(dp(72), dp(buttonDp)));
+        LinearLayout.LayoutParams vp = new LinearLayout.LayoutParams(0, dp(heightDp), 1f);
+        vp.leftMargin = dp(8);
+        vp.rightMargin = dp(8);
+        row.addView(value, vp);
+        row.addView(plus, new LinearLayout.LayoutParams(dp(72), dp(buttonDp)));
+        return row;
     }
 
     private View buildWatchPage() {
@@ -1775,30 +2225,54 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         kinds.setOrientation(LinearLayout.HORIZONTAL);
         for (int i = 0; i < Entries.KINDS.length; i++) {
             String k = Entries.KINDS[i];
-            TextView c = text(k, 15, TEXT, true);
+            // four exercises in one row since 26.11.2026: one size, one line, each chip as wide as its name needs
+            // (as the stretches on the Verlauf tab - at Doc's font size 1.3 equal quarters would break "Dumbbells")
+            TextView c = text(k, 13, TEXT, true);
             c.setGravity(Gravity.CENTER);
-            c.setMaxLines(1);
-            c.setPadding(dp(8), 0, dp(8), 0);
-            c.setAutoSizeTextTypeUniformWithConfiguration(10, 15, 1, TypedValue.COMPLEX_UNIT_SP);
+            c.setSingleLine(true);
+            c.setIncludeFontPadding(false);
+            c.setPadding(dp(4), 0, dp(4), 0);
             c.setOnClickListener(v -> chooseKind(k));
             kindChips[i] = c;
-            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(40), 1f);
+            float need = c.getPaint().measureText(k) + dp(18);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(40), need);
             cp.leftMargin = i == 0 ? 0 : dp(5);
             cp.rightMargin = i == Entries.KINDS.length - 1 ? 0 : dp(5);
             kinds.addView(c, cp);
         }
-        paintKinds();
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(16);
         page.addView(kinds, lp);
+        // the moves of a counted exercise (Dumbbells: Curls, Lateral Raises) in a second row, only where it has some
+        moveRow = new LinearLayout(this);
+        moveRow.setOrientation(LinearLayout.HORIZONTAL);
+        moveRow.setVisibility(View.GONE);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        page.addView(moveRow, lp);
+        pickHint = text("", 12, LAMBDA, false);
+        pickHint.setGravity(Gravity.CENTER);
+        pickHint.setVisibility(View.GONE);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(6);
+        page.addView(pickHint, lp);
+        paintKinds();
 
-        state = text("DocFit Start", 26, PHI, true);
+        state = text("DocFit Start", 26, pal.commandInk, true);
         state.setGravity(Gravity.CENTER);
         state.setLetterSpacing(0.12f);
         // more air between the parts (Doc, 20.11.2026: "in Y auseinanderziehen, damit es gefälliger aussieht")
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(24);
         page.addView(state, lp);
+        // a counted exercise: "Eintragen" in the command's place stores the set shown below
+        enterBtn = button("Eintragen", PHI);
+        enterBtn.setMaxLines(1);
+        enterBtn.setOnClickListener(v -> enterSet());
+        enterBtn.setVisibility(View.GONE);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56));
+        lp.topMargin = dp(20);
+        page.addView(enterBtn, lp);
 
         // only when the microphone is missing or the recognizer failed
         ear = text("", 14, UPSILON, false);
@@ -1816,6 +2290,31 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(28);
         page.addView(timer, lp);
+
+        // a counted exercise instead of the stopwatch: the repetitions big in the idle stopwatch's ink between – and +,
+        // below the weight in steps of 0.5 kg; a tap on a number types it
+        LinearLayout count = new LinearLayout(this);
+        count.setOrientation(LinearLayout.VERTICAL);
+        count.setVisibility(View.GONE);
+        countBox = count;
+        TextView repsLabel = smallLabel("WIEDERHOLUNGEN");
+        repsLabel.setGravity(Gravity.CENTER);
+        count.addView(repsLabel, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        repsView = new DigitsView(this, orbitron, 80, pal.idleInk);
+        repsView.setOnClickListener(v -> typeReps());
+        count.addView(stepRow(repsView, 96, 72, "Eine Wiederholung weniger", "Eine Wiederholung mehr",
+                () -> stepReps(-1), () -> stepReps(1)), topParams(4));
+        kgLabel = smallLabel("GEWICHT");
+        kgLabel.setGravity(Gravity.CENTER);
+        count.addView(kgLabel, topParams(14));
+        kgView = new DigitsView(this, orbitron, 26, TEXT);
+        kgView.setOnClickListener(v -> typeKg());
+        count.addView(stepRow(kgView, 56, 56, "Ein halbes Kilo weniger", "Ein halbes Kilo mehr",
+                () -> stepKg(-0.5), () -> stepKg(0.5)), topParams(4));
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(20);
+        page.addView(count, lp);
+        loadSet();
 
         // no hint line under the stopwatch: the command stands above it (Doc, 20.11.2026: "das ist doppelt")
         LinearLayout row = new LinearLayout(this);
@@ -1845,6 +2344,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(32);
         page.addView(row, lp);
+        watchButtons = row;
 
         page.addView(sectionHead("ZEITEN", null, null), headParams());
 
@@ -1855,7 +2355,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             LastRun before = last;
             last = last.afterDelete(gone);   // the time on the display goes with its row
             saveLast();
-            offerUndo("Gelöscht: " + Times.duration(gone.duration), () -> {
+            offerUndo("Gelöscht: " + (gone.isCounted() ? Entries.setText(gone) : Times.duration(gone.duration)), () -> {
                 entries.insert(pos, gone);
                 adapter.notifyItemInserted(Math.min(pos, entries.size() - 1));
                 last = last.afterUndo(gone, before, runStart != 0);
@@ -1870,9 +2370,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     /**
-     * The blood pressure tab, a placeholder until the Omron M400 Intelli IT arrives (Doc, 20.11.2026): the heading, one
-     * line on what will come, and the list's place with its empty line. Deliberately no field to type a value in (Doc,
-     * 19.11.2026: no typing in blood pressure) - the readings will come over Bluetooth only.
+     * The blood pressure tab: the person switch, "+ Messung eintragen" (Doc, 21.11.2026), "Omron koppeln" while no
+     * Omron is paired and the Omron's state line (Doc, 24.11.2026), then the list.
      */
     private View buildBpPage() {
         LinearLayout page = new LinearLayout(this);
@@ -1907,13 +2406,20 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp.topMargin = dp(16);
         page.addView(add, lp);
 
-        // the Omron, small (Doc, 21.11.2026): once it is here its readings come in by themselves
-        TextView hint = text("Später kommen die Werte vom Omron M400 Intelli IT per Bluetooth von selbst.", 12, MUTED,
-                false);
-        hint.setGravity(Gravity.CENTER);
+        // the Omron M400 Intelli IT (Doc, 24.11.2026): paired once from here, then its readings come in by themselves
+        bpPair = button("Omron koppeln", CARD);
+        bpPair.setTextColor(LAMBDA);
+        bpPair.setOnClickListener(v -> pairOmron());
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48));
+        lp.topMargin = dp(10);
+        page.addView(bpPair, lp);
+        bpState = text("", 13, MUTED, false);
+        bpState.setGravity(Gravity.CENTER);
+        bpState.setPadding(0, dp(4), 0, dp(4));
+        bpState.setOnClickListener(v -> onBpStateTapped());
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(8);
-        page.addView(hint, lp);
+        lp.topMargin = dp(6);
+        page.addView(bpState, lp);
 
         View head = sectionHead("MESSUNGEN", null, null);
         bpTitle = (TextView) ((ViewGroup) head).getChildAt(0);
@@ -1927,6 +2433,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         page.addView(listBox(bpList, bpEmpty), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         paintPersons();
         refreshBp();
+        refreshBpState();
         return page;
     }
 
@@ -1947,6 +2454,267 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             refreshBp();
         });
         refreshBp();
+    }
+
+    // ---------- the Omron ----------
+
+    /**
+     * The 16-byte key DocFit stores in the Omron when pairing (BpLink): random, made once on this phone and kept only in
+     * its settings - never in the code, never synced.
+     */
+    private byte[] omronKey() {
+        byte[] k = Bpm.unhex(prefs.getString(OMRON_KEY, null));
+        if (k != null && k.length == 16) return k;
+        k = new byte[16];
+        new java.security.SecureRandom().nextBytes(k);
+        prefs.edit().putString(OMRON_KEY, Bpm.hex(k)).apply();
+        return k;
+    }
+
+    private boolean omronClockDue() {
+        if (prefs.getBoolean(OMRON_CLOCK_NEEDED, false)) return true;
+        long set = prefs.getLong(OMRON_CLOCK, 0), now = System.currentTimeMillis();
+        if (set == 0) return false;   // not known yet: the first reading with a time says the clock runs
+        int offset = TimeZone.getDefault().getOffset(now);
+        return prefs.getInt(OMRON_CLOCK_OFFSET, offset) != offset || now - set > OMRON_CLOCK_EVERY_MS;
+    }
+
+    /** The Omron's clock runs right as of now (set by DocFit, or a reading came with a time). */
+    private void omronClockFine() {
+        long now = System.currentTimeMillis();
+        prefs.edit().putLong(OMRON_CLOCK, now).putInt(OMRON_CLOCK_OFFSET, TimeZone.getDefault().getOffset(now))
+                .remove(OMRON_CLOCK_NEEDED).apply();
+    }
+
+    @Override
+    public void onBpClockSet() {
+        omronClockFine();
+        bpClockNow = true;
+        bp.setClockDue(false);
+    }
+
+    private boolean omronPaired() {
+        return prefs.getString(OMRON_ADDRESS, null) != null;
+    }
+
+    /** The Omron is waited for only while the "Blutdruck" tab is open and DocFit is in front (like the scale). */
+    private void updateBp() {
+        if (bp == null) return;
+        if (!resumed || tab != TAB_BP) {
+            bp.stop();
+        } else if (!hasBluetoothPermission()) {
+            if (omronPaired() || pendingPair) askBluetooth(false);
+        } else {
+            bp.setClockDue(omronClockDue());
+            bp.start();
+            if (pendingPair) {
+                pendingPair = false;
+                bp.pair();
+            }
+        }
+        refreshBpState();
+    }
+
+    /** "Omron koppeln": how to put the monitor into pairing mode, then the search. */
+    private void pairOmron() {
+        AlertDialog d = dialog("Omron koppeln")
+                .setMessage("Schalte das Omron aus. Dann halte seine Bluetooth-Taste 3 bis 5 Sekunden gedrückt, bis "
+                        + "„P“ blinkt, und tippe hier auf „Suchen“. Android fragt einmal, ob es koppeln darf – bitte "
+                        + "bestätigen.\n\nBeim ersten Koppeln übernimmt DocFit nur Messungen ab heute; ältere im "
+                        + "Gerät bleiben draußen.")
+                .setPositiveButton("Suchen", (x, w) -> {
+                    if (!hasBluetoothPermission()) {
+                        pendingPair = true;
+                        askBluetooth(true);
+                        return;
+                    }
+                    bp.start();
+                    bp.pair();
+                })
+                .setNegativeButton("Abbrechen", null)
+                .create();
+        show(d);
+    }
+
+    private void onBpStateTapped() {
+        if (tab != TAB_BP) return;
+        if (!hasBluetoothPermission()) {
+            askBluetooth(true);
+            return;
+        }
+        switch (bp.status()) {
+            case BLUETOOTH_OFF:
+                try {
+                    startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
+                } catch (SecurityException | ActivityNotFoundException e) {
+                    // then Doc switches Bluetooth on in the quick settings; BpLink notices it
+                }
+                break;
+            case PAIR_FAILED:
+            case BOND_LOST:
+                pairOmron();
+                break;
+            case PAIR_SEARCH:
+            case PAIRING:
+                break;
+            default:
+                if (omronPaired()) omronMenu();
+        }
+    }
+
+    /** A tap on the state line of a paired Omron: what to do when nothing comes, pair again, or forget it. */
+    private void omronMenu() {
+        AlertDialog d = dialog("Omron M400 Intelli IT")
+                .setMessage("Nach dem Messen kommen die Werte von selbst, solange dieser Reiter offen ist. Kommt "
+                        + "nichts, drück kurz die Bluetooth-Taste am Omron.\n\n„Entkoppeln“ vergisst das Omron in "
+                        + "DocFit; aus Android entfernst du es unter Einstellungen › Bluetooth.")
+                .setPositiveButton("Neu koppeln", (x, w) -> pairOmron())
+                .setNegativeButton("Entkoppeln", (x, w) -> {
+                    prefs.edit().remove(OMRON_ADDRESS).apply();
+                    bp.setPaired(null);
+                    bpDoneText = null;
+                    refreshBpState();
+                })
+                .create();
+        show(d);
+    }
+
+    @Override
+    public void onBpStatus(BpLink.Status status) {
+        if (status == BpLink.Status.LOADING && bpLast != BpLink.Status.LOADING) {   // a transfer begins
+            bpNew = 0;
+            bpNewOther = 0;
+            bpSkipped = 0;
+            bpNoTime = 0;
+        }
+        bpLast = status;
+        refreshBpState();
+    }
+
+    /** Paired: keep the address; the first pairing also fixes the first day whose readings count (Doc, 24.11.2026). */
+    @Override
+    public void onBpPaired(String address) {
+        SharedPreferences.Editor e = prefs.edit().putString(OMRON_ADDRESS, address);
+        if (!prefs.contains(OMRON_SINCE)) {
+            e.putLong(OMRON_SINCE, Bpm.startOfDay(System.currentTimeMillis(), TimeZone.getDefault()));
+        }
+        e.apply();
+        bpJustPaired = true;
+        refreshBpState();
+    }
+
+    /**
+     * A reading from the Omron: its time (moved by how far the monitor's clock was off), left out when it has no time
+     * of its own, when it is from before the day of the first pairing (e.g. the seller's) or already there, else stored with the monitor's user 1
+     * for Doc and user 2 for the second person, its warnings as the note.
+     */
+    @Override
+    public void onBpReading(Bpm.Measurement m, long clockLag) {
+        long now = System.currentTimeMillis();
+        // no time of its own (the monitor's clock was never set) or one in the future: left out - otherwise the old
+        // readings in the memory all arrive "now" (24.11.2026: 57 of them, the seller's among them, at 19:37)
+        if (Bpm.timeIsArrival(m, clockLag, now)) {
+            bpNoTime++;
+            prefs.edit().putBoolean(OMRON_CLOCK_NEEDED, true).apply();   // its clock is off: set it next time
+            bp.setClockDue(true);
+            return;
+        }
+        if (prefs.getLong(OMRON_CLOCK, 0) == 0) omronClockFine();
+        long t = Bpm.when(m, clockLag, now);
+        if (t < prefs.getLong(OMRON_SINCE, 0)) {
+            bpSkipped++;
+            return;
+        }
+        int slot = Bpm.person(m.user);
+        Pressures list = bpLists[slot];
+        if (list.has(t, m.sys, m.dia)) return;
+        int at = list.add(new Pressures.Reading(t, m.sys, m.dia, m.pulse, Pressures.OMRON, Bpm.note(m.status, false)));
+        if (slot == 0) bpNew++;
+        else bpNewOther++;
+        if (list == pressures && bpAdapter != null) {
+            bpAdapter.notifyItemInserted(at);
+            bpList.scrollToPosition(at);
+        }
+        refreshBp();
+    }
+
+    /** The Omron let go: what the transfer brought, in one line. */
+    @Override
+    public void onBpTransferDone() {
+        int n = bpNew + bpNewOther;
+        String s = bpJustPaired ? "Omron gekoppelt ✓"
+                : bpClockNow && n == 0 ? "Uhr des Omron gestellt ✓ – neue Werte kommen beim nächsten Mal"
+                : n == 0 ? "Omron: nichts Neues" : n == 1 ? "1 neue Messung vom Omron ✓" : n + " neue Messungen vom Omron ✓";
+        if (bpJustPaired && n > 0) s += " · " + n + " neu";
+        if (bpNewOther > 0) s += " (" + bpNewOther + " für " + names[1] + ")";
+        if (bpSkipped > 0) s += " · " + bpSkipped + " ältere übersprungen";
+        if (bpNoTime > 0) s += " · " + bpNoTime + " ohne Uhrzeit übersprungen";
+        bpDoneText = s;
+        bpJustPaired = false;
+        bpClockNow = false;
+        refreshBpState();
+    }
+
+    private void refreshBpState() {
+        if (bpState == null || bp == null) return;
+        boolean paired = omronPaired();
+        BpLink.Status st = bp.status();
+        String s;
+        int color;
+        if (!hasBluetoothPermission()) {
+            s = paired || pendingPair ? "Bluetooth nicht erlaubt – hier tippen" : "";
+            color = UPSILON;
+        } else if (!bp.isActive()) {
+            s = "";
+            color = MUTED;
+        } else {
+            switch (st) {
+                case BLUETOOTH_OFF:
+                    s = "Bluetooth ist aus – hier tippen zum Einschalten";
+                    color = UPSILON;
+                    break;
+                case NO_PERMISSION:
+                    s = "Bluetooth nicht erlaubt – hier tippen";
+                    color = UPSILON;
+                    break;
+                case PAIR_SEARCH:
+                    s = "Suche das Omron – „P“ muss blinken …";
+                    color = LAMBDA;
+                    break;
+                case PAIRING:
+                    s = "Omron gefunden – kopple … bitte am Smartphone bestätigen";
+                    color = LAMBDA;
+                    break;
+                case PAIR_FAILED:
+                    s = "Koppeln hat nicht geklappt – hier tippen für einen neuen Versuch";
+                    color = UPSILON;
+                    break;
+                case BOND_LOST:
+                    s = "Kopplung verloren – hier tippen und neu koppeln";
+                    color = UPSILON;
+                    break;
+                case WAITING:
+                    s = "Omron gekoppelt – nach dem Messen kommen die Werte von selbst";
+                    color = MUTED;
+                    break;
+                case LOADING:
+                    s = "Omron verbunden – lädt Messungen …";
+                    color = LAMBDA;
+                    break;
+                case DONE:
+                    s = bpDoneText != null ? bpDoneText : "Fertig ✓";
+                    color = PHI;
+                    break;
+                default:
+                    s = "";
+                    color = MUTED;
+            }
+        }
+        bpState.setText(s);
+        bpState.setTextColor(color);
+        bpState.setVisibility(s.isEmpty() ? View.GONE : View.VISIBLE);
+        boolean busy = st == BpLink.Status.PAIR_SEARCH || st == BpLink.Status.PAIRING;
+        bpPair.setVisibility(paired || busy && bp.isActive() ? View.GONE : View.VISIBLE);
     }
 
     /** The ESH category as a colour: optimal / normal green, high-normal orange, hypertension red. */
@@ -2056,6 +2824,167 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             row.addView(c, cp);
         }
         return row;
+    }
+
+    // ---------- the "Verlauf" tab ----------
+
+    /**
+     * The "Verlauf" tab (Doc, 26.11.2026: "ein Tab mit den Verlaufsdaten ... für die laufenden Werte"; the fasting view
+     * stays where it is): the person switch, the stretch of time (4 Wochen / 3 Monate / 1 Jahr / Alles) and a card per
+     * value with its newest value and its course - Gewicht, Körperfett, Bauch (with the zones and goal lines of the
+     * detail sheets), Blutdruck (systolic and diastolic in one chart), Puls, Blutzucker nüchtern and, for Doc, the
+     * stopwatch times per exercise (Trends, HistoryChart).
+     */
+    private View buildHistPage() {
+        LinearLayout page = new LinearLayout(this);
+        page.setOrientation(LinearLayout.VERTICAL);
+        histRange = Math.max(0, Math.min(prefs.getInt("histRange", 1), Trends.RANGE_WORDS.length - 1));
+
+        LinearLayout persons = personSwitch(histPersonChips);
+        histPersonRow = persons;
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(12);
+        page.addView(persons, lp);
+
+        LinearLayout ranges = new LinearLayout(this);
+        ranges.setOrientation(LinearLayout.HORIZONTAL);
+        for (int i = 0; i < Trends.RANGE_WORDS.length; i++) {
+            int r = i;
+            // one size for all four, one line, centred in the height of the person chips; each chip as wide as its word
+            // needs (Doc, 26.11.2026: "schön machen" - squeezed into equal quarters "4 Wochen" / "3 Monate" shrank,
+            // then broke into two lines at his font size 1.3)
+            TextView c = text(Trends.RANGE_WORDS[i], 13, TEXT, true);
+            c.setGravity(Gravity.CENTER);
+            c.setSingleLine(true);
+            c.setIncludeFontPadding(false);
+            c.setPadding(dp(4), 0, dp(4), 0);
+            float need = c.getPaint().measureText(Trends.RANGE_WORDS[i]) + dp(18);
+            c.setOnClickListener(v -> {
+                histRange = r;
+                prefs.edit().putInt("histRange", r).apply();
+                refreshHist();
+            });
+            histRangeChips[i] = c;
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), need);
+            cp.leftMargin = i == 0 ? 0 : dp(5);
+            cp.rightMargin = i == Trends.RANGE_WORDS.length - 1 ? 0 : dp(5);
+            ranges.addView(c, cp);
+        }
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(12);
+        page.addView(ranges, lp);
+
+        ScrollView scroll = new ScrollView(this);
+        histCards = new LinearLayout(this);
+        histCards.setOrientation(LinearLayout.VERTICAL);
+        histCards.setPadding(0, 0, 0, dp(64));
+        scroll.addView(histCards, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
+        lp.topMargin = dp(4);
+        page.addView(scroll, lp);
+        paintPersons();
+        return page;
+    }
+
+    /** The cards of the "Verlauf" tab, built anew for the shown person and the chosen stretch of time. */
+    private void refreshHist() {
+        if (histCards == null) return;
+        for (int i = 0; i < histRangeChips.length; i++) if (histRangeChips[i] != null) paintPick(histRangeChips[i], i == histRange);
+        histCards.removeAllViews();
+        long from = Trends.from(histRange, System.currentTimeMillis());
+
+        List<Weighings.Weighing> all = new ArrayList<>();
+        for (int i = 0; i < weighings.size(); i++) all.add(weighings.get(i));
+        Weighings.Weighing newest = all.isEmpty() ? null : all.get(0);
+        for (TileInfo.Key k : new TileInfo.Key[]{TileInfo.Key.WEIGHT, TileInfo.Key.FAT, TileInfo.Key.WAIST}) {
+            List<History.Point> pts = Trends.since(History.series(all, k, profile), from);
+            int dec = History.decimals(k);
+            String unit = History.unit(k);
+            histCard(TileInfo.of(k).title, pts, null, newest == null ? null : History.scale(newest, k, profile),
+                    History.goals(k, profile), dec, Trends.latest(pts, dec, unit));
+        }
+
+        List<Pressures.Reading> bp = new ArrayList<>();
+        for (int i = 0; i < pressures.size(); i++) bp.add(pressures.get(i));
+        List<History.Point> sys = Trends.since(Trends.pressure(bp, Trends.SYS), from);
+        List<History.Point> dia = Trends.since(Trends.pressure(bp, Trends.DIA), from);
+        String bpNow = sys.isEmpty() ? "–" : Math.round(sys.get(sys.size() - 1).value) + "/"
+                + Math.round(dia.get(dia.size() - 1).value) + " mmHg";
+        histCard("Blutdruck", sys, dia, null, new ArrayList<>(), 0, bpNow);
+        List<History.Point> pulse = Trends.since(Trends.pressure(bp, Trends.PULSE), from);
+        histCard("Puls", pulse, null, null, new ArrayList<>(), 0, Trends.latest(pulse, 0, "/min"));
+
+        List<Glucoses.Reading> glu = new ArrayList<>();
+        for (int i = 0; i < glucoses.size(); i++) glu.add(glucoses.get(i));
+        List<History.Point> fasting = Trends.since(Trends.fastingGlucose(glu), from);
+        histCard("Blutzucker nüchtern", fasting, null, null, new ArrayList<>(), 0, Trends.latest(fasting, 0, "mg/dL"));
+
+        if (person == 0) {   // the stopwatch is Doc's
+            List<Entries.Entry> runs = new ArrayList<>();
+            for (int i = 0; i < entries.size(); i++) runs.add(entries.get(i));
+            for (String k : Entries.KINDS) {
+                List<History.Point> ever = Trends.runs(runs, k);
+                if (!ever.isEmpty()) {   // an exercise never timed gets no card yet
+                    List<History.Point> pts = Trends.since(ever, from);
+                    histCard(k + " · Sekunden", pts, null, null, new ArrayList<>(), 0,
+                            pts.isEmpty() ? "–" : Trends.clock(pts.get(pts.size() - 1).value));
+                }
+                // a counted exercise: the repetitions per set, one card per move (Dumbbells: Curls, Lateral Raises),
+                // the newest set with its weight on top ("12 × 5 kg"); a move without a set gets no card yet
+                for (String m : Trends.setMoves(runs, k)) {
+                    List<Entries.Entry> sets = Trends.setsSince(Trends.sets(runs, k, m), from);
+                    histCard(m.isEmpty() ? k : m, Trends.reps(sets), null, null, new ArrayList<>(), 0,
+                            sets.isEmpty() ? "–" : Entries.setText(sets.get(sets.size() - 1)));
+                }
+            }
+        }
+    }
+
+    /** One card: title and newest value on top, then the course (or a line that there is none in this stretch). */
+    private void histCard(String title, List<History.Point> pts, List<History.Point> second, Ranges.Scale scale,
+                          List<History.Goal> goals, int decimals, String now) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackground(round(CARD, 12));
+        card.setPadding(dp(12), dp(10), dp(12), dp(10));
+        LinearLayout head = new LinearLayout(this);
+        head.setOrientation(LinearLayout.HORIZONTAL);
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        TextView t = text(title.toUpperCase(java.util.Locale.GERMAN), 12, MUTED, true);
+        t.setMaxLines(1);
+        t.setEllipsize(TextUtils.TruncateAt.END);   // never under the value
+        head.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        TextView v = text(now, 15, TEXT, true);
+        v.setPadding(dp(8), 0, 0, 0);
+        head.addView(v);
+        card.addView(head);
+        if (pts.isEmpty()) {
+            TextView none = text("Keine Werte in diesem Zeitraum.", 13, MUTED, false);
+            none.setPadding(0, dp(6), 0, dp(2));
+            card.addView(none);
+        } else {
+            HistoryChart chart = new HistoryChart(this, orbitron, LAMBDA, TEXT, MUTED, CARD,
+                    pal.scoreHigh, pal.scoreMid, pal.scoreLow);
+            chart.setData(pts, scale, goals, decimals);
+            if (second != null) chart.setSecond(second, PHI);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(150));
+            cp.topMargin = dp(6);
+            card.addView(chart, cp);
+            if (second != null) {   // which line is which: under the chart, in the lines' colours
+                SpannableString key = new SpannableString("●  Sys      ●  Dia");
+                key.setSpan(new ForegroundColorSpan(LAMBDA), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                int dia = key.toString().lastIndexOf('●');
+                key.setSpan(new ForegroundColorSpan(PHI), dia, dia + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                TextView legend = text("", 12, MUTED, false);
+                legend.setText(key);
+                legend.setGravity(Gravity.CENTER);
+                legend.setPadding(0, dp(4), 0, 0);
+                card.addView(legend);
+            }
+        }
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(10);
+        histCards.addView(card, lp);
     }
 
     /** The blood glucose tab: the person switch, "+ Messung eintragen" and the list. */
@@ -2832,14 +3761,16 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     /**
      * The detail sheet of a value (Doc, 20.11.2026: "dass man dort genauere Informationen findet, warum das schlecht,
-     * gut oder whatsoever ist", then "natürlich der Verlauf"): the newest value with its word, the course over all
+     * gut oder whatsoever ist", then "natürlich der Verlauf"): the value of the weigh-in on the card (the newest, or the
+     * one tapped in the list) with its word, the course over all
      * weigh-ins with the zones behind it (and the goal lines for the waist), every zone with its numbers, then what it
      * is, how it is measured, what moves it, why it matters, the source and the disclaimer (TileInfo, History).
      */
     private void openInfo(TileInfo.Key key) {
         if (weighings.size() == 0) return;
         TileInfo info = TileInfo.of(key);
-        Weighings.Weighing newest = weighings.get(0);
+        int at = shownWeighing();
+        Weighings.Weighing newest = weighings.get(at);   // the one on the card
         Ranges.Scale scale = History.scale(newest, key, profile);
         List<Weighings.Weighing> all = new ArrayList<>();
         for (int i = 0; i < weighings.size(); i++) all.add(weighings.get(i));
@@ -2907,7 +3838,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         scroll.addView(box);
         AlertDialog.Builder b = dialog(info.title).setView(scroll).setNegativeButton("Schließen", null);
         if (TileInfo.typedIn(key)) {
-            b.setPositiveButton(newest.hasWaist() || newest.hasHip() ? "Ändern" : "Eintragen", (x, which) -> editGirths(0));
+            b.setPositiveButton(newest.hasWaist() || newest.hasHip() ? "Ändern" : "Eintragen", (x, which) -> editGirths(at));
         }
         show(b.create());
     }
@@ -3017,13 +3948,22 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private static final class Row extends RecyclerView.ViewHolder {
         final TextView day, sub, extra;
         final DigitsView value;
+        /** only in a weigh-in row (newScaleRow): the fitness score behind the date and the edit pencil, else null */
+        final TextView score;
+        final ImageView edit;
 
         Row(View v, TextView day, TextView sub, TextView extra, DigitsView value) {
+            this(v, day, sub, extra, value, null, null);
+        }
+
+        Row(View v, TextView day, TextView sub, TextView extra, DigitsView value, TextView score, ImageView edit) {
             super(v);
             this.day = day;
             this.sub = sub;
             this.extra = extra;
             this.value = value;
+            this.score = score;
+            this.edit = edit;
         }
     }
 
@@ -3060,13 +4000,25 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         @NonNull
         @Override
         public Row onCreateViewHolder(@NonNull ViewGroup parent, int type) {
-            return newRow();
+            Row r = newRow();
+            r.itemView.setOnClickListener(v -> pickRun(r.getBindingAdapterPosition()));
+            return r;
         }
 
         @Override
         public void onBindViewHolder(@NonNull Row r, int i) {
             Entries.Entry e = entries.get(i);
+            GradientDrawable bg = round(CARD, 12);
+            if (e.start == pickedRun) bg.setStroke(dp(2), LAMBDA);   // the selected time
+            r.itemView.setBackground(bg);
             r.day.setText(Times.day(e.start));
+            if (e.isCounted()) {
+                // a set: its move (or the exercise) and the weight in front of the time it was entered, "12 ×" right
+                r.sub.setText((e.move.isEmpty() ? e.kind : e.move) + (e.kg > 0 ? " · " + Entries.kgText(e.kg) : "")
+                        + " · " + Times.clock(e.start) + " Uhr");
+                r.value.setText(e.reps + " ×");
+                return;
+            }
             // the exercise in front of the start time, as plain text; times from before there were exercises as they were
             r.sub.setText((e.kind.isEmpty() ? "" : e.kind + " · ") + "Start " + Times.clock(e.start) + " Uhr");
             r.value.setText(Times.duration(e.duration));
@@ -3155,28 +4107,96 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
     }
 
+    /**
+     * One weigh-in of MESSUNGEN (Doc, 23.11.2026: "oben rechts in der Zeile, wo der Tag und das Datum steht, rechts
+     * eine Taste 'Edit' ... Und hinter das Datum die jeweilige Note, also '7 fit', in der entsprechenden Farbe"): on top
+     * the day, its score and at the right end the edit pencil (24 dp in a 48 dp touch target, its right edge on the
+     * weight's); below the time and the body values on the left, the weight on the right. The same card, padding and
+     * texts as newRow.
+     */
+    private Row newScaleRow() {
+        LinearLayout v = new LinearLayout(this);
+        v.setOrientation(LinearLayout.VERTICAL);
+        v.setBackground(round(CARD, 12));
+        v.setPadding(dp(12), 0, dp(12), dp(10));   // no top padding: the 48 dp pencil row gives the air above the day
+        v.setClipToPadding(false);                 // the pencil's touch target reaches into the right padding
+        RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        v.setLayoutParams(lp);
+        LinearLayout top = new LinearLayout(this);
+        top.setOrientation(LinearLayout.HORIZONTAL);
+        top.setGravity(Gravity.CENTER_VERTICAL);
+        TextView day = text("", 15, TEXT, false);
+        TextView score = text("", 15, TEXT, false);
+        score.setTypeface(score.getTypeface(), Typeface.BOLD);
+        score.setPadding(dp(10), 0, 0, 0);
+        score.setMaxLines(1);
+        score.setEllipsize(TextUtils.TruncateAt.END);
+        top.addView(day);
+        top.addView(score, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        ImageView edit = new ImageView(this);
+        edit.setImageResource(R.drawable.ic_edit);
+        edit.setColorFilter(pal.iconIdle);
+        edit.setPadding(dp(12), dp(12), dp(12), dp(12));
+        edit.setContentDescription("Bauch und Hüfte eintragen");
+        top.addView(edit, new LinearLayout.LayoutParams(dp(48), dp(48)));
+        LinearLayout.LayoutParams tp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        tp.rightMargin = -dp(12);   // the 48 dp target ends at the card's edge, the 24 dp pencil above the weight's end
+        v.addView(top, tp);
+        LinearLayout body = new LinearLayout(this);
+        body.setOrientation(LinearLayout.HORIZONTAL);
+        body.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout left = new LinearLayout(this);
+        left.setOrientation(LinearLayout.VERTICAL);
+        TextView sub = text("", 13, MUTED, false);
+        TextView extra = text("", 12, MUTED, false);
+        extra.setVisibility(View.GONE);
+        left.addView(sub);
+        left.addView(extra);
+        body.addView(left, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        DigitsView value = new DigitsView(this, orbitron, 22, LAMBDA);
+        value.setGravity(Gravity.END);
+        value.setPadding(dp(10), 0, 0, 0);
+        body.addView(value);
+        v.addView(body, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        return new Row(v, day, sub, extra, value, score, edit);
+    }
+
     private final class ScaleAdapter extends RecyclerView.Adapter<Row> {
         @NonNull
         @Override
         public Row onCreateViewHolder(@NonNull ViewGroup parent, int type) {
-            Row r = newRow();
+            Row r = newScaleRow();
             r.value.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-            // a tap enters waist and hip for this weigh-in: the row answers with a ripple
-            int ink = (MUTED & 0x00FFFFFF) | 0x40000000;
-            r.itemView.setBackground(new RippleDrawable(ColorStateList.valueOf(ink), round(CARD, 12), null));
-            r.itemView.setOnClickListener(v -> editGirths(r.getBindingAdapterPosition()));
-            r.itemView.setOnLongClickListener(v -> {   // wrong person: move it to the other one
-                moveWeighing(r.getBindingAdapterPosition());
+            // a tap shows this weigh-in in the card, a long press enters its waist and hip (Doc, 23.11.2026: "Das müssen
+            // wir auf langes Klicken machen - wenn es nur klickt, würde ich gerne oben die Werte sehen"), and so does
+            // the pencil ("Long Press identisch"); the row answers with a ripple, its background is set in
+            // onBindViewHolder
+            r.itemView.setOnClickListener(v -> pickWeighing(r.getBindingAdapterPosition()));
+            View.OnLongClickListener girths = v -> {
+                editGirths(r.getBindingAdapterPosition());
                 return true;
-            });
+            };
+            r.itemView.setOnLongClickListener(girths);
+            r.edit.setOnClickListener(girths::onLongClick);
             return r;
         }
 
         @Override
         public void onBindViewHolder(@NonNull Row r, int i) {
             Weighings.Weighing w = weighings.get(i);
+            // the weigh-in on the card has a phi green frame like a chosen chip - only one picked, not the newest
+            boolean picked = pickedWeighing != 0 && w.time == pickedWeighing;
+            GradientDrawable bgRow = round(CARD, 12);
+            if (picked) bgRow.setStroke(Math.max(2, dp(2)), PHI);
+            int ink = (MUTED & 0x00FFFFFF) | 0x40000000;
+            r.itemView.setBackground(new RippleDrawable(ColorStateList.valueOf(ink), bgRow, null));
             BodyComposition bc = BodyComposition.of(w, profile);
             r.day.setText(Times.day(w.time));
+            // the score behind the date in its colour, nothing without one (no fat, implausible, profile incomplete)
+            int fit = FitnessScore.of(w, profile).score;
+            r.score.setText(FitnessScore.label(fit));
+            r.score.setTextColor(pal.scoreInk(fit));
             r.sub.setText(Times.clock(w.time) + " Uhr");
             List<String> parts = new ArrayList<>();
             if (!Double.isNaN(bc.fatPercent)) parts.add("Fett " + Times.one(bc.fatPercent, "%"));

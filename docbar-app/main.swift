@@ -22,6 +22,12 @@ private enum Style {
     static let warnInk = NSColor(red: 25 / 255, green: 52 / 255, blue: 130 / 255, alpha: 1)
     static let hereGreen = NSColor(red: 121 / 255, green: 158 / 255, blue: 49 / 255, alpha: 1)
     static let alertRed = NSColor(red: 176 / 255, green: 36 / 255, blue: 24 / 255, alpha: 1)
+    // Soft tones for the usage capsule (Doc, 26.11.2026: "Lindgrün, Lindorange", a red set apart from the D's red):
+    // the palette colours mixed with white - phi and Upsilon half and half, lambda 45 % white. Ink-blue digits read
+    // 6.8:1, 8.5:1 and 4.5:1 on them.
+    static let softGreen = NSColor(red: 188 / 255, green: 207 / 255, blue: 152 / 255, alpha: 1)
+    static let softOrange = NSColor(red: 250 / 255, green: 221 / 255, blue: 151 / 255, alpha: 1)
+    static let softRed = NSColor(red: 216 / 255, green: 146 / 255, blue: 140 / 255, alpha: 1)
     static let font = NSFont.systemFont(ofSize: 13)
     static let nameFont = NSFont.systemFont(ofSize: 13, weight: .semibold)
     static let subFont = NSFont.systemFont(ofSize: 11)
@@ -75,6 +81,7 @@ final class PanelController: NSViewController {
     var onPick: ((DocBarMenu, DocBarItem) -> Void)?
     var onLaunch: ((DocBarMenu) -> Void)?
     var onQuit: (() -> Void)?
+    var onUsage: (() -> Void)?
 
     private let stack = NSStackView()
     /// Sections the user folded away; remembered between openings.
@@ -261,10 +268,18 @@ final class PanelController: NSViewController {
     }
 
     /// Rebuilds the whole panel and lays it out top down; cheap enough to do on every opening.
-    func show(apps: [DocBarMenu], running: (DocBarMenu) -> Bool) {
+    func show(apps: [DocBarMenu], running: (DocBarMenu) -> Bool, usage: String? = nil) {
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
 
         var plan: [(NSView, CGFloat)] = []
+
+        // Weekly Claude usage on top; a click reads it again right away.
+        if let line = usage {
+            plan.append((plainRow(line, color: .labelColor, indent: Style.inset, check: false) { [weak self] in
+                self?.onUsage?()
+            }, Style.rowHeight))
+            plan.append((separator(), 9))
+        }
 
         if apps.isEmpty {
             let r = plainRow("Keine Werkzeuge gemeldet", color: .secondaryLabelColor,
@@ -315,6 +330,170 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// State the menu bar icon was last drawn for, so the 4 s timer only redraws on a change.
     private var iconKey = ""
 
+    // MARK: weekly Claude usage
+
+    /// Doc, 26.11.2026 (weekly limit at 97 %): the week's Claude usage permanently next to the D. Read every 60 s
+    /// through the Claude Code CLI's local /usage (claude-usage.mjs in Resources, 0 $, ~3 s) off the main thread.
+    /// A failed reading keeps the last value, faded and with "?"; the last good one survives a restart.
+    private struct Usage { var pct: Double; var reset: String; var at: Date }
+    private var usage: Usage? = {
+        let d = UserDefaults.standard
+        guard let at = d.object(forKey: "usageAt") as? Date else { return nil }
+        return Usage(pct: d.double(forKey: "usagePct"), reset: d.string(forKey: "usageReset") ?? "", at: at)
+    }()
+    private var usageFailed = false
+    private var usageBusy = false
+    /// Old when the last attempt failed or the last good reading is over 5 minutes old (e.g. right after a start).
+    private var usageStale: Bool { usageFailed || usage.map { Date().timeIntervalSince($0.at) > 300 } ?? true }
+
+    /// "Woche 97 % · Reset So 21:00", plus the age of an old value.
+    private var usageLine: String? {
+        guard let u = usage else { return nil }
+        var line = "Woche \(Int(u.pct.rounded(.up))) %"
+        if !u.reset.isEmpty { line += " · Reset \(u.reset)" }
+        if usageStale {
+            let min = Int(Date().timeIntervalSince(u.at) / 60)
+            line += min < 60 ? " · Stand vor \(min) min" : " · Stand vor \(min / 60) h"
+        }
+        return line
+    }
+
+    private func refreshUsage() {
+        guard !usageBusy else { return }
+        usageBusy = true
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let reading = AppDelegate.readUsage()
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.usageBusy = false
+                if let r = reading {
+                    self.usage = r
+                    self.usageFailed = false
+                    let d = UserDefaults.standard
+                    d.set(r.pct, forKey: "usagePct")
+                    d.set(r.reset, forKey: "usageReset")
+                    d.set(r.at, forKey: "usageAt")
+                } else {
+                    self.usageFailed = true
+                }
+                if self.popover.isShown { self.rebuildPanel() } else { self.refreshIcon(self.loadApps()) }
+            }
+        }
+    }
+
+    /// Runs the bundled claude-usage.mjs with node and decodes its JSON line; nil on any failure.
+    /// Blocks for a few seconds - never call it on the main thread.
+    private static func readUsage() -> Usage? {
+        guard let script = Bundle.main.path(forResource: "claude-usage", ofType: "mjs"),
+              let node = ["/opt/homebrew/bin/node", "/usr/local/bin/node"]
+                .first(where: { FileManager.default.isExecutableFile(atPath: $0) }) else { return nil }
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: node)
+        p.arguments = [script]
+        let out = Pipe()
+        p.standardOutput = out
+        p.standardError = FileHandle.nullDevice
+        do { try p.run() } catch { return nil }
+        // The script gives up by itself (2 x 40 s at worst); this only catches a hung node.
+        let killer = DispatchWorkItem { if p.isRunning { p.terminate() } }
+        DispatchQueue.global().asyncAfter(deadline: .now() + 100, execute: killer)
+        let data = out.fileHandleForReading.readDataToEndOfFile()   // read before waiting: a full pipe would block
+        p.waitUntilExit()
+        killer.cancel()
+        guard p.terminationStatus == 0,
+              let j = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let pct = (j["pct"] as? NSNumber)?.doubleValue else { return nil }
+        return Usage(pct: pct, reset: j["reset"] as? String ?? "", at: Date())
+    }
+
+    /// The D and the usage as ONE capsule (Doc, 26.11.2026): the D's circle is its rounded left end, the capsule
+    /// runs on to the right, as high as the circle, with "NN %" in ink blue - soft green below 90 %, soft orange from
+    /// 90 %, a soft red from 98 % that stays apart from the red disc (Style.soft*). Always as wide as "88 %", so it
+    /// never jumps. The circle keeps every state it has; a faded
+    /// capsule marks an old value (the age is in the tooltip). Returns the image and whether it may stay a template.
+    private func withUsage(_ icon: NSImage?, iconTemplate: Bool, ink: NSColor) -> (NSImage?, Bool) {
+        guard let icon = icon, let u = usage else { return (icon, iconTemplate) }
+        let pct = Int(u.pct.rounded(.up))
+        let stale = usageStale
+        let fill: NSColor = pct >= 98 ? Style.softRed : pct >= 90 ? Style.softOrange : Style.softGreen
+        let template = false   // the run is always coloured
+        let alpha: CGFloat = stale ? 0.5 : 1
+        let back = fill.withAlphaComponent(alpha)
+        let color = Style.warnInk
+        let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .bold)
+        let text = NSAttributedString(string: "\(pct) %",
+                                      attributes: [.font: font, .foregroundColor: color.withAlphaComponent(alpha)])
+        let ts = text.size()
+        // Fixed width: the widest everyday case, two digits and the sign (only 100 % is wider).
+        let slot = max(ceil(NSAttributedString(string: "88 %", attributes: [.font: font]).size().width), ceil(ts.width))
+
+        // Where the circle really sits inside the symbol's padded image.
+        let circle = AppDelegate.inkBounds(icon)
+        let r = max(circle.width, circle.height) / 2
+        let cx = circle.midX, cy = circle.midY
+        let textX = circle.maxX + 3
+        let right = max(textX + slot + 6, circle.maxX + r)
+        let out = NSImage(size: NSSize(width: max(icon.size.width, right), height: icon.size.height))
+        out.lockFocus()
+        // The run from the circle's centre to a rounded right end; the circle itself is cut out again (a little
+        // less than its full size, so the run tucks under the ring without a seam).
+        let run = NSBezierPath()
+        run.move(to: NSPoint(x: cx, y: cy - r))
+        run.line(to: NSPoint(x: right - r, y: cy - r))
+        run.appendArc(withCenter: NSPoint(x: right - r, y: cy), radius: r, startAngle: 270, endAngle: 90)
+        run.line(to: NSPoint(x: cx, y: cy + r))
+        run.close()
+        back.set()
+        run.fill()
+        NSGraphicsContext.current?.compositingOperation = .copy
+        NSColor.clear.set()
+        NSBezierPath(ovalIn: circle.insetBy(dx: 0.8, dy: 0.8)).fill()
+        NSGraphicsContext.current?.compositingOperation = .sourceOver
+        // The D on top; a template D inside a coloured image gets the bar's ink, as the system would give it.
+        let iconRect = NSRect(origin: .zero, size: icon.size)
+        if iconTemplate && !template {
+            let inked = NSImage(size: icon.size)
+            inked.lockFocus()
+            icon.draw(in: iconRect)
+            ink.set()
+            iconRect.fill(using: .sourceAtop)
+            inked.unlockFocus()
+            inked.draw(in: iconRect)
+        } else {
+            icon.draw(in: iconRect)
+        }
+        text.draw(at: NSPoint(x: textX + (slot - ts.width) / 2, y: cy - ts.height / 2))
+        out.unlockFocus()
+        return (out, template)
+    }
+
+    /// Bounding box of the drawn pixels (alpha > 10 %) - the symbol image carries padding around its circle.
+    private static func inkBounds(_ image: NSImage) -> NSRect {
+        let scale: CGFloat = 4
+        let w = Int(image.size.width * scale), h = Int(image.size.height * scale)
+        let whole = NSRect(origin: .zero, size: image.size)
+        guard w > 0, h > 0, let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: w, pixelsHigh: h, bitsPerSample: 8, samplesPerPixel: 4,
+            hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)
+        else { return whole }
+        rep.size = image.size
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+        image.draw(in: whole)
+        NSGraphicsContext.restoreGraphicsState()
+        guard let data = rep.bitmapData else { return whole }
+        var minX = w, maxX = -1, minY = h, maxY = -1
+        for y in 0..<h {
+            for x in 0..<w where data[y * rep.bytesPerRow + x * 4 + 3] > 25 {
+                minX = min(minX, x); maxX = max(maxX, x); minY = min(minY, y); maxY = max(maxY, y)
+            }
+        }
+        guard maxX >= 0 else { return whole }
+        // Bitmap rows run top down, the image's y bottom up.
+        return NSRect(x: CGFloat(minX) / scale, y: CGFloat(h - 1 - maxY) / scale,
+                      width: CGFloat(maxX - minX + 1) / scale, height: CGFloat(maxY - minY + 1) / scale)
+    }
+
     /// Companion tools that belong to the toolbox: bring them up with the bar,
     /// so a single login item (DocBar) restores the whole set after a reboot.
     /// openApplication is a no-op for apps that already run, so always safe.
@@ -356,6 +535,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         panel.onQuit = { NSApp.terminate(nil) }
         panel.onRelayout = { [weak self] in self?.rebuildPanel() }
+        panel.onUsage = { [weak self] in self?.refreshUsage() }
 
         // Lets the panel be opened without the mouse — handy for a hotkey later.
         DistributedNotificationCenter.default().addObserver(
@@ -370,6 +550,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.reviveCrashedTools(apps)
             if !self.popover.isShown { self.refreshIcon(apps) }
         }
+        refreshUsage()
+        let usageTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            self?.refreshUsage()
+        }
+        usageTimer.tolerance = 10
     }
 
     /// A tool that asks to be kept alive (keepAlive in its menu file) but no longer runs did not quit on purpose - a
@@ -445,10 +630,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // since macOS 26 — the log showed two every 4 s while nothing changed. Only redraw
         // when the state or the bar's ink does.
         let bar = button.effectiveAppearance.bestMatch(from: [.aqua, .vibrantLight, .darkAqua, .vibrantDark])
-        let key = "\(alerting)-\(here)-\(other)-\(bar?.rawValue ?? "")"
+        let tip = usageLine
+        if button.toolTip != tip { button.toolTip = tip }
+        let usageKey = usage.map { "\(Int($0.pct.rounded(.up)))-\(usageStale)" } ?? ""
+        let key = "\(alerting)-\(here)-\(other)-\(bar?.rawValue ?? "")-\(usageKey)"
         guard key != iconKey else { return }
         iconKey = key
 
+        let ink: NSColor = bar == .darkAqua || bar == .vibrantDark ? .white : .black
         let layers: [NSImage?]
         if other {
             // always blue on the yellow disc, with caffeine too (Doc: "Ich fand das Blau auf Gelb besser")
@@ -464,14 +653,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             layers = [symbol(Style.iconFilled, .semibold, [.white, Style.alertRed])]
         } else if here {
             // Colours rule out a template, so the ring takes its ink from the bar it sits in.
-            let ink: NSColor = bar == .darkAqua || bar == .vibrantDark ? .white : .black
             layers = [symbol(Style.icon, .light, [.clear, ink]),
                       symbol(Style.icon, .semibold, [Style.hereGreen, .clear])]
         } else {
             layers = [symbol(Style.icon, .light)]
         }
-        button.image = loweredByOne(layers)
-        button.image?.isTemplate = !alerting && !here && !other
+        let (image, template) = withUsage(loweredByOne(layers), iconTemplate: !alerting && !here && !other, ink: ink)
+        button.image = image
+        button.image?.isTemplate = template
         blink(other ? button.image : nil)
     }
 
@@ -498,7 +687,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func rebuildPanel() {
         let apps = loadApps()
         refreshIcon(apps)
-        panel.show(apps: apps, running: isRunning)
+        panel.show(apps: apps, running: isRunning, usage: usageLine)
         // Explicit, so the popover never keeps a height from an earlier opening.
         popover.contentSize = NSSize(width: Style.width, height: panel.contentHeight)
         // Folding a section resizes the popover, and NSPopover then recentres it under

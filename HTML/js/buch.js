@@ -635,11 +635,28 @@
             const L = G && G[LANG];
             if (!L) { sec.hidden = true; return; }
             sec.innerHTML = '<div class="b-band"><span class="b-band-tag">' + upper(grussTitel()) + '</span></div>' + grussHtml(L, 'b-gruss');
+            if (L.dank) sec.after(buildDank(L.dank));                             // the acknowledgement right below the letter
             // the letter pushed everything below it down: back to the section in the address, and the chapter list marks anew
             const h = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
             if (h && h !== sec) h.scrollIntoView({ block: 'start', behavior: 'instant' });
             dispatchEvent(new Event('scroll'));
         });
+    }
+    // ---------- the acknowledgement (dank in js/buch-gruss.js): on the start page, right after the foreword ----------
+    // Doc, 23.11.2026: "dass die Danksagung in der Online-Version überhaupt nicht drin ist. Bitte." The same text as on the
+    // back of the dedication in the print edition (js/buch-druck.js danksagung()), styled like the foreword, Solita's portrait
+    // and lines under the signature as in print. Online in every language that has a dank (Doc: "Ja" to translating it);
+    // dank.aktiv switches the print page only. No entry in the chapter list: the list is made before the text has loaded.
+    function buildDank(D) {
+        const root = ME.replace(/js\/buch\.js(\?.*)?$/, '');
+        const sec = document.createElement('section');
+        sec.className = 'b-sec b-gruss b-dank'; sec.id = 'dank';
+        sec.innerHTML = '<div class="b-band"><span class="b-band-tag">' + upper(D.titel) + '</span></div>' +
+            '<div class="b-text">' + D.text.map(p => '<p>' + p + '</p>').join('') + '</div>' +
+            '<p class="b-dank-sig">' + D.sig + '</p>' +
+            (D.bild ? '<div class="b-dank-bild"><img src="' + root + D.bild.src + '" alt="' + D.bild.name + '" loading="lazy" decoding="async">' +
+                '<p><b>' + D.bild.name + '</b><br>' + D.bild.rolle + '</p></div>' : '');
+        return sec;
     }
 
     // ---------- "PDF" in the header: the print edition as a finished PDF from R2 ----------
@@ -670,6 +687,62 @@
             const old = document.querySelector('.b-start-acts a.b-btn[href="druck.html"]');
             if (old) old.remove();
         }).catch(() => { });
+    }
+
+    // ---------- "erhältlich bei Amazon": the printed book on sale, in the header beside "PDF" ----------
+    // Doc, 22.11.2026: "da haben wir ja den Link gar nicht vom Amazon … sehr schön präsent machen, zum Beispiel oben … auf
+    // jeden Fall das Amazon-Symbol … dass man direkt auf das Buch zum Kaufen kommt, neben PDF". ONE map for all books: the
+    // folder of an edition → the ASIN of its paperback and the Amazon store of its language. An edition without an entry
+    // (no paperback on sale yet) shows nothing. Plain product links, no affiliate tag.
+    // The badge is Amazon's own "Available at Amazon" tag for KDP publishers (kdp.amazon.com/help/topic/G9WES4WJAC3GUVSV),
+    // the files in resources/amazon/ exactly as downloaded there: never altered, recoloured, outlined or boxed, never part of
+    // a sentence, with clear space around it (the width of its "o" beside it), horizontal tag at least 200 px wide - so it
+    // is exactly 200 px wide (Doc: "so klein wie erlaubt"). On a phone the header has no room for that: there it opens the
+    // page (buch.css).
+    const AMAZON = {
+        'mathe11':     { asin: 'B0HR1XY76S', shop: 'amazon.de' },    // ISBN 979-8161192665
+        'mathe11-en':  { asin: 'B0HR34YTFX', shop: 'amazon.com' },   // ISBN 979-8140613136, KDP main store of the English edition
+        'mathe11-es':  { asin: 'B0HR54GFVR', shop: 'amazon.es' },    // ISBN 979-8140619275
+        'mathe11-fr':  { asin: 'B0HR51GPK1', shop: 'amazon.fr' },    // ISBN 979-8140786922
+        'mathegy12lk': { asin: 'B0HRSLP8ST', shop: 'amazon.de' },    // ISBN 979-8142916655
+        // not on sale yet - fill in the ASIN (amazon.de search by ISBN) once the paperback is live:
+        // 'mathe11-it': { asin: '', shop: 'amazon.it' },            // ISBN 979-8140792220, KDP draft
+        // 'mathe12':    { asin: '', shop: 'amazon.de' },            // ISBN 979-8144986588, submitted 22.11.2026
+        // 'mathe13':    { asin: '', shop: 'amazon.de' },            // ISBN 979-8145000474, KDP set-up
+    };
+    const AMAZON_TAG = ['de', 'en', 'es', 'fr', 'it'];               // the languages of Amazon's tag in resources/amazon/
+    function buildAmazon() {
+        const top = document.querySelector('.b-top');
+        const folder = (location.pathname.match(/\/buch\/([^/]+)\//) || [])[1];
+        const ed = folder && AMAZON[folder];
+        if (!top || !ed || !ed.asin || !ME) return;
+        const href = 'https://www.' + ed.shop + '/dp/' + ed.asin;
+        const res = ME.replace(/js\/buch\.js(\?.*)?$/, 'resources/amazon/available_at_amazon_' + (AMAZON_TAG.includes(LANG) ? LANG : 'en') + '_horizontal');
+        const label = t('Gedrucktes Buch bei Amazon kaufen', 'Buy the printed book on Amazon', 'Comprar el libro impreso en Amazon',
+            'Acquista il libro stampato su Amazon', 'Acheter le livre imprimé sur Amazon');
+        const alt = t('erhältlich bei Amazon', 'available at Amazon', 'disponible en Amazon', 'disponibile su Amazon', 'disponible sur Amazon');
+        // the two-colour tag of the dark grounds (Blau, Grau) and the one of the light ground (Hell, js/farbschema.js)
+        const tag = cls => {
+            const a = document.createElement('a');
+            a.className = 'b-amazon ' + cls;
+            a.href = href; a.target = '_blank'; a.rel = 'noopener';
+            a.title = label; a.setAttribute('aria-label', label);
+            a.innerHTML = '<img class="b-amazon-rev" src="' + res + '_rev.png" alt="' + alt + '">' +
+                '<img class="b-amazon-clr" src="' + res + '.png" alt="' + alt + '">';
+            return a;
+        };
+        // in the header: at the far right, after "PDF", "Seiten" and the colour pill (Doc, 22.11.2026: "Erhältlich bei Amazon
+        // machen wir ganz rechts") - last in the header's order here, and buch.css keeps it last whatever is added later
+        top.appendChild(tag('b-amazon-top'));
+        top.classList.add('b-has-amazon');
+        // the phone: first thing on the page, under the header
+        const main = document.querySelector('.b-main');
+        if (main) {
+            const row = document.createElement('div');
+            row.className = 'b-amazon-row';
+            row.appendChild(tag('b-amazon-flow'));
+            main.prepend(row);
+        }
     }
 
     // ---------- Solita in the header, as in the decks (Doc, 09.10.2026): js/buch-solita.js loads the shared box itself ----------
@@ -726,6 +799,7 @@
         buildBook();
         buildIndex();
         buildOverview();
+        buildAmazon();                                                           // "erhältlich bei Amazon", far right in the header
         buildPdf();
         buildSolita();
         buildFeedback();

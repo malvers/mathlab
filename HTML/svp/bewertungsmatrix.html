@@ -48,8 +48,10 @@
         .bm-wrap {
             max-width: 1200px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: minmax(0, 1fr);
+            /* one column as flex, not grid: a sticky child of a grid is held inside its own row,
+               a flex child can stick across the whole page (the stopwatch, Doc 25.11.2026) */
+            display: flex;
+            flex-direction: column;
             gap: 14px;
         }
 
@@ -282,7 +284,7 @@
             padding: 8px 10px;
             border-bottom: 1px solid var(--row-line);
             font-size: 0.92rem;
-            vertical-align: top;
+            vertical-align: middle;   /* text, points and fields on one centre line (Doc, 25.11.2026: "y zentriert") */
         }
 
         table.bm tbody tr:last-child td { border-bottom: 0; }
@@ -296,7 +298,7 @@
             padding-top: 11px;
         }
 
-        table.bm td.txt { font-weight: 300; line-height: 1.45; padding-top: 10px; }
+        table.bm td.txt { font-weight: 300; line-height: 1.45; }
 
         table.bm th.pts, table.bm td.pts {
             width: 6.5rem;
@@ -305,7 +307,7 @@
             font-variant-numeric: tabular-nums;
         }
 
-        table.bm td.pts { padding-top: 11px; font-weight: 400; }
+        table.bm td.pts { font-weight: 400; }
 
         table.bm td.pts .bonus {
             display: block;
@@ -413,6 +415,14 @@
             flex-wrap: wrap;
             align-items: center;
             gap: 10px 18px;
+            /* stays in view while the criteria scroll by, above everything else
+               (Doc, 25.11.2026: "bring mal nach vorn ... die Uhr soll nicht weg scrollen") */
+            position: sticky;
+            top: 8px;
+            z-index: 40;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
         }
         .bm-clock-face {
             display: inline-flex;
@@ -450,6 +460,28 @@
             --cc-sw: 0.42em;
             --cc-weight: 700;
             gap: 1px;
+        }
+        /* Elapsed clock beside the countdown (Doc, 24.11.2026: "da auch eine
+           abgelaufene Uhr"): the same face with a small caption, counting UP
+           through the phase; it turns Upsilon red together with the countdown
+           once the target is passed. Hidden while there is no target - the
+           countdown face is then itself the plain stopwatch. */
+        .bm-clock-faces {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 10px;
+        }
+        .bm-clock-face[hidden] { display: none; }
+        .bm-clock-face.elapsed { gap: 10px; }
+        .bm-clock-cap {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            line-height: 1.15;
+            opacity: 0.75;
         }
         .bm-clock-info { flex: 1 1 12rem; min-width: 0; }
         .bm-clock-phase {
@@ -566,6 +598,11 @@
             .bm-clock { gap: 10px 14px; }
             .bm-clock-digits .cyber-digits, .bm-clock-digits.cyber-digits { --cc-size: 1.7rem; }
             .bm-clock-sign { font-size: 1.35rem; }
+            /* phone: countdown and elapsed clock stacked, both boxes as wide as the wider one */
+            .bm-clock-faces { flex-direction: column; align-items: stretch; }
+            /* digits flush right in both boxes so they line up, the caption stays left */
+            .bm-clock-faces .bm-clock-face { justify-content: flex-end; }
+            .bm-clock-faces .bm-clock-cap { margin-right: auto; }
             .bm-clock-btns { flex-basis: 100%; }
             .bm-fields { grid-template-columns: 1fr; }
             .bm-big { font-size: 1.25rem; }
@@ -659,9 +696,16 @@
         <!-- Talk stopwatch (Doc, 17.11.2026: "ich brauche in der Bewertungsmatrix eine Stoppuhr").
              Texts come from SHEETS[lang].clock; the script fills and wires it. -->
         <section class="bm-card bm-clock bm-noprint" id="bmClock" aria-label="Stoppuhr">
-            <div class="bm-clock-face" id="bmClockFace" role="timer" aria-live="off">
-                <span class="bm-clock-sign" id="bmClockSign"></span>
-                <span class="bm-clock-digits" id="bmClockDigits">00:00</span>
+            <div class="bm-clock-faces">
+                <div class="bm-clock-face" id="bmClockFace" role="timer" aria-live="off">
+                    <span class="bm-clock-sign" id="bmClockSign"></span>
+                    <span class="bm-clock-digits" id="bmClockDigits">00:00</span>
+                </div>
+                <!-- elapsed time of the phase, counting up (Doc, 24.11.2026) -->
+                <div class="bm-clock-face elapsed" id="bmClockElFace" role="timer" aria-live="off" hidden>
+                    <span class="bm-clock-cap" id="bmClockElCap">abgelaufen</span>
+                    <span class="bm-clock-digits" id="bmClockElDigits">00:00</span>
+                </div>
             </div>
             <div class="bm-clock-info">
                 <div class="bm-clock-phase" id="bmClockPhase">Stoppuhr</div>
@@ -771,7 +815,8 @@
                         persons: ['Vortragende/r', 'Vortragende'],
                         redeWas: 'Rede gedauert: {t} (Soll {s})',
                         unknown: 'Sollzeit unbekannt – Namen der Vortragenden eintragen',
-                        paused: 'angehalten'
+                        paused: 'angehalten',
+                        elapsed: 'abgelaufen'
                     },
                     rows: [
                         { max: 2, bonus: 1, show: '2 + 1', text: 'Abstract erstellt (Inhalt des Vortrages kompakt zusammengefasst, written in English is a bonus)' },
@@ -831,7 +876,8 @@
                         persons: ['presenter', 'presenters'],
                         redeWas: 'Talk took {t} (target {s})',
                         unknown: 'Target time unknown – enter the presenters’ names',
-                        paused: 'paused'
+                        paused: 'paused',
+                        elapsed: 'elapsed'
                     },
                     rows: [
                         { max: 3, text: 'Abstract created (content of the presentation summarized concisely)?' },
@@ -1015,7 +1061,8 @@
                     const top = r.max + (r.bonus || 0);
                     const show = r.show || String(r.max || r.bonus || 0);
                     const isBonus = r.bonus && !r.max;
-                    const got = st.pts === undefined || st.pts === null ? '' : st.pts;
+                    /* whole points only, also for halves stored before 25.11.2026 */
+                    const got = st.pts === undefined || st.pts === null || st.pts === '' ? '' : String(Math.round(Number(st.pts)));
                     h += '<tr data-i="' + i + '">' +
                         '<td class="nr">' + nr +
                         (editing ? '<button type="button" class="bm-x" data-del="' + i + '" title="Kriterium entfernen">&#10005;</button>' : '') +
@@ -1036,7 +1083,7 @@
                               (isBonus ? '<span class="bonus">' + esc(sh.bonus) + '</span>' : '')) +
                         '</td>' +
                         '<td class="got" data-label="' + esc(sh.cols.got) + '">' +
-                        '<input type="number" inputmode="decimal" min="0" max="' + top + '" step="0.5" data-row="' + nr +
+                        '<input type="number" inputmode="numeric" min="0" max="' + top + '" step="1" data-row="' + nr +
                         '" value="' + esc(got) + '" aria-label="' + esc(sh.cols.got) + ' ' + nr + '"' +
                         (got !== '' && Number(got) > top ? ' class="over"' : '') + '></td>' +
                         '<td class="cmt" data-label="' + esc(sh.cols.cmt) + '">' +
@@ -1083,7 +1130,7 @@
                     bonus += r.bonus || 0;
                     const st = state.rows[i + 1];
                     if (st && st.pts !== undefined && st.pts !== null && st.pts !== '') {
-                        const v = Number(st.pts);
+                        const v = Math.round(Number(st.pts));   // whole points only
                         if (isFinite(v)) { got += v; any = true; }
                     }
                 });
@@ -1097,7 +1144,7 @@
                 if (!st || !st.rows) return null;
                 let got = 0, any = false;
                 for (const nr in st.rows) {
-                    const v = Number(st.rows[nr] && st.rows[nr].pts);
+                    const v = Math.round(Number(st.rows[nr] && st.rows[nr].pts));   // whole points only
                     if (st.rows[nr] && st.rows[nr].pts !== null && st.rows[nr].pts !== '' && isFinite(v)) {
                         got += v; any = true;
                     }
@@ -1270,7 +1317,9 @@
                The number of presenters is read from the Vortragende field (the names the list hands over,
                separated by commas). With a target: two phases, Rede then Fragen, each counting DOWN to its
                target, orange in the last minute, red and "+mm:ss" once over, one quiet gong when a target is
-               reached (never again while it runs over). Without names: a plain stopwatch counting up.
+               reached (never again while it runs over). Beside the countdown an elapsed clock counts the
+               same phase UP (Doc, 24.11.2026: "da auch eine abgelaufene Uhr"), red once over, hidden
+               without a target. Without names: a plain stopwatch counting up.
                The state lives in localStorage per talk (both roles share it), so a reload keeps the running
                time: { phase, run, t0 = start of the running stretch, acc = ms per phase, gong = phases rung }.
                No key handling and no focus moves - the clock only reacts to clicks on its own buttons. */
@@ -1283,6 +1332,9 @@
             const elClockFace = document.getElementById('bmClockFace');
             const elClockSign = document.getElementById('bmClockSign');
             const elClockDigits = document.getElementById('bmClockDigits');
+            const elClockElFace = document.getElementById('bmClockElFace');
+            const elClockElCap = document.getElementById('bmClockElCap');
+            const elClockElDigits = document.getElementById('bmClockElDigits');
             const elClockPhase = document.getElementById('bmClockPhase');
             const elClockSub = document.getElementById('bmClockSub');
             const elClockSeg = document.getElementById('bmClockSeg');
@@ -1334,6 +1386,13 @@
                 return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60);
             }
             function setText(el, txt) { if (el.textContent !== txt) el.textContent = txt; }
+            /* digits through the site's widget, redrawn only when the shown value changes */
+            function setDigits(el, shown) {
+                if (el.dataset.shown === shown) return;
+                el.dataset.shown = shown;
+                if (window.CyberClock) CyberClock.digits(el, shown);
+                else el.textContent = shown;
+            }
 
             function clockDraw() {
                 const L = sheet().clock;
@@ -1350,14 +1409,20 @@
                     sign = '+';
                     cls = 'over';
                 }
-                if (elClockDigits.dataset.shown !== shown) {
-                    elClockDigits.dataset.shown = shown;
-                    if (window.CyberClock) CyberClock.digits(elClockDigits, shown);
-                    else elClockDigits.textContent = shown;
-                }
+                setDigits(elClockDigits, shown);
                 setText(elClockSign, sign);
                 elClockFace.classList.toggle('warn', cls === 'warn');
                 elClockFace.classList.toggle('over', cls === 'over');
+
+                /* elapsed clock: the phase's time gone, whole seconds (so it and the countdown always add
+                   up to the target), red from the moment the countdown goes over */
+                elClockElFace.hidden = !tgt;
+                if (tgt) {
+                    setDigits(elClockElDigits, mmss(el, true));
+                    elClockElFace.classList.toggle('over', el >= tgt);
+                }
+                setText(elClockElCap, L.elapsed);
+                elClockElFace.setAttribute('aria-label', L.elapsed);
 
                 const n = presenters();
                 const stopped = !clock.run && el > 0;
@@ -1761,7 +1826,7 @@
                 publikum = { got: null, max: null, names: '' };
                 try {
                     const d = JSON.parse(await svpCrypto.open(rows[0].data_enc));
-                    if (typeof d.got === 'number') publikum.got = d.got;
+                    if (typeof d.got === 'number') publikum.got = Math.round(d.got);   // whole points only
                     if (typeof d.max === 'number') publikum.max = d.max;
                 } catch (e) { status('Bewertung des Teams nicht lesbar.', 'err'); }
                 try { publikum.names = await svpCrypto.open(rows[0].name_enc); } catch (e) { }
@@ -1819,9 +1884,17 @@
                 if (inp.dataset.field === 'presenter') clockTick();
             });
 
+            /* no decimal separator in the points fields: whole points only (Doc, 25.11.2026) */
+            elTable.addEventListener('keydown', function (e) {
+                if (e.target.matches('input[data-row]') && (e.key === '.' || e.key === ',')) e.preventDefault();
+            });
+
             elTable.addEventListener('input', function (e) {
                 const t = e.target;
                 if (t.matches('input[data-row]')) {
+                    /* whole points only (Doc, 25.11.2026: "halbe Pkt verbieten") - a half typed or pasted in
+                       is rounded to the nearest whole point at once */
+                    if (t.value !== '' && !Number.isInteger(Number(t.value))) t.value = String(Math.round(Number(t.value)));
                     const nr = t.dataset.row;
                     const row = state.rows[nr] || (state.rows[nr] = {});
                     row.pts = t.value === '' ? null : t.value;

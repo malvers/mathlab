@@ -12,6 +12,9 @@
 //                                                             shared with, turquoise there); with a file: every entry in it
 //   --gemeinsam                                               a JOINT entry of Doc and the guest (gold and turquoise,
 //                                                             needs 20261119d_calendar_together.sql); with a file: every one
+//   --erinnerung                                              a REMINDER, not an appointment (red with a bell in the
+//                                                             calendar, only its start time; needs
+//                                                             20261122_calendar_reminder.sql); with a file: every one
 //
 // Times are Europe/Berlin wall-clock time ("2026-11-14 10:00" or "2026-11-14T10:00"); this tool turns them into ISO
 // times with the right offset (+01:00 in winter, +02:00 in summer). A time that already carries an offset or Z is kept.
@@ -27,6 +30,13 @@
 // entry stays whose it was. The guest's name is never needed here - it lives only in the database.
 // "together": true (or --gemeinsam) makes it a joint entry of Doc and the guest (implies "shared": true, so no reminder
 // either); "together": false makes a replaced joint entry the guest's alone.
+// "reminder": true (or --erinnerung) makes it a REMINDER (Doc, 22.11.2026: print reminders put in as 15-minute
+// appointments read as if the exam itself were at 07:30 - "da müssten wir irgendwie ein extra Item haben für
+// Erinnerung"). Use it for everything that is a nudge, not a time Doc is busy: "Bögen drucken", "Mail an X", "Müll
+// raus". A reminder is a point in time: --start is the moment (a time is required), without --end it keeps a 15-minute
+// slot (only for the watcher's dialog), without --remind Solita calls at the moment itself ([0]). Doc's own only -
+// never with --fuer-gast / --gemeinsam. "reminder": false makes a replaced reminder an appointment again; without the
+// key a replaced entry stays what it was.
 //
 // Access: like the reminder watcher (waechter.mjs) this has no login. It calls calendar_add / calendar_remove
 // (supabase/migrations/20261107_calendar_write.sql) with the random token that lives only in the Mac's keychain
@@ -42,7 +52,8 @@ import { fileURLToPath } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '..', '..');
 const KEYCHAIN_SERVICE = 'doc-kalender-waechter';
-const FIELDS = ['title', 'starts_at', 'ends_at', 'all_day', 'location', 'notes', 'rrule', 'exdates', 'remind', 'color', 'source_uid', 'shared', 'together'];
+const FIELDS = ['title', 'starts_at', 'ends_at', 'all_day', 'location', 'notes', 'rrule', 'exdates', 'remind', 'color', 'source_uid', 'shared', 'together', 'reminder'];
+const REMINDER_SLOT = 15 * 60000;   // a reminder's ends_at when none is given (the page writes the same)
 const WEEKDAY = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 const DAY = 86400000;
 
@@ -169,6 +180,17 @@ function normalize(ev, i) {
         if (ev.together && out.remind && out.remind.length) fail(what + ': gemeinsame Termine bekommen keine Erinnerung - remind bitte weglassen');
         out.together = ev.together;
     }
+    if (ev.reminder != null) {
+        if (typeof ev.reminder !== 'boolean') fail(what + ': reminder muss true oder false sein');
+        if (ev.reminder) {
+            if (allDay) fail(what + ': eine Erinnerung ist ein Zeitpunkt - bitte mit Uhrzeit, nicht ganztägig');
+            if (ev.shared || ev.together) fail(what + ': eine Erinnerung ist immer Docs eigene - nicht mit shared/together (--fuer-gast / --gemeinsam)');
+            // only for the watcher's dialog ("07:30–07:45"): the calendar shows a reminder with its start time alone
+            if (!out.ends_at) out.ends_at = isoBerlin(new Date(+s + REMINDER_SLOT));
+            if (!out.remind) out.remind = [0];   // Solita calls at the moment itself
+        }
+        out.reminder = ev.reminder;
+    }
     return out;
 }
 
@@ -198,6 +220,7 @@ function fromFlags(f) {
     }
     if (f.fuerGast || f.gemeinsam) ev.shared = true;
     if (f.gemeinsam) ev.together = true;
+    if (f.erinnerung) ev.reminder = true;
     return ev;
 }
 
@@ -209,7 +232,9 @@ function describe(ev, i) {
     const hm = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
     const utc = d => d.toISOString().slice(0, 16).replace('T', ' ');
     const lines = [(i + 1) + '. ' + ev.title];
-    if (ev.all_day) {
+    if (ev.reminder === true) {
+        lines.push('   ERINNERUNG ' + date(s) + ' ' + hm(s) + ' Berlin   =   ' + utc(s) + ' UTC   (rot mit Glocke im Kalender, nur der Zeitpunkt)');
+    } else if (ev.all_day) {
         const last = e ? new Date(+e - DAY / 2) : s;   // exclusive end -> the last day
         lines.push('   ' + date(s) + (e && date(last) !== date(s) ? ' bis ' + date(last) : '') + ', ganztägig');
     } else {
@@ -220,6 +245,7 @@ function describe(ev, i) {
     if (ev.together === true) lines.push('   Für: Doc und die geteilte Person gemeinsam (gold-türkis im Kalender)');
     else if (ev.shared === true) lines.push('   Für: die geteilte Person (türkis im Kalender)');
     if (ev.shared === false) lines.push('   Für: Doc (nicht die geteilte Person)');
+    if (ev.reminder === false) lines.push('   Art: Termin (keine Erinnerung mehr)');
     const remind = ev.remind || (ev.all_day ? [360] : [60, 15]);
     if (ev.shared === true || ev.together === true) lines.push('   Erinnerung: keine (' + (ev.together ? 'gemeinsamer Termin' : 'Termin der geteilten Person') + ')');
     else lines.push('   Erinnerung: ' + (remind.length ? remind.map(m => m + ' min' + (ev.all_day ? '' : ' (' + hm(new Date(+s - m * 60000)) + ')')).join(', ') : 'keine') + (ev.remind ? '' : ' (Standard)'));
@@ -239,6 +265,7 @@ function parseArgs(argv) {
         if (a === '--dry') { flags.dry = true; continue; }
         if (a === '--fuer-gast') { flags.fuerGast = true; continue; }
         if (a === '--gemeinsam') { flags.gemeinsam = true; continue; }
+        if (a === '--erinnerung') { flags.erinnerung = true; continue; }
         if (a === '-h' || a === '--help') { flags.help = true; continue; }
         if (a.startsWith('--')) {
             let name = a.slice(2), val;
@@ -257,11 +284,13 @@ function parseArgs(argv) {
 }
 
 const USAGE = [
-    'node tools/kalender/eintragen.mjs add events.json [--fuer-gast | --gemeinsam] [--dry]',
-    'node tools/kalender/eintragen.mjs add --title "…" --start "2026-11-14 10:00" --end "2026-11-14 12:30" [--location …] [--notes …] [--remind 100,60] [--uid …] [--fuer-gast | --gemeinsam] [--dry]',
+    'node tools/kalender/eintragen.mjs add events.json [--fuer-gast | --gemeinsam | --erinnerung] [--dry]',
+    'node tools/kalender/eintragen.mjs add --title "…" --start "2026-11-14 10:00" --end "2026-11-14 12:30" [--location …] [--notes …] [--remind 100,60] [--uid …] [--fuer-gast | --gemeinsam | --erinnerung] [--dry]',
     'node tools/kalender/eintragen.mjs remove <id> [--dry]',
     '  --fuer-gast   als Eintrag der geteilten Person (türkis), ohne Erinnerung (in der Datei: "shared": true)',
-    '  --gemeinsam   als gemeinsamer Termin von Doc und der geteilten Person (gold-türkis), ohne Erinnerung (in der Datei: "together": true)'
+    '  --gemeinsam   als gemeinsamer Termin von Doc und der geteilten Person (gold-türkis), ohne Erinnerung (in der Datei: "together": true)',
+    '  --erinnerung  als ERINNERUNG statt Termin (rot mit Glocke, nur Zeitpunkt; ohne --end 15 Min, ohne --remind ruft Solita',
+    '                genau dann; in der Datei: "reminder": true) - für alles, was ein Anstoß ist, keine belegte Zeit ("Bögen drucken")'
 ].join('\n');
 
 function needToken() {
@@ -279,6 +308,7 @@ async function main() {
         const flagMode = ['title', 'start', 'end', 'location', 'notes', 'remind', 'uid'].some(k => k in flags);
         let raw;
         if (flags.fuerGast && flags.gemeinsam) fail('--fuer-gast oder --gemeinsam, nicht beides');
+        if (flags.erinnerung && (flags.fuerGast || flags.gemeinsam)) fail('eine Erinnerung ist immer Docs eigene - --erinnerung nicht mit --fuer-gast / --gemeinsam');
         if (pos.length > 2) fail('zu viele Angaben: ' + pos.slice(2).join(' '));
         if (pos[1]) {
             if (flagMode) fail('entweder eine Datei oder --title/--start, nicht beides');
@@ -292,6 +322,10 @@ async function main() {
                 return ev && typeof ev === 'object' && !Array.isArray(ev)
                     ? Object.assign({}, ev, { shared: true }, flags.gemeinsam ? { together: true } : {}) : ev;
             });
+            if (flags.erinnerung) raw = raw.map((ev, i) => {
+                if (ev && typeof ev === 'object' && ev.reminder === false) fail('Termin ' + (i + 1) + ': "reminder": false widerspricht --erinnerung');
+                return ev && typeof ev === 'object' && !Array.isArray(ev) ? Object.assign({}, ev, { reminder: true }) : ev;
+            });
         } else if (flagMode) raw = [fromFlags(flags)];
         else fail('add braucht eine Datei oder --title/--start\n' + USAGE);
         if (!raw.length || raw.length > 200) fail('1 bis 200 Termine erwartet, nicht ' + raw.length);
@@ -304,10 +338,17 @@ async function main() {
             return;
         }
         const token = needToken();
-        const rows = await rpc('calendar_add', { p_token: token, p_events: events }, token);
+        let rows;
+        try {
+            rows = await rpc('calendar_add', { p_token: token, p_events: events }, token);
+        } catch (e) {
+            // the database refuses keys it does not know - before the reminder SQL ran, say what is missing
+            if (/unknown key "reminder"/.test(e.message)) fail('die Datenbank kennt Erinnerungen noch nicht - erst supabase/migrations/20261122_calendar_reminder.sql ausführen (Doc, SQL-Editor); bis dahin ohne --erinnerung / "reminder"');
+            throw e;
+        }
         console.log('');
         rows.forEach((r, i) => console.log((r.op === 'update' ? 'ersetzt' : 'eingetragen') + ': id ' + r.id + ' - ' + events[i].title +
-            (events[i].together === true ? ' (gemeinsam)' : events[i].shared === true ? ' (geteilte Person)' : '')));
+            (events[i].together === true ? ' (gemeinsam)' : events[i].shared === true ? ' (geteilte Person)' : events[i].reminder === true ? ' (Erinnerung)' : '')));
         return;
     }
 

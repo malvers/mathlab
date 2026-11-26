@@ -552,6 +552,17 @@
         .lt-tile.run { border: 2px solid var(--cyan); padding: 9px 11px 9px; }
         .lt-tile.run .tl-state { color: var(--cyan); }
         .lt-tile.run .tl-bar i { background: var(--cyan); }
+        /* started = clearly lit (Doc, 24.11.2026: "wenn begonnen, deutlicher erkennbar"): the 2 px cyan frame alone
+           read like the 1 px grey one across a grid of 25. A running tile gets a solid cyan edge on the left (it
+           survives a washed-out projector), a soft cyan ground and "läuft" as a filled pill like the other states;
+           a tile nobody has started stays flat - no ground, code and bar faded, the name clear, so who still sits
+           idle shows as a gap. Away (red ground), offline (dashed), finished (band) and aborted keep their looks;
+           the WebUntis triangle keeps its own fading. The 6 px edge takes 4 px of the left padding: same content box */
+        .lt-tiles .lt-tile.run { border-left-width: 6px; padding-left: 7px; background: color-mix(in srgb, var(--cyan) 22%, transparent); }
+        .lt-tiles .lt-tile.run .tl-att { left: -12px; }
+        .lt-tile.run .tl-pill { background: var(--cyan); color: var(--bg); border-radius: 999px; padding: 0 9px; }
+        .lt-tiles .lt-tile.none { background: transparent; }
+        .lt-tiles .lt-tile.none:not(.untis-alarm) > .tl-code, .lt-tiles .lt-tile.none:not(.untis-alarm) > .tl-bar { opacity: 0.5; }
         .lt-tile.away { border: 2px solid var(--ypsilon); padding: 9px 11px 9px; }
         .lt-tile.away .tl-bar i { background: var(--ypsilon); }
         .lt-tile.away .tl-pill { background: var(--ypsilon); color: #fff; border-radius: 999px; padding: 1px 9px;
@@ -814,6 +825,7 @@
                         <option value="../infotest-ki-bgy24.html?klasse=BGY24">Informatik &middot; BGY24 &middot; Leistungstest KI &middot; Gruppe E</option>
                         <option value="../infotest-ki-fog251.html?klasse=FOG25-1">Informatik &middot; FOG25-1 &middot; Leistungstest KI</option>
                         <option value="../infotest-ki-fow251.html?klasse=FOW25-1">Informatik &middot; FOW25-1 &middot; Leistungstest KI</option>
+                        <option value="../wasserzeichen-minitest.html?klasse=FOW25-1">Informatik &middot; FOW25-1 &middot; Mini-Test Wasserzeichen (24.11.)</option>
                         <option value="../infotest-ki-fos252.html?klasse=FOS25-2">Informatik &middot; FOS25-2 &middot; Leistungstest KI</option>
                         <option value="../mathetest11.html?klasse=BGY26">Mathematik &middot; BGY26-1 + 2</option>
                         <option value="../mathetest11-lt1-quadratisch.html?klasse=BGY26">Mathematik &middot; BGY26-1 + 2 &middot; Leistungstest 1 (23.11.)</option>
@@ -867,7 +879,7 @@
                 <h3>Am Ende</h3>
                 <ol start="12">
                     <li>Punkte und Noten stehen nach jeder Abgabe von selbst in der Kachel. „Ergebnisse abrufen“ lädt nur alles neu.</li>
-                    <li><b>Klassenarbeit mit Teil B (Papier):</b> Die Note steht erst da, wenn Teil B eingetragen ist. „Liste“ wählen, die Punkte in die Spalte „Teil B“ tippen (Enter springt weiter), dann „Liste als CSV sichern“.</li>
+                    <li><b>Klassenarbeit mit Teil B (Papier):</b> Die Note steht erst da, wenn Teil B eingetragen ist (ist Teil B nur Bonus, steht sie sofort da, B kommt obendrauf). „Liste“ wählen, die Punkte in die Spalte „Teil B“ tippen (Enter springt weiter), dann „Liste als CSV sichern“.</li>
                     <li><b>Geht es schief:</b> Ruhe bewahren, abbrechen. Die Gruppe schreibt den Test dann später noch einmal.</li>
                 </ol>
             </div>
@@ -1291,6 +1303,9 @@
                                 /* copied out before the frame goes */
                                 ok(JSON.parse(JSON.stringify({ id: q.id, version: q.version || 'v1', title: q.title || '',
                                     questions: q.questions || [], partB: Number(q.partB) || 0,
+                                    /* QUIZ.partBBonus: Teil B is a bonus on top of A (Doc, 23.11.2026, LT 1 BGY26:
+                                       "zeig mal ohne B ... ist Bonus!") - graded on A at once, the base stays max A */
+                                    partBBonus: q.partBBonus === true && Number(q.partB) > 0,
                                     gradeScale: f.contentWindow.quizGradeScale || q.gradeScale || [],
                                     gradeUnit: f.contentWindow.quizGradeUnit || '',
                                     gradeRule: f.contentWindow.quizGradeRule || '',
@@ -1364,7 +1379,7 @@
             function gradeOf(meta, res, code) {
                 if (meta.noGrades) return '';
                 if (meta.partB) {
-                    /* a Klassenarbeit with Teil B: graded only once B is in */
+                    /* a Klassenarbeit with Teil B: graded only once B is in (a bonus B: graded on A at once, see sumAB) */
                     const s = sumAB(meta, res, code);
                     if (!s) return '';
                     return gradeAB(meta, s.pts, s.max);
@@ -1392,8 +1407,10 @@
                              c: c, answered: row.answered, total: row.total, projPts: proj, max: row.total, b: null };
                 }
                 const b = code ? partBGet(poolOf(meta, testUrl()), code) : null;     /* Teil B, if already typed in */
-                const max = row.total + meta.partB;
-                const proj = b === null ? Math.round(rate * max) : Math.round(rate * row.total) + b;
+                /* a bonus B: the base stays the points of A, B only lands on top once it is in */
+                const max = meta.partBBonus ? row.total : row.total + meta.partB;
+                const proj = meta.partBBonus ? Math.round(rate * row.total) + (b || 0)
+                    : b === null ? Math.round(rate * max) : Math.round(rate * row.total) + b;
                 return { now: gradeAB(meta, c + (b || 0), max), proj: gradeAB(meta, proj, max),
                          c: c, answered: row.answered, total: row.total, projPts: proj, max: max, b: b };
             }
@@ -1401,7 +1418,8 @@
                 const g = function (x) { return meta.gradeUnit === 'NP' ? x + ' NP (Note ' + npNote(x) + ')' : 'Note ' + x; };
                 const pct = Math.round(h.c / h.answered * 100);
                 return 'Zu erwartende Note \u2013 nur ein Hinweis, wird nirgends eingetragen\n' +
-                    'jetzt: ' + h.c + ' von ' + h.total + ' richtig' + (meta.partB ? (h.b === null ? ', Teil B noch offen (0)' : ', Teil B ' + fmtB(h.b)) : '') +
+                    'jetzt: ' + h.c + ' von ' + h.total + ' richtig' + (meta.partB ? (meta.partBBonus ? (h.b === null ? ', Bonus B noch offen' : ', Bonus B +' + fmtB(h.b))
+                        : h.b === null ? ', Teil B noch offen (0)' : ', Teil B ' + fmtB(h.b)) : '') +
                     ', alles Offene z\u00e4hlt als falsch \u2192 ' + g(h.now) + '\n' +
                     'Hochrechnung: ' + h.c + ' von ' + h.answered + ' beantworteten richtig (' + pct + ' %) \u2192 \u2248 ' +
                     h.projPts + ' von ' + h.max + ' \u2192 ' + g(h.proj) + '\n' +
@@ -1429,7 +1447,7 @@
                 const s = res && meta.partB ? sumAB(meta, res, code) : null;
                 tileRes[code] = res ? { score: res.score, total: res.total, grade: gradeOf(meta, res, code),
                     gradeUnit: meta.gradeUnit,
-                    partB: meta.partB, b: s ? s.b : null,
+                    partB: meta.partB, partBBonus: !!meta.partBBonus, b: s ? s.b : null,
                     pct: s ? s.pts * 100 / s.max : res.score / res.total * 100 } : res;
                 partBMeta = { url: testUrl(), meta: meta };
                 paintTile(code);
@@ -1442,7 +1460,9 @@
                points are typed in here per code - column "Teil B" in the list, a
                field in the detail - and the grade is (A + B) / (max A + max B)
                in whole percent, rounded half up, on that key (">= 95" gives 1).
-               Without B there is no grade, neither here nor on the test page.
+               Without B there is no grade, neither here nor on the test page -
+               unless B is a bonus (QUIZ.partBBonus, Doc 23.11.2026): then the grade
+               is (A + B) / max A at once, a missing B counts 0 and B can only lift it.
                Kept only in this browser, like the codes: per pool and code,
                never a name, never the server; the CSV export is the backup. */
             const PARTB_STORE = 'svp-leistungstest-teilb-v1';
@@ -1465,10 +1485,12 @@
             /* whole percent, rounded half up; the epsilon keeps 64.5 from
                arriving as 64.4999... */
             function pctHalfUp(pts, max) { return Math.floor(pts * 100 / max + 0.5 + 1e-9); }
-            /* A + B, or null while Teil B is missing */
+            /* A + B, or null while Teil B is missing - a bonus B (QUIZ.partBBonus) is never missing:
+               the base is max A alone, an empty B counts 0 (b stays null, so "+B offen" can say so) */
             function sumAB(meta, res, code) {
                 if (!res || !code) return null;
                 const b = partBGet(poolOf(meta, testUrl()), code);
+                if (meta.partBBonus) return { a: res.score, b: b, pts: res.score + (b || 0), max: res.total, bonus: true };
                 if (b === null) return null;
                 return { a: res.score, b: b, pts: res.score + b, max: res.total + meta.partB };
             }
@@ -1557,6 +1579,11 @@
                         ' (' + Math.round(res.score / res.total * 100) + ' %)' + (meta.noGrades ? '' : ' · ' + gradeText(meta, gradeOf(meta, res)));
                 }
                 const s = sumAB(meta, res, code);
+                if (s && s.bonus) {
+                    return who + ' — A ' + res.score + '/' + res.total + ' · Bonus B ' +
+                        (s.b === null ? 'offen' : '+' + fmtB(s.b) + ' = ' + fmtB(s.pts) + '/' + s.max) +
+                        ' (' + pctHalfUp(s.pts, s.max) + ' %) · ' + gradeText(meta, gradeOf(meta, res, code));
+                }
                 return who + ' — A ' + res.score + '/' + res.total + (s
                     ? ' · B ' + fmtB(s.b) + '/' + meta.partB + ' = ' + fmtB(s.pts) + '/' + s.max +
                       ' (' + pctHalfUp(s.pts, s.max) + ' %) · ' + gradeText(meta, gradeOf(meta, res, code))
@@ -1604,6 +1631,7 @@
                orange at 50 %, green at 100 % (Doc, 18.09.2026: "nach unserem Schema von rot
                bis grün über gelb"). */
             function scoreColor(pct) {
+                pct = Math.max(0, Math.min(100, pct));   /* a bonus can lift A + B above 100 % */
                 const red = [176, 36, 24], orange = [245, 194, 66], green = [121, 158, 49];
                 const a = pct <= 50 ? red : orange, b = pct <= 50 ? orange : green;
                 const t = (pct <= 50 ? pct : pct - 50) / 50;
@@ -1653,6 +1681,8 @@
                 if (meta.partB) {
                     const s = sumAB(meta, res, code);
                     if (!s) { tg.textContent = 'B fehlt'; tg.classList.add('miss'); tg.title = 'Teil B noch nicht eingetragen'; }
+                    else if (s.bonus) tg.title = 'A + Bonus = ' + fmtB(s.pts) + '/' + s.max + ' · ' + pctHalfUp(s.pts, s.max) + ' %' +
+                        (s.b === null ? ' · Bonus B noch offen' : '');
                     else tg.title = 'A + B = ' + fmtB(s.pts) + '/' + s.max + ' · ' + pctHalfUp(s.pts, s.max) + ' %';
                 }
                 const band = g ? gradeBand(meta, g) : '';
@@ -2826,7 +2856,9 @@
                     if (res.partB) {
                         const b = document.createElement('span');
                         b.className = 'tl-b' + (res.b === null ? '' : ' in');
-                        b.textContent = res.b === null ? 'B fehlt' : 'B ' + fmtB(res.b) + '/' + res.partB;
+                        /* a bonus B does not hold the grade back: "+B offen" in the muted ink, "+B 2" once it is in */
+                        b.textContent = res.partBBonus ? (res.b === null ? '+B offen' : '+B ' + fmtB(res.b))
+                            : res.b === null ? 'B fehlt' : 'B ' + fmtB(res.b) + '/' + res.partB;
                         main.appendChild(b);
                     }
                 } else if (row && row.total && st.key !== 'none') {
@@ -3096,8 +3128,10 @@
             function csv() {
                 /* a Klassenarbeit with Teil B also exports A, B, sum, percent and grade */
                 const m = partBCsvMeta();
-                const extra = m ? ['Teil A (von ' + m.questions.length + ')', 'Teil B (von ' + m.partB + ')',
-                    'Summe (von ' + (m.questions.length + m.partB) + ')', 'Prozent', 'Note'] : [];
+                const extra = m ? ['Teil A (von ' + m.questions.length + ')',
+                    m.partBBonus ? 'Teil B (Bonus, bis ' + m.partB + ')' : 'Teil B (von ' + m.partB + ')',
+                    m.partBBonus ? 'Summe (von ' + m.questions.length + ', B als Bonus)' : 'Summe (von ' + (m.questions.length + m.partB) + ')',
+                    'Prozent', 'Note'] : [];
                 const rows = [['Klarname', 'Code'].concat(extra)].concat(
                     entries.map(function (e) {
                         return [e.name || LOCKED, e.code].concat(m ? partBCsvRow(m, e.code) : []);

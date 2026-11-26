@@ -194,6 +194,17 @@
     }
     function usageDa(k) { return k.tin > 0 || k.tout > 0; }
 
+    // A module in a show (decks/deck.js, V): the same page runs in the presenter view and on the beamer, and the beamer's
+    // copy only replays what is done in the presenter's. Her answer comes ONCE (Doc, 24.11.2026): the presenter's copy
+    // asks and speaks, the beamer's copy asks nobody, stays silent and shows the presenter's box word for word. The deck
+    // says which copy a page is (window.top.__deckReplica, __deckSolitaLead); a page that is not in a show's frame -
+    // a lab on its own, a deck's own box, any deck outside a show - never sees either, nothing changes there.
+    function echoKopie() { try { return window.top !== window && window.top.__deckReplica === true; } catch (e) { return false; } }
+    function fuehrung() {
+        try { return window.top !== window && typeof window.top.__deckSolitaLead === 'function' ? window.top.__deckSolitaLead : null; }
+        catch (e) { return null; }
+    }
+
     let zaehler = 0;
     function mount(host, opt) {
         opt = opt || {};
@@ -574,6 +585,7 @@
         // call after a pause waited for a cold start).
         let warmAt = 0;
         function aufwaermen() {
+            if (echoKopie()) return;                         // the beamer's copy of a module in a show asks nobody
             if (Date.now() - warmAt < 60000) return;
             warmAt = Date.now();
             post(TTS_URL, {}).catch(function () { });
@@ -584,6 +596,7 @@
         function frage(v) {
             v = String(v || '').trim();
             if (!v || busy) return;
+            if (echoKopie()) return;                         // in a show the presenter's copy asks; its box comes here (spiegel)
             if (!pwd()) { askPassword(); fokus(); say('Einmal das Passwort, dann kann ' + wer() + ' antworten.', 'sf-err'); return; }
             busy = true; sendBtn.disabled = true; bereit();
             stop();
@@ -684,7 +697,7 @@
             const tv = Date.now();
             function once() { if (!shown) { shown = true; if (zeigen) el = zeigen(); } }
             const whole = sprechbar(text);
-            if (!ttsOn || !whole) { once(); return; }
+            if (!ttsOn || !whole || echoKopie()) { once(); return; }   // in a show her voice comes from the presenter's copy
             // Doc's voice needs ~5 s a sentence (16 s for a long step, measured 29.09.2026) - past the wait, so it comes
             // sentence by sentence as in the decks: the first piece at once, the next fetched while one plays. Each
             // piece lights up exactly its share of the answer's words; if the shares do not add up, one piece.
@@ -1016,7 +1029,7 @@
         // keys inside the box stay there: they must not turn the lab's steps
         root.addEventListener('keydown', function (e) { e.stopPropagation(); });
 
-        return {
+        const handle = {
             frage: frage, vorlesen: vorlesen, stop: stop, leeren: leeren, wechsle: wechsle, bild: bild,
             out: out, row: row,
             feld: function () { return input; },             // a new field after the password - never keep the old one
@@ -1035,6 +1048,24 @@
                 out.scrollTop = m.st || 0;
             },
         };
+        // a module in a show (see echoKopie): the presenter's copy hands every change of its box to the deck, at most
+        // every 50 ms, and the deck puts it into the beamer's copy - through window.__sfEcho, which only takes it there
+        if (fuehrung()) {
+            let melden = 0;
+            const bald = function () {
+                if (melden) return;
+                melden = setTimeout(function () {
+                    melden = 0;
+                    const f = fuehrung();
+                    if (f) f(window, { html: out.innerHTML, zu: out.classList.contains('sf-zu'), busy: busy, st: out.scrollTop });
+                }, 50);
+            };
+            new MutationObserver(bald).observe(out, { childList: true, subtree: true, characterData: true, attributes: true,
+                attributeFilter: ['class'] });
+            out.addEventListener('scroll', bald);
+        }
+        global.__sfEcho = function (m) { if (echoKopie()) handle.spiegel(m); };
+        return handle;
     }
 
     // who speaks: Solita, or Doc himself when he is chosen (his voice, his name over the box)

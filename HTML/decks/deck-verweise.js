@@ -30,7 +30,12 @@
   const SITE = new URL('../', DECKS);                 // HTML/ - the site's root, here or live
   const DECK = decodeURIComponent(location.pathname.split('/').pop()).replace(/\.html$/, '');
   const NAME = DECK.split('-')[0];                    // mathe11-quadratisch -> mathe11
-  const MAX_EINTRAEGE = 5, MAX_LE = 3;   // what fits the field: five entries (the red list counts), three Lerneinheiten
+  const MAX_EINTRAEGE = 5, MAX_LE = 3;
+  // the deck's topic from its name (mathe11-loesungsmengen -> loesungsmengen): a week that names this deck only as an
+  // extra shows the sets on that topic, not the week's own (Doc, 23.11.2026, the deck hung into KW 48 "Anwendungen
+  // quadratischer Modelle": the new 20 tasks vanished behind "+3 weitere" and the right tile overflowed)
+  const THEMA = DECK.replace(/^[a-z]+\d*-/, '');
+  const passt = href => THEMA.length > 3 && String(href || '').indexOf(THEMA) >= 0;   // what fits the field: five entries (the red list counts), three Lerneinheiten
 
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   // the plan's formulas ($...$) are shown as plain text here: the slide names topics, it does not set maths
@@ -161,7 +166,8 @@
     } else {
       // one group per week (two only when two weeks name this deck): its heading, its sets, its red list
       d.hits.forEach(function (w) {
-        const auf = aufgaben(w, planUrl);
+        const alle = aufgaben(w, planUrl), treffer = alle.filter(a => passt(a.url.pathname));
+        const auf = treffer.length ? treffer : alle;
         if (!erste && auf.length) erste = auf[0];
         links += '<div class="vw-woche">KW ' + esc(w.kw) + (w.thema ? ' · ' + esc(plain(w.thema)) : '') + '</div>';
         // the week's set first, then its first written sheet, then the rest in the material's order - so a long list
@@ -169,7 +175,7 @@
         const platz = (d.hits.length > 1 ? 2 : MAX_EINTRAEGE) - (w.rot ? 1 : 0);
         const text = auf.findIndex((a, i) => i > 0 && a.art === 'text');
         const order = auf.length && text > 1 ? [auf[0], auf[text]].concat(auf.filter((a, i) => i && i !== text)) : auf;
-        weitere += Math.max(0, order.length - platz);
+        weitere += Math.max(0, alle.length - Math.min(order.length, platz));
         order.slice(0, platz).forEach(function (a) {
           links += '<a class="vw-a' + (a.art ? ' vw-' + a.art : '') + '" href="' + esc(a.url.href) + '" target="_blank" rel="noopener">' +
             '<span class="vw-n">' + (a.n ? esc(a.n) : '') + '</span><span class="vw-txt"><span class="vw-name">' + esc(a.name) +
@@ -194,7 +200,9 @@
     // the book
     const b = d.plan.buch, cover = new URL('resources/og/buch-' + b.name + '-cover.jpg', SITE).href;
     const les = [];
-    d.hits.forEach(function (w) { lerneinheiten(b, w).forEach(function (x) { if (!les.some(y => y.le === x.le)) les.push(x); }); });
+    // the book: only the weeks whose own set is on the deck's topic, if there are such - else every week
+    const eigen = d.hits.filter(w => w.quiz && passt(w.quiz.href));
+    (eigen.length ? eigen : d.hits).forEach(function (w) { lerneinheiten(b, w).forEach(function (x) { if (!les.some(y => y.le === x.le)) les.push(x); }); });
     const S = d.seiten;
     const seite = (f, s) => S && S.first[f + '|' + s];
     let buch = '';

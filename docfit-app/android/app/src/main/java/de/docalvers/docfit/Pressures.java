@@ -14,8 +14,8 @@ import java.util.List;
  * Blood pressure readings of one person, newest first, kept on the phone like the weigh-ins (Weighings): in the app's
  * own preferences, key "pressures" (Doc) or "pressures2" (the second person) - the same slots as Profile.
  *
- * Typed in by hand for now (Doc, 21.11.2026: for when the Omron does not send, or in Spain without it); the Omron
- * M400 Intelli IT will add its readings over Bluetooth with source "omron". The stored fields follow the web's table
+ * Typed in by hand (Doc, 21.11.2026: for when the Omron does not send, or in Spain without it), or sent by the Omron
+ * M400 Intelli IT over Bluetooth with source "omron" (BpLink, Bpm; Doc, 24.11.2026). The stored fields follow the web's table
  * docfit_bp (supabase/migrations/20261121_docfit.sql): {"time" (= measured_at, ms), "sys", "dia" (mmHg), "pulse"
  * (bpm, 0 = none), "source" ("hand" / "omron"), "note" (only where one was typed)}.
  * Reading, writing, the input check and the ESH category are pure (parse / format / check / category), tested in
@@ -134,6 +134,11 @@ final class Pressures {
 
     Reading get(int i) {
         return list.get(i);
+    }
+
+    /** True when this reading is already in the list - the Omron sent it again (Bpm.known). */
+    boolean has(long time, int sys, int dia) {
+        return Bpm.known(list, time, sys, dia);
     }
 
     /** Puts a reading in its place by time (a value typed in later for an earlier moment); returns that place. */

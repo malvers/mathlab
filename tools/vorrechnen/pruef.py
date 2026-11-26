@@ -2,12 +2,19 @@
 # (over the reals, or the range written behind the task as "\quad(0\le x<2\pi)"), every step of a term has its value,
 # the last step isolates the variable. "\approx" steps are compared by value (rounded as written). A step may hold
 # several equations side by side ("x_1=2\quad x_2=-3", "x=2\vee x=-3"): their solutions together.
+# A solution may end with its solution set (Doc, 23.11.2026: "Vorrechnen-Aufgaben zu Lösungsmengen"): "L=\{-2;3\}" -
+# the elements by ";" in the order of size, each once - "L=\{\}", "L=\emptyset", "L=\mathbb{R}"; it must be exactly the
+# task's. A step "D=\mathbb{R}\setminus\{0\}" is the task's domain (checked against it); the steps after it are solved
+# within it, so multiplying by a denominator changes nothing. A row without the variable is true ("0=0": every x) or
+# false ("3=-1": none). After squaring (op "quadrieren") a step may have more solutions than the task - the Probe takes
+# them out - but the last step must be the task's solution set again.
 # Systems of linear equations and matrix terms: lgs.py. Helpers to write Gauss tasks without hand arithmetic: gen_lgs.py.
 # usage: python3 pruef.py bloecke.json   (bloecke.json from bloecke.mjs) - or ./pruefe.sh [kw ...]
 # needs sympy and antlr4-python3-runtime 4.11 (sympy's LaTeX parser)
 import json, re, sys
 from sympy import (ConditionSet, E, Eq, FiniteSet, Interval, S, Symbol, N, nsimplify, pi, simplify, solveset, Union, EmptySet,
                    Intersection, oo, log, sqrt)
+from sympy.calculus.util import continuous_domain
 from sympy.parsing.latex import parse_latex
 import lgs
 from sympy import Matrix
@@ -58,10 +65,43 @@ def teile(tex):
 
 INDEX = r'_\{?(?:1,2|[1-9])\}?(?=\s*(?:=|\\approx))'
 
+def ist_menge(tex, name='L'):
+    """A step that states a set: the solution set L (or the domain D) - not a formula solved for a quantity L or D."""
+    return re.match(r'\s*' + name + r'\s*=\s*(?:\\\{|\\mathbb\{R\}|\\emptyset|\\varnothing)', tex) is not None
+
+def eine_menge(s):
+    s = s.strip()
+    if s in ('\\emptyset', '\\varnothing') or re.fullmatch(r'\\\{\s*\\\}', s):
+        return EmptySet
+    m = re.fullmatch(r'\\mathbb\{R\}(?:\s*\\setminus\s*\\\{(.*)\\\})?', s)
+    if m:
+        return S.Reals - FiniteSet(*[parse(z) for z in m.group(1).split(';')]) if m.group(1) else S.Reals
+    m = re.fullmatch(r'\\\{(.*)\\\}', s)
+    if not m:
+        raise ValueError('keine Menge: ' + s)
+    elemente = [parse(z) for z in m.group(1).split(';')]
+    if len(set(elemente)) != len(elemente) or sorted(elemente, key=lambda w: float(N(w))) != elemente:
+        raise ValueError('nicht der Größe nach oder doppelt: ' + s)
+    return FiniteSet(*elemente)
+
+def als_menge(tex):
+    r"""The set a step "L=..." or "D=..." states; several forms side by side ("L=\{\}=\emptyset") must agree."""
+    mengen = [eine_menge(s) for s in re.sub(r'\\[,;:! ]', ' ', tex).split('=')[1:]]
+    if any(not (m.is_subset(mengen[0]) and mengen[0].is_subset(m)) for m in mengen[1:]):
+        raise ValueError('verschiedene Mengen: ' + tex)
+    return mengen[0]
+
+def enthalten(a, b):
+    """Every solution of a is one of b (finite sets) - a step after squaring may have more."""
+    ea, eb = endlich(a), endlich(b)
+    if ea is None or eb is None:
+        return False
+    return all(any(abs(complex(N(x - y, 30))) <= 1e-9 for y in eb) for x in ea)
+
 def loesungen(tex, v, dom):
     menge = EmptySet
-    if re.fullmatch(r'\s*L\s*=\s*\\\{\s*\\\}\s*', tex):
-        return EmptySet, False
+    if ist_menge(tex):
+        return als_menge(tex), False
     stuecke = []
     for s in teile(tex):
         stuecke += [s.replace('\\pm', '+'), s.replace('\\pm', '-')] if '\\pm' in s else [s]
@@ -69,6 +109,10 @@ def loesungen(tex, v, dom):
         s2 = re.sub(INDEX, '', s)
         ungefaehr = '\\approx' in s2
         e = parse(s2.replace('\\approx', '='))
+        if e in (S.true, S.false):
+            # no variable left: "0=0" holds for every x of the range, "3=-1" for none
+            menge = Union(menge, dom) if e == S.true else menge
+            continue
         # the other letters of a formula are quantities: positive
         e = e.subs({x: Symbol(x.name, positive=True) for x in e.free_symbols if x != v})
         if not isinstance(e, Eq):
@@ -114,7 +158,12 @@ for block in json.load(open(sys.argv[1])):
                 for k, st in enumerate(a['schritte'], 1):
                     eqs = lgs.gleichungen(st, vs, parse)
                     t = Symbol('t')
-                    if eqs is not None and any(e.has(t) for e in eqs):
+                    if eqs == []:
+                        # "0=0" after subtracting: a row that says nothing - right only where one equation (right side
+                        # included) is a combination of the others
+                        erw = Matrix([[e.coeff(v) for v in vs] + [e.subs({v: 0 for v in vs})] for e in ziel])
+                        ok = erw.rank() < len(ziel)
+                    elif eqs is not None and any(e.has(t) for e in eqs):
                         # a parameter: the step's solutions solve the task, and as many free as the task has
                         sol = lgs.loesung(eqs, vs)
                         tup = next(iter(sol))
@@ -164,15 +213,28 @@ for block in json.load(open(sys.argv[1])):
                         if abs(complex(N((e.lhs - e.rhs).subs(v, w)))) > 1e-9:
                             raise ValueError(f'{w} erfüllt die Aufgabe nicht')
                     print(f'  (nur Probe) {slug}: {ziel}')
-                if ziel == EmptySet and not re.fullmatch(r'\s*L\s*=\s*\\\{\s*\\\}\s*', a['schritte'][-1]):
+                if ziel == EmptySet and not ist_menge(a['schritte'][-1]):
                     raise ValueError('die Aufgabe hat keine Lösung')
+                feld, folgerung, n = dom, False, len(a['schritte'])
                 for k, st in enumerate(a['schritte'], 1):
-                    l, grob = loesungen(st, v, dom)
-                    if not gleich(l, ziel, grob):
+                    if ist_menge(st, 'D'):
+                        # the domain: what the task allows (no denominator 0, no negative radicand)
+                        e = parse(aufg)
+                        d, soll = als_menge(st), continuous_domain(e.lhs - e.rhs, v, dom)
+                        if not (d.is_subset(soll) and soll.is_subset(d)):
+                            fehler += 1
+                            print(f'  FALSCH {slug} Schritt {k}: {st}  ->  {d}  statt  {soll}')
+                        feld = Intersection(dom, d)
+                        continue
+                    if 'quadrieren' in ((a.get('ops') or [''] * n)[k - 1] or ''):
+                        folgerung = True
+                    l, grob = loesungen(st, v, feld)
+                    ok = enthalten(ziel, l) if folgerung and k < n and not ist_menge(st) else gleich(l, ziel, grob)
+                    if not ok:
                         fehler += 1
                         print(f'  FALSCH {slug} Schritt {k}: {st}  ->  {l}  statt  {ziel}')
                 letzte = a['schritte'][-1]
-                for s in ([] if re.fullmatch(r'\s*L\s*=\s*\\\{\s*\\\}\s*', letzte) else teile(letzte)):
+                for s in ([] if ist_menge(letzte) else teile(letzte)):
                     links, rechts = re.split(r'=|\\approx', s, maxsplit=1)
                     lv = re.sub(r'_\{?(?:1,2|[1-9])\}?\s*$', '', links.strip())
                     rv = parse(rechts)

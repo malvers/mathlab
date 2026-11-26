@@ -8,6 +8,8 @@
 //   SolitaKaraoke.render(el, text, opt)      the text as word spans, $...$ as KaTeX in ONE span that knows how it is said;
 //                                            opt.wort = class of a word span ('ask-w'), opt.absaetze = blank lines become
 //                                            paragraphs and $$...$$ is set displayed (the labs; the decks: neither)
+//   SolitaKaraoke.satzendZahlen(text)        a number that ends a sentence as a word ("Seite 20." -> "Seite zwanzig."), so the
+//                                            voice does not read an ordinal; also run by Node (videopipeline/lib/tts.mjs)
 //   SolitaKaraoke.woerter(text, opt)         how many word spans render() makes of this text
 //   SolitaKaraoke.stuecke(text)              sentence pieces for a slow voice (Doc's), each ending outside $...$
 //   SolitaKaraoke.spielen(el, audio, spans, opt)   lights the word being said: opt.box = the box that keeps it centred,
@@ -201,14 +203,29 @@
         'oktober', 'november', 'dezember']);
     const SATZANFANG = new Set(['Es', 'Er', 'Sie', 'Das', 'Die', 'Der', 'Den', 'Dem', 'Wir', 'Ich', 'Du', 'Und', 'Aber',
         'Also', 'Dann', 'Da', 'So', 'Jetzt', 'Nun', 'Hier', 'Nur', 'Auch', 'Mit', 'Wenn', 'Weil', 'Damit', 'Probe']);
+    // The same rule for everything she says, not only the answers in the box: her calls (~/.claude/hooks/solita-ruf.mjs),
+    // the deck clips (tools/pptx/deck_audio.mjs), the films (videopipeline/lib/tts.mjs, which loads this file in Node),
+    // solita.html and the tracker (Doc, 24.11.2026: "dass Solita nicht beim Satzende, wo 20 steht, und ein Punkt, als
+    // Satz immer 20. [liest]"). What stays untouched: a number after another number's dot, comma, colon or slash - dates
+    // ("am 24.11.", "1.12.2026."), outlines ("3.2."), decimals, times ("um 15:30.") - and one glued to a letter ("A4.").
+    // A thousands number ("1.000.") is one number and goes as a word as well; 1100 to 1999 the way one says a year
+    // ("1963." -> "neunzehnhundertdreiundsechzig", not "eintausend..."). SSML passes through: a number inside a tag is
+    // left alone, and a tag after the dot ends the sentence like a space ("20.</speak>", "20.<break .../> Danach").
+    function grundzahl(n) {
+        return n >= 1100 && n < 2000 ? unter100(Math.floor(n / 100)) + 'hundert' + (n % 100 ? unter100(n % 100) : '') : zahlwort(n);
+    }
+    const TAG = /<\/?[a-zA-Z][^<>]*>/g;
     function satzendZahlen(t) {
-        return t.replace(/(^|[^\d.,])(\d{1,6})\.(?=\s|$)/g, function (m, vor, zahl, i, alles) {
-            const davor = alles.slice(Math.max(0, i - 16), i + vor.length).toLowerCase().match(/([a-zäöüß]+)\s*$/);
-            const danach = alles.slice(i + m.length).match(/^\s+([A-Za-zÄÖÜäöüß]+)/);
+        return String(t).replace(/(^|[^\p{L}\d.,:\/])(\d{1,3}\.\d{3}|\d{1,6})\.(?=\s|$|<)/gu, function (m, vor, zahl, i, alles) {
+            const auf = alles.lastIndexOf('<', i);
+            if (auf > alles.lastIndexOf('>', i) && /^<\/?[a-zA-Z]/.test(alles.slice(auf, auf + 3))) return m;   // inside a tag
+            const davor = alles.slice(Math.max(0, i - 120), i + vor.length).replace(TAG, ' ').slice(-16).toLowerCase()
+                .match(/([a-zäöüß]+)\s*$/);
+            const danach = alles.slice(i + m.length, i + m.length + 120).replace(TAG, ' ').match(/^\s+([A-Za-zÄÖÜäöüß]+)/);
             // "die 1. Es stimmt!" - after an article the dot still ends a sentence when a sentence starts behind it
             if (davor && ORDINAL_DAVOR.has(davor[1]) && !(danach && SATZANFANG.has(danach[1]))) return m;
             if (danach && (MONATE.has(danach[1].toLowerCase()) || /^[a-zäöüß]/.test(danach[1]))) return m;
-            return vor + zahlwort(+zahl) + '.';
+            return vor + grundzahl(+zahl.replace('.', '')) + '.';
         });
     }
     // What the voice is given: formulas as words, no emoji or markdown - and no HTML tags (a lab's step text)
@@ -428,5 +445,5 @@
     }
 
     global.SolitaKaraoke = { texWords: texWords, sprechbar: sprechbar, render: render, woerter: woerter, selbst: SELBST,
-                             stuecke: stuecke, spielen: spielen, syllables: syllables };
+                             stuecke: stuecke, spielen: spielen, syllables: syllables, satzendZahlen: satzendZahlen };
 })(window);

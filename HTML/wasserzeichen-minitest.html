@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini-Test Wasserzeichen FOW25-1 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+<style>
+  /* Page-specific input type: number boxes above the words + AI/Human per sentence.
+     The engine's own multiple-choice cards stay in the DOM (they carry answers,
+     score and submission) but are hidden; the inputs below drive them. */
+  #quiz > .card.wm-engine { display: none; }
+  /* the fold button of js/quiz-collapse.js only folds the hidden engine cards */
+  .qbar .btn-fold { display: none; }
+  /* a bit wider than the other tests so the seven words fit in one row on a laptop */
+  .wrap { max-width: 860px; }
+  .wm-rule { font-size: 0.98rem; line-height: 1.5; }
+  .wm-rule .wm-key {
+    display: inline-block; font-family: 'Orbitron', sans-serif; font-weight: 700;
+    background: var(--blue); color: #fff; border-radius: 8px; padding: 2px 10px; margin: 0 2px;
+  }
+  .wm-rule .g { color: var(--green-dark); font-weight: bold; }
+  .wm-rule .r { color: var(--red); font-weight: bold; }
+  .wm-rule ul { margin: 8px 0 0 20px; }
+  .wm-keyline { font-size: 1.15rem; }
+  .wm-keyline .wm-key { font-size: 1.5rem; padding: 2px 14px; }
+  .wm-row { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; }
+  .wm-words { display: flex; flex-wrap: wrap; gap: 10px 6px; }
+  .wm-w { display: flex; flex-direction: column; align-items: center; min-width: 58px; }
+  .wm-w input {
+    width: 4.2em; height: 2.3em; text-align: center; font: bold 1.05rem Arial, Helvetica, sans-serif;
+    color: var(--blue); background: #fff; border: 2px solid rgba(14, 36, 78, 0.35); border-radius: 8px;
+  }
+  .wm-w input:focus { outline: none; border-color: var(--blue); }
+  .wm-w input.lg { border-color: var(--green); background: rgba(121, 158, 49, 0.10); }
+  .wm-w input.lr { border-color: var(--red); background: rgba(176, 36, 24, 0.07); }
+  .wm-w input[readonly] { color: rgba(14, 36, 78, 0.6); background: var(--blue-soft); border-style: dashed; }
+  .wm-word { font-size: 1.08rem; font-weight: bold; margin-top: 6px; }
+  .wm-num { font-size: 0.82rem; opacity: 0.75; }
+  .wm-choice { display: flex; flex-direction: column; gap: 8px; min-width: 112px; }
+  .wm-choice label {
+    display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: 'Orbitron', sans-serif;
+    font-weight: 700; font-size: 0.95rem; border: 2px solid rgba(14, 36, 78, 0.25); border-radius: 10px; padding: 8px 12px;
+  }
+  .wm-choice input { width: 20px; height: 20px; accent-color: var(--blue); }
+  .wm-choice label.sel { border-color: var(--blue); background: var(--blue-soft); }
+  .wm-points { font-size: 0.85rem; opacity: 0.75; margin-top: 10px; }
+  /* the pupil's own result after "Abgegeben ✓" */
+  .wm-review .wm-score { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.9rem; margin: 6px 0 2px; }
+  .wm-review .wm-s { margin-top: 18px; }
+  .wm-review .wm-s-head { font-weight: bold; margin-bottom: 8px; }
+  .wm-out {
+    width: 4.2em; height: 2.3em; display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+    font: bold 1.05rem Arial, Helvetica, sans-serif; border: 2px solid; border-radius: 8px;
+  }
+  .wm-out.ok { border-color: var(--green); background: rgba(121, 158, 49, 0.10); color: var(--green-dark); }
+  .wm-out.bad { border-color: var(--red); background: rgba(176, 36, 24, 0.07); color: var(--red); }
+  .wm-out.given { border: 2px dashed rgba(14, 36, 78, 0.35); background: var(--blue-soft); color: rgba(14, 36, 78, 0.6); }
+  .wm-right { font-size: 0.82rem; font-weight: bold; color: var(--green-dark); }
+  .wm-pick { margin-top: 10px; }
+  .wm-pick .ok { color: var(--green-dark); font-weight: bold; }
+  .wm-pick .bad { color: var(--red); font-weight: bold; }
+  @media (max-width: 560px) {
+    .wm-row { grid-template-columns: 1fr; }
+    .wm-choice { flex-direction: row; }
+    .wm-choice label { flex: 1; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<!-- Page markup, scoring, code gate, submission and the teacher dashboard live in
+     js/quiz-engine.js. This page only adds its own input type: the pupil types the
+     result of the deck's watermark rule (ai-wasserzeichen.html, slides 18-23, key 7)
+     above each word and picks AI or Human per sentence. -->
+<script>
+(function () {
+  'use strict';
+  /* The rule of the deck: result = number of the previous word * key + number of the word;
+     last digit 0-4 = green, 5-9 = red; the first word counts with its own number.
+     Five variants (Doc, 24.11.2026: "für jeden Test einen anderen Key" - "mach 5 verschiedene"):
+     each key has its own three sentences (Doc 11:42: "Noch einen 3. Satz je"), AI and Human mixed
+     differently per key; the pupil's slip code picks the key (keyOf). */
+  var KEYS = [3, 4, 6, 7, 9];
+  var VARIANTS = {
+    3: { ai: [0, 2], sentences: [
+        [['Unsere', 30], ['Katze', 22], ['schläft', 47], ['gern', 39], ['auf', 43], ['dem', 36], ['Sofa', 26]],
+        [['Opa', 18], ['repariert', 33], ['sein', 14], ['altes', 20], ['Fahrrad', 41], ['im', 16], ['Keller', 44]],
+        [['Papa', 11], ['fährt', 19], ['jeden', 32], ['Morgen', 17], ['mit', 40], ['dem', 24], ['Bus', 31]]] },
+    4: { ai: [1], sentences: [
+        [['Meine', 12], ['Schwester', 15], ['backt', 39], ['jeden', 18], ['Sonntag', 20], ['einen', 27], ['Apfelkuchen', 40]],
+        [['Nach', 21], ['der', 31], ['Schule', 17], ['gehen', 44], ['wir', 37], ['ins', 23], ['Kino', 32]],
+        [['Die', 29], ['Kinder', 28], ['bauen', 48], ['im', 11], ['Schnee', 13], ['einen', 16], ['Schneemann', 46]]] },
+    6: { ai: [0], sentences: [
+        [['Der', 41], ['Zug', 44], ['nach', 16], ['Berlin', 47], ['hat', 48], ['heute', 38], ['Verspätung', 35]],
+        [['Im', 42], ['Garten', 17], ['blühen', 33], ['jetzt', 49], ['viele', 37], ['rote', 30], ['Tulpen', 19]],
+        [['Heute', 21], ['Abend', 14], ['schauen', 29], ['wir', 25], ['zusammen', 23], ['einen', 20], ['Film', 27]]] },
+    7: { ai: [1, 2], sentences: [
+        [['Wir', 45], ['grillen', 37], ['am', 25], ['Samstag', 38], ['mit', 49], ['unseren', 43], ['Nachbarn', 21]],
+        [['Tim', 11], ['liest', 36], ['abends', 28], ['im', 15], ['Bett', 12], ['spannende', 30], ['Krimis', 22]],
+        [['Unser', 31], ['Lehrer', 16], ['erklärt', 39], ['die', 44], ['Aufgabe', 46], ['noch', 40], ['einmal', 24]]] },
+    9: { ai: [0, 1], sentences: [
+        [['Im', 13], ['Urlaub', 25], ['sammeln', 37], ['wir', 11], ['am', 23], ['Strand', 17], ['Muscheln', 22]],
+        [['Das', 43], ['Konzert', 16], ['in', 26], ['der', 19], ['Halle', 27], ['war', 40], ['ausverkauft', 12]],
+        [['Lina', 32], ['übt', 24], ['jeden', 14], ['Tag', 15], ['eine', 34], ['Stunde', 33], ['Klavier', 41]]] }
+  };
+  var green = function (v) { return v % 10 <= 4; };
+  function results(words, key) {
+    return words.map(function (w, i) { return i === 0 ? w[1] : words[i - 1][1] * key + w[1]; });
+  }
+  /* solutions per key, checked: the AI sentence has at least 6 of 7 green, the human one at most 4 */
+  KEYS.forEach(function (key) {
+    var v = VARIANTS[key];
+    v.key = key;
+    v.sentences = v.sentences.map(function (words, si) {
+      var r = results(words, key), n = r.filter(green).length, ai = v.ai.indexOf(si) >= 0;
+      if (words.length !== 7 || (ai ? n < 6 : n > 4)) throw new Error('wasserzeichen-minitest: variant ' + key + ' sentence ' + (si + 1) + ' fails (' + n + ' green)');
+      return { words: words, results: r, green: n, ai: ai };
+    });
+  });
+  /* stable code -> key: the same slip code always gets the same key */
+  function keyOf(code) {
+    var h = 0;
+    for (var i = 0; i < code.length; i++) h = (h * 31 + code.charCodeAt(i)) % 100003;
+    return KEYS[h % KEYS.length];
+  }
+  /* the engine's questions are the same for every variant: 6 boxes + 1 choice per sentence,
+     option 0 = right, option 1 = wrong (6 boxes + 1 choice per sentence, 3 sentences = 21); the page decides right/wrong for the pupil's variant */
+  var questions = [];
+  [0, 1, 2].forEach(function (si) {
+    for (var wi = 1; wi < 7; wi++) {
+      questions.push({ q: 'Satz ' + (si + 1) + ', Ergebnis über Wort ' + (wi + 1), opts: ['richtig', 'andere Zahl'], solution: 0 });
+    }
+    questions.push({ q: 'Satz ' + (si + 1) + ': AI oder Human?', opts: ['richtig gewählt', 'falsch gewählt'], solution: 0 });
+  });
+  window.WM = { KEYS: KEYS, VARIANTS: VARIANTS, green: green, keyOf: keyOf,
+                qBox: function (si, wi) { return si * 7 + wi - 1; }, qChoice: function (si) { return si * 7 + 6; } };
+
+  window.QUIZ = {
+    id: 'wasserzeichen-minitest',
+    back: 'svp/informatik/fos12.html',
+    version: 'v1',
+    requireCode: true,
+    revealAfterSubmit: false,
+    title: 'Mini-Test Wasserzeichen · FOW25-1',
+    subtitle: 'Informatik · Unsichtbare Wasserzeichen · 3 Sätze · ' + questions.length + ' Punkte · jeder Code hat seinen eigenen Schlüssel',
+    gradeScale: [[95, 1], [80, 2], [65, 3], [45, 4], [25, 5], [0, 6]],
+    questions: questions
+  };
+})();
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+<script>
+/* Own input type on top of the engine: every number box and every AI/Human pick
+   presses the matching (hidden) engine option - 0 = right, 1 = wrong for the
+   pupil's variant - so answers, code, keep-alive, guard and submission all stay
+   the engine's. The variant follows the slip code (?test: &key=3 previews one). */
+(function () {
+  'use strict';
+  var WM = window.WM, QZ = window.QUIZ;
+  var quizEl = document.getElementById('quiz');
+  /* the teacher dashboard (?auswertung) has no test cards */
+  if (!quizEl || !WM || new URLSearchParams(location.search).has('auswertung')) return;
+  var PARAMS = new URLSearchParams(location.search);
+  var TEST = PARAMS.has('test');
+  /* No full screen on touch devices for this typing test (Leni, FOW25-1, iPad Safari, 24.11.2026: no number
+     could be typed). On touch the engine's guard answers every tap with a request for full screen; on the iPad
+     the tap into a box started the switch, the page jumped, the box lost its focus and the keyboard never came.
+     A lost full screen is no leave on touch anyway; another tab or app still locks the test. */
+  if ((window.matchMedia && matchMedia('(pointer: coarse)').matches) || navigator.maxTouchPoints > 0) {
+    document.documentElement.requestFullscreen = undefined;
+    document.documentElement.webkitRequestFullscreen = undefined;
+  }
+  var engineCards = Array.prototype.slice.call(quizEl.querySelectorAll(':scope > .card'));
+  engineCards.forEach(function (c) { c.classList.add('wm-engine'); });
+  function press(qi, oi) {
+    var b = engineCards[qi] && engineCards[qi].querySelectorAll('.opt')[oi];
+    if (b && !b.disabled) b.click();
+  }
+  var STORE = 'wm-typed-' + QZ.id;
+  var state = { key: null, typed: {}, choice: {} };
+  try {
+    var kept = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (kept && kept.typed && kept.choice) state = kept;
+  } catch (e) { /* no storage */ }
+  function keep() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* no storage */ } }
+
+  function currentCode() {
+    var el = document.getElementById('codeInput'), g = document.querySelector('.guard-code');
+    var c = (el && el.value) || (g && g.value) || PARAMS.get('code') || '';
+    return String(c).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  }
+  function wantedKey() {
+    var k = Number(PARAMS.get('key'));
+    if (TEST && WM.VARIANTS[k]) return k;
+    var c = currentCode();
+    if (/^[2-9A-HJ-NP-Z]{4}$/.test(c)) return WM.keyOf(c);
+    return TEST ? WM.KEYS[0] : null;
+  }
+
+  var ui = document.createElement('div');
+  ui.className = 'wm';
+  quizEl.insertBefore(ui, quizEl.firstChild);
+  var shownKey;
+
+  function render(key) {
+    shownKey = key;
+    ui.innerHTML = '';
+    var rule = document.createElement('div');
+    rule.className = 'card wm-rule';
+    if (key == null) {
+      rule.innerHTML = '<div class="qnum">SO WIRD GERECHNET</div><p>Gib zuerst den Code von deinem Zettel ein – ' +
+        'er bestimmt deinen Schlüssel und deine drei Sätze.</p>';
+      ui.appendChild(rule);
+      return;
+    }
+    var V = WM.VARIANTS[key];
+    rule.innerHTML =
+      '<div class="qnum">SO WIRD GERECHNET</div>' +
+      '<p class="wm-keyline">Dein geheimer Schlüssel: <span class="wm-key">' + key + '</span></p>' +
+      '<ul>' +
+      '<li>Rechnung: <b>Zahl des vorherigen Worts · ' + key + ' + Zahl des Worts</b></li>' +
+      '<li>Nur die letzte Ziffer zählt: <span class="g">0 bis 4 grün</span>, <span class="r">5 bis 9 rot</span>.</li>' +
+      '<li>Erstes Wort: nur seine eigene Zahl (steht schon da).</li>' +
+      '</ul>' +
+      '<p style="margin-top:8px">Trage über jedem Wort das <b>Ergebnis</b> ein. Entscheide dann bei jedem Satz: Stammt er von einer ' +
+      '<b>KI mit Wasserzeichen (AI)</b> oder von einem <b>Menschen (Human)</b>?</p>' +
+      '<p class="wm-points">1 Punkt je richtiges Ergebnis, 1 Punkt je richtige Wahl AI/Human · zusammen ' + QZ.questions.length + ' Punkte.</p>';
+    ui.appendChild(rule);
+
+    V.sentences.forEach(function (s, si) {
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = '<div class="qnum">SATZ ' + (si + 1) + ' / ' + V.sentences.length + ' · SCHLÜSSEL ' + key + '</div>';
+      var row = document.createElement('div');
+      row.className = 'wm-row';
+      var words = document.createElement('div');
+      words.className = 'wm-words';
+      s.words.forEach(function (w, wi) {
+        var col = document.createElement('div');
+        col.className = 'wm-w';
+        var inp = document.createElement('input');
+        inp.type = 'text';
+        inp.inputMode = 'numeric';
+        inp.autocomplete = 'off';
+        inp.maxLength = 4;
+        inp.setAttribute('aria-label', 'Satz ' + (si + 1) + ', Ergebnis für „' + w[0] + '“');
+        function paint() {
+          var v = inp.value;
+          inp.classList.toggle('lg', v !== '' && WM.green(Number(v)));
+          inp.classList.toggle('lr', v !== '' && !WM.green(Number(v)));
+        }
+        if (wi === 0) {
+          inp.value = String(w[1]);
+          inp.readOnly = true;
+          inp.tabIndex = -1;
+        } else {
+          var qi = WM.qBox(si, wi), tk = si + '-' + wi;
+          if (state.typed[tk] != null) inp.value = state.typed[tk];
+          inp.addEventListener('input', function () {
+            var v = inp.value.replace(/\D/g, '').slice(0, 4);
+            if (inp.value !== v) inp.value = v;
+            state.typed[tk] = v;
+            keep();
+            paint();
+            /* an emptied box counts as wrong; every box has to be filled before "Abgeben" */
+            press(qi, v !== '' && Number(v) === s.results[wi] ? 0 : 1);
+          });
+        }
+        paint();
+        var word = document.createElement('div');
+        word.className = 'wm-word';
+        word.textContent = w[0];
+        var num = document.createElement('div');
+        num.className = 'wm-num';
+        num.textContent = 'Zahl ' + w[1];
+        col.appendChild(inp);
+        col.appendChild(word);
+        col.appendChild(num);
+        words.appendChild(col);
+      });
+      var choice = document.createElement('div');
+      choice.className = 'wm-choice';
+      ['AI', 'Human'].forEach(function (label, oi) {
+        var lab = document.createElement('label');
+        var r = document.createElement('input');
+        r.type = 'radio';
+        r.name = 'wm-choice-' + si;
+        r.checked = state.choice[si] === oi;
+        lab.classList.toggle('sel', r.checked);
+        r.addEventListener('change', function () {
+          state.choice[si] = oi;
+          keep();
+          press(WM.qChoice(si), (oi === 0) === s.ai ? 0 : 1);
+          choice.querySelectorAll('label').forEach(function (l) { l.classList.toggle('sel', l.contains(r)); });
+        });
+        lab.appendChild(r);
+        lab.appendChild(document.createTextNode(label));
+        choice.appendChild(lab);
+      });
+      row.appendChild(words);
+      row.appendChild(choice);
+      card.appendChild(row);
+      ui.appendChild(card);
+    });
+  }
+
+  /* another key than the kept answers were typed for (new code on this device): they do not
+     belong to these sentences - drop them and mark the boxes answered so far as wrong */
+  function switchTo(key) {
+    if (key != null && state.key != null && state.key !== key) {
+      Object.keys(state.typed).forEach(function (tk) {
+        var p = tk.split('-');
+        if (state.typed[tk] !== '') press(WM.qBox(Number(p[0]), Number(p[1])), 1);
+      });
+      Object.keys(state.choice).forEach(function (si) { press(WM.qChoice(Number(si)), 1); });
+      state.typed = {};
+      state.choice = {};
+    }
+    if (key != null) { state.key = key; keep(); }
+    render(key);
+  }
+  switchTo(wantedKey());
+  /* the code arrives later (start screen, code field): follow it */
+  setInterval(function () {
+    var k = wantedKey();
+    if (k !== shownKey) switchTo(k);
+  }, 400);
+
+  /* After "Abgeben" the pupil sees her own result at once (Doc, 24.11.2026: "Das sollen die natürlich sofort
+     sehen für ihren Test. Bitte dringend ändern."): points, every box and every AI/Human pick right or wrong,
+     the right number next to a wrong one. Only once the engine says "Abgegeben ✓" - the server has the
+     submission; before that a reload would open the test again. Only this page: the engine keeps graded tests
+     sealed, the class figures stay in the dashboard. */
+  var resEl = document.getElementById('result');
+  var reviewEl = null;
+  var DONE_TEXT = 'Deine Antworten sind angekommen. Deine Auswertung steht darunter.';
+  function showReview() {
+    var V = WM.VARIANTS[state.key];
+    if (reviewEl || !V) return;
+    var pts = 0;
+    reviewEl = document.createElement('div');
+    reviewEl.className = 'card wm-review';
+    var head = document.createElement('div');
+    head.className = 'qnum';
+    head.textContent = 'DEINE AUSWERTUNG · SCHLÜSSEL ' + V.key;
+    var score = document.createElement('div');
+    score.className = 'wm-score';
+    reviewEl.appendChild(head);
+    reviewEl.appendChild(score);
+    V.sentences.forEach(function (s, si) {
+      var box = document.createElement('div');
+      box.className = 'wm-s';
+      var sh = document.createElement('div');
+      sh.className = 'wm-s-head';
+      sh.textContent = 'Satz ' + (si + 1);
+      box.appendChild(sh);
+      var words = document.createElement('div');
+      words.className = 'wm-words';
+      s.words.forEach(function (w, wi) {
+        var col = document.createElement('div');
+        col.className = 'wm-w';
+        var out = document.createElement('div');
+        var t = wi === 0 ? String(w[1]) : (state.typed[si + '-' + wi] || '');
+        var ok = wi > 0 && t !== '' && Number(t) === s.results[wi];
+        if (ok) pts++;
+        out.className = 'wm-out ' + (wi === 0 ? 'given' : ok ? 'ok' : 'bad');
+        out.textContent = wi === 0 ? t : (t === '' ? '–' : t) + (ok ? ' ✓' : ' ✗');
+        col.appendChild(out);
+        var word = document.createElement('div');
+        word.className = 'wm-word';
+        word.textContent = w[0];
+        col.appendChild(word);
+        if (wi > 0 && !ok) {
+          var right = document.createElement('div');
+          right.className = 'wm-right';
+          right.textContent = 'richtig: ' + s.results[wi];
+          col.appendChild(right);
+        }
+        words.appendChild(col);
+      });
+      box.appendChild(words);
+      var c = state.choice[si];
+      var picked = c === 0 ? 'AI' : c === 1 ? 'Human' : 'nichts gewählt';
+      var cOk = (c === 0 || c === 1) && (c === 0) === s.ai;
+      if (cOk) pts++;
+      var pick = document.createElement('div');
+      pick.className = 'wm-pick';
+      var mark = document.createElement('span');
+      mark.className = cOk ? 'ok' : 'bad';
+      mark.textContent = cOk ? 'richtig ✓' : 'falsch ✗ – richtig: ' + (s.ai ? 'AI' : 'Human');
+      pick.appendChild(document.createTextNode('Deine Wahl: ' + picked + ' · '));
+      pick.appendChild(mark);
+      pick.appendChild(document.createTextNode(' (' + s.green + ' von 7 grün)'));
+      box.appendChild(pick);
+      reviewEl.appendChild(box);
+    });
+    score.textContent = pts + ' / ' + QZ.questions.length + ' Punkte';
+    resEl.parentNode.insertBefore(reviewEl, resEl.nextSibling);
+  }
+  function checkDone() {
+    var h = resEl.querySelector('h2'), p = resEl.querySelector('.sealed-text');
+    if (!resEl.classList.contains('sealed') || !h || h.textContent !== 'Abgegeben ✓') return;
+    if (p && p.textContent !== DONE_TEXT) p.textContent = DONE_TEXT;
+    showReview();
+  }
+  if (resEl) {
+    new MutationObserver(checkDone).observe(resEl, { childList: true, subtree: true, characterData: true, attributes: true });
+    checkDone();   /* submitted before a reload: the engine showed "Abgegeben ✓" already */
+  }
+})();
+</script>
+</body>
+</html>

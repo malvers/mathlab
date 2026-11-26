@@ -19,6 +19,8 @@ DECKS = os.path.join(HTML_DIR, "decks")
 # what a page loads itself: <script src>, <link href> (only .css counts below), and ES module imports in the page
 REFS = re.compile(r'<script\b[^>]*\bsrc="([^"#?]+)"|<link\b[^>]*\bhref="([^"#?]+)"|\bfrom\s+[\'"]([^\'"#?]+\.m?js)[\'"]', re.I)
 WATCHED = (".js", ".mjs", ".css")
+# what the page reports it fetched at runtime may also be data and pictures (RELOAD_JS: the browser's resource list)
+REF_WATCHED = WATCHED + (".json", ".webp", ".png", ".jpg", ".jpeg", ".svg", ".gif")
 VORSPANN = re.compile(r"\bvorspann/[a-z0-9_-]+\.html")
 MITSCHRIFT_APP = os.path.join(os.path.dirname(HTML_DIR), "docmitschrift-app")
 MITSCHRIFT_DATA = os.path.join(os.path.expanduser("~"), "Documents", "mitschrift")
@@ -83,8 +85,11 @@ def stamp(page, refs=()):
     paths = files_for(page)
     for ref in refs:
         p = _local(ref, HTML_DIR)
-        if p and p.endswith(WATCHED) and p not in paths:
+        if p and p.endswith(REF_WATCHED) and p not in paths:
             paths.append(p)
+    # this module too: a change to live reload itself reloads every open page once, so each gets the new reload.js
+    # (Doc, 25.11.2026: "das ist ganz wichtig mit diesem Reload")
+    paths.append(os.path.abspath(__file__))
     newest = 0
     for p in paths:
         try:
@@ -101,6 +106,8 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
 // of its own writes, so saving a text or moving a picture never counts as a change. (tools/live_reload.py)
 (function () {
   if (window.__liveReload) return;
+  // room in the browser's resource list for everything the page fetches (default 250 - a full list drops the rest)
+  try { performance.setResourceTimingBufferSize(2000); } catch (e) { }
   const page = location.pathname;
   // when the server read this page (serve.py): a change after that moment is not in what we show, even if it came while
   // the page was still loading. Taken as the first ground it would be swallowed: of two saves in a row the reload showed
@@ -116,12 +123,12 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
   // else anyway.
   function refs() {
     const out = [];
-    function add(u) {
-      if (!u) return;
+    function add(u, more) {
+      if (!u || out.length >= 200) return;   // a page full of pictures keeps the question short
       try {
         const x = new URL(u, location.href);
         if (x.origin !== location.origin) return;
-        if (!/\.(m?js|css)$/i.test(x.pathname)) return;
+        if (!(more ? /\.(m?js|css|json|webp|png|jpe?g|svg|gif)$/i : /\.(m?js|css)$/i).test(x.pathname)) return;
         if (out.indexOf(x.pathname) < 0) out.push(x.pathname);
       } catch (e) { }
     }
@@ -138,6 +145,10 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
       }
     }
     for (const sheet of document.styleSheets) imports(sheet);
+    // ... and what scripts pulled in at runtime: a module loaded with import() (the Tagebuch's sondertage.js), fetched
+    // data and pictures stand in no tag at all - the browser's resource list has them (Doc, 25.11.2026: "Es fehlte wieder
+    // der Auto-Refresh ... Wie können wir sicherstellen, dass es auch immer auto-reloadet?")
+    try { for (const e of performance.getEntriesByType('resource')) add(e.name, true); } catch (e) { }
     return out.sort().join(',');
   }
   // why the page must not reload right now - '' when it may (the name is shown on the waiting pill below)

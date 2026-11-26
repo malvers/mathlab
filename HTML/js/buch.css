@@ -71,24 +71,75 @@ html::-webkit-scrollbar-corner { background: transparent; }
     font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 1.4px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+/* the book's name in a field of its own (Doc, 22.11.2026: "Dann hat alles so seine Pille"): the look of Solita's question
+   line beside it - 32 px high, radius 8, padding 10, the faint ground and teal hairline of .sf-in (js/solita-frage.css,
+   js/buch-solita.css) - the words white and larger than before, readable like "Doc Alvers Mathe-Labor" */
 .b-top-book {
-    margin-left: auto; font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1.2px;
-    color: var(--b-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-left: auto; min-width: 0; height: 32px; line-height: 31px; padding: 0 10px; border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05); border: 0.5px solid rgba(2, 100, 123, 0.9);
+    font-family: 'Orbitron', sans-serif; font-size: 0.78rem; letter-spacing: 1.2px;
+    color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .b-progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0; background: var(--b-lambda);
     box-shadow: 0 0 8px rgba(245, 194, 66, 0.7); transition: width 0.1s linear; }
-/* all pages of the print edition at a glance (O): the pill in the header and the frame over the book (js/buch.js) */
-.b-ovbtn {
+/* all pages of the print edition at a glance (O): the pill in the header and the frame over the book (js/buch.js).
+   "PDF", "Seiten" and the colour pill (js/farbschema.js) in the book's own header look like the book's name and Solita's
+   question line (Doc, 22.11.2026: "dass wir die Buttons PDF, Seiten, Hell auch so in diesem Stil machen"): 32 px high,
+   radius 8, padding 10, the faint ground and teal hairline of .sf-in; icons only: a 32 px square like her buttons */
+.b-ovbtn, .b-top .fs-pill {
     display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; cursor: pointer;
-    padding: 5px 12px 5px 9px; border-radius: 999px; border: 0.5px solid rgba(255, 255, 255, 0.22);
-    background: rgba(255, 255, 255, 0.06); color: #cfd8e6;
+    height: 32px; padding: 0 10px; border-radius: 8px; border: 0.5px solid rgba(2, 100, 123, 0.9);
+    background: rgba(255, 255, 255, 0.05); color: #cfd8e6;
     font-family: 'Orbitron', sans-serif; font-size: 0.66rem; letter-spacing: 1.1px; text-transform: uppercase;
 }
-.b-ovbtn:hover { border-color: var(--b-lambda); color: #fff; }
+.b-ovbtn:hover, .b-top .fs-pill:hover { border-color: var(--b-lambda); color: #fff; }
+html.fs-light .b-top .fs-pill { background: rgba(255, 255, 255, 0.05); }   /* js/farbschema.css paints the labs' pill white on Hell */
 .b-ovbtn svg { width: 16px; height: 16px; }
 .b-pdfbtn { text-decoration: none; }                  /* the PDF of the print edition, left of "Seiten" (js/buch.js buildPdf) */
 /* PDF, Seiten and the colour pill one gap apart: the header's own (Doc, 27.10.2026: "der Abstand … soll gleich sein") */
 .b-top .fs-pill { margin-left: 0; }
+/* "erhältlich bei Amazon" (js/buch.js buildAmazon, Doc 22.11.2026): Amazon's own tag for KDP publishers, untouched - no
+   box, no outline, no other colour. As small as Amazon allows (Doc, 22.11.2026: "so klein wie erlaubt"): the horizontal
+   tag exactly 200 px wide, its height from the file (30-32 px); its 4 px plus the header's gap keep Amazon's clear space
+   (the width of the tag's "o", 14-15 px at this size). The white tag on the dark grounds (Blau, Grau), the dark one on Hell. */
+.b-amazon { display: inline-flex; align-items: center; flex: 0 0 auto; padding: 4px; line-height: 0; border-radius: 6px; }
+.b-amazon img { display: block; width: 200px; height: auto; }
+/* in the header the word "amazon" sits on the pills' text line, the smile hangs below (Doc: "das amazon auf Höhe der
+   Buttons"): its letters fill rows 0-59 of the 103 of every file (measured 22.11.2026), centre 29.6 % from the top -
+   20.4 % of the tag's height down puts that centre on the header's middle, 1 px more on the pills' words (measured) */
+.b-amazon-top img { transform: translateY(calc(20.4% + 1px)); }
+.b-amazon .b-amazon-clr, html.fs-light .b-amazon .b-amazon-rev { display: none; }
+html.fs-light .b-amazon .b-amazon-clr { display: block; }
+.b-amazon:focus-visible { outline: 1.5px solid var(--b-lambda); outline-offset: 2px; }
+.b-amazon-row { display: none; }                      /* the phone's place for it, under the header (see below) */
+.b-amazon-top { order: 1; }                           /* the far right of the header, after the colour pill */
+/* Amazon's clear space under the tag (half its "o": 8.7-9.4 px at 200 px, measured 22.11.2026 - the English tag is the
+   tallest) did not fit under the smile in 58 px (5.7-7.6 px left). From 761 px the header is 4 px taller, the 4 px all at
+   the bottom, so everything in it stays where it was (Doc, 22.11.2026: "Ja, machen"); every book alike */
+@media (min-width: 761px) {
+    :root { --b-head-h: 62px; }
+    .b-top { padding-bottom: 4px; }
+}
+/* the header with the tag: Solita keeps her line (Doc, 10.10.2026: "die Zeile immer sichtbar"), the book's name gives way
+   first - and goes where it would only be a stub; up to 1100 px the pills show their icons only, as on the phone.
+   Up to 760 px the tag is not in the header (see below), so the header stays as it was there. */
+@media (min-width: 1301px) { .b-has-amazon .b-solita { flex: 1 0 260px; } .b-has-amazon .b-brand { flex-shrink: 0; } }
+@media (min-width: 761px) and (max-width: 1300px) { .b-has-amazon .b-top-book { display: none; } }
+@media (min-width: 761px) and (max-width: 1100px) {
+    .b-has-amazon .b-ovbtn, .b-has-amazon .fs-pill { width: 32px; padding: 0; justify-content: center; }
+    .b-has-amazon .b-ovbtn-l, .b-has-amazon .fs-pill .fs-label { display: none; }
+}
+/* the phone: no room in the header for a tag of 200 px - it opens the page, centred under the header. And for every book:
+   the book's name would only be a stub that cuts "Doc Alvers Mathe-Labor" short (measured 22.11.2026: "Doc Al…" at
+   640 px), so it goes, and the pills show their icons, as on the phone */
+@media (max-width: 760px) {
+    .b-top-book { display: none; }
+    .b-ovbtn, .b-top .fs-pill { width: 32px; padding: 0; justify-content: center; }
+    .b-ovbtn-l, .b-top .fs-pill .fs-label { display: none; }
+    .b-amazon-top { display: none; }
+    .b-amazon-row { display: flex; justify-content: center; margin: 16px 0 10px; }
+}
+@media print { .b-amazon, .b-amazon-row { display: none !important; } }
 .b-ov { position: fixed; inset: 0; z-index: 200; background: #071630; }
 .b-ov[hidden] { display: none; }
 .b-ov iframe { display: block; width: 100%; height: 100%; border: 0; }
@@ -135,7 +186,7 @@ html.b-ov-open #local-badge { top: auto !important; bottom: 8px !important; }   
     body.b-book { font-size: 17px; }
     .b-brand span { font-size: 0.7rem; letter-spacing: 1px; }
     .b-top-book { display: none; }
-    .b-ovbtn { margin-left: auto; padding: 5px 7px; }
+    .b-ovbtn { margin-left: auto; }
     .b-ovbtn + .b-ovbtn { margin-left: 0; }          /* PDF and Seiten side by side on the right */
     /* one pill more since PDF: a tighter header keeps "Doc Alvers Mathe-Labor" whole on a 390 px phone */
     .b-top { gap: 8px; padding: 0 12px; }
@@ -197,6 +248,17 @@ html.b-ov-open #local-badge { top: auto !important; bottom: 8px !important; }   
 .b-gruss-sig b { font-family: 'Orbitron', sans-serif; color: var(--b-lambda); }
 @media (max-width: 560px) {
     .b-gruss-foto { width: 108px; height: 108px; margin-left: 14px; }
+}
+/* the acknowledgement right below it (js/buch.js buildDank, text dank in js/buch-gruss.js), as on the back of the dedication
+ * in print (js/buch-druck.css .d-dank): the signature in italics, Solita's portrait at the right with her two lines beside it */
+.b-dank-sig { margin: 18px 0 0; color: var(--b-dim); font-family: Raleway, sans-serif; font-style: italic; line-height: 1.5; }   /* "2026" in text figures */
+.b-dank-bild { display: flex; flex-direction: row-reverse; align-items: last baseline; gap: 18px; margin: 20px 0 0; }
+.b-dank-bild img { width: 120px; height: 120px; object-fit: cover; object-position: 50% 30%; border-radius: 12px; flex: none; }
+.b-dank-bild p { margin: 0; text-align: right; color: var(--b-dim); line-height: 1.5; }
+.b-dank-bild b { font-family: 'Orbitron', sans-serif; color: var(--b-lambda); }
+@media (max-width: 560px) {
+    .b-dank-bild { gap: 14px; }
+    .b-dank-bild img { width: 88px; height: 88px; }
 }
 
 .b-sec h2 {
@@ -473,7 +535,7 @@ pre.b-pre code { background: none; border: none; padding: 0; white-space: pre; f
 .b-chapcard-t { color: #fff; font-size: 1.02rem; }
 @media (max-width: 560px) { .b-chapnav { grid-template-columns: minmax(0, 1fr); } .b-chapcard.next { text-align: left; } }
 a.b-top-book { text-decoration: none; }
-a.b-top-book:hover { color: var(--b-lambda); }
+a.b-top-book:hover { border-color: var(--b-lambda); }   /* as the pills beside it (.b-ovbtn:hover) */
 
 /* ---- the book's table of contents (buch/…/index.html) ---- */
 .b-cover { margin: 30px 0 26px; }

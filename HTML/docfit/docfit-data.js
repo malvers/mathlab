@@ -20,7 +20,8 @@
     const T = {
         profile: { name: 'docfit_profile', key: 'person', cols: ['person', 'name', 'height_cm', 'birth_year', 'sex', 'active'] },
         weighing: { name: 'docfit_weighing', key: 'measured_at', cols: ['measured_at', 'person', 'centi_kg', 'ohm', 'waist_mm', 'hip_mm'] },
-        run: { name: 'docfit_run', key: 'started_at', cols: ['started_at', 'duration_ms', 'kind'] },
+        // a time, or a counted set (reps, weight_kg, move - 20261126_docfit_run_reps.sql; null for a time)
+        run: { name: 'docfit_run', key: 'started_at', cols: ['started_at', 'duration_ms', 'kind', 'reps', 'weight_kg', 'move'] },
         bp: { name: 'docfit_bp', key: 'measured_at', cols: ['measured_at', 'person', 'sys', 'dia', 'pulse', 'source', 'note'] },
         glucose: { name: 'docfit_glucose', key: 'measured_at', cols: ['measured_at', 'person', 'mg_dl', 'context', 'source', 'note'] },
         // live fasts (20261121d_docfit_fast.sql): keyed by the fast's id, listed by their start
@@ -150,10 +151,15 @@
         let failed = false;
         setStatus('speichert …');
         try {
+            // one request per table and set of columns: PostgREST wants the same keys in every row of a request (a write
+            // queued before a table got new columns has fewer)
             const byTable = {};
-            for (const it of queue.values()) (byTable[it.table] = byTable[it.table] || []).push(it);
-            for (const table of Object.keys(byTable)) {
-                const items = byTable[table];
+            for (const it of queue.values()) {
+                const group = it.table + '|' + Object.keys(it.wire).sort().join(',');
+                (byTable[group] = byTable[group] || []).push(it);
+            }
+            for (const group of Object.keys(byTable)) {
+                const items = byTable[group], table = items[0].table;
                 const res = await auth.api(`${T[table].name}?on_conflict=user_id,${T[table].key}`, {
                     method: 'POST',
                     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },

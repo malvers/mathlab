@@ -178,8 +178,9 @@ function render() {
   list.forEach(drawStroke);
 }
 
-// one change, from here or from another window - applied the same way everywhere, and harmless twice
-function applyInk(m) {
+// one change, from here or from another window - applied the same way everywhere, and harmless twice.
+// quiet: kept, not drawn - the beamer is frozen (deck.js, B); its catch-up paints it
+function applyInk(m, quiet) {
   const s = m.s | 0;
   let st = null;
   if (m.op === 'start' || m.op === 'pts' || m.op === 'end') {
@@ -200,7 +201,7 @@ function applyInk(m) {
     const gone = new Set(m.ids || []);
     ink[s] = (ink[s] || []).filter(x => !gone.has(x.id));
   } else return;
-  if (s === si) { if (st) drawStroke(st); else render(); }
+  if (s === si && !quiet) { if (st) drawStroke(st); else render(); }
   save();
 }
 
@@ -292,6 +293,8 @@ function hello() {                                   // asked until someone answ
   clearTimeout(helloT);
   if (REMOTE) helloT = setTimeout(function () { if (!gotState && netUp) hello(); }, 3000);
 }
+// the beamer window is frozen (deck.js, B): ink and turns from elsewhere leave its picture as it is
+const held = () => !!(window.DeckLink && DeckLink.held && DeckLink.held());
 function receive(m) {
   if (!m || m.from === me || typeof m.t !== 'string') return;
   if (REMOTE && m.t === 'go' && m.deck !== DECK) {   // the Mac went to another deck: the tablet goes along
@@ -300,7 +303,7 @@ function receive(m) {
     return;
   }
   if (m.deck !== DECK) return;
-  if (m.t === 'ink') applyInk(m);
+  if (m.t === 'ink') applyInk(m, held());
   else if (m.t === 'lab') {                           // a hand in a lab on the Mac: the same on the tablet's copy
     if (!REMOTE || !Array.isArray(m.evs) || !window.DeckLabMirror) return;
     m.evs.forEach(function (e) { if (labOk(e)) try { DeckLabMirror.replay(e); } catch (err) { } });
@@ -320,7 +323,7 @@ function receive(m) {
     follow(m);
     if (!gotState) hello();                          // the Mac came after us: fetch its ink too
   } else if (m.t === 'turn') {                        // the tablet's triangles turn the beamer
-    if (REMOTE || PRESENTER) return;
+    if (REMOTE || PRESENTER || held()) return;       // not a frozen one: its picture stands
     tabLinked(true);
     if (typeof narr !== 'undefined' && narr.stop) narr.stop();
     follow(m);

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Icon-Vorschau</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Local preview of the Doc app icons: the new DocBooks and DocBib icons next to the family.
+   Android cuts the maskable icon to the launcher's shape - shown here as circle and rounded square. */
+:root { --bg: rgb(26, 28, 33); --card: rgb(36, 39, 46); --ink: rgb(225, 230, 240); --muted: rgba(225, 230, 240, 0.6);
+        --gold: rgb(245, 194, 66); --light: rgb(232, 236, 244); }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 16px; background: var(--bg); color: var(--ink); font: 500 14px/1.4 'Orbitron', sans-serif; }
+h1 { font-size: 18px; margin: 0 0 4px; color: var(--gold); }
+p.note { margin: 0 0 16px; color: var(--muted); font-size: 12px; }
+.home { display: flex; flex-wrap: wrap; gap: 18px 22px; padding: 18px; border-radius: 14px; margin-bottom: 14px; }
+.home.dark { background: rgb(18, 20, 24); }
+.home.light { background: var(--light); color: rgb(30, 34, 40); }
+.app { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 72px; font-size: 10px; text-align: center; }
+.app img { width: 56px; height: 56px; border-radius: 50%; display: block; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 14px; }
+@media (max-width: 420px) {           /* phone: the big icon a bit smaller, so 48 + 96 + big fit in one row */
+  .row img:last-child { width: 140px; height: 140px; }
+  .home { gap: 14px 10px; padding: 14px 10px; }
+}
+.card { background: var(--card); border-radius: 14px; padding: 14px; }
+.card.new { outline: 2px solid var(--gold); }
+.card h2 { font-size: 14px; margin: 0 0 10px; }
+.card h2 small { color: var(--gold); font-size: 11px; margin-left: 6px; }
+.row { display: flex; align-items: flex-end; gap: 14px; margin-bottom: 10px; flex-wrap: wrap; }
+.row span { font-size: 10px; color: var(--muted); width: 100%; }
+.row img { display: block; }
+.round img { border-radius: 50%; }
+.squircle img { border-radius: 22%; }
+</style>
+</head>
+<body>
+<h1>Icon-Vorschau</h1>
+<p class="note">Neu: DocBooks (Buch statt Kopfhörer) und DocBib (drei Buchrücken). Daneben die anderen Doc-Apps. Nur lokal.</p>
+<div class="home dark" id="homeDark"></div>
+<div class="home light" id="homeLight"></div>
+<div class="grid" id="grid"></div>
+<script>
+// name, maskable icon, "new" flag
+const APPS = [
+  ['DocBooks', 'hoerbuch/icons/icon-maskable-512.png', true],
+  ['DocBib', 'bib/icons/app-512-maskable.png', true],
+  ['DocDo', 'todo/icons/app-512-maskable.png'],
+  ['DocPad', 'docpad/icons/icon-maskable-512.png'],
+  ['VGP', 'vgp/icons/app-512-maskable.png'],
+  ['DocChat', 'kontakt/icon-maskable-512.png']
+];
+const v = '?v=' + Date.now();   // always the files as they are on disk now
+const img = (src, z) => `<img src="${src + v}" width="${z}" height="${z}" alt="">`;
+for (const id of ['homeDark', 'homeLight'])
+  document.getElementById(id).innerHTML = APPS.map(([n, src]) => `<div class="app">${img(src, 56)}${n}</div>`).join('');
+document.getElementById('grid').innerHTML = APPS.map(([n, src, isNew]) => `<div class="card${isNew ? ' new' : ''}">
+  <h2>${n}${isNew ? '<small>neu</small>' : ''}</h2>
+  <div class="row round"><span>Kreis</span>${[48, 96, 192].map(z => img(src, z)).join('')}</div>
+  <div class="row squircle"><span>abgerundetes Quadrat</span>${[48, 96, 192].map(z => img(src, z)).join('')}</div>
+</div>`).join('');
+</script>
+</body>
+</html>
