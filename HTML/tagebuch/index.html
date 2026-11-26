@@ -3221,7 +3221,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     host.appendChild(root);
     const pages = pagesEl = SEQ[mode].map(makePage);
     if (!window.St || !St.PageFlip) { fallback(root, pages); return; }
-    /* ?tag=2026-03-14 opens that day, ?seite=cover|woche|monat|wolke a part of the book; otherwise today */
+    /* ?tag=2026-03-14 opens that day, ?seite=cover|woche|monat|wolke|einstellungen|bedienung a part of the book; otherwise today */
     let q = null;
     try { q = new URLSearchParams(location.search); } catch (e) { }
     const tag = q && q.get('tag'), seite = q && q.get('seite');
@@ -3238,6 +3238,9 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     if (seite === 'woche') start = at('wocheL@' + sundayOf(TODAY));
     if (seite === 'monat') start = at('monatL@' + TODAY.slice(0, 7));
     if (seite === 'wolke') start = at(mode === 'desk' ? 'wolkeL' : 'wolkeP');
+    /* ?seite=einstellungen | bedienung: the settings, or the page with the keys (on the desk both are one spread) */
+    if (seite === 'einstellungen') start = at('set1');
+    if (seite === 'bedienung') start = at('set2');
     start = Math.max(0, start);
     fillNear(start);
     pf = new St.PageFlip(root, mode === 'desk'
