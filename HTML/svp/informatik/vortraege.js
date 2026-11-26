@@ -450,6 +450,33 @@
         if (!el) return;
         el.textContent = text || '';
         el.classList.toggle('bad', !!bad);
+        toast(el, text, bad);
+    }
+
+    /* The status line sits above the list, out of sight as soon as one scrolls to a card: a mark,
+       a name or points typed further down saved - or failed - without anybody seeing it (Doc,
+       26.11.2026, points by hand: "geht nicht"). So while the line is off screen, the same message
+       also shows at the bottom edge of the window; a failure stays longer. A click closes it. */
+    let toastTimer = 0;
+    function toast(line, text, bad) {
+        let t = $('vt-toast');
+        const r = line.getBoundingClientRect();
+        const seen = r.bottom > 0 && r.top < window.innerHeight && r.width > 0;
+        if (!text || seen) { if (t) t.hidden = true; return; }
+        if (!t) {
+            t = document.createElement('div');
+            t.id = 'vt-toast';
+            t.className = 'vt-toast';
+            t.setAttribute('role', 'status');
+            t.setAttribute('aria-live', 'polite');
+            t.addEventListener('click', () => { t.hidden = true; });
+            document.body.appendChild(t);
+        }
+        t.textContent = text;
+        t.classList.toggle('bad', !!bad);
+        t.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { t.hidden = true; }, bad ? 9000 : 4500);
     }
 
     /* Does the database have the plain column yet? null = not asked yet,
@@ -3190,6 +3217,10 @@
            confirmed with "Fertig" yet (Doc, 04.09.2026). The fresh slot data is
            in `slots` either way - the next render shows it. */
         if (editing) return;
+        /* The 20 s poll only starts while nobody types - but a points field (wirePts) opened while the
+           reads above were still running would be wiped by this render. The next round redraws. */
+        const act = document.activeElement;
+        if (act && act.classList && act.classList.contains('vt-pts-in')) return;
         render();
     }
 

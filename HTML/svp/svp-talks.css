@@ -728,6 +728,34 @@ body:has(.vt-list) header.page-head { margin-bottom: 10px; }
 
 .vt-status.bad { color: var(--ypsilon); }
 
+/* the same message at the bottom of the window while the status line is scrolled away
+   (vortraege.js toast) - a card's save never goes unseen */
+.vt-toast {
+    position: fixed;
+    /* centred between 16px gutters, as wide as its text, never wider than 520px */
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    margin-inline: auto;
+    width: fit-content;
+    max-width: 520px;
+    z-index: 130;
+    box-sizing: border-box;
+    padding: 10px 16px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    text-align: center;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    cursor: pointer;
+}
+.vt-toast[hidden] { display: none; }
+.vt-toast.bad { color: var(--ypsilon); border-color: var(--ypsilon); }
+
 /* a name that did NOT reach the cloud: it must never sit there looking done */
 .vt-name input.unsaved {
     border-color: var(--ypsilon);
@@ -838,7 +866,7 @@ body:has(.vt-list) header.page-head { margin-bottom: 10px; }
 @media print {
     .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-more-box, .vt-status,
     .vt-menu, .vt-grade, .vt-grade-lbl, .vt-grades, .vt-add, .vt-fundus, .vt-date.empty,
-    .vt-up, .vt-meld-btn, .vt-dlg, .vt-frage { display: none !important; }
+    .vt-up, .vt-meld-btn, .vt-dlg, .vt-frage, .vt-toast { display: none !important; }
 
     .vt-row {
         break-inside: avoid;
