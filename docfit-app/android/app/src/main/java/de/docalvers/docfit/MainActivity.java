@@ -87,13 +87,16 @@ import java.util.function.IntConsumer;
  *   off (Doc, 19.11.2026: the stopwatch started while he was on the scale tab); a running stopwatch keeps its start.
  *   Start and stop confirm with a short buzz and a beep. On top of the tab, under the tab bar, the exercise the time
  *   is for (Doc, 20.11.2026: two "Rubriken", "Planks" and "Two Balls"): one of two chips, the last choice remembered
- *   ("kind"); a stopped time takes the chip chosen at that moment (it may still be switched while the clock runs), and
- *   the list shows it in front of the start time. Voice control is the same for both.
+ *   ("kind"); a stopped time takes the chip chosen at that moment (it may still be switched while the clock runs).
+ *   One list per exercise (Doc, 26.11.2026: "eine Liste für Planks, eine für Balls, eine für Dumbbells, eine für
+ *   Legs"): the list below shows only the chosen chip's times or sets, its head names it ("ZEITEN · PLANKS").
+ *   Voice control is the same for all timed exercises.
  *   Counted exercises (Doc, 26.11.2026: "Bei Dumbbells und Legs müssen wir Repeats zählen. Nicht die Zeit." - "Klar
- *   brauchen wir auch das Gewicht."): with Dumbbells or Legs chosen the stopwatch gives way to the repetitions (big,
- *   with – and +, a tap types them) and the weight (– / + in 0.5 kg, a tap types it; for dumbbells ONE dumbbell, 0 =
- *   without), "Eintragen" under the weight row stores the set with the time of now; Dumbbells shows its moves
- *   (Curls, Lateral Raises) as a second chip row. No voice control for a set. A running clock is never left for them.
+ *   brauchen wir auch das Gewicht."; "Dumbbells" is "Bells" since the evening): with Bells or Legs chosen the
+ *   stopwatch gives way to the repetitions (big, with – and +, a tap types them) and the weight (– / + in 0.5 kg, a
+ *   tap types it; for dumbbells ONE dumbbell, 0 = without), "Eintragen" under the weight row stores the set with the
+ *   time of now; Bells shows its moves (Curls, Lateral Raises) as a second chip row. No voice control for a set. A
+ *   running clock is never left for them.
  * - "Waage": while it is open the phone looks for the scale (ScaleLink). A state line says what happens ("Stell dich
  *   auf die Waage …", connecting, measuring, done), the last weigh-in stands big with fat, water, muscle and BMI
  *   (BodyComposition, from the profile Doc enters under "Profil"), waist and hip typed in by hand with their ratios
@@ -263,6 +266,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     // the exercise a stopped time is filed under (Entries.KINDS) and its chips on the stopwatch tab
     private String kind;
     private final TextView[] kindChips = new TextView[Entries.KINDS.length];
+    // one list per exercise (Doc, 26.11.2026): the positions in entries of the chosen exercise's rows, and the head
+    // above them that names it
+    private List<Integer> shownRows = new ArrayList<>();
+    private TextView listHead;
     // a time selected in ZEITEN (its start, 0 = none) and the line under the chips that says so
     private long pickedRun;
     private TextView pickHint;
@@ -349,6 +356,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         pressures = bpLists[person];
         glucoses = gluLists[person];
         fasts = fastLists[person];
+        renameExerciseKeys();
         kind = Entries.kindOrDefault(prefs.getString("kind", null));
         scale = new ScaleLink(this, this);
         bp = new BpLink(this, this);
@@ -463,7 +471,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         pressures = bpLists[person];
         glucoses = gluLists[person];
         fasts = fastLists[person];
-        if (adapter != null) adapter.notifyDataSetChanged();
+        if (adapter != null) relist();
         if (scaleAdapter != null) scaleAdapter.notifyDataSetChanged();
         if (bpAdapter != null) bpAdapter.notifyDataSetChanged();
         if (gluAdapter != null) gluAdapter.notifyDataSetChanged();
@@ -776,7 +784,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private void stop(long at) {
         long duration = at - runStart;
         entries.addNewest(new Entries.Entry(runStart, duration, kind));
-        adapter.notifyItemInserted(0);
+        relist();
         list.scrollToPosition(0);
         last = new LastRun(runStart, duration);
         runStart = 0;
@@ -838,10 +846,53 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         // wegmachen"); only a problem says what it is
         ear.setText(earProblem == null ? "" : earProblem);
         ear.setVisibility(earProblem == null || counting() ? View.GONE : View.VISIBLE);
-        empty.setVisibility(entries.size() == 0 ? View.VISIBLE : View.GONE);
+        empty.setVisibility(shownRows.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    /** The chosen exercise's rows of entries anew (no redraw) - after every change of the list or of the exercise. */
+    private void rebuildRows() {
+        shownRows = Entries.rowsOf(entries.all(), kind);
+        boolean counted = Entries.counted(kind);
+        if (listHead != null) listHead.setText((counted ? "SÄTZE · " : "ZEITEN · ") + kind.toUpperCase(java.util.Locale.GERMAN));
+        if (empty != null) {
+            empty.setText(counted ? "Noch keine Sätze." : "Noch keine Zeiten.");
+            empty.setVisibility(shownRows.isEmpty() ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    /** The chosen exercise's list anew and redrawn. */
+    private void relist() {
+        rebuildRows();
+        if (adapter != null) adapter.notifyDataSetChanged();
+    }
+
+    /** The position in entries of a row of the shown list; -1 when there is none. */
+    private int entryAt(int pos) {
+        return pos >= 0 && pos < shownRows.size() ? shownRows.get(pos) : -1;
     }
 
     // ---------- counted exercises (Doc, 26.11.2026) ----------
+
+    /**
+     * "Dumbbells" is "Bells" since 26.11.2026 (Doc): the remembered move and the next set's numbers move to the new
+     * name once (Entries.renamedKey), so nothing chosen is lost; a key already under the new name wins.
+     */
+    private void renameExerciseKeys() {
+        SharedPreferences.Editor ed = null;
+        for (java.util.Map.Entry<String, ?> e : prefs.getAll().entrySet()) {
+            String to = Entries.renamedKey(e.getKey());
+            if (to == null) continue;
+            if (ed == null) ed = prefs.edit();
+            Object v = e.getValue();
+            if (!prefs.contains(to)) {
+                if (v instanceof String) ed.putString(to, (String) v);
+                else if (v instanceof Integer) ed.putInt(to, (Integer) v);
+                else if (v instanceof Float) ed.putFloat(to, (Float) v);
+            }
+            ed.remove(e.getKey());
+        }
+        if (ed != null) ed.apply();
+    }
 
     /** Repetitions instead of the stopwatch: a counted exercise chosen and no time running (a running one stays). */
     private boolean counting() {
@@ -917,7 +968,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         long now = System.currentTimeMillis();
         while (entries.indexOf(now) >= 0) now++;   // the moment is the key: never over another entry
         entries.addNewest(new Entries.Entry(now, 0, kind, reps, kg, move()));
-        adapter.notifyItemInserted(0);
+        relist();
         list.scrollToPosition(0);
         keepSet();
         confirm(true);
@@ -1015,11 +1066,11 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                     int i = entries.indexOf(old.start);
                     if (i >= 0) {
                         entries.replace(i, old);
-                        adapter.notifyItemChanged(i);
+                        relist();
                     }
                 });
             }
-            adapter.notifyDataSetChanged();
+            relist();
             paintKinds();
             return;
         }
@@ -2123,16 +2174,16 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             }
             pickedRun = 0;
             if (!k.equals(old.kind)) {
-                entries.replace(at, Entries.withKind(old, k));
+                entries.replace(at, Entries.withKind(old, k));   // it leaves this list for the other one
                 offerUndo(Times.day(old.start) + " → " + k, () -> {
                     int i = entries.indexOf(old.start);
                     if (i >= 0) {
                         entries.replace(i, old);
-                        adapter.notifyItemChanged(i);
+                        relist();
                     }
                 });
             }
-            adapter.notifyDataSetChanged();
+            relist();
             paintKinds();
             return;
         }
@@ -2145,13 +2196,16 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         kind = k;
         prefs.edit().putString("kind", k).apply();
         loadSet();
+        relist();   // the list below follows the chip: only this exercise's times or sets
+        list.scrollToPosition(0);
         refresh();
     }
 
     /** A tap on a time in ZEITEN selects it (the chips then show and change its exercise); a second tap lets go. */
     private void pickRun(int pos) {
-        if (pos < 0 || pos >= entries.size()) return;
-        long start = entries.get(pos).start;
+        int at = entryAt(pos);
+        if (at < 0) return;
+        long start = entries.get(at).start;
         pickedRun = pickedRun == start ? 0 : start;
         adapter.notifyDataSetChanged();
         paintKinds();
@@ -2225,8 +2279,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         kinds.setOrientation(LinearLayout.HORIZONTAL);
         for (int i = 0; i < Entries.KINDS.length; i++) {
             String k = Entries.KINDS[i];
-            // four exercises in one row since 26.11.2026: one size, one line, each chip as wide as its name needs
-            // (as the stretches on the Verlauf tab - at Doc's font size 1.3 equal quarters would break "Dumbbells")
+            // four exercises in one row, all chips equally wide (Doc, 26.11.2026: "Ich finde das doof, wenn die nicht
+            // gleich breit sind" - with "Bells" instead of "Dumbbells" a quarter fits at 1.3)
             TextView c = text(k, 13, TEXT, true);
             c.setGravity(Gravity.CENTER);
             c.setSingleLine(true);
@@ -2234,8 +2288,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             c.setPadding(dp(4), 0, dp(4), 0);
             c.setOnClickListener(v -> chooseKind(k));
             kindChips[i] = c;
-            float need = c.getPaint().measureText(k) + dp(18);
-            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(40), need);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(40), 1f);
             cp.leftMargin = i == 0 ? 0 : dp(5);
             cp.rightMargin = i == Entries.KINDS.length - 1 ? 0 : dp(5);
             kinds.addView(c, cp);
@@ -2243,7 +2296,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(16);
         page.addView(kinds, lp);
-        // the moves of a counted exercise (Dumbbells: Curls, Lateral Raises) in a second row, only where it has some
+        // the moves of a counted exercise (Bells: Curls, Lateral Raises) in a second row, only where it has some
         moveRow = new LinearLayout(this);
         moveRow.setOrientation(LinearLayout.HORIZONTAL);
         moveRow.setVisibility(View.GONE);
@@ -2347,18 +2400,27 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         page.addView(row, lp);
         watchButtons = row;
 
-        page.addView(sectionHead("ZEITEN", null, null), headParams());
+        // the head names the list: one per exercise, "ZEITEN · PLANKS", "SÄTZE · DUMBBELLS" (rebuildRows)
+        LinearLayout head = (LinearLayout) sectionHead("ZEITEN", null, null);
+        listHead = (TextView) head.getChildAt(0);
+        page.addView(head, headParams());
 
         adapter = new WatchAdapter();
         list = listView(adapter, pos -> {
-            Entries.Entry gone = entries.remove(pos);
+            int at = entryAt(pos);
+            if (at < 0) {
+                adapter.notifyDataSetChanged();
+                return;
+            }
+            Entries.Entry gone = entries.remove(at);
+            rebuildRows();
             adapter.notifyItemRemoved(pos);
             LastRun before = last;
             last = last.afterDelete(gone);   // the time on the display goes with its row
             saveLast();
             offerUndo("Gelöscht: " + (gone.isCounted() ? Entries.setText(gone) : Times.duration(gone.duration)), () -> {
-                entries.insert(pos, gone);
-                adapter.notifyItemInserted(Math.min(pos, entries.size() - 1));
+                entries.insert(at, gone);
+                relist();
                 last = last.afterUndo(gone, before, runStart != 0);
                 saveLast();
                 refresh();
@@ -2366,6 +2428,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             refresh();
         });
         empty = emptyText("Noch keine Zeiten.");
+        rebuildRows();
         page.addView(listBox(list, empty), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         return page;
     }
@@ -2930,7 +2993,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
                     histCard(k + " · Sekunden", pts, null, null, new ArrayList<>(), 0,
                             pts.isEmpty() ? "–" : Trends.clock(pts.get(pts.size() - 1).value));
                 }
-                // a counted exercise: the repetitions per set, one card per move (Dumbbells: Curls, Lateral Raises),
+                // a counted exercise: the repetitions per set, one card per move (Bells: Curls, Lateral Raises),
                 // the newest set with its weight on top ("12 × 5 kg"); a move without a set gets no card yet
                 for (String m : Trends.setMoves(runs, k)) {
                     List<Entries.Entry> sets = Trends.setsSince(Trends.sets(runs, k, m), from);
@@ -4008,26 +4071,26 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
         @Override
         public void onBindViewHolder(@NonNull Row r, int i) {
-            Entries.Entry e = entries.get(i);
+            Entries.Entry e = entries.get(shownRows.get(i));
             GradientDrawable bg = round(CARD, 12);
             if (e.start == pickedRun) bg.setStroke(dp(2), LAMBDA);   // the selected time
             r.itemView.setBackground(bg);
             r.day.setText(Times.day(e.start));
+            // the exercise stands in the list's head, so a row no longer repeats it (one list per exercise)
             if (e.isCounted()) {
-                // a set: its move (or the exercise) and the weight in front of the time it was entered, "12 ×" right
-                r.sub.setText((e.move.isEmpty() ? e.kind : e.move) + (e.kg > 0 ? " · " + Entries.kgText(e.kg) : "")
-                        + " · " + Times.clock(e.start) + " Uhr");
+                // a set: its move and the weight in front of the time it was entered, "12 ×" right
+                r.sub.setText((e.move.isEmpty() ? "" : e.move + " · ") + (e.kg > 0 ? Entries.kgText(e.kg) + " · " : "")
+                        + Times.clock(e.start) + " Uhr");
                 r.value.setText(e.reps + " ×");
                 return;
             }
-            // the exercise in front of the start time, as plain text; times from before there were exercises as they were
-            r.sub.setText((e.kind.isEmpty() ? "" : e.kind + " · ") + "Start " + Times.clock(e.start) + " Uhr");
+            r.sub.setText("Start " + Times.clock(e.start) + " Uhr");
             r.value.setText(Times.duration(e.duration));
         }
 
         @Override
         public int getItemCount() {
-            return entries.size();
+            return shownRows.size();
         }
     }
 

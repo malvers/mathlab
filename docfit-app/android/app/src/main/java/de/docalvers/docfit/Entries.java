@@ -31,22 +31,24 @@ import java.util.Map;
 final class Entries {
     /**
      * The exercises to choose from on the stopwatch tab, in their order there; the first is the default. "Dumbbells"
-     * (Kurzhanteln) and "Legs" added on 26.11.2026, and "Two Balls" became plain "Balls" (Doc).
+     * (Kurzhanteln) and "Legs" added on 26.11.2026, and "Two Balls" became plain "Balls" (Doc); in the evening
+     * "Dumbbells" became "Bells", placed last so it does not stand next to "Balls" (Doc: "Legs und Bells tauschen ...
+     * Balls, Bells, das kann man leicht verwechseln").
      */
-    static final String[] KINDS = {"Planks", "Balls", "Dumbbells", "Legs"};
+    static final String[] KINDS = {"Planks", "Balls", "Legs", "Bells"};
 
     /** The exercises counted in repetitions instead of timed (Doc, 26.11.2026); all others are timed. */
-    private static final List<String> COUNTED = Arrays.asList("Dumbbells", "Legs");
+    private static final List<String> COUNTED = Arrays.asList("Bells", "Legs");
 
     /**
      * The moves (Übungsart) of a counted exercise, in the order of their chips - the ONE place for their names (Doc may
-     * rename them; entries stored under an old name keep it). Dumbbells: pulling the weights up to the chest (biceps
-     * curl) and pushing them out sideways to horizontal. Legs has none yet: one line here adds them.
+     * rename them; entries stored under an old name keep it). Bells (dumbbells): pulling the weights up to the chest
+     * (biceps curl) and pushing them out sideways to horizontal. Legs has none yet: one line here adds them.
      */
     private static final Map<String, String[]> MOVES = new LinkedHashMap<>();
 
     static {
-        MOVES.put("Dumbbells", new String[]{"Curls", "Lateral Raises"});
+        MOVES.put("Bells", new String[]{"Curls", "Lateral Raises"});
         MOVES.put("Legs", new String[]{});
     }
 
@@ -54,12 +56,29 @@ final class Entries {
     static final int MAX_REPS = 1000;
     static final double MAX_KG = 300;
 
-    /** An exercise under its current name: "Two Balls" is "Balls" since 26.11.2026. */
+    /** An exercise under its current name: "Two Balls" is "Balls" and "Dumbbells" is "Bells" since 26.11.2026. */
     static String renamed(String kind) {
-        return "Two Balls".equals(kind) ? "Balls" : kind;
+        if ("Two Balls".equals(kind)) return "Balls";
+        return "Dumbbells".equals(kind) ? "Bells" : kind;
     }
 
-    /** Whether an exercise counts repetitions (Dumbbells, Legs) rather than time. */
+    /**
+     * A remembered choice under a renamed exercise ("move:Dumbbells", "set:Dumbbells:Curls:reps") under its current
+     * name ("move:Bells", "set:Bells:Curls:reps"); null for every other key.
+     */
+    static String renamedKey(String key) {
+        for (String head : new String[]{"move:", "set:"}) {
+            if (key == null || !key.startsWith(head)) continue;
+            String rest = key.substring(head.length());
+            int end = rest.indexOf(':');
+            String k = end < 0 ? rest : rest.substring(0, end);
+            String now = renamed(k);
+            return now.equals(k) ? null : head + now + (end < 0 ? "" : rest.substring(end));
+        }
+        return null;
+    }
+
+    /** Whether an exercise counts repetitions (Bells, Legs) rather than time. */
     static boolean counted(String kind) {
         return COUNTED.contains(kind);
     }
@@ -145,7 +164,7 @@ final class Entries {
 
     /** The label of the weight on the stopwatch tab: for dumbbells the weight of ONE dumbbell (Doc, 26.11.2026). */
     static String weightLabel(String kind) {
-        return "Dumbbells".equals(kind) ? "GEWICHT JE HANTEL" : "GEWICHT";
+        return "Bells".equals(kind) ? "GEWICHT JE HANTEL" : "GEWICHT";
     }
 
     /** A set in short: "12 ×" and, with a weight, "12 × 5 kg". */
@@ -161,7 +180,8 @@ final class Entries {
         prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         String stored = prefs.getString(KEY, "[]");
         list.addAll(parse(stored));
-        if (stored.contains("\"Two Balls\"")) save();   // written once under the new name, so the server follows
+        // written once under the new names, so the server follows
+        if (stored.contains("\"Two Balls\"") || stored.contains("\"Dumbbells\"")) save();
     }
 
     /** The stored text as entries, newest first; a broken list reads as empty rather than crash the stopwatch. */
@@ -218,6 +238,25 @@ final class Entries {
             if (e.isCounted() && e.kind.equals(kind) && e.move.equals(move == null ? "" : move)) return e;
         }
         return null;
+    }
+
+    /**
+     * The exercise list an entry belongs to: its own exercise; a time from before there were exercises (or under a name
+     * no chip has any more) in the first one's.
+     */
+    static String listOf(Entry e) {
+        for (String k : KINDS) if (k.equals(e.kind)) return k;
+        return KINDS[0];
+    }
+
+    /**
+     * One list per exercise on the stopwatch tab (Doc, 26.11.2026: "eine Liste für Planks, eine für Balls, eine für
+     * Dumbbells, eine für Legs"): the positions in {@code newestFirst} of the entries of {@code kind}, newest first.
+     */
+    static List<Integer> rowsOf(List<Entry> newestFirst, String kind) {
+        List<Integer> out = new ArrayList<>();
+        for (int i = 0; i < newestFirst.size(); i++) if (listOf(newestFirst.get(i)).equals(kind)) out.add(i);
+        return out;
     }
 
     int size() {

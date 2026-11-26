@@ -455,22 +455,23 @@
     // ---- counted sets (Entries.java, 26.11.2026) -------------------------------------------------------------------
 
     /**
-     * Dumbbells and Legs count repetitions instead of time: such a docfit_run row is one set - reps, weight_kg (for
-     * dumbbells ONE dumbbell; null = without), move ('Curls', 'Lateral Raises'), duration_ms 0.
+     * Bells (dumbbells; "Dumbbells" until the evening of 26.11.2026) and Legs count repetitions instead of time: such a
+     * docfit_run row is one set - reps, weight_kg (for dumbbells ONE dumbbell; null = without), move ('Curls',
+     * 'Lateral Raises'), duration_ms 0.
      */
     const Sets = {
-        COUNTED: ['Dumbbells', 'Legs'],
+        COUNTED: ['Bells', 'Legs'],
         isSet: r => r.reps > 0,
         /** "5 kg", "2,5 kg", "2,25 kg" (Entries.kgText) */
         kg: w => String(+(+w).toFixed(2)).replace('.', ',') + ' kg',
         /** "12 ×", with a weight "12 × 5 kg" (Entries.setText) */
         text: r => r.reps + ' ×' + (r.weight_kg > 0 ? ' ' + Sets.kg(r.weight_kg) : ''),
         /** the moves of a counted exercise in the order of their chips (Entries.MOVES); none for the others */
-        MOVES: { Dumbbells: ['Curls', 'Lateral Raises'], Legs: [] },
+        MOVES: { Bells: ['Curls', 'Lateral Raises'], Legs: [] },
         moves: kind => (Sets.MOVES[kind] || []).slice()
     };
-    /** an exercise under its current name: "Two Balls" is "Balls" since 26.11.2026 (Entries.renamed) */
-    const renamed = kind => (kind === 'Two Balls' ? 'Balls' : kind);
+    /** an exercise under its current name: "Two Balls" is "Balls", "Dumbbells" is "Bells" since 26.11.2026 (renamed) */
+    const renamed = kind => (kind === 'Two Balls' ? 'Balls' : kind === 'Dumbbells' ? 'Bells' : kind);
     const kindOf = r => renamed(r.kind == null ? '' : r.kind);
     const moveOf = r => (r.move == null ? '' : String(r.move).trim());
 
@@ -632,11 +633,19 @@
         }
     };
 
+    /** the exercises in the order of their chips (Entries.KINDS): "Bells" last, away from "Balls" (Doc, 26.11.2026) */
+    const KINDS = ['Planks', 'Balls', 'Legs', 'Bells'];
+    /**
+     * the exercise list a docfit_run row belongs to (Entries.listOf): one list per exercise (Doc, 26.11.2026); a row
+     * from before there were exercises, or under a name no chip has any more, in the first one's
+     */
+    const listOf = r => { const k = kindOf(r || {}); return KINDS.includes(k) ? k : KINDS[0]; };
+
     const api = {
         Times, Profile, isMeasured, gallagher, implausible, bodyOf, body, limits, fatScore, word, bmiWord, scoreOf, score,
         scoreColor, Scale, Ranges, Girths, Pressures, CATEGORIES, Glucose, Fasting, ScaleTexts, Sets, History, Trends,
         fmt, tenth, nextUp,
-        HINTS: { HINT_PROFILE, HINT_FAT, HINT_IMPLAUSIBLE }, KINDS: ['Planks', 'Balls', 'Dumbbells', 'Legs']
+        HINTS: { HINT_PROFILE, HINT_FAT, HINT_IMPLAUSIBLE }, KINDS, listOf
     };
     root.DocFitCore = api;
     if (typeof module !== 'undefined' && module.exports) module.exports = api;

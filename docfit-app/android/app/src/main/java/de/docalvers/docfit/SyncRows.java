@@ -30,7 +30,7 @@ import java.util.TreeMap;
  * hip in mm (none = null), the exercise of a time exactly as the app names it, a reading's pulse (0 = none = null),
  * source and note. Body values are computed when shown, on the phone and on the web alike.
  *
- * A set of a counted exercise (Dumbbells, Legs - 20261126_docfit_run_reps.sql) is a docfit_run row with duration 0 and
+ * A set of a counted exercise (Bells, Legs - 20261126_docfit_run_reps.sql) is a docfit_run row with duration 0 and
  * its repetitions, weight and move; a time has all three null. The weight travels as kg (numeric) but is held in the
  * row in hundredths of a kilogram (a Long like every other number here), so rows stay exact and comparable. Columns
  * added after the first sync (LATE) are left out of the canonical text while empty: every row synced before keeps its

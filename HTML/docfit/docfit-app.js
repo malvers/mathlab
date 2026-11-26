@@ -29,7 +29,7 @@
     const rgb = a => `rgb(${a[0]}, ${a[1]}, ${a[2]})`;
 
     let tab = ls.get(LS.tab, 'watch');
-    let kind = C.KINDS.includes(ls.get(LS.kind, '')) ? ls.get(LS.kind, '') : C.KINDS[0];
+    let kind = C.listOf({ kind: ls.get(LS.kind, '') });   // an old name ("Dumbbells") under its new one
     let runStart = +ls.get(LS.run, 0) || 0;
     let last = null;   // the last stopped run { start, duration }, shown until the next start or a reset
     try { last = JSON.parse(ls.get(LS.last, 'null')); } catch (e) { last = null; }
@@ -134,7 +134,7 @@
             b.type = 'button';
             b.className = 'chip kind' + (k === kind ? ' on' : '');   // grey, chosen phi green (Doc, 21.11.2026)
             b.textContent = k;
-            b.onclick = () => { kind = k; ls.set(LS.kind, k); renderKinds(); };
+            b.onclick = () => { kind = k; ls.set(LS.kind, k); renderKinds(); renderRuns(); };
             box.appendChild(b);
         });
     }
@@ -158,18 +158,22 @@
 
     function renderRuns() {
         const box = $('runs');
-        const list = D.list('run');
-        box.innerHTML = list.length ? '' : '<li class="empty">Noch keine Zeiten.</li>';
+        // one list per exercise, as on the phone (Doc, 26.11.2026): only the chosen chip's times or sets, the head
+        // names it ("ZEITEN · PLANKS", "SÄTZE · BELLS")
+        const counted = C.Sets.COUNTED.includes(kind);
+        $('runsHead').textContent = (counted ? 'SÄTZE · ' : 'ZEITEN · ') + kind.toUpperCase();
+        const list = D.list('run').filter(r => C.listOf(r) === kind);
+        box.innerHTML = list.length ? '' : `<li class="empty">${counted ? 'Noch keine Sätze.' : 'Noch keine Zeiten.'}</li>`;
         for (const r of list) {
             const li = document.createElement('li');
             li.className = 'row';
-            // the exercise as plain text in front of the start time (Doc, 21.11.2026: no colour in the list); a counted
-            // set (Dumbbells, Legs) as on the phone: its move (or exercise) and weight before the time, "12 ×" right
+            // the exercise stands in the head, so a row no longer repeats it; a counted set (Bells, Legs) as on the
+            // phone: its move and weight before the time, "12 ×" right
             const set = C.Sets.isSet(r);
             const start = 'Start ' + C.Times.clock(r.started_at) + ' Uhr';
             const sub = set
-                ? esc(r.move || r.kind) + (r.weight_kg > 0 ? ' · ' + C.Sets.kg(r.weight_kg) : '') + ' · ' + C.Times.clock(r.started_at) + ' Uhr'
-                : (r.kind ? esc(r.kind) + ' · ' : '') + start;
+                ? (r.move ? esc(r.move) + ' · ' : '') + (r.weight_kg > 0 ? C.Sets.kg(r.weight_kg) + ' · ' : '') + C.Times.clock(r.started_at) + ' Uhr'
+                : start;
             const num = set ? r.reps + ' ×' : C.Times.duration(r.duration_ms);
             li.innerHTML = `<div class="when"><b>${C.Times.day(r.started_at)}</b><span>${sub}</span></div>`
                 + `<div class="num">${num}</div>`

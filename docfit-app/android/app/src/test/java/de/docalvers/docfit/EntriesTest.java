@@ -73,6 +73,8 @@ public class EntriesTest {
     public void rememberedChoiceOrTheFirst() {
         assertEquals("Planks", Entries.KINDS[0]);
         assertEquals("Balls", Entries.kindOrDefault("Two Balls"));
+        assertEquals("Bells", Entries.kindOrDefault("Dumbbells"));   // renamed in the evening of 26.11.2026
+        assertEquals("Bells", new Entries.Entry(T1, 0, "Dumbbells", 12, 5, "Curls").kind);
         assertEquals("Legs", Entries.kindOrDefault("Legs"));
         assertEquals("Planks", Entries.kindOrDefault("Planks"));
         assertEquals("Planks", Entries.kindOrDefault(null));
@@ -97,26 +99,26 @@ public class EntriesTest {
     public void countedExercisesAndTheirMoves() {
         assertFalse(Entries.counted("Planks"));
         assertFalse(Entries.counted("Balls"));
-        assertTrue(Entries.counted("Dumbbells"));
+        assertTrue(Entries.counted("Bells"));
         assertTrue(Entries.counted("Legs"));
         assertFalse(Entries.counted(""));
-        assertEquals(2, Entries.moves("Dumbbells").length);
-        assertEquals("Curls", Entries.moves("Dumbbells")[0]);
+        assertEquals(2, Entries.moves("Bells").length);
+        assertEquals("Curls", Entries.moves("Bells")[0]);
         assertEquals(0, Entries.moves("Legs").length);      // none yet
         assertEquals(0, Entries.moves("Planks").length);
-        assertEquals("Curls", Entries.moveOrDefault("Dumbbells", null));
-        assertEquals("Lateral Raises", Entries.moveOrDefault("Dumbbells", "Lateral Raises"));
-        assertEquals("Curls", Entries.moveOrDefault("Dumbbells", "Kniebeuge"));   // a move that is gone
+        assertEquals("Curls", Entries.moveOrDefault("Bells", null));
+        assertEquals("Lateral Raises", Entries.moveOrDefault("Bells", "Lateral Raises"));
+        assertEquals("Curls", Entries.moveOrDefault("Bells", "Kniebeuge"));   // a move that is gone
         assertEquals("", Entries.moveOrDefault("Legs", "Curls"));
-        Entries.moves("Dumbbells")[0] = "changed";                  // a copy: the names stay in one place
-        assertEquals("Curls", Entries.moves("Dumbbells")[0]);
+        Entries.moves("Bells")[0] = "changed";                  // a copy: the names stay in one place
+        assertEquals("Curls", Entries.moves("Bells")[0]);
     }
 
     @Test
     public void setsSurviveSavingAndReadingAndTimesStayAsBefore() throws Exception {
         List<Entries.Entry> l = new ArrayList<>(Entries.parse(OLD));
         l.add(0, new Entries.Entry(T2 + 60_000L, 47_000L, "Planks"));
-        l.add(0, new Entries.Entry(T2 + 120_000L, 0, "Dumbbells", 12, 2.5, "Curls"));
+        l.add(0, new Entries.Entry(T2 + 120_000L, 0, "Bells", 12, 2.5, "Curls"));
         l.add(0, new Entries.Entry(T2 + 180_000L, 0, "Legs", 15, 0, ""));
         String saved = Entries.format(l);
         List<Entries.Entry> back = Entries.parse(saved);
@@ -129,7 +131,7 @@ public class EntriesTest {
         assertEquals(12, curls.reps);
         assertEquals(2.5, curls.kg, 0);
         assertEquals("Curls", curls.move);
-        assertEquals("Dumbbells", curls.kind);
+        assertEquals("Bells", curls.kind);
         assertEquals(0, curls.duration);
         assertFalse(planks.isCounted());
         assertEquals(47_000L, planks.duration);
@@ -165,7 +167,7 @@ public class EntriesTest {
         assertEquals("5 kg", Entries.kgText(5));
         assertEquals("2,5 kg", Entries.kgText(2.5));
         assertEquals("2,25 kg", Entries.kgText(2.25));
-        assertEquals("12 × 5 kg", Entries.setText(new Entries.Entry(T1, 0, "Dumbbells", 12, 5, "Curls")));
+        assertEquals("12 × 5 kg", Entries.setText(new Entries.Entry(T1, 0, "Bells", 12, 5, "Curls")));
         assertEquals("15 ×", Entries.setText(new Entries.Entry(T1, 0, "Legs", 15, 0, "")));
         assertEquals(2.5, Entries.parseKg("2,5"), 0);
         assertEquals(2.5, Entries.parseKg(" 2.5 kg"), 0);
@@ -180,20 +182,20 @@ public class EntriesTest {
         assertEquals("", e.move);
         assertEquals(0, new Entries.Entry(T1, 0, "Legs", -3, Double.NaN, "").kg, 0);
         assertEquals(0.3, new Entries.Entry(T1, 0, "Legs", 1, 0.1 + 0.2, "").kg, 0);   // no float noise
-        assertEquals("GEWICHT JE HANTEL", Entries.weightLabel("Dumbbells"));
+        assertEquals("GEWICHT JE HANTEL", Entries.weightLabel("Bells"));
         assertEquals("GEWICHT", Entries.weightLabel("Legs"));
     }
 
     @Test
     public void timesMoveAmongTimedSetsAmongCounted() {
         Entries.Entry time = new Entries.Entry(T1, 57_857L, "Planks");
-        Entries.Entry set = new Entries.Entry(T2, 0, "Dumbbells", 12, 5, "Curls");
+        Entries.Entry set = new Entries.Entry(T2, 0, "Bells", 12, 5, "Curls");
         assertTrue(Entries.canMove(time, "Balls"));
-        assertFalse(Entries.canMove(time, "Dumbbells"));
+        assertFalse(Entries.canMove(time, "Bells"));
         assertTrue(Entries.canMove(set, "Legs"));
         assertFalse(Entries.canMove(set, "Planks"));
-        // a time stored under Dumbbells before it counted may still go to a timed exercise
-        assertTrue(Entries.canMove(new Entries.Entry(T1, 30_000L, "Dumbbells"), "Planks"));
+        // a time stored under Bells before it counted may still go to a timed exercise
+        assertTrue(Entries.canMove(new Entries.Entry(T1, 30_000L, "Bells"), "Planks"));
         Entries.Entry legs = Entries.withKind(set, "Legs");
         assertEquals(12, legs.reps);
         assertEquals(5, legs.kg, 0);
@@ -204,18 +206,50 @@ public class EntriesTest {
         assertEquals("Lateral Raises", raised.move);
         assertEquals(12, raised.reps);
         assertEquals(set.start, raised.start);
-        assertEquals("Curls", Entries.withKind(set, "Dumbbells").move);
+        assertEquals("Curls", Entries.withKind(set, "Bells").move);
     }
 
     @Test
     public void theLastSetOfAnExerciseAndMove() {
         List<Entries.Entry> newestFirst = new ArrayList<>();
-        newestFirst.add(new Entries.Entry(T2 + 2, 0, "Dumbbells", 10, 4, "Lateral Raises"));
+        newestFirst.add(new Entries.Entry(T2 + 2, 0, "Bells", 10, 4, "Lateral Raises"));
         newestFirst.add(new Entries.Entry(T2 + 1, 61_000L, "Planks"));
-        newestFirst.add(new Entries.Entry(T2, 0, "Dumbbells", 12, 6, "Curls"));
-        newestFirst.add(new Entries.Entry(T1, 0, "Dumbbells", 8, 5, "Curls"));
-        assertEquals(12, Entries.lastSet(newestFirst, "Dumbbells", "Curls").reps);
-        assertEquals(4, Entries.lastSet(newestFirst, "Dumbbells", "Lateral Raises").kg, 0);
+        newestFirst.add(new Entries.Entry(T2, 0, "Bells", 12, 6, "Curls"));
+        newestFirst.add(new Entries.Entry(T1, 0, "Bells", 8, 5, "Curls"));
+        assertEquals(12, Entries.lastSet(newestFirst, "Bells", "Curls").reps);
+        assertEquals(4, Entries.lastSet(newestFirst, "Bells", "Lateral Raises").kg, 0);
         assertEquals(null, Entries.lastSet(newestFirst, "Legs", ""));
+    }
+
+    @Test
+    public void oneListPerExercise() {
+        List<Entries.Entry> newestFirst = new ArrayList<>();
+        newestFirst.add(new Entries.Entry(T2 + 4, 0, "Bells", 10, 4, "Curls"));
+        newestFirst.add(new Entries.Entry(T2 + 3, 61_000L, "Balls"));
+        newestFirst.add(new Entries.Entry(T2 + 2, 57_000L, "Planks"));
+        newestFirst.add(new Entries.Entry(T2 + 1, 0, "Legs", 15, 0, ""));
+        newestFirst.add(new Entries.Entry(T2, 40_000L, "Two Balls"));   // the old name reads as "Balls"
+        newestFirst.add(new Entries.Entry(T1, 30_000L));                  // from before there were exercises
+        assertEquals(java.util.Arrays.asList(2, 5), Entries.rowsOf(newestFirst, "Planks"));
+        assertEquals(java.util.Arrays.asList(1, 4), Entries.rowsOf(newestFirst, "Balls"));
+        assertEquals(java.util.Arrays.asList(0), Entries.rowsOf(newestFirst, "Bells"));
+        assertEquals(java.util.Arrays.asList(3), Entries.rowsOf(newestFirst, "Legs"));
+        assertEquals("Planks", Entries.listOf(newestFirst.get(5)));
+        assertTrue(Entries.rowsOf(new ArrayList<>(), "Legs").isEmpty());
+        // a set stored as "Dumbbells" before the rename stands in the Bells list
+        newestFirst.add(new Entries.Entry(T1 - 1, 0, "Dumbbells", 8, 3, "Curls"));
+        assertEquals(java.util.Arrays.asList(0, 6), Entries.rowsOf(newestFirst, "Bells"));
+    }
+
+    @Test
+    public void rememberedChoicesFollowTheRename() {
+        assertEquals("move:Bells", Entries.renamedKey("move:Dumbbells"));
+        assertEquals("set:Bells:Curls:reps", Entries.renamedKey("set:Dumbbells:Curls:reps"));
+        assertEquals("set:Bells::kg", Entries.renamedKey("set:Dumbbells::kg"));
+        assertEquals(null, Entries.renamedKey("set:Bells:Curls:reps"));   // already under the new name
+        assertEquals(null, Entries.renamedKey("set:Legs::reps"));
+        assertEquals(null, Entries.renamedKey("kind"));
+        assertEquals(null, Entries.renamedKey("runStart"));
+        assertEquals(null, Entries.renamedKey(null));
     }
 }

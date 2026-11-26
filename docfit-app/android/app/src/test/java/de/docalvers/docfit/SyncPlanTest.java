@@ -276,7 +276,7 @@ public class SyncPlanTest {
     @Test
     public void setsTravelWithRepsWeightAndMove() throws Exception {
         Map<String, SyncRows.Row> local = new TreeMap<>();
-        SyncRows.runs("[{\"start\":" + T2 + ",\"duration\":0,\"kind\":\"Dumbbells\",\"reps\":12,\"kg\":2.5,"
+        SyncRows.runs("[{\"start\":" + T2 + ",\"duration\":0,\"kind\":\"Bells\",\"reps\":12,\"kg\":2.5,"
                 + "\"move\":\"Curls\"},{\"start\":" + T1 + ",\"duration\":61000,\"kind\":\"Planks\"}]", local);
         SyncRows.Row set = local.get(String.valueOf(T2)), time = local.get(String.valueOf(T1));
         assertEquals(12, set.num("reps"));
@@ -302,7 +302,7 @@ public class SyncPlanTest {
         assertEquals(12, e.reps);
         assertEquals(2.5, e.kg, 0);
         assertEquals("Curls", e.move);
-        assertEquals("Dumbbells", e.kind);
+        assertEquals("Bells", e.kind);
     }
 
     @Test
