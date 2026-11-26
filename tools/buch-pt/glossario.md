@@ -338,7 +338,33 @@ Terms the book adds go here.
 
 ## mathegy11-pt (GY 11 Grundkurs, block pt-9)
 
-Terms the book adds go here (the new module `exponential.js`, its pt0 part included).
+Die Begriffe, die GY 11 Grundkurs (`mathegy11-pt`, 22.11. und 26.11.2026) dazubringt; Vektoren, Geraden und Ebenen wie
+`mathe12-pt`/`mathe13-pt` und pt-8 (Punkte $P(1, 2, 3)$, Vektoren $(3, -2, 2)$, Norm $\|\vec a\|$, Nullvektor $\vec 0$).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Steckbriefaufgabe · Funktion aus Bedingungen | funções a partir de condições | Kapitel 1.5 „Funções à medida“ |
+| Extremwertproblem · Zielfunktion · Nebenbedingung · Randwerte | problema de otimização · função objetivo · condição de ligação · valores nas extremidades | |
+| Bestimmtheitsmaß $r^2$ · Residuum · Überanpassung | coeficiente de determinação · resíduo · sobreajustamento | Methode der kleinsten Quadrate = método dos mínimos quadrados |
+| Typ $(m,n)$ einer Matrix · verkettet | tipo $m \times n$ · compatíveis | wie das Widget `matrixprodukt` (pt-5) |
+| Koeffizientenmatrix · erweiterte Matrix $(A \mid \vec b)$ | matriz dos coeficientes · matriz ampliada $(A \;\vert\; \vec b)$ | im Seitentext `\;|\;`, nie `\mid` |
+| Einheitsmatrix $E$ · Drehmatrix | matriz identidade $I$ · matriz de rotação | Zeilen $Z_1$ → $L_1$ |
+| Lösbarkeit: eine / unendlich viele / keine Lösung | sistema possível e determinado / possível e indeterminado / impossível | |
+| Nullproduktsatz · Kommutativgesetz | lei do anulamento do produto · propriedade comutativa | |
+| Bisektion · Newton-Verfahren · Startwert · Vorzeichenwechsel | método da bissecção · método de Newton · valor inicial · mudança de sinal | Zwischenwertsatz: teorema de Bolzano |
+| Ortsvektor · Verbindungsvektor „Spitze minus Fuß“ · Gegenvektor | vetor posição · vetor $\overrightarrow{AB}$ „extremidade menos origem“ · vetor simétrico | |
+| Schwerpunkt · Teilungspunkt · kollinear · komplanar | baricentro $G$ · ponto de divisão · colineares · complanares | |
+| Schrägbild · Koordinatenebenen | perspetiva cavaleira · planos $xOy$, $xOz$, $yOz$ | Achsen eixo $Ox$, $Oy$, $Oz$ |
+| Parameterform (Gerade/Ebene) · Stützvektor · Richtungs-/Spannvektor | equação vetorial · vetor posição de um ponto · vetor diretor | |
+| Punktprobe · Spurpunkte einer Geraden | pertença de um ponto · pontos de interseção com os planos coordenados (traços), $S_{xy}$ | |
+| identisch · parallel · schneidend · windschief | coincidentes · (estritamente) paralelas · concorrentes · não complanares | wie das Widget `geradenlage` |
+| Koordinatenform · Achsenabschnittsform · Spurdreieck | equação cartesiana · equação segmentária · triângulo cujos vértices são os pontos de interseção com os eixos | wie pt-8 |
+| Durchstoßpunkt · Gerade liegt in der Ebene | ponto de interseção · a reta está contida no plano | |
+| Pfadregeln (1./2.) · Urnenmodell · mit/ohne Zurücklegen | regra do produto / da soma · modelo da urna · com/sem reposição | |
+| Vierfeldertafel · stochastisch unabhängig · unvereinbar | tabela de dupla entrada · independentes · incompatíveis | Sport/Musik $S$, $M$ → desporto/música $D$, $M$ |
+| Bernoulli-Kette · Treffer/Niete · $B_{n;\,p}$ | sucessão de provas de Bernoulli · sucesso/insucesso (S/I) · $X \sim B(n, p)$ | |
+| Einzel- / kumulierte Wahrscheinlichkeit · Erwartungswert · Standardabweichung | probabilidade de um valor / acumulada · valor médio · desvio padrão | wie `kapitel.js` |
+| Galtonbrett · Pasch / Sechserpasch | tabuleiro de Galton · dois números iguais / duplo seis | |
 
 ## mathegy6-pt (GY 6, block pt-10)
 
