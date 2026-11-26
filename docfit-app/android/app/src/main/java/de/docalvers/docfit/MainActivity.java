@@ -92,7 +92,7 @@ import java.util.function.IntConsumer;
  *   Counted exercises (Doc, 26.11.2026: "Bei Dumbbells und Legs müssen wir Repeats zählen. Nicht die Zeit." - "Klar
  *   brauchen wir auch das Gewicht."): with Dumbbells or Legs chosen the stopwatch gives way to the repetitions (big,
  *   with – and +, a tap types them) and the weight (– / + in 0.5 kg, a tap types it; for dumbbells ONE dumbbell, 0 =
- *   without), "Eintragen" in place of the command stores the set with the time of now; Dumbbells shows its moves
+ *   without), "Eintragen" under the weight row stores the set with the time of now; Dumbbells shows its moves
  *   (Curls, Lateral Raises) as a second chip row. No voice control for a set. A running clock is never left for them.
  * - "Waage": while it is open the phone looks for the scale (ScaleLink). A state line says what happens ("Stell dich
  *   auf die Waage …", connecting, measuring, done), the last weigh-in stands big with fat, water, muscle and BMI
@@ -273,7 +273,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         paintKinds();
     };
     // counted exercises (Doc, 26.11.2026): the move chips under the exercise chips (built for the exercise in
-    // moveRowKind), the next set's repetitions and weight with their – / +, and "Eintragen" in place of the command;
+    // moveRowKind), the next set's repetitions and weight with their – / +, and "Eintragen" under the weight row;
     // the stopwatch's Start / Stopp / Reset row steps aside meanwhile
     private LinearLayout moveRow;
     private String moveRowKind;
@@ -2265,14 +2265,6 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(24);
         page.addView(state, lp);
-        // a counted exercise: "Eintragen" in the command's place stores the set shown below
-        enterBtn = button("Eintragen", PHI);
-        enterBtn.setMaxLines(1);
-        enterBtn.setOnClickListener(v -> enterSet());
-        enterBtn.setVisibility(View.GONE);
-        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56));
-        lp.topMargin = dp(20);
-        page.addView(enterBtn, lp);
 
         // only when the microphone is missing or the recognizer failed
         ear = text("", 14, UPSILON, false);
@@ -2315,6 +2307,15 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         lp.topMargin = dp(20);
         page.addView(count, lp);
         loadSet();
+        // a counted exercise: "Eintragen" under the weight row stores the set shown above (Doc, 26.11.2026:
+        // "Eintragen-Knopf unter die kg-Zeile")
+        enterBtn = button("Eintragen", PHI);
+        enterBtn.setMaxLines(1);
+        enterBtn.setOnClickListener(v -> enterSet());
+        enterBtn.setVisibility(View.GONE);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56));
+        lp.topMargin = dp(20);
+        page.addView(enterBtn, lp);
 
         // no hint line under the stopwatch: the command stands above it (Doc, 20.11.2026: "das ist doppelt")
         LinearLayout row = new LinearLayout(this);
