@@ -183,6 +183,13 @@
             border-color: var(--cyan);
         }
 
+        /* a field the send button still needs (the team's names): red until filled */
+        .bm-fields input.bm-missing,
+        .bm-fields input.bm-missing:focus {
+            outline: 2px solid var(--ypsilon);
+            border-color: var(--ypsilon);
+        }
+
         .bm-card.bare {
             padding: 0;
             border: 0;
@@ -1730,34 +1737,60 @@
                 return anonFetch(path, opts);
             }
 
-            function status(text, cls) {
+            /* `show`: scroll the message into view. The status line sits under the
+               table, and on a phone it was below the screen edge - the team pressed
+               "Bewertung senden", the hint "Bitte zuerst eure drei Namen eintragen."
+               appeared out of sight and it looked as if nothing happened
+               (Doc, 26.11.2026). Only the send button asks for it, never a page load. */
+            function status(text, cls, show) {
                 elStatus.textContent = text || '';
                 elStatus.className = 'bm-status' + (cls ? ' ' + cls : '');
+                if (show && text) {
+                    requestAnimationFrame(function () {
+                        elStatus.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                    });
+                }
+            }
+
+            /* The send button needs the names field: mark it red, scroll to it and
+               put the cursor in, so it is obvious what is missing. */
+            function markMissing(field) {
+                const inp = elFields.querySelector('input[data-field="' + field + '"]');
+                if (!inp) return;
+                inp.classList.add('bm-missing');
+                inp.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                inp.focus({ preventScroll: true });
+                inp.addEventListener('input', function clear() {
+                    if (!inp.value.trim()) return;
+                    inp.classList.remove('bm-missing');
+                    inp.removeEventListener('input', clear);
+                });
             }
 
             /* Send this sheet. One row per talk and role, so a second send is a
                correction of the same row rather than a new entry. */
             async function sendSheet() {
-                if (!meta) { status('Diesen Bogen über die Vortragsliste öffnen, sonst weiß er nicht, wohin er gehört.', 'err'); return; }
+                if (!meta) { status('Diesen Bogen über die Vortragsliste öffnen, sonst weiß er nicht, wohin er gehört.', 'err', true); return; }
                 const who = (state.fields.reviewer || '').trim();
                 if (!who) {
                     status(role === 'publikum'
-                        ? 'Bitte zuerst eure drei Namen eintragen.'
-                        : 'Bitte zuerst den Namen im Gutachter-Feld eintragen.', 'err');
+                        ? 'Bitte zuerst eure drei Namen eintragen (oben, rot markiert).'
+                        : 'Bitte zuerst den Namen im Gutachter-Feld eintragen (oben, rot markiert).', 'err');
+                    markMissing('reviewer');
                     return;
                 }
                 const t = totals();
-                if (!t.any) { status('Bitte zuerst Punkte vergeben.', 'err'); return; }
+                if (!t.any) { status('Bitte zuerst Punkte vergeben.', 'err', true); return; }
                 if (!window.svpCrypto || !svpCrypto.available) {
-                    status('Verschlüsselung im Browser nicht verfügbar - Senden nicht möglich.', 'err');
+                    status('Verschlüsselung im Browser nicht verfügbar - Senden nicht möglich.', 'err', true);
                     return;
                 }
                 if (role === 'coach' && !(window.svpAuth && svpAuth.hasSession())) {
-                    status('Zum Speichern des Coach-Bogens bitte anmelden (Notizen-Seite).', 'err');
+                    status('Zum Speichern des Coach-Bogens bitte anmelden (Notizen-Seite).', 'err', true);
                     return;
                 }
                 elSendBtn.disabled = true;
-                status('sende …');
+                status('sende …', '', true);
                 try {
                     const payload = JSON.stringify({
                         lang: state.lang, rows: state.rows, sos: state.sos,
@@ -1782,22 +1815,22 @@
                     });
                     if (!res.ok) {
                         if (res.status === 401 || res.status === 403) {
-                            status('Diese Bewertung wurde schon abgeschickt und lässt sich nicht mehr ändern.', 'err');
+                            status('Diese Bewertung wurde schon abgeschickt und lässt sich nicht mehr ändern.', 'err', true);
                             return;
                         }
                         throw new Error('HTTP ' + res.status);
                     }
                     const rows = await res.json();
                     if (!rows.length) {
-                        status('Nichts gespeichert - die Änderungsfrist ist abgelaufen.', 'err');
+                        status('Nichts gespeichert - die Änderungsfrist ist abgelaufen.', 'err', true);
                         return;
                     }
                     try { localStorage.setItem(sentKey, new Date().toISOString()); } catch (e) { }
                     status(role === 'publikum'
                         ? 'Bewertung des Teams gesendet. Danke!'
-                        : 'Coach-Bogen gespeichert.', 'ok');
+                        : 'Coach-Bogen gespeichert.', 'ok', true);
                 } catch (e) {
-                    status('Senden fehlgeschlagen: ' + e.message, 'err');
+                    status('Senden fehlgeschlagen: ' + e.message, 'err', true);
                 } finally {
                     elSendBtn.disabled = false;
                 }
