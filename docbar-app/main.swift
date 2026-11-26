@@ -400,41 +400,91 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return Usage(pct: pct, reset: j["reset"] as? String ?? "", at: Date())
     }
 
-    /// The D with the usage to its right: plain ink below 90 %, a lambda-orange pill with ink-blue text from 90 %,
-    /// a red pill with white text from 98 % - the colour pairs the D itself uses, as orange or red text alone is
-    /// unreadable on one of the two bars. Returns the image and whether it may stay a template.
+    /// The D and the usage as ONE capsule (Doc, 26.11.2026): the D's circle is its rounded left end, the capsule
+    /// runs on to the right, as high as the circle, with the number in it - orange (lambda) with ink-blue digits from
+    /// 90 %, red with white digits from 98 % (Doc: red next to a red disc, "egal, machen wir so, erstmal"), a faint
+    /// grey of the bar's own ink below. The circle keeps every state it has; a faded capsule and "?" mark an old
+    /// value. Returns the image and whether it may stay a template.
     private func withUsage(_ icon: NSImage?, iconTemplate: Bool, ink: NSColor) -> (NSImage?, Bool) {
         guard let icon = icon, let u = usage else { return (icon, iconTemplate) }
         let pct = Int(u.pct.rounded())
+        let stale = usageStale
         let fill: NSColor? = pct >= 98 ? Style.alertRed : pct >= 90 ? Style.warnYellow : nil
         let template = iconTemplate && fill == nil
-        let alpha: CGFloat = usageStale ? 0.5 : 1
-        let color: NSColor = pct >= 98 ? .white : pct >= 90 ? Style.warnInk : (template ? .black : ink)
-        let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: fill == nil ? .medium : .bold)
-        let text = NSAttributedString(string: "\(pct) %" + (usageStale ? "?" : ""),
+        let neutral: NSColor = template ? .black : ink
+        let alpha: CGFloat = stale ? 0.5 : 1
+        let back = (fill ?? neutral.withAlphaComponent(0.2)).withAlphaComponent((fill == nil ? 0.2 : 1) * alpha)
+        let color: NSColor = pct >= 98 ? .white : pct >= 90 ? Style.warnInk : neutral
+        let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .bold)
+        let text = NSAttributedString(string: "\(pct)" + (stale ? "?" : ""),
                                       attributes: [.font: font, .foregroundColor: color.withAlphaComponent(alpha)])
         let ts = text.size()
-        let padX: CGFloat = fill == nil ? 0 : 5, pillH: CGFloat = 16, gap: CGFloat = 3
-        let badgeW = ceil(ts.width) + 2 * padX
-        let midY = (icon.size.height - 1) / 2   // loweredByOne added a point on top
-        let out = NSImage(size: NSSize(width: icon.size.width + gap + badgeW, height: icon.size.height))
+
+        // Where the circle really sits inside the symbol's padded image.
+        let circle = AppDelegate.inkBounds(icon)
+        let r = max(circle.width, circle.height) / 2
+        let cx = circle.midX, cy = circle.midY
+        let textX = circle.maxX + 3
+        let right = max(textX + ceil(ts.width) + 6, circle.maxX + r)
+        let out = NSImage(size: NSSize(width: max(icon.size.width, right), height: icon.size.height))
         out.lockFocus()
+        // The run from the circle's centre to a rounded right end; the circle itself is cut out again (a little
+        // less than its full size, so the run tucks under the ring without a seam).
+        let run = NSBezierPath()
+        run.move(to: NSPoint(x: cx, y: cy - r))
+        run.line(to: NSPoint(x: right - r, y: cy - r))
+        run.appendArc(withCenter: NSPoint(x: right - r, y: cy), radius: r, startAngle: 270, endAngle: 90)
+        run.line(to: NSPoint(x: cx, y: cy + r))
+        run.close()
+        back.set()
+        run.fill()
+        NSGraphicsContext.current?.compositingOperation = .copy
+        NSColor.clear.set()
+        NSBezierPath(ovalIn: circle.insetBy(dx: 0.8, dy: 0.8)).fill()
+        NSGraphicsContext.current?.compositingOperation = .sourceOver
+        // The D on top; a template D inside a coloured image gets the bar's ink, as the system would give it.
         let iconRect = NSRect(origin: .zero, size: icon.size)
-        icon.draw(in: iconRect)
         if iconTemplate && !template {
-            // A template D inside a coloured image: give it the bar's ink, as the system would.
+            let inked = NSImage(size: icon.size)
+            inked.lockFocus()
+            icon.draw(in: iconRect)
             ink.set()
             iconRect.fill(using: .sourceAtop)
+            inked.unlockFocus()
+            inked.draw(in: iconRect)
+        } else {
+            icon.draw(in: iconRect)
         }
-        let x = icon.size.width + gap
-        if let fill = fill {
-            fill.withAlphaComponent(alpha).set()
-            NSBezierPath(roundedRect: NSRect(x: x, y: midY - pillH / 2, width: badgeW, height: pillH),
-                         xRadius: pillH / 2, yRadius: pillH / 2).fill()
-        }
-        text.draw(at: NSPoint(x: x + padX, y: midY - ts.height / 2))
+        text.draw(at: NSPoint(x: textX, y: cy - ts.height / 2))
         out.unlockFocus()
         return (out, template)
+    }
+
+    /// Bounding box of the drawn pixels (alpha > 10 %) - the symbol image carries padding around its circle.
+    private static func inkBounds(_ image: NSImage) -> NSRect {
+        let scale: CGFloat = 4
+        let w = Int(image.size.width * scale), h = Int(image.size.height * scale)
+        let whole = NSRect(origin: .zero, size: image.size)
+        guard w > 0, h > 0, let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: w, pixelsHigh: h, bitsPerSample: 8, samplesPerPixel: 4,
+            hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)
+        else { return whole }
+        rep.size = image.size
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+        image.draw(in: whole)
+        NSGraphicsContext.restoreGraphicsState()
+        guard let data = rep.bitmapData else { return whole }
+        var minX = w, maxX = -1, minY = h, maxY = -1
+        for y in 0..<h {
+            for x in 0..<w where data[y * rep.bytesPerRow + x * 4 + 3] > 25 {
+                minX = min(minX, x); maxX = max(maxX, x); minY = min(minY, y); maxY = max(maxY, y)
+            }
+        }
+        guard maxX >= 0 else { return whole }
+        // Bitmap rows run top down, the image's y bottom up.
+        return NSRect(x: CGFloat(minX) / scale, y: CGFloat(h - 1 - maxY) / scale,
+                      width: CGFloat(maxX - minX + 1) / scale, height: CGFloat(maxY - minY + 1) / scale)
     }
 
     /// Companion tools that belong to the toolbox: bring them up with the bar,
