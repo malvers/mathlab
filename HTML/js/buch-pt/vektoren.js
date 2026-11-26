@@ -60,6 +60,11 @@ window.BuchPT && BuchPT.add('vektoren', {
         // book pt-8 mathegy12-pt:
         // kreuzprodukt (lb7-1): Flächeneinheiten = unidades de área; the preset "parallel" keeps the word of pt-2 (colineares)
         'zwei Vektoren': 'dois vetores', 'Dachfläche': 'Vertente de telhado', 'in der x-y-Ebene': 'no plano xOy', 'Dreieck': 'Triângulo', 'Welche Fläche?': 'Que área?',
+        // winkel3d (lb7-2): Schnittwinkel = ângulo (de duas retas, de reta e plano, de dois planos); the presets name the two objects,
+        // a line perpendicular / parallel to a plane by a rule below (the word table says it for two lines or two planes)
+        'Gerade – Gerade': 'reta – reta', 'Gerade – Ebene': 'reta – plano', 'Ebene – Ebene': 'plano – plano', 'Welcher Winkel?': 'Que ângulo?',
+        'spitz': 'ângulo agudo', 'stumpfe Vektoren': 'vetores com ângulo obtuso', 'senkrecht': 'perpendiculares', 'schräg': 'oblíquos', 'Dach und Boden': 'telhado e chão',
+        'Der Nullvektor hat keine Richtung, er liefert keinen Winkel.': 'O vetor nulo não tem direção; não dá nenhum ângulo.',
         // book pt-9 mathegy11-pt:
     },
     phrase: [
@@ -151,6 +156,23 @@ window.BuchPT && BuchPT.add('vektoren', {
         [' (im Bild verkürzt gezeichnet)', ' (na figura, desenhado mais curto)'],
         ['Dreieck: $A = \\tfrac12\\,|\\vec{u} \\times \\vec{v}| = \\tfrac12 \\cdot ', 'Triângulo: $A = \\tfrac12\\,\\|\\vec{u} \\times \\vec{v}\\| = \\tfrac12 \\cdot '],
         ['Parallelogramm: $A = |\\vec{u} \\times \\vec{v}| = ', 'Paralelogramo: $A = \\|\\vec{u} \\times \\vec{v}\\| = '], [' Flächeneinheiten', ' unidades de área'],
+        // winkel3d (the norms come from the rule of pt-2; |u · v| in the numerator is an absolute value and stays)
+        ['Die Richtungsvektoren sind parallel: Die Geraden sind parallel oder identisch, sie schneiden sich nicht unter einem Winkel.',
+            'Os vetores diretores são colineares: as retas são paralelas ou coincidentes e não se intersetam segundo um ângulo.'],
+        ['Die Vektoren selbst schließen $', 'Os próprios vetores formam um ângulo de $'],
+        ['$ ein, also einen stumpfen Winkel. Die Geraden bilden den spitzen Nebenwinkel $180^\\circ - ', '$, ou seja, um ângulo obtuso. As retas formam o ângulo agudo suplementar $180^\\circ - '],
+        ['$; dafür steht der Betrag im Zähler.', '$; é para isso que serve o valor absoluto no numerador.'],
+        ['Das Skalarprodukt ist $0$: Die Geraden schneiden sich senkrecht.', 'O produto escalar é $0$: as retas são perpendiculares.'],
+        ['Das Skalarprodukt ist positiv, der Winkel zwischen den Vektoren ist schon spitz.', 'O produto escalar é positivo; o ângulo dos vetores já é agudo.'],
+        ['Winkel zwischen $\\vec{u}$ und dem Normalenvektor: $\\cos\\alpha = ', 'Ângulo de $\\vec{u}$ com o vetor normal: $\\cos\\alpha = '],
+        ['Der Winkel zur Ebene ergänzt ihn zu $90^\\circ$: $', 'O ângulo com o plano é o seu complementar: $'],
+        ['. Das Skalarprodukt ist $0$: $g$ ist parallel zu $E$ oder liegt in $E$.', '. O produto escalar é $0$: $g$ é paralela a $E$ ou está contida em $E$.'],
+        ['. $\\vec{u}$ ist ein Vielfaches von $\\vec{n}$: $g$ steht senkrecht auf $E$.', '. $\\vec{u}$ é múltiplo de $\\vec{n}$: $g$ é perpendicular a $E$.'],
+        ['. Gelb gestrichelt: die Projektion von $g$ in die Ebene.', '. A amarelo, a tracejado: a projeção de $g$ no plano.'],
+        ['Die Normalenvektoren sind parallel: Die Ebenen sind parallel oder identisch.', 'Os vetores normais são colineares: os planos são paralelos ou coincidentes.'],
+        ['Weiß: die Schnittgerade $s$ mit dem Richtungsvektor $', 'A branco: a reta de interseção $s$, com o vetor diretor $'],
+        ['$. Gemessen wird der Winkel senkrecht zu ihr, zwischen den beiden farbigen Linien in den Ebenen.', '$. O ângulo mede-se perpendicularmente a ela, entre as duas linhas coloridas nos planos.'],
+        ['$, also $', '$, logo $'],
         // book pt-9 mathegy11-pt:
     ],
     rule: [
@@ -183,6 +205,11 @@ window.BuchPT && BuchPT.add('vektoren', {
         [/\\vec\{([A-Z]{2}')\}/g, '\\overrightarrow{$1}'],
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
+        // winkel3d: a line perpendicular / parallel to a plane (data-p steil, flach); the word table has already parked the label
+        [/(data-p="steil">)(?:\u0003\d+\u0004|senkrecht)(?=<\/button>)/g, '$1perpendicular'],
+        [/(data-p="flach">)(?:\u0003\d+\u0004|parallel)(?=<\/button>)/g, '$1paralela'],
+        // winkel3d: the norm of an indexed vector, |n_1| → ‖n_1‖ (the norm rule of pt-2 reads \vec{…}| only)
+        [/\|(\\vec\{[^{}]*\}_\{?\w\}?)\|/g, '\\|$1\\|'],
         // book pt-9 mathegy11-pt:
     ]
 });
