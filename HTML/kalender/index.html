@@ -261,23 +261,12 @@
            column (Doc, 23.11.2026: "die Pille oben nicht Kreis"). A size container: where the column gets narrow (phone,
            a crowded bar) only the pill with the picture stays */
         .gdw {
-            grid-area: gdw; justify-self: stretch; min-width: 0; height: var(--ctl); padding: 0; border: 0; background: transparent;
-            color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden;
-            container-type: inline-size;
+            grid-area: gdw; justify-self: center; width: min(calc(var(--ctl) - 4px), 100%); height: var(--ctl); padding: 0; overflow: hidden; cursor: pointer;
+            border: 1px solid var(--line); border-radius: 10px; background: rgb(255, 255, 255);
         }
-        .gdw-in {
-            display: inline-flex; align-items: center; gap: 9px; min-width: 0; max-width: 100%; height: 100%; padding: 0 12px 0 4px;
-            border: 1px solid var(--line); border-radius: 10px;
-        }
-        .gdw:hover .gdw-in { background: rgba(var(--tint), .1); }
-        .gdw:focus-visible { outline: none; }
-        .gdw:focus-visible .gdw-in { outline: 2px solid var(--lambda); outline-offset: -2px; }
-        .gdw-img { flex: none; height: 30px; width: auto; aspect-ratio: 200 / 289; border-radius: 4px; object-fit: cover; background: rgb(255, 255, 255); }
-        .gdw-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 15px/1.3 Arial, Helvetica, sans-serif; }
-        @container (max-width: 180px) {
-            .gdw-txt { display: none; }
-            .gdw-in { padding: 0 4px; }
-        }
+        .gdw:hover { border-color: var(--text); }
+        .gdw:focus-visible { outline: 2px solid var(--lambda); outline-offset: 2px; }
+        .gdw-img { display: block; width: 100%; height: 100%; object-fit: cover; }
         /* the thought whole: the sheet as large as the window allows (Doc, 23.11.2026: "Bitte größer"). No words and no
            button bar under it any more (Doc, 24.11.2026: "Lass rausnehmen, bitte" - the ◀ Schließen ▶ bar - and "auch den
            Spruch drüber ... genau nochmal das Gleiche": the sheet carries the words itself); it closes with the drawn X top
@@ -639,12 +628,13 @@
         /* the filter in the header: whose appointments show */
         .filter-wrap { display: flex; gap: 6px; flex: 0 0 auto; }
         .bar .filter-wrap { order: 3; }
-        /* C and D: small letter toggles, calm - the letter in the person's colour, pressed = a soft fill and rim in it */
-        button.icon.fbtn { flex: 0 0 auto; width: calc(var(--ctl) - 4px); font: 700 14px Orbitron, sans-serif; }
+        /* C and D: two independent on/off switches like the old checkmarks - on: filled in the person's appointment colour
+           (D the event gold, C the turquoise) with dark text; off: no fill, muted letter, thin neutral rim */
+        button.icon.fbtn { flex: 0 0 auto; width: calc(var(--ctl) - 4px); font: 700 14px Orbitron, sans-serif; color: var(--muted); background: transparent; border-color: var(--line); }
         @media (max-width: 599px) { .filter-wrap { gap: 4px; } button.icon.fbtn { width: calc(var(--ctl) - 12px); } }   /* the entry field keeps its "Neuer Termin" */
-        button.icon.fbtn-c { --f: var(--c-turquoise); color: rgb(var(--f)); }
-        button.icon.fbtn-d { --f: var(--c-event-gold); color: rgb(var(--f)); }
-        button.icon.fbtn[aria-pressed="true"] { background: rgba(var(--f), .22); border-color: rgba(var(--f), .85); }
+        button.icon.fbtn-c { --f: var(--c-turquoise); --fon: var(--ink-navy); }
+        button.icon.fbtn-d { --f: var(--c-event-gold); --fon: var(--ink-navy); }
+        button.icon.fbtn[aria-pressed="true"] { background: rgb(var(--f)); border-color: rgb(var(--f)); color: var(--fon); }
 
         /* ---------- search (Doc, 22.11.2026: the calendar had none) ----------
            The magnifier turns the entry row into the search field - same place, same size (Doc, 22.11.2026: "die Zeile, wo
@@ -946,8 +936,8 @@
             <button class="icon gear" id="gearBtn" type="button" aria-label="Einstellungen" aria-expanded="false" aria-controls="settings">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
             </button>
-            <!-- whose appointments show (only once the calendar is shared, and in the guest's view): C = only Cutie's (turquoise),
-                 D = only Doc's (gold); a second tap on the active one shows both again; keys C / D / B -->
+            <!-- whose appointments show (only once the calendar is shared, and in the guest's view): C = Cutie's entries (turquoise),
+                 D = Doc's (gold), each an on/off switch, never both off; keys C / D toggle, B = both on -->
             <div class="filter-wrap" id="filterWrap" role="group" aria-label="Wessen Termine" hidden>
                 <button class="icon fbtn fbtn-c" id="fltC" type="button" aria-pressed="false" aria-label="Nur Cuties Termine" title="Nur Cuties Termine (Taste C)" aria-keyshortcuts="C">C</button>
                 <button class="icon fbtn fbtn-d" id="fltD" type="button" aria-pressed="false" aria-label="Nur Docs Termine" title="Nur Docs Termine (Taste D)" aria-keyshortcuts="D">D</button>
@@ -969,9 +959,10 @@
                     <button class="icon" id="prevBtn" type="button" aria-label="Zurück"></button>
                     <span class="period" id="period" aria-live="polite" title="Zurück zu heute"></span>
                     <button class="icon" id="nextBtn" type="button" aria-label="Weiter"></button>
+                    <!-- the thought of the week, between the forward arrow and the right edge (renderGdw): a tile with the sheet filling it; a tap opens it whole in #gdwDlg -->
+                    <button class="gdw" id="gdwBtn" type="button" hidden><img class="gdw-img" id="gdwImg" alt=""></button>
                     <!-- the thought of the week shown, between the forward arrow and the people button (renderGdw); a tap
                          opens it whole in #gdwDlg -->
-                    <button class="gdw" id="gdwBtn" type="button" hidden><span class="gdw-in"><img class="gdw-img" id="gdwImg" alt=""></span></button>
                 </div>
             </div>
         </div>
@@ -1859,6 +1850,7 @@
                 if (b.dataset.sig === sig) return;   // the half-minute redraws leave it alone
                 b.dataset.sig = sig;
                 $('gdwImg').src = gdwThumb(e);
+                tileGdw(e);   // the kept measurement at once (none yet: the whole sheet until trimGdw has measured it)
                 trimGdw(e);   // ready before the dialog is opened
                 const say = gdwHead(e) + (e.ferien ? ' · ' + e.ferien : '') + (e.titel ? ': ' + e.titel : '');
                 b.title = say + ' (antippen)';
@@ -1892,6 +1884,13 @@
                one that is white all over: the whole sheet */
             const GDW_FULL = { x: 0, y: 0, w: 1, h: 1 };
             const gdwTrim = new Map();   // picture number -> { x, y, w, h } as fractions of the sheet; null while measuring
+            const gdwTight = new Map();  // picture number -> the printed part without the white page around it (the header tile)
+            /* the header tile shows only the printed part, filling the tile edge to edge - the round corners may cut into it
+               (Doc, 26.11.2026: "Der Gedanke soll wirklich die ganze Kachel ausfüllen ... kann ruhig die Ecken abschneiden") */
+            function tileGdw(e) {
+                const t = e && gdwTight.get(e.bild), img = $('gdwImg');
+                img.style.objectViewBox = t ? `inset(${(t.y * 100).toFixed(2)}% ${((1 - t.x - t.w) * 100).toFixed(2)}% ${((1 - t.y - t.h) * 100).toFixed(2)}% ${(t.x * 100).toFixed(2)}%)` : '';
+            }
             function trimGdw(e) {
                 if (!e || gdwTrim.has(e.bild)) return;
                 gdwTrim.set(e.bild, null);
@@ -1916,12 +1915,14 @@
                             }
                         }
                         if (x1 > x0 && y1 > y0) {
+                            gdwTight.set(e.bild, { x: x0 / W, y: y0 / H, w: (x1 - x0 + 1) / W, h: (y1 - y0 + 1) / H });
                             const m = Math.round(W * 0.03);
                             x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(W - 1, x1 + m); y1 = Math.min(H - 1, y1 + m);
                             t = { x: x0 / W, y: y0 / H, w: (x1 - x0 + 1) / W, h: (y1 - y0 + 1) / H };
                         }
                     } catch (err) { t = null; }
                     gdwTrim.set(e.bild, t || GDW_FULL);
+                    if (gdw && gdw[K.ymd(gdwMonday())] && gdw[K.ymd(gdwMonday())].bild === e.bild) tileGdw(e);
                     if (gdwOpen && gdw && gdw[gdwOpen] && gdw[gdwOpen].bild === e.bild) fitGdw();
                 };
                 im.onerror = () => gdwTrim.set(e.bild, GDW_FULL);
@@ -1994,22 +1995,26 @@
                 markHit(false);
                 refreshPreview();
             }
-            /* the C / D buttons: one person only, or (second tap on the active one) both */
+            /* the C / D buttons: two independent switches, the old checkmarks' rule - never both off */
             const cKey = () => (GUEST ? 'me' : 'other'), dKey = () => (GUEST ? 'other' : 'me');   // Cutie is the guest, Doc the owner
             function renderFilter() {
                 const on = filterShown();
                 $('filterWrap').hidden = !on;
                 if (!on) return;
-                $('fltC').setAttribute('aria-pressed', String(filter[cKey()] && !filter[dKey()]));
-                $('fltD').setAttribute('aria-pressed', String(filter[dKey()] && !filter[cKey()]));
+                $('fltC').setAttribute('aria-pressed', String(filter[cKey()]));
+                $('fltD').setAttribute('aria-pressed', String(filter[dKey()]));
             }
-            function setFilterOnly(who) {   // 'c' | 'd' | 'both'; a tap on the one already alone shows both
-                if (!filterShown()) return;
-                const only = who === 'both' ? null : who === 'c' ? cKey() : dKey();
-                const alone = only && filter[only] && !filter[only === 'me' ? 'other' : 'me'];
-                filter = only && !alone ? { me: only === 'me', other: only === 'other' } : { me: true, other: true };
+            function setFilter(which, on) {   // which: 'me' | 'other'
+                if (!on && !filter[which === 'me' ? 'other' : 'me']) { renderFilter(); return; }   // never both off
+                filter[which] = on;
                 try { localStorage.setItem(FILTER_KEY, JSON.stringify(filter)); } catch (e) { }
                 render();
+            }
+            function toggleFilter(who) {   // 'c' | 'd' toggles that one, 'both' switches both on
+                if (!filterShown()) return;
+                if (who === 'both') { filter = { me: true, other: true }; try { localStorage.setItem(FILTER_KEY, JSON.stringify(filter)); } catch (e) { } render(); return; }
+                const key = who === 'c' ? cKey() : dKey();
+                setFilter(key, !filter[key]);
             }
 
             /* guest mode: the entry field only while the guest may write; the words in the settings */
@@ -3156,8 +3161,8 @@
                 try { applyTheme(localStorage.getItem('svp-theme')); } catch (e) { applyTheme('dark'); }
                 $('themeSeg').onclick = e => { const b = e.target.closest('button'); if (b) applyTheme(b.dataset.theme); };
                 $('gearBtn').onclick = () => showSettings($('settings').hidden);
-                $('fltC').onclick = () => setFilterOnly('c');
-                $('fltD').onclick = () => setFilterOnly('d');
+                $('fltC').onclick = () => toggleFilter('c');
+                $('fltD').onclick = () => toggleFilter('d');
                 /* ONE rule for every menu (settings, people filter, search): a press outside closes it and the click that follows
                    is swallowed - no new appointment, no info box, no navigation (Doc, 26.11.2026). Inside a menu all works as before. */
                 const MENUS = [
@@ -3363,7 +3368,7 @@
                     e.preventDefault();
                     step(e.key === 'ArrowRight' ? 1 : -1);
                 });
-                // C / D / B: only Cutie's, only Doc's, both (Doc, 22.11.2026) - never while typing, not with a dialog open, no modifier
+                // C / D toggle Cutie's / Doc's entries, B = both on (Doc, 22.11.2026) - never while typing, not with a dialog open, no modifier
                 document.addEventListener('keydown', e => {
                     const who = { c: 'c', d: 'd', b: 'both' }[(e.key || '').toLowerCase()];
                     if (!who || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.repeat || e.defaultPrevented || !filterShown()) return;
@@ -3371,7 +3376,7 @@
                     const t = e.target;
                     if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
                     e.preventDefault();
-                    setFilterOnly(who);
+                    toggleFilter(who);
                 });
                 // T / W / M switch to Tag / Woche / Monat (Doc, 13.11.2026) - never while typing (here an empty entry field
                 // counts too: a "T" may start a title), not with a dialog open, not with Cmd / Ctrl / Alt (Cmd-W, Cmd-T)
