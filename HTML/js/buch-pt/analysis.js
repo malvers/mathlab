@@ -106,11 +106,8 @@ window.BuchPT && BuchPT.add('analysis', {
         'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
             'O declive é sempre $0{,}5$: as retas são paralelas e não têm nenhum ponto comum. O parâmetro desloca-as.',
         // book pt-9 mathegy11-pt:
-        // bruchfunktion (lb1-4): Polstelle = polo, Lücke = lacuna (Loch = buraco), Zähler / Nenner = numerador / denominador
-        'Polstelle': 'Polo', 'Lücke': 'Lacuna', 'ohne Vorzeichenwechsel': 'Sem mudança de sinal', 'schiefe Asymptote': 'Assíntota oblíqua',
-        'Graph einer gebrochenrationalen Funktion mit Polstellen, Lücken und Asymptoten': 'Gráfico de uma função racional com polos, lacunas e assíntotas',
-        'Beispiele:': 'Exemplos:', 'Zähler:': 'Numerador:', 'Nenner:': 'Denominador:', 'Grad des Zählers': 'Grau do numerador', 'Grad des Nenners': 'Grau do denominador',
-        'Grad 0': 'Grau 0', 'Grad 1': 'Grau 1', 'Grad 2': 'Grau 2', 'Faktor $k$': 'Fator $k$',
+        // bruchfunktion (lb1-4): the widget's words are in the pt-7 block above (merge 26.11.2026: one copy per string, the
+        // lowest block wins; "Buraco" and "descontinuidade removível" also stand in the GY 11 text)
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -251,18 +248,10 @@ window.BuchPT && BuchPT.add('analysis', {
         ['genau ein Punkt, die Gerade <b>berührt</b> die Parabel in $x = ', 'exatamente um ponto: a reta é <b>tangente</b> à parábola em $x = '],
         ['$. Das passiert für $a = \\pm 2$.', '$. Isto acontece para $a = \\pm 2$.'],
         // book pt-9 mathegy11-pt:
-        // bruchfunktion (lb1-4)
-        ['Nullstelle des Zählers $', 'Zero do numerador $'], ['Nullstelle des Nenners $', 'Zero do denominador $'],
-        ['Nach dem Kürzen steht kein $x$ mehr im Nenner: Der Graph ist ', 'Depois de simplificar, já não há $x$ no denominador: o gráfico é '],
-        ['eine waagerechte Gerade', 'uma reta horizontal'], ['eine Gerade', 'uma reta'],
-        ['Zählergrad kleiner als Nennergrad: waagerechte Asymptote $y = 0$, die $x$-Achse.', 'Grau do numerador menor do que o do denominador: assíntota horizontal $y = 0$, o eixo $Ox$.'],
-        ['Zählergrad gleich Nennergrad: waagerechte Asymptote $y = ', 'Graus do numerador e do denominador iguais: assíntota horizontal $y = '],
-        ['$ (Quotient der Leitkoeffizienten).', '$ (quociente dos coeficientes dos termos de maior grau).'],
-        ['Zählergrad um 1 größer: Polynomdivision ergibt $f(x) = ', 'Grau do numerador maior uma unidade: a divisão de polinómios dá $f(x) = '],
-        ['$, schiefe Asymptote $y = ', '$, assíntota oblíqua $y = '], ['Kürzen: $f(x) = ', 'Simplificando: $f(x) = '], ['$ für $x \\neq ', '$ para $x \\neq '],
-        ['$ · hebbare Lücken', '$ · lacunas (descontinuidades removíveis)'], ['$ · hebbare Lücke', '$ · lacuna (descontinuidade removível)'],
-        ['Nullstellen: ', 'Zeros: '], [' · Polstellen: ', ' · polos: '],
-        [' mit Vorzeichenwechsel', ' com mudança de sinal'], [' ohne Vorzeichenwechsel', ' sem mudança de sinal'], [' (senkrechte Asymptote)', ' (assíntota vertical)'],
+        // bruchfunktion (lb1-4): the sentences are in the pt-7 block (merge 26.11.2026, lowest block wins); only these three,
+        // shorter than pt-7's keys, stay here
+        ['Nullstellen: ', 'Zeros: '],
+        [' mit Vorzeichenwechsel', ' com mudança de sinal'], [' ohne Vorzeichenwechsel', ' sem mudança de sinal'],
     ],
     rule: [
         // pt0: notation of the module, for every book
