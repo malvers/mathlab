@@ -97,6 +97,23 @@ final class Entries {
         save();
     }
 
+    /** Puts another version of a time in its place - e.g. the same time moved to another exercise. */
+    void replace(int i, Entry e) {
+        list.set(i, e);
+        save();
+    }
+
+    /** Where the time that started at {@code start} stands; -1 when it is not (or no longer) there. */
+    int indexOf(long start) {
+        for (int i = 0; i < list.size(); i++) if (list.get(i).start == start) return i;
+        return -1;
+    }
+
+    /** The same time under another exercise (Doc, 26.11.2026: a time stored as "Planks" was "Two Balls"). */
+    static Entry withKind(Entry e, String kind) {
+        return new Entry(e.start, e.duration, kind);
+    }
+
     Entry remove(int i) {
         Entry e = list.remove(i);
         save();

@@ -117,6 +117,10 @@ import java.util.function.IntConsumer;
  *   mmol/L, else mg/dL, a chip to override), date and time, when it was measured (nüchtern / vor dem Essen / nach dem
  *   Essen (2 h) / sonstige), a note; always shown in both units (his meter says mmol/L, he thinks in mg/dL). Fasting and
  *   two hours after a meal are coloured by their limits. Per person like the scale; long press deletes (Glucoses).
+ * - "Verlauf" (Doc, 26.11.2026): the course of the running values - Gewicht, Körperfett, Bauch, Blutdruck (Sys/Dia),
+ *   Puls, Blutzucker nüchtern, the stopwatch times per exercise - over 4 weeks, 3 months, 1 year or everything, per
+ *   person (Trends, HistoryChart). In the stopwatch's ZEITEN a tap selects a time; the exercise chips then move it to
+ *   another exercise, with "Rückgängig" (Doc, 26.11.2026).
  * - Fastenmodus (Doc, 21.11.2026): in the fasting view "Fasten starten" (planned 5 / 7 days / own, start now or
  *   earlier), a running fast shows a slim banner on top ("Fasten · Tag 3 von 5 · 62 h", "Beenden"). A fast is a time
  *   range (Fasts): every measurement in it belongs to it by its time, also after start or end are changed. It stands
@@ -148,7 +152,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     // 30 days (drift)
     private static final long OMRON_CLOCK_EVERY_MS = 30L * 24 * 3_600_000L;
     // TAB_FAST is the fasting view, opened from the settings (no tab of its own since 20.11.2026)
-    private static final int TAB_WATCH = 0, TAB_SCALE = 1, TAB_FAST = 2, TAB_BP = 3, TAB_GLU = 4;
+    private static final int TAB_WATCH = 0, TAB_SCALE = 1, TAB_FAST = 2, TAB_BP = 3, TAB_GLU = 4, TAB_HIST = 5;
     private static final String FASTING_PAGE = "file:///android_asset/fasting/index.html";
     private static final long DEBOUNCE_MS = 1500;   // one word must not start and at once stop again
     private static final long UNDO_MS = 5000;
@@ -164,7 +168,13 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     private TextView state, ear, empty, undoText;
     private DigitsView timer;
     private Button startBtn, stopBtn, resetBtn;
-    private View undoBar, watchPage, scalePage, bpPage, gluPage;
+    private View undoBar, watchPage, scalePage, bpPage, gluPage, histPage;
+    // the "Verlauf" tab (Doc, 26.11.2026): its cards, the stretch of time (Trends.RANGE_WORDS) and the person switch
+    private LinearLayout histCards;
+    private final TextView[] histRangeChips = new TextView[Trends.RANGE_WORDS.length];
+    private final TextView[] histPersonChips = new TextView[SLOTS.length];
+    private View histPersonRow;
+    private int histRange;
     private RecyclerView list;
     private WatchAdapter adapter;
     private Model model;
@@ -241,13 +251,16 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     // remembered, so the scale's repeats of it (the resistance comes a moment later) are not stored either
     private Weighings.Weighing pendingWeigh, rejectedWeigh;
     private AlertDialog askDialog;
-    private ImageView tabWatch, tabScale, tabBp, tabGlu;
+    private ImageView tabWatch, tabScale, tabBp, tabGlu, tabHist;
     private TextView scaleState, resWhen, resNote, scaleEmpty;
     // the tab the fasting view was opened from - Back at the page's start returns there
     private int backTab = TAB_WATCH;
     // the exercise a stopped time is filed under (Entries.KINDS) and its chips on the stopwatch tab
     private String kind;
     private final TextView[] kindChips = new TextView[Entries.KINDS.length];
+    // a time selected in ZEITEN (its start, 0 = none) and the line under the chips that says so
+    private long pickedRun;
+    private TextView pickHint;
     private DigitsView resWeight;
     // the tiles under the weight: value, range bar and reference line (Ranges)
     private Tile tFat, tWater, tMuscle, tBmi, tWaist, tWhtr, tHip, tWhr;
@@ -335,7 +348,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         setContentView(build());
         int savedTab = prefs.getInt("tab", TAB_WATCH);
         showTab(savedTab == TAB_SCALE || savedTab == TAB_FAST || savedTab == TAB_BP
-                || savedTab == TAB_GLU ? savedTab : TAB_WATCH);
+                || savedTab == TAB_GLU || savedTab == TAB_HIST ? savedTab : TAB_WATCH);
         refresh();
         if (runStart != 0) ui.post(tick);
         try {
@@ -366,6 +379,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         updateScale();
         updateBp();
         refresh();
+        if (tab == TAB_HIST) refreshHist();
         if (fastWeb != null) fastWeb.onResume();
         applyFastingChrome();   // the phone may have been turned while another app was in front
         refreshFast();
@@ -435,6 +449,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         refreshBp();
         refreshGlu();
         refreshFast();   // a fast started or ended on the web: banner and fasting page
+        if (tab == TAB_HIST) refreshHist();
     }
 
     /** Page, status bar and navigation bar in the scheme's ground; dark system icons on Hell. */
@@ -1012,6 +1027,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         paintPersons();
         if (scaleAdapter != null) scaleAdapter.notifyDataSetChanged();
         refreshScale();
+        if (tab == TAB_HIST) refreshHist();
     }
 
     private void paintPersons() {
@@ -1037,6 +1053,12 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         }
         if (gluPersonRow != null) gluPersonRow.setVisibility(Weighings.countOn(on) > 1 ? View.VISIBLE : View.GONE);
         if (gluTitle != null) gluTitle.setText("MESSUNGEN · " + names[person].toUpperCase(java.util.Locale.GERMAN));
+        for (int i = 0; i < histPersonChips.length; i++) {
+            if (histPersonChips[i] == null) continue;
+            paintGreen(histPersonChips[i], i == person);
+            histPersonChips[i].setVisibility(on[i] ? View.VISIBLE : View.GONE);
+        }
+        if (histPersonRow != null) histPersonRow.setVisibility(Weighings.countOn(on) > 1 ? View.VISIBLE : View.GONE);
     }
 
     /** "Personen" in the settings: a person on or off; the last one on stays on. Her data is never touched. */
@@ -1674,12 +1696,19 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
 
     private void showTab(int which) {
         if (which == TAB_FAST && tab != TAB_FAST) backTab = tab;
+        if (which != TAB_WATCH && pickedRun != 0) {
+            pickedRun = 0;
+            if (adapter != null) adapter.notifyDataSetChanged();
+            paintKinds();
+        }
         tab = which;
         prefs.edit().putInt("tab", which).apply();
         watchPage.setVisibility(which == TAB_WATCH ? View.VISIBLE : View.GONE);
         scalePage.setVisibility(which == TAB_SCALE ? View.VISIBLE : View.GONE);
         bpPage.setVisibility(which == TAB_BP ? View.VISIBLE : View.GONE);
         gluPage.setVisibility(which == TAB_GLU ? View.VISIBLE : View.GONE);
+        histPage.setVisibility(which == TAB_HIST ? View.VISIBLE : View.GONE);
+        if (which == TAB_HIST) refreshHist();
         fastPage.setVisibility(which == TAB_FAST ? View.VISIBLE : View.GONE);
         if (which == TAB_FAST) {
             openFasting();
@@ -1690,6 +1719,7 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         paintTab(tabScale, which == TAB_SCALE);
         paintTab(tabBp, which == TAB_BP);
         paintTab(tabGlu, which == TAB_GLU);
+        paintTab(tabHist, which == TAB_HIST);
         undoBar.setVisibility(View.GONE);   // an undo belongs to the list it came from
         ui.removeCallbacks(hideUndo);
         if (which == TAB_WATCH) listenIfAllowed();
@@ -1752,9 +1782,10 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         tabScale = tabIcon(R.drawable.ic_tab_scale, "Waage", v -> showTab(TAB_SCALE));
         tabBp = tabIcon(R.drawable.ic_tab_heart, "Blutdruck", v -> showTab(TAB_BP));
         tabGlu = tabIcon(R.drawable.ic_tab_drop, "Blutzucker", v -> showTab(TAB_GLU));
+        tabHist = tabIcon(R.drawable.ic_tab_chart, "Verlauf", v -> showTab(TAB_HIST));
         ImageView gear = tabIcon(R.drawable.ic_tab_settings, "Einstellungen", v -> openSettings());
         paintTab(gear, false);   // the gear opens a dialog, it is never "the shown tab"
-        for (ImageView t : new ImageView[]{tabWatch, tabScale, tabBp, tabGlu, gear}) {
+        for (ImageView t : new ImageView[]{tabWatch, tabScale, tabBp, tabGlu, tabHist, gear}) {
             tabs.addView(t, new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), 1f));
         }
         col.addView(tabs, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -1768,6 +1799,8 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         pages.addView(bpPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         gluPage = buildGluPage();
         pages.addView(gluPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        histPage = buildHistPage();
+        pages.addView(histPage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         fastPage = new FrameLayout(this);
         fastPage.setBackgroundColor(BG);
         LinearLayout fastCol = new LinearLayout(this);
@@ -1832,18 +1865,59 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
     }
 
     /** The exercise chip tapped: remembered, and the time stopped next is filed under it. */
+    /**
+     * An exercise chip: with a time selected in ZEITEN it moves that time to this exercise (Doc, 26.11.2026: "den Wert
+     * selektieren und oben die Tasten drücken, bringt den in die andere Kategorie"), with "Rückgängig"; otherwise it
+     * chooses the exercise of the next time.
+     */
     private void chooseKind(String k) {
+        int at = pickedRun == 0 ? -1 : entries.indexOf(pickedRun);
+        if (at >= 0) {
+            Entries.Entry old = entries.get(at);
+            pickedRun = 0;
+            if (!k.equals(old.kind)) {
+                entries.replace(at, Entries.withKind(old, k));
+                offerUndo(Times.day(old.start) + " → " + k, () -> {
+                    int i = entries.indexOf(old.start);
+                    if (i >= 0) {
+                        entries.replace(i, old);
+                        adapter.notifyItemChanged(i);
+                    }
+                });
+            }
+            adapter.notifyDataSetChanged();
+            paintKinds();
+            return;
+        }
+        pickedRun = 0;
         if (k.equals(kind)) return;
         kind = k;
         prefs.edit().putString("kind", k).apply();
         paintKinds();
     }
 
+    /** A tap on a time in ZEITEN selects it (the chips then show and change its exercise); a second tap lets go. */
+    private void pickRun(int pos) {
+        if (pos < 0 || pos >= entries.size()) return;
+        long start = entries.get(pos).start;
+        pickedRun = pickedRun == start ? 0 : start;
+        adapter.notifyDataSetChanged();
+        paintKinds();
+    }
+
     private void paintKinds() {
+        int at = pickedRun == 0 ? -1 : entries.indexOf(pickedRun);
+        if (at < 0) pickedRun = 0;
+        // with a time selected the chips show ITS exercise; otherwise the one for the next time
+        String shown = at >= 0 ? entries.get(at).kind : kind;
         for (int i = 0; i < kindChips.length; i++) {
             // the second row is green, the top row orange (Doc, 21.11.2026): the chosen exercise phi green, the other a
             // neutral grey outline - both alike, no colour of their own
-            if (kindChips[i] != null) paintPick(kindChips[i], Entries.KINDS[i].equals(kind));
+            if (kindChips[i] != null) paintPick(kindChips[i], Entries.KINDS[i].equals(shown));
+        }
+        if (pickHint != null) {
+            pickHint.setText(at >= 0 ? Times.day(entries.get(at).start) + " ausgewählt – oben die Übung tippen" : "");
+            pickHint.setVisibility(at >= 0 ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -1868,10 +1942,16 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             cp.rightMargin = i == Entries.KINDS.length - 1 ? 0 : dp(5);
             kinds.addView(c, cp);
         }
-        paintKinds();
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(16);
         page.addView(kinds, lp);
+        pickHint = text("", 12, LAMBDA, false);
+        pickHint.setGravity(Gravity.CENTER);
+        pickHint.setVisibility(View.GONE);
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(6);
+        page.addView(pickHint, lp);
+        paintKinds();
 
         state = text("DocFit Start", 26, pal.commandInk, true);
         state.setGravity(Gravity.CENTER);
@@ -2405,6 +2485,157 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
             row.addView(c, cp);
         }
         return row;
+    }
+
+    // ---------- the "Verlauf" tab ----------
+
+    /**
+     * The "Verlauf" tab (Doc, 26.11.2026: "ein Tab mit den Verlaufsdaten ... für die laufenden Werte"; the fasting view
+     * stays where it is): the person switch, the stretch of time (4 Wochen / 3 Monate / 1 Jahr / Alles) and a card per
+     * value with its newest value and its course - Gewicht, Körperfett, Bauch (with the zones and goal lines of the
+     * detail sheets), Blutdruck (systolic and diastolic in one chart), Puls, Blutzucker nüchtern and, for Doc, the
+     * stopwatch times per exercise (Trends, HistoryChart).
+     */
+    private View buildHistPage() {
+        LinearLayout page = new LinearLayout(this);
+        page.setOrientation(LinearLayout.VERTICAL);
+        histRange = Math.max(0, Math.min(prefs.getInt("histRange", 1), Trends.RANGE_WORDS.length - 1));
+
+        LinearLayout persons = personSwitch(histPersonChips);
+        histPersonRow = persons;
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(12);
+        page.addView(persons, lp);
+
+        LinearLayout ranges = new LinearLayout(this);
+        ranges.setOrientation(LinearLayout.HORIZONTAL);
+        for (int i = 0; i < Trends.RANGE_WORDS.length; i++) {
+            int r = i;
+            // one size for all four, one line, centred in the height of the person chips; each chip as wide as its word
+            // needs (Doc, 26.11.2026: "schön machen" - squeezed into equal quarters "4 Wochen" / "3 Monate" shrank,
+            // then broke into two lines at his font size 1.3)
+            TextView c = text(Trends.RANGE_WORDS[i], 13, TEXT, true);
+            c.setGravity(Gravity.CENTER);
+            c.setSingleLine(true);
+            c.setIncludeFontPadding(false);
+            c.setPadding(dp(4), 0, dp(4), 0);
+            float need = c.getPaint().measureText(Trends.RANGE_WORDS[i]) + dp(18);
+            c.setOnClickListener(v -> {
+                histRange = r;
+                prefs.edit().putInt("histRange", r).apply();
+                refreshHist();
+            });
+            histRangeChips[i] = c;
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(0, dp(TAB_HEIGHT), need);
+            cp.leftMargin = i == 0 ? 0 : dp(5);
+            cp.rightMargin = i == Trends.RANGE_WORDS.length - 1 ? 0 : dp(5);
+            ranges.addView(c, cp);
+        }
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(12);
+        page.addView(ranges, lp);
+
+        ScrollView scroll = new ScrollView(this);
+        histCards = new LinearLayout(this);
+        histCards.setOrientation(LinearLayout.VERTICAL);
+        histCards.setPadding(0, 0, 0, dp(64));
+        scroll.addView(histCards, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
+        lp.topMargin = dp(4);
+        page.addView(scroll, lp);
+        paintPersons();
+        return page;
+    }
+
+    /** The cards of the "Verlauf" tab, built anew for the shown person and the chosen stretch of time. */
+    private void refreshHist() {
+        if (histCards == null) return;
+        for (int i = 0; i < histRangeChips.length; i++) if (histRangeChips[i] != null) paintPick(histRangeChips[i], i == histRange);
+        histCards.removeAllViews();
+        long from = Trends.from(histRange, System.currentTimeMillis());
+
+        List<Weighings.Weighing> all = new ArrayList<>();
+        for (int i = 0; i < weighings.size(); i++) all.add(weighings.get(i));
+        Weighings.Weighing newest = all.isEmpty() ? null : all.get(0);
+        for (TileInfo.Key k : new TileInfo.Key[]{TileInfo.Key.WEIGHT, TileInfo.Key.FAT, TileInfo.Key.WAIST}) {
+            List<History.Point> pts = Trends.since(History.series(all, k, profile), from);
+            int dec = History.decimals(k);
+            String unit = History.unit(k);
+            histCard(TileInfo.of(k).title, pts, null, newest == null ? null : History.scale(newest, k, profile),
+                    History.goals(k, profile), dec, Trends.latest(pts, dec, unit));
+        }
+
+        List<Pressures.Reading> bp = new ArrayList<>();
+        for (int i = 0; i < pressures.size(); i++) bp.add(pressures.get(i));
+        List<History.Point> sys = Trends.since(Trends.pressure(bp, Trends.SYS), from);
+        List<History.Point> dia = Trends.since(Trends.pressure(bp, Trends.DIA), from);
+        String bpNow = sys.isEmpty() ? "–" : Math.round(sys.get(sys.size() - 1).value) + "/"
+                + Math.round(dia.get(dia.size() - 1).value) + " mmHg";
+        histCard("Blutdruck", sys, dia, null, new ArrayList<>(), 0, bpNow);
+        List<History.Point> pulse = Trends.since(Trends.pressure(bp, Trends.PULSE), from);
+        histCard("Puls", pulse, null, null, new ArrayList<>(), 0, Trends.latest(pulse, 0, "/min"));
+
+        List<Glucoses.Reading> glu = new ArrayList<>();
+        for (int i = 0; i < glucoses.size(); i++) glu.add(glucoses.get(i));
+        List<History.Point> fasting = Trends.since(Trends.fastingGlucose(glu), from);
+        histCard("Blutzucker nüchtern", fasting, null, null, new ArrayList<>(), 0, Trends.latest(fasting, 0, "mg/dL"));
+
+        if (person == 0) {   // the stopwatch is Doc's
+            List<Entries.Entry> runs = new ArrayList<>();
+            for (int i = 0; i < entries.size(); i++) runs.add(entries.get(i));
+            for (String k : Entries.KINDS) {
+                List<History.Point> pts = Trends.since(Trends.runs(runs, k), from);
+                histCard(k + " · Sekunden", pts, null, null, new ArrayList<>(), 0,
+                        pts.isEmpty() ? "–" : Trends.clock(pts.get(pts.size() - 1).value));
+            }
+        }
+    }
+
+    /** One card: title and newest value on top, then the course (or a line that there is none in this stretch). */
+    private void histCard(String title, List<History.Point> pts, List<History.Point> second, Ranges.Scale scale,
+                          List<History.Goal> goals, int decimals, String now) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackground(round(CARD, 12));
+        card.setPadding(dp(12), dp(10), dp(12), dp(10));
+        LinearLayout head = new LinearLayout(this);
+        head.setOrientation(LinearLayout.HORIZONTAL);
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        TextView t = text(title.toUpperCase(java.util.Locale.GERMAN), 12, MUTED, true);
+        t.setMaxLines(1);
+        t.setEllipsize(TextUtils.TruncateAt.END);   // never under the value
+        head.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        TextView v = text(now, 15, TEXT, true);
+        v.setPadding(dp(8), 0, 0, 0);
+        head.addView(v);
+        card.addView(head);
+        if (pts.isEmpty()) {
+            TextView none = text("Keine Werte in diesem Zeitraum.", 13, MUTED, false);
+            none.setPadding(0, dp(6), 0, dp(2));
+            card.addView(none);
+        } else {
+            HistoryChart chart = new HistoryChart(this, orbitron, LAMBDA, TEXT, MUTED, CARD,
+                    pal.scoreHigh, pal.scoreMid, pal.scoreLow);
+            chart.setData(pts, scale, goals, decimals);
+            if (second != null) chart.setSecond(second, PHI);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(150));
+            cp.topMargin = dp(6);
+            card.addView(chart, cp);
+            if (second != null) {   // which line is which: under the chart, in the lines' colours
+                SpannableString key = new SpannableString("●  Sys      ●  Dia");
+                key.setSpan(new ForegroundColorSpan(LAMBDA), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                int dia = key.toString().lastIndexOf('●');
+                key.setSpan(new ForegroundColorSpan(PHI), dia, dia + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                TextView legend = text("", 12, MUTED, false);
+                legend.setText(key);
+                legend.setGravity(Gravity.CENTER);
+                legend.setPadding(0, dp(4), 0, 0);
+                card.addView(legend);
+            }
+        }
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(10);
+        histCards.addView(card, lp);
     }
 
     /** The blood glucose tab: the person switch, "+ Messung eintragen" and the list. */
@@ -3420,12 +3651,17 @@ public class MainActivity extends Activity implements KeywordListener.Callback, 
         @NonNull
         @Override
         public Row onCreateViewHolder(@NonNull ViewGroup parent, int type) {
-            return newRow();
+            Row r = newRow();
+            r.itemView.setOnClickListener(v -> pickRun(r.getBindingAdapterPosition()));
+            return r;
         }
 
         @Override
         public void onBindViewHolder(@NonNull Row r, int i) {
             Entries.Entry e = entries.get(i);
+            GradientDrawable bg = round(CARD, 12);
+            if (e.start == pickedRun) bg.setStroke(dp(2), LAMBDA);   // the selected time
+            r.itemView.setBackground(bg);
             r.day.setText(Times.day(e.start));
             // the exercise in front of the start time, as plain text; times from before there were exercises as they were
             r.sub.setText((e.kind.isEmpty() ? "" : e.kind + " · ") + "Start " + Times.clock(e.start) + " Uhr");

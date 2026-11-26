@@ -79,4 +79,14 @@ public class EntriesTest {
         assertEquals("", new Entries.Entry(1, 2).kind);
         assertEquals("", new Entries.Entry(1, 2, null).kind);
     }
+
+    @Test
+    public void aTimeMovesToAnotherExercise() {
+        Entries.Entry e = new Entries.Entry(1_795_000_000_000L, 57_857L, "Planks");
+        Entries.Entry moved = Entries.withKind(e, "Two Balls");
+        assertEquals(e.start, moved.start);
+        assertEquals(e.duration, moved.duration);
+        assertEquals("Two Balls", moved.kind);
+        assertEquals("Planks", e.kind);   // the old version stays as it was (for "Rückgängig")
+    }
 }
