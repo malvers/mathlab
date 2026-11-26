@@ -1,6 +1,7 @@
 /*
  * DocFit core for the web - the SAME formulas as the Android app (docfit-app/android/.../docfit): BodyComposition,
- * FitnessScore, Ranges, Girths, Times, Pressures, ScoreBar. Doc, 20.11.2026: "DocFit im Web = identisch zum Phone".
+ * FitnessScore, Ranges, Girths, Times, Pressures, ScoreBar, History and Trends (the "Verlauf" tab's series).
+ * Doc, 20.11.2026: "DocFit im Web = identisch zum Phone".
  *
  * Kept identical by shared test values: CoreVectorsTest.java computes a grid of made-up people with the app's classes
  * into docfit-app/test/core-vectors.json, and docfit-app/test/test_core_vectors.mjs checks this file against it
@@ -463,12 +464,178 @@
         /** "5 kg", "2,5 kg", "2,25 kg" (Entries.kgText) */
         kg: w => String(+(+w).toFixed(2)).replace('.', ',') + ' kg',
         /** "12 ×", with a weight "12 × 5 kg" (Entries.setText) */
-        text: r => r.reps + ' ×' + (r.weight_kg > 0 ? ' ' + Sets.kg(r.weight_kg) : '')
+        text: r => r.reps + ' ×' + (r.weight_kg > 0 ? ' ' + Sets.kg(r.weight_kg) : ''),
+        /** the moves of a counted exercise in the order of their chips (Entries.MOVES); none for the others */
+        MOVES: { Dumbbells: ['Curls', 'Lateral Raises'], Legs: [] },
+        moves: kind => (Sets.MOVES[kind] || []).slice()
+    };
+    /** an exercise under its current name: "Two Balls" is "Balls" since 26.11.2026 (Entries.renamed) */
+    const renamed = kind => (kind === 'Two Balls' ? 'Balls' : kind);
+    const kindOf = r => renamed(r.kind == null ? '' : r.kind);
+    const moveOf = r => (r.move == null ? '' : String(r.move).trim());
+
+    // ---- History (History.java: the course of one scale value, for the detail sheets and the Verlauf tab) --------
+
+    /**
+     * Points { time, value }, oldest first. A weigh-in is { time, centiKg, ohm, waistMm, hipMm }; the values by the
+     * tiles' keys: 'weight', 'fat', 'water', 'muscle', 'bmi', 'waist', 'hip', 'whtr', 'whr'.
+     */
+    const History = {
+        /** the value of one weigh-in as its tile shows it; NaN where it has none */
+        value(w, k, p) {
+            const bc = body(w, p);
+            switch (k) {
+                case 'weight': return w.centiKg / 100.0;
+                case 'fat': return bc.fatPercent;
+                case 'water': return bc.waterPercent;
+                case 'muscle': return bc.muscleKg;
+                case 'bmi': return bc.bmi;
+                case 'waist': return w.waistMm > 0 ? w.waistMm / 10.0 : NaN;
+                case 'hip': return w.hipMm > 0 ? w.hipMm / 10.0 : NaN;
+                case 'whtr': { const h = Girths.waistToHeight(w.waistMm, p.heightCm); return h > 0 ? h / 100.0 : NaN; }
+                default: { const h = Girths.waistToHip(w.waistMm, w.hipMm); return h > 0 ? h / 100.0 : NaN; }
+            }
+        },
+        /** the scale of one weigh-in's value (its zones), null where the value has none (hip) or lacks data */
+        scale(w, k, p) {
+            const v = History.value(w, k, p);
+            switch (k) {
+                case 'weight': return Ranges.weight(v, p.heightCm);
+                case 'fat': return Ranges.fat(v, p.sex, Profile.ageIn(p, new Date(w.time).getFullYear()));
+                case 'water': return Ranges.water(v, p.sex);
+                case 'muscle': return Ranges.muscle(v, p.heightCm, p.sex);
+                case 'bmi': return Number.isNaN(v) ? null : Ranges.bmi(v);
+                case 'waist': return Ranges.waist(w.waistMm, p.sex);
+                case 'whtr': return Profile.hasHeight(p) ? Ranges.waistToHeight(Girths.waistToHeight(w.waistMm, p.heightCm)) : null;
+                case 'whr': return Ranges.waistToHip(Girths.waistToHip(w.waistMm, w.hipMm), p.sex);
+                default: return null;
+            }
+        },
+        /** all weigh-ins that have the value, oldest first (newestFirst as the lists keep them) */
+        series(newestFirst, k, p) {
+            const out = [];
+            for (let i = newestFirst.length - 1; i >= 0; i--) {
+                const v = History.value(newestFirst[i], k, p);
+                if (!Number.isNaN(v)) out.push({ time: newestFirst[i].time, value: v });
+            }
+            return out;
+        },
+        /** the waist's goal lines from the profile: WHO red, WHO green and half the height; none for the others */
+        goals(k, p) {
+            if (k !== 'waist' || !known(p.sex)) return [];
+            const male = p.sex === 'm';
+            const red = male ? WAIST_MEN_HIGH : WAIST_WOMEN_HIGH, green = male ? WAIST_MEN : WAIST_WOMEN;
+            const out = [{ value: red, label: '< ' + jround(red) + ' WHO rot' }, { value: green, label: '< ' + jround(green) + ' WHO grün' }];
+            if (Profile.hasHeight(p)) {
+                const half = p.heightCm * WHTR_INCREASED / 100.0;
+                out.push({ value: half, label: '< ' + jround(half) + ' Bauch/Größe 0,5' });
+            }
+            return out;
+        },
+        /** the y axis [lo, hi]: points and goal lines, at least minSpan high, 12 % room above and below */
+        yRange(points, goals, minSpan) {
+            let lo = Number.MAX_VALUE, hi = -Number.MAX_VALUE;
+            for (const pt of points) { lo = Math.min(lo, pt.value); hi = Math.max(hi, pt.value); }
+            for (const g of goals || []) { lo = Math.min(lo, g.value); hi = Math.max(hi, g.value); }
+            if (lo > hi) return [0, 1];
+            const span = Math.max(hi - lo, minSpan), mid = (lo + hi) / 2;
+            lo = Math.min(lo, mid - span / 2);
+            hi = Math.max(hi, mid + span / 2);
+            const pad = (hi - lo) * 0.12;
+            return [lo - pad, hi + pad];
+        },
+        /** decimals on the axis and in the sheet: ratios two, everything else one */
+        decimals: k => (k === 'whtr' || k === 'whr' ? 2 : 1),
+        unit: k => ({ weight: 'kg', muscle: 'kg', fat: '%', water: '%', waist: 'cm', hip: 'cm' }[k] || ''),
+        /** the smallest y stretch: a ratio 0.05, one decimal 2 units, whole numbers 4 */
+        minSpan: d => (d >= 2 ? 0.05 : d === 1 ? 2 : 4)
+    };
+
+    // ---- Trends (Trends.java: the data of the "Verlauf" tab) -------------------------------------------------------
+
+    /**
+     * The chosen stretch of time and one series per running value, all oldest first: blood pressure and pulse (docfit_bp
+     * rows), the fasting glucose (docfit_glucose), the stopwatch times per exercise and the repetitions per set of the
+     * counted exercises per move (docfit_run). The lists come in newest first, as DocFitData.list gives them.
+     */
+    const RANGE_DAYS = [28, 91, 365, 0];
+    const Trends = {
+        RANGE_WORDS: ['4 Wochen', '3 Monate', '1 Jahr', 'Alles'],
+        DAY_MS, SYS: 0, DIA: 1, PULSE: 2,
+        /** the first moment of a stretch (index into RANGE_WORDS); everything: -Infinity */
+        from(range, now) {
+            const r = Math.max(0, Math.min(range, RANGE_DAYS.length - 1));
+            return RANGE_DAYS[r] === 0 ? -Infinity : now - RANGE_DAYS[r] * DAY_MS;
+        },
+        since: (oldestFirst, from) => oldestFirst.filter(p => p.time >= from),
+        /** systolic, diastolic or pulse (readings without a pulse are left out) */
+        pressure(newestFirst, which) {
+            const out = [];
+            for (let i = newestFirst.length - 1; i >= 0; i--) {
+                const r = newestFirst[i], pulse = Math.max(0, r.pulse || 0);
+                if (which === Trends.PULSE && pulse <= 0) continue;
+                out.push({ time: r.measured_at, value: which === Trends.SYS ? r.sys : which === Trends.DIA ? r.dia : pulse });
+            }
+            return out;
+        },
+        /** the fasting glucose in mg/dL (other contexts are not comparable day to day) */
+        fastingGlucose(newestFirst) {
+            const out = [];
+            for (let i = newestFirst.length - 1; i >= 0; i--) {
+                const r = newestFirst[i];
+                if (r.context === Glucose.CONTEXTS[0]) out.push({ time: r.measured_at, value: r.mg_dl });
+            }
+            return out;
+        },
+        /** the stopwatch times of one exercise in seconds (its counted sets are no times) */
+        runs(newestFirst, kind) {
+            const out = [];
+            for (let i = newestFirst.length - 1; i >= 0; i--) {
+                const r = newestFirst[i];
+                if (kindOf(r) === kind && !Sets.isSet(r)) out.push({ time: r.started_at, value: r.duration_ms / 1000.0 });
+            }
+            return out;
+        },
+        /** the counted sets of one exercise made as move ('' = without a move), oldest first */
+        sets(newestFirst, kind, move) {
+            const out = [];
+            for (let i = newestFirst.length - 1; i >= 0; i--) {
+                const r = newestFirst[i];
+                if (Sets.isSet(r) && kindOf(r) === kind && moveOf(r) === move) out.push(r);
+            }
+            return out;
+        },
+        /** the moves an exercise's sets were made as, one card each: its own moves in their order, then any other */
+        setMoves(newestFirst, kind) {
+            const seen = [];
+            for (let i = newestFirst.length - 1; i >= 0; i--) {
+                const r = newestFirst[i];
+                if (Sets.isSet(r) && kindOf(r) === kind && !seen.includes(moveOf(r))) seen.push(moveOf(r));
+            }
+            const out = Sets.moves(kind).filter(m => seen.includes(m));
+            for (const m of seen) if (!out.includes(m)) out.push(m);
+            return out;
+        },
+        setsSince: (oldestFirst, from) => oldestFirst.filter(r => r.started_at >= from),
+        /** the repetitions of sets as points, in their order */
+        reps: sets => sets.map(r => ({ time: r.started_at, value: r.reps })),
+        /** the newest value as shown in a card's head ("80,0 kg"); "–" without any */
+        latest(oldestFirst, decimals, unit) {
+            if (!oldestFirst.length) return '–';
+            const n = fmt(oldestFirst[oldestFirst.length - 1].value, decimals);
+            return unit === '' ? n : n + ' ' + unit;
+        },
+        /** seconds as the stopwatch shows them ("1:34") */
+        clock(seconds) {
+            const s = jround(seconds);
+            return Math.floor(s / 60) + ':' + pad2(s % 60);
+        }
     };
 
     const api = {
         Times, Profile, isMeasured, gallagher, implausible, bodyOf, body, limits, fatScore, word, bmiWord, scoreOf, score,
-        scoreColor, Scale, Ranges, Girths, Pressures, CATEGORIES, Glucose, Fasting, ScaleTexts, Sets, fmt, tenth, nextUp,
+        scoreColor, Scale, Ranges, Girths, Pressures, CATEGORIES, Glucose, Fasting, ScaleTexts, Sets, History, Trends,
+        fmt, tenth, nextUp,
         HINTS: { HINT_PROFILE, HINT_FAT, HINT_IMPLAUSIBLE }, KINDS: ['Planks', 'Balls', 'Dumbbells', 'Legs']
     };
     root.DocFitCore = api;

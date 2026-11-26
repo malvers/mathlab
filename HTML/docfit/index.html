@@ -32,8 +32,10 @@
             --bg: #131315; --card: #2c2c30; --text: #d4d4d8; --muted: #8d8d90; --on-phi: #131315; --chip-ink: #131315;
             --icon-idle: #b3b3b6; --line: rgba(141, 141, 144, .3);
         }
+        /* light: the background a little darker, tone in tone with the blue, so the white cards stand out (Doc,
+           26.11.2026); the muted text one step darker with it, so it still reads on the background */
         html.svp-light {
-            --bg: #f6f8fc; --card: #ffffff; --text: #182234; --muted: #60708c; --accent: #1e3c78; --phi: #5c7a20;
+            --bg: #e4e9f1; --card: #ffffff; --text: #182234; --muted: #56657f; --accent: #1e3c78; --phi: #5c7a20;
             --on-phi: #ffffff; --alarm: #b02418; --s-mid: #b07a00; --s-high: #5c7a20; --chip-on: #fbe3a7; --chip-ink: #182234;
             --tab: #b07a00; --icon-idle: #3a4660;
             --line: rgba(96, 112, 140, .3);
@@ -41,8 +43,11 @@
 
         * { box-sizing: border-box; }
         html, body { margin: 0; background: var(--bg); color: var(--text); }
+        /* room for the scrollbar always kept: a short tab stands exactly where a long one does (Doc, 26.11.2026) */
+        html { scrollbar-gutter: stable; }
         body { font-family: var(--read); font-size: 15px; line-height: 1.45; padding: 0 16px max(40px, env(safe-area-inset-bottom)); }
-        .wrap { max-width: 1100px; margin: 0 auto; }
+        /* the whole page as narrow as the stacked column, the top row with title, tabs and gear too (Doc, 26.11.2026) */
+        .wrap { max-width: 560px; margin: 0 auto; }
         h1, h2, h3, .label, .tabs, .digits, .num, button, .chip, .pill-v, .tile-v, .score-n, .say { font-family: var(--display); }
         button { cursor: pointer; }
         [hidden] { display: none !important; }
@@ -63,6 +68,14 @@
             .top h1 { font-size: 20px; }
             .tabs { gap: 0; }
             .tabs button { padding: 7px 6px; }
+        }
+        /* the narrowest phones (320px) with the Verlauf tab: smaller title and icons, still one row */
+        @media (max-width: 360px) {
+            .top { gap: 4px; }
+            .top h1 { font-size: 18px; }
+            .tabs button { padding: 7px 4px; }
+            .tabs button svg, .gear svg { width: 24px; height: 24px; }
+            .gear { padding: 5px; }
         }
         .state { min-height: 18px; font-size: 12px; color: var(--muted); text-align: right; }
         .state.err { color: var(--alarm); }
@@ -121,9 +134,24 @@
 
         /* scale */
         .persons { display: flex; gap: 8px; margin-bottom: 12px; }
+        /* person chips with the profile chip at their right, all three alike in size (Doc, 26.11.2026): the chips
+           take part in the row's flex as if the box were not there */
+        .persons-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        .persons-row .persons { display: contents; }
+        .persons-row .persons[hidden] { display: none; }
+        .chip.profile { border-color: var(--line); color: var(--accent); flex: 1; }
         .pill { background: var(--card); border-radius: 14px; padding: 10px 14px; cursor: pointer; }
         .pill .label { font-size: 10px; }
         .pill-v { margin-top: 4px; display: flex; align-items: baseline; }
+        /* whose values: under the stopwatch's clock, at the right of the weight (Doc, 26.11.2026) */
+        .pill-who { font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--phi); margin-top: 2px; }
+        .pill-who:empty { display: none; }
+        /* the weight card: whose weigh-in at its right, big, in the free room - not under the weight, so the card stays
+           as tall as the tiles (Doc, 26.11.2026: "alle Kacheln gleich hoch"); the weigh-ins below may stay flatter */
+        #weightPill { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-content: center; }
+        #weightPill .label, #weightPill .pill-v { grid-column: 1; }
+        #weightWho { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: 30px; margin: 0; }
+        #weightPill, #tiles .tile { box-sizing: border-box; min-height: 102px; }
         .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
         .tile { background: var(--card); border-radius: 14px; padding: 10px 12px 9px; cursor: pointer; min-width: 0; }
         .tile .label { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
@@ -131,6 +159,11 @@
         .bar { height: 12px; display: block; width: 100%; }
         .tile .note { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 16px; }
         .tile .note.offer { color: var(--accent); }
+        /* the top of a stacked tab (the stopwatch, the chosen weigh-in's values) sticks under the top bar (--top-h, set by the
+           script) and the list scrolls away beneath them - not on a low screen, where they would leave no room */
+        .stack-top { background: var(--bg); padding-bottom: 10px; }
+        @media (min-height: 640px) { .stack-top { position: sticky; top: var(--top-h, 0px); z-index: 3; } }
+        #weighings .row.picked { box-shadow: inset 0 0 0 2px var(--accent); }
         .fitness { background: var(--card); border-radius: 14px; padding: 12px 14px; margin-top: 8px; }
         .segs { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; margin: 8px 0; }
         .segs i { height: 10px; border-radius: 3px; opacity: .25; }
@@ -144,7 +177,7 @@
         /* blood pressure */
         .bp-cat { font-size: 12px; font-weight: 700; }
         .num small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); text-align: right; }
-        /* "+ Messung eintragen" in lambda orange like the chosen tab, dark ink on it in every scheme (Doc, 21.11.2026) */
+        /* "Messung eintragen" (no plus since 26.11.2026) in lambda orange like the chosen tab, dark ink on it in every scheme (Doc, 21.11.2026) */
         .add { width: 100%; border: 0; background: #f5c242; color: var(--chip-ink); border-radius: 12px;
                padding: 12px; font-size: 14px; font-weight: 700; margin-bottom: 10px; }
         html.svp-light .add { color: #182234; }
@@ -205,6 +238,21 @@
         .bands i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
         .chart { width: 100%; height: 170px; display: block; margin-top: 12px; }
         .chart text { font: 10px var(--read); fill: var(--muted); }
+        /* a goal line's label (the waist) on a rim of the card colour, so it reads over zones and lines */
+        .chart .goal { fill: var(--text); stroke: var(--card); stroke-width: 3px; stroke-linejoin: round; paint-order: stroke; }
+
+        /* Verlauf: the stretches of time on one line, each chip as wide as its word (the app's range chips) */
+        .chips.ranges { flex-wrap: nowrap; gap: 6px; }
+        .ranges .chip { flex: 1 1 auto; white-space: nowrap; padding: 9px 6px; }
+        /* a card per value: its name and newest value on top, the course below (the app's histCard) */
+        .hcards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+        .card.hcard { padding: 10px 12px; }
+        .hcard-head { display: flex; align-items: baseline; gap: 8px; }
+        .hcard-head .label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .hcard-v { font-family: var(--display); font-size: 15px; font-weight: 700; white-space: nowrap; }
+        .hcard .chart { margin-top: 6px; }
+        .hcard-none { margin: 6px 0 2px; font-size: 13px; color: var(--muted); }
+        .hcard .lg { justify-content: center; margin-top: 4px; }
 
         .undo { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 20;
                 background: var(--text); color: var(--bg); border-radius: 12px; padding: 10px 12px 10px 16px; display: flex; gap: 14px;
@@ -215,7 +263,8 @@
         .gate { text-align: center; padding: 40px 16px; max-width: 420px; margin: 40px auto; }
         .gate p { color: var(--muted); margin: 0 0 18px; }
         .gate .btn { width: 100%; max-width: 260px; }
-        .page-tab { padding-top: 6px; }
+        /* every tab in one narrow column, stacked (Doc, 26.11.2026: "überall" - so the buttons are narrower too) */
+        .page-tab { padding-top: 6px; max-width: 560px; margin: 0 auto; }
     </style>
 </head>
 
@@ -238,6 +287,10 @@
                 <button type="button" role="tab" data-tab="glucose" aria-label="Blutzucker" title="Blutzucker">
                     <svg viewBox="0 -960 960 960"><path d="M479-208q16 0 24.5-5.5T512-230q0-11-8.5-17t-25.5-6q-42 0-85.5-26.5T337-373q-2-9-9-14.5t-15-5.5q-11 0-17 8.5t-4 17.5q15 84 71 121.5T479-208Zm-227.5 34Q160-268 160-408q0-100 79.5-217.5T480-880q161 137 240.5 254.5T800-408q0 140-91.5 234T480-80q-137 0-228.5-94ZM666-216.5Q740-293 740-408q0-79-66.5-179.5T480-800Q353-688 286.5-587.5T220-408q0 115 74 191.5T480-140q112 0 186-76.5ZM480-480Z"/></svg>
                 </button>
+                <!-- the app's ic_tab_chart (Verlauf): an axis and a rising line, drawn as strokes like there -->
+                <button type="button" role="tab" data-tab="history" aria-label="Verlauf" title="Verlauf">
+                    <svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M7.5 15.5 11 11.5l3 2.5 5-6"/></g></svg>
+                </button>
             </nav>
             <button type="button" class="gear" id="gear" aria-label="Einstellungen" title="Einstellungen" hidden>
                 <svg viewBox="0 -960 960 960"><path d="m388-80-20-126q-19-7-40-19t-37-25l-118 54-93-164 108-79q-2-9-2.5-20.5T185-480q0-9 .5-20.5T188-521L80-600l93-164 118 54q16-13 37-25t40-18l20-127h184l20 126q19 7 40.5 18.5T669-710l118-54 93 164-108 77q2 10 2.5 21.5t.5 21.5q0 10-.5 21t-2.5 21l108 78-93 164-118-54q-16 13-36.5 25.5T592-206L572-80H388Zm48-60h88l14-112q33-8 62.5-25t53.5-41l106 46 40-72-94-69q4-17 6.5-33.5T715-480q0-17-2-33.5t-7-33.5l94-69-40-72-106 46q-23-26-52-43.5T538-708l-14-112h-88l-14 112q-34 7-63.5 24T306-642l-106-46-40 72 94 69q-4 17-6.5 33.5T245-480q0 17 2.5 33.5T254-413l-94 69 40 72 106-46q24 24 53.5 41t62.5 25l14 112Zm44-210q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Zm0-130Z"/></svg>
@@ -258,11 +311,13 @@
         <main id="app" hidden>
             <!-- Stoppuhr: exercise, the big digits, Start / Stopp / Reset, the times -->
             <section class="page-tab" data-page="watch">
-                <div class="cols">
+                <!-- stacked as everywhere (Doc, 26.11.2026): the stopwatch stays at the top, the times scroll away under it -->
+                <div class="stack-top">
                     <div class="card watch">
                         <div class="chips" id="kinds"></div>
                         <div class="say" id="say"></div>
                         <div class="digits" id="digits"></div>
+                        <div class="pill-who" id="watchWho"></div>
                         <div class="btns">
                             <button class="btn go" id="startBtn" type="button">Start</button>
                             <button class="btn halt" id="stopBtn" type="button">Stopp</button>
@@ -270,21 +325,25 @@
                         </div>
                         <p class="hint" id="voiceHint">Sprachsteuerung „DocFit Start“ / „DocFit Stopp“ kommt im nächsten Schritt – bis dahin die Knöpfe.</p>
                     </div>
-                    <div>
-                        <div class="head"><h2>ZEITEN</h2></div>
-                        <ol class="list" id="runs"></ol>
-                    </div>
                 </div>
+                <div class="head"><h2>ZEITEN</h2></div>
+                <ol class="list" id="runs"></ol>
             </section>
 
             <!-- Waage: person, the newest weigh-in with its tiles and the fitness score, the weigh-ins -->
             <section class="page-tab" data-page="scale" hidden>
-                <div class="persons" id="scalePersons"></div>
-                <div class="cols">
-                    <div>
+                <!-- one narrow column (Doc, 26.11.2026): the person chips with the profile at their right, then the values
+                     of the chosen weigh-in, which stay at the top while the weigh-ins below scroll away under them -->
+                <div>
+                    <div class="persons-row">
+                        <div class="persons" id="scalePersons"></div>
+                        <button class="chip profile" id="profileBtn" type="button">Profil</button>
+                    </div>
+                    <div class="stack-top">
                         <div class="pill" id="weightPill">
                             <div class="label" id="whenLabel"></div>
                             <div class="pill-v" id="weightDigits"></div>
+                            <div class="pill-who" id="weightWho"></div>
                         </div>
                         <div class="tiles" id="tiles"></div>
                         <div class="fitness" id="fitness" hidden>
@@ -295,17 +354,14 @@
                         </div>
                         <p class="note-line" id="scaleNote"></p>
                     </div>
-                    <div>
-                        <div class="head"><h2 id="scaleTitle">MESSUNGEN</h2><button class="link" id="profileBtn" type="button">Profil</button></div>
-                        <ol class="list" id="weighings"></ol>
-                    </div>
+                    <ol class="list" id="weighings"></ol>
                 </div>
             </section>
 
             <!-- Blutdruck: person, typing a reading in, the readings -->
             <section class="page-tab" data-page="bp" hidden>
                 <div class="persons" id="bpPersons"></div>
-                <button class="add" id="bpAdd" type="button">+ Messung eintragen</button>
+                <button class="add" id="bpAdd" type="button">Messung eintragen</button>
                 <div class="head"><h2 id="bpTitle">MESSUNGEN</h2></div>
                 <ol class="list" id="readings"></ol>
             </section>
@@ -321,9 +377,18 @@
             <!-- Blutzucker: person, typing a value in (mg/dL or mmol/L, both always shown), the values -->
             <section class="page-tab" data-page="glucose" hidden>
                 <div class="persons" id="gluPersons"></div>
-                <button class="add" id="gluAdd" type="button">+ Messung eintragen</button>
+                <button class="add" id="gluAdd" type="button">Messung eintragen</button>
                 <div class="head"><h2 id="gluTitle">MESSUNGEN</h2></div>
                 <ol class="list" id="glucoses"></ol>
+            </section>
+
+            <!-- Verlauf: person and stretch of time stay at the top, a card per value with its course scrolls beneath -->
+            <section class="page-tab" data-page="history" hidden>
+                <div class="stack-top">
+                    <div class="persons" id="histPersons"></div>
+                    <div class="chips ranges" id="histRanges"></div>
+                </div>
+                <div class="hcards" id="histCards"></div>
             </section>
         </main>
     </div>

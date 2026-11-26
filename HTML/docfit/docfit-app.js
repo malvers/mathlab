@@ -4,7 +4,8 @@
  * tiles, range bars and fitness score, the weigh-ins with waist and hip), Blutdruck (typed-in readings with the ESH
  * category), Blutzucker (typed-in values, mg/dL and mmol/L side by side, with their context), the fasting mode (a
  * banner while a fast runs, a card per fast with the day's weight, fasting glucose and blood pressure, the weight
- * against earlier fasts), and the gear: Fasten, colour scheme, people, profile, method, account.
+ * against earlier fasts), Verlauf (the course of the running values over 4 weeks to everything, as on the phone), and
+ * the gear: Fasten, colour scheme, people, profile, method, account.
  * Numbers and readings come from docfit-core.js (the app's formulas, checked against the app's test values), the data
  * from docfit-data.js (the same private tables the phone syncs to). Voice control and the scale over Web Bluetooth are
  * the next steps (concept: konzept-web.html).
@@ -15,7 +16,10 @@
     const $ = id => document.getElementById(id);
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const X = '<svg viewBox="0 -960 960 960" aria-hidden="true"><path d="m249-207-42-42 231-231-231-231 42-42 231 231 231-231 42 42-231 231 231 231-42 42-231-231-231 231Z"/></svg>';
-    const LS = { tab: 'docfit-web-tab', kind: 'docfit-web-kind', run: 'docfit-web-run', last: 'docfit-web-last', person: 'docfit-web-person' };
+    // Material Symbols "edit" (Apache 2.0), as the app's pen for waist and hip
+    const PEN = '<svg viewBox="0 -960 960 960" aria-hidden="true"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>';
+    const LS = { tab: 'docfit-web-tab', kind: 'docfit-web-kind', run: 'docfit-web-run', last: 'docfit-web-last', person: 'docfit-web-person',
+        hist: 'docfit-web-hist-range' };
     const ls = {
         get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } },
         set(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } }
@@ -30,6 +34,11 @@
     let last = null;   // the last stopped run { start, duration }, shown until the next start or a reset
     try { last = JSON.parse(ls.get(LS.last, 'null')); } catch (e) { last = null; }
     let person = +ls.get(LS.person, 0) || 0;
+    let pickedWeigh = 0;   // measured_at of the weigh-in shown at the top of Waage, 0 = the newest
+    // the sticky top bar's height, for what sticks right under it (Waage: the chosen weigh-in's values)
+    const topBar = document.querySelector('.top');
+    if (topBar && window.ResizeObserver) new ResizeObserver(() =>
+        document.documentElement.style.setProperty('--top-h', topBar.offsetHeight + 'px')).observe(topBar);
     let tick = null;
 
     // ---- small helpers --------------------------------------------------------------------------------------------
@@ -104,11 +113,14 @@
     // ---- tabs -----------------------------------------------------------------------------------------------------
 
     function showTab(t) {
-        tab = ['watch', 'scale', 'bp', 'glucose', 'fast'].includes(t) ? t : 'watch';
+        const before = tab;
+        tab = ['watch', 'scale', 'bp', 'glucose', 'history', 'fast'].includes(t) ? t : 'watch';
         if (tab !== 'fast') ls.set(LS.tab, tab);   // the fasting view is opened, not a tab of its own
         document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
         document.querySelectorAll('[data-page]').forEach(s => { s.hidden = s.dataset.page !== tab; });
         render();
+        // another tab opens at its top, not as far down as the one before was scrolled (Doc, 26.11.2026)
+        if (tab !== before) window.scrollTo(0, 0);
     }
     document.querySelectorAll('#tabs button').forEach(b => { b.onclick = () => showTab(b.dataset.tab); });
 
@@ -132,6 +144,8 @@
         const el = $('digits');
         const shown = running ? Date.now() - runStart : last ? last.duration : 0;
         CyberClock.digits(el, C.Times.duration(shown));
+        // whose times they are, under the clock as under the weight (Doc, 26.11.2026); the times are the first person's
+        $('watchWho').textContent = people()[0].name;
         el.classList.toggle('run', running);
         el.classList.toggle('stopped', !running && !!last);
         $('startBtn').disabled = running;
@@ -219,14 +233,14 @@
         t.water = show(C.Times.one(bc.waterPercent, '%'), C.Ranges.water(bc.waterPercent, p.sex));
         t.muscle = show(C.Times.one(bc.muscleKg, 'kg'), C.Ranges.muscle(bc.muscleKg, p.heightCm, p.sex));
         t.bmi = show(C.Times.one(bc.bmi, ''), Number.isNaN(bc.bmi) ? null : C.Ranges.bmi(bc.bmi));
-        t.waist = w.waistMm > 0 ? show(C.Girths.cm(w.waistMm), C.Ranges.waist(w.waistMm, p.sex)) : offer('+ Bauch eintragen');
-        t.hip = w.hipMm > 0 ? Object.assign(show(C.Girths.cm(w.hipMm), null), { note: 'für Bauch/Hüfte' }) : offer('+ Hüfte eintragen');
+        t.waist = w.waistMm > 0 ? show(C.Girths.cm(w.waistMm), C.Ranges.waist(w.waistMm, p.sex)) : offer('Bauch eintragen');
+        t.hip = w.hipMm > 0 ? Object.assign(show(C.Girths.cm(w.hipMm), null), { note: 'für Bauch/Hüfte' }) : offer('Hüfte eintragen');
         const whtr = C.Girths.waistToHeight(w.waistMm, p.heightCm);
         t.whtr = whtr > 0 ? show(C.Girths.ratio(whtr), C.Ranges.waistToHeight(whtr))
-            : offer(w.waistMm > 0 ? 'Größe im Profil fehlt' : '+ Bauch eintragen');
+            : offer(w.waistMm > 0 ? 'Größe im Profil fehlt' : 'Bauch eintragen');
         const whr = C.Girths.waistToHip(w.waistMm, w.hipMm);
         t.whr = whr > 0 ? show(C.Girths.ratio(whr), C.Ranges.waistToHip(whr, p.sex))
-            : offer(w.waistMm > 0 ? '+ Hüfte eintragen' : '+ Bauch eintragen');
+            : offer(w.waistMm > 0 ? 'Hüfte eintragen' : 'Bauch eintragen');
         return t;
     }
 
@@ -234,18 +248,22 @@
         personChips($('scalePersons'), renderScale);
         const p = D.profile(person);
         const list = weighList();
-        const newest = list[0] ? asW(list[0]) : null;
-        $('whenLabel').textContent = newest ? C.ScaleTexts.when(newest) : 'NOCH KEINE MESSUNG';
+        // the top shows the weigh-in tapped in the list, else the newest (Doc, 26.11.2026)
+        const shownRow = list.find(r => r.measured_at === pickedWeigh) || list[0];
+        const shown = shownRow ? asW(shownRow) : null;
+        $('whenLabel').textContent = shown ? C.ScaleTexts.when(shown) : 'NOCH KEINE MESSUNG';
         const wd = $('weightDigits');
-        if (newest) {
+        if (shown) {
             wd.innerHTML = '<span class="dg"></span><span style="font-family:var(--display);font-weight:700;font-size:20px;margin-left:8px;color:var(--accent)">kg</span>';
             // the widget sets its own defaults on its element, so the look goes in per call
-            CyberClock.digits(wd.querySelector('.dg'), C.fmt(newest.centiKg / 100, 2),
+            CyberClock.digits(wd.querySelector('.dg'), C.fmt(shown.centiKg / 100, 2),
                 { style: { size: '44px', color: 'var(--accent)', digitWidth: '.74em', sepWidth: '.2em' } });
         } else {
             wd.innerHTML = '<span style="font-family:var(--display);font-size:36px;color:var(--muted)">–</span>';
         }
-        const vals = tileValues(newest, p);
+        // whose weigh-in it is, big at the right of the weight: the person chips scroll away, the values stay (Doc, 26.11.2026)
+        $('weightWho').textContent = p.name;
+        const vals = tileValues(shown, p);
         $('tiles').innerHTML = TILES.map(([k, label]) => {
             const v = vals[k];
             const color = v.warn ? 'var(--s-mid)' : v.offer ? 'var(--muted)' : v.scale ? zoneColor(v.scale) : 'var(--text)';
@@ -255,17 +273,17 @@
         }).join('');
         $('tiles').querySelectorAll('.tile').forEach(el => {
             el.onclick = () => {
-                if (!newest) return;
+                if (!shown) return;
                 const k = el.dataset.k, v = vals[k];
-                if (v.offer || ((k === 'waist' || k === 'hip') && !v.scale && v.text === '–')) editGirths(list[0]);
+                if (v.offer || ((k === 'waist' || k === 'hip') && !v.scale && v.text === '–')) editGirths(shownRow);
                 else openInfo(k, label(k));
             };
         });
-        $('weightPill').onclick = () => { if (newest) openInfo('weight', 'GEWICHT'); };
+        $('weightPill').onclick = () => { if (shown) openInfo('weight', 'GEWICHT'); };
 
         // fitness 1-10
-        const fit = newest ? C.score(newest, p) : null;
-        $('fitness').hidden = !newest;
+        const fit = shown ? C.score(shown, p) : null;
+        $('fitness').hidden = !shown;
         if (fit) {
             const lowC = hexRgb(css('--s-low')), midC = hexRgb(css('--s-mid')), highC = hexRgb(css('--s-high'));
             $('segs').innerHTML = Array.from({ length: 10 }, (_, i) =>
@@ -277,10 +295,9 @@
             $('scoreW').style.color = fit.score > 0 ? col : 'var(--muted)';
             $('segs').hidden = fit.score === 0;
         }
-        const note = C.ScaleTexts.note(newest, p);
+        const note = C.ScaleTexts.note(shown, p);
         $('scaleNote').textContent = note;
-        $('scaleNote').classList.toggle('warn', !!newest && C.Profile.complete(p) && newest.centiKg > 0 && !C.isMeasured(newest.ohm));
-        $('scaleTitle').textContent = 'MESSUNGEN · ' + p.name.toUpperCase();
+        $('scaleNote').classList.toggle('warn', !!shown && C.Profile.complete(p) && shown.centiKg > 0 && !C.isMeasured(shown.ohm));
 
         const box = $('weighings');
         box.innerHTML = list.length ? '' : '<li class="empty">Noch keine Wiegung – gewogen wird mit dem Phone (Waage am Mac kommt).</li>';
@@ -290,12 +307,19 @@
             const fat = !C.isMeasured(w.ohm) ? 'nur Gewicht' : bc.fatImplausible ? 'Fett unplausibel' : 'Fett ' + C.Times.one(bc.fatPercent, '%');
             const girth = [w.waistMm ? 'Bauch ' + C.Girths.cm(w.waistMm) : '', w.hipMm ? 'Hüfte ' + C.Girths.cm(w.hipMm) : ''].filter(Boolean).join(' · ');
             const li = document.createElement('li');
-            li.className = 'row tap';
+            li.className = 'row tap' + (pickedWeigh && r.measured_at === pickedWeigh ? ' picked' : '');
             li.innerHTML = `<div class="when"><b>${C.Times.day(w.time)} · ${C.Times.clock(w.time)}</b><span>${esc(fat)}${girth ? ' · ' + esc(girth) : ''}</span></div>`
                 + `<div class="num">${C.Times.kg(w.centiKg / 100)}</div>`
-                + `<button type="button" class="x" aria-label="Löschen">${X}</button>`;
-            li.onclick = e => { if (!e.target.closest('.x')) editGirths(r); };
-            li.querySelector('.x').onclick = () => {
+                + `<button type="button" class="x pen" aria-label="Bauch und Hüfte">${PEN}</button>`
+                + `<button type="button" class="x del" aria-label="Löschen">${X}</button>`;
+            // a tap shows the weigh-in at the top, a second tap goes back to the newest; the pen edits waist and hip
+            li.onclick = e => {
+                if (e.target.closest('.x')) return;
+                pickedWeigh = pickedWeigh === r.measured_at ? 0 : r.measured_at;
+                renderScale();
+            };
+            li.querySelector('.pen').onclick = () => editGirths(r);
+            li.querySelector('.del').onclick = () => {
                 const gone = D.remove('weighing', r.measured_at);
                 offerUndo('Gelöscht: ' + C.Times.kg(r.centi_kg / 100), () => D.put('weighing', gone));
             };
@@ -362,34 +386,65 @@
         if (s) bands = '<ul class="bands">' + s.bands.map((b, i) => `<li><i style="background:${zoneVar(b.zone)}"></i><span>${esc(s.span(i))}</span><span style="color:var(--muted)">${esc(b.word)}</span></li>`).join('') + '</ul>';
         dialog(title, `<div style="font-family:var(--display);font-weight:700;font-size:22px;color:${s ? zoneColor(s) : 'var(--text)'}">${esc(valueText + wordText)}</div>`
             + (s ? `<p>${esc(s.note)}</p>` : k === 'hip' ? '<p>Die Hüfte hat keinen eigenen Grenzwert – sie zählt für Bauch/Hüfte.</p>' : '')
-            + bands + chart(pts, s)
+            // the app's sheet: its axis around the values, the waist's goal lines, drawn in the dialog's own width
+            + bands + chart(pts.map(q => ({ time: q.t, value: q.v })), s, {
+                goals: C.History.goals(k, p), decimals: C.History.decimals(k),
+                width: Math.min(520, document.documentElement.clientWidth - 32) - 40
+            })
             + (pts.length < 2 ? '<p>Verlauf erscheint ab der zweiten Messung.</p>' : '')
             + '<p style="font-size:12px">Orientierung, keine ärztliche Bewertung.</p>');
     }
 
-    /** the course as a small SVG line chart with the zones as faint bands */
-    function chart(pts, s) {
+    /**
+     * The course of a value as a small SVG line chart, drawn like the app's HistoryChart (the detail sheets and the
+     * Verlauf tab alike): the zones of its scale as faint bands - only where they fall into the axis -, three values on
+     * the axis, goal lines with their labels at the right (solid: Doc does not like dashes), the points joined over
+     * time, the newest one ringed, the first and the last date below. Points { time, value }, oldest first.
+     * opt: goals [{ value, label }], second (a second series in phi green under the first, e.g. the diastolic),
+     * decimals (of the axis values, as History.decimals), width / height (the drawn size in px, so text and dots are
+     * not stretched; 480 x 170 without).
+     */
+    function chart(pts, s, opt) {
         if (!pts.length) return '';
-        const W = 480, H = 170, L = 34, R = 8, T = 8, B = 20;
-        let lo = Math.min(...pts.map(p => p.v)), hi = Math.max(...pts.map(p => p.v));
-        if (s) { lo = Math.min(lo, s.min); hi = Math.max(hi, s.max); }
-        if (hi - lo < 1e-9) { lo -= 1; hi += 1; }
-        const t0 = pts[0].t, t1 = pts[pts.length - 1].t;
-        const x = t => L + (t1 === t0 ? (W - L - R) / 2 : (t - t0) / (t1 - t0) * (W - L - R));
-        const y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+        const o = opt || {};
+        const W = Math.max(160, Math.round(o.width || 480)), H = o.height || 170;
+        const dec = o.decimals == null ? 1 : o.decimals, goals = o.goals || [];
+        const second = o.second && o.second.length ? o.second : null;
+        const all = second ? pts.concat(second) : pts;
+        const [lo, hi] = C.History.yRange(all, goals, C.History.minSpan(dec));
+        const num = v => C.fmt(v, dec), f = v => v.toFixed(1);
+        // room for the values at the left (10px Arial: a digit about 5.6px) and the dates below
+        const L = Math.max(num(hi).length, num(lo).length) * 5.6 + 10, R = W - 4, T = 4, B = H - 18;
+        const w = R - L, h = B - T, r = 3.5;
+        const y = v => T + (hi - v) / (hi - lo) * h;
+        let t0 = Infinity, t1 = -Infinity;
+        for (const q of all) { t0 = Math.min(t0, q.time); t1 = Math.max(t1, q.time); }
+        const x = t => (t1 === t0 ? L + w / 2 : L + r + (w - 2 * r) * (t - t0) / (t1 - t0));
         let g = '';
         if (s) for (const b of s.bands) {
-            const a = Math.max(lo, b.from), z = Math.min(hi, b.to);
-            if (z > a) g += `<rect x="${L}" y="${y(z).toFixed(1)}" width="${W - L - R}" height="${(y(a) - y(z)).toFixed(1)}" fill="${zoneVar(b.zone)}" opacity=".12"/>`;
+            const a = Math.max(b.from, lo), z = Math.min(b.to, hi);
+            if (z > a) g += `<rect x="${f(L)}" y="${f(y(z))}" width="${f(w)}" height="${f(y(a) - y(z))}" fill="${zoneVar(b.zone)}" opacity=".18"/>`;
         }
-        const line = pts.map((p, i) => (i ? 'L' : 'M') + x(p.t).toFixed(1) + ',' + y(p.v).toFixed(1)).join(' ');
-        const dots = pts.map(p => `<circle cx="${x(p.t).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="3" fill="var(--accent)"/>`).join('');
-        const lab = v => C.fmt(v, Math.abs(hi - lo) < 2 ? 2 : 0);
-        return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${g}`
-            + `<path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"/>${dots}`
-            + `<text x="2" y="${T + 8}">${lab(hi)}</text><text x="2" y="${H - B}">${lab(lo)}</text>`
-            + `<text x="${L}" y="${H - 4}">${C.Times.day(t0).slice(3)}</text>`
-            + (t1 !== t0 ? `<text x="${W - R}" y="${H - 4}" text-anchor="end">${C.Times.day(t1).slice(3)}</text>` : '') + '</svg>';
+        for (let i = 0; i <= 2; i++) {
+            const v = lo + (hi - lo) * (0.1 + 0.4 * i);
+            g += `<line x1="${f(L)}" x2="${f(R)}" y1="${f(y(v))}" y2="${f(y(v))}" stroke="var(--muted)" stroke-opacity=".2"/>`
+                + `<text x="${f(L - 4)}" y="${f(y(v) + 3.3)}" text-anchor="end">${num(v)}</text>`;
+        }
+        for (const gl of goals) {
+            g += `<line x1="${f(L)}" x2="${f(R)}" y1="${f(y(gl.value))}" y2="${f(y(gl.value))}" stroke="var(--text)" stroke-opacity=".55"/>`
+                + `<text class="goal" x="${f(R - 2)}" y="${f(y(gl.value) - 4)}" text-anchor="end">${esc(gl.label)}</text>`;
+        }
+        const series = (ps, color) =>
+            `<path d="${ps.map((q, i) => (i ? 'L' : 'M') + f(x(q.time)) + ',' + f(y(q.value))).join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`
+            + ps.map(q => `<circle cx="${f(x(q.time))}" cy="${f(y(q.value))}" r="${r}" fill="${color}"/>`).join('');
+        if (second) g += series(second, 'var(--phi)');
+        g += series(pts, 'var(--accent)');
+        const newest = pts[pts.length - 1];
+        g += `<circle cx="${f(x(newest.time))}" cy="${f(y(newest.value))}" r="${r + 2}" fill="none" stroke="var(--text)" stroke-width="2"/>`;
+        const day = t => C.Times.day(t).slice(3);
+        g += t1 === t0 ? `<text x="${f(L + w / 2)}" y="${H - 3}" text-anchor="middle">${day(t0)}</text>`
+            : `<text x="${f(L)}" y="${H - 3}">${day(t0)}</text><text x="${f(R)}" y="${H - 3}" text-anchor="end">${day(t1)}</text>`;
+        return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px" role="img" aria-label="Verlauf">${g}</svg>`;
     }
 
     // ---- Blutdruck ------------------------------------------------------------------------------------------------
@@ -726,6 +781,98 @@
         };
     }
 
+    // ---- Verlauf (Trends.java, MainActivity.refreshHist) -----------------------------------------------------------
+
+    // the stretch of time, an index into Trends.RANGE_WORDS - 3 Monate to start with, then the last one chosen
+    let histRange = (() => {
+        const v = parseInt(ls.get(LS.hist, '1'), 10);
+        return Number.isNaN(v) ? 1 : Math.max(0, Math.min(v, C.Trends.RANGE_WORDS.length - 1));
+    })();
+    let histWidth = 0;   // the width the charts were drawn for: drawn anew when the column gets narrower or wider
+
+    /**
+     * The "Verlauf" tab as on the phone: the person switch, the stretch of time (4 Wochen / 3 Monate / 1 Jahr / Alles)
+     * and a card per value with its newest value and its course - Gewicht, Körperfett, Bauch (zones and goal lines as
+     * in the detail sheets), Blutdruck (systolic and diastolic in one chart), Puls, Blutzucker nüchtern and, for the
+     * first person (the stopwatch is Doc's, runs have no person), the times per exercise and the repetitions per set of
+     * the counted exercises, one card per move. A card appears once its value was measured at all; a stretch without
+     * values says so.
+     */
+    function renderHistory() {
+        const host = $('histCards');
+        if (!host) return;
+        personChips($('histPersons'), renderHistory);
+        const rb = $('histRanges');
+        rb.innerHTML = '';
+        C.Trends.RANGE_WORDS.forEach((word, i) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'chip kind' + (i === histRange ? ' on' : '');   // grey, chosen phi green - the app's paintPick
+            b.textContent = word;
+            b.onclick = () => { histRange = i; ls.set(LS.hist, String(i)); renderHistory(); };
+            rb.appendChild(b);
+        });
+
+        const T = C.Trends, H = C.History, p = D.profile(person);
+        const from = T.from(histRange, Date.now());
+        const cards = [];
+        const card = (title, ever, c) => {
+            if (ever.length) cards.push(Object.assign({ title, scale: null, goals: [], second: null, decimals: 0 }, c));
+        };
+        const weigh = weighList().map(asW);   // newest first
+        for (const [k, title] of [['weight', 'Gewicht'], ['fat', 'Körperfett'], ['waist', 'Bauch']]) {
+            const ever = H.series(weigh, k, p), pts = T.since(ever, from), dec = H.decimals(k);
+            card(title, ever, {
+                pts, now: T.latest(pts, dec, H.unit(k)), decimals: dec, goals: H.goals(k, p),
+                scale: weigh.length ? H.scale(weigh[0], k, p) : null   // the zones of the newest weigh-in
+            });
+        }
+        const bp = D.list('bp', r => r.person === person);
+        const sysEver = T.pressure(bp, T.SYS), sys = T.since(sysEver, from), dia = T.since(T.pressure(bp, T.DIA), from);
+        card('Blutdruck', sysEver, {
+            pts: sys, second: dia, legend: true,
+            now: sys.length ? Math.round(sys[sys.length - 1].value) + '/' + Math.round(dia[dia.length - 1].value) + ' mmHg' : '–'
+        });
+        const pulseEver = T.pressure(bp, T.PULSE), pulse = T.since(pulseEver, from);
+        card('Puls', pulseEver, { pts: pulse, now: T.latest(pulse, 0, '/min') });
+        const gluEver = T.fastingGlucose(D.list('glucose', r => r.person === person)), glu = T.since(gluEver, from);
+        card('Blutzucker nüchtern', gluEver, { pts: glu, now: T.latest(glu, 0, 'mg/dL') });
+        if (person === 0) {
+            const runs = D.list('run');
+            for (const k of C.KINDS) {
+                const ever = T.runs(runs, k), pts = T.since(ever, from);
+                card(k + ' · Sekunden', ever, { pts, now: pts.length ? T.clock(pts[pts.length - 1].value) : '–' });
+                // a counted exercise: the repetitions per set, one card per move, the newest set on top ("12 × 5 kg")
+                for (const m of T.setMoves(runs, k)) {
+                    const sets = T.sets(runs, k, m), shown = T.setsSince(sets, from);
+                    card(m || k, sets, { pts: T.reps(shown), now: shown.length ? C.Sets.text(shown[shown.length - 1]) : '–' });
+                }
+            }
+        }
+
+        // built anew; the column keeps its height meanwhile, so the page does not jump when it is scrolled down
+        host.style.minHeight = host.offsetHeight + 'px';
+        host.innerHTML = cards.length ? '' : '<p class="empty">Noch keine Werte – der Verlauf füllt sich mit jeder Messung.</p>';
+        histWidth = host.clientWidth;
+        for (const c of cards) {
+            const el = document.createElement('div');
+            el.className = 'card hcard';
+            el.innerHTML = `<div class="hcard-head"><span class="label">${esc(c.title)}</span><span class="hcard-v">${esc(c.now)}</span></div>`
+                + (c.pts.length ? '<div class="hcard-chart"></div>' : '<p class="hcard-none">Keine Werte in diesem Zeitraum.</p>')
+                + (c.pts.length && c.legend
+                    ? '<div class="lg"><span><i style="background:var(--accent)"></i>Sys</span><span><i style="background:var(--phi)"></i>Dia</span></div>' : '');
+            host.appendChild(el);
+            const slot = el.querySelector('.hcard-chart');
+            if (slot) slot.innerHTML = chart(c.pts, c.scale, { goals: c.goals, second: c.second, decimals: c.decimals, width: slot.clientWidth, height: 150 });
+        }
+        host.style.minHeight = '';
+    }
+    // the column narrower or wider (window, phone turned): the charts drawn anew for their width
+    if ($('histCards') && window.ResizeObserver) new ResizeObserver(() => {
+        const w = $('histCards').clientWidth;
+        if (tab === 'history' && w && w !== histWidth) renderHistory();
+    }).observe($('histCards'));
+
     // ---- settings -------------------------------------------------------------------------------------------------
 
     function theme() {
@@ -851,6 +998,7 @@
         if (tab === 'scale') renderScale();
         if (tab === 'bp') renderBp();
         if (tab === 'glucose') renderGlucose();
+        if (tab === 'history') renderHistory();
         if (tab === 'fast') renderFast();
         renderBanner();
     }
