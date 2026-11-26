@@ -364,6 +364,8 @@
 }
 
 .vt-dlg-note { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 4px; }
+/* the sentence of a yes/no question (vortraege.js askReplace) - body text, with air above the buttons */
+.vt-dlg-text { font-size: 0.9rem; line-height: 1.45; color: var(--text); text-align: center; margin: 0 0 18px; }
 
 /* Doc's panel */
 .vt-dlg-h {
@@ -533,6 +535,16 @@ html.svp-light .vt-date input { color-scheme: light; }
 .vt-note,
 .vt-pts,
 .vt-note-pct { font-variant-numeric: tabular-nums; }
+/* Doc only: the points box takes a total by hand (vortraege.js wirePts) - a click turns it into a field
+   of the same size, so nothing in the row moves. A total typed by hand stands in the accent, like a
+   hand-set mark (.vt-note.over), so it never passes for a sheet. */
+.vt-pts.edit { cursor: text; }
+.vt-pts.edit:hover,
+.vt-pts.edit:focus-visible { border-color: var(--lambda); }
+.vt-pts.hand { color: var(--lambda); border-color: var(--lambda); }
+.vt-pts.vt-pts-in { cursor: text; user-select: text; }
+.vt-pts.vt-pts-in:focus { border-color: var(--lambda); }
+.vt-pts.vt-pts-in::placeholder { color: var(--muted); opacity: 1; }
 /* "Note" on most plans, "NP" on BGY 12/13 - one width for both, right-aligned onto its box */
 .vt-note-unit {
     display: inline-block;

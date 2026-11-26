@@ -795,6 +795,7 @@
                     total: 'Erreichbare Gesamtpunktzahl',
                     of: 'von',
                     empty: 'Noch keine Punkte eingetragen.',
+                    hand: 'von Hand eingetragen',
                     clear: 'Leeren',
                     really: 'Alles löschen?',
                     yes: 'Ja',
@@ -856,6 +857,7 @@
                     total: 'Total points available',
                     of: 'of',
                     empty: 'No points entered yet.',
+                    hand: 'entered by hand',
                     clear: 'Clear',
                     really: 'Delete everything?',
                     yes: 'Yes',
@@ -1174,7 +1176,9 @@
                a pupil must not see the other grades anyway. */
             function drawSummary() {
                 if (role !== 'coach') { elSummary.hidden = true; return; }
-                const mine = totals();
+                const t = totals();
+                /* an empty sheet with a Coach total typed by hand: that total (pullOwnCoach) */
+                const mine = !t.any && coachHand ? { got: coachHand.got, max: coachHand.max, any: true } : t;
                 const other = publikumScore();
                 if (!mine.any || !other) { elSummary.hidden = true; return; }
                 const pct = svpNoten.combine({ got: mine.got, max: mine.max },
@@ -1255,8 +1259,9 @@
                 if (sum) sum.textContent = t.any ? fmt(t.got) : '–';
                 drawForecast();
                 if (!t.any) {
-                    elBig.textContent = '–';
-                    elNote.textContent = '(' + sh.empty + ')';
+                    /* nothing entered here, but Doc typed the Coach total on the list of talks: show that */
+                    elBig.textContent = coachHand ? fmt(coachHand.got) + ' / ' + coachHand.max : '–';
+                    elNote.textContent = '(' + (coachHand ? sh.hand : sh.empty) + ')';
                     drawSummary();
                     return;
                 }
@@ -1842,6 +1847,7 @@
             /* ---------- Coach: read the Publikum sheet back ----------
                Needs Doc's private key, so nothing is shown until he unlocks. */
             let publikum = null;   /* { got, names } once decrypted */
+            let coachHand = null;  /* { got, max }: Doc's Coach total typed on the list of talks, see pullOwnCoach */
 
             async function pullPublikum() {
                 if (!meta || role !== 'coach') return;
@@ -1886,6 +1892,18 @@
                     const rows = (await res.json()).filter(function (r) { return r.taken && r.data_enc; });
                     if (!rows.length) return;
                     const d = JSON.parse(await svpCrypto.open(rows[0].data_enc));
+                    if (d.manual) {
+                        /* a total Doc typed on the list of talks (vortraege.js savePts): no criteria to load, the
+                           sheet stays as it is - the total stands in the head and counts for the summary until
+                           points are entered here */
+                        if (typeof d.got === 'number' && d.max > 0) {
+                            coachHand = { got: Math.round(d.got), max: d.max };
+                            status(ROLE_LABEL.coach + ': ' + fmt(coachHand.got) + ' ' + sheet().of + ' ' + coachHand.max +
+                                ' · ' + sheet().hand, 'ok');
+                        }
+                        drawVerdict();
+                        return;
+                    }
                     state.rows = d.rows || {};
                     state.sos = d.sos || state.sos;
                     if (d.notiz && !state.notiz) state.notiz = d.notiz;

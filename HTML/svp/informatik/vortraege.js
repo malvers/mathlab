@@ -941,6 +941,7 @@
                     openMatrix(i, pos, r[0], r[1]);
                     flushAll();
                 });
+                wirePts(i, pos, r);               /* Doc: points by hand */
             });
             wireMeta(i, pos);                     /* date and mark, see META_PAGE */
             wireMeld(i);                          /* "Stimmt was nicht?" */
@@ -1913,12 +1914,7 @@
         /* A locked field may show "vergeben"/"eingetragen" instead of a name (an
            old sealed entry) - that is a placeholder and has no business on a
            grading sheet. A locked field with a real, public name goes along. */
-        const names = [0, 1, 2]
-            .map(function (j) {
-                const el = $('name-' + i + '-' + j);
-                return el && (editable(i, j) || showsName(i, j)) ? el.value.trim() : '';
-            })
-            .filter(function (v) { return v; });
+        const names = cardNames(i);
         try {
             localStorage.setItem(HANDOFF, JSON.stringify({
                 v: talkId(i, role),
@@ -2214,7 +2210,8 @@
                     try {
                         const d = JSON.parse(await openCached(r.data_enc));
                         if (typeof d.got !== 'number') continue;
-                        (sheetPts[r.idx] = sheetPts[r.idx] || {})[r.rolle] = { got: d.got, max: d.max };
+                        (sheetPts[r.idx] = sheetPts[r.idx] || {})[r.rolle] = { got: d.got, max: d.max,
+                            bonus: typeof d.bonus === 'number' ? d.bonus : 0, manual: !!d.manual };
                     } catch (e) { /* unreadable sheet: no points from it */ }
                 }
             }
@@ -2222,6 +2219,206 @@
         for (const k of Object.keys(meta.noten)) {
             try { noteOver[k] = JSON.parse(await openCached(meta.noten[k])).note || ''; } catch (e) { }
         }
+        await loadBogenDef();
+    }
+
+    /* ---------- points by hand ----------
+       Doc types a sheet's total straight into the card (Doc, 26.11.2026, during a BGY25 talk: the team's
+       sheet did not go out, "außerdem kann ich die Punkte nicht per Hand eintragen"). Logged in AND
+       unlocked only. It is written as ONE ordinary row of svp_vortrag_bewertung for that talk and role -
+       the same sealed format bewertungsmatrix.html sends (taken, name_enc, data_enc with got/max/bonus),
+       only without criteria (rows {}) and with manual: true, so the card, the mark (svp-noten.js 3 : 3)
+       and the Coach sheet read it like any other sheet. */
+    const HAND = 'von Hand';
+    /* Maximum and bonus of the sheet as Doc set it up: his version of the Bewertungsmatrix lives in
+       svp_plan_edits under that page's path (bewertungsmatrix.html pullRemote), German sheet. Read once. */
+    let bogenDef = null;          /* { max, bonus } or null while unknown */
+    let bogenDefDone = false;
+    async function loadBogenDef() {
+        if (bogenDefDone) return;
+        const a = A();
+        if (!a) return;
+        try {
+            const page = new URL(MATRIX, location.href).pathname;
+            const res = await fetch(a.DB_URL + '/rest/v1/svp_plan_edits?page=eq.' + encodeURIComponent(page) +
+                '&select=edits', { headers: { apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY } });
+            if (!res.ok) return;
+            bogenDefDone = true;
+            const rows = await res.json();
+            const de = rows[0] && rows[0].edits && rows[0].edits.de;
+            if (de && Array.isArray(de.rows)) {
+                let max = 0, bonus = 0;
+                de.rows.forEach((r) => { max += Number(r && r.max) || 0; bonus += Number(r && r.bonus) || 0; });
+                if (max > 0) bogenDef = { max: max, bonus: bonus };
+            }
+        } catch (e) { /* offline: the sheets already in tell the maximum, see sheetLimit */ }
+    }
+    /* The range a typed total may take: Doc's sheet first, else a sheet already sent for this talk,
+       else the maximum most sheets of this Lerngruppe carry. null: nothing to go by. */
+    function sheetLimit(i) {
+        if (bogenDef) return bogenDef;
+        const own = sheetPts[i] || {};
+        for (const r of ROLES) {
+            const p = own[r[0]];
+            if (p && p.max > 0) return { max: p.max, bonus: p.bonus || 0 };
+        }
+        const count = {};
+        let best = '';
+        Object.keys(sheetPts).forEach((k) => ROLES.forEach((r) => {
+            const p = sheetPts[k][r[0]];
+            if (!p || !(p.max > 0)) return;
+            const key = p.max + '+' + (p.bonus || 0);
+            count[key] = (count[key] || 0) + 1;
+            if (!best || count[key] > count[best]) best = key;
+        }));
+        if (!best) return null;
+        const mb = best.split('+').map(Number);
+        return { max: mb[0], bonus: mb[1] };
+    }
+    /* the names on a card that may go onto a sheet (openMatrix, savePts) - placeholders of old sealed
+       entries stay off, see openMatrix */
+    function cardNames(i) {
+        return [0, 1, 2]
+            .map(function (j) {
+                const el = $('name-' + i + '-' + j);
+                return el && (editable(i, j) || showsName(i, j)) ? el.value.trim() : '';
+            })
+            .filter(function (v) { return v; });
+    }
+
+    /* Click on the points box (Doc only): it becomes a field, Enter or leaving it saves, Escape cancels. */
+    function wirePts(i, pos, role) {
+        const box = $('pts-' + role[0] + '-' + i);
+        if (!box || !box.classList.contains('edit')) return;
+        const open = () => {
+            if (editing) { setStatus('Erst „Fertig“ drücken, dann Punkte von Hand eintragen.', true); return; }
+            const lim = sheetLimit(i);
+            if (!lim) {
+                setStatus('Höchstpunktzahl des Bogens unbekannt — von Hand geht es, sobald ein Bogen dieser Lerngruppe da ist.', true);
+                return;
+            }
+            const top = lim.max + lim.bonus;
+            const p = (sheetPts[i] || {})[role[0]];
+            const was = p && typeof p.got === 'number' ? String(wholePts(p.got)) : '';
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.inputMode = 'numeric';
+            inp.maxLength = 3;
+            inp.autocomplete = 'off';
+            inp.spellcheck = false;
+            inp.className = 'vt-pts vt-pts-in';
+            inp.id = box.id;
+            inp.value = was;
+            inp.placeholder = '0–' + top;
+            inp.title = role[1] + ': ganze Punkte von 0 bis ' + top + ' (' + lim.max + (lim.bonus ? ' + ' + lim.bonus + ' Bonus' : '') +
+                ') — Enter speichert, Escape bricht ab';
+            inp.setAttribute('aria-label', 'Punkte ' + role[1] + ' von Hand für Thema ' + (pos + 1));
+            box.replaceWith(inp);
+            inp.focus();
+            inp.select();
+            let done = false;
+            const close = () => { done = true; if (inp.isConnected) inp.replaceWith(box); };
+            const commit = (fromBlur) => {
+                if (done) return;
+                const v = inp.value.trim();
+                if (v === '' || v === was) { close(); return; }
+                if (!/^\d+$/.test(v) || Number(v) > top) {
+                    setStatus('Nur ganze Punkte von 0 bis ' + top + ' — nichts gespeichert.', true);
+                    if (fromBlur) close(); else inp.select();
+                    return;
+                }
+                done = true;
+                savePts(i, pos, role, Number(v), lim);
+            };
+            inp.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); commit(false); }
+                else if (e.key === 'Escape') { e.preventDefault(); close(); box.focus(); }
+                else if (e.key === '.' || e.key === ',') e.preventDefault();   /* whole points only */
+            });
+            inp.addEventListener('blur', () => commit(true));
+        };
+        box.addEventListener('click', open);
+        box.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    }
+
+    /* A sheet that came from the matrix is replaced only after asking. */
+    function askReplace(i, pos, role, n, lim) {
+        return new Promise((resolve) => {
+            const p = (sheetPts[i] || {})[role[0]];
+            const t = list[pos] || {};
+            const ov = overlay(
+                '<div class="svp-gate-card vt-dlg-card" role="document">' +
+                    '<div class="svp-gate-title" id="vt-dlg-title">' + esc(role[1]) + '-Bogen ersetzen?</div>' +
+                    '<div class="svp-gate-sub">' + esc('Platz ' + (pos + 1) + ' · ' + (t.title || '')) + '</div>' +
+                    '<p class="vt-dlg-text">Für diesen Vortrag ist schon ein ' + esc(role[1]) + '-Bogen abgegeben' +
+                        (p && typeof p.got === 'number' ? ': ' + wholePts(p.got) + ' von ' + p.max + ' Punkten.' : ' (nicht lesbar).') +
+                        ' Er wird durch ' + n + ' von ' + lim.max + ' Punkten von Hand ersetzt.</p>' +
+                    '<div class="svp-gate-row">' +
+                        '<button type="button" class="action secondary" id="vt-rep-no">Abbrechen</button>' +
+                        '<button type="button" class="action" id="vt-rep-yes">Ersetzen</button>' +
+                    '</div>' +
+                '</div>');
+            ov.setAttribute('role', 'dialog');
+            ov.setAttribute('aria-modal', 'true');
+            ov.setAttribute('aria-labelledby', 'vt-dlg-title');
+            let over = false;
+            /* Escape and the backdrop close it through overlay() - any way it goes away counts as "no" */
+            const gone = new MutationObserver(() => { if (!ov.isConnected) end(false); });
+            const end = (yes) => {
+                if (over) return;
+                over = true;
+                gone.disconnect();
+                closeOverlay();
+                resolve(yes);
+            };
+            gone.observe(document.body, { childList: true });
+            $('vt-rep-no').addEventListener('click', () => end(false));
+            $('vt-rep-yes').addEventListener('click', () => end(true));
+            $('vt-rep-no').focus();
+        });
+    }
+
+    async function savePts(i, pos, role, n, lim) {
+        const p = (sheetPts[i] || {})[role[0]];
+        const sent = !!(bewIn[i] && bewIn[i][role[0]]);
+        if (sent && !(p && p.manual) && !(await askReplace(i, pos, role, n, lim))) {
+            setStatus('Nichts geändert.');
+            if (!editing) render();
+            return;
+        }
+        try {
+            setStatus('speichere ' + role[1] + '-Punkte …');
+            const t = list[pos] || {};
+            const plain = JSON.stringify({
+                lang: 'de', rows: {}, sos: '',
+                got: n, max: lim.max, bonus: lim.bonus,
+                topic: t.title || '', presenter: cardNames(i).join(', '),
+                notiz: '', manual: true
+            });
+            const body = {
+                plan: PLAN, klasse: KLASSE, idx: i, rolle: role[0],
+                taken: true,
+                name_enc: await svpCrypto.seal(HAND),
+                data_enc: await svpCrypto.seal(plain),
+                ts: new Date().toISOString()
+            };
+            /* the same upsert as the sheet's own send button (bewertungsmatrix.html sendSheet), through Doc's session */
+            const res = await A().api(TABLE_BEW, {
+                method: 'POST',
+                headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+                body: JSON.stringify([body])
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const rows = await res.json();
+            if (!rows.length) throw new Error('die Datenbank hat nichts angenommen');
+            openCache.set(body.data_enc, plain);
+            (sheetPts[i] = sheetPts[i] || {})[role[0]] = { got: n, max: lim.max, bonus: lim.bonus, manual: true };
+            (bewIn[i] = bewIn[i] || {})[role[0]] = true;
+            setStatus('☁ ' + role[1] + ': ' + n + ' von ' + lim.max + ' Punkten von Hand gespeichert (verschlüsselt)');
+        } catch (e) {
+            setStatus('☁ ' + role[1] + '-Punkte NICHT gespeichert: ' + e.message, true);
+        }
+        if (!editing) render();
     }
 
     const pctTxt = (p) => Math.round(p * 100) + ' %';
@@ -2243,11 +2440,15 @@
         const has = p && typeof p.got === 'number';
         const got = has ? wholePts(p.got) : null;
         const txt = has ? got + (typeof p.max === 'number' ? '/' + p.max : '') : '–';
-        const t = has
-            ? role[1] + ': ' + got + ' von ' + (p.max != null ? p.max : '?') + ' Punkten'
+        let t = has
+            ? role[1] + ': ' + got + ' von ' + (p.max != null ? p.max : '?') + ' Punkten' + (p.manual ? ' — ' + HAND + ' eingetragen' : '')
             : 'Noch keine Punkte aus dem Bogen ' + role[1];
-        return '<span class="vt-pts' + (has ? '' : ' none') + '" title="' + esc(t) + '">' +
-            esc(txt) + '</span>';
+        /* Doc, logged in and unlocked: a click turns the box into a field (wirePts) */
+        const edit = gradesVisible();
+        if (edit) t += ' — klicken, um die Punkte ' + HAND + ' einzutragen';
+        return '<span class="vt-pts' + (has ? '' : ' none') + (has && p.manual ? ' hand' : '') + (edit ? ' edit' : '') + '"' +
+            (edit ? ' id="pts-' + role[0] + '-' + i + '" role="button" tabindex="0"' : '') +
+            ' title="' + esc(t) + '">' + esc(txt) + '</span>';
     }
 
     function noteCalc(i) {
@@ -3030,7 +3231,7 @@
             if (Object.keys(timers).length) return;
             if (saving) return;                   /* a write is still on its way */
             const act = document.activeElement;
-            if (act && act.tagName === 'INPUT' && /^(name|note|date)-/.test(act.id)) return;
+            if (act && act.tagName === 'INPUT' && /^(name|note|date|pts)-/.test(act.id)) return;
             refresh();
         }, 20000);
     })();
