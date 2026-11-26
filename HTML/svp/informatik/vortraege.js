@@ -2226,6 +2226,12 @@
 
     const pctTxt = (p) => Math.round(p * 100) + ' %';
 
+    /* Whole points on screen only (Doc, 26.11.2026: "da stehen immer noch .5 Pkte"). Since 25.11.2026 the
+       sheet takes whole points only; sheets sent before may still hold halves. They are rounded half up
+       HERE, for display - the stored sheet is never touched, and the computed mark below (noteCalc) keeps
+       working from the stored points, so no mark moves because of this. */
+    const wholePts = (n) => Math.round(n);
+
     /* Die Punkte des Bogens direkt hinter seinem Knopf (Doc, 21.09.2026).
        Der Platz steht IMMER da, auch leer - genau wie das Feld Note, das mit
        einem Gedankenstrich anfaengt (Doc: "zeig Pkt auch leer wie Note").
@@ -2235,9 +2241,10 @@
     function ptsHtml(i, role) {
         const p = (sheetPts[i] || {})[role[0]];
         const has = p && typeof p.got === 'number';
-        const txt = has ? p.got + (typeof p.max === 'number' ? '/' + p.max : '') : '–';
+        const got = has ? wholePts(p.got) : null;
+        const txt = has ? got + (typeof p.max === 'number' ? '/' + p.max : '') : '–';
         const t = has
-            ? role[1] + ': ' + p.got + ' von ' + (p.max != null ? p.max : '?') + ' Punkten'
+            ? role[1] + ': ' + got + ' von ' + (p.max != null ? p.max : '?') + ' Punkten'
             : 'Noch keine Punkte aus dem Bogen ' + role[1];
         return '<span class="vt-pts' + (has ? '' : ' none') + '" title="' + esc(t) + '">' +
             esc(txt) + '</span>';

@@ -1180,7 +1180,10 @@
                 const pct = svpNoten.combine({ got: mine.got, max: mine.max },
                     { got: other.got, max: other.max || mine.max });
                 if (pct === null) { elSummary.hidden = true; return; }
-                const total = pct * mine.max;
+                /* the weighted mean of both sheets in this sheet's points - shown in whole points, rounded half up
+                   (Doc, 26.11.2026: no ".5 Pkte" anywhere); the share and the mark below stay unrounded. The
+                   1e-9 keeps a float like 31.4999999 from rounding down. */
+                const total = Math.round(pct * mine.max + 1e-9);
                 const sh = sheet();
                 elSummary.hidden = false;
                 elSummary.innerHTML = '';
