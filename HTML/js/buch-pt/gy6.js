@@ -57,6 +57,20 @@ window.BuchPT && BuchPT.add('gy6', {
         'Wie oft passt der zweite Bruch in den ersten?': 'Quantas vezes cabe a segunda fração na primeira?',
         'Zähler mal Zähler, Nenner mal Nenner. Vorher kürzen spart Arbeit.': 'Numerador vezes numerador, denominador vezes denominador. Simplificar antes poupa trabalho.',
         'Durch einen Bruch teilt man, indem man mit seinem Kehrwert malnimmt.': 'Para dividir por uma fração, multiplica-se pelo seu inverso.',
+        // vorrang6: the five sums and the steps (a step after "Agora:" starts in lower case; "Jetzt:" and the steps with a formula are phrases)
+        'Punkt vor Strich': '× e : antes de + e −', 'Klammern zuerst': 'Parênteses primeiro', 'Mit Komma': 'Com vírgula',
+        'Von links nach rechts': 'Da esquerda para a direita', 'Rechenvorteil': 'Cálculo inteligente', 'Aufgabe': 'Exercício',
+        'Nächster Schritt': 'Próximo passo', 'Von vorn': 'Do início', 'Fertig.': 'Pronto.',
+        'Fertig. Mit der Klammer kommt etwas anderes heraus als ohne.': 'Pronto. Com os parênteses o resultado é diferente do que sem eles.',
+        'Fertig. Wer von links rechnet, erhält falsch $6$.': 'Pronto. Quem calcula só da esquerda para a direita obtém, erradamente, $6$.',
+        'Jetzt die Strichrechnung.': 'a adição.',
+        'Distributivgesetz: $\\tfrac25$ ausklammern.': 'pela propriedade distributiva, pôr $\\tfrac25$ em evidência.',
+        // probieren6
+        'Einsetzen': 'Substituir', 'Alle Werte prüfen': 'Testar todos os valores',
+        'Zahlenstrahl: grün erfüllt, rot nicht': 'Reta numérica: a verde os valores que servem, a vermelho os outros',
+        'Passt.': 'Serve.', 'Passt nicht.': 'Não serve.',
+        'Probe: Einsetzen ergibt eine wahre Aussage.': 'Verificação: ao substituir, obtém-se uma afirmação verdadeira.',
+        'Die linke Seite ist zu klein.': 'O membro da esquerda é demasiado pequeno.', 'Die linke Seite ist zu groß.': 'O membro da esquerda é demasiado grande.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -78,6 +92,13 @@ window.BuchPT && BuchPT.add('gy6', {
         ['$: Wie oft passt nichts in etwas? Diese Frage hat keine Antwort. Durch $0$ teilt man nie.',
             '$: quantas vezes cabe nada em alguma coisa? Esta pergunta não tem resposta. Nunca se divide por $0$.'],
         ['$ passt $', '$ cabe $'], ['$-mal in $', '$ vezes em $'],
+        // vorrang6 (after the rule × for the product)
+        ['<b>Jetzt:</b> ', '<b>Agora:</b> '], ['Punktrechnung zuerst: $', 'primeiro a multiplicação: $'], ['Hauptnenner 4: $', 'denominador comum 4: $'],
+        ['Die Klammer zuerst: $', 'primeiro os parênteses: $'], ['Punkt vor Strich: $', 'a multiplicação antes da subtração: $'],
+        ['Zwei Punktrechnungen: die linke zuerst. $', 'há uma divisão e uma multiplicação, primeiro a da esquerda. $'],
+        ['Fertig. Ohne Ausklammern: $', 'Pronto. Sem pôr em evidência: $'], ['$, mehr Arbeit.', '$, dá mais trabalho.'],
+        // probieren6: "$x = 2$: $… = …$, und $… < …$"
+        [', und $', ', e $'], ['Es passen: ', 'Servem: '], ['Bisher passt keiner.', 'Por enquanto, nenhum serve.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -98,5 +119,9 @@ window.BuchPT && BuchPT.add('gy6', {
         // bruchop6: "Erst gleichnamig machen, dann die Zähler addieren. Der Nenner bleibt."
         [/Erst gleichnamig machen, dann die Zähler (addieren|subtrahieren)\. Der Nenner bleibt\./g,
             (m, v) => 'Primeiro reduzir ao mesmo denominador, depois ' + (v === 'addieren' ? 'adicionar' : 'subtrair') + ' os numeradores. O denominador fica.'],
+        // probieren6: the inequalities and the count of the values tried
+        [/Gesucht sind alle Zahlen, für die die linke Seite (kleiner|größer) als (\$[^$]*\$) ist\./g, (m, r, x) =>
+            'Procuram-se todos os números para os quais o membro da esquerda é ' + (r === 'kleiner' ? 'menor' : 'maior') + ' do que ' + x + '.'],
+        [/Geprüft: (\d+) von (\d+) Werten\. /g, (m, a, b) => (a === '1' ? 'Valor testado: 1 de ' : 'Valores testados: ' + a + ' de ') + b + '. '],
     ]
 });

@@ -376,3 +376,12 @@ parts, so every later book that loads them gets it too):
 | Teiler · Vielfache | divisores · múltiplos | |
 | Zahlenstrahl | reta numérica | |
 | Elfmeter | penálti | |
+| Vorrangregeln · Punkt vor Strich | prioridade das operações · multiplicações e divisões antes de adições e subtrações | |
+| Rechengesetze · Vertauschen, Verbinden, Verteilen | propriedades das operações · comutativa, associativa, distributiva | „trocar a ordem, agrupar, distribuir" |
+| ausklammern | pôr em evidência | |
+| Gleichung · Ungleichung · Variable | equação · inequação · variável | |
+| Umkehraufgabe · Rückwärtsrechnen · Probieren | operação inversa · calcular para trás · experimentar | |
+| Probe | verificação | |
+| Lösungsplan · Sachaufgabe | plano de resolução · problema | |
+| linke Seite (einer Gleichung) | membro da esquerda | |
+| Murmeln | berlindes | |
