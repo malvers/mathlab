@@ -2268,7 +2268,7 @@
         const given = noteGiven(i);
         const t = given ? NOTE_GIVEN : NOTE_NONE;
         return '<span class="vt-note-box">' +
-            '<span class="vt-grade-lbl">' + gradeUnit() + '</span>' +
+            '<span class="vt-grade-lbl vt-note-unit">' + gradeUnit() + '</span>' +
             '<span class="vt-note locked' + (given ? '' : ' none') + '" id="notelock-' + i + '"' +
             ' title="' + t + '" aria-label="' + t + '">' + (given ? '***' : '–') + '</span>' +
             '</span>';
@@ -2295,11 +2295,13 @@
             : s.coach ? 'Der Team-Bogen fehlt noch'
             : s.publikum ? 'Der Coach-Bogen fehlt noch' : 'Noch kein Bogen abgegeben';
         return '<span class="vt-note-box">' +
-            '<span class="vt-grade-lbl">' + gradeUnit() + '</span>' +
+            '<span class="vt-grade-lbl vt-note-unit">' + gradeUnit() + '</span>' +
             '<span class="vt-note calc' + (c ? '' : ' none') + '" title="' + esc(why) + '"' +
             ' aria-label="Errechnete ' + (gradeUnit() === 'NP' ? 'Notenpunkte' : 'Note') + ' für Thema ' + (pos + 1) + '">' +
             (c ? c.note : '–') + '</span>' +
-            (c ? '<span class="vt-note-pct">' + pctTxt(c.pct) + '</span>' : '') +
+            /* the slot stays even without a mark, so arrow, field, Abgabe and Meldung keep
+               their place in every card (Doc, 26.11.2026: "alles x bündig") */
+            '<span class="vt-note-pct">' + (c ? pctTxt(c.pct) : '') + '</span>' +
             /* an arrow, not a word: the row has to keep Abgabe and Meldung on one line */
             '<span class="vt-grade-lbl" title="Endnote">→</span>' +
             '<input type="text" class="vt-note' + (over ? ' over' : '') + '" id="note-' + i + '"' +

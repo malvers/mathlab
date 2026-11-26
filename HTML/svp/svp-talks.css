@@ -277,7 +277,15 @@
    Doc 28.10.2026): pupils ask for a change there instead of in Teams. Same
    button as Coach/Publikum; green once something is reported for the card,
    Upsilon red for Doc while requests are open. */
-.vt-meld { margin-left: 8px; }
+.vt-meld {
+    margin-left: 8px;
+    /* every variant ("Stimmt was nicht?", "Gemeldet ✓", "2 Meldungen", "Jetzt melden") as wide as the
+       widest, so the button cannot wrap in one card and stay in line in the next (Doc, 26.11.2026:
+       "alles x bündig") */
+    box-sizing: border-box;
+    min-width: 15.8em;
+    text-align: center;
+}
 .vt-meld.sent { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
 .vt-meld.hot,
 .vt-meld.hot:hover,
@@ -517,7 +525,20 @@ html.svp-light .vt-date input { color-scheme: light; }
 }
 
 /* "26/36" in Orbitron needs room (Doc, 04.11.2026: "ein bisschen zu schmal ... nach rechts noch Platz") */
-.vt-pts { width: 4.9em; }
+.vt-pts { width: 4.9em; white-space: nowrap; }
+
+/* Alles x-buendig (Doc, 26.11.2026): every piece of the Bewerten row has a width of its own that does
+   not depend on what it shows, so each sits at the same x in every card and on every talk page. The
+   point boxes and the mark already are fixed boxes; these are the rest. Digits in table figures. */
+.vt-note,
+.vt-pts,
+.vt-note-pct { font-variant-numeric: tabular-nums; }
+/* "Note" on most plans, "NP" on BGY 12/13 - one width for both, right-aligned onto its box */
+.vt-note-unit {
+    display: inline-block;
+    min-width: 2.4em;
+    text-align: right;
+}
 
 .vt-note::placeholder { color: var(--muted); opacity: 1; }
 .vt-note:focus { border-color: var(--lambda); }
@@ -543,6 +564,11 @@ html.svp-light .vt-date input { color-scheme: light; }
     font-size: 0.72rem;
     color: var(--muted);
     white-space: nowrap;
+    /* a fixed slot, there even without a mark (vortraege.js noteHtml): room for "100 %",
+       right-aligned so the % signs stand under each other */
+    display: inline-block;
+    width: 2.7em;
+    text-align: right;
 }
 
 /* edit mode: dashed outlines come from .editing [contenteditable] above */
