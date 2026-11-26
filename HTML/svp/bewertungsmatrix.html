@@ -137,6 +137,12 @@
         .bm-status:empty { display: none; }
         .bm-status.err { color: var(--ypsilon); }
         .bm-status.ok { color: var(--phi); }
+        /* status(…, show): the line lights up once - the same text after a second tap is seen as an answer */
+        .bm-status.bm-flash { animation: bm-flash 1.1s ease-out; border-radius: 6px; }
+        @keyframes bm-flash {
+            from { background: color-mix(in srgb, rgb(245, 194, 66) 40%, transparent); }
+            to { background: transparent; }
+        }
         @media print { .bm-send { display: none !important; } }
 
         /* Head fields: Vortragende, Thema, Team, Gutachter. */
@@ -1003,16 +1009,37 @@
                    cannot be split reliably, a Lerngruppe carries dashes of its
                    own ("FOG26-1"). They are kept so a reload still knows which
                    database row this sheet belongs to. */
+                let touched = false;
                 if (h.plan && h.klasse && h.idx != null) {
                     state.meta = { plan: h.plan, klasse: h.klasse, idx: h.idx };
+                    touched = true;          /* kept at once - a reload must still know its row */
                 }
-                let touched = false;
                 if (h.topic && !state.fields.topic) { state.fields.topic = h.topic; touched = true; }
                 if (h.names && !state.fields.presenter) { state.fields.presenter = h.names; touched = true; }
                 if (talkLabel !== (state.talkLabel || '')) { state.talkLabel = talkLabel; touched = true; }
                 if (touched) save();
             }());
             if (!talkLabel) talkLabel = state.talkLabel || '';
+            /* No handoff - the sheet reloaded after more than a minute, opened again from the history or on
+               a device that never had the list open (Doc, 26.11.2026: the team's iPad, "Bewertung senden" did
+               "gar nichts"): the row is read off the talk id itself. vortraege.js talkId builds it as
+               PLAN-KLASSE-NR-ROLE, KLASSE being the ?g= key of the list, which svp-map.json groups give
+               already in slug form (BGY25, FOS25-2, FOG25-2_FOW25-2) - the database row carries the same
+               string. The plan has no dash, the Lerngruppe may have some, so: first part, middle, last two. */
+            function metaFromTalk(v) {
+                const parts = String(v || '').split('-');
+                if (parts.length < 4) return null;
+                const r = parts.pop();
+                const nr = parts.pop();
+                const plan = parts.shift();
+                const klasse = parts.join('-');
+                if (!/^(coach|publikum)$/.test(r) || !/^[1-9][0-9]*$/.test(nr) || !plan || !klasse) return null;
+                return { plan: plan, klasse: klasse, idx: Number(nr) - 1 };
+            }
+            if (!state.meta) {
+                const m = metaFromTalk(talk);
+                if (m) { state.meta = m; save(); }
+            }
             const meta = state.meta || null;
 
             function save() {
@@ -1754,6 +1781,9 @@
                 elStatus.textContent = text || '';
                 elStatus.className = 'bm-status' + (cls ? ' ' + cls : '');
                 if (show && text) {
+                    /* a short flash, so that a message repeated word for word on a second tap still visibly answers it */
+                    void elStatus.offsetWidth;
+                    elStatus.classList.add('bm-flash');
                     requestAnimationFrame(function () {
                         elStatus.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                     });
@@ -1777,7 +1807,30 @@
 
             /* Send this sheet. One row per talk and role, so a second send is a
                correction of the same row rather than a new entry. */
+            /* Never silent (Doc, 26.11.2026, the team's iPad: "gar nichts, kein Feedback"): every tap shows
+               "sende …" on the button at once, every way out ends in a message in view, and an error anywhere -
+               the checks included - lands in the catch instead of nowhere. A second tap while sending is
+               ignored. */
+            let sending = false;
             async function sendSheet() {
+                if (sending) return;
+                sending = true;
+                const label = elSendBtn.textContent;
+                elSendBtn.disabled = true;
+                elSendBtn.textContent = 'sende …';
+                status('sende …', '', true);
+                try {
+                    await sendNow();
+                } catch (e) {
+                    status('Senden fehlgeschlagen: ' + ((e && e.message) || e), 'err', true);
+                } finally {
+                    sending = false;
+                    elSendBtn.disabled = false;
+                    elSendBtn.textContent = label;
+                }
+            }
+
+            async function sendNow() {
                 if (!meta) { status('Diesen Bogen über die Vortragsliste öffnen, sonst weiß er nicht, wohin er gehört.', 'err', true); return; }
                 const who = (state.fields.reviewer || '').trim();
                 if (!who) {
@@ -1797,8 +1850,6 @@
                     status('Zum Speichern des Coach-Bogens bitte anmelden (Notizen-Seite).', 'err', true);
                     return;
                 }
-                elSendBtn.disabled = true;
-                status('sende …', '', true);
                 try {
                     const payload = JSON.stringify({
                         lang: state.lang, rows: state.rows, sos: state.sos,
@@ -1839,8 +1890,6 @@
                         : 'Coach-Bogen gespeichert.', 'ok', true);
                 } catch (e) {
                     status('Senden fehlgeschlagen: ' + e.message, 'err', true);
-                } finally {
-                    elSendBtn.disabled = false;
                 }
             }
 
