@@ -53,7 +53,8 @@ function parse(text) {
   const m = text.match(RE);
   if (!m) return null;
   const raw = (m[2] || '').trim();
-  return { pct: Number(m[1].replace(',', '.')), reset: raw ? resetLabel(raw) : '', resetRaw: raw };
+  // Rounded up, like Claude's own usage view (the text may carry a fraction; today it gives whole numbers).
+  return { pct: Math.ceil(Number(m[1].replace(',', '.'))), reset: raw ? resetLabel(raw) : '', resetRaw: raw };
 }
 
 const fake = opt('--fake');

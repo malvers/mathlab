@@ -343,7 +343,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// "Woche 97 % · Reset So 21:00", plus the age of an old value.
     private var usageLine: String? {
         guard let u = usage else { return nil }
-        var line = "Woche \(Int(u.pct.rounded())) %"
+        var line = "Woche \(Int(u.pct.rounded(.up))) %"
         if !u.reset.isEmpty { line += " · Reset \(u.reset)" }
         if usageStale {
             let min = Int(Date().timeIntervalSince(u.at) / 60)
@@ -401,31 +401,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// The D and the usage as ONE capsule (Doc, 26.11.2026): the D's circle is its rounded left end, the capsule
-    /// runs on to the right, as high as the circle, with the number in it - orange (lambda) with ink-blue digits from
-    /// 90 %, red with white digits from 98 % (Doc: red next to a red disc, "egal, machen wir so, erstmal"), a faint
-    /// grey of the bar's own ink below. The circle keeps every state it has; a faded capsule and "?" mark an old
-    /// value. Returns the image and whether it may stay a template.
+    /// runs on to the right, as high as the circle, with "NN %" in it - green (phi) below 90 %, orange (lambda) from
+    /// 90 %, both with ink-blue digits, red with white digits from 98 % (Doc: red next to a red disc, "egal, machen
+    /// wir so, erstmal"). Always as wide as "88 %", so it never jumps. The circle keeps every state it has; a faded
+    /// capsule marks an old value (the age is in the tooltip). Returns the image and whether it may stay a template.
     private func withUsage(_ icon: NSImage?, iconTemplate: Bool, ink: NSColor) -> (NSImage?, Bool) {
         guard let icon = icon, let u = usage else { return (icon, iconTemplate) }
-        let pct = Int(u.pct.rounded())
+        let pct = Int(u.pct.rounded(.up))
         let stale = usageStale
-        let fill: NSColor? = pct >= 98 ? Style.alertRed : pct >= 90 ? Style.warnYellow : nil
-        let template = iconTemplate && fill == nil
-        let neutral: NSColor = template ? .black : ink
+        let fill: NSColor = pct >= 98 ? Style.alertRed : pct >= 90 ? Style.warnYellow : Style.hereGreen
+        let template = false   // the run is always coloured
         let alpha: CGFloat = stale ? 0.5 : 1
-        let back = (fill ?? neutral.withAlphaComponent(0.2)).withAlphaComponent((fill == nil ? 0.2 : 1) * alpha)
-        let color: NSColor = pct >= 98 ? .white : pct >= 90 ? Style.warnInk : neutral
+        let back = fill.withAlphaComponent(alpha)
+        let color: NSColor = pct >= 98 ? .white : Style.warnInk
         let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .bold)
-        let text = NSAttributedString(string: "\(pct)" + (stale ? "?" : ""),
+        let text = NSAttributedString(string: "\(pct) %",
                                       attributes: [.font: font, .foregroundColor: color.withAlphaComponent(alpha)])
         let ts = text.size()
+        // Fixed width: the widest everyday case, two digits and the sign (only 100 % is wider).
+        let slot = max(ceil(NSAttributedString(string: "88 %", attributes: [.font: font]).size().width), ceil(ts.width))
 
         // Where the circle really sits inside the symbol's padded image.
         let circle = AppDelegate.inkBounds(icon)
         let r = max(circle.width, circle.height) / 2
         let cx = circle.midX, cy = circle.midY
         let textX = circle.maxX + 3
-        let right = max(textX + ceil(ts.width) + 6, circle.maxX + r)
+        let right = max(textX + slot + 6, circle.maxX + r)
         let out = NSImage(size: NSSize(width: max(icon.size.width, right), height: icon.size.height))
         out.lockFocus()
         // The run from the circle's centre to a rounded right end; the circle itself is cut out again (a little
@@ -455,7 +456,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             icon.draw(in: iconRect)
         }
-        text.draw(at: NSPoint(x: textX, y: cy - ts.height / 2))
+        text.draw(at: NSPoint(x: textX + (slot - ts.width) / 2, y: cy - ts.height / 2))
         out.unlockFocus()
         return (out, template)
     }
@@ -625,7 +626,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let bar = button.effectiveAppearance.bestMatch(from: [.aqua, .vibrantLight, .darkAqua, .vibrantDark])
         let tip = usageLine
         if button.toolTip != tip { button.toolTip = tip }
-        let usageKey = usage.map { "\(Int($0.pct.rounded()))-\(usageStale)" } ?? ""
+        let usageKey = usage.map { "\(Int($0.pct.rounded(.up)))-\(usageStale)" } ?? ""
         let key = "\(alerting)-\(here)-\(other)-\(bar?.rawValue ?? "")-\(usageKey)"
         guard key != iconKey else { return }
         iconKey = key
