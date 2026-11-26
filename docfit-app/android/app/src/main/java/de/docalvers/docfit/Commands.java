@@ -6,10 +6,11 @@ import java.util.Locale;
 /**
  * What Doc said, as a command: "DocFit Start" starts the stopwatch, "DocFit Stopp" stops it (Doc, 19.11.2026; first
  * 16.11.2026 with plain "DocFit" / "Stopp", which started and stopped far too often from talk nearby: "Ständig geht das
- * Ding an neben mir"). Plain "DocFit" or "Start" do nothing. Plain "Stopp" stops too, but only while the stopwatch runs
- * (Doc, 20.11.2026: "dass wenn ich nur ‚Stopp' sage, das in dem Modus dann auch stoppt") - under the same rules as the
- * phrase: conf >= 0.7, nothing but noise around it, said on its own; when the stopwatch stands still it does nothing,
- * and a start always needs "DocFit Start" (a plain "Start" was what fired from talk nearby).
+ * Ding an neben mir"). Plain "DocFit" does nothing. Plain "Stopp" stops too, but only while the stopwatch runs (Doc,
+ * 20.11.2026: "dass wenn ich nur ‚Stopp' sage, das in dem Modus dann auch stoppt"), and plain "Start" starts while it
+ * stands still (Doc, 26.11.2026: "Wenn die App offen ist und vor mir liegt ... Start würde da wirklich reichen, Stopp
+ * würde auch reichen") - both under the same rules as the phrase: conf >= 0.7, the only word of the result besides
+ * noise, said on its own. (On 16.11.2026 a plain "Start" fired from talk nearby - that rule had no loudness check.)
  *
  * The recognizer runs with a closed grammar (GRAMMAR): the two phrases, their parts, and words that sound like them, so
  * that "Topf", "Doktor", "Fitness" or "stark" land on themselves instead of on a command, and "[unk]" for everything
@@ -24,7 +25,8 @@ import java.util.Locale;
  * Measured on the silent samples (docfit-app/test/, six German macOS voices, 186 samples): "DocFit Start" 24 of 24,
  * "DocFit Stopp" 22 of 24, false commands 0 of 138 (plain DocFit, Stopp, "Stopp mal", "Ich bin heute fit", radio-like
  * passages). The old rule had 29 false starts in 132. While running (20.11.2026): plain "Stopp" / "Stop" 12 of 12,
- * false stops 0 of 150 (everything else, "Stopp mal" and "Stopp bitte" included).
+ * false stops 0 of 150 (everything else, "Stopp mal" and "Stopp bitte" included). Plain "Start" (26.11.2026): 6 of 6,
+ * false starts still 0 of 156 ("Der Start war gut", "Wir starten gleich" included).
  * Pure Java, tested in CommandsTest.
  */
 final class Commands {
@@ -80,12 +82,15 @@ final class Commands {
     private Commands() {
     }
 
-    /** For a stopwatch that stands still: only the two phrases count. */
+    /** For a stopwatch that stands still: the phrases and a plain "Start". */
     static Command decide(List<Word> words, Loudness loud) {
         return decide(words, loud, false);
     }
 
-    /** @param running whether the stopwatch runs - then a plain "Stopp" said on its own stops it as well */
+    /**
+     * @param running whether the stopwatch runs - then a plain "Stopp" said on its own stops it as well; while it stands
+     *                still a plain "Start" said on its own starts it
+     */
     static Command decide(List<Word> words, Loudness loud, boolean running) {
         for (Word w : words) {
             switch (w.text) {
@@ -99,13 +104,16 @@ final class Commands {
                     return NONE;
             }
         }
-        String turnedDown = "";
+        String turnedDown = "", unsure = "";
         for (int i = 0; i + 2 < words.size(); i++) {
             Word dock = words.get(i), fit = words.get(i + 1), cmd = words.get(i + 2);
             if (!dock.text.equals("dock") || !fit.text.equals("fit")) continue;
             boolean start = cmd.text.equals("start");
             if (!start && !cmd.text.equals("stopp")) continue;
-            if (dock.conf < MIN_CONF || fit.conf < MIN_CONF || cmd.conf < COMMAND_CONF) continue;
+            if (dock.conf < MIN_CONF || fit.conf < MIN_CONF || cmd.conf < COMMAND_CONF) {
+                unsure = "unsure: " + heard(words);   // for the log: a phrase heard, but not sure enough
+                continue;
+            }
             if (fit.start - dock.end > MAX_GAP || cmd.start - fit.end > MAX_PAUSE) continue;
             double phrase = loud.rms(dock.start, cmd.end);
             double before = loud.rms(dock.start - QUIET_GAP - QUIET_SPAN, dock.start - QUIET_GAP);
@@ -117,33 +125,38 @@ final class Commands {
             }
             turnedDown = "not alone: " + why;
         }
-        if (turnedDown.isEmpty() && running) {
-            Command plain = plainStop(words, loud);
+        if (turnedDown.isEmpty()) {
+            Command plain = running ? plainWord(words, loud, "stopp") : plainWord(words, loud, "start");
             if (plain != null) return plain;
         }
-        return turnedDown.isEmpty() ? NONE : new Command(Kind.NONE, 0, turnedDown);
+        if (!turnedDown.isEmpty()) return new Command(Kind.NONE, 0, turnedDown);
+        return unsure.isEmpty() ? NONE : new Command(Kind.NONE, 0, unsure);
     }
 
     /**
-     * A plain "Stopp" while the stopwatch runs: the only word of the result besides noise, sure enough and said on its
-     * own. Stops at the beginning of the word; null if the result holds no such word, NONE with the reason if it was
-     * turned down (for the log).
+     * A plain "Stopp" while the stopwatch runs, a plain "Start" while it stands still: the only word of the result
+     * besides noise, sure enough and said on its own. A stop counts from the beginning of the word, a start from its
+     * end (as for the phrases); null if the result holds no such word, NONE with the reason if it was turned down
+     * (for the log).
      */
-    private static Command plainStop(List<Word> words, Loudness loud) {
-        Word stop = null;
+    private static Command plainWord(List<Word> words, Loudness loud, String text) {
+        Word word = null;
         for (Word w : words) {
             if (w.text.equals("[unk]")) continue;
-            if (!w.text.equals("stopp") || stop != null) return null;   // another word, or two of them
-            stop = w;
+            if (!w.text.equals(text) || word != null) return null;   // another word, or two of them
+            word = w;
         }
-        if (stop == null || stop.conf < COMMAND_CONF) return null;
-        double phrase = loud.rms(stop.start, stop.end);
-        double before = loud.rms(stop.start - QUIET_GAP - QUIET_SPAN, stop.start - QUIET_GAP);
-        double after = loud.rms(stop.end + QUIET_GAP, stop.end + QUIET_GAP + QUIET_SPAN);
-        String why = heard(words) + String.format(Locale.ROOT, "; plain Stopp, loudness before %.2f, after %.2f",
+        if (word == null) return null;
+        boolean start = text.equals("start");
+        String name = start ? "Start" : "Stopp";
+        if (word.conf < COMMAND_CONF) return new Command(Kind.NONE, 0, "unsure: " + heard(words) + "; plain " + name);
+        double phrase = loud.rms(word.start, word.end);
+        double before = loud.rms(word.start - QUIET_GAP - QUIET_SPAN, word.start - QUIET_GAP);
+        double after = loud.rms(word.end + QUIET_GAP, word.end + QUIET_GAP + QUIET_SPAN);
+        String why = heard(words) + String.format(Locale.ROOT, "; plain %s, loudness before %.2f, after %.2f", name,
                 phrase > 0 ? before / phrase : 0, phrase > 0 ? after / phrase : 0);
-        return alone(phrase, before, after) ? new Command(Kind.STOP, stop.start, why)
-                : new Command(Kind.NONE, 0, "not alone: " + why);
+        if (!alone(phrase, before, after)) return new Command(Kind.NONE, 0, "not alone: " + why);
+        return start ? new Command(Kind.START, word.end, why) : new Command(Kind.STOP, word.start, why);
     }
 
     /** Said on its own: what came just before and after is at most QUIET_RATIO as loud as the phrase. */

@@ -6,7 +6,10 @@
 # (the model is the one ../build.sh fetched into ~/Library/Caches/docfit/).
 # 16.11.2026 (plain "DocFit" / "Stopp"): 70 of 78 right, "Ich bin heute fit" started. 19.11.2026 (two-part commands,
 # loudness check): "DocFit Start" 24/24, "DocFit Stopp" 22/24, false commands 0 of 138. 20.11.2026 (plain "Stopp"
-# while running): plain "Stopp"/"Stop" 12/12, false stops 0 of 150; standing still unchanged.
+# while running): plain "Stopp"/"Stop" 12/12, false stops 0 of 150; standing still unchanged. 26.11.2026 (plain "Start"
+# while standing still, AutoGain before the recognizer): "DocFit Start" + plain "Start" 29/30, false starts 0 of 132,
+# plain "Stopp" 12/12, false stops 0 of 150; at a quarter of the level (test_app_rule.py 0.25) 28/30 - without the
+# gain 16/30.
 cd "$(dirname "$0")"
 mkdir -p samples
 : > samples/index.txt

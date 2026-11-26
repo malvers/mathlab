@@ -15,6 +15,7 @@ import org.vosk.Recognizer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Listens all the time while DocFit is open, on the phone itself: the microphone feeds Vosk (Kaldi, small German
@@ -99,16 +100,21 @@ final class KeywordListener {
             short[] buf = new short[RATE / 10];   // 100 ms
             long samples = 0;
             LoudnessMeter loudness = new LoudnessMeter(10);
+            AutoGain gain = new AutoGain();
             rec.startRecording();
             while (running) {
                 int n = rec.read(buf, 0, buf.length);
                 if (n <= 0) continue;
                 long wallNow = System.currentTimeMillis();   // the newest sample of this block arrived about now
                 samples += n;
-                loudness.add(buf, n);
+                loudness.add(buf, n);   // the loudness check on the samples as recorded ...
+                double lift = gain.apply(buf, n);   // ... the recognizer hears quiet speech lifted (AutoGain)
                 if (recognizer.acceptWaveForm(buf, n)) {
                     Commands.Command c = Commands.decide(words(recognizer.getResult()), loudness, watchRunning);
-                    if (!c.heard.isEmpty()) Log.i(TAG, c.kind + ": " + c.heard);   // START / STOP / NONE: not alone
+                    // START / STOP / NONE (not alone, unsure), with the gain of the last block: how loud Doc spoke
+                    if (!c.heard.isEmpty()) {
+                        Log.i(TAG, c.kind + ": " + c.heard + String.format(Locale.ROOT, "; gain %.1f", lift));
+                    }
                     if (c.kind != Commands.Kind.NONE) {
                         long streamMs = samples * 1000 / RATE;
                         long when = wallNow - (streamMs - Math.round(c.at * 1000));

@@ -1,9 +1,10 @@
 """DocFit's exact rule (Commands.java: GRAMMAR, decide(), LoudnessMeter) on the silently generated samples, through the
 same small German model and the way the app hears: silence around each sample, decided per recognizer result, the
-loudness before and after the phrase taken from the audio. Twice: with the stopwatch standing still (only the two
-phrases count) and running (a plain "Stopp" said on its own stops too - Doc, 20.11.2026). Prints the misses, then the
-summary; "Fehlstopps" are stops while running from anything but a stop command."""
-import array, json, math, os, random, wave
+loudness before and after the phrase taken from the audio, the recognizer fed through AutoGain (Doc, 26.11.2026). Twice:
+with the stopwatch standing still (the phrases and a plain "Start" said on its own - Doc, 26.11.2026) and running (a
+plain "Stopp" said on its own stops too - Doc, 20.11.2026). Prints the misses, then the summary; "Fehlstopps" are stops
+while running from anything but a stop command. Optional argument: the speaking level, e.g. 0.25 for a quarter."""
+import array, json, math, os, random, sys, wave
 from vosk import Model, KaldiRecognizer, SetLogLevel
 
 SetLogLevel(-1)
@@ -12,6 +13,8 @@ GRAMMAR = ["dock fit start", "dock fit stopp", "dock fit", "start", "stopp", "do
 MIN_CONF, COMMAND_CONF, MAX_GAP, MAX_PAUSE = 0.5, 0.7, 0.3, 0.5
 QUIET_GAP, QUIET_SPAN, QUIET_RATIO = 0.1, 0.4, 0.5
 RATE = 16000
+LEVEL = float(sys.argv[1]) if len(sys.argv) > 1 else 1.0
+TARGET, MAX_GAIN, DECAY = 12000.0, 4.0, 0.97   # AutoGain.java
 model = Model(os.path.expanduser('~/Library/Caches/docfit/vosk-model-small-de-0.15'))
 
 
@@ -30,6 +33,16 @@ def alone(pcm, a, b):
     return phrase > 0 and before <= QUIET_RATIO * phrase and after <= QUIET_RATIO * phrase
 
 
+def auto_gain(pcm):   # as AutoGain.apply, block by block of 100 ms
+    out, env = array.array('h'), 0.0
+    for i in range(0, len(pcm), 1600):
+        blk = pcm[i:i + 1600]
+        env = max(max(abs(x) for x in blk), env * DECAY ** (len(blk) / 1600))
+        g = max(1.0, min(MAX_GAIN, TARGET / env)) if env > 0 else MAX_GAIN
+        out.extend(max(-32768, min(32767, round(x * g))) for x in blk)
+    return out
+
+
 def decide(words, pcm, running=False):   # same as Commands.decide
     if any(w['word'] not in ('dock', 'fit', 'start', 'stopp', '[unk]') for w in words):
         return '-'
@@ -45,17 +58,17 @@ def decide(words, pcm, running=False):   # same as Commands.decide
         if alone(pcm, d['start'], c['end']):
             return 'start' if c['word'] == 'start' else 'stop'
         turned_down = True
-    if running and not turned_down:   # plain "Stopp": the only word besides noise, sure, said on its own
+    if not turned_down:   # plain "Stopp" running / "Start" standing still: the only word, sure, said on its own
         real = [w for w in words if w['word'] != '[unk]']
-        if len(real) == 1 and real[0]['word'] == 'stopp' and real[0]['conf'] >= COMMAND_CONF \
-                and alone(pcm, real[0]['start'], real[0]['end']):
-            return 'stop'
+        if len(real) == 1 and real[0]['word'] == ('stopp' if running else 'start') \
+                and real[0]['conf'] >= COMMAND_CONF and alone(pcm, real[0]['start'], real[0]['end']):
+            return 'stop' if running else 'start'
     return '-'
 
 
 def expected(phrase):
     q = phrase.lower().replace(' ', '').replace(',', '')
-    return 'start' if q in ('docfitstart', 'dockfitstart') else 'stop' if q in ('docfitstopp', 'docfitstop') else '-'
+    return 'start' if q in ('docfitstart', 'dockfitstart', 'start') else 'stop' if q in ('docfitstopp', 'docfitstop') else '-'
 
 
 def plain_stop(phrase):
@@ -68,11 +81,12 @@ plain_hits, plain_n, false_stops, run_others = 0, 0, 0, 0
 for line in open('samples/index.txt', encoding='utf-8'):
     n, voice, phrase = line.strip().split('|')
     wf = wave.open('samples/%s.wav' % n, 'rb')
-    pcm = array.array('h', [0] * 8000) + array.array('h', wf.readframes(wf.getnframes())) + array.array('h', [0] * 24000)
+    speech = array.array('h', [int(x * LEVEL) for x in array.array('h', wf.readframes(wf.getnframes()))])
+    pcm = array.array('h', [0] * 8000) + speech + array.array('h', [0] * 24000)
     random.seed(int(n))   # quiet room noise, so silence is not digital zero
     pcm = array.array('h', [max(-32768, min(32767, x + random.randint(-60, 60))) for x in pcm])
     rec = KaldiRecognizer(model, RATE, json.dumps(GRAMMAR)); rec.SetWords(True)
-    raw, results = pcm.tobytes(), []
+    raw, results = auto_gain(pcm).tobytes(), []   # loudness from pcm, the recognizer hears it lifted
     for i in range(0, len(raw), 3200):
         if rec.AcceptWaveform(raw[i:i + 3200]):
             results.append(json.loads(rec.Result()).get('result', []))

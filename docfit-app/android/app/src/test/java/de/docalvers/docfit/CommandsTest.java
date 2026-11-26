@@ -12,8 +12,8 @@ import java.util.List;
 /**
  * The command rule against what the small German model really returned for silently generated samples (six macOS
  * German voices, see docfit-app/test/): "DocFit Start" starts, "DocFit Stopp" stops, plain "Stopp" only while the
- * stopwatch runs; plain "DocFit", "Start" (and "Stopp" when it stands still) and the look-alikes do nothing, and a
- * phrase inside talk does nothing either (LoudnessMeter). Plus the stopwatch format.
+ * stopwatch runs, plain "Start" only while it stands still (Doc, 26.11.2026); plain "DocFit" and the look-alikes do
+ * nothing, and a phrase or word inside talk does nothing either (LoudnessMeter). Plus the stopwatch format.
  */
 public class CommandsTest {
     private static Commands.Word w(String t, double conf, double s, double e) {
@@ -75,7 +75,6 @@ public class CommandsTest {
         assertEquals(Commands.Kind.NONE, kind(w("dock", 1, 0.51, 0.75), w("fit", 1, 0.75, 1.08)));      // "DocFit"
         assertEquals(Commands.Kind.NONE, kind(w("stopp", 1, 0.48, 0.87)));                             // "Stopp"
         assertEquals(Commands.Kind.NONE, kind(w("stopp", 1, 0.48, 0.87), w("[unk]", 0.9, 0.9, 1.2)));  // "Stopp mal"
-        assertEquals(Commands.Kind.NONE, kind(w("start", 1, 0.5, 0.9)));                               // "Start"
         assertEquals(Commands.Kind.NONE, kind(w("fit", 1, 1.23, 1.59)));                    // "Ich bin heute fit"
         assertEquals(Commands.Kind.NONE, kind(w("fit", 1, 0.75, 1.08), w("start", 1, 1.08, 1.5)));      // no "dock"
         assertEquals(Commands.Kind.NONE, kind(w("dock", 1, 0.5, 0.75), w("start", 1, 0.75, 1.2)));      // no "fit"
@@ -161,9 +160,31 @@ public class CommandsTest {
                 alone, true).kind);
         assertEquals(Commands.Kind.NONE, Commands.decide(Arrays.asList(w("stopp", 1, 0.48, 0.87), w("stopp", 1, 1.0, 1.3)),
                 alone, true).kind);
-        // a plain "Start" never starts, running or not
+        // a plain "Start" never stops, and while the stopwatch runs it does nothing at all
         assertEquals(Commands.Kind.NONE, Commands.decide(Arrays.asList(w("start", 1, 0.48, 0.87)), alone, true).kind);
-        assertEquals(Commands.Kind.NONE, Commands.decide(Arrays.asList(w("start", 1, 0.48, 0.87)), alone, false).kind);
+        // the log learns why a plain "Stopp" was turned down
+        Commands.Command low = Commands.decide(Arrays.asList(w("stopp", 0.6, 0.48, 0.87)), alone, true);
+        assertTrue(low.heard, low.heard.startsWith("unsure: stopp 0.60"));
+    }
+
+    @Test
+    public void plainStartStartsWhileStandingStill() {
+        // Doc, 26.11.2026: "Start würde da wirklich reichen" - said on its own, the app open in front of him
+        LoudnessMeter alone = audio(3, new double[]{0.5, 0.9});
+        Commands.Command c = Commands.decide(Arrays.asList(w("start", 0.95, 0.5, 0.9)), alone, false);
+        assertEquals(Commands.Kind.START, c.kind);
+        assertEquals(0.9, c.at, 1e-9);                        // the end of the word: now the workout begins
+        assertTrue(c.heard, c.heard.contains("plain Start"));
+        assertEquals(Commands.Kind.START, kind(alone, w("[unk]", 0.4, 0.1, 0.3), w("start", 1, 0.5, 0.9)));
+        // the same care as for a plain "Stopp": sure enough, alone in the result, said on its own
+        assertEquals(Commands.Kind.NONE, kind(alone, w("start", 0.69, 0.5, 0.9)));
+        assertEquals(Commands.Kind.NONE, kind(alone, w("start", 1, 0.5, 0.9), w("start", 1, 1.0, 1.3)));
+        assertEquals(Commands.Kind.NONE, kind(alone, w("statt", 1, 0.1, 0.4), w("start", 1, 0.5, 0.9)));
+        assertEquals(Commands.Kind.NONE, kind(alone, w("fit", 1, 0.1, 0.4), w("start", 1, 0.5, 0.9)));   // no "dock"
+        // "Der Start war gut": talk right before and after the word
+        assertEquals(Commands.Kind.NONE, kind(audio(3, new double[]{0.1, 1.6}), w("start", 1, 0.5, 0.9)));
+        // a plain "Stopp" while it stands still still does nothing
+        assertEquals(Commands.Kind.NONE, kind(alone, w("stopp", 1, 0.5, 0.9)));
     }
 
     @Test
