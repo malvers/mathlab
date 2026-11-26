@@ -2082,7 +2082,20 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   const SVGNS = 'http://www.w3.org/2000/svg';
 
   /* ---------- the year in this book ---------- */
-  const YEAR = 2026;
+  /* the book's year: the current one, never before 2026 (the first edition) - so on 1 January the book turns to the new year
+     by itself, the same book one year on (Doc, 26.11.2026: "du kannst das 2027er Buch bauen. Eigentlich genauso wie es heute
+     ist, nur das Datum um 1 verschoben"); ?jahr=2027 opens that year's book before it begins (the gift links sent at
+     Christmas open on 1 January), ?jahr=2026 last year's */
+  const YEAR = (() => {
+    try { const j = +(new URLSearchParams(location.search).get('jahr') || 0); if (j >= 2026 && j <= 2099) return j; } catch (e) { }
+    return Math.max(2026, new Date().getFullYear());
+  })();
+  /* the year printed on the cover, the title page and the year's curve: from YEAR, in the page templates before any page is made */
+  document.querySelectorAll('template').forEach(t => {
+    t.content.querySelectorAll('.cv-year, .t2.yr').forEach(e => { e.textContent = String(YEAR); });
+    t.content.querySelectorAll('.lbl').forEach(e => { e.textContent = e.textContent.replace(/· 2026$/, '· ' + YEAR); });
+    t.content.querySelectorAll('svg[aria-label*="2026"]').forEach(e => e.setAttribute('aria-label', e.getAttribute('aria-label').replace('2026', YEAR)));
+  });
   const pad = n => String(n).padStart(2, '0');
   const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   const dateOf = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
@@ -2743,7 +2756,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     if (o.title) {
       const tt = o.title;
       title += '<text x="' + tt.x + '" y="' + tt.y + '" font-family="\'Caveat Brush\'" font-size="' + tt.fs + '" fill="' + INK.ink + '">Mein Jahr in Worten</text>';
-      title += '<text x="' + tt.x + '" y="' + (tt.y + tt.fs * 0.95) + '" font-family="Orbitron" font-weight="700" font-size="' + (tt.fs * 0.42) + '" letter-spacing="6" fill="' + INK.ochre + '">2026</text>';
+      title += '<text x="' + tt.x + '" y="' + (tt.y + tt.fs * 0.95) + '" font-family="Orbitron" font-weight="700" font-size="' + (tt.fs * 0.42) + '" letter-spacing="6" fill="' + INK.ochre + '">' + YEAR + '</text>';
       if (window.rough) title += roughPaths(rough.generator().line(tt.x, tt.y + tt.fs * 0.28, tt.x + tt.fs * 5.6, tt.y + tt.fs * 0.22, { stroke: INK.red, strokeWidth: 1.6, roughness: 1.4, seed: o.seed + 40 }));
     }
     let note = '';
