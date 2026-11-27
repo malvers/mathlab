@@ -1037,3 +1037,33 @@ andere Bücher gehen auf die portugiesische Ausgabe (BGY 11, BGY 12, FOS 11). Sc
 ## mathegy11lk-pt (GY 11 Leistungskurs, block pt-22)
 
 ## mathegy12lk-pt (GY 12 Leistungskurs, block pt-23)
+
+Die Begriffe, die GY 12 Leistungskurs (`mathegy12lk-pt`, 27.11.2026) zu `mathegy12-pt` (Grundkurs) und `mathe13lk-pt` dazubringt. Wo der
+deutsche Text gleich ist, ist die Übersetzung von GY 12 Grundkurs pt (sonst BGY 13 LK pt) Zeile für Zeile übernommen. Neu in den Widgets
+(Block pt-23 von `gy12lk.js`): `simpson`, `uneigentlich` und das Titelbild.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| verkettete Funktion · innere Funktion · innere Ableitung | função composta · função interior · derivada interior | |
+| Kettenregel rückwärts | regra da cadeia ao contrário | lb5-1, Lerneinheit 4 |
+| Zähler ist Ableitung des Nenners | o numerador é a derivada do denominador | $\int \tfrac{g'}{g}\,\mathrm{d}x = \ln\lvert g\rvert + C$ |
+| Federkonstante · Ruhelage · Arbeit | constante elástica · posição de equilíbrio · trabalho | lei de Hooke |
+| Keplersche Fassregel · Simpsonregel | regra dos barris de Kepler · regra de Simpson | auch im Widget `simpson` |
+| Abbruchregel | critério de paragem | |
+| Kegel- / Kugelformel hergeleitet | a fórmula do cone / da esfera deduzida | |
+| Stetigkeitskorrektur · Laplace-Bedingung | correção de continuidade · condição de Laplace | wie pt-5; $N(500, 4^2)$ mit Komma, $B(1000;\ 0{,}5)$ mit Semikolon |
+| Kopf (Münze) | face nacional | wie pt-1 |
+| Hessesche Normalform (HNF) · Normaleneinheitsvektor | forma normal de Hesse (nie abgekürzt) · vetor normal unitário | |
+| Aufpunkt / Stützpunkt | ponto de apoio | |
+| Abstand mit Vorzeichen | distância com sinal | |
+| Hilfsebene | plano auxiliar | |
+| windschief · schneidend | não complanares · concorrentes | wie pt-5, auch im Widget `abstand3d` |
+| Lotfußpunkte (windschiefe Geraden) | pés da perpendicular | |
+| Sehwinkel · größter Sehwinkel | ângulo de visão · maior ângulo de visão | Regiomontanus |
+| $\tan$, $\arctan$ · Additionstheorem $\tan(\beta - \alpha)$ | $\operatorname{tg}$, $\operatorname{arctg}$ · fórmula da tangente da diferença | |
+| Rugby: Versuch · Kicker · Torlinie | râguebi: ensaio · pontapeador · linha de ensaio | |
+| unbegrenzte Fläche · Polstelle (an der Grenze) | região / área ilimitada · assíntota vertical | Widget `uneigentlich`: Grenze = limite, Grenzwert = limite |
+| Exponentialverteilung · Lebensdauer · Median | distribuição exponencial · tempo de vida · mediana | |
+| Gabriels Horn | a trombeta de Gabriel | Torricelli |
+| Ebenenschar · Trägergerade · Ebenenbüschel | família de planos · reta comum · feixe de planos | |
+| Probeklausur unter Abiturbedingungen | teste de avaliação de treino em condições de Abitur | |
