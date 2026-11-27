@@ -88,6 +88,10 @@ window.BuchPT && BuchPT.add('exponential', {
         'Nur ungerade Exponenten: <b>punktsymmetrisch</b> zum Ursprung. Für große $x$ entscheidet $x^3$: rechts nach oben, links nach unten.':
             'Só expoentes ímpares: <b>simétrico em relação à origem</b>. Para $x$ grande decide $x^3$: à direita para cima, à esquerda para baixo.',
         'Zwei Punkte: $f(1) = -3$ und, symmetrisch, $f(-1) = 3$.': 'Dois pontos: $f(1) = -3$ e, por simetria, $f(-1) = 3$.',
+        // funktionsklassen (the widget): the buttons name the family (função polinomial, racional, logarítmica, trigonométrica), the canvas labels sen, tg, log
+        'Funktionsklasse': 'Família de funções', 'Typische Graphen der gewählten Funktionsklasse': 'Gráficos típicos da família de funções escolhida',
+        'ganzrational': 'polinomial', 'gebrochenrational': 'racional', 'logarithmisch': 'logarítmica', 'trigonometrisch': 'trigonométrica',
+        'sin': 'sen', 'tan': 'tg', 'lg x': 'log x',
         // book pt-20 mathegy10-pt:
     },
     phrase: [
