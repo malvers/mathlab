@@ -25,6 +25,13 @@ window.BuchPT && BuchPT.add('spiele', {
         'Einsatz 1 €. Mit Wahrscheinlichkeit $\\tfrac{1}{100}$ gibt es 100 € zurück, sonst nichts.': 'Aposta de 1 €. Com probabilidade $\\tfrac{1}{100}$ recebes 100 €, senão nada.',
         // book pt-15 mathe6-pt:
         // book pt-19 mathe10-pt:
+        // spielstreuung (chapter 3, unit 3): the games are the helpers above
+        'Spiel': 'Jogo', 'Noch einmal spielen': 'Jogar outra vez', 'Runde': 'Ronda', 'Kontostand in €': 'Saldo em €',
+        'Kontostände von acht Spielern über hundert Runden': 'Saldos de oito jogadores ao longo de cem rondas',
+        // fairesspiel (chapter 3, unit 2): Pasch = duplo (two equal numbers), Einsatz = aposta, Auszahlung = prémio, Gewinn = ganho, fair = equitativo
+        'Einsatz $e$': 'Aposta $e$', 'Auszahlung bei Pasch': 'Prémio com duplo', 'Auszahlung bei Summe 7': 'Prémio com soma 7',
+        'Fairen Einsatz einstellen': 'Pôr a aposta equitativa', '1000 Spiele': '1000 jogos',
+        'Ergebnis': 'Resultado', 'Pasch': 'Duplo', 'Summe 7': 'Soma 7', 'sonst': 'outros', 'Gewinn $x_i$ in €': 'Ganho $x_i$ em €',
         // book pt-20 mathegy10-pt:
     },
     phrase: [
@@ -38,6 +45,21 @@ window.BuchPT && BuchPT.add('spiele', {
         [' der 36 gleich wahrscheinlichen Ergebnisse gehören dazu. Alle Wahrscheinlichkeiten zusammen ergeben $1$.', ' dos 36 resultados equiprováveis dão este valor. Todas as probabilidades juntas somam $1$.'],
         // book pt-15 mathe6-pt:
         // book pt-19 mathe10-pt:
+        // fairesspiel
+        ['Beim Schulfest wirft man zwei Würfel. Ein <b>Pasch</b> (zwei gleiche Augenzahlen) bringt den ersten Preis, die <b>Augensumme 7</b> den zweiten, alles andere nichts. Der Einsatz ist in jedem Fall weg.',
+            'Na festa da escola lançam-se dois dados. Um <b>duplo</b> (dois números iguais) dá o primeiro prémio, a <b>soma 7</b> dá o segundo e tudo o resto não dá nada. A aposta perde-se sempre.'],
+        ['Das Spiel ist <b>fair</b>.', 'O jogo é <b>equitativo</b>.'],
+        ['Für die Spielerin oder den Spieler <b>ungünstig</b>: Die Klasse verdient im Mittel ', '<b>Desfavorável</b> para quem joga: a turma ganha, em média, '],
+        ['Für die Spielerin oder den Spieler <b>günstig</b>: Die Klasse verliert im Mittel ', '<b>Favorável</b> para quem joga: a turma perde, em média, '],
+        [' € pro Spiel.', ' € por jogo.'], [' Fair wäre der Einsatz $e = \\tfrac{', ' Equitativa seria a aposta $e = \\tfrac{'],
+        ['Gespielt: ', 'Jogados: '], [' Spiele, mittlerer Gewinn <b>', ' jogos, ganho médio <b>'], [' €</b> pro Spiel (Erwartungswert ', ' €</b> por jogo (valor médio '],
+        ['Lass das Spiel 1000-mal laufen und vergleiche den mittleren Gewinn mit dem Erwartungswert.', 'Faz o jogo correr 1000 vezes e compara o ganho médio com o valor médio.'],
+        // spielstreuung
+        ['Gewinn $X$ pro Spiel: $', 'Ganho $X$ por jogo: $'], ['$ € mit $', '$ € com probabilidade $'], [' = 0$: Das Spiel ist <b>fair</b>.', ' = 0$: o jogo é <b>equitativo</b>.'],
+        ['$ € · gestrichelt: $\\pm\\sigma\\sqrt{n}$, nach 100 Runden $\\pm ', '$ € · a tracejado: $\\pm\\sigma\\sqrt{n}$; ao fim de 100 rondas, $\\pm '],
+        ['Kontostände nach 100 Runden: ', 'Saldos ao fim de 100 rondas: '],
+        [' €. Gleicher Erwartungswert, aber je größer $\\sigma$, desto weiter liegen Gewinner und Verlierer auseinander: <b>$\\sigma$ misst das Risiko.</b>',
+            ' €. O mesmo valor médio, mas quanto maior for $\\sigma$, mais afastados ficam vencedores e vencidos: <b>$\\sigma$ mede o risco.</b>'],
         // book pt-20 mathegy10-pt:
     ],
     rule: [

@@ -954,4 +954,41 @@ Block pt-18 (Vicente, 27.11.2026). Oberschule und Realschulbildungsgang bleiben 
 
 ## mathe10-pt (OS 10, block pt-19)
 
+Block pt-19 (Almeida, 27.11.2026). Oberschule und Realschulbildungsgang bleiben deutsch und werden auf der Startseite erklärt
+(10.º ano ≈ 9.º ano do ensino básico und Beginn des ensino secundário; „percurso Realschule“, exame final). Wahlpflichtbereich 3 `k: 'O'`
+(Área opcional) wie OS 8. Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Schreibweisen:
+
+- **× für das Produkt** auf allen Seiten (auch in den Algebra-Kapiteln lb2-x, lb3, lb4-x); die Widgets von `funktionen.js` und
+  `exponential.js` auf diesen Seiten zeigen weiter $\cdot$ (keine neue Regel in geteilten Modulen).
+- **sen, cos, tg** überall, $\operatorname{sen}^{-1}$, $\operatorname{tg}^{-1}$ (Regeln von `geometrie.js`/`funktionen.js`); im Widget
+  `funktionsklassen` auch die Canvas-Beschriftungen `sen`, `tg`, `log x` (Wörter in `exponential.js`).
+- **Dreiecke:** $[ABC]$, Strecke $\overline{AC}$; Kongruenzfälle LLL, LAL, ALA, LLA (auch der Knopf im `dreieckloeser`).
+- **Körper:** $A_b$, $A_L$, $A_T$, Mantellinie $g$, Seitenhöhe = apótema; Kugel $A = 4\pi r^2$ (área da superfície); Pyramidenstumpf mit den
+  Grundflächen $A_1$, $A_2$ (deutsch $G_1$, $G_2$, Regel in `os10.js`), Kegelstumpf $A_L = \pi g (R + r)$; Dichte = massa volúmica $\varrho$.
+- **Funktionen:** $y = mx + b$, Scheitel $V(h, k)$, Achsen $Ox$, $Oy$; Erwartungswert = valor médio (einmal „valor esperado“).
+- **Lohn:** das deutsche System bleibt (vier Sozialversicherungen, einmal erklärt); Lohnsteuer = IRS (Widget `lohnos10`), effektiver Jahreszins = TAEG.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Sinussatz · Kosinussatz · Dreieckslöser | lei dos senos · lei dos cossenos · resolver triângulos | Widget-Schritte „LEI DOS SENOS“ |
+| Gegenwinkel · eingeschlossener Winkel · Schenkellinie | ângulo oposto · ângulo por eles formado · outro lado do ângulo | `dreieckloeser`, `dreiecksflaeche` |
+| Umkreis · Umkreisradius · Bestimmungsdreieck | circunferência circunscrita (Knopf „Circunscrita“ wie gy7) · raio da circunferência circunscrita · triângulos iguais | |
+| Haus der Vierecke · Drachenviereck · Schenkel (Trapez) | casa dos quadriláteros · papagaio · lados oblíquos | wie OS 7 |
+| Giebel · Satteldach · First · Traufe · Sparren | empena · telhado de duas águas · cumeeira · beiral · vigas do telhado | |
+| Bogenmaß · Einheitskreis · Vollwinkel · gestreckter Winkel | radianos · círculo trigonométrico · ângulo giro · ângulo raso | |
+| Mittellage / Mittellinie · Hochpunkt / Tiefpunkt | linha média · máximo / mínimo | `messkurve`, `skizze` |
+| Messkurve · Marker · Ebbe und Flut · Riesenrad | curva de medições · marcadores · marés · roda-gigante | |
+| Wachstumsfaktor · Anfangswert · Schranke · beschränkt / logistisch | fator de crescimento · valor inicial · limite · limitado / logístico | `wachstumsmodell` |
+| Funktionsklasse · ganzrational / gebrochenrational | família de funções · polinomial / racional | `funktionsklassen` |
+| Zufallsgröße · Wahrscheinlichkeitsverteilung · Gesetz der großen Zahlen | variável aleatória · distribuição de probabilidades · lei dos grandes números | |
+| Pasch · Augensumme · faires Spiel | duplo · soma das pintas · jogo equitativo | `fairesspiel` |
+| Kontostand · Runde · Reihen- / Parallelschaltung | saldo · ronda · ligação em série / em paralelo | `spielstreuung` |
+| Bruttolohn · Nettolohn · Arbeitgeberanteil · Sozialabgaben | salário bruto · salário líquido · parte da entidade empregadora · contribuições sociais | `lohnos10` |
+| Renten- / Kranken- / Pflege- / Arbeitslosenversicherung | seguro de reforma / de saúde / de dependência / de desemprego | |
+| Lohnabrechnung · Haushaltsplan · Schuldenfalle · Dispokredit | recibo de vencimento · orçamento familiar · armadilha das dívidas · descoberto bancário | |
+| Kegelstumpf · Pyramidenstumpf · Werkstück | tronco de cone · tronco de pirâmide · peça | `stumpfos10`: Raio inferior/superior, Aresta inferior/superior |
+| Försterdreieck · Messrad · Peilstab · Daumensprung · Standlinie | triângulo do guarda-florestal · roda de medição · vara de pontaria · salto do polegar · base | wie GY 8 |
+| Strahlensatz · Nivellieren | teorema de Tales · nivelamento | wie GY 8 |
+| Namen | Anna → Ana, Ben → Bruno, Lea → Leonor | |
+
 ## mathegy10-pt (GY 10, block pt-20)
