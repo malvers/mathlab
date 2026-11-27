@@ -349,5 +349,8 @@ window.BuchPT && BuchPT.add('gy5', {
         // koord5 (chapter 3.1): plain-text points A(2 | 1) → A(2, 1), with a decimal comma A(1,5; 2), as the rule of os5.js,
         // which the GY 5 pages do not load (on the OS 5 pages both rules give the same result)
         [/\(([-−]?\d+(?:,\d+)?) \| ([-−]?\d+(?:,\d+)?)\)/g, (m, x, y) => '(' + x + (/,/.test(x + y) ? '; ' : ', ') + y + ')'],
+        // einheiten5 (chapters 4.1, 4.2, 5): × for the steps of the stairs ("· 24" on the steps, "Rechnung: 3,5 · 24 = 84"),
+        // the job of the plain-text rule of os5.js on the OS 5 pages; tied to the widget's markup
+        [/(<text[^>]*>)· (?=\d)/g, '$1× '], [/<p>Rechnung: [^<]*<\/p>/g, m => m.replace(/ · /g, ' × ')],
     ]
 });
