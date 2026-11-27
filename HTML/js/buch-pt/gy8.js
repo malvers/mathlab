@@ -22,7 +22,6 @@ window.BuchPT && BuchPT.add('gy8', {
         'Tipp auf einen Knoten: Dann leuchtet sein Teilterm auf.': 'Toca num nó: a sua subexpressão acende-se.',
         // binomformeln8 (the binomial formulas are the casos notáveis)
         '1. Formel': '1.º caso', '2. Formel': '2.º caso', '3. Formel': '3.º caso', 'Binomische Formel': 'Caso notável',
-        'Länge $a$': 'Comprimento $a$', 'Länge $b$': 'Comprimento $b$',
         'Binomische Formel als Flächenbild': 'Caso notável como figura de áreas',
         'Das große Quadrat besteht aus vier Teilen: $a^2$, zweimal $ab$ und $b^2$. Wer nur $a^2 + b^2$ rechnet, vergisst die beiden blauen Rechtecke.':
             'O quadrado grande é formado por quatro partes: $a^2$, duas vezes $ab$ e $b^2$. Quem calcula só $a^2 + b^2$ esquece-se dos dois retângulos azuis.',
@@ -143,6 +142,8 @@ window.BuchPT && BuchPT.add('gy8', {
             (m, t, k, v) => 'Selecionada: a subexpressão $' + t + '$, ' + ({ Summe: 'uma soma', Differenz: 'uma diferença', Produkt: 'um produto', Quotient: 'um quociente', Potenz: 'uma potência' })[k] + ' com o valor $' + v + '$.'],
         [/Ausgewählt: die Variable \$x\$ mit dem Wert \$([^$]*)\$\./g, (m, v) => 'Selecionada: a variável $x$, com o valor $' + v + '$.'],
         [/Ausgewählt: die Zahl \$([^$]*)\$\./g, (m, v) => 'Selecionado: o número $' + v + '$.'],
+        // waage (js/buch-gleichungen.js, chapter 1.2): its parser takes × as well, so the example shows the Portuguese sign
+        [/<code>·2<\/code>/g, '<code>×2</code>'],
         // sets of whole numbers written by the widgets (gluecksrad8 …): Portuguese schools separate the elements with commas
         [/\\\{((?:\d+|\\ldots)(?:; (?:\d+|\\ldots))+)\\\}/g, (m, l) => '\\{' + l.replace(/; /g, ', ') + '\\}'],
         // gluecksrad8: the number of elements is written #E, #Ω in Portuguese schools (tools/buch-pt/glossario.md, mathefos11-pt)

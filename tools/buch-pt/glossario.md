@@ -538,5 +538,11 @@ ensino básico (3.º ciclo).
 | Handytarif | tarifário de telemóvel | |
 | Klassenfahrt · Jugendherberge | visita de estudo · alojamento | |
 | Streichhölzer | fósforos | |
+| binomische Formeln (1./2./3.) · Binom | casos notáveis (1.º quadrado da soma, 2.º quadrado da diferença, 3.º diferença de quadrados) · binómio | auch im Widget `binomformeln8` |
+| lineare Gleichung · Äquivalenzumformung · Probe | equação do 1.º grau · princípios de equivalência · verificação | $\text{C.S.} = \{3\}$, $\text{C.S.} = \{\,\}$ |
+| Klammern auflösen · auf beiden Seiten | desembaraçar de parênteses · nos dois membros | |
+| Ungleichung · Zeichen dreht sich um | inequação · o sinal inverte-se | $\text{C.S.} = \{x : x > -3\}$; bola aberta / fechada |
+| Balkenwaage · Fitnessstudio · Besuch | balança de pratos · ginásio · ida | |
+| periodisch $5{,}\overline{3}$ | $5{,}(3)$ | wie GY 6 |
 
 ## mathegy9-pt
