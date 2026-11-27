@@ -513,6 +513,45 @@ parts, so every later book that loads them gets it too):
 
 ## mathegy7-pt
 
+Block pt-11 (Nunes, 27.11.2026). Wie GY 6 (pt-10): × für das Produkt (Regel in `geometrie.js` pt0, auch in den Seiten),
+Strecke $[AB]$ und Länge $\overline{AB}$, Dreieck $[ABC]$, Winkel $A\hat{P}B$ (Regel `\angle` in `gy7.js` pt0), ℕ₀ und ℚ₀⁺ für das
+deutsche ℕ und ℚ⁺ (Regeln in `gy7.js` pt0 wie in `gy6.js`), CALC für TR. Laborname und Tests bleiben deutsch
+(„MAIS PRÁTICA ONLINE (EM ALEMÃO)“). Neu: AGD (ambiente de geometria dinâmica) für DGS.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Kreis $k$ um $M$ mit $r$ · Kreisbogen | circunferência $\mathcal{C}$ de centro $M$ e raio $r$ · arco de circunferência | $k_1$, $k_2$ → $\mathcal{C}_1$, $\mathcal{C}_2$, Hilfskreis $h$ → $\mathcal{C}'$ (auch im Widget `konstruktion7`) |
+| Passante · Tangente · Sekante · Sehne · Berührungspunkt | reta exterior · tangente · secante · corda · ponto de tangência | |
+| Abstand · Lot · Lotfußpunkt | distância · perpendicular · pé da perpendicular | |
+| Umkreis(mittelpunkt) $U$ · Inkreis(mittelpunkt) $I$ · Inkreisradius $\varrho$ | circunferência circunscrita, circuncentro $O$ · circunferência inscrita, incentro $I$ · $\varrho$ | O auch im Widget (Regel) |
+| Satz des Thales · Thaleskreis | teorema de Tales · circunferência de Tales | einmal erklärt: in Portugal heißt meist der Strahlensatz so |
+| Peripheriewinkel · Zentriwinkel · über demselben Bogen | ângulo inscrito · ângulo ao centro · que abrange o mesmo arco | |
+| Sehnenviereck · Gegenwinkel | quadrilátero inscrito (numa circunferência) · ângulos opostos (suplementares) | |
+| Satz · Definition · Umkehrung · Voraussetzung · Behauptung · direkter Beweis | teorema · definição · recíproco · hipótese · tese · demonstração direta | „genau dann, wenn“ = se e só se |
+| Allaussage · Existenzaussage · Gegenbeispiel | afirmação universal · afirmação existencial · contraexemplo | |
+| Planfigur · Konstruktionsplan · Konstruktionsbeschreibung · Lösbarkeit | esboço · plano de construção · descrição da construção · número de soluções | Fall WSW = caso ALA |
+| Vorwärts- / Rückwärtsarbeiten · Bestimmungs- / Beweisaufgabe | trabalhar para a frente / para trás · problema de determinação / de demonstração | Pappos = Papo; Pólya, *Como Resolver Problemas* |
+| Gegenzahl · Betrag · Zahlengerade | simétrico · valor absoluto · reta numérica | |
+| natürliche / ganze / gebrochene / rationale Zahlen | $\mathbb{N}_0$ números naturais e o zero / $\mathbb{Z}$ inteiros / $\mathbb{Q}_0^+$ racionais não negativos / $\mathbb{Q}$ racionais | einmal erklärt: in Portugal beginnt ℕ bei 1 |
+| Teilmenge · Schnittmenge · Vereinigungsmenge · leere Menge · Mengendiagramm | subconjunto · interseção · reunião · conjunto vazio · diagrama de Venn | Mengen mit Kommas $\{-1, 0, 1\}$ |
+| Vorzeichenregeln · Kommutativ- / Assoziativ- / Distributivgesetz | regras dos sinais · propriedade comutativa / associativa / distributiva | Überschlag = estimativa |
+| Potenz · Basis · Exponent · Quadratwurzel | potência · base · expoente · raiz quadrada | |
+| Äquivalenzumformung · Lösungsmenge $L$ | princípio de equivalência · $\text{C.S.}$ | $L = \{\,\}$ → $\text{C.S.} = \{\,\}$, $L = \mathbb{Q}$ → $\text{C.S.} = \mathbb{Q}$ |
+| Formel umstellen nach $b$ | resolver a fórmula em ordem a $b$ | Umfang $u$ → $P$, Weg $s$ → $d$, Grundfläche $G$ → $A_b$ (auch im Widget `umstellen7`) |
+| Dichte | massa volúmica $\varrho$ | |
+| Grundwert $G$ · Prozentsatz $p\,\%$ · Prozentwert $W$ | valor de referência $G$ · percentagem $p\,\%$ · valor da percentagem $W$ | Buchstaben bleiben wie in `mathefos11-pt`, einmal erklärt |
+| Steigerung um / auf · Senkung · Faktor · Prozentpunkte | aumentar / aumentar para · diminuir · fator · pontos percentuais | |
+| Rabatt · Mehrwertsteuer · netto / brutto · Skonto | desconto · IVA · sem IVA / com IVA · desconto de pronto pagamento | 19 % bleibt (deutscher Satz), PT 23 % einmal genannt |
+| Säulen- / Linien- / Kreis- / Balkendiagramm | gráfico de barras / de linhas / circular / de barras horizontais | Tabellenkalkulation = folha de cálculo |
+| Namen im Widget `diagramm7` | Anna → Ana, Ben → Bruno, Cem → Carla, Dana → Diogo | |
+| Netz · Schrägbild · Zweitafelbild | planificação · perspetiva cavaleira · dupla projeção ortogonal | |
+| Aufriss · Grundriss · Rissachse $x_{12}$ · Ordnungslinie | projeção frontal · projeção horizontal · eixo $x_{12}$ · linha de chamada | $P'$, $P''$ bleiben (einmal: $P_1$, $P_2$ der portugiesischen Geometria Descritiva) |
+| wahre Länge · wahre Größe | verdadeira grandeza | |
+| Grundfläche $G$ · Umfang $u$ · Mantel $M$ · Oberfläche $O$ · $h_s$ | $A_b$ · $P_b$ · $A_L$ · área total $A$ · $h_s$ (altura da face lateral, o apótema) | wie GY 6; auch im Widget `schraegbild7` mit `data-calc` (Regel) |
+| Pyramidenstumpf · Spitze · Rückführprinzip | tronco de pirâmide · vértice / pirâmide do topo · princípio da redução | |
+| Polyeder · regulär · platonische Körper | poliedro · regular (convexo) · sólidos platónicos | |
+| Eulerscher Polyedersatz $e - k + f = 2$ | relação de Euler $V - A + F = 2$ | einmal $F + V = A + 2$; auch im Widget `faltnetz7` |
+
 ## mathegy8-pt
 
 ## mathegy9-pt
