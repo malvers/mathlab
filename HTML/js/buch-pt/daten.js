@@ -27,6 +27,26 @@ window.BuchPT && BuchPT.add('daten', {
         'Das Auge vergleicht Flächen: $2 \\cdot 2 = 4$, das Bild wirkt <b>viermal</b> so groß. Als Körper gezeichnet sogar $2^3 = 8$-mal.':
             'O olho compara áreas: $2 \\times 2 = 4$, a imagem parece <b>quatro vezes</b> maior. Desenhada como um sólido, até $2^3 = 8$ vezes.',
         // book pt-13 mathegy9-pt:
+        // mittelwerte (chapter 4): moda, mediana, média; valor atípico (achsentrick is translated by pt-11, not here)
+        'Ausreißer dazu (75 min)': 'Juntar um valor atípico (75 min)', 'Ausreißer weg': 'Retirar o valor atípico', 'Fahrzeit in min': 'Tempo de caminho em min',
+        'Median': 'Mediana', 'Mittelwert': 'Média', 'Modalwert': 'Moda',
+        'Punktdiagramm der Fahrzeiten mit Median und Mittelwert': 'Diagrama de pontos dos tempos de caminho, com a mediana e a média',
+        'Zieh die Punkte. Ein einzelner weiter Weg verschiebt den Mittelwert deutlich, den Median kaum.':
+            'Arrasta os pontos. Um único caminho longo desloca bastante a média e quase nada a mediana.',
+        // streuung: amplitude, variância s², desvio padrão s
+        'Streuung von B': 'Dispersão de B', 'Monatsmittel in °C': 'Média mensal em °C',
+        'Stadt am Meer': 'Cidade à beira-mar', 'Stadt im Binnenland': 'Cidade do interior',
+        'A · STADT AM MEER': 'A · CIDADE À BEIRA-MAR', 'B · STADT IM BINNENLAND': 'B · CIDADE DO INTERIOR',
+        'Zwei Datenreihen mit gleichem Mittelwert und unterschiedlicher Streuung': 'Duas séries de dados com a mesma média e dispersões diferentes',
+        'Spannweite': 'Amplitude', 'Varianz $s^2$': 'Variância $s^2$',
+        'Gleiches Jahresmittel, ganz anderes Klima. Der helle Streifen reicht von $\\bar{x} - s$ bis $\\bar{x} + s$. Modellwerte, keine Messdaten.':
+            'A mesma média anual, um clima completamente diferente. A faixa clara vai de $\\bar{x} - s$ a $\\bar{x} + s$. Valores de um modelo, não medições.',
+        // histogramm: classes [150, 155[ (the sentence below is a rule)
+        'absolute Häufigkeit': 'Frequência absoluta', 'relative Häufigkeit': 'Frequência relativa', 'Häufigkeit': 'Frequência',
+        'Klassenbreite': 'Amplitude das classes', 'Erste Klasse ab': 'Primeira classe a partir de', 'Körpergröße in cm': 'Altura em cm',
+        'Histogramm der Körpergrößen': 'Histograma das alturas',
+        'Sehr schmale Klassen zeigen fast nur Einzelwerte, sehr breite verwischen alles. Dazwischen erkennt man die Form der Verteilung.':
+            'Classes muito estreitas mostram quase só valores isolados, classes muito largas apagam tudo. Entre umas e outras reconhece-se a forma da distribuição.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs daten/*)
@@ -34,6 +54,8 @@ window.BuchPT && BuchPT.add('daten', {
         // achsentrick
         ['Tatsächlich: $', 'Na realidade: $'], ['$, also ein Plus von ', '$, ou seja, um aumento de '],
         // book pt-13 mathegy9-pt:
+        // mittelwerte: "Geordnet ($n = 9$): …", "keiner …" (several modes "15 und 18 min": a rule below)
+        ['Geordnet ($n = ', 'Ordenados ($n = '], ['keiner (jeder Wert kommt nur einmal vor)', 'nenhuma (cada valor aparece só uma vez)'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -42,5 +64,10 @@ window.BuchPT && BuchPT.add('daten', {
         [/Mitglieder eines Sportvereins\. Die letzte Säule <b>wirkt<\/b> ([\d,]+)-mal so hoch wie die erste\./g,
             'Sócios de um clube desportivo. A última barra <b>parece</b> $1 vezes mais alta do que a primeira.'],
         // book pt-13 mathegy9-pt:
+        // mittelwerte: several modes "15 und 18 min", "8 und 15 und 30 min" (only numbers followed by min)
+        [/(\d) und (?=\d+(?: und \d+)* min\b)/g, '$1 e '],
+        // histogramm: "8 Klassen der Breite 5 cm · häufigste Klasse $[165;\,170)$ mit 10 von 40 Werten (" - Portuguese classes [165, 170[
+        [/(\d+) Klassen der Breite (\d+) cm · häufigste Klasse \$\[(\d+);\\,(\d+)\)\$ mit (\d+) von (\d+) Werten \(/g,
+            (m, k, w, a, b, c, n) => k + ' classes de amplitude ' + w + ' cm · classe mais frequente $[' + a + ', ' + b + '[$ com ' + c + ' de ' + n + ' valores ('],
     ]
 });

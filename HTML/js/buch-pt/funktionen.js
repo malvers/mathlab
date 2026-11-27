@@ -109,6 +109,34 @@ window.BuchPT && BuchPT.add('funktionen', {
         // lage (chapter 3.3): the example buttons, as the line words of js/buch-pt/vektoren.js ('parallel' there means colineares: a rule below)
         'schneidend': 'concorrentes', 'orthogonal': 'perpendiculares', 'identisch': 'coincidentes',
         // book pt-13 mathegy9-pt:
+        // potenzfunktion (chapter 1.2): the table of properties (a função: feminine)
+        'Verwandte zeigen': 'Mostrar as parentes', 'Graph einer Potenzfunktion': 'Gráfico de uma função potência', 'Exponent': 'Expoente',
+        'Nullstelle': 'Zero', 'Polstelle': 'Polo', 'Gemeinsame Punkte': 'Pontos comuns',
+        'keine, $f$ ist nur für $x \\geq 0$ definiert': 'nenhuma, $f$ só está definida para $x \\geq 0$',
+        'achsensymmetrisch zur $y$-Achse, denn $f(-x) = f(x)$': 'simétrica em relação ao eixo $Oy$ (função par), porque $f(-x) = f(x)$',
+        'punktsymmetrisch zum Ursprung, denn $f(-x) = -f(x)$': 'simétrica em relação à origem (função ímpar), porque $f(-x) = -f(x)$',
+        'steigt für $x \\geq 0$': 'crescente para $x \\geq 0$', 'steigt überall': 'crescente em todo o domínio',
+        'fällt für $x < 0$, steigt für $x > 0$': 'decrescente para $x < 0$, crescente para $x > 0$',
+        'steigt für $x < 0$, fällt für $x > 0$': 'crescente para $x < 0$, decrescente para $x > 0$',
+        'fällt für $x < 0$ und fällt für $x > 0$': 'decrescente para $x < 0$ e decrescente para $x > 0$',
+        '$x = 0$, ohne Vorzeichenwechsel': '$x = 0$, sem mudança de sinal', '$x = 0$, mit Vorzeichenwechsel': '$x = 0$, com mudança de sinal',
+        'senkrecht $x = 0$, waagerecht $y = 0$': 'vertical $x = 0$, horizontal $y = 0$',
+        // parabelschar (chapter 1.4): the selector
+        'Funktionenschar': 'Família de funções',
+        // extremwert (chapter 1.4; the two problems are pt0 helpers): Zielgröße = grandeza a maximizar, Nebenbedingung = condição
+        'Aufgabe': 'Exercício', 'Seite $x$': 'Lado $x$', 'Flächeninhalt in Abhängigkeit von x': 'Área em função de x', 'MAUER': 'MURO',
+        'x in m': 'x em m', 'x in cm': 'x em cm', 'A in m²': 'A em m²', 'A in cm²': 'A em cm²',
+        'Rechteckiges Gehege an einer Mauer mit 40 m Zaun': 'Cercado retangular junto a um muro, com 40 m de rede',
+        'Rechteck mit festem Umfang 24 cm': 'Retângulo com perímetro fixo de 24 cm',
+        'Zielgröße $A = x \\cdot (40 - 2x)$, Nebenbedingung: Zaunlänge $x + (40 - 2x) + x = 40$.':
+            'Grandeza a maximizar $A = x \\cdot (40 - 2x)$, condição: comprimento da rede $x + (40 - 2x) + x = 40$.',
+        'Scheitelpunktform: $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$': 'Forma canónica: $A(x) = -2x^2 + 40x = -2(x - 10)^2 + 200$',
+        'Maximum: $x = 10\\,\\text{m}$, Breite $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.': 'Máximo: $x = 10\\,\\text{m}$, largura $20\\,\\text{m}$, $A = 200\\,\\text{m}^2$.',
+        'Such die größte Fläche. Sie liegt am Scheitel der Parabel.': 'Procura a maior área. Está no vértice da parábola.',
+        'Zielgröße $A = x \\cdot y$, Nebenbedingung $2x + 2y = 24$, also $y = 12 - x$.': 'Grandeza a maximizar $A = x \\cdot y$, condição $2x + 2y = 24$, portanto $y = 12 - x$.',
+        'Scheitelpunktform: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$': 'Forma canónica: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$',
+        'Maximum: das Quadrat mit $6\\,\\text{cm}$ Seitenlänge, $A = 36\\,\\text{cm}^2$.': 'Máximo: o quadrado com $6\\,\\text{cm}$ de lado, $A = 36\\,\\text{cm}^2$.',
+        'Welches Rechteck mit Umfang $24\\,\\text{cm}$ hat die größte Fläche?': 'Que retângulo com $24\\,\\text{cm}$ de perímetro tem a maior área?',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -203,6 +231,8 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-9 mathegy11-pt:
         // book pt-12 mathegy8-pt:
         // book pt-13 mathegy9-pt:
+        // parabelschar: "$f_a(x) = …$ für $a = 1$"; extremwert: "Jetzt: $A(6) = …"
+        ['$ für $', '$ para $'], ['Jetzt: $A(', 'Agora: $A('],
     ],
     rule: [
         // pt0: notation of the module, for every book
