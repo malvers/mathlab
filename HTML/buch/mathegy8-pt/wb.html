@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matemática GY 8 · Capítulo O · Simulação com números aleatórios | Doc Alvers Mathe-Labor</title>
+    <meta name="description" content="Números aleatórios, método de Monte Carlo, problema de Monty Hall, cromos. Capítulo O do manual interativo Matemática · Gymnasium 8: explicações, exemplos, exercícios em três níveis, autoavaliações e laboratórios para experimentar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../../js/buch.css">
+    <script src="../../js/farbschema.js"></script>
+</head>
+<body class="b-book">
+
+<header class="b-top">
+    <a class="b-brand" href="../../index.html"><span class="b-logo" aria-hidden="true"></span><span>Doc Alvers Mathe-Labor</span></a>
+    <span class="b-top-book">MATEMÁTICA · GYMNASIUM 8</span>
+    <div class="b-progress"></div>
+</header>
+<nav class="b-strip" aria-label="Capítulo"></nav>
+
+<div class="b-wrap">
+    <nav class="b-toc b-scroll" aria-label="Conteúdo do capítulo">
+        <p class="b-toc-title">CAPÍTULO O · ÁREA OPCIONAL</p>
+        <div class="b-toc-list"></div>
+    </nav>
+
+    <main class="b-main">
+
+<section class="b-sec" id="auftakt" data-toc="Introdução" data-toc-k="A" data-toc-short="Introdução" style="margin-top:0">
+    <div class="b-hero">
+        <div>
+            <p class="b-kicker">CAPÍTULO O · ÁREA OPCIONAL 3 · MAIO · JUNHO</p>
+            <h1>Simulação com números aleatórios</h1>
+            <p class="b-hero-lead">Quantas saquetas é preciso comprar até completar uma caderneta de cromos? No problema de Monty Hall, deve trocar-se de porta? Quanto vale $\pi$?
+                Algumas perguntas são difíceis de calcular, mas fáceis de experimentar, e isso mil vezes num segundo. Vais aprender a gerar <b>números aleatórios</b>,
+                a construir experiências aleatórias <b>com a mesma estrutura</b> e a simular com o <b>método de Monte Carlo</b>.</p>
+            <div class="b-chips"><span class="b-chip">8 AULAS</span><span class="b-chip">2 UNIDADES</span><span class="b-chip">MONTE CARLO</span><span class="b-chip">MONTY HALL</span></div>
+        </div>
+        <div class="b-hero-art" data-widget="mcpi8" data-hero></div>
+    </div>
+    <div class="b-grid2">
+        <div class="b-box">
+            <div class="b-box-title">NESTE CAPÍTULO VAIS APRENDER</div>
+            <div class="b-text"><ul>
+                <li>gerar <b>números aleatórios</b> com dados, roletas, urnas, tabelas e a calculadora</li>
+                <li>construir, realizar e analisar experiências aleatórias <b>com a mesma estrutura</b></li>
+                <li>responder com simulações a perguntas difíceis de calcular: $\pi$, problema de Monty Hall, caderneta de cromos</li>
+                <li>ter uma <b>ideia</b> de onde se simula hoje em dia</li>
+            </ul></div>
+        </div>
+        <div class="b-box b-check" data-check="checkin">
+            <div class="b-box-title">CHECK-IN: JÁ SABES?</div>
+            <div class="b-q" data-ans="1/6" data-ph="fração"><p class="b-q-text">$P(6)$ no dado?</p><div class="b-sol"><p>Um de seis números.</p></div></div>
+            <div class="b-q" data-ans="0,25" data-ph="número decimal"><p class="b-q-text">Que parte é 250 em 1000?</p><div class="b-sol"><p>$\tfrac{250}{1000}$</p></div></div>
+            <div class="b-q" data-ans="3,14" data-ph="número decimal"><p class="b-q-text">Indica $\pi$ com duas casas decimais.</p><div class="b-sol"><p>$\pi = 3{,}14159\ldots$</p></div></div>
+            <div class="b-q" data-ans="1/3" data-ph="fração"><p class="b-q-text">Atrás de uma de três portas há um prémio. Qual é a probabilidade de acertares na porta certa, escolhendo ao acaso?</p><div class="b-sol"><p>Uma de três.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="b-sec" id="erkundungen" data-kind="erkundung" data-toc="Explorações" data-toc-k="E" data-toc-short="Explorações">
+    <div class="b-band"><span class="b-band-tag">EXPLORAÇÕES</span><span class="b-band-sub">PARA COMEÇAR · EM GRUPO</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-erk"><div class="b-box-title">GOTAS DE CHUVA</div>
+            <div class="b-text"><p>Desenhem um quadrado e, dentro dele, um quarto de círculo centrado num vértice. Atirem grãos de arroz ao acaso para a folha e contem quantos caem no quarto de círculo e quantos no quadrado.</p>
+                <ul><li>O que tem a razão a ver com $\pi$?</li></ul></div>
+            <span class="b-pair">→ Unidade 1</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">FEBRE DOS CROMOS</div>
+            <div class="b-text"><p>Uma caderneta tem 6 cromos, cada saqueta traz um. Imitem isto com um dado: quantas vezes têm de lançar até cada número ter saído uma vez?</p>
+                <ul><li>Juntem os resultados da turma toda. Quantos lançamentos são, em média?</li></ul></div>
+            <span class="b-pair">→ Unidade 2</span></div>
+        <div class="b-box b-erk"><div class="b-box-title">TRÊS COPOS</div>
+            <div class="b-text"><p>Debaixo de um de três copos está uma moeda. Uma pessoa sabe onde. Vocês escolhem um copo e depois ela levanta outro copo, vazio. Mantêm a vossa escolha ou trocam?</p>
+                <ul><li>Joguem 20 rondas com troca e 20 sem troca. O que reparam?</li></ul></div>
+            <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">Pontos a chover num quadrado</span></span></a></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le1" data-kind="le" data-toc="Números aleatórios e Monte Carlo" data-toc-k="1" data-toc-short="1 Monte Carlo">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 1</span><span class="b-band-sub">CAS · 4 AULAS</span></div>
+    <h2><span class="b-no">1</span>Números aleatórios e experiências com a mesma estrutura</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Um dado é um gerador de números aleatórios para os números de 1 a 6. Uma roleta com 10 setores dá os algarismos de 0 a 9.
+                A calculadora gera números destes em segundos. Assim pode imitar-se qualquer experiência aleatória que tenha a mesma <b>estrutura</b>:
+                uma moeda comporta-se como «o algarismo aleatório é par».</p></div></div>
+            <div class="b-text"><p>Também $\pi$ se pode estimar assim. Um quarto de círculo de raio 1 tem área $\tfrac{\pi}{4} \approx 0{,}785$, e o quadrado à sua volta tem área 1.
+                Se caírem muitíssimos pontos ao acaso no quadrado, cerca de $\tfrac{\pi}{4}$ deles ficam no quarto de círculo. Multiplicando por 4, obtém-se uma estimativa de $\pi$.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · SIMULAR</div>
+                <div class="b-text">
+                    <p>Para uma experiência aleatória constrói-se uma experiência <b>com a mesma estrutura</b>: o mesmo número de resultados com as mesmas probabilidades, mas mais fácil de realizar.</p>
+                    <p><b>Números aleatórios</b> obtêm-se com dados, roletas, urnas, tabelas e a calculadora; no CAS, por exemplo, <code>randInt(1,6)</code>, na folha de cálculo <code>=ALEATÓRIOENTRE(1;6)</code>.</p>
+                    <p>Muitas repetições dão uma <b>frequência relativa</b> que estima a probabilidade procurada. A isto chama-se <b>método de Monte Carlo</b>.</p>
+                    <p>Mais repetições tornam a estimativa mais fiável, mas nunca totalmente exata.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Pseudoaleatório:</b> uma calculadora não consegue lançar dados. Calcula números com uma fórmula, tão baralhados que parecem aleatórios.</p>
+            <p class="b-note"><b>Área do círculo:</b> um círculo de raio $r$ tem área $\pi r^2$. Mais sobre isto no 9.º ano.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · ALGARISMOS ALEATÓRIOS COMO MOEDA E COMO DADO</div>
+        <p class="b-help" style="margin:0 0 12px">Lê a tabela como moeda ou como dado. Com «Nova tabela» recebes novos algarismos aleatórios.</p>
+        <div data-widget="ziffern8"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · π A PARTIR DA CHUVA</div>
+        <p class="b-help" style="margin:0 0 12px">Deixa cair pontos ao acaso no quadrado. Os pontos amarelos estão no quarto de círculo. De quantos pontos precisas para duas casas decimais certas?</p>
+        <div data-widget="mcpi8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 1 · A MESMA ESTRUTURA</div>
+            <div class="b-text"><p>Com os algarismos aleatórios de 0 a 9 constrói experiências com a mesma estrutura: a) uma moeda &nbsp; b) um dado &nbsp; c) um lançamento de basquetebol que acerta 70 % das vezes</p></div>
+            <div class="b-sol"><p>a) algarismo par: face nacional, ímpar: face europeia &nbsp; b) usar os algarismos de 1 a 6, saltar o 0, o 7, o 8 e o 9</p>
+                <p>c) <span class="b-res">algarismos de 0 a 6: cesto, de 7 a 9: falhado</span>, porque 7 dos 10 algarismos são 70 %.</p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 2 · ESTIMAR π</div>
+            <div class="b-text"><p>De 1000 pontos aleatórios no quadrado, 791 estão no quarto de círculo. Que aproximação de $\pi$ se obtém?</p></div>
+            <div class="b-sol"><p>Fração $\tfrac{791}{1000} = 0{,}791 \approx \tfrac{\pi}{4}$, logo <span class="b-res">$\pi \approx 4 \times 0{,}791 = 3{,}164$</span>.</p>
+                <p>A segunda casa decimal ainda não está certa. Para mais rigor são precisos muitíssimos pontos.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Como simulas com algarismos aleatórios a) uma roleta com 5 setores iguais, b) o mês de nascimento de uma pessoa, c) um penálti que entra com probabilidade $\tfrac34$?</p></div>
+            <div class="b-sol"><p>a) algarismos de 0 a 4, saltar o resto (ou dois algarismos por setor) &nbsp; b) pares de algarismos de 01 a 12, saltar o resto &nbsp; c) algarismos 1, 2, 3: golo, 4: falhado, saltar todos os outros</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Simula com a tabela acima 50 lançamentos de uma moeda. Quantas vezes sai a face nacional? Comparem os resultados da turma toda.</p></div>
+            <div class="b-sol"><p>Normalmente entre 20 e 30. Todos os resultados juntos ficam muito mais perto de $0{,}5$ do que cada um sozinho.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Na chuva de $\pi$, deixa cair primeiro 100 e depois 10&nbsp;000 pontos e regista a aproximação de cada vez. Repete três vezes. Quantos algarismos de $\pi$ ficam aproximadamente certos?</p></div>
+            <div class="b-sol"><p>Com 100 pontos, muitas vezes só o 3 está certo; com 10&nbsp;000 pontos, normalmente 3,1. O método de Monte Carlo é simples, mas lento.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Um atirador acerta 40 % das vezes. Simula com algarismos aleatórios 20 séries de 5 tiros e conta quantas vezes acerta pelo menos duas vezes. Compara com o resultado do cálculo, cerca de $0{,}66$.</p></div>
+            <div class="b-sol"><p>Algarismos de 0 a 3: acerta, de 4 a 9: falha. Em 20 séries, cerca de 13 têm êxito, mas os valores variam bastante.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p><span class="g-cas">CAS</span> Escreve um programa que lance dois dados 1000 vezes e conte quantas vezes a soma das pintas é 7. Compara com a probabilidade de Laplace do capítulo 2.1.</p></div>
+            <div class="b-sol"><p>Um ciclo repetido 1000 vezes: <code>a:=randInt(1,6)</code>, <code>b:=randInt(1,6)</code>; se <code>a+b=7</code>, aumentar o contador em 1. Resultado normalmente entre 140 e 190, esperado cerca de $\tfrac16 \times 1000 \approx 167$.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le1">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="3,164" data-ph="número decimal"><p class="b-q-text">Que aproximação de $\pi$ se obtém no exemplo 2?</p><div class="b-sol"><p>$4 \times 0{,}791$</p></div></div>
+        <div class="b-q" data-ans="7" data-ph="quantidade"><p class="b-q-text">Quantos dos algarismos de 0 a 9 significam «cesto» para um jogador que acerta 70 %?</p><div class="b-sol"><p>70 % de 10</p></div></div>
+        <div class="b-q" data-mc="1"><p class="b-q-text">Os algarismos aleatórios de 0 a 9 devem imitar uma moeda equilibrada. Que regra tem a mesma estrutura?</p><div class="b-mc"><button>0 a 3: face nacional, senão face europeia</button><button>par: face nacional, ímpar: face europeia</button><button>0: face nacional, senão face europeia</button></div><div class="b-sol"><p>Cinco algarismos para cada face.</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="le2" data-kind="le" data-toc="Simulações na prática" data-toc-k="2" data-toc-short="2 Prática">
+    <div class="b-band"><span class="b-band-tag">UNIDADE 2</span><span class="b-band-sub">4 AULAS</span></div>
+    <h2><span class="b-no">2</span>Simulações na prática</h2>
+    <div class="b-row">
+        <div>
+            <div class="b-box b-einstieg"><div class="b-text"><p>Três portas: atrás de uma está um carro, atrás das outras duas uma cabra em cada. Escolhes uma porta. O apresentador, que sabe onde está o carro,
+                abre outra porta com uma cabra e pergunta: «Queres trocar?» A maioria das pessoas diz: «Tanto faz, agora é 50 por cento.» Uma simulação mostra uma coisa muito diferente.</p></div></div>
+            <div class="b-text"><p>Quem troca ganha exatamente quando a primeira escolha estava <b>errada</b>. Isso acontece em dois de três casos. Quem mantém só ganha se a primeira escolha estava certa:
+                em um de três casos. Trocar duplica, portanto, a probabilidade de ganhar.</p></div>
+            <div class="b-box b-merk">
+                <div class="b-box-title">RETÉM · PORQUE SE SIMULA</div>
+                <div class="b-text">
+                    <p>Se uma experiência for demasiado cara, perigosa, lenta ou difícil de calcular, imita-se no computador.</p>
+                    <p>Um <b>modelo</b> define o que é importante e que probabilidades valem. O resultado só é tão bom quanto o modelo.</p>
+                    <p>As simulações dão <b>estimativas</b>. Mais repetições tornam-nas mais rigorosas.</p>
+                </div>
+            </div>
+        </div>
+        <aside class="b-aside">
+            <p class="b-note"><b>Simulações hoje:</b> previsões do tempo, propagação de doenças, simuladores de voo para a formação de pilotos, proteção civil e planeamento do trânsito.</p>
+            <p class="b-note"><b>No estádio:</b> que comprimento terão as filas à entrada se cada décima pessoa for revistada a fundo? Coisas destas experimentam-se antes numa simulação.</p>
+        </aside>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · O PROBLEMA DE MONTY HALL</div>
+        <p class="b-help" style="margin:0 0 12px">Joga algumas rondas tu mesmo, com e sem troca. Depois deixa a calculadora jogar mil jogos.</p>
+        <div data-widget="ziegen"></div>
+    </div>
+
+    <div class="b-box b-widget">
+        <div class="b-box-title">INTERATIVO · A CADERNETA DE CROMOS</div>
+        <p class="b-help" style="margin:0 0 12px">Abre saqueta a saqueta ou completa logo mil cadernetas. De quantas saquetas se precisa em média, e quanto é que isso varia?</p>
+        <div data-widget="sammel8"></div>
+    </div>
+
+    <div class="b-grid2">
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 3 · MONTY HALL COM UM DADO</div>
+            <div class="b-text"><p>Simula com um dado: 1 ou 2 significa «carro atrás da porta 1», 3 ou 4 «atrás da porta 2», 5 ou 6 «atrás da porta 3». Escolhes sempre a porta 1. Quando ganhas, se trocares?</p></div>
+            <div class="b-sol"><p>Se o carro estiver atrás da porta 2 ou 3 (o dado mostra de 3 a 6), o apresentador abre a outra porta com cabra, e trocar ganha.</p>
+                <p><span class="b-res">$P(\text{ganhar trocando}) = \tfrac46 = \tfrac23$</span></p></div>
+        </div>
+        <div class="b-box b-bsp">
+            <div class="b-box-title">EXEMPLO 4 · CADERNETA DE CROMOS</div>
+            <div class="b-text"><p>Uma caderneta tem 10 cromos. A simulação com 1000 cadernetas dá, em média, cerca de 29 saquetas. O que significa isto para quem compra 10 saquetas?</p></div>
+            <div class="b-sol"><p>Com 10 saquetas, a caderneta quase nunca fica completa. Em média são precisas quase três vezes mais saquetas do que cromos, e cerca de uma vez em cada vinte até mais de 50.</p>
+                <p><span class="b-res">Trocar cromos compensa.</span> Perto do fim faltam só poucos cromos, e quase todas as saquetas trazem um repetido.</p></div>
+        </div>
+    </div>
+
+    <h3>EXERCÍCIOS</h3>
+    <div class="b-tasks" data-start="6">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Joguem o problema de Monty Hall no livro 30 vezes com troca e 30 sem troca. Comparem as vossas frequências relativas com $\tfrac23$ e $\tfrac13$.</p></div>
+            <div class="b-sol"><p>Com troca obtém-se normalmente algo perto de $0{,}67$, sem troca perto de $0{,}33$. Com só 30 jogos, ainda varia bastante.</p></div></div>
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Indica três áreas em que hoje se usam simulações em computador e descreve, para uma delas, o que é simulado.</p></div>
+            <div class="b-sol"><p>Por exemplo, o tempo (como se movem o ar, o calor e a humidade), a medicina (como uma doença passa de pessoa para pessoa), o simulador de voo (como um avião reage aos comandos), o trânsito, o clima, os testes de colisão.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Uma caderneta tem 6 cromos. Simula 10 cadernetas completas com o dado ou no livro. Que média obténs? Compara com o valor teórico, $6 \times \left(1 + \tfrac12 + \tfrac13 + \tfrac14 + \tfrac15 + \tfrac16\right) = 14{,}7$.</p></div>
+            <div class="b-sol"><p>Com 10 cadernetas, a média fica normalmente entre 11 e 19. Quantas mais cadernetas, mais perto de 14,7.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>À entrada do estádio, cada pessoa é revistada a fundo com probabilidade 10 % (2 minutos), senão rapidamente (20 segundos). Quanto tempo precisa um segurança, em média, por pessoa?
+            Como poderias simular com algarismos aleatórios o comprimento da fila?</p></div>
+            <div class="b-sol"><p>$0{,}1 \times 120 + 0{,}9 \times 20 = 12 + 18 = 30$ segundos. Simulação: o algarismo 0 significa revista a fundo, de 1 a 9 rápida. Além disso, sorteia-se quantas pessoas chegam por minuto e regista-se a fila.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Uma variante com 4 portas e um carro: depois da tua escolha, o apresentador abre uma porta com cabra. Podes trocar para uma das duas outras portas fechadas, ao acaso. Compensa? Simula ou calcula.</p></div>
+            <div class="b-sol"><p>Sem troca: $\tfrac14$. Com troca: a primeira escolha está errada com $\tfrac34$; então o carro está atrás de uma das outras duas portas, e acertas com $\tfrac12$: $\tfrac34 \times \tfrac12 = \tfrac38$. Trocar compensa.</p></div></div>
+    </div>
+    <div class="b-box b-check" data-check="le2">
+        <div class="b-box-title">TESTA-TE!</div>
+        <div class="b-q" data-ans="2/3" data-ph="fração"><p class="b-q-text">Qual é a probabilidade de ganhar no problema de Monty Hall, trocando?</p><div class="b-sol"><p>Quando a primeira escolha estava errada.</p></div></div>
+        <div class="b-q" data-ans="30" data-ph="segundos"><p class="b-q-text">Tempo médio de revista por pessoa no exercício 9?</p><div class="b-sol"><p>$12 + 18$</p></div></div>
+        <div class="b-q" data-ans="3/8" data-ph="fração"><p class="b-q-text">Probabilidade de ganhar trocando com 4 portas (exercício 10)?</p><div class="b-sol"><p>$\tfrac34 \times \tfrac12$</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="wvv" data-kind="wvv" data-toc="Rever · Aprofundar · Relacionar" data-toc-k="W" data-toc-short="Praticar">
+    <div class="b-band"><span class="b-band-tag">REVER · APROFUNDAR · RELACIONAR</span></div>
+    <div class="b-tasks" data-start="11">
+        <div class="b-task" data-lvl="1"><div class="b-task-q"><p>Num teste há 10 perguntas de sim ou não, e alguém responde só ao acaso. Como simulas com algarismos aleatórios quantas vezes acerta pelo menos 7?</p></div>
+            <div class="b-sol"><p>Algarismo par: certa, ímpar: errada. Cada 10 algarismos são um teste. Simular muitos testes e contar quantas vezes há pelo menos 7 algarismos pares.</p></div></div>
+        <div class="b-task" data-lvl="2"><div class="b-task-q"><p>Ao lançar um dado com algarismos aleatórios saltam-se o 0, o 7, o 8 e o 9. De quantos algarismos se precisa, em média, para 100 lançamentos? Porquê?</p></div>
+            <div class="b-sol"><p>Só 6 de 10 algarismos servem, por isso são precisos cerca de $\tfrac{100}{0{,}6} \approx 167$ algarismos.</p></div></div>
+        <div class="b-task" data-lvl="3"><div class="b-task-q"><p>Explica a alguém que não acredita no problema de Monty Hall os $\tfrac23$ com 100 portas: escolhes uma, o apresentador abre 98 portas com cabras. Trocas?</p></div>
+            <div class="b-sol"><p>A tua porta tem probabilidade $\tfrac{1}{100}$. A única porta que o apresentador deixou fechada entre 99 tem $\tfrac{99}{100}$. Troca!</p></div></div>
+    </div>
+</section>
+
+<section class="b-sec" id="exkursion" data-kind="exkursion" data-toc="Para saber mais: um casino dá o nome" data-toc-k="X" data-toc-short="Monte Carlo">
+    <div class="b-band"><span class="b-band-tag">PARA SABER MAIS</span><span class="b-band-sub">HISTÓRIA</span></div>
+    <h2>Monte Carlo: um casino dá o nome</h2>
+    <div class="b-row">
+        <div class="b-text">
+            <p>Na década de 1940, o matemático <b>Stanisław Ulam</b> e os seus colegas trabalhavam em Los Alamos, nos EUA, em problemas que ninguém conseguia calcular.
+                Ulam teve uma ideia enquanto jogava paciências: em vez de calcular a muito custo a probabilidade de ganhar uma paciência, podia simplesmente jogá-la muitas vezes e contar,
+                de preferência numa das novas máquinas de calcular.</p>
+            <p>Como o método joga com o acaso, recebeu o nome do famoso casino do Mónaco. Em 1949, <b>Nicholas Metropolis</b> e Ulam publicaram
+                o artigo «The Monte Carlo Method». Hoje, as simulações de Monte Carlo estão nas previsões do tempo, na medicina e nas imagens dos filmes de animação.</p>
+            <p>Também o problema de Monty Hall ficou famoso graças às simulações. Quando a colunista Marilyn vos Savant aconselhou a troca numa revista americana, em 1990,
+                recebeu milhares de cartas indignadas, muitas de pessoas com doutoramento. Só calcular e experimentar convenceu a maioria.</p>
+        </div>
+        <aside class="b-aside"><p class="b-note"><b>Fonte:</b> N. Metropolis, S. Ulam: The Monte Carlo Method. Journal of the American Statistical Association 44 (1949), pp. 335–341.</p></aside>
+    </div>
+</section>
+
+<section class="b-sec" id="rueckblick" data-kind="rueckblick" data-toc="Síntese" data-toc-k="R" data-toc-short="Síntese">
+    <div class="b-band"><span class="b-band-tag">SÍNTESE</span><span class="b-band-sub">O ESSENCIAL NUM RELANCE</span></div>
+    <div class="b-rueck"><div><h4>NÚMEROS ALEATÓRIOS</h4><p>dado, roleta, urna, tabela, calculadora</p></div>
+        <div><p><code>randInt(1,6)</code></p></div></div>
+    <div class="b-rueck"><div><h4>A MESMA ESTRUTURA</h4><p>o mesmo número de resultados com as mesmas probabilidades</p></div>
+        <div><p>Moeda: algarismo par ou ímpar</p></div></div>
+    <div class="b-rueck"><div><h4>MONTE CARLO</h4><p>repetir muitíssimas vezes; a frequência relativa estima a probabilidade</p></div>
+        <div><p>$\pi \approx 4 \times$ fração no quarto de círculo</p></div></div>
+    <div class="b-rueck"><div><h4>MONTY HALL</h4><p>trocar ganha com $\tfrac23$</p></div>
+        <div><p>100 portas: $\tfrac{99}{100}$</p></div></div>
+    <div class="b-rueck"><div><h4>MODELOS</h4><p>só tão bons como as suas hipóteses</p></div>
+        <div><p>Caderneta com 10 cromos: cerca de 29 saquetas</p></div></div>
+</section>
+
+<section class="b-sec" id="test" data-kind="test" data-toc="Teste" data-toc-k="T" data-toc-short="Teste">
+    <div class="b-band"><span class="b-band-tag">TESTE</span><span class="b-band-sub">DUAS RONDAS · CORREÇÃO IMEDIATA</span></div>
+    <div class="b-grid2">
+        <div class="b-box b-check" data-check="test1">
+            <div class="b-box-title">RONDA 1 · SEM CALCULADORA</div>
+            <div class="b-q" data-ans="1/3" data-ph="fração"><p class="b-q-text">Probabilidade de ganhar no problema de Monty Hall, mantendo a porta?</p><div class="b-sol"><p>A primeira escolha estava certa.</p></div></div>
+            <div class="b-q" data-ans="0,785" data-tol="0.002" data-ph="número decimal"><p class="b-q-text">Que fração dos pontos esperas no quarto de círculo? Três casas decimais.</p><div class="b-sol"><p>$\tfrac{\pi}{4}$</p></div></div>
+            <div class="b-q" data-mc="0"><p class="b-q-text">Que experiência tem a mesma estrutura que o lançamento de uma moeda equilibrada?</p><div class="b-mc"><button>algarismo aleatório par ou ímpar</button><button>o dado mostra 6 ou não</button><button>pionés de costas ou de lado</button></div><div class="b-sol"><p>Dois resultados com $\tfrac12$ cada.</p></div></div>
+        </div>
+        <div class="b-box b-check" data-check="test2">
+            <div class="b-box-title">RONDA 2 · APLICAR</div>
+            <div class="b-q" data-ans="167" data-tol="1" data-ph="algarismos"><p class="b-q-text">De quantos algarismos aleatórios se precisa, em média, para 100 lançamentos (exercício 12)?</p><div class="b-sol"><p>$\tfrac{100}{0{,}6}$</p></div></div>
+            <div class="b-q" data-ans="14,7" data-tol="0.05" data-ph="saquetas"><p class="b-q-text">Média teórica para a caderneta com 6 cromos (exercício 8)?</p><div class="b-sol"><p>$6 \times 2{,}45$</p></div></div>
+            <div class="b-q" data-ans="99/100" data-ph="fração"><p class="b-q-text">Probabilidade de ganhar trocando com 100 portas?</p><div class="b-sol"><p>A primeira escolha está quase de certeza errada.</p></div></div>
+        </div>
+    </div>
+    <h3>MAIS PRÁTICA ONLINE (EM ALEMÃO)</h3>
+    <div class="b-labs">
+        <a class="b-lab" data-lab="fallingpi" href="../../fallingpi.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">FALLING PI</span><span class="b-lab-what">π a partir de milhares de pontos aleatórios</span></span></a>
+        <a class="b-lab" data-lab="infektionssimulation" href="../../infektionssimulation.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">INFEKTIONSSIMULATION</span><span class="b-lab-what">Como se propaga uma doença</span></span></a>
+        <a class="b-lab" data-lab="galtonboard" href="../../galtonboard.html"><span class="b-lab-icon"></span><span><span class="b-lab-name">GALTON BOARD</span><span class="b-lab-what">O acaso em grande escala</span></span></a>
+    </div>
+</section>
+
+<footer class="b-foot">
+    <p>Doc Alvers Mathe-Labor · Matemática, Gymnasium 8.º ano · área opcional, segundo o programa de Matemática do Gymnasium da Saxónia.</p>
+    <p>Todos os textos, exercícios e figuras são conteúdos próprios.</p>
+</footer>
+
+
+    </main>
+</div>
+
+<script src="../../js/labs-icons.js"></script>
+<script src="../../js/apple-emoji.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+<script src="kapitel.js"></script>
+<script src="../../js/buch-pt.js"></script>
+<script src="../../js/buch.js"></script>
+<script src="../../js/buch-plot.js"></script>
+<script src="../../js/buch-stochastik.js"></script>
+<script src="../../js/buch-pt/stochastik.js"></script>
+<script src="../../js/buch-geometrie.js"></script>
+<script src="../../js/buch-pt/geometrie.js"></script>
+<script src="../../js/buch-gy8.js"></script>
+<script src="../../js/buch-pt/gy8.js"></script>
+</body>
+</html>

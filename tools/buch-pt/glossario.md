@@ -593,5 +593,9 @@ ensino básico (3.º ciclo).
 | Lösungsplan: verstehen, planen, durchführen, zurückschauen | plano de resolução: compreender, planear, executar, olhar para trás | Pólya, «Como Resolver Problemas» |
 | Umkehrrechnung · Startzahl · Rätsel | operação inversa · número inicial · enigma | `rueckwaerts8` |
 | Krug · Eimer · Händeschütteln · Taschengeld | jarro · balde · apertos de mão · semanada | |
+| Zufallszahl · Pseudozufall · strukturgleicher Versuch | número aleatório · pseudoaleatório · experiência com a mesma estrutura | |
+| Monte-Carlo-Methode · Viertelkreis · Ziegenproblem (Moderator) | método de Monte Carlo · quarto de círculo · problema de Monty Hall (apresentador) | |
+| Sammelalbum · Tüte · Bild · doppelt | caderneta de cromos · saqueta · cromo · repetido | `sammel8` |
+| Patience · Elfmeter · Schütze | paciência · penálti · atirador | |
 
 ## mathegy9-pt

@@ -196,8 +196,8 @@ window.BuchPT && BuchPT.add('gy8', {
         [/Mit \$([^$]*)\$ kommt \$([^$]*)\$ heraus\. /g, (m, a, b) => 'Com $' + a + '$ obtém-se $' + b + '$. '],
         [/Das passt nicht\./g, 'Não dá.'],
         [/Rückwärts von \$([^$]*)\$ aus, mit den Umkehrrechnungen: Die Startzahl ist <b>/g, (m, e) => 'Para trás a partir de $' + e + '$, com as operações inversas: o número inicial é <b>'],
-        // mcpi8: the buttons "+100 Punkte" and the sentence "Von $1000$ Punkten liegen $791$ im Viertelkreis, das ist der Anteil $…"
-        [/\+(\d[\d ]*) Punkte</g, '+$1 pontos<'],
+        // mcpi8: the buttons "+100 Punkte" ("+1 000" with a thin space) and the sentence "Von $1000$ Punkten liegen $791$ im Viertelkreis, das ist der Anteil $…"
+        [/\+(\d[\d\s]*?) Punkte</g, '+$1 pontos<'],
         [/Von \$([^$]*)\$ Punkten liegen \$([^$]*)\$ im Viertelkreis, das ist der Anteil \$/g, (m, a, b) => 'Dos $' + a + '$ pontos, $' + b + '$ estão no quarto de círculo, ou seja, a fração $'],
         // sammel8: the album in numbers (the sentence rules before the album sizes "10 Bilder")
         [/Jede Tüte enthält ein Bild\. Alle (\d+) Bilder sind gleich häufig\. Wie viele Tüten brauchst du, bis das Album voll ist\?/g,
