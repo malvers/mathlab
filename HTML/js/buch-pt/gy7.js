@@ -252,6 +252,7 @@ window.BuchPT && BuchPT.add('gy7', {
         // so the German ℕ (with 0) is ℕ₀ and the German ℚ⁺ (with 0) is ℚ₀⁺ (números racionais não negativos), also in the SVG labels
         [/\\mathbb\{N\}(?!_)/g, '\\mathbb{N}_0'], [/\\mathbb\{Q\}\^\+/g, '\\mathbb{Q}_0^+'],
         [/>ℕ<\/text>/g, '>ℕ₀</text>'], [/>ℚ⁺<\/text>/g, '>ℚ₀⁺</text>'],
+        [/>ℕ ⊂ ℤ, ℕ ⊂ ℚ⁺</g, '>ℕ₀ ⊂ ℤ, ℕ₀ ⊂ ℚ₀⁺<'],
         // an angle by three points is written with a hat on the vertex: ∠APB → A\hat{P}B (tools/buch-pt/glossario.md, mathegy6-pt)
         [/\\angle ([A-Z](?:_\d)?)([A-Z])(_\d)?([A-Z](?:_\d)?)/g, (m, a, v, i, c) => a + '\\hat{' + v + '}' + (i || '') + c],
         // book pt-11 mathegy7-pt:
