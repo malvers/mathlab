@@ -513,6 +513,30 @@ parts, so every later book that loads them gets it too):
 
 ## mathegy7-pt
 
-## mathegy8-pt
+## mathegy8-pt (GY 8, block pt-12)
+
+Block pt-12 (Caraça, 27.11.2026). Terms the book adds (modules `gy8.js` and `spiele.js` new for pt; `geometrie`, `gleichungen`,
+`funktionen`, `lgs`, `stochastik` shared). The 8.º ano of this book is compared once on the start page with the 8.º ano of the
+ensino básico (3.º ciclo).
+
+- **× for the product** everywhere (page text and widgets; rule `\cdot` → `\times` of `geometrie.js` pt0, as GY 6).
+- **Homotetia de centro O e razão k**: the German centre Z is $O$ (also in the widget `streckung8`, rule), the lengths
+  $\overline{OA}$, $\overline{OA'}$.
+- **Sets** with commas $\{1, 2, 3\}$, also in the widgets of `gy8.js` (rule); the number of elements $\#E$, $\#\Omega$.
+- **Distance** in the distance-time graphs is $d$ (distância; German $s$), also in `wegzeit8` (rule for the axis).
+- The shadows $s$, $S$ stay (sombra); the relative frequency stays $h$ as in the other pt books.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Term · Rechenbaum · Teilterm | expressão · árvore de cálculo · subexpressão | |
+| Platzhalter · Unbekannte · Veränderliche | número genérico · incógnita · grandeza variável | Name, Wert, Bedeutung = nome, valor, significado |
+| Summe (Summand) · Differenz (Minuend, Subtrahend) | soma (parcelas) · diferença (aditivo, subtrativo) | |
+| Produkt (Faktor) · Quotient (Dividend, Divisor) · Potenz (Basis, Exponent) | produto (fatores) · quociente (dividendo, divisor) · potência (base, expoente) | |
+| zusammenfassen · gleichartige Glieder | reduzir os termos semelhantes · termos semelhantes | |
+| ausmultiplizieren · ausklammern · Distributivgesetz | desenvolver · pôr em evidência · propriedade distributiva | |
+| Malpunkt | sinal de multiplicação | |
+| Handytarif | tarifário de telemóvel | |
+| Klassenfahrt · Jugendherberge | visita de estudo · alojamento | |
+| Streichhölzer | fósforos | |
 
 ## mathegy9-pt
