@@ -51,8 +51,8 @@ window.BuchPT && BuchPT.add('trigonometrie', {
         'eingeschlossener Winkel $\\gamma$': 'Ângulo formado $\\gamma$', 'Dreieck aus zwei Seiten und dem eingeschlossenen Winkel': 'Triângulo definido por dois lados e o ângulo por eles formado',
         // tangensfunktion
         'Einheitskreis mit Tangente an der Stelle 1': 'Círculo trigonométrico com a reta tangente no ponto de abcissa 1', 'Graph der Tangensfunktion mit Polstellen': 'Gráfico da função tangente com polos',
-        // pyramidekegel: the same words as pt-18 (and as js/buch-pt/geometrie.js, which these pages do not load)
-        'Kegel': 'Cone', 'Höhe – Seitenhöhe': 'Altura – apótema', 'Höhe – Seitenkante': 'Altura – aresta lateral', 'Höhe – Mantellinie': 'Altura – geratriz',
+        // pyramidekegel: the same words as pt-18 (and as js/buch-pt/geometrie.js, which these pages do not load); "Kegel" is no word here (pt-18 rule below)
+        'Höhe – Seitenhöhe': 'Altura – apótema', 'Höhe – Seitenkante': 'Altura – aresta lateral', 'Höhe – Mantellinie': 'Altura – geratriz',
         'Rechtwinkliges Dreieck': 'Triângulo retângulo', 'Körper': 'Sólido', 'Grundkante $a$': 'Aresta da base $a$', 'Radius $r$': 'Raio $r$', 'Höhe $h$': 'Altura $h$',
     },
     phrase: [
@@ -104,8 +104,6 @@ window.BuchPT && BuchPT.add('trigonometrie', {
         ['$O = a^2 + 4 \\cdot \\tfrac12 a h_s = a^2 + 2a\\,h_s \\approx ', '$A_T = a^2 + 4 \\cdot \\tfrac12 a\\,a_p = a^2 + 2a\\,a_p \\approx '],
         ['halber Öffnungswinkel:', 'Semiângulo de abertura:'], ['$ · Öffnungswinkel $2', '$ · ângulo de abertura $2'],
         ['$M = \\pi r s \\approx ', '$A_L = \\pi r g \\approx '], ['$O = \\pi r^2 + \\pi r s \\approx ', '$A_T = \\pi r^2 + \\pi r g \\approx '],
-        // pyramidekegel: the body button (js/buch-pt/geometrie.js turns it with a rule into the same words; gy7.js is not loaded here)
-        ['Quadratische Pyramide', 'Pirâmide quadrangular regular'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -121,6 +119,9 @@ window.BuchPT && BuchPT.add('trigonometrie', {
         // pyramidekegel: the two rules of pt-18, word for word (the merge keeps one copy)
         [/Seitenkante \$s = (\\sqrt\{h\^2 \+ \\left\(\\tfrac\{d\}\{2\}\\right\)\^2\})\$ mit der Diagonale \$d = a\\sqrt2 \\approx ([^$]*)\$: \$s \\approx /g,
             (m, f, d) => 'Aresta lateral $\\ell = ' + f + '$, com a diagonal $d = a\\sqrt2 \\approx ' + d + '$: $\\ell \\approx '],
+        // pyramidekegel, the body buttons: the two rules of pt-18 (531800240), word for word
+        [/(<button type="button" data-v="pyr">)Quadratische Pyramide(?=<\/button><button type="button" data-v="kegel">Kegel<\/button>)/g, '$1Pirâmide quadrangular'],
+        [/(<button type="button" data-v="kegel">)Kegel(?=<\/button>)/g, '$1Cone'],
         [/<svg viewBox="0 0 520 330" role="img" aria-label="Schrägbild (einer quadratischen Pyramide|eines Kegels) mit einem rechtwinkligen Dreieck">[\s\S]*?<\/svg>/g,
             (m, k) => m.replace(/>hₐ</g, '>aₚ<').replace(/>s<\/text>/g, k === 'eines Kegels' ? '>g</text>' : '>ℓ</text>')],
     ]
