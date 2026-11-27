@@ -859,3 +859,48 @@ $(3, -2)$, Mengen $\{2, 4, 6\}$, ℕ₀ und ℚ₀⁺ (einmal erklärt), Strecke
 
 
 ## mathe8-pt (OS 8, block pt-17)
+
+Block pt-17 (Ribeiro, 27.11.2026). Oberschule und Realschulbildungsgang bleiben deutsch und werden auf der Startseite erklärt
+(8.º ano ≈ 8.º ano do ensino básico, 3.º ciclo; „percurso Realschule“). Wahlpflichtbereich `k: 'O'` (Área opcional) wie GY 6/8/9.
+Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Schreibweisen wie GY 8 (pt-12):
+
+- **× für das Produkt** in allen Kapiteln (Seiten und Widgets, Regel `\cdot` → `\times` von `geometrie.js` pt0), auch in den Bildern
+  von `flaecheos8` (Regel in `os8.js`).
+- **Geraden** $y = mx + b$ (declive $m$, ordenada na origem $b$, auch in `linearos8`, `lgsgrafos8`); proportionale Funktion = função de
+  proporcionalidade direta $y = mx$; Argument = objeto, Funktionswert = imagem; $D_f$, $D'_f$.
+- **Kreis:** Umfang $P$ ($P = \pi d = 2\pi r$, auch `kreisflaecheos8`, `fahrrados8`, `reifenos8`), Kreisring mit $r_e$, $r_i$ (wie GY 9).
+- **Zylinder:** $A_b$, $A_L$, $A_T$ (wie GY 9 und `koerper`), auch in der Tabelle von `zylinderos8` (Regel); Hohlzylinder-Innenmantel $A_{L,i}$.
+- **Zentrische Streckung:** homotetia de centro $O$ e razão $k$ (wie GY 8), Strahl $\dot{O}P$.
+- **Liter** $\text{L}$, $\text{mL}$ (auch `raumos8`); Mehrwertsteuer bleibt 19 % / 7 % (deutsch), PT 23 % einmal genannt.
+- Die Schrittmarke $\mid -3x$ beim Umformen bleibt (wie die Widgets `waage`, `umstellen7`), einmal erklärt („depois de um traço vertical“).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Oberschule · Realschulbildungsgang | Oberschule · percurso Realschule | auf der Startseite erklärt |
+| Term · Termwert · gleichwertig | expressão · valor da expressão · equivalentes | `termwertos8` |
+| Plusklammer / Minusklammer | parênteses precedidos de + / de − | desembaraçar de parênteses |
+| lineare Gleichung · Äquivalenzumformung | equação do 1.º grau · princípios de equivalência | $\text{C.S.} = \{\,\}$; impossível / possível e indeterminada |
+| Formel umstellen nach $t$ | resolver a fórmula em ordem a $t$ | Weg $s$ → $d$, Grundseite $g$ → $b$ |
+| Handwerker · Kletterpark | canalizador · parque de arborismo | |
+| Wortvorschrift · Pfeildiagramm | por palavras · diagrama de setas | wie GY 6 |
+| Punktprobe | verificar se um ponto pertence ao gráfico | |
+| Gleichsetzungs- / Einsetzungs- / Additionsverfahren | método de igualação / de substituição / de adição ordenada | wie GY 8 |
+| Hühner und Kaninchen · Fasanen und Hasen | galinhas e coelhos · faisões e coelhos | |
+| Tarif · Grundgebühr | tarifário · valor fixo (Widget), mensalidade / termo fixo (Text) | `tarifos8`: „Tarifário A: valor fixo“ |
+| Passante · Tangente · Sekante · Sehne · Berührpunkt | reta exterior · tangente · secante · corda · ponto de tangência | wie GY 7 |
+| Satz des Thales · Thaleskreis | teorema de Tales · circunferência de Tales | einmal erklärt (Portugal: meist der Strahlensatz) |
+| Kreiszahl · Kreisring · Rosette | número pi · coroa circular · roseta (pétalas) | `rosetteos8` |
+| Kreiszylinder · Hohlzylinder · Mantel · Netz · Schrägbild | cilindro (maciço) · cilindro oco · superfície lateral · planificação · perspetiva cavaleira | `zylinderos8` |
+| Dichte | massa volúmica $\varrho$ | wie GY 7 |
+| Hauptähnlichkeitssatz · kongruent · Kongruenzsätze | critério AA de semelhança · geometricamente iguais · critérios LLL, LAL, ALA, LLA | wie GY 6/8 |
+| Försterdreieck · Schatten | triângulo do guarda-florestal · sombra | wie GY 8 |
+| Pfadregeln · Zählprinzip · Fakultät | regras do produto e da soma · princípio fundamental da contagem · fatorial | `zaehlenos8` |
+| Wappen / Zahl · Galtonbrett (links/rechts) | face nacional $N$ / face europeia $E$ · tabuleiro de Galton (E/D) | |
+| Zahlenschloss (Ring) · Menü · Outfit | cadeado de código (roda) · menu · maneira de se vestir | |
+| Kaltmiete · Nebenkosten · Warmmiete | renda base · despesas · renda total | „2 Zimmer“ = T1 |
+| Arbeitspreis · Grundpreis · Abschlag · Nachzahlung · Guthaben | preço da energia · termo fixo · pagamento mensal · acerto a pagar · crédito | `stromos8` |
+| Laminat · Verschnitt · Eimer · Raumhöhe · Estrich | piso flutuante · desperdício · lata · pé-direito · betonilha | `raumos8` |
+| Rabatt · Skonto · Ratenkauf · Zinseszins | desconto · desconto de pronto pagamento · compra a prestações · juros compostos | |
+| Kettenblatt · Ritzel · Übersetzung · Trittfrequenz | prato · carreto · relação de transmissão · cadência (pedaladas por minuto) | `fahrrados8` |
+| Zoll · Felge · Rahmenhöhe · Schrittlänge | polegada · jante · altura do quadro · altura do entrepernas | `reifenos8` |
+| Namen | Lena → Rita, Tim → Tomás, Mia → Marta (lb1-2; Mia im Widget `wegzeit8` bleibt), Max → Rui, Lea → Leonor, Lisa → Inês, Tom → Tiago, Bea → Beatriz, Cleo → Clara | |
