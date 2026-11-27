@@ -65,7 +65,7 @@ window.BuchPT && BuchPT.add('trigonometrie', {
         ['</b> · Liegen beide Marker auf benachbarten Hochpunkten, ist das die <b>Periode</b>.', '</b> · Se os dois marcadores estiverem em máximos vizinhos, esta distância é o <b>período</b>.'],
         ['Größter Wert $', 'Valor máximo $'], ['$, kleinster Wert $', '$, valor mínimo $'],
         // sinussatz (after the sen rule below)
-        ['Die Höhe aus zwei Richtungen: $h_c = b \\cdot \\operatorname{sen}\\alpha = ', 'A altura calculada de dois lados: $h_c = b \\cdot \\operatorname{sen}\\alpha = '],
+        ['Die Höhe aus zwei Richtungen: $h_c = b \\cdot \\operatorname{sen}\\alpha = ', 'A altura calculada de duas maneiras: $h_c = b \\cdot \\operatorname{sen}\\alpha = '],
         ['$ und $h_c = a \\cdot \\operatorname{sen}\\beta \\approx ', '$ e $h_c = a \\cdot \\operatorname{sen}\\beta \\approx '],
         ['$. Gleichsetzen und teilen ergibt $\\tfrac{a}{\\operatorname{sen}\\alpha} = \\tfrac{b}{\\operatorname{sen}\\beta}$.', '$. Igualando e dividindo obtém-se $\\tfrac{a}{\\operatorname{sen}\\alpha} = \\tfrac{b}{\\operatorname{sen}\\beta}$.'],
         ['Alle drei Quotienten sind so groß wie der <b>Durchmesser des Umkreises</b>: $2r = ', 'Os três quocientes são iguais ao <b>diâmetro da circunferência circunscrita</b>: $2r = '],
