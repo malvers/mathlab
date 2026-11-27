@@ -40,6 +40,7 @@ window.BuchPT && BuchPT.add('zahlen', {
         'Die Lampe leuchtet, wenn <b>mindestens einer</b> der Schalter geschlossen ist.': 'A lâmpada acende se <b>pelo menos um</b> dos interruptores estiver fechado.',
         'Treppenhaus: Jeder der beiden Schalter kann die Lampe ein- und ausschalten. Sie leuchtet, wenn beide Schalter <b>gleich</b> stehen.': 'Escada: cada um dos dois interruptores pode acender e apagar a lâmpada. Ela acende quando os dois interruptores estão na <b>mesma</b> posição.',
         // book pt-13 mathegy9-pt:
+        // book pt-20 mathegy10-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs zahlen/*)
@@ -82,6 +83,7 @@ window.BuchPT && BuchPT.add('zahlen', {
         ['$ · jetzt: $a = ', '$ · agora: $a = '],
         ['$ → Lampe <b>', '$ → lâmpada <b>'],
         // book pt-13 mathegy9-pt:
+        // book pt-20 mathegy10-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -91,5 +93,6 @@ window.BuchPT && BuchPT.add('zahlen', {
         // schaltung: "Lampe <b>an</b>" / "<b>aus</b>" (the rules run before the pieces)
         [/Lampe <b>an<\/b>/g, 'Lampe <b>acesa</b>'], [/Lampe <b>aus<\/b>/g, 'Lampe <b>apagada</b>'],
         // book pt-13 mathegy9-pt:
+        // book pt-20 mathegy10-pt:
     ]
 });

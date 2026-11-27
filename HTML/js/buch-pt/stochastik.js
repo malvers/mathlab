@@ -118,6 +118,8 @@ window.BuchPT && BuchPT.add('stochastik', {
         // venn: the two buttons of the event choice (missing in pt-6)
         '$A$ bearbeiten': 'Editar $A$', '$B$ bearbeiten': 'Editar $B$',
         // book pt-17 mathe8-pt:
+        // book pt-19 mathe10-pt:
+        // book pt-20 mathegy10-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -227,6 +229,8 @@ window.BuchPT && BuchPT.add('stochastik', {
         // book pt-9 mathegy11-pt:
         // book pt-12 mathegy8-pt:
         // book pt-17 mathe8-pt:
+        // book pt-19 mathe10-pt:
+        // book pt-20 mathegy10-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -283,5 +287,7 @@ window.BuchPT && BuchPT.add('stochastik', {
         // book pt-9 mathegy11-pt:
         // book pt-12 mathegy8-pt:
         // book pt-17 mathe8-pt:
+        // book pt-19 mathe10-pt:
+        // book pt-20 mathegy10-pt:
     ]
 });

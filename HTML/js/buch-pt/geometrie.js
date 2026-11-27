@@ -67,6 +67,8 @@ window.BuchPT && BuchPT.add('geometrie', {
         // book pt-15 mathe6-pt:
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-18 mathe9-pt:
+        // book pt-19 mathe10-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
@@ -102,6 +104,8 @@ window.BuchPT && BuchPT.add('geometrie', {
         // book pt-15 mathe6-pt:
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-18 mathe9-pt:
+        // book pt-19 mathe10-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -128,5 +132,7 @@ window.BuchPT && BuchPT.add('geometrie', {
         // book pt-15 mathe6-pt:
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-18 mathe9-pt:
+        // book pt-19 mathe10-pt:
     ]
 });

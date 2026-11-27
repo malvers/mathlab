@@ -46,6 +46,8 @@ window.BuchPT && BuchPT.add('finanz', {
         'Tilgung (zusammen: die Rate)': 'amortização (juntos: a prestação)',
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-19 mathe10-pt:
+        // book pt-20 mathegy10-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs finanz/*)
@@ -70,6 +72,8 @@ window.BuchPT && BuchPT.add('finanz', {
         ['Die Rate sinkt, weil die Restschuld und damit die Zinsen sinken. Zinsen insgesamt: <b>', 'A prestação desce, porque a dívida em falta e, com ela, os juros descem. Juros no total: <b>'],
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-19 mathe10-pt:
+        // book pt-20 mathegy10-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -78,5 +82,7 @@ window.BuchPT && BuchPT.add('finanz', {
         [/^(\d+) J\.$/, (m, n) => n + (n === '1' ? ' ano' : ' anos')],
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-19 mathe10-pt:
+        // book pt-20 mathegy10-pt:
     ]
 });

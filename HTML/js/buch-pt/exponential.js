@@ -14,13 +14,19 @@ window.BuchPT && BuchPT.add('exponential', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs exponential/*)
         // book pt-9 mathegy11-pt:
+        // book pt-19 mathe10-pt:
+        // book pt-20 mathegy10-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs exponential/*)
         // book pt-9 mathegy11-pt:
+        // book pt-19 mathe10-pt:
+        // book pt-20 mathegy10-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-9 mathegy11-pt:
+        // book pt-19 mathe10-pt:
+        // book pt-20 mathegy10-pt:
     ]
 });

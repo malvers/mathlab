@@ -164,6 +164,7 @@ window.BuchPT && BuchPT.add('gy7', {
             'Colunas: quantos polígonos há num vértice. Exatamente cinco casas têm um visto: há exatamente cinco sólidos platónicos.',
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-18 mathe9-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy7/*)
@@ -249,6 +250,7 @@ window.BuchPT && BuchPT.add('gy7', {
         ['Weniger als $360^\\circ$: Klappt man die Lücke zu, entsteht eine räumliche Ecke. ', 'Menos de $360^\\circ$: fechando o espaço vazio, forma-se um vértice no espaço. '],
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-18 mathe9-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -332,5 +334,6 @@ window.BuchPT && BuchPT.add('gy7', {
         [/^(\d+) regelmäßige (\d+)-Ecke an einer Ecke$/, (m, n, k) => n + ' polígonos regulares de ' + k + ' lados num vértice'],
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-18 mathe9-pt:
     ]
 });

@@ -32,6 +32,7 @@ window.BuchPT && BuchPT.add('gleichungen', {
         // book pt-13 mathegy9-pt:
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-18 mathe9-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gleichungen/*)
@@ -65,6 +66,7 @@ window.BuchPT && BuchPT.add('gleichungen', {
         // book pt-13 mathegy9-pt:
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-18 mathe9-pt:
     ],
     rule: [
         // pt0: the solution set is C.S. (conjunto-solução) in Portuguese schools, also in the widget sentences:
@@ -79,5 +81,6 @@ window.BuchPT && BuchPT.add('gleichungen', {
         // book pt-13 mathegy9-pt:
         // book pt-16 mathe7-pt:
         // book pt-17 mathe8-pt:
+        // book pt-18 mathe9-pt:
     ]
 });

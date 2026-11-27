@@ -904,3 +904,9 @@ Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Schreibweise
 | Kettenblatt · Ritzel · Übersetzung · Trittfrequenz | prato · carreto · relação de transmissão · cadência (pedaladas por minuto) | `fahrrados8` |
 | Zoll · Felge · Rahmenhöhe · Schrittlänge | polegada · jante · altura do quadro · altura do entrepernas | `reifenos8` |
 | Namen | Lena → Rita, Tim → Tomás, Mia → Marta (lb1-2; Mia im Widget `wegzeit8` bleibt), Max → Rui, Lea → Leonor, Lisa → Inês, Tom → Tiago, Bea → Beatriz, Cleo → Clara | |
+
+## mathe9-pt (OS 9, block pt-18)
+
+## mathe10-pt (OS 10, block pt-19)
+
+## mathegy10-pt (GY 10, block pt-20)
