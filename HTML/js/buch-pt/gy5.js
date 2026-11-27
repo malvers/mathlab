@@ -39,6 +39,14 @@ window.BuchPT && BuchPT.add('gy5', {
         'Zieh am Punkt auf der Geraden s, um sie zu drehen. Mit „h kippen“ sind g und h nicht mehr parallel.':
             'Arrasta o ponto sobre a reta s para a rodar. Com «Inclinar h», g e h deixam de ser paralelas.',
         'Zwei Geraden g und h, geschnitten von s': 'Duas retas g e h, intersetadas pela secante s',
+        // rechteck5 (chapter 3.2): the perimeter is P (German u), as Silva (pt-14) writes it
+        'Zusammengesetzte Figur': 'Figura composta', 'Figur': 'Figura', 'Zerlegen': 'Decompor', 'Ergänzen': 'Completar', 'Weg': 'Método',
+        'Zieh an der Ecke. Ein Kästchen ist 1 cm lang und 1 cm breit, also 1 cm² groß.': 'Arrasta o vértice. Cada quadradinho tem 1 cm de comprimento e 1 cm de largura, ou seja, 1 cm² de área.',
+        'Ein Quadrat: alle vier Seiten gleich lang.': 'Um quadrado: os quatro lados são iguais.',
+        'Zerlegen in zwei Rechtecke:': 'Decompor em dois retângulos:',
+        'Zum großen Rechteck ergänzen und das fehlende Stück abziehen:': 'Completar até ao retângulo grande e subtrair a parte que falta:',
+        'Erstaunlich: Der Umfang ist so groß wie beim ganzen Rechteck, weil die Stufe genauso lang ist wie die fehlenden Seiten.':
+            'Surpreendente: o perímetro é igual ao do retângulo inteiro, porque o degrau tem o mesmo comprimento que os lados que faltam.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy5/*)
@@ -91,5 +99,11 @@ window.BuchPT && BuchPT.add('gy5', {
         [/(<p class="g5-big">)Mittelwert (?=\d)/g, '$1Média '], [/<p>Summe: (?=\d)/g, '<p>Soma: '],
         // winkelpaare5: "g und h sind (nicht) parallel."
         [/g und h sind (nicht )?parallel\./g, (m, n) => 'g e h ' + (n ? 'não são paralelas.' : 'são paralelas.')],
+        // rechteck5: the aria label, the rows of squares, the perimeter P, the products × in the plain lines
+        [/^Rechteck aus (\d+) Einheitsquadraten$/, (m, n) => 'Retângulo formado por ' + n + (n === '1' ? ' quadrado unitário' : ' quadrados unitários')],
+        [/Das sind (\d+) Reihen mit je (\d+) Kästchen\./g, (m, r, n) => 'São ' + r + ' filas com ' + n + ' quadradinhos cada uma.'],
+        [/Das ist 1 Reihe mit (\d+) Kästchen\./g, (m, n) => 'É 1 fila com ' + n + (n === '1' ? ' quadradinho.' : ' quadradinhos.')],
+        [/(<p class="g5-big">)u = (?=\d)/g, '$1P = '], [/\$u = 2 \\times a \+ 2 \\times b = /g, '$$P = 2 \\times a + 2 \\times b = '],
+        [/<p>Zusammen (\d+) cm²<\/p>/g, '<p>Ao todo, $1 cm²</p>'], [/(\d) cm · (?=\d)/g, '$1 cm × '],
     ]
 });
