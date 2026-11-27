@@ -912,6 +912,63 @@
             #printWeek p { margin: 0; color: rgb(110, 110, 110); }
         }
 
+        /* ---------- the phone turned sideways (Doc, 27.11.2026: "wenn man den Kalender auf dem Phone quer dreht, geht
+           gar nicht ... man sieht praktisch gar nichts von den eigentlichen Ereignissen unten") ----------
+           A short landscape screen on a touch device only - portrait, tablets and the Mac keep everything above. The
+           header becomes ONE slim row in the order of the wide screen's (mic, field, search, back / period / forward
+           with the thought of the week, C / D, Heute, the views, gear), every control a little lower, and the day
+           names stand beside their dates instead of above them: the hours get the height. Left and right keep clear
+           of a camera cutout (safe area) */
+        @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+            :root { --ctl: 34px; --tb-word: 4em; --tb-pad: 4px; --nav-box: 172px; }
+            .top { padding: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 4px max(8px, env(safe-area-inset-left)); }
+            .bar { flex-wrap: nowrap; gap: 6px; }
+            .bar .row2 { display: contents; }
+            .bar #text, .bar .search-field { flex: 1 1 0; min-width: 72px; }
+            .bar input.new { font-size: 16px; }
+            .bar button.icon svg { width: 20px; height: 20px; }
+            .row2 .search-btn { order: 2; margin-left: 0; }
+            /* back, period, forward and the thought right behind the search, as on the wide screen; the box gives up
+               width before the field does (renderWeek then writes the month short). The thought's column is kept even
+               while its picture is still loading, so the box does not narrow after renderWeek has measured it */
+            .row2 .nav {
+                order: 2; flex: 0 1 auto;
+                grid-template-columns: var(--ctl) minmax(0, var(--nav-box)) var(--ctl) calc(var(--ctl) - 4px); grid-template-areas: "prev per next gdw";
+            }
+            /* a guest who may only read has no field: the arrows and the period stand in the middle of the room */
+            .bar:has(> #text[hidden]) .row2 .nav { margin: 0 auto; }
+            .nav .period { padding: 0 6px; font-size: 12px; line-height: 1.15; }
+            .nav .period small { font-size: 9px; line-height: 1.25; }
+            .row2 .views { order: 4; flex: 0 0 auto; gap: 6px; }
+            .bar #gearBtn { order: 5; }
+            .bar #todayBtn, .row2 .views button { font-size: 11px; letter-spacing: .02em; }
+            .wrap { padding: 6px max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left)); }
+            /* week and month: the day name and its date on one line, the arrows beside them as low as the circle. The
+               arrows keep their own side columns at every width here (no "kal" container, so the 800px rule does not
+               move them into the Monday and Sunday columns, where they would now cover "MO 23") */
+            .wk, .mo { padding-top: 4px; container-name: none; }
+            .wk-dayname { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 2px 0 4px; }
+            .wk-dayname b { margin: 0; width: 26px; height: 26px; font-size: 14px; line-height: 26px; }
+            .wk-head .nav-step { height: 28px; margin-bottom: 3px; }
+            .mo-head > span { padding: 2px 0 6px; }
+            .mo-head .nav-step { height: 28px; margin-bottom: 2px; }
+            /* the month's rows lower, so more of the six weeks shows at once */
+            .mo-cell { min-height: 52px; padding: 2px 3px; gap: 2px; }
+            .mo-cell .n { width: 24px; height: 24px; font-size: 12px; line-height: 24px; }
+            /* Tag: the "Als Nächstes" card no larger than upright - its type follows the width, which turning enlarges */
+            .hero { padding-top: 12px; padding-bottom: 12px; }
+            .hero-count { margin-top: 8px; font-size: 28px; }
+            .hero-title { font-size: 19px; }
+            .hero-bar { margin-top: 10px; }
+        }
+        /* narrower ones (iPhone SE: 667px): the period alone in the row - back and forward stay beside the day names of
+           week and month, the thought of the week shows when the phone stands upright again */
+        @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) and (max-width: 819px) {
+            .bar, .row2 .views { gap: 4px; }
+            .row2 .nav { grid-template-columns: minmax(0, var(--nav-box)); grid-template-areas: "per"; }
+            .nav #prevBtn, .nav #nextBtn, .nav .gdw { display: none; }
+        }
+
         [hidden] { display: none !important; }
     </style>
 </head>
@@ -1984,14 +2041,16 @@
                 $('vWeek').hidden = view !== 'week';
                 $('vMonth').hidden = view !== 'month';
                 for (const b of $('views').children) b.setAttribute('aria-selected', String(b.dataset.view === view));
+                // the header's own buttons first (a guest's field, C / D): with the phone turned sideways they share one
+                // row with the period, which renderWeek measures for the short month name
+                renderGuest();
+                renderFilter();
                 if (view === 'agenda') renderAgenda(now);
                 else if (view === 'week') renderWeek(now);
                 else renderMonth(now);
                 renderGdw();
                 renderSetting();
                 renderShare();
-                renderGuest();
-                renderFilter();
                 markHit(false);
                 refreshPreview();
             }
