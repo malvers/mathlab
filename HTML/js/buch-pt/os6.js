@@ -14,18 +14,33 @@ window.BuchPT && BuchPT.add('os6', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs os6/*)
         // book pt-14 mathe5-pt:
+        // the helpers of the module (the pieces of the tangram), reported for every page that loads it
+        'Quadrat': 'Quadrado', 'Parallelogramm': 'Paralelogramo',
+        // wuerfelbauos6: sólido formado por cubos, planta com as alturas, vistas (área total, as GY 6)
+        'Treppe': 'Escada', 'Turm': 'Torre', 'Mauer': 'Muro', 'Selbst bauen': 'Construir', 'Körper': 'Sólido', 'vorne': 'frente',
+        'Körper aus Würfeln im Schrägbild': 'Sólido formado por cubos, em perspetiva cavaleira',
+        'Bauplan: Draufsicht mit den Höhen': 'Planta: vista de cima com as alturas', 'Bauplan': 'Planta',
+        'von vorn': 'vista de frente', 'von rechts': 'vista da direita',
+        'Tippe im Bauplan auf ein Feld: Die Zahl sagt, wie viele Würfel dort übereinander stehen (bis 3, dann wieder 0). Kantenlänge 1 cm.':
+            'Toca numa casa da planta: o número diz quantos cubos estão empilhados nesse sítio (até 3, depois outra vez 0). Aresta de 1 cm.',
         // book pt-15 mathe6-pt:
         // book pt-16 mathe7-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs os6/*)
         // book pt-14 mathe5-pt:
+        // the helpers of the module (the pieces of the tangram)
+        ['großes Dreieck', 'triângulo grande'], ['mittleres Dreieck', 'triângulo médio'], ['kleines Dreieck', 'triângulo pequeno'],
+        // wuerfelbauos6: the line under the views (the number of cubes is a rule below)
+        [' · Oberfläche ', ' · área total '],
         // book pt-15 mathe6-pt:
         // book pt-16 mathe7-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-14 mathe5-pt:
+        // wuerfelbauos6: "7 Würfel · Volumen 7 cm³"
+        [/<b>(\d+)<\/b> Würfel · Volumen /, (m, n) => '<b>' + n + '</b> ' + (n === '1' ? 'cubo' : 'cubos') + ' · volume '],
         // book pt-15 mathe6-pt:
         // book pt-16 mathe7-pt:
     ]
