@@ -26,6 +26,17 @@ window.BuchPT && BuchPT.add('spiele', {
         // book pt-15 mathe6-pt:
         // book pt-19 mathe10-pt:
         // book pt-20 mathegy10-pt:
+        // spielstreuung
+        'Spiel': 'Jogo', 'Noch einmal spielen': 'Jogar outra vez',
+        'Runde': 'Ronda', 'Kontostand in €': 'Saldo em €', 'Kontostände von acht Spielern über hundert Runden': 'Saldos de oito jogadores ao longo de cem rondas',
+        // fairesspiel (a Pasch is a "dupla", two equal numbers, as the page text)
+        'Beim Schulfest wirft man zwei Würfel. Ein <b>Pasch</b> (zwei gleiche Augenzahlen) bringt den ersten Preis, die <b>Augensumme 7</b> den zweiten, alles andere nichts. Der Einsatz ist in jedem Fall weg.':
+            'Na festa da escola lançam-se dois dados. Uma <b>dupla</b> (dois números iguais) dá o primeiro prémio, a <b>soma das pintas 7</b> o segundo, tudo o resto nada. A aposta perde-se em qualquer caso.',
+        'Einsatz $e$': 'Aposta $e$', 'Auszahlung bei Pasch': 'Prémio com dupla', 'Auszahlung bei Summe 7': 'Prémio com soma 7',
+        'Fairen Einsatz einstellen': 'Pôr a aposta equitativa', '1000 Spiele': '1000 jogos',
+        'Pasch': 'Dupla', 'Summe 7': 'Soma 7', 'sonst': 'outro', 'Gewinn $x_i$ in €': 'Ganho $x_i$ em €',
+        'Lass das Spiel 1000-mal laufen und vergleiche den mittleren Gewinn mit dem Erwartungswert.': 'Faz correr o jogo 1000 vezes e compara o ganho médio com o valor médio.',
+        'Ergebnis': 'Resultado',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs spiele/*)
@@ -39,6 +50,19 @@ window.BuchPT && BuchPT.add('spiele', {
         // book pt-15 mathe6-pt:
         // book pt-19 mathe10-pt:
         // book pt-20 mathegy10-pt:
+        // spielstreuung
+        ['Gewinn $X$ pro Spiel: $', 'Ganho $X$ por jogo: $'], ['$ € mit $', '$ € com $'], [' = 0$: Das Spiel ist <b>fair</b>.', ' = 0$: o jogo é <b>equitativo</b>.'],
+        ['Standardabweichung $\\sigma = \\sqrt{V(X)} \\approx ', 'Desvio padrão $\\sigma = \\sqrt{V(X)} \\approx '],
+        ['$ € · gestrichelt: $\\pm\\sigma\\sqrt{n}$, nach 100 Runden $\\pm ', '$ € · a tracejado: $\\pm\\sigma\\sqrt{n}$, ao fim de 100 rondas $\\pm '],
+        ['Kontostände nach 100 Runden: ', 'Saldos ao fim de 100 rondas: '],
+        [' €. Gleicher Erwartungswert, aber je größer $\\sigma$, desto weiter liegen Gewinner und Verlierer auseinander: <b>$\\sigma$ misst das Risiko.</b>',
+            ' €. O mesmo valor médio, mas quanto maior for $\\sigma$, mais afastados ficam vencedores e perdedores: <b>$\\sigma$ mede o risco.</b>'],
+        // fairesspiel
+        ['Das Spiel ist <b>fair</b>.', 'O jogo é <b>equitativo</b>.'],
+        ['Für die Spielerin oder den Spieler <b>ungünstig</b>: Die Klasse verdient im Mittel ', '<b>Desfavorável</b> para a jogadora ou o jogador: a turma ganha em média '],
+        ['Für die Spielerin oder den Spieler <b>günstig</b>: Die Klasse verliert im Mittel ', '<b>Favorável</b> para a jogadora ou o jogador: a turma perde em média '],
+        [' € pro Spiel.', ' € por jogo.'], [' Fair wäre der Einsatz $e = \\tfrac{', ' A aposta equitativa seria $e = \\tfrac{'],
+        ['Gespielt: ', 'Jogados: '], [' Spiele, mittlerer Gewinn <b>', ' jogos, ganho médio <b>'], [' €</b> pro Spiel (Erwartungswert ', ' €</b> por jogo (valor médio '],
     ],
     rule: [
         // pt0: notation of the module, for every book
