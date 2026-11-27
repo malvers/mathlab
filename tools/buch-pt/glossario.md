@@ -578,5 +578,10 @@ ensino básico (3.º ciclo).
 | genau eine / keine / unendlich viele Lösungen | possível e determinado / impossível / possível e indeterminado | schneidend / parallel / identisch / orthogonal = concorrentes / (estritamente) paralelas / coincidentes / perpendiculares (Widget `lage`) |
 | vollständige Fallunterscheidung | análise completa de todos os casos | |
 | Fasane und Hasen (Sunzi suanjing) | faisões e coelhos (Sunzi suanjing) | |
+| zentrische Streckung · Streckzentrum $Z$ · Streckfaktor $k$ | homotetia · centro $O$ · razão $k$ | auch im Widget `streckung8` ($O$, Regel) |
+| Vergrößerung · Verkleinerung · Punktspiegelung | ampliação · redução · reflexão central | |
+| geradentreu · parallelentreu · winkeltreu | transforma retas em retas · retas em retas paralelas · conserva os ângulos | |
+| Streckenverhältnis · Verhältnisgleichung · Strahlensätze | razão entre segmentos · proporção · teorema de Tales | |
+| Storchschnabel (Pantograph) · Maßstab | pantógrafo · escala | GeoGebra: `Homotetia(Polígono, k, O)` |
 
 ## mathegy9-pt
