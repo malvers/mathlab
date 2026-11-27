@@ -45,6 +45,9 @@ window.BuchPT && BuchPT.add('gy12lk', {
         // titelbildgy12lk (cover)
         'Titelbild: ein Rotationskörper mit Kreisscheiben, ein Binomialhistogramm unter der Glockenkurve, zwei windschiefe Geraden mit ihrem kürzesten Verbindungsstück':
             'Capa: um sólido de revolução com discos, um histograma binomial sob a curva de Gauss, duas retas não complanares e o segmento mais curto entre elas',
+        // simpson (wb5): Fassregel = regra dos barris de Kepler, Simpsonregel = regra de Simpson, Abbruchregel = critério de paragem
+        'Anzahl der Streifen $n$ (gerade)': 'Número de faixas $n$ (par)', 'Graph mit Parabelbögen über je zwei Streifen': 'Gráfico com arcos de parábola sobre cada par de faixas',
+        'Trapez': 'Trapézio',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12lk/*)
@@ -74,6 +77,12 @@ window.BuchPT && BuchPT.add('gy12lk', {
         ['. Abstand $0$: Die Geraden <b>schneiden</b> sich in $S(', '. Distância $0$: as retas <b>intersetam-se</b> em $S('],
         ['. <b>Windschief</b>; das kürzeste Verbindungsstück (pink) verbindet $F(', '. <b>Não complanares</b>; o segmento mais curto (cor-de-rosa) une $F('], [')$ und $G(', ')$ e $G('],
         // book pt-23 mathegy12lk-pt:
+        // simpson
+        ['$. Simpson mit $n = ', '$. Simpson com $n = '],
+        ['Doppelt so viele Streifen: Trapezfehler etwa durch $', 'O dobro das faixas: o erro do trapézio fica dividido por cerca de $'],
+        ['$, Simpsonfehler etwa durch $', '$, o erro de Simpson por cerca de $'], ['$ geteilt. ', '$. '],
+        ['Abbruchregel „zwei Simpson-Werte unterscheiden sich um weniger als $10^{-6}$“: ', 'Critério de paragem «dois valores de Simpson diferem menos de $10^{-6}$»: '],
+        ['erfüllt ab $n = ', 'verificado a partir de $n = '], ['erst sehr spät erfüllt.', 'só se verifica muito tarde.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
