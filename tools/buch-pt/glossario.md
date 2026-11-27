@@ -694,6 +694,63 @@ Block pt-13 (Gomes, 27.11.2026). Gymnasium bleibt deutsch und wird auf der Start
 
 ## mathe5-pt (OS 5, block pt-14)
 
+Block pt-14 (Silva, 27.11.2026). Oberschule bleibt deutsch und wird auf der Startseite erklärt (Schule der Saxónia vom 5.º bis
+10.º ano, Realschulabschluss / Hauptschulabschluss; 5.º ano ≈ 5.º ano do ensino básico, 2.º ciclo). Wahlbereich `k: 'O'` (Área
+opcional) wie GY 6. Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Schreibweisen:
+
+- **× für das Produkt** überall (Seiten und Widgets; TeX über `geometrie.js` pt0, Klartext „4 738 · 3“ über die Regel in `os5.js`,
+  das Rechenzeichen zwischen den Eingaben über `SIGN` in `js/buch-os5.js`).
+- **Punkte** $A(2, 3)$, mit Dezimalkomma $A(1{,}5; 2)$, auch im Klartext der Widgets (Regel in `os5.js`); Strecke $[AB]$, Gerade $AB$.
+- **Umfang** $P$, **Flächeninhalt** $A$, **Oberfläche** área total $A$ (wie GY 6, auch in `rechteck5`, `quader5`); der Tag bleibt `d`.
+- **Stellenwerttafel** = quadro de ordens e classes: C D U in jeder Klasse unter MIL MILH. / MILHÕES / MILHARES / UNIDADES (Regel
+  in `gy5.js` pt-14); mit Komma UM C D U , d c m (Regel pt-15 in `gy5.js`, für beide Bücher).
+- **Zahlwörter** nach portugiesischer Schulschreibung, lange Skala (10⁹ mil milhões, 10¹² um bilião), „e“ vor der letzten Dreiergruppe
+  unter 100 oder runden Hundertern; Dezimalzahlen gelesen „três unidades e quarenta e sete milésimas“ (Regel in `gy5.js`).
+- Die **natürlichen Zahlen** beginnen im Buch wie in der deutschen Schule bei 0; einmal erklärt (in Portugal ab 1).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Zahlenstrahl · Einteilung · Strich · Schritt | reta numérica · graduação · traço · passo | |
+| Vorgänger · Nachfolger | antecessor · sucessor | |
+| Stelle · Stellenwert · Ziffer · Dreiergruppe | ordem · valor posicional · algarismo · classe | „ordem das centenas“ |
+| Milliarde · Billion | mil milhões · bilião | einmal: brasilianisch „bilhão“ = 10⁹ |
+| runden · aufrunden · abrunden · Rundungsstelle | arredondar · por excesso · por defeito · ordem do arredondamento | „arredondar às dezenas / aos milhares“ |
+| schriftlich · halbschriftlich · Übertrag | em coluna (algoritmo) · em linha · transporte („e vai um“) | |
+| Ergänzen · Entbündeln (Subtraktion) | completar („de 7 para 13 vão 6“) · desagrupar | |
+| Summand · Minuend · Subtrahend · Teilprodukt | parcela · aditivo · subtrativo · produto parcial | |
+| Überschlag · Probe · Umkehraufgabe | estimativa · prova / verificação · operação inversa | |
+| Vorrangregeln · Punkt vor Strich · Term | prioridade das operações · × e : antes de + e − · expressão numérica | |
+| Vertauschungs- / Verbindungs- / Verteilungsgesetz | propriedade comutativa / associativa / distributiva | |
+| Zehnerpotenz · Grundzahl · Hochzahl | potência de base 10 · base · expoente | |
+| Quadratzahl · Quadratwurzel · Plättchen | quadrado perfeito · raiz quadrada · quadradinhos | |
+| Gleichung · Ungleichung · Variable · Einsetzen | equação · inequação · variável · substituir | |
+| Teiler · Vielfache · Quersumme · Primzahlzwillinge | divisores · múltiplos · soma dos algarismos · primos gémeos | |
+| echter / unechter Bruch · gemischte Zahl · Stammbruch | fração própria / imprópria · numeral misto · fração unitária | |
+| Erweitern · Kürzen (Knöpfe) | Termos × 2 · Simplificar | |
+| Ganzes · Bruchteil | unidade (Zahl) / todo (Menge) · fração de uma quantidade | |
+| Zehnerbruch · Zehntel · Hundertstel · Tausendstel | fração decimal · décima · centésima · milésima | |
+| Prozent · Hunderterfeld | percentagem / por cento · quadrado de cem | |
+| Durchschnitt · Notendurchschnitt | média · média das classificações | deutsche Noten 1–6 einmal erklärt |
+| Einheitentreppe · Umrechnungszahl · ct | escada das unidades · fator de conversão · cêntimos | |
+| Koordinatensystem · x-Achse · y-Achse · Ursprung | referencial cartesiano · eixo das abcissas · eixo das ordenadas · origem | |
+| Strecke · Strahl · Gerade · parallel · senkrecht | segmento de reta · semirreta · reta · paralelas · perpendiculares | |
+| Scheitelpunkt · Schenkel · Geodreieck | vértice · lados · esquadro-transferidor (transferidor) | |
+| spitz · recht · stumpf · gestreckt · überstumpf · Vollwinkel | agudo · reto · obtuso · raso · côncavo · giro | |
+| Schrägbild · Verzerrungswinkel · Verkürzungsverhältnis | perspetiva cavaleira · ângulo de fuga · razão de redução | |
+| Würfelnetz · Kantenmodell · Vollmodell · Klebelasche | planificação do cubo · modelo de arestas · modelo maciço · aba para colar | |
+| Bauplan · Draufsicht | planta · vista de cima | `wuerfelbauos6` |
+| achsensymmetrisch · Symmetrieachse · Faltprobe | com simetria axial · eixo de simetria · prova da dobragem | |
+| Geradenspiegelung · Spiegelachse · Original · Bild | reflexão axial · eixo de reflexão · figura original · imagem | $P'$ „P linha“ |
+| Verschiebung · Verschiebungspfeil · Drehung um Z | translação · seta da translação · rotação de centro O | |
+| deckungsgleich · umgeklappt · Umlaufsinn | geometricamente iguais · virada ao contrário · sentido | |
+| Bandornament · Motiv | friso · motivo | |
+| Kerbholz · Kerbe · Strichliste · Fünferbündel | pau entalhado · entalhe · tabela de contagem · grupo de cinco | |
+| Keil · Winkelhaken · Sechzigersystem | cunha · cunha em ângulo · sistema sexagesimal | |
+| Strich · Fessel · Seil · Lotus (ägyptisch) | traço · arco · corda · flor de lótus | |
+| Rechenpfennig · Rechentisch · Linie · Zwischenraum · bündeln | ficha de cálculo · mesa de calcular · linha · espaço · agrupar | Adam Ries |
+| Elle | côvado | lb2-3 |
+| Namen | Lina → Leonor, Familie Kühn → família Costa, Tom → Tiago, Lea → Rita, Tim → Tomás, Mia → Inês, Jonas → João, Lena → Beatriz, Max → Rui, Ali → Duarte, Paul → Pedro | |
+
 ## mathe6-pt (OS 6, block pt-15)
 
 ## mathe7-pt (OS 7, block pt-16)

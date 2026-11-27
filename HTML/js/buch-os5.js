@@ -48,8 +48,8 @@
     const isHero = box => box.dataset.hero != null;
     // the decimal separator: a point in the English editions, a comma everywhere else
     const DP = B.en ? '.' : ',';
-    // the signs of British (× ÷) and French (×) schools where an edition shows a sign the dictionary cannot reach (input values, a lone sign)
-    const SIGN = t => B.en ? String(t).replace(/·/g, '×').replace(/:/g, '÷') : B.lang === 'fr' ? String(t).replace(/·/g, '×') : t;
+    // the signs of British (× ÷) and French and Portuguese (×) schools where an edition shows a sign the dictionary cannot reach (input values, a lone sign)
+    const SIGN = t => B.en ? String(t).replace(/·/g, '×').replace(/:/g, '÷') : (B.lang === 'fr' || B.lang === 'pt') ? String(t).replace(/·/g, '×') : t;
     // hero mode (chapter opener): only the picture, centred
     function heroOnly(box, pic, hide, maxW) {
         if (!isHero(box)) return false;
