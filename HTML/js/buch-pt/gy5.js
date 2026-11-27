@@ -28,6 +28,11 @@ window.BuchPT && BuchPT.add('gy5', {
         'Beim Multiplizieren mit 10 rückt jede Ziffer eine Stelle nach links, beim Dividieren nach rechts. Man sagt kurz: Das Komma wandert.':
             'Ao multiplicar por 10, cada algarismo avança uma ordem para a esquerda; ao dividir, para a direita. Diz-se, para abreviar, que a vírgula se desloca.',
         'nicht möglich: Die Ziffern würden aus der Tafel fallen.': 'não é possível: os algarismos sairiam do quadro.',
+        // mittel5 (chapter 1.3): the mean is a média
+        'Ausgleichen': 'Igualar', 'Neue Werte': 'Novos valores', 'Mittelwert': 'Média', 'Säulen mit dem Mittelwert': 'Barras com a média',
+        'Zieh die Säulen höher oder niedriger. „Ausgleichen“ verteilt alles gerecht: Jede Säule bekommt gleich viel.':
+            'Arrasta as barras para cima ou para baixo. «Igualar» reparte tudo de forma justa: cada barra fica com o mesmo.',
+        'Was über der Linie war (gestrichelt grau), füllt genau die Lücken (gelb).': 'O que estava acima da linha (tracejado cinzento) preenche exatamente os espaços vazios (amarelo).',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy5/*)
@@ -47,6 +52,8 @@ window.BuchPT && BuchPT.add('gy5', {
         ['Jetzt vergleicht man nur die Zähler: ', 'Agora basta comparar os numeradores: '],
         ['Als Dezimalzahlen: A ≈ ', 'Como números decimais: A ≈ '],
         ['. Weiter rechts auf dem Zahlenstrahl heißt größer.', '. Mais à direita na reta numérica quer dizer maior.'],
+        // mittel5: "Geteilt durch die Anzahl: 25 : 5 = 5" (the lines with a tag in front are rules)
+        ['Geteilt durch die Anzahl: ', 'A dividir pelo número de valores: '],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -63,5 +70,7 @@ window.BuchPT && BuchPT.add('gy5', {
             a + ({ ZT: 'DM', T: 'UM', H: 'C', Z: 'D', E: 'U', z: 'd', h: 'c', t: 'm' })[k] + b)],
         [/(<button type="button" class="b-btn" data-o="m" data-k="\d+">)· /g, '$1× '],
         [/^<p>([^<]*?) · (\d+) =<\/p>/, '<p>$1 × $2 =</p>'],
+        // mittel5: "Mittelwert 5" and "Summe: 6 + 3 + … = 25" (a tag in front: rules, the pieces never see tags)
+        [/(<p class="g5-big">)Mittelwert (?=\d)/g, '$1Média '], [/<p>Summe: (?=\d)/g, '<p>Soma: '],
     ]
 });
