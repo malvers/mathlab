@@ -573,5 +573,10 @@ ensino básico (3.º ciclo).
 | Regressionsgerade · Methode der kleinsten Quadrate · Trendlinie | reta de regressão · método dos mínimos quadrados · linha de tendência | `=DECLIVE(…)`, `=INTERCETAR(…)` (Excel pt-PT) |
 | Grundgebühr (Taxi) · Steigung 12 % · Gefälle | bandeirada · inclinação de 12 % · descida | |
 | Federkraftmesser · Handyakku | dinamómetro · bateria do telemóvel | |
+| lineares Gleichungssystem · Schnittpunkt · Lösung $(x \mid y)$ | sistema de equações lineares · ponto de interseção · solução $(x, y)$ | $\text{C.S.} = \{(2, 3)\}$; Schnittpunkt im Text ohne Buchstaben |
+| Einsetzungs- / Gleichsetzungs- / Additionsverfahren | método de substituição / de igualação / de adição ordenada | auch im Widget `lgs8` |
+| genau eine / keine / unendlich viele Lösungen | possível e determinado / impossível / possível e indeterminado | schneidend / parallel / identisch / orthogonal = concorrentes / (estritamente) paralelas / coincidentes / perpendiculares (Widget `lage`) |
+| vollständige Fallunterscheidung | análise completa de todos os casos | |
+| Fasane und Hasen (Sunzi suanjing) | faisões e coelhos (Sunzi suanjing) | |
 
 ## mathegy9-pt

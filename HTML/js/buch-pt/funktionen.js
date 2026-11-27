@@ -106,6 +106,8 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
         // book pt-12 mathegy8-pt:
+        // lage (chapter 3.3): the example buttons, as the line words of js/buch-pt/vektoren.js ('parallel' there means colineares: a rule below)
+        'schneidend': 'concorrentes', 'orthogonal': 'perpendiculares', 'identisch': 'coincidentes',
         // book pt-13 mathegy9-pt:
     },
     phrase: [
@@ -244,6 +246,8 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
         // book pt-12 mathegy8-pt:
+        // lage: the example button "parallel" (lines: paralelas; the word 'parallel' of js/buch-pt/vektoren.js is colineares for vectors)
+        [/(data-v="parallel">)parallel</g, '$1paralelas<'],
         // book pt-13 mathegy9-pt:
     ]
 });
