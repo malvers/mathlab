@@ -33,6 +33,12 @@ window.BuchPT && BuchPT.add('gy5', {
         'Zieh die Säulen höher oder niedriger. „Ausgleichen“ verteilt alles gerecht: Jede Säule bekommt gleich viel.':
             'Arrasta as barras para cima ou para baixo. «Igualar» reparte tudo de forma justa: cada barra fica com o mesmo.',
         'Was über der Linie war (gestrichelt grau), füllt genau die Lücken (gelb).': 'O que estava acima da linha (tracejado cinzento) preenche exatamente os espaços vazios (amarelo).',
+        // winkelpaare5 (chapter 3.1): verticalmente opostos, suplementares (adjacentes), correspondentes, alternos internos (glossary pt-10)
+        'Scheitelwinkel': 'Verticalmente opostos', 'Nebenwinkel': 'Suplementares', 'Stufenwinkel': 'Correspondentes', 'Wechselwinkel': 'Alternos internos',
+        'Winkelpaar': 'Par de ângulos', 'Anderes Paar': 'Outro par', 'h kippen': 'Inclinar h',
+        'Zieh am Punkt auf der Geraden s, um sie zu drehen. Mit „h kippen“ sind g und h nicht mehr parallel.':
+            'Arrasta o ponto sobre a reta s para a rodar. Com «Inclinar h», g e h deixam de ser paralelas.',
+        'Zwei Geraden g und h, geschnitten von s': 'Duas retas g e h, intersetadas pela secante s',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy5/*)
@@ -54,6 +60,17 @@ window.BuchPT && BuchPT.add('gy5', {
         ['. Weiter rechts auf dem Zahlenstrahl heißt größer.', '. Mais à direita na reta numérica quer dizer maior.'],
         // mittel5: "Geteilt durch die Anzahl: 25 : 5 = 5" (the lines with a tag in front are rules)
         ['Geteilt durch die Anzahl: ', 'A dividir pelo número de valores: '],
+        // winkelpaare5: the rule under the picture
+        ['Scheitelwinkel liegen sich am selben Schnittpunkt gegenüber. Sie sind <b>immer gleich groß</b>.',
+            'Os ângulos verticalmente opostos ficam frente a frente no mesmo ponto de interseção. São <b>sempre iguais</b>.'],
+        ['Nebenwinkel liegen am selben Schnittpunkt nebeneinander und bilden zusammen einen gestreckten Winkel: Sie ergänzen sich <b>immer zu 180°</b>.',
+            'Os ângulos suplementares adjacentes ficam lado a lado no mesmo ponto de interseção e formam juntos um ângulo raso: somam <b>sempre 180°</b>.'],
+        ['Stufenwinkel liegen an verschiedenen Schnittpunkten auf derselben Seite von s und derselben Seite der Geraden. ',
+            'Os ângulos correspondentes ficam em pontos de interseção diferentes, do mesmo lado de s e do mesmo lado das retas. '],
+        ['Wechselwinkel liegen an verschiedenen Schnittpunkten auf verschiedenen Seiten von s und zwischen den Geraden. ',
+            'Os ângulos alternos internos ficam em pontos de interseção diferentes, em lados diferentes de s e entre as retas. '],
+        ['An <b>parallelen</b> Geraden sind sie <b>gleich groß</b>.', 'Em retas <b>paralelas</b>, são <b>iguais</b>.'],
+        ['Weil g und h <b>nicht parallel</b> sind, sind sie verschieden groß.', 'Como g e h <b>não são paralelas</b>, têm amplitudes diferentes.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -72,5 +89,7 @@ window.BuchPT && BuchPT.add('gy5', {
         [/^<p>([^<]*?) · (\d+) =<\/p>/, '<p>$1 × $2 =</p>'],
         // mittel5: "Mittelwert 5" and "Summe: 6 + 3 + … = 25" (a tag in front: rules, the pieces never see tags)
         [/(<p class="g5-big">)Mittelwert (?=\d)/g, '$1Média '], [/<p>Summe: (?=\d)/g, '<p>Soma: '],
+        // winkelpaare5: "g und h sind (nicht) parallel."
+        [/g und h sind (nicht )?parallel\./g, (m, n) => 'g e h ' + (n ? 'não são paralelas.' : 'são paralelas.')],
     ]
 });
