@@ -1392,8 +1392,37 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 .stage.portrait .imp-page .imp p { font-size: calc(var(--u) * 1.75); }
 .stage.portrait .p-imp .imp-b, .stage.portrait .p-imp2 .imp-a, .stage.portrait .p-imp2 .imp-vign { display: none; }
 .stage.portrait .p-imp2 .imp p { font-size: calc(var(--u) * 1.5); line-height: 1.38; }
-/* "So geht's" without the imprint: a gold divider closes it */
-.notes .so-end { display: block; width: 30cqw; margin: 4cqh auto 0; flex: none; }
+/* the heart under the imprint sat too low on the desk, the page's foot cut it (Doc, 27.11.2026: "Unterm Impressum, da ist so
+   ein Herz, das ist zu weit unten, das ist geklatscht"): the small print a touch tighter, so print, heart and the footer with
+   the page arrow all fit inside the page's frame - the heart stands free above the footer line */
+.stage:not(.portrait) .imp-page .imp p { font-size: calc(var(--u) * 1.52); line-height: 1.4; margin-bottom: .75cqh; }
+.imp-page .imp-vign { margin: auto auto 1.2cqh; padding-top: 2.2cqh; }
+/* the phone's credits page has no heart: its arrows go to the page's foot on their own */
+.stage.portrait .p-imp2 .ft { margin-top: auto; }
+/* the book's last page (Doc, 27.11.2026: "the future was yesterday ... ein bisschen größer in die Mitte. Und unten drunter ...
+   einen Verweis auf das nächste Buch ... mit einem leicht schräg gestellten Cover. Auch leicht reingekippt"): the slogan as
+   the heading in the contents' script, under it next year's cover - the book's own cover, cloned by the script - tilted and
+   tipped back into the page, with a caption; cover and caption are one link to that year's book */
+.nx { align-items: center; text-align: center; }
+.nx .ft { align-self: stretch; }   /* the page arrow at the page's edge, not centred with the rest */
+.nx-h { margin: auto 0 0; padding: 0 .3em .12em; font-family: 'Great Vibes', 'Pinyon Script', cursive; font-weight: 400;
+  font-size: calc(var(--u) * 9.4); line-height: 1.08; letter-spacing: 0; color: var(--ink); }
+.nx-link { display: flex; flex-direction: column; align-items: center; gap: 3.4cqh; margin-top: 5cqh; color: inherit; text-decoration: none;
+  perspective: calc(var(--u) * 110); outline: none; -webkit-tap-highlight-color: transparent; }
+.nx-book { position: relative; display: block; width: calc(var(--u) * 33); aspect-ratio: 500 / 700; transform-style: preserve-3d;
+  transform: rotateX(8deg) rotateY(17deg) rotateZ(-4deg); transition: transform .55s cubic-bezier(.2, .75, .25, 1); }
+.nx-book > .pg { border-radius: 0 calc(var(--u) * .7) calc(var(--u) * .7) 0; transition: box-shadow .55s;
+  box-shadow: 0 0 0 1px rgba(10, 18, 34, .35), calc(var(--u) * 1.4) calc(var(--u) * 2) calc(var(--u) * 2.6) rgba(45, 28, 8, .36), calc(var(--u) * .3) calc(var(--u) * .5) calc(var(--u) * .8) rgba(45, 28, 8, .3); }
+/* the spine, seen edge-on on the left as the book turns */
+.nx-book::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: calc(var(--u) * 2.4); transform-origin: 0 50%; transform: rotateY(90deg);
+  background: linear-gradient(90deg, #0e1830, #1c2c4f 45%, #0e1830); }
+.nx-cap { font-family: var(--read); font-style: italic; font-size: calc(var(--u) * 2.9); color: var(--print-soft); white-space: nowrap; transition: color .25s; }
+/* the gentle lift: the book rises and turns a little towards the reader */
+.nx-link:hover .nx-book, .nx-link:focus-visible .nx-book { transform: translateY(-1.4cqh) rotateX(4deg) rotateY(9deg) rotateZ(-2deg) scale(1.03); }
+.nx-link:hover .nx-book > .pg, .nx-link:focus-visible .nx-book > .pg {
+  box-shadow: 0 0 0 1px rgba(10, 18, 34, .35), calc(var(--u) * 2.2) calc(var(--u) * 3.4) calc(var(--u) * 4) rgba(45, 28, 8, .32), calc(var(--u) * .4) calc(var(--u) * .7) calc(var(--u) * 1.1) rgba(45, 28, 8, .28); }
+.nx-link:hover .nx-cap, .nx-link:focus-visible .nx-cap { color: var(--ochre); }
+@media (prefers-reduced-motion: reduce) { .nx-book, .nx-book > .pg { transition: none; } }
 /* the quiet page before the back endpaper: paper, a small gold heart a little below the middle */
 .finis { position: absolute; inset: 0; display: grid; place-items: center; }
 .finis svg { width: 7cqw; margin-top: 18cqh; opacity: .75; }
@@ -2002,7 +2031,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 <template id="tpl-wolkeR"><div class="pg paper"><div class="cloud"><svg viewBox="500 0 500 700" preserveAspectRatio="xMidYMid slice" aria-label="Mein Jahr in Worten, rechte Hälfte"><use href="#draw-cloud-spread"/></svg></div></div></template>
 <template id="tpl-wolkeP"><div class="pg paper"><div class="cloud"><svg viewBox="0 0 600 960" preserveAspectRatio="xMidYMid slice" aria-label="Mein Jahr in Worten, gemalt (Beispielwörter)"><use href="#draw-cloud-portrait"/></svg></div></div></template>
 
-<!-- a whole page for notes before "So geht's" (Doc, 24.11.2026: "vorher eine extra Seite, eine ganze Seite mit Notizen"); on the
+<!-- a whole page for notes before the imprint (Doc, 24.11.2026: "vorher eine extra Seite, eine ganze Seite mit Notizen"); on the
      desk a spread of two, because the back board must close alone (the book keeps its pages in pairs) -->
 <template id="tpl-lines1">
   <div class="pg paper"><div class="in notes">
@@ -2019,24 +2048,10 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   </div></div>
 </template>
 
-<template id="tpl-notes">
-  <div class="pg paper"><div class="in notes">
-    <div class="hd"><div class="nm">SO GEHT'S</div></div>
-    <p><b>Morgens</b> drei Gedanken, jeder 30 Sekunden. Die Uhr gibt nur den Takt vor, sie drängt nicht.</p>
-    <p><b>In der Mitte</b> liegt ein Gedanke für den Tag; den Gedanken der Woche zeigt die Wochenseite.</p>
-    <p><b>Abends</b> drei Gedanken, dann die Haken für die Gewohnheiten.</p>
-    <p><b>Sonntags</b> die Woche auf einer Doppelseite. Hinten wächst dein Jahr in Worten.</p>
-    <!-- the imprint has a page of its own now (tpl-imp); a gold divider closes "So geht's" -->
-    <svg class="so-end" viewBox="0 0 200 20" aria-hidden="true"><path d="M5 10 H80 M120 10 H195" stroke="#b07a14" stroke-width="1.2"/><path d="M100 3 L107 10 L100 17 L93 10 Z" fill="none" stroke="#b07a14" stroke-width="1.2"/><circle cx="86" cy="10" r="1.6" fill="#b07a14"/><circle cx="114" cy="10" r="1.6" fill="#b07a14"/></svg>
-    <!-- no page number here: 365 is the 31st of December (Doc, 24.11.2026) -->
-    <!-- no "So geht's · Impressum" down here (Doc, 24.11.2026) - his slogan instead, the back cover carries the other one -->
-    <div class="ft"><span class="pn"></span><span class="ft-say">The future was yesterday.</span></div>
-  </div></div>
-</template>
-
 <!-- the imprint on a page of its own (Doc, 25.11.2026: "noch eine zweite Seite und auf die rechte Seite das Impressum. Dann
-     machen wir da was Schönes drunter"): on the desk right of "So geht's", in two columns, a gold vignette under it; on the
-     phone in two pages (the second, "imp2", a copy of this one made by the script, carries the credits) -->
+     machen wir da was Schönes drunter"): in two columns, a gold vignette under it; on the phone in two pages (the second,
+     "imp2", a copy of this one made by the script, carries the credits). Since 27.11.2026 the left page of the last spread,
+     the book's last page beside it (Doc: "macht die Seite als letzte und das Impressum davor") -->
 <template id="tpl-imp">
   <div class="pg paper"><div class="in notes imp-page">
     <div class="hd"><div class="nm">IMPRESSUM</div></div>
@@ -2060,6 +2075,20 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       </div>
     </div>
     <svg class="imp-vign" viewBox="0 0 240 40" aria-hidden="true"><g fill="none" stroke="#b07a14" stroke-width="1.1" stroke-linecap="round"><path d="M120 31 C108 23 104 17 106 13 C108 8 116 8 120 14 C124 8 132 8 134 13 C136 17 132 23 120 31 Z" fill="#b07a14" fill-opacity=".14"/><path d="M100 20 C88 20 80 12 68 13 C58 14 56 26 66 26 C73 26 73 18 67 18"/><path d="M140 20 C152 20 160 12 172 13 C182 14 184 26 174 26 C167 26 167 18 173 18"/><path d="M56 20 H16 M184 20 H224"/></g><circle cx="11" cy="20" r="1.6" fill="#b07a14"/><circle cx="229" cy="20" r="1.6" fill="#b07a14"/></svg>
+    <!-- the page arrows like on every other page: as the left page of the last spread the desk needs its arrow back -->
+    <div class="ft"><span class="pn"></span></div>
+  </div></div>
+</template>
+<!-- the book's last page (Doc, 27.11.2026: "der Spruch, the future was yesterday, ist natürlich der absolut perfekt.
+     Vielleicht ein bisschen größer in die Mitte. Und unten drunter ... machen wir einen Verweis auf das nächste Buch für 2027
+     ... Und wenn man da drauf klickt, kommt man auf das neue Buch"): instead of "So geht's", after the imprint. The script
+     puts next year's cover into .nx-book and sets the link (personalise, kind 'next'); the caption Doc's ("And tomorrow?
+     Already waiting.") -->
+<template id="tpl-next">
+  <div class="pg paper"><div class="in nx">
+    <h4 class="nx-h">The future<br>was yesterday.</h4>
+    <a class="nx-link"><span class="nx-book"></span><span class="nx-cap">And tomorrow? Already waiting.</span></a>
+    <div class="ft r"><span class="pn"></span></div>
   </div></div>
 </template>
 <!-- a quiet page before the back endpaper, only a small gold heart (the desk; it keeps the pages even, so the back board
@@ -2912,7 +2941,10 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     });
     if (m === 'desk') { add('wolkeL'); add('wolkeR'); } else add('wolkeP');
     add('lines1'); if (m === 'desk') add('lines2');
-    add('notes'); add('imp'); if (m === 'desk') { add('finis'); add('endpaper2'); } else add('imp2');
+    /* the imprint, then the book's last page with next year's cover (Doc, 27.11.2026: "macht die Seite als letzte und das
+       Impressum davor") - the desk shows both as one spread; finis is that leaf's quiet back beside the back endpaper */
+    add('imp'); if (m === 'phone') add('imp2');
+    add('next'); if (m === 'desk') { add('finis'); add('endpaper2'); }
     add('back');
     return seq;
   }
@@ -2956,6 +2988,33 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     if (spec.kind === 'set1') {
       markSegs(d);
       setText(d, '[data-where]', remote ? 'der Rest des Buchs ebenfalls in deinem Konto.' : 'der Rest des Buchs vorerst nur in diesem Browser, bis die neue Tabelle angelegt ist.');
+    }
+    /* the book's last page (Doc, 27.11.2026): next year's book. Its cover is this book's own cover template with next year on
+       it - fillPage then writes the name and the symbol from the link onto it, as on the real cover. The link keeps what
+       makes the book someone's (?fuer=, ?symbol=, ?geb=, ?gruss=, ?schrift=, ...), drops what picks a day or a page of this
+       book (?tag=, ?seite=, ?spruch=, ?sonntag=, ?sondertag=) and opens the new book at its cover - without ?seite= it would
+       open at the page this browser left last, which is this very page */
+    if (spec.kind === 'next') {
+      const nxt = YEAR + 1, book = d.querySelector('.nx-book'), link = d.querySelector('.nx-link');
+      if (book && !book.firstElementChild) {
+        const cv = document.getElementById('tpl-cover').content.cloneNode(true);
+        /* own ids for the copy's gradients: the real cover's may sit in a hidden page, and a url(#...) into a hidden page
+           paints nothing */
+        cv.querySelectorAll('[id]').forEach(el => {
+          const id = el.id; el.id = id + '-nx';
+          cv.querySelectorAll('[stroke="url(#' + id + ')"]').forEach(s => s.setAttribute('stroke', 'url(#' + id + '-nx)'));
+        });
+        cv.querySelectorAll('.cv-year').forEach(el => { el.textContent = String(nxt); });
+        book.appendChild(cv);
+      }
+      if (link) {
+        let q = new URLSearchParams();
+        try { q = new URLSearchParams(location.search); } catch (e) { }
+        ['tag', 'seite', 'spruch', 'sonntag', 'sondertag'].forEach(p => q.delete(p));
+        q.set('jahr', String(nxt)); q.set('seite', 'cover');
+        link.href = location.pathname + '?' + q.toString();
+        link.setAttribute('aria-label', 'Grateful ' + nxt + ', das nächste Buch, aufschlagen');
+      }
     }
     if (spec.kind === 'morgen' || spec.kind === 'abend') {
       /* the date without the year, it is the book's year anyway (Doc, 24.11.2026) */
@@ -3204,7 +3263,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
     let name = '';
     try { name = localStorage.getItem(LAST_KEY) || ''; } catch (e) { }
     if (!name) return -1;
-    const twin = { wolkeL: 'wolkeP', wolkeR: 'wolkeP', wolkeP: 'wolkeL', lines2: 'lines1', endpaper2: 'imp', finis: 'imp', imp2: 'imp', set2: 'set1' };
+    const twin = { wolkeL: 'wolkeP', wolkeR: 'wolkeP', wolkeP: 'wolkeL', lines2: 'lines1', endpaper2: 'next', finis: 'next', imp2: 'imp', set2: 'set1', notes: 'next' };
     const [kind, key] = name.split('@');
     const tries = [name, twin[kind] || '', kind === 'spruch' ? 'morgen@' + key : '', kind === 'abend' || kind === 'morgen' ? (mode === 'desk' ? 'morgen@' : kind + '@') + key : ''];
     for (const n of tries) { if (n && at(n) >= 0) return at(n); }
@@ -3666,12 +3725,12 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       w: () => 'wocheL@' + sundayOf(regDay || TODAY), m: () => 'monatL@' + (regDay || TODAY).slice(0, 7),
       c: () => mode === 'desk' ? 'wolkeL' : 'wolkeP', r: () => 'back', s: () => 'cover',
       h: () => 'morgen@' + TODAY /* H = today (Doc, 25.11.2026: "eine Pille für H wie heute") */,
-      p: () => 'imp' /* P = the imprint, on its own page next to "So geht's" (Doc, 24.11.2026 / 25.11.2026) */,
+      p: () => 'imp' /* P = the imprint, on its own page, the book's last page beside it (Doc, 24.11.2026 / 25.11.2026 / 27.11.2026) */,
       n: () => 'lines1' /* N = the notes page (Doc, 24.11.2026) */ })[e.key.toLowerCase()];
     if (jump) {
       e.preventDefault();
       const name = jump(), t = at(name);
-      const there = t >= 0 && (idx === t || (/L(@|$)/.test(name) && idx === t + 1) || (name === 'imp' && mode === 'desk' && idx === t - 1));
+      const there = t >= 0 && (idx === t || (/L(@|$)/.test(name) && idx === t + 1) || (name === 'imp' && mode === 'desk' && idx === t + 1));
       goPage(there ? 'morgen@' + (regDay || TODAY) : name);
       return;
     }
