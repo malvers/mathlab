@@ -431,16 +431,21 @@
             position: absolute; top: -7px; right: 6px; font: 500 10px Orbitron, sans-serif; color: var(--muted); font-variant-numeric: tabular-nums;
         }
         .wk-hours span.end { top: auto; bottom: 2px; }
-        /* hour zoom: + over - pinned to the top of the visible box inside the hour column, as wide as the labels and
-           opaque, so the hours scroll away under them (Doc, 26.11.2026); zero height in the flow, so the hours stay put */
+        /* hour zoom: + over - pinned to the top of the visible box inside the hour column, as wide as the labels (Doc,
+           26.11.2026); zero height in the flow, so the hours stay put. Drawn like the labels - outline and glyph in their
+           colour, no ground of their own (Doc, 27.11.2026: "Das muss so sein wie die Zahlen unten, also nur die Outlines"):
+           a label scrolling beneath them steps aside instead (fitWeek: .under) */
         .wk-hours > div.wk-zoom { position: sticky; top: 0; z-index: 3; height: 0; overflow: visible; }
-        .wk-zoom-in { position: absolute; top: 0; left: 0; right: 0; height: 36px; padding: 2px 6px 0 0; background: var(--card); display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .wk-zoom-in { position: absolute; top: 0; left: 0; right: 0; height: 36px; padding: 2px 6px 0 0; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .wk-hours span.under { visibility: hidden; }
         /* as wide as the hour labels in ANY font: the label's typography and an invisible "08" size the button; the rim is an inset
            shadow (a border would add width); the +/- glyph is centred on top */
-        button.icon.wk-zoom-btn { position: relative; flex: 0 0 16px; width: auto; height: 16px; padding: 0; border: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--line);
+        button.icon.wk-zoom-btn { position: relative; flex: 0 0 16px; width: auto; height: 16px; padding: 0; border: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--muted);
             font: 500 10px Orbitron, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: normal; color: var(--muted); }
         .wk-zoom-btn .sizer { visibility: hidden; position: static; }   /* .wk-hours span would pin it */
         .wk-zoom-btn .glyph { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; line-height: 1; }
+        button.icon.wk-zoom-btn::after { content: ''; position: absolute; inset: -1px -6px -1px -12px; }   /* a larger target, unseen */
+        button.icon.wk-zoom-btn:hover:not(:disabled), button.icon.wk-zoom-btn:focus-visible { outline: none; color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
         .wk-col:last-child { border-right: 1px solid var(--line); }
         .wk-col.today { background-color: rgba(var(--c-gold), .06); }
         .wk-col {
@@ -944,11 +949,9 @@
             background: linear-gradient(rgba(var(--c-green), var(--hol-a)), rgba(var(--c-green), var(--hol-a))), color-mix(in srgb, var(--card) var(--glass), transparent);
         }
         /* inside the week card the grid lets the glass through; the still copy of the lines behind it (only for the
-           rubber band at the top) would then show twice, so it stays away; the hour zoom is a denser pane, as the header,
-           so the labels that scroll beneath it vanish under + and - */
+           rubber band at the top) would then show twice, so it stays away */
         html.natur .wk-grid { background: transparent; }
         html.natur .wk-lines { visibility: hidden; }
-        html.natur .wk-zoom-in { background: color-mix(in srgb, var(--card) var(--glass-head), transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
         /* the appointments' fill a little see-through (--ev-a), lessons over the glass instead of the solid card */
         html.natur :is(.wk-ev, .chip):not(.cl) { background: rgba(var(--c), var(--ev-a)); }
         html.natur :is(.wk-ev, .chip).cw { background: linear-gradient(135deg, rgba(var(--c-event-gold), var(--ev-a)) 0 50%, rgba(var(--c-turquoise), var(--ev-a)) 50% 100%); }
@@ -1918,7 +1921,15 @@
                 // the still lines behind (for the rubber band at the top) only while in the upper half
                 const low = () => box.parentElement.classList.toggle('low', box.scrollTop > (box.scrollHeight - box.clientHeight) / 2);
                 low();
-                box.onscroll = () => { wkTop = (box.scrollTop + WK_LABEL) / hour; low(); };
+                // the labels that scroll beneath + and - step aside: the two have no ground to hide them
+                const zoomH = (box.querySelector('.wk-zoom-in') || {}).offsetHeight || 0;
+                const labels = [...box.querySelectorAll('.wk-hours > div:not(.wk-zoom) > span')];
+                const under = () => {
+                    const t = box.scrollTop;
+                    for (const sp of labels) { const y = sp.parentElement.offsetTop + sp.offsetTop; sp.classList.toggle('under', y < t + zoomH && y + sp.offsetHeight > t); }
+                };
+                under();
+                box.onscroll = () => { wkTop = (box.scrollTop + WK_LABEL) / hour; low(); under(); };
             }
 
             /* ---------- Monat ---------- */
@@ -3492,7 +3503,9 @@
                     const zm = e.target.closest('[data-zoom]');
                     if (zm) { setWkZoom(Number(zm.dataset.zoom)); return; }
                     const add = e.target.closest('[data-add]');
-                    if (add) { openEditor({ day: dateOf(add.dataset.add) }); return; }
+                    // a day name or date at the top of the week: a new all-day entry that day (Doc, 27.11.2026: "Wenn ich im
+                    // Kalender oben auf den Tag klicke, beziehungsweise das Datum, dann soll bitte sofort ganztägig gesetzt sein")
+                    if (add) { openEditor({ day: dateOf(add.dataset.add), draft: add.classList.contains('wk-dayname') ? { allDay: true } : null }); return; }
                     const hit = e.target.closest('[data-key]');
                     if (hit && shownOcc.has(hit.dataset.key)) { openOcc(shownOcc.get(hit.dataset.key)); return; }
                     const cell = e.target.closest('.mo-cell');
