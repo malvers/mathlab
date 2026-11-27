@@ -818,4 +818,44 @@ wie GY 6. Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Di
 
 ## mathe7-pt (OS 7, block pt-16)
 
+Block pt-16 (Morgado, 27.11.2026). Oberschule und Realschule bleiben deutsch und werden auf der Startseite erklärt (7.º ano ≈ 7.º ano do
+ensino básico, 3.º ciclo). Wahlbereich `k: 'O'` (área opcional) wie GY 6/7/9. Laborname und Tests deutsch: „MAIS PRÁTICA ONLINE (EM ALEMÃO)“.
+Schreibweisen wie GY 6/7: × für das Produkt überall (Regel `\cdot` → `\times` in `geometrie.js` pt0; alle Seiten laden geometrie), Punkte
+$(3, -2)$, Mengen $\{2, 4, 6\}$, ℕ₀ und ℚ₀⁺ (einmal erklärt), Strecke $[AB]$ / Länge $\overline{AB}$, Umformungsstrich $\big|\; +5$ wie GY 7.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Grundwert $G$ · Prozentsatz $p\,\%$ · Prozentwert $W$ | valor de referência $G$ · percentagem $p\,\%$ · valor da percentagem $W$ | wie GY 7; Buchstaben einmal erklärt |
+| Hundertstel · Promille · bequeme Prozentsätze | centésima parte · por mil (‰) · percentagens fáceis | „Por cento“ ← it. *per cento* |
+| vermehrter / verminderter Grundwert · Faktor | valor de referência aumentado / diminuído · fator | „um 20 % / auf 20 %“ = baixou 20 % / baixou para 20 % |
+| Rabatt · Skonto · Mehrwertsteuer · netto / brutto | desconto · desconto de pronto pagamento · IVA · sem IVA / com IVA | 19 % / 7 % bleiben, PT 23 % einmal genannt |
+| Kapital $K$ · Zinssatz $p\,\%$ · Zinsen $Z$ · Tage $t$ · Zinsjahr | capital $K$ · taxa de juro $p\,\%$ · juros $Z$ · dias $t$ · ano bancário | Buchstaben bleiben (wie `zins` in finanz, pt-6), einmal erklärt; Widget `tageszinsos7` |
+| Jahreszinsen · Tageszinsen · Zinseszins · 72er-Regel | juros anuais · juros de alguns dias · juro composto · regra dos 72 | |
+| Tagesgeld / Sparkonto · Girokonto · Dispokredit | conta poupança · conta à ordem · descoberto bancário | |
+| Zufallsversuch · Ergebnismenge $\Omega$ · Ereignis $E$ · Laplace-Versuch | experiência aleatória · espaço amostral $\Omega$ · acontecimento $E$ · experiência de Laplace | $E$ wie `gluecksrad8`; bei der Münze ($N$/$E$) heißt das Ereignis $A$ |
+| Urliste · Strichliste · absolute / relative Häufigkeit $H$, $h$ | lista de dados · tabela de contagem · frequência absoluta / relativa $H$, $h$ | `=ALEATÓRIOENTRE(1;6)` |
+| Pasch · Lostrommel · Gewinn / Niete · Legostein · Reißzwecke (Rücken / Seite) | dois números iguais · tômbola · com prémio / sem prémio · peça de Lego · pionés (de costas / de lado) | wie GY 8 |
+| Achsentrick · Gee-Whiz-Diagramm | o truque do eixo · gráfico gee-whiz | Huff: «How to Lie with Statistics» («Como mentir com estatísticas») |
+| Gegenzahl · Betrag · Zahlengerade · Zahlbereiche | simétrico · valor absoluto · reta numérica · conjuntos numéricos | |
+| Koordinatensystem mit vier Quadranten · I. … IV. Quadrant | referencial com quatro quadrantes · 1.º … 4.º quadrante | im Bild römisch I–IV; Text „1.º quadrante (I)“ einmal |
+| spiegeln an der x-Achse / y-Achse / am Ursprung · Spiegelpunkt | simetria em relação ao eixo $Ox$ / $Oy$ / à origem · ponto simétrico | Widget `quadrantos7`: Knöpfe „eixo Ox“, „eixo Oy“, „origem“ |
+| Vorzeichenregeln · Rechengesetze · Vorrangregeln · Punkt vor Strich | regras dos sinais · propriedades das operações · prioridade das operações · multiplicações e divisões antes de adições e subtrações | Zahlenmauer = pirâmide de números |
+| Term · Termwert · Rechenbaum · Gleichung · Probe | expressão · valor da expressão · árvore de cálculo · equação · verificação | |
+| Äquivalenzumformung · Verhältnisgleichung · Formel umstellen nach | princípio de equivalência · proporção (produto dos extremos = produto dos meios) · resolver a fórmula em ordem a | $u$ → $P$, $s$ → $d$ wie `umstellen7`; Breite → $l$ |
+| Namen | Mia → Mariana, Tom → Tiago, Lena → Rita, Paul → Paulo, Sara → Sara, Ali → André, Jonas → João, Lisa → Inês, Tim → Tomás | |
+| Haus der Vierecke · Drachenviereck · Raute · gleichschenkliges Trapez | casa dos quadriláteros · papagaio · losango · trapézio isósceles | wie GY 6 |
+| Planfigur · Konstruktionsbeschreibung · Stück (gegeben) | esboço · descrição da construção · elemento | |
+| Grundseite $g$ · Umfang $u$ · Diagonalen $e$, $f$ | base $b$ · perímetro $P$ · diagonais $e$, $f$ | wie GY 6 |
+| Winkelsumme · $n$-Eck · regelmäßig · inhaltsgleich · zerlegungsgleich | soma dos ângulos internos · polígono de $n$ lados · regular · equivalentes (com a mesma área) · equidecomponíveis | Neuneck = eneágono, Zwölfeck = dodecágono |
+| Hausgiebel · Dachziegel | empena · telha | |
+| Satz von Pick $A = I + \tfrac{R}{2} - 1$ | teorema de Pick $A = I + \tfrac{F}{2} - 1$ | wie GY 6 |
+| Tangram: großes / mittleres / kleines Dreieck | triângulo grande / médio / pequeno | Phrasen in `os6.js`, wie pt-14 |
+| Grund- / Deckfläche · Mantel · Schrägbild · Zweitafelbild · Netz | base inferior / superior · superfície lateral · perspetiva cavaleira · dupla projeção ortogonal · planificação | |
+| Grundfläche $G$ · Umfang $u$ · Mantel $M$ · Oberfläche $O$ | $A_b$ · $P_b$ · $A_L$ · área total $A$ | wie GY 6/7; Widget `prisma6` (Regel/Phrase pt-16 in `gy6.js`) |
+| Dichte $\varrho$ · schwimmt / geht unter | massa volúmica $\varrho$ (lê-se «ró») · flutua / vai ao fundo | Widget `dichteos7`; Beton = betão |
+| Hohlkörper · zusammengesetzter Körper · umbauter Raum | sólido oco · sólido composto · volume construído | |
+| Parkett(ierung) · Kachel · Schablone · lückenlos, ohne Überlappung | pavimentação · ladrilho · molde · sem espaços vazios, sem sobreposições | Widgets `parkettos7`, `escheros7` |
+| Verschiebung · Drehung (Escher) | translação · rotação | |
+
+
 ## mathe8-pt (OS 8, block pt-17)

@@ -56,6 +56,10 @@ window.BuchPT && BuchPT.add('os6', {
         'Die 36 Ergebnisse zweier Würfel mit ihrer Augensumme': 'Os 36 resultados de dois dados, com a soma das pintas',
         'Säulendiagramm: relative Häufigkeiten der Augensummen': 'Gráfico de barras: frequências relativas das somas das pintas',
         // book pt-16 mathe7-pt:
+        // tangramos6 (the pieces are phrases below; 'Quadrat' and 'Parallelogramm' are words of js/buch-pt/gy6.js)
+        'Tangram: sieben Teile in einem Quadrat': 'Tangram: sete peças num quadrado',
+        // the helpers of the module (labels of wuerfelbauos6, reported on every page that loads os6; the same words as pt-14 and pt-15)
+        'Treppe': 'Escada', 'Turm': 'Torre', 'Mauer': 'Muro', 'Selbst bauen': 'Construir',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs os6/*)
@@ -81,6 +85,11 @@ window.BuchPT && BuchPT.add('os6', {
         ['Tippe auf ein Feld oder eine Säule. Die gestrichelte Linie zeigt den Anteil der Felder. Die 7 hat die meisten Felder (', 'Toca numa casa ou numa barra. A linha tracejada mostra a parte das casas. O 7 tem mais casas ('],
         ['), die 2 und die 12 nur eins.', '), o 2 e o 12 só uma.'],
         // book pt-16 mathe7-pt:
+        // tangramos6: the pieces (helpers of the module, outside the widget) and the sentences
+        ['großes Dreieck', 'triângulo grande'], ['mittleres Dreieck', 'triângulo médio'], ['kleines Dreieck', 'triângulo pequeno'],
+        ['Anteil am Quadrat: ', 'Parte do quadrado: '],
+        ['Ist das Quadrat 4 cm × 4 cm groß, hat das Teil ', 'Se o quadrado medir 4 cm × 4 cm, a peça tem '],
+        ['Tippe auf ein Teil. Alle sieben zusammen ergeben das ganze Quadrat: ', 'Toca numa peça. As sete peças juntas formam o quadrado inteiro: '],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -111,5 +120,9 @@ window.BuchPT && BuchPT.add('os6', {
         [/Augensumme <b>(\d+)<\/b>: (\d+)-mal(, relativ \$)?/g, (m, s, k, r) => 'Soma <b>' + s + '</b>: ' + k + (k === '1' ? ' vez' : ' vezes') + (r ? ', relativa $' : '')],
         [/ · im Gitter (\d+) von 36 Feldern, also \$/g, (m, w) => ' · na grelha, ' + w + (w === '1' ? ' casa' : ' casas') + ' de 36, ou seja, $'],
         // book pt-16 mathe7-pt:
+        // tangramos6: the square and the parallelogram in lower case like the triangles, as the name of the piece and in the
+        // list of the pieces of equal area (the triangles of that list are phrases)
+        [/(<p style="margin:0"><b>)(Quadrat|Parallelogramm)(<\/b><\/p>)/, (m, a, n, b) => a + (n === 'Quadrat' ? 'quadrado' : 'paralelogramo') + b],
+        [/Genauso groß: ([^(<]+) \(hell markiert\)\./, (m, l) => 'Com a mesma área: ' + l.replace(/\bQuadrat\b/g, 'quadrado').replace(/\bParallelogramm\b/g, 'paralelogramo') + ' (com destaque a claro).'],
     ]
 });

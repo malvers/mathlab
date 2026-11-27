@@ -308,6 +308,9 @@ window.BuchPT && BuchPT.add('gy6', {
         ['Die beiden Zahlen haben keinen gemeinsamen Teiler außer 1.', 'Os dois números não têm nenhum divisor comum além do 1.'],
         // book pt-15 mathe6-pt:
         // book pt-16 mathe7-pt:
+        // prisma6 on the OS 7 pages: the rule [/\$O = /g, '$A_T = '] of js/buch-pt/gleichungen.js (pt-1, koerper) runs before the
+        // pieces and turns "Oberfläche $O = …" into "Oberfläche $A_T = …", so the piece of pt-10 above no longer matches
+        ['Oberfläche $A_T = 2 \\times G + M', 'Área total $A = 2 \\times A_b + A_L'],
         // book pt-17 mathe8-pt:
     ],
     rule: [
@@ -398,6 +401,9 @@ window.BuchPT && BuchPT.add('gy6', {
         [/(<span class="g-(?:lam|cy)">)(ggT|kgV)(<\/span>)\$\((\d+), (\d+)\) = /g, (m, a, k, b, x, y) => a + (k === 'ggT' ? 'm.d.c.' : 'm.m.c.') + b + '$(' + x + ', ' + y + ') = '],
         // book pt-15 mathe6-pt:
         // book pt-16 mathe7-pt:
+        // prisma6 on pages that also load gy7: the rule of js/buch-pt/gy7.js (pt-11, konstruktion7) turns every side label "h"
+        // into 𝒞′; the height h of the prism (oblique view, identified by its aria-label) is wrapped in a tspan so it stays h
+        [/(im Schrägbild: Grundfläche vorn in wahrer Größe[\s\S]*?<text class="g-side"[^>]*>)h(<\/text>)/, '$1<tspan>h</tspan>$2'],
         // book pt-17 mathe8-pt:
     ]
 });
