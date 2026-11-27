@@ -510,3 +510,9 @@ parts, so every later book that loads them gets it too):
 | ggT · kgV | m.d.c. · m.m.c. | auch im Widget (Regel), $\text{m.d.c.}(84, 360)$ |
 | Sieb des Eratosthenes · Quersumme · Teilbarkeitsregeln | crivo de Eratóstenes · soma dos algarismos · critérios de divisibilidade | |
 | Primzahlzwillinge · vollkommene / befreundete Zahlen · euklidischer Algorithmus | primos gémeos · números perfeitos / amigos · algoritmo de Euclides | |
+
+## mathegy7-pt
+
+## mathegy8-pt
+
+## mathegy9-pt

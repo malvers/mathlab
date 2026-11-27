@@ -14,10 +14,16 @@ window.BuchPT && BuchPT.add('geometrie', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
         // book pt-10 mathegy6-pt:
+        // book pt-11 mathegy7-pt:
+        // book pt-12 mathegy8-pt:
+        // book pt-13 mathegy9-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
         // book pt-10 mathegy6-pt:
+        // book pt-11 mathegy7-pt:
+        // book pt-12 mathegy8-pt:
+        // book pt-13 mathegy9-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -26,5 +32,8 @@ window.BuchPT && BuchPT.add('geometrie', {
         // a phrase key that contains a product must therefore be written with \times
         [/\\cdot(?![a-zA-Z])/g, '\\times'],
         // book pt-10 mathegy6-pt:
+        // book pt-11 mathegy7-pt:
+        // book pt-12 mathegy8-pt:
+        // book pt-13 mathegy9-pt:
     ]
 });

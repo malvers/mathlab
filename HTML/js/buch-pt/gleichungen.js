@@ -25,6 +25,9 @@ window.BuchPT && BuchPT.add('gleichungen', {
         '$c$ (rechte Seite)': '$c$ (segundo membro)',
         'Zahlenstrahl mit der Lösungsmenge': 'Reta numérica com o conjunto-solução',
         'wahr': 'verdadeiro', 'falsch': 'falso',
+        // book pt-11 mathegy7-pt:
+        // book pt-12 mathegy8-pt:
+        // book pt-13 mathegy9-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gleichungen/*)
@@ -53,6 +56,9 @@ window.BuchPT && BuchPT.add('gleichungen', {
         ['$ ist ', '$ é '],
         [': Die Zahl gehört zur Lösungsmenge.', ': o número pertence ao conjunto-solução.'],
         [': Die Zahl gehört nicht dazu.', ': o número não pertence.'],
+        // book pt-11 mathegy7-pt:
+        // book pt-12 mathegy8-pt:
+        // book pt-13 mathegy9-pt:
     ],
     rule: [
         // pt0: the solution set is C.S. (conjunto-solução) in Portuguese schools, also in the widget sentences:
@@ -62,5 +68,8 @@ window.BuchPT && BuchPT.add('gleichungen', {
         // koerper: lateral and total surface A_L, A_T, the slant height g (geratriz), as Portuguese schools and lb2 write them
         [/\$M = 2\\pi r h/g, '$A_L = 2\\pi r h'], [/\$O = /g, '$A_T = '], [/\\pi r s \\approx/g, '\\pi r g \\approx'],
         // book pt-6 mathefos11-pt:
+        // book pt-11 mathegy7-pt:
+        // book pt-12 mathegy8-pt:
+        // book pt-13 mathegy9-pt:
     ]
 });

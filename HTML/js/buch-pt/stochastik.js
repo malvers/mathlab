@@ -114,6 +114,7 @@ window.BuchPT && BuchPT.add('stochastik', {
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
+        // book pt-12 mathegy8-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs stochastik/*)
@@ -221,6 +222,7 @@ window.BuchPT && BuchPT.add('stochastik', {
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
+        // book pt-12 mathegy8-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -275,5 +277,6 @@ window.BuchPT && BuchPT.add('stochastik', {
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
         // book pt-9 mathegy11-pt:
+        // book pt-12 mathegy8-pt:
     ]
 });
