@@ -552,6 +552,89 @@ deutsche ℕ und ℚ⁺ (Regeln in `gy7.js` pt0 wie in `gy6.js`), CALC für TR. 
 | Polyeder · regulär · platonische Körper | poliedro · regular (convexo) · sólidos platónicos | |
 | Eulerscher Polyedersatz $e - k + f = 2$ | relação de Euler $V - A + F = 2$ | einmal $F + V = A + 2$; auch im Widget `faltnetz7` |
 
-## mathegy8-pt
+## mathegy8-pt (GY 8, block pt-12)
+
+Block pt-12 (Caraça, 27.11.2026). Terms the book adds (modules `gy8.js` and `spiele.js` new for pt; `geometrie`, `gleichungen`,
+`funktionen`, `lgs`, `stochastik` shared). The 8.º ano of this book is compared once on the start page with the 8.º ano of the
+ensino básico (3.º ciclo).
+
+- **× for the product** everywhere (page text and widgets; rule `\cdot` → `\times` of `geometrie.js` pt0, as GY 6).
+- **Homotetia de centro O e razão k**: the German centre Z is $O$ (also in the widget `streckung8`, rule), the lengths
+  $\overline{OA}$, $\overline{OA'}$.
+- **Sets** with commas $\{1, 2, 3\}$, also in the widgets of `gy8.js` (rule); the number of elements $\#E$, $\#\Omega$.
+- **Distance** in the distance-time graphs is $d$ (distância; German $s$), also in `wegzeit8` (rule for the axis).
+- The shadows $s$, $S$ stay (sombra); the relative frequency stays $h$ as in the other pt books.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Term · Rechenbaum · Teilterm | expressão · árvore de cálculo · subexpressão | |
+| Platzhalter · Unbekannte · Veränderliche | número genérico · incógnita · grandeza variável | Name, Wert, Bedeutung = nome, valor, significado |
+| Summe (Summand) · Differenz (Minuend, Subtrahend) | soma (parcelas) · diferença (aditivo, subtrativo) | |
+| Produkt (Faktor) · Quotient (Dividend, Divisor) · Potenz (Basis, Exponent) | produto (fatores) · quociente (dividendo, divisor) · potência (base, expoente) | |
+| zusammenfassen · gleichartige Glieder | reduzir os termos semelhantes · termos semelhantes | |
+| ausmultiplizieren · ausklammern · Distributivgesetz | desenvolver · pôr em evidência · propriedade distributiva | |
+| Malpunkt | sinal de multiplicação | |
+| Handytarif | tarifário de telemóvel | |
+| Klassenfahrt · Jugendherberge | visita de estudo · alojamento | |
+| Streichhölzer | fósforos | |
+| binomische Formeln (1./2./3.) · Binom | casos notáveis (1.º quadrado da soma, 2.º quadrado da diferença, 3.º diferença de quadrados) · binómio | auch im Widget `binomformeln8` |
+| lineare Gleichung · Äquivalenzumformung · Probe | equação do 1.º grau · princípios de equivalência · verificação | $\text{C.S.} = \{3\}$, $\text{C.S.} = \{\,\}$ |
+| Klammern auflösen · auf beiden Seiten | desembaraçar de parênteses · nos dois membros | |
+| Ungleichung · Zeichen dreht sich um | inequação · o sinal inverte-se | $\text{C.S.} = \{x : x > -3\}$; bola aberta / fechada |
+| Balkenwaage · Fitnessstudio · Besuch | balança de pratos · ginásio · ida | |
+| periodisch $5{,}\overline{3}$ | $5{,}(3)$ | wie GY 6 |
+| Zufallsversuch · Ergebnis · Ergebnismenge $\Omega$ · Ereignis tritt ein | experiência aleatória · resultado · espaço amostral $\Omega$ · o acontecimento realiza-se | |
+| sicheres / unmögliches Ereignis | acontecimento certo / impossível | |
+| Vereinigung · Durchschnitt · Differenz · Gegenereignis | reunião · interseção · diferença («$A$ menos $B$») · acontecimento contrário | |
+| absolute / relative Häufigkeit $H_n$, $h_n$ | frequência absoluta / relativa $H_n$, $h_n$ | Buchstaben bleiben wie mathe11-pt |
+| Laplace-Versuch · Laplace-Regel · günstig / möglich | experiência de Laplace (resultados equiprováveis) · regra de Laplace · casos favoráveis / possíveis | $P(E) = \tfrac{\#E}{\#\Omega}$ |
+| Wappen / Zahl (Euromünze) · historische Münze (Buffon, Pearson, Kerrich) | face nacional $N$ / face europeia $E$ · «cara» / «coroa» | wie GY 6 |
+| Urne: rot, blau, grün | vermelha $v$, azul $a$, branca $b$ | die grüne Kugel wird weiß, damit die Buchstaben verschieden sind (lb2-1, Aufgabe 3) |
+| Reißzwecke · Legostein (Noppen) · Kronkorken · Lostrommel (Los, Niete) | pionés · peça de Lego (pinos) · carica · tômbola (rifa, sem prémio) | |
+| Skatblatt: Herz, Bube, Dame, König, Ass · Pasch | baralho de 32 cartas: copas, valete, dama, rei, ás · dois números iguais | |
+| Namen | Lena → Rita, Tom → Tiago, Tim → Tomás, Lisa → Inês, Max → Rui | |
+| mehrstufiger Zufallsversuch · Produktregel / Summenregel (Pfade) · Verzweigung | experiência aleatória composta · regra do produto / regra da soma · ponto de ramificação | |
+| Produktregel (Zählen) · Fakultät $4!$ | princípio fundamental da contagem · fatorial | |
+| unabhängig / abhängig (Stufen) | independentes / dependentes | |
+| Kaugummikugeln · Zahlenschloss · Outfit | bolas de pastilha elástica · cadeado de código · maneira de se vestir | |
+| Eiscafé (Sorten, Kugeln) · Siegerpodest · Sechserpasch | gelataria (sabores, bolas) · pódio · duplo seis | |
+| Zufallszahl · `=ZUFALLSBEREICH(1;6)` | número aleatório · `=ALEATÓRIOENTRE(1;6)` | Excel auf Portugiesisch |
+| Schere, Stein, Papier · Chevalier de Méré | pedra, papel, tesoura · cavaleiro de Méré | |
+| Funktion · eindeutige Zuordnung · Senkrechten-Test | função · correspondência unívoca · teste da reta vertical | |
+| unabhängige / abhängige Variable · Funktionswert | variável independente / dependente · imagem | $f\colon x \mapsto \ldots$ bleibt |
+| Definitionsbereich $D$ · Wertebereich $W$ | domínio $D_f$ · contradomínio $D'_f$ | |
+| monoton steigend / fallend · Hoch- / Tiefpunkt | crescente / decrescente · máximo / mínimo (no ponto $(-1, 2)$) | ohne die Buchstaben H, T |
+| symmetrisch zur y-Achse / zum Ursprung | simétrico em relação ao eixo $Oy$ (função par) / à origem (função ímpar) | |
+| Weg-Zeit-Diagramm · Weg-Zeit-Gesetz $s = 5t$ | gráfico distância-tempo · lei distância-tempo $d = 5t$ | auch im Widget `wegzeit8` |
+| Haltestelle · Bus · Straßenbahn · Klimadiagramm (DWD) | paragem · autocarro · elétrico · gráfico termopluviométrico (IPMA) | |
+| lineare Funktion $y = mx + n$ · Anstieg · y-Achsenabschnitt | função afim $y = mx + b$ · declive · ordenada na origem | $n = 0$: função linear |
+| Differenzenquotient · Steigungsdreieck · Nullstelle $x_0 = -\tfrac{n}{m}$ | taxa de variação · triângulo de declive · zero $x_0 = -\tfrac{b}{m}$ | data-ph „n =“ → „b =“ |
+| Regressionsgerade · Methode der kleinsten Quadrate · Trendlinie | reta de regressão · método dos mínimos quadrados · linha de tendência | `=DECLIVE(…)`, `=INTERCETAR(…)` (Excel pt-PT) |
+| Grundgebühr (Taxi) · Steigung 12 % · Gefälle | bandeirada · inclinação de 12 % · descida | |
+| Federkraftmesser · Handyakku | dinamómetro · bateria do telemóvel | |
+| lineares Gleichungssystem · Schnittpunkt · Lösung $(x \mid y)$ | sistema de equações lineares · ponto de interseção · solução $(x, y)$ | $\text{C.S.} = \{(2, 3)\}$; Schnittpunkt im Text ohne Buchstaben |
+| Einsetzungs- / Gleichsetzungs- / Additionsverfahren | método de substituição / de igualação / de adição ordenada | auch im Widget `lgs8` |
+| genau eine / keine / unendlich viele Lösungen | possível e determinado / impossível / possível e indeterminado | schneidend / parallel / identisch / orthogonal = concorrentes / (estritamente) paralelas / coincidentes / perpendiculares (Widget `lage`) |
+| vollständige Fallunterscheidung | análise completa de todos os casos | |
+| Fasane und Hasen (Sunzi suanjing) | faisões e coelhos (Sunzi suanjing) | |
+| zentrische Streckung · Streckzentrum $Z$ · Streckfaktor $k$ | homotetia · centro $O$ · razão $k$ | auch im Widget `streckung8` ($O$, Regel) |
+| Vergrößerung · Verkleinerung · Punktspiegelung | ampliação · redução · reflexão central | |
+| geradentreu · parallelentreu · winkeltreu | transforma retas em retas · retas em retas paralelas · conserva os ângulos | |
+| Streckenverhältnis · Verhältnisgleichung · Strahlensätze | razão entre segmentos · proporção · teorema de Tales | |
+| Storchschnabel (Pantograph) · Maßstab | pantógrafo · escala | GeoGebra: `Homotetia(Polígono, k, O)` |
+| ähnlich · Hauptähnlichkeitssatz · kongruent | semelhante · critério AA de semelhança · geometricamente iguais | $[ABC] \sim [A'B'C']$ |
+| entsprechende Winkel / Seiten · Stufenwinkel | ângulos / lados correspondentes · ângulos correspondentes | $C\hat{D}E = C\hat{A}B$ |
+| Hilfsfigur · Vorwärts- / Rückwärtsarbeiten | figura auxiliar · trabalhar para a frente / para trás | |
+| Försterdreieck · Schattenmethode · Daumensprung | triângulo do guarda-florestal · método das sombras · salto do polegar | auch in `schatten8`; die Schatten $s$, $S$ bleiben (sombra) |
+| Einheitswürfel · Oberfläche · Maßstab $1 : m$ | cubo unitário · área total · escala $1 : m$ | `gulliver8` |
+| Liliputaner · Modell (Maßstab) | liliputianos · maqueta | |
+| heuristische Strategien · Vorwärts- / Rückwärtsarbeiten · Teilziel | estratégias heurísticas · trabalhar para a frente / para trás · objetivo intermédio | |
+| Lösungsplan: verstehen, planen, durchführen, zurückschauen | plano de resolução: compreender, planear, executar, olhar para trás | Pólya, «Como Resolver Problemas» |
+| Umkehrrechnung · Startzahl · Rätsel | operação inversa · número inicial · enigma | `rueckwaerts8` |
+| Krug · Eimer · Händeschütteln · Taschengeld | jarro · balde · apertos de mão · semanada | |
+| Zufallszahl · Pseudozufall · strukturgleicher Versuch | número aleatório · pseudoaleatório · experiência com a mesma estrutura | |
+| Monte-Carlo-Methode · Viertelkreis · Ziegenproblem (Moderator) | método de Monte Carlo · quarto de círculo · problema de Monty Hall (apresentador) | |
+| Sammelalbum · Tüte · Bild · doppelt | caderneta de cromos · saqueta · cromo · repetido | `sammel8` |
+| Patience · Elfmeter · Schütze | paciência · penálti · atirador | |
 
 ## mathegy9-pt

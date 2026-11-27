@@ -27,6 +27,8 @@ window.BuchPT && BuchPT.add('gleichungen', {
         'wahr': 'verdadeiro', 'falsch': 'falso',
         // book pt-11 mathegy7-pt:
         // book pt-12 mathegy8-pt:
+        // ungleichung: the label of the test value on the number line
+        'Probe': 'Teste',
         // book pt-13 mathegy9-pt:
     },
     phrase: [
