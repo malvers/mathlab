@@ -907,6 +907,51 @@ Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Schreibweise
 
 ## mathe9-pt (OS 9, block pt-18)
 
+Block pt-18 (Vicente, 27.11.2026). Oberschule und Realschulbildungsgang bleiben deutsch und werden auf der Startseite erklärt (9.º ano ≈
+9.º ano do ensino básico, 3.º ciclo; „percurso Realschule“). Wahlpflichtbereich `k: 'O'` (Área opcional) wie OS 8. Lab-Namen bleiben deutsch,
+„MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Schreibweisen wie GY 9 (pt-13):
+
+- **× für das Produkt** in allen Kapiteln (alle Seiten laden `geometrie.js`, Regel `\cdot` → `\times` pt0); **sen, cos, tg** auch in den
+  Widgets (Regeln `geometrie.js` pt-13), Umkehrung $\operatorname{sen}^{-1}$, $\operatorname{tg}^{-1}$; im Text einmal: die Tasten heißen sin, cos, tan.
+- **Körper** wie GY 9: $A_b$, $A_L$, $A_T$, Apothem $a_p$, Seitenkante $\ell$, Mantellinie $g$; auch in `pyramidekegel` (Phrasen und zwei Regeln in
+  `trigonometrie.js` pt-18) und `turmos9` ($V_{\text{cil}}$, $V_{\text{cone}}$, $h_{\text{cone}}$, $V_{\text{semiesf}}$). Das 3D-Widget `schraegbild7`
+  (gy7) schreibt das Apothem weiterhin $h_s$; lb2-1 sagt das einmal.
+- **Dach** (`dachos9`): Hausbreite $l$ (largura), Hauslänge $c$ (comprimento), Sparren $s$ (varas); Regeln/Phrasen in `os9.js`.
+- **Parabeln:** Scheitelpunktform bleibt $y = (x + d)^2 + e$ wie das Widget `parabelos9`, Scheitel $V(-d, e)$; einmal erklärt: in Portugal
+  $y = a(x - h)^2 + k$ mit $h = -d$, $k = e$. Normalform → forma geral $y = x^2 + bx + c$ (auch die Regler $b$, $c$ in `parabelos9`, Regel).
+- **Quadratische Gleichungen:** fórmula resolvente $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$, binómio discriminante $\Delta = b^2 - 4ac$ statt der
+  p-q-Formel (einmal als deutsche Schreibweise erwähnt); das Widget `quadglos9` schreibt das über eine Regel in `os9.js` um ($a = 1$, $b = p$,
+  $c = q$, $\Delta = 4D$); Viète für $x^2 + bx + c = 0$; $\text{C.S.} = \{\,\}$.
+- **Statistik:** média $\bar x$, mediana, moda, amplitude $R$, valor atípico; deutsche Noten einmal erklärt („1 é a melhor“).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Satz des Pythagoras · Umkehrung · Zahlentripel | teorema de Pitágoras · recíproco · terno pitagórico | |
+| Zwölfknotenschnur · Seilspanner | corda de doze nós · «esticadores de cordas» | |
+| Stützdreieck · Hilfslinie | triângulo auxiliar · linha auxiliar | |
+| Gegenkathete · Ankathete · Taschenrechner auf DEG | cateto oposto · cateto adjacente · calculadora em DEG (graus) | |
+| Steigung in Prozent · Steigungswinkel · waagerecht | inclinação em percentagem · ângulo de inclinação · na horizontal | `steigungos9` |
+| Höhenwinkel · Tiefenwinkel · Augenhöhe | ângulo de elevação · ângulo de depressão · altura dos olhos | |
+| Satteldach · First · Sparren · Giebel · Dachüberstand | telhado de duas águas · cumeeira · varas · empena · beiral | `dachos9` |
+| Spannseil · Hering · Böschung · Damm | cabo de suspensão · estaca · talude · dique | |
+| Körperhöhe · Seitenhöhe · Seitenkante · Grundkante | altura · apótema $a_p$ · aresta lateral $\ell$ · aresta da base | wie GY 9 |
+| Zweitafelbild · Grundriss · Aufriss | dupla projeção ortogonal · planta · alçado | |
+| Kreiskegel · Mantellinie · Öffnungswinkel | cone · geratriz $g$ · ângulo de abertura | |
+| Kugel · Halbkugel · Kubikwurzel | esfera · semiesfera · raiz cúbica | |
+| zusammengesetzter Körper · zerlegen · ergänzen · Bohrung | sólido composto · decompor · completar · furo | `turmos9` |
+| Normalparabel · Scheitelpunkt · Streckfaktor | parábola de referência · vértice $V$ · coeficiente $a$ | |
+| gestreckt / gestaucht · nach oben / unten geöffnet | dilatada / contraída · concavidade voltada para cima / baixo | |
+| Wertebereich · Definitionsbereich · Monotonie | contradomínio · domínio · monotonia | |
+| inhaltlich lösen · Produkt gleich null | resolver por raciocínio · lei do anulamento do produto | |
+| Lösungsformel · Diskriminante · Fallunterscheidung | fórmula resolvente · binómio discriminante $\Delta$ · análise de casos | |
+| goldener Schnitt · goldene Zahl · goldenes Rechteck | secção áurea · número de ouro $\Phi$ · retângulo de ouro | |
+| Fibonacci-Folge · Quotient | sucessão de Fibonacci · quociente | `fibonaccios9` |
+| absolute / relative Häufigkeit · Säulen- / Linien- / Kreisdiagramm | frequência absoluta / relativa · gráfico de barras / de linhas / circular | |
+| Mittelwert · Zentralwert · Modalwert · Spannweite · Ausreißer | média $\bar x$ · mediana · moda · amplitude $R$ · valor atípico | `spannweiteos9` |
+| Suggestivfrage · Umfrage · Urliste | pergunta tendenciosa · inquérito · lista de dados | |
+| Namen | Anna → Ana, Ben → Bruno, Cem → Carlos, Dana → Daniela, Lea → Leonor, Erik → Henrique | |
+
+
 ## mathe10-pt (OS 10, block pt-19)
 
 ## mathegy10-pt (GY 10, block pt-20)
