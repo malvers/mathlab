@@ -18,6 +18,9 @@ window.BuchPT && BuchPT.add('trigonometrie', {
         // (spitzkoerper); "Grundkante $a$", "Radius $r$", "Höhe $h$", "Körper" are words there, the button "Quadratische Pyramide" a rule there
         'Kegel': 'Cone', 'Höhe – Seitenhöhe': 'Altura – apótema', 'Höhe – Seitenkante': 'Altura – aresta lateral', 'Höhe – Mantellinie': 'Altura – geratriz',
         'Rechtwinkliges Dreieck': 'Triângulo retângulo',
+        // the body button, as js/buch-pt/gy7.js has it (GY 10 lb3-2 loads only this module; with geometrie.js loaded the word comes first, so
+        // spitzkoerper shows «Pirâmide quadrangular» there too)
+        'Quadratische Pyramide': 'Pirâmide quadrangular',
         // book pt-19 mathe10-pt:
         // book pt-20 mathegy10-pt:
     },
