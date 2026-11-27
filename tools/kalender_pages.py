@@ -29,6 +29,7 @@ FILES = {
     'svp/svp-auth.js': 'svp/svp-auth.js',
     'svp/svp-gate.js': 'svp/svp-gate.js',
     'svp/svp-tokens.css': 'svp/svp-tokens.css',      # the colours of Hell and Grau
+    'svp/svp-natur.css': 'svp/svp-natur.css',        # lays the photo of js/natur-bild.js behind the page
     'js/natur-bild.js': 'js/natur-bild.js',          # svp-gate.js loads it from ../js/
     'js/solita-listen.js': 'js/solita-listen.js',    # dictation
     'svp/qrcode.min.js': 'svp/qrcode.min.js',        # the guest's access as a QR code (sharing, settings)
@@ -40,6 +41,11 @@ FILES = {
     'kalender/icons/app-512.png': 'icons/app-512.png',
     'kalender/icons/app-512-maskable.png': 'icons/app-512-maskable.png',
 }
+
+# the nature photos js/natur-bild.js offers - it takes them from ../decks/natur/ beside its own folder (1 MB together)
+for _f in sorted(os.listdir(os.path.join(ROOT, 'decks', 'natur'))):
+    if _f.endswith('.webp'):
+        FILES['decks/natur/' + _f] = 'decks/natur/' + _f
 
 # the page sits one level deeper in forloop (HTML/kalender/) than in the mirror (its root)
 REWRITE = {
