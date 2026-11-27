@@ -2116,9 +2116,17 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
   /* the book's year: the current one, never before 2026 (the first edition) - so on 1 January the book turns to the new year
      by itself, the same book one year on (Doc, 26.11.2026: "du kannst das 2027er Buch bauen. Eigentlich genauso wie es heute
      ist, nur das Datum um 1 verschoben"); ?jahr=2027 opens that year's book before it begins (the gift links sent at
-     Christmas open on 1 January), ?jahr=2026 last year's */
+     Christmas open on 1 January), ?jahr=2026 last year's. Without ?jahr= a ?tag= of another year opens that year's book, so
+     ?tag=2027-10-30 lands on that day instead of today (Doc, 27.11.2026: "dieser Link öffnet den 27. November, nicht den
+     30.10."); a ?tag= in a year without an edition (before 2026, after 2099, no real date) changes nothing - the book opens at today */
   const YEAR = (() => {
-    try { const j = +(new URLSearchParams(location.search).get('jahr') || 0); if (j >= 2026 && j <= 2099) return j; } catch (e) { }
+    try {
+      const q = new URLSearchParams(location.search);
+      const j = +(q.get('jahr') || 0); if (j >= 2026 && j <= 2099) return j;
+      const t = /^(\d{4})-(\d\d)-(\d\d)$/.exec(q.get('tag') || ''), y = t ? +t[1] : 0;
+      const d = t && new Date(y, t[2] - 1, +t[3]);
+      if (y >= 2026 && y <= 2099 && d.getMonth() === t[2] - 1 && d.getDate() === +t[3]) return y;
+    } catch (e) { }
     return Math.max(2026, new Date().getFullYear());
   })();
   /* the year printed on the cover, the title page and the year's curve: from YEAR, in the page templates before any page is made */
