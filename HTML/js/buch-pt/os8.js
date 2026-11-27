@@ -37,7 +37,7 @@ window.BuchPT && BuchPT.add('os8', {
         // tarifos8
         'Handy': 'Telemóvel', 'Strom': 'Eletricidade', 'Carsharing': 'Carsharing', 'Minuten': 'minutos', 'kWh im Jahr': 'kWh por ano', 'Kilometer': 'quilómetros',
         '€ pro Minute': '€ por minuto', '€ pro kWh': '€ por kWh', '€ pro km': '€ por km',
-        'Tarif A: Grundgebühr': 'Tarifário A: mensalidade', 'Tarif B: Grundgebühr': 'Tarifário B: mensalidade',
+        'Tarif A: Grundgebühr': 'Tarifário A: valor fixo', 'Tarif B: Grundgebühr': 'Tarifário B: valor fixo',
         'Tarif A: € pro Minute': 'Tarifário A: € por minuto', 'Tarif B: € pro Minute': 'Tarifário B: € por minuto',
         'Tarif A: € pro kWh': 'Tarifário A: € por kWh', 'Tarif B: € pro kWh': 'Tarifário B: € por kWh',
         'Tarif A: € pro km': 'Tarifário A: € por km', 'Tarif B: € pro km': 'Tarifário B: € por km',
