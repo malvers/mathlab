@@ -48,6 +48,9 @@ window.BuchPT && BuchPT.add('gy12lk', {
         // simpson (wb5): Fassregel = regra dos barris de Kepler, Simpsonregel = regra de Simpson, Abbruchregel = critério de paragem
         'Anzahl der Streifen $n$ (gerade)': 'Número de faixas $n$ (par)', 'Graph mit Parabelbögen über je zwei Streifen': 'Gráfico com arcos de parábola sobre cada par de faixas',
         'Trapez': 'Trapézio',
+        // uneigentlich (lb9-2): unbegrenzte Fläche = região ilimitada / área ilimitada, Grenze = limite (de integração), Grenzwert = limite
+        'Grenze': 'Limite', 'obere Grenze $b$': 'limite superior $b$',
+        'Fläche unter einer Kurve bis zu einer verschiebbaren Grenze': 'Área sob uma curva até um limite móvel',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12lk/*)
@@ -83,6 +86,10 @@ window.BuchPT && BuchPT.add('gy12lk', {
         ['$, Simpsonfehler etwa durch $', '$, o erro de Simpson por cerca de $'], ['$ geteilt. ', '$. '],
         ['Abbruchregel „zwei Simpson-Werte unterscheiden sich um weniger als $10^{-6}$“: ', 'Critério de paragem «dois valores de Simpson diferem menos de $10^{-6}$»: '],
         ['erfüllt ab $n = ', 'verificado a partir de $n = '], ['erst sehr spät erfüllt.', 'só se verifica muito tarde.'],
+        // uneigentlich
+        [' (die Grenze liegt weit rechts außerhalb des Bildes)', ' (o limite está muito à direita, fora da figura)'], ['Grenzwert: $', 'Limite: $'],
+        [': Die Fläche ist unbegrenzt, obwohl der Graph sich der Achse nähert.', ': a área é ilimitada, embora o gráfico se aproxime do eixo.'],
+        [': Die unbegrenzte Fläche hat einen endlichen Inhalt.', ': a região ilimitada tem uma área finita.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
