@@ -49,6 +49,13 @@ window.BuchPT && BuchPT.add('gy11lk', {
         'Gozinto-Graph: drei Rohstoffe, zwei Zwischenprodukte, zwei Endprodukte, an den Pfeilen die benötigten Mengen':
             'Gozintograma: três matérias-primas, dois produtos intermédios, dois produtos finais; nas setas, as quantidades necessárias',
         // book pt-22 mathegy11lk-pt:
+        // the cover of GY 11 LK (titelbildgy11lk)
+        'Titelbild: eine Kurve mit Tangente, der Epsilon-Delta-Streifen um einen Punkt und eine Fixpunktiteration als Spinnennetz':
+            'Imagem da capa: uma curva com a tangente, a faixa épsilon-delta à volta de um ponto e uma iteração do ponto fixo em teia de aranha',
+        // epsdelta (lb1-1): Streifen = faixa, Behauptung = afirmação
+        'Streifenbreite $\\varepsilon$': 'Largura da faixa $\\varepsilon$',
+        'Graph mit einem waagerechten Streifen der Breite Epsilon um den Grenzwert und einem senkrechten Streifen der Breite Delta um die Stelle':
+            'Gráfico com uma faixa horizontal de largura épsilon à volta do limite e uma faixa vertical de largura delta à volta do ponto',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk/*)
@@ -93,6 +100,16 @@ window.BuchPT && BuchPT.add('gy11lk', {
         ['In einem Schritt: $C = A \\cdot B = ', 'Num só passo: $C = A \\cdot B = '],
         ['$ gibt den Rohstoffbedarf je Endprodukt an, und $C \\cdot \\vec{e} = ', '$ dá as necessidades de matérias-primas por produto final, e $C \\cdot \\vec{e} = '],
         // book pt-22 mathegy11lk-pt:
+        // epsdelta
+        ['\\text{ rechts, } ', '\\text{ à direita, } '], ['\\text{ links, also } ', '\\text{ à esquerda, logo } '],
+        ['$, Behauptung: $', '$, afirmação: $'], ['$. Orange: alle $y$ mit $|y - ', '$. A laranja: todos os $y$ com $|y - '],
+        ['Blau: Für alle $x \\neq ', 'A azul: para todo o $x \\neq '], ['$ mit $|x - ', '$ com $|x - '],
+        ['| < \\delta$ liegt $f(x)$ im orangen Streifen. Das größte passende $\\delta$ ist hier etwa ', '| < \\delta$, $f(x)$ está na faixa cor de laranja. Aqui, o maior $\\delta$ que serve é cerca de '],
+        [' (exakt: $', ' (exatamente: $'],
+        ['. Mach $\\varepsilon$ kleiner: Es gibt immer noch ein $\\delta > 0$. Genau das heißt „Grenzwert“.', '. Diminui $\\varepsilon$: continua a existir um $\\delta > 0$. É exatamente isso que significa «limite».'],
+        ['Kein $\\delta$ passt:', 'Nenhum $\\delta$ serve:'],
+        ['So nah man der 0 von links auch kommt, dort ist $f(x) = -1$, also mindestens 2 vom behaupteten Grenzwert entfernt. Für $\\varepsilon < 2$ scheitert jede Wahl. Die Funktion hat bei 0 keinen Grenzwert, nur einseitige.',
+            'por mais perto de 0 que se chegue pela esquerda, aí $f(x) = -1$, ou seja, a uma distância de pelo menos 2 do limite afirmado. Para $\\varepsilon < 2$ qualquer escolha falha. A função não tem limite em 0, só limites laterais.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
