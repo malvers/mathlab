@@ -30,6 +30,6 @@ window.BUCH = {
         { file: 'lb4.html', lb: 'Área de aprendizagem 4', k: '4', title: 'Simetria e figuras geometricamente iguais',
           sub: 'Eixos de simetria, reflexão axial, translação, figura original e imagem, frisos', when: 'Maio · Junho', ustd: 12 },
         { file: 'wb.html', lb: 'Área opcional', k: 'O', title: 'Como a humanidade aprendeu a contar e a calcular',
-          sub: 'Pau de contagem, babilónios, egípcios e romanos, calcular sobre as linhas, uma apresentação', when: 'Junho · Julho', ustd: 8 }
+          sub: 'Pau entalhado, babilónios, egípcios e romanos, calcular sobre as linhas, uma apresentação', when: 'Junho · Julho', ustd: 8 }
     ]
 };
