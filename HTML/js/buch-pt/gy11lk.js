@@ -64,6 +64,9 @@ window.BuchPT && BuchPT.add('gy11lk', {
         'Dieses Bild braucht js/buch-vektoren.js.': 'Esta figura precisa de js/buch-vektoren.js.',
         'Drehachse:': 'Eixo de rotação:', 'Drehachse': 'Eixo de rotação', 'x-Achse': 'eixo Ox', 'y-Achse': 'eixo Oy', 'z-Achse': 'eixo Oz',
         'Ein Haus wird im Raum um eine Koordinatenachse gedreht': 'Uma casa roda no espaço em torno de um eixo coordenado',
+        // fixpunkt (wb2): Fixpunkt = ponto fixo, anziehend / abstoßend = atrativo / repulsivo, Spinnennetz = teia de aranha
+        'Funktion φ': 'Função φ',
+        'Fixpunktiteration: Spinnennetz zwischen dem Graphen von φ und der Geraden y = x': 'Iteração do ponto fixo: teia de aranha entre o gráfico de φ e a reta y = x',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk/*)
@@ -128,6 +131,19 @@ window.BuchPT && BuchPT.add('gy11lk', {
         ['die beiden anderen werden wie in der Ebene gedreht.', 'as outras duas rodam como no plano.'],
         // verflechtung: the quantities under the boxes of the Gozinto graph ("100 ME"), the same u.q. as bgy13lk.js (not loaded by GY 11 LK)
         [' ME', ' u.q.'],
+        // fixpunkt
+        ['Hier ist $\\varphi\'(x^*) = 0$: Die Folge konvergiert extrem schnell, die Zahl der richtigen Stellen verdoppelt sich etwa bei jedem Schritt (das ist das Newton-Verfahren für $x^2 - 2 = 0$).',
+            'Aqui, $\\varphi\'(x^*) = 0$: a sucessão converge extremamente depressa e o número de casas certas duplica mais ou menos em cada passo (é o método de Newton para $x^2 - 2 = 0$).'],
+        ['Wegen $|\\varphi\'(x^*)| < 1$ ist der Fixpunkt <b>anziehend</b>: Nahe bei $x^*$ schrumpft der Fehler bei jedem Schritt etwa um diesen Faktor.',
+            'Como $|\\varphi\'(x^*)| < 1$, o ponto fixo é <b>atrativo</b>: perto de $x^*$, o erro é multiplicado em cada passo aproximadamente por este fator.'],
+        [' Weil $\\varphi\' < 0$ ist, springt die Folge um den Fixpunkt herum (Spirale).', ' Como $\\varphi\' < 0$, a sucessão salta de um lado para o outro do ponto fixo (espiral).'],
+        [' Weil $\\varphi\' > 0$ ist, nähert sie sich von einer Seite (Treppe).', ' Como $\\varphi\' > 0$, aproxima-se por um só lado (escada).'],
+        ['Hier ist $|\\varphi\'(x^*)| = 1$: Der Satz sagt nichts. Bei $\\varphi(x) = \\tfrac2x$ springt die Folge ewig zwischen zwei Werten hin und her, ein Zyklus.',
+            'Aqui, $|\\varphi\'(x^*)| = 1$: o teorema não diz nada. Com $\\varphi(x) = \\tfrac2x$, a sucessão salta sem fim entre dois valores: um ciclo.'],
+        ['Wegen $|\\varphi\'(x^*)| > 1$ ist der Fixpunkt <b>abstoßend</b>: Selbst ganz nahe bei $x^*$ wächst der Fehler, die Folge läuft weg.',
+            'Como $|\\varphi\'(x^*)| > 1$, o ponto fixo é <b>repulsivo</b>: mesmo muito perto de $x^*$ o erro cresce e a sucessão foge.'],
+        ['$ mit $\\varphi(x) = ', '$ com $\\varphi(x) = '], ['$, Fixpunkt $x^* \\approx ', '$, ponto fixo $x^* \\approx '],
+        ['$ (grün), $|\\varphi\'(x^*)| \\approx ', '$ (a verde), $|\\varphi\'(x^*)| \\approx '], ['\\text{sehr groß}', '\\text{muito grande}'],
     ],
     rule: [
         // pt0: notation of the module, for every book
