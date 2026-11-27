@@ -18,6 +18,11 @@ window.BuchPT && BuchPT.add('os6', {
         // the tangram pieces and the cube buildings (helpers of the module, outside every widget)
         'großes Dreieck': 'triângulo grande', 'mittleres Dreieck': 'triângulo médio', 'kleines Dreieck': 'triângulo pequeno',
         'Quadrat': 'Quadrado', 'Parallelogramm': 'Paralelogramo', 'Treppe': 'Escada', 'Turm': 'Torre', 'Mauer': 'Muro', 'Selbst bauen': 'Construir',
+        // wuerfelbauos6 (chapter 4): planta, vistas de frente e da direita
+        'vorne': 'frente', 'Körper aus Würfeln im Schrägbild': 'Sólido feito de cubos em perspetiva cavaleira', 'Bauplan: Draufsicht mit den Höhen': 'Planta: vista de cima com as alturas',
+        'Bauplan': 'Planta', 'von vorn': 'de frente', 'von rechts': 'da direita',
+        'Tippe im Bauplan auf ein Feld: Die Zahl sagt, wie viele Würfel dort übereinander stehen (bis 3, dann wieder 0). Kantenlänge 1 cm.':
+            'Toca num quadrado da planta: o número diz quantos cubos estão empilhados ali (até 3, depois outra vez 0). Aresta de 1 cm.',
         // book pt-16 mathe7-pt:
     },
     phrase: [
@@ -33,6 +38,8 @@ window.BuchPT && BuchPT.add('os6', {
         // pt0: notation of the module, for every book
         // book pt-14 mathe5-pt:
         // book pt-15 mathe6-pt:
+        // wuerfelbauos6: "<b>7</b> Würfel · Volumen $7 cm³$ · Oberfläche $30 cm²$" (cubos · volume · área total, as Silva writes it)
+        [/<b>(\d+)<\/b> Würfel · Volumen \$/g, (m, n) => '<b>' + n + '</b> ' + (n === '1' ? 'cubo' : 'cubos') + ' · volume $'], [/\$ · Oberfläche \$/g, '$$ · área total $$'],
         // book pt-16 mathe7-pt:
     ]
 });

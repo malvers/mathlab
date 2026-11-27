@@ -47,6 +47,11 @@ window.BuchPT && BuchPT.add('gy5', {
         'Zum großen Rechteck ergänzen und das fehlende Stück abziehen:': 'Completar até ao retângulo grande e subtrair a parte que falta:',
         'Erstaunlich: Der Umfang ist so groß wie beim ganzen Rechteck, weil die Stufe genauso lang ist wie die fehlenden Seiten.':
             'Surpreendente: o perímetro é igual ao do retângulo inteiro, porque o degrau tem o mesmo comprimento que os lados que faltam.',
+        // quader5 (chapter 4): área total A (German O), as GY 6 and Silva (pt-14); the faces of the net
+        'Einheitswürfel': 'Cubos unitários', 'Länge a (cm)': 'Comprimento a (cm)', 'Breite b (cm)': 'Largura b (cm)', 'Höhe c (cm)': 'Altura c (cm)',
+        'hinten': 'trás', 'oben': 'cima', 'vorn': 'frente', 'unten': 'baixo', 'links': 'esquerda', 'rechts': 'direita',
+        'Gegenüberliegende Flächen haben dieselbe Farbe: Sie sind gleich groß.': 'As faces opostas têm a mesma cor: são iguais.',
+        'Alle Kanten gleich lang: ein Würfel.': 'Todas as arestas iguais: um cubo.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy5/*)
@@ -79,6 +84,8 @@ window.BuchPT && BuchPT.add('gy5', {
             'Os ângulos alternos internos ficam em pontos de interseção diferentes, em lados diferentes de s e entre as retas. '],
         ['An <b>parallelen</b> Geraden sind sie <b>gleich groß</b>.', 'Em retas <b>paralelas</b>, são <b>iguais</b>.'],
         ['Weil g und h <b>nicht parallel</b> sind, sind sie verschieden groß.', 'Como g e h <b>não são paralelas</b>, têm amplitudes diferentes.'],
+        // quader5: the sum of the edges (the product is × already)
+        ['Alle 12 Kanten zusammen: 4 \\times (a + b + c) = ', 'As 12 arestas juntas: 4 \\times (a + b + c) = '], ['Alle 12 Kanten zusammen: 4 · (a + b + c) = ', 'As 12 arestas juntas: 4 × (a + b + c) = '],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -105,5 +112,9 @@ window.BuchPT && BuchPT.add('gy5', {
         [/Das ist 1 Reihe mit (\d+) Kästchen\./g, (m, n) => 'É 1 fila com ' + n + (n === '1' ? ' quadradinho.' : ' quadradinhos.')],
         [/(<p class="g5-big">)u = (?=\d)/g, '$1P = '], [/\$u = 2 \\times a \+ 2 \\times b = /g, '$$P = 2 \\times a + 2 \\times b = '],
         [/<p>Zusammen (\d+) cm²<\/p>/g, '<p>Ao todo, $1 cm²</p>'], [/(\d) cm · (?=\d)/g, '$1 cm × '],
+        // quader5: the aria label, the layers of unit cubes, the total area A
+        [/^Quader (\d+) mal (\d+) mal (\d+)$/, 'Paralelepípedo $1 por $2 por $3'],
+        [/(\d+) Schicht(?:en)? mit je (\d+) · (\d+) = (\d+) Würfeln\./g, (m, c, a, b, n) => c + (c === '1' ? ' camada' : ' camadas') + ' de ' + a + ' × ' + b + ' = ' + n + ' cubos cada.'],
+        [/(<p class="g5-big">)O = (?=\d)/g, '$1A = '], [/\$O = 2 \\times \(ab \+ ac \+ bc\)/g, '$$A = 2 \\times (ab + ac + bc)'],
     ]
 });
