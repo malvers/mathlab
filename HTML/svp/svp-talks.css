@@ -215,13 +215,16 @@
     white-space: nowrap;
 }
 
-.vt-grade {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.6rem;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    line-height: 14px;
-    padding: 3px 9px;
+/* Coach, Team and "Stimmt was nicht?" in the form of the Abgabe button beside
+   them (Doc, 27.11.2026: "Coach und Team auch wie Abgabe"): height, corner,
+   Orbitron size, letter spacing and padding come from the same .badge
+   (svp-table.css), the weight from .badge.mat-upload (svp-untis.css), no
+   capitals any more. Only the colours below are their own. */
+.badge.vt-grade {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
     /* Nicht mehr --muted: die beiden Knoepfe waren blasser als alles um sie
        herum und kaum zu lesen (Doc, 21.09.2026: "etwas dunkler"). Jetzt die
        normale Textfarbe, wie im Kaestchen der Note daneben - UND eine leichte
@@ -234,12 +237,8 @@
        werden. */
     color: var(--text);
     background: color-mix(in srgb, var(--text) 10%, transparent);
-    border: 1px solid var(--line);
-    /* 8px wie Note, Abgabe und die Export-Knoepfe, nicht mehr als Pille
-       (Doc, 21.09.2026: "Coach und Pub so round wie die andern") */
-    border-radius: 8px;
+    border-color: var(--line);
     cursor: pointer;
-    white-space: nowrap;
 }
 
 .vt-grade:hover { color: var(--lambda); border-color: var(--lambda); }
@@ -274,17 +273,20 @@
 }
 
 /* "Stimmt was nicht?" at the end of the Bewerten line (vortraege.js meldHtml,
-   Doc 28.10.2026): pupils ask for a change there instead of in Teams. Same
-   button as Coach/Publikum; green once something is reported for the card,
-   Upsilon red for Doc while requests are open. */
-.vt-meld {
-    margin-left: 8px;
-    /* every variant ("Stimmt was nicht?", "Gemeldet ✓", "2 Meldungen", "Jetzt melden") as wide as the
+   Doc 28.10.2026): pupils ask for a change there instead of in Teams. Green
+   once something is reported for the card, Upsilon red for Doc while requests
+   are open. */
+/* A .badge.vt-grade like Coach/Team (Doc, 27.11.2026: "höher als Abgabe und es
+   stimmt auch im Design nicht"), plus a drawn sign in front with the gap of
+   .badge.mat-upload (svp-untis.css). */
+.badge.vt-meld {
+    gap: 6px;
+    margin: 0 0 0 8px;
+    /* every variant ("Stimmt was nicht?", "Gemeldet", "2 Meldungen", "Jetzt melden") as wide as the
        widest, so the button cannot wrap in one card and stay in line in the next (Doc, 26.11.2026:
        "alles x bündig") */
     box-sizing: border-box;
-    min-width: 15.8em;
-    text-align: center;
+    min-width: 14.8em;
 }
 .vt-meld.sent { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
 .vt-meld.hot,

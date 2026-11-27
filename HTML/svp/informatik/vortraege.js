@@ -937,7 +937,8 @@
                         ROLES.map(function (r) {
                             const done = graded(i, r[0]);
                             const sent = !!(bewIn[i] && bewIn[i][r[0]]);
-                            return '<button type="button" class="vt-grade' + (done ? ' done' : '') +
+                            /* .badge: the form of the Abgabe button beside them (svp-talks.css .badge.vt-grade) */
+                            return '<button type="button" class="badge vt-grade' + (done ? ' done' : '') +
                                 (sent ? ' full' : '') +
                                 '" id="grade-' + r[0] + '-' + i + '" title="' +
                                 (sent ? 'Bewertung ' + r[1] + ' ist abgegeben'
@@ -2652,9 +2653,10 @@
         const e = list.find((x) => x.id === i);
         return e && rowTaken(i) && ohneTitel(e) ? 'titel' : null;
     }
-    /* Lucide "flag" (ISC) */
+    /* Lucide "flag" (ISC) - also the sign on the card's "Stimmt was nicht?" button (meldBtn) */
+    const FLAG_D = 'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7';
     const FLAG_SVG = '<svg class="vt-frage-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-        '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7" fill="none" stroke="currentColor"' +
+        '<path d="' + FLAG_D + '" fill="none" stroke="currentColor"' +
         ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     function frageHtml(i) {
         const k = meldOk ? frageOf(i) : null;
@@ -2724,22 +2726,32 @@
     /* The button at the end of a card's Bewerten line. Pupils see "Stimmt was
        nicht?" and, once somebody has asked, "Gemeldet"; Doc sees how many
        requests are open for this card. */
+    /* A sibling of the Abgabe button beside it (Doc, 27.11.2026: "höher als Abgabe
+       und es stimmt auch im Design nicht"): the same .badge, a drawn sign of the
+       same size (.mat-upload-svg) in front of the word - the flag of the hint
+       above, Lucide "check" (ISC) once something is reported. The colours are
+       those of Coach/Team (svp-talks.css .badge.vt-grade, .vt-meld). */
+    function meldBtn(i, cls, title, ok, text) {
+        return '<button type="button" class="badge vt-grade vt-meld' + cls + '" id="meld-' + i + '" title="' + title + '">' +
+            '<svg class="mat-upload-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' +
+            (ok ? 'M20 6 9 17l-5-5' : FLAG_D) + '" fill="none" stroke="currentColor" stroke-width="2"' +
+            ' stroke-linecap="round" stroke-linejoin="round"/></svg>' + text + '</button>';
+    }
     function meldHtml(i) {
         if (!meldOk) return '';
         const n = meldOffen(i).length;
         if (logged() && n) {
-            return '<button type="button" class="vt-grade vt-meld hot" id="meld-' + i + '" title="Offene Meldungen zu diesem Vortrag ansehen">' +
-                n + (n === 1 ? ' Meldung' : ' Meldungen') + '</button>';
+            return meldBtn(i, ' hot', 'Offene Meldungen zu diesem Vortrag ansehen', false,
+                n + (n === 1 ? ' Meldung' : ' Meldungen'));
         }
         const k = frageOf(i);
         if (k && !n) {
             /* the card is asking - the button answers, in the red of the hint */
-            return '<button type="button" class="vt-grade vt-meld hot" id="meld-' + i + '" title="' + esc(FRAGEN[k][1]) + '">' +
-                (k === 'titel' ? 'Thema melden' : 'Jetzt melden') + '</button>';
+            return meldBtn(i, ' hot', esc(FRAGEN[k][1]), false, k === 'titel' ? 'Thema melden' : 'Jetzt melden');
         }
-        return '<button type="button" class="vt-grade vt-meld' + (n ? ' sent' : '') + '" id="meld-' + i + '" title="' +
-            (n ? 'Für diesen Vortrag ist schon etwas gemeldet — weitere Meldung schicken' : 'Austragen, Thema wechseln, Wunschthema: hier an Herrn Alvers melden') +
-            '">' + (n ? 'Gemeldet ✓' : 'Stimmt was nicht?') + '</button>';
+        return meldBtn(i, n ? ' sent' : '',
+            n ? 'Für diesen Vortrag ist schon etwas gemeldet — weitere Meldung schicken' : 'Austragen, Thema wechseln, Wunschthema: hier an Herrn Alvers melden',
+            !!n, n ? 'Gemeldet' : 'Stimmt was nicht?');
     }
 
     function wireMeld(i) {
