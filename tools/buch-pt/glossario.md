@@ -544,5 +544,15 @@ ensino básico (3.º ciclo).
 | Ungleichung · Zeichen dreht sich um | inequação · o sinal inverte-se | $\text{C.S.} = \{x : x > -3\}$; bola aberta / fechada |
 | Balkenwaage · Fitnessstudio · Besuch | balança de pratos · ginásio · ida | |
 | periodisch $5{,}\overline{3}$ | $5{,}(3)$ | wie GY 6 |
+| Zufallsversuch · Ergebnis · Ergebnismenge $\Omega$ · Ereignis tritt ein | experiência aleatória · resultado · espaço amostral $\Omega$ · o acontecimento realiza-se | |
+| sicheres / unmögliches Ereignis | acontecimento certo / impossível | |
+| Vereinigung · Durchschnitt · Differenz · Gegenereignis | reunião · interseção · diferença («$A$ menos $B$») · acontecimento contrário | |
+| absolute / relative Häufigkeit $H_n$, $h_n$ | frequência absoluta / relativa $H_n$, $h_n$ | Buchstaben bleiben wie mathe11-pt |
+| Laplace-Versuch · Laplace-Regel · günstig / möglich | experiência de Laplace (resultados equiprováveis) · regra de Laplace · casos favoráveis / possíveis | $P(E) = \tfrac{\#E}{\#\Omega}$ |
+| Wappen / Zahl (Euromünze) · historische Münze (Buffon, Pearson, Kerrich) | face nacional $N$ / face europeia $E$ · «cara» / «coroa» | wie GY 6 |
+| Urne: rot, blau, grün | vermelha $v$, azul $a$, branca $b$ | die grüne Kugel wird weiß, damit die Buchstaben verschieden sind (lb2-1, Aufgabe 3) |
+| Reißzwecke · Legostein (Noppen) · Kronkorken · Lostrommel (Los, Niete) | pionés · peça de Lego (pinos) · carica · tômbola (rifa, sem prémio) | |
+| Skatblatt: Herz, Bube, Dame, König, Ass · Pasch | baralho de 32 cartas: copas, valete, dama, rei, ás · dois números iguais | |
+| Namen | Lena → Rita, Tom → Tiago, Tim → Tomás, Lisa → Inês, Max → Rui | |
 
 ## mathegy9-pt

@@ -14,10 +14,25 @@ window.BuchPT && BuchPT.add('spiele', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs spiele/*)
         // book pt-12 mathegy8-pt:
+        // verteilung (chapter 2.1: two dice; 'Augensumme', 'Zufallsgröße' and the aria label of the bar chart are in js/buch-pt/stochastik.js)
+        'Differenz': 'Diferença', 'Maximum': 'Máximo', 'Anzahl Sechsen': 'Número de seis',
+        'Die 36 Ergebnisse zweier Würfel mit dem Wert der Zufallsgröße': 'Os 36 resultados de dois dados com o valor da variável aleatória',
+        '2. Würfel →': '2.º dado →',
+        // the games of spielstreuung (module helpers; GY 10 widget, not on a pt page yet)
+        'Münzwette': 'Aposta na moeda', 'Glücksrad': 'Roleta', 'Los': 'Rifa',
+        'Einsatz 1 €. Wappen: 2 € zurück, Zahl: nichts.': 'Aposta de 1 €. Face nacional: recebes 2 €, face europeia: nada.',
+        'Einsatz 1 €. Mit Wahrscheinlichkeit $\\tfrac{1}{10}$ gibt es 10 € zurück, sonst nichts.': 'Aposta de 1 €. Com probabilidade $\\tfrac{1}{10}$ recebes 10 €, senão nada.',
+        'Einsatz 1 €. Mit Wahrscheinlichkeit $\\tfrac{1}{100}$ gibt es 100 € zurück, sonst nichts.': 'Aposta de 1 €. Com probabilidade $\\tfrac{1}{100}$ recebes 100 €, senão nada.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs spiele/*)
         // book pt-12 mathegy8-pt:
+        // verteilung: "$X$ = die Summe der beiden Augenzahlen. Tippe auf ein Feld oder einen Wert."
+        ['die Summe der beiden Augenzahlen', 'a soma das pintas dos dois dados'],
+        ['der Abstand der beiden Augenzahlen, die größere minus die kleinere', 'a distância entre os números de pintas dos dois dados, o maior menos o menor'],
+        ['die größere der beiden Augenzahlen', 'o maior dos dois números de pintas'], ['wie viele der beiden Würfel eine Sechs zeigen', 'quantos dos dois dados mostram um seis'],
+        ['. Tippe auf ein Feld oder einen Wert.', '. Toca numa casa ou num valor.'],
+        [' der 36 gleich wahrscheinlichen Ergebnisse gehören dazu. Alle Wahrscheinlichkeiten zusammen ergeben $1$.', ' dos 36 resultados equiprováveis dão este valor. Todas as probabilidades juntas somam $1$.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
