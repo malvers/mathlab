@@ -8,6 +8,8 @@ sees what the board shows while he works on the Mac.
 - Floats over every app, full screen included, and never takes the keyboard
 - Drag to move; under the mouse orange grips show in the corners, drag one to resize
   (the opposite corner stays, the board's shape too); both are remembered
+- Right-click (or control-click) the picture: Hide (= Active off in DocBar, which brings it
+  back) and Back to the corner
 - 15 frames a second with the mouse pointer, as many pixels as the window shows
 
 Frames go straight from ScreenCaptureKit into the window, nothing is saved or sent. The log

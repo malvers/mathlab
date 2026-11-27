@@ -5,6 +5,7 @@
 // is saved or sent.
 //
 // Drag the picture to move it, drag one of its corners to resize it. Both are remembered.
+// Right-click (or control-click) it for Hide and Back to the corner.
 
 import Cocoa
 import CoreMedia
@@ -254,7 +255,21 @@ final class MirrorView: NSView {
         NSCursor.arrow.set()
     }
 
+    /// Right-click and control-click open the mirror's menu (set by the app) instead of dragging.
+    private func showMenu(_ event: NSEvent) {
+        guard let menu else { return }
+        NSMenu.popUpContextMenu(menu, with: event, for: self)
+        // "Hide" took the window away under the mouse, so no exit may come: drop the grips for next time.
+        if window?.isVisible != true { showGrips(false) }
+    }
+
+    override func rightMouseDown(with event: NSEvent) { showMenu(event) }
+
     override func mouseDown(with event: NSEvent) {
+        if event.modifierFlags.contains(.control) {
+            showMenu(event)
+            return
+        }
         guard let window, let corner = corner(at: event) else {
             window?.performDrag(with: event)
             return
@@ -347,8 +362,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         panel.contentMinSize = NSSize(width: Setting.minWidth, height: Setting.minWidth * 9 / 16)
         panel.delegate = self
         picture.resized = { [weak self] in self?.resized() }
+        picture.menu = contextMenu()
         panel.contentView = picture
     }
+
+    /// Right-click on the mirror: the DocBar items that belong on the window itself, going the same way as there.
+    /// "Hide" is DocBar's "Active" switched off, so DocBar shows OFF and brings it back. No quit here: DocClock's
+    /// right-click quit was hit by mistake (Doc, 21.11.2026), quitting stays a deliberate step in DocBar.
+    private func contextMenu() -> NSMenu {
+        let menu = NSMenu()
+        menu.addItem(withTitle: "Hide", action: #selector(menuHide), keyEquivalent: "").target = self
+        menu.addItem(withTitle: "Back to the corner", action: #selector(menuCorner), keyEquivalent: "").target = self
+        return menu
+    }
+
+    @objc private func menuHide() { if enabled { clicked("toggle") } }
+    @objc private func menuCorner() { clicked("corner") }
 
     // MARK: following the screens
 
