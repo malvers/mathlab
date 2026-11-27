@@ -43,6 +43,12 @@ window.BuchPT && BuchPT.add('geometrie', {
         'Ecken verdoppeln': 'Duplicar os vértices', 'Zurück auf 6': 'Voltar a 6', 'Anzahl der Ecken $n$': 'Número de vértices $n$',
         'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Circunferência com um polígono inscrito e um polígono circunscrito', 'innen': 'inscrito', 'außen': 'circunscrito',
         'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circunferência com $r = 1$, portanto $P = 2\\pi$. Perímetro a dividir por $2$:',
+        // spitzkoerper (chapter 3.3): base area A_b, lateral area A_L, total area A_T, apótema a_p, aresta lateral ℓ, geratriz g
+        // (as pt-1 writes the koerper widget of js/buch-gleichungen.js; the formulas are phrases, the picture labels a rule below)
+        'Quadratische Pyramide': 'Pirâmide quadrangular regular', 'Kreiskegel': 'Cone', 'Körper': 'Sólido', 'Seitenhöhe': 'Apótema',
+        'Seitenkante': 'Aresta lateral', 'Hilfsdreieck': 'Triângulo auxiliar', 'Grundkante $a$': 'Aresta da base $a$', 'Höhe $h$': 'Altura $h$',
+        'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Pirâmide quadrangular regular em perspetiva cavaleira, com o triângulo auxiliar',
+        'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cone em perspetiva cavaleira, com o triângulo auxiliar',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
@@ -60,6 +66,13 @@ window.BuchPT && BuchPT.add('geometrie', {
         ['\\text{Gegenkathete}', '\\text{cateto oposto}'], ['\\text{Ankathete}', '\\text{cateto adjacente}'], ['\\text{Hypotenuse}', '\\text{hipotenusa}'],
         // vieleck: "Also $3{,}1… < \pi < 3{,}2…$, Abstand $…$"
         ['Also $', 'Portanto, $'], ['$, Abstand $', '$, diferença $'],
+        // spitzkoerper: the formulas with the Portuguese letters (the product is \times already)
+        ['$h_s = \\sqrt{h^2 + \\left(\\tfrac{a}{2}\\right)^2} \\approx ', '$a_p = \\sqrt{h^2 + \\left(\\tfrac{a}{2}\\right)^2} \\approx '],
+        ['$s = \\sqrt{h^2 + \\left(\\tfrac{d}{2}\\right)^2} = \\sqrt{h^2 + \\tfrac{a^2}{2}} \\approx ', '$\\ell = \\sqrt{h^2 + \\left(\\tfrac{d}{2}\\right)^2} = \\sqrt{h^2 + \\tfrac{a^2}{2}} \\approx '],
+        ['$G = a^2 = ', '$A_b = a^2 = '], ['$M = 4 \\times \\tfrac12 a\\,h_s \\approx ', '$A_L = 4 \\times \\tfrac12 a\\,a_p \\approx '],
+        ['$O = G + M \\approx ', '$A_T = A_b + A_L \\approx '], ['$V = \\tfrac13\\,G\\,h \\approx ', '$V = \\tfrac13\\,A_b\\,h \\approx '],
+        ['$s = \\sqrt{r^2 + h^2} \\approx ', '$g = \\sqrt{r^2 + h^2} \\approx '], ['$G = \\pi r^2 \\approx ', '$A_b = \\pi r^2 \\approx '],
+        ['$M = \\pi r s \\approx ', '$A_L = \\pi r g \\approx '], ['$O = \\pi r^2 + \\pi r s \\approx ', '$A_T = \\pi r^2 + \\pi r g \\approx '],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -74,5 +87,8 @@ window.BuchPT && BuchPT.add('geometrie', {
         // trigo, vieleck: sine and tangent as Portuguese schools write them, sen and tg (as the pt-1 sen rule of funktionen.js;
         // \operatorname{sen} and \operatorname{tg} contain no \sin or \tan, so a page that loads both modules is not changed twice)
         [/\\sin(?![a-zA-Z])/g, '\\operatorname{sen}'], [/\\tan(?![a-zA-Z])/g, '\\operatorname{tg}'],
+        // spitzkoerper, the labels in its own picture (only this SVG): hₛ → aₚ (apótema), s → ℓ (aresta lateral) or g (geratriz)
+        [/<svg viewBox="0 0 360 290" role="img" aria-label="(Quadratische Pyramide|Kreiskegel) im Schrägbild mit Hilfsdreieck">[\s\S]*?<\/svg>/g,
+            (m, k) => m.replace(/>hₛ</g, '>aₚ<').replace(/>s<\/text>/g, k === 'Kreiskegel' ? '>g</text>' : '>ℓ</text>')],
     ]
 });
