@@ -696,6 +696,69 @@ Block pt-13 (Gomes, 27.11.2026). Gymnasium bleibt deutsch und wird auf der Start
 
 ## mathe6-pt (OS 6, block pt-15)
 
+Block pt-15 (Mira, 27.11.2026). "Oberschule" bleibt deutsch und wird auf der Startseite erklärt (5.º–10.º ano, ab dem 7.º ano zwei
+Wege: Realschulabschluss / Hauptschulabschluss; 6.º ano ≈ 6.º ano do ensino básico, 2.º ciclo). Wahlbereich `k: 'O'` (Área opcional)
+wie GY 6. Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Die Widgets kommen aus gy5 (mit OS 5, pt-14), gy6, gy8 und os6
+(mit OS 5 und OS 7); die Schreibweisen wie GY 6:
+
+- **× für das Produkt** überall (Seiten und Widgets; Regel `\cdot` → `\times` in `geometrie.js` pt0); auch die Knöpfe und die Zeile von
+  `komma5` („× 10“, Regel in `gy5.js` pt-15) und die Rechteck-Zeilen von `rechteck5` („3 cm × 4 cm“).
+- **Periode in Klammern** $0{,}(3)$, $0{,}8(3)$ (Regel in `gy6.js` pt0), im Seitentext „escreve-se o período entre parênteses“.
+- **Mengen mit Kommas** $\{1, 2, 3, 6\}$, Teilermenge $D_{12}$; einmal erklärt: in Portugal beginnt $\mathbb{N}$ bei 1, mit der Null $\mathbb{N}_0$.
+- **Punkte** $P(3, 5)$, mit Dezimalkomma $P(3; 12{,}5)$; Achsen $Ox$ (abcissas), $Oy$ (ordenadas).
+- **Flächen:** Grundseite $b$ (deutsch $g$), $A = b \times h$, $A = \frac{b \times h}{2}$; Drachen/Raute $A = \frac{e \times f}{2}$; Trapez
+  $A = \frac{(a + c) \times h}{2}$; Umfang $P$ (deutsch $u$, auch in `rechteck5`, Regel).
+- **Körper:** $V = a \times b \times c$, Oberfläche = área total $A$ (deutsch $O$, auch in `quader5`, Regel); Prisma $V = A_b \times h$,
+  $A_L = P_b \times h$, $A = 2 \times A_b + A_L$.
+- **Stellenwerttafel** (nur `komma5`): DM UM C D U, d c m (Regel in `gy5.js` pt-15; die ganzzahlige Tafel `g5-sw` macht pt-14).
+- Deutsche Schulnoten einmal erklärt („na escala alemã, 1 é a melhor nota“).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| gebrochene Zahlen | números racionais não negativos (frações e números decimais) | Kapiteltitel: „Representar frações e números decimais“ |
+| erweitern · kürzen · vollständig gekürzt | escrever uma fração equivalente (multiplicar os dois termos por …) · simplificar · fração irredutível | Knöpfe in `bruch5`: „Multiplicar por 2“, „por 3“, „Simplificar“ |
+| echter / unechter Bruch · gemischte Zahl | fração própria / imprópria · numeral misto | wie pt-14 |
+| endlich / periodisch | dízima finita / infinita periódica | |
+| gleichnamig machen · Hauptnenner | reduzir ao mesmo denominador · mínimo denominador comum | |
+| Kehrwert · Überschlag | inverso · estimativa | |
+| Stellenwerttafel · das Komma wandert | quadro de valor posicional · a vírgula desloca-se | |
+| abrunden / aufrunden | arredondar por defeito / por excesso | |
+| Rechengesetze · Vorrangregeln · Rechenvorteile | propriedades das operações · prioridade das operações · calcular com jeito | |
+| arithmetisches Mittel · Ausgleichen | média aritmética · igualar | `mittel5`: „Igualar“, „Média“ |
+| Umkehraufgabe · Verhältnisgleichung · Probe | operação inversa · proporção · verificação | |
+| Zuordnung · eindeutig / eineindeutig / mehrdeutig | correspondência · unívoca / biunívoca / não unívoca | wie pt-10 |
+| Ausgangsmenge · Zielmenge · Pfeildarstellung · Wertetabelle | conjunto de partida · conjunto de chegada · diagrama de setas · tabela de valores | |
+| Koordinatensystem | referencial cartesiano | |
+| direkt / indirekt proportional · quotientengleich / produktgleich | diretamente / inversamente proporcional · quociente constante / produto constante | |
+| Dreisatz | regra de três simples | einmal: „em alemão chama-se Dreisatz“ |
+| Grundgebühr · Anfahrt · Maßstab | bandeirada (Taxi), taxa fixa · deslocação · escala | |
+| Nebenwinkel · Scheitelwinkel · Stufenwinkel · Wechselwinkel | ângulos suplementares (adjacentes) · verticalmente opostos · correspondentes · alternos internos | auch `winkelpaare5` |
+| gestreckter Winkel · Vollwinkel | ângulo raso · ângulo giro | |
+| Innenwinkelsatz · Basiswinkel · Spitze | teorema da soma dos ângulos internos · ângulos da base · vértice oposto à base | |
+| spitz-/recht-/stumpfwinklig · unregelmäßig · gleichschenklig · gleichseitig | acutângulo / retângulo / obtusângulo · escaleno · isósceles · equilátero | |
+| Kongruenzsätze sss, sws, wsw, SsW, www · kongruent | critérios de igualdade LLL, LAL, ALA, LLA, AAA · geometricamente iguais | wie pt-10 |
+| Dreiecksungleichung · Planfigur | desigualdade triangular · esboço | |
+| Grundseite · Höhe · Drachenviereck · Raute | base · altura · papagaio · losango | |
+| zerlegen · ergänzen · zusammengesetzte Figur | decompor · completar · figura composta | `rechteck5` |
+| Ar · Hektar | are (a) · hectare (ha) | |
+| Ecken · Kanten · Flächen · Vielflächner | vértices · arestas · faces · poliedros | |
+| Grundriss · Vorder-/Seitenansicht · Bauplan | planta · vista de frente / lateral · planta (com números) | `wuerfelbauos6`: „Planta“, „de frente“, „da direita“ |
+| Schrägbild · Netz · Einheitswürfel | perspetiva cavaleira · planificação · cubos unitários | |
+| Mantel · Grund-/Deckfläche | superfície lateral ($A_L$) · base inferior / superior | |
+| Eulers Formel | relação de Euler | |
+| systematisch probieren · rückwärts arbeiten · auf Bekanntes zurückführen | experimentar de forma sistemática · trabalhar para trás · reduzir ao que já se conhece | |
+| Hühner und Kaninchen · Handschläge | galinhas e coelhos · apertos de mão | |
+| Zufallsversuch · Strichliste · absolute / relative Häufigkeit | experiência aleatória · tabela de contagem · frequência absoluta / relativa | |
+| Kopf / Zahl · historische Münze (Buffon, Kerrich, Pearson) | face nacional / face europeia · «cara» | wie pt-10 |
+| Reißzwecke (Rücken / Seite) | pionés (de costas / de lado) | |
+| wenn – dann · Umkehrung · Gegenbeispiel · je – desto | se – então · recíproco · contraexemplo · quanto mais – mais | |
+| Tangram · Soma-Würfel · zerlegungsgleich | tangram · cubo Soma · equivalentes por decomposição | Teile klein geschrieben wie pt-16 („triângulo grande“, „quadrado“) |
+| Schiebepuzzle · Fünfzehner-Spiel · Steine · Mischen | puzzle de deslizar · jogo dos quinze · peças · Baralhar | |
+| Turm von Hanoi · Scheiben · Stab · Züge | Torre de Hanói · discos · haste · jogadas | |
+| Nim · Hölzer · nimm 1 · Gewinnstrategie | Nim · paus · tira 1 · estratégia vencedora | |
+| Augensumme · Würfelwettrennen · fair | soma das pintas · corrida de dados · justo | |
+| Namen | Lea → Leonor, Tom → Tiago, Max → Rui, Ben → Bruno, Can → Carlos, Ina → Inês, Tim → Tomás, Ida → Inês, Anna → Ana | |
+
 ## mathe7-pt (OS 7, block pt-16)
 
 ## mathe8-pt (OS 8, block pt-17)
