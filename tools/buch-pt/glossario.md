@@ -516,3 +516,56 @@ parts, so every later book that loads them gets it too):
 ## mathegy8-pt
 
 ## mathegy9-pt
+
+Block pt-13 (Gomes, 27.11.2026). Gymnasium bleibt deutsch und wird auf der Startseite erklärt (9.º ano ≈ 9.º ano do ensino básico,
+3.º ciclo). Wahlbereich `k: 'O'` (Área opcional) wie GY 6. Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Schreibweisen:
+
+- **Produkt:** in den Geometrie-Kapiteln (lb2, lb3-1 … lb3-3, wb) $\times$ wie die Regel in `geometrie.js` pt0; in den Algebra-Kapiteln
+  (lb1-x, lb4, lb5) bleibt $\cdot$, wie die Widgets von `funktionen.js` es auf diesen Seiten schreiben.
+- **Quadratische Gleichungen:** fórmula resolvente $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$ und binómio discriminante $\Delta = b^2 - 4ac$
+  statt der p-q-Formel (einmal als deutsche Schreibweise erwähnt); Viète für $x^2 + bx + c = 0$: $x_1 + x_2 = -b$, $x_1 x_2 = c$.
+- **Scheitelpunktform** $a(x - h)^2 + k$, $V(h, k)$ wie das Widget `parabel`; Normalform → forma geral $ax^2 + bx + c$ (mit $a = 1$: $x^2 + bx + c$).
+- **sen, cos, tg** auch in den Widgets (Regeln in `geometrie.js` pt-13, wie die sen-Regel von `funktionen.js` pt-1).
+- **Körper:** Grundfläche $A_b$, Mantel $A_L$, Oberfläche $A_T$ (wie `koerper` seit pt-1), Mantellinie $g$ (geratriz), Seitenhöhe $a_p$
+  (apótema), Seitenkante $\ell$ (aresta lateral); Kreisbogen $\ell$, Umfang $P$; Kreisring mit $r_e$, $r_i$.
+- **Klassen** $[150, 155[$; Spannweite $R$ (amplitude), Varianz $s^2$, Standardabweichung $s$ (Division durch $n$).
+- Deutsche Schulnoten 1–6 bleiben in den Aufgaben (einmal erklärt: 1 ist die beste).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Potenzieren · Radizieren · Potenzgesetze | potenciação · radiciação · regras das potências | Permanenzprinzip = princípio da permanência |
+| Wurzelgleichung · Scheinlösung · Probe | equação com radicais (equação irracional) · solução falsa (solução estranha) · verificação | $\text{C.S.} = \{\,\}$ |
+| Potenzfunktion · Hyperbel · Polynom · Grad | função potência · hipérbole · polinómio · grau | Parabel $n$-ter Ordnung = parábola de ordem $n$ |
+| Polstelle (mit / ohne Vorzeichenwechsel) | polo (com / sem mudança de sinal) | wie `potenzfunktion` |
+| achsensymmetrisch zur $y$-Achse / punktsymmetrisch zum Ursprung | simétrico em relação ao eixo $Oy$ (função par) / à origem (função ímpar) | |
+| Streckung · Stauchung · Verschiebung · Spiegelung | dilatação · contração · translação · reflexão | wie `parameter` |
+| Normalparabel | parábola $y = x^2$ (parábola de referência) | |
+| quadratische Ergänzung | completar o quadrado | |
+| Lösungsformel · Diskriminante · Fallunterscheidung | fórmula resolvente · binómio discriminante $\Delta$ · análise de casos | |
+| Satz von Vieta | relações de Viète | |
+| Extremwertaufgabe · Zielgröße · Nebenbedingung | problema de otimização · grandeza a maximizar · condição | wie `extremwert` |
+| Kreisbogen · Kreisausschnitt · Kreisring | arco · setor circular · coroa circular | Mittelpunktswinkel = ângulo ao centro |
+| Kreiszylinder · Kugel · Dichte | cilindro · esfera · densidade $\varrho$ | |
+| Satzgruppe des Pythagoras | teorema de Pitágoras e relações métricas | |
+| Hypotenuse · Kathete · Hypotenusenabschnitte $p$, $q$ | hipotenusa · cateto · projeções dos catetos $p$, $q$ | |
+| Höhensatz · Kathetensatz | teorema da altura · teorema do cateto | |
+| Umkehrung · indirekter Beweis · genau dann, wenn | recíproco · demonstração por redução ao absurdo · se e só se | Voraussetzung / Behauptung = hipótese / tese |
+| Thaleskreis | semicircunferência (de diâmetro $[AB]$) | |
+| Raumdiagonale · Quader | diagonal espacial · paralelepípedo | |
+| pythagoreisches Tripel | terno pitagórico | |
+| Gegenkathete · Ankathete | cateto oposto · cateto adjacente | wie `trigo` |
+| Steigung in Prozent · Höhenwinkel / Tiefenwinkel | inclinação em percentagem · ângulo de elevação / de depressão | |
+| regelmäßiges $n$-Eck · Umkreisradius | polígono regular de $n$ lados · raio da circunferência circunscrita | Seite $l$ |
+| quadratische Pyramide · Kreiskegel · Spitzkörper | pirâmide quadrangular regular · cone · sólidos com vértice | |
+| Landvermessung | medição de terrenos | Vermesser = topógrafos |
+| Modalwert · Median · arithmetisches Mittel | moda · mediana · média $\bar x$ | Mittelwert (allgemein) = medida de tendência central |
+| Nominal- / Ordinal- / metrische Skala | escala nominal / ordinal / métrica | Ausreißer = valor atípico |
+| Spannweite · Varianz · Standardabweichung | amplitude $R$ · variância $s^2$ · desvio padrão $s$ | |
+| Klasse · Klassenbreite · Histogramm | classe · amplitude das classes · histograma | |
+| Prozentpunkte · Bezugsgröße | pontos percentuais · referência | |
+| Säule / wirkt (Diagramm) | barra / parece | wie `achsentrick` (pt-11) |
+| Tabellenkalkulation | folha de cálculo | MÉDIA, VAR.P, DESVPAD.P, DESVPAD.S, MÁXIMO, MÍNIMO |
+| Miete · Mietvertrag | renda · contrato de arrendamento | Einzimmerwohnung = T0 |
+| goldener Schnitt · goldene Zahl $\Phi$ | secção áurea · número de ouro $\Phi$ | goldenes Rechteck / Dreieck = retângulo / triângulo de ouro |
+| äußere Teilung | divisão exterior | Euklid: „em média e extrema razão“ |
+| Fibonacci-Folge | sucessão de Fibonacci | |
