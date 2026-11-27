@@ -35,6 +35,7 @@ window.BuchPT && BuchPT.add('trigonometrie', {
         'Dreieck mit Quadraten über den drei Seiten': 'Triângulo com quadrados construídos sobre os três lados',
         // dreieckloeser: S = side (lado), W = angle (ângulo) - the Portuguese criteria LLL, LAL, ALA, LLA as in gy6
         'SSS': 'LLL', 'SWS': 'LAL', 'WSW': 'ALA', 'SSW': 'LLA', 'Gegeben': 'Dados', 'Das berechnete Dreieck': 'O triângulo calculado',
+        'Kosinussatz': 'Lei dos cossenos', 'Sinussatz': 'Lei dos senos', 'Winkelsumme': 'Soma dos ângulos',
         'KOSINUSSATZ': 'LEI DOS COSSENOS', 'SINUSSATZ': 'LEI DOS SENOS', 'WINKELSUMME': 'SOMA DOS ÂNGULOS',
         'Seite $a$': 'Lado $a$', 'Seite $b$': 'Lado $b$', 'Seite $c$': 'Lado $c$', 'Winkel $\\alpha$': 'Ângulo $\\alpha$', 'Winkel $\\beta$': 'Ângulo $\\beta$',
         'Winkel $\\alpha$ (gegenüber von $a$)': 'Ângulo $\\alpha$ (oposto a $a$)',
