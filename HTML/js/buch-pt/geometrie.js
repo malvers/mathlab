@@ -20,6 +20,9 @@ window.BuchPT && BuchPT.add('geometrie', {
         // titelbildgy9 (the cover of GY 9)
         'Titelbild: rechtwinkliges Dreieck mit den Quadraten über seinen Seiten, ein goldenes Rechteck mit Spirale, ein Kreis zwischen zwei Sechsecken und eine Parabel':
             'Capa: um triângulo retângulo com os quadrados construídos sobre os seus lados, um retângulo de ouro com uma espiral, um círculo entre dois hexágonos e uma parábola',
+        // kreisteil (chapter 2): the arc length is ℓ and the perimeter P (German b, u; the phrases below)
+        'Radius $r$': 'Raio $r$', 'Mittelpunktswinkel $\\alpha$': 'Ângulo ao centro $\\alpha$', 'Kreis mit Kreisausschnitt und Kreisbogen': 'Círculo com um setor circular e um arco',
+        'Kreisbogen': 'Arco', 'Kreisausschnitt': 'Setor circular',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
@@ -27,6 +30,10 @@ window.BuchPT && BuchPT.add('geometrie', {
         // book pt-11 mathegy7-pt:
         // book pt-12 mathegy8-pt:
         // book pt-13 mathegy9-pt:
+        // kreisteil (the product is \times already: the pt0 rule runs before the phrases)
+        ['Anteil am Vollkreis: $', 'Parte do círculo completo: $'],
+        [' $b = \\tfrac{\\alpha}{360^\\circ} \\times 2\\pi r', ' $\\ell = \\tfrac{\\alpha}{360^\\circ} \\times 2\\pi r'],
+        ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $u \\approx ', 'Arrasta a extremidade do arco. Para comparar, o círculo inteiro: $P \\approx '],
     ],
     rule: [
         // pt0: notation of the module, for every book
