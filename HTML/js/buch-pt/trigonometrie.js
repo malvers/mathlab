@@ -16,11 +16,8 @@ window.BuchPT && BuchPT.add('trigonometrie', {
         // book pt-18 mathe9-pt:
         // pyramidekegel (chapters 2.1, 2.2 of OS 9): apótema a_p, aresta lateral ℓ, geratriz g, A_b, A_L, A_T as in js/buch-pt/geometrie.js pt-13
         // (spitzkoerper); "Grundkante $a$", "Radius $r$", "Höhe $h$", "Körper" are words there, the button "Quadratische Pyramide" a rule there
-        'Kegel': 'Cone', 'Höhe – Seitenhöhe': 'Altura – apótema', 'Höhe – Seitenkante': 'Altura – aresta lateral', 'Höhe – Mantellinie': 'Altura – geratriz',
+        'Höhe – Seitenhöhe': 'Altura – apótema', 'Höhe – Seitenkante': 'Altura – aresta lateral', 'Höhe – Mantellinie': 'Altura – geratriz',
         'Rechtwinkliges Dreieck': 'Triângulo retângulo',
-        // the body button, as js/buch-pt/gy7.js has it (GY 10 lb3-2 loads only this module; with geometrie.js loaded the word comes first, so
-        // spitzkoerper shows «Pirâmide quadrangular» there too)
-        'Quadratische Pyramide': 'Pirâmide quadrangular',
         // book pt-19 mathe10-pt:
         // book pt-20 mathegy10-pt:
     },
@@ -42,6 +39,12 @@ window.BuchPT && BuchPT.add('trigonometrie', {
     rule: [
         // pt0: notation of the module, for every book
         // book pt-18 mathe9-pt:
+        // pyramidekegel, the body buttons: its markup is the same as spitzkoerper's (data-v="pyr", data-v="kegel"), only the second label differs
+        // ("Kegel" here, "Kreiskegel" there, a word of geometrie.js that is already parked when the rules run) - so "Kegel" is no word in this
+        // module or in os9.js. Where geometrie.js is loaded its rule has already written «Pirâmide quadrangular regular» for both widgets;
+        // where it is not (GY 10 lb3-2) the pyramid becomes «Pirâmide quadrangular» as in gy7.js, and spitzkoerper keeps its own form everywhere
+        [/(<button type="button" data-v="pyr">)Quadratische Pyramide(?=<\/button><button type="button" data-v="kegel">Kegel<\/button>)/g, '$1Pirâmide quadrangular'],
+        [/(<button type="button" data-v="kegel">)Kegel(?=<\/button>)/g, '$1Cone'],
         // pyramidekegel: the side edge ℓ (aresta lateral, German s) with the diagonal d
         [/Seitenkante \$s = (\\sqrt\{h\^2 \+ \\left\(\\tfrac\{d\}\{2\}\\right\)\^2\})\$ mit der Diagonale \$d = a\\sqrt2 \\approx ([^$]*)\$: \$s \\approx /g,
             (m, f, d) => 'Aresta lateral $\\ell = ' + f + '$, com a diagonal $d = a\\sqrt2 \\approx ' + d + '$: $\\ell \\approx '],

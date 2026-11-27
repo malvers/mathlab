@@ -53,12 +53,12 @@ window.BuchPT && BuchPT.add('os9', {
         'Eine Kugel in einem Zylinder, der genau um sie passt': 'Uma esfera dentro do cilindro em que encaixa exatamente',
         'Die Kugel füllt immer genau $\\tfrac{2}{3}$ des Zylinders, der um sie passt. Das hat Archimedes entdeckt.':
             'A esfera ocupa sempre exatamente $\\tfrac{2}{3}$ do cilindro em que encaixa. Foi Arquimedes quem o descobriu.',
-        // turmos9 (chapter 2.3): cylinder + cone (geratriz g, base A_b) or + hemisphere; "Zylinder", "Kegel" as in js/buch-pt/gleichungen.js
+        // turmos9 (chapter 2.3): cylinder + cone (geratriz g, base A_b) or + hemisphere; "Zylinder" as in js/buch-pt/gleichungen.js ("Kegel" is a rule below)
         'Turm: Zylinder + Kegel': 'Torre: cilindro + cone', 'Silo: Zylinder + Halbkugel': 'Silo: cilindro + semiesfera',
         'Höhe des Zylinders $h$': 'Altura do cilindro $h$', 'Höhe des Kegels $h_K$': 'Altura do cone $h_{\\text{cone}}$',
         'Turm aus einem Zylinder mit einem Kegeldach': 'Torre formada por um cilindro com um telhado cónico',
         'Silo aus einem Zylinder mit einer Halbkugel als Dach': 'Silo formado por um cilindro com uma semiesfera como telhado',
-        'Zylinder': 'Cilindro', 'Kegel': 'Cone', 'Halbkugel': 'Semiesfera', 'Mantellinie': 'Geratriz',
+        'Zylinder': 'Cilindro', 'Halbkugel': 'Semiesfera', 'Mantellinie': 'Geratriz',
         'Zur Oberfläche gehören nur die Außenflächen: Der Deckkreis des Zylinders liegt innen und zählt nicht mit.':
             'Na área total só entram as faces exteriores: a base superior do cilindro fica no interior e não conta.',
         // parabelos9 (chapters 3.1, 3.2): parábola de referência, vértice V, forma canónica; "Streckfaktor $a$" as in js/buch-pt/funktionen.js;
@@ -119,6 +119,8 @@ window.BuchPT && BuchPT.add('os9', {
         [/<svg viewBox="0 0 320 320" role="img" aria-label="Querschnitt eines Satteldachs mit Neigung \d+ Grad">[\s\S]*?<\/svg>/g, m => m.replace(/>b = /g, '>l = ')],
         [/^Querschnitt eines Satteldachs mit Neigung (\d+) Grad$/, 'Corte de um telhado de duas águas com $1 graus de inclinação'],
         [/<td>Dachfläche<\/td>(?=<td>\$2 \\times s)/g, '<td>Área do telhado</td>'],
+        // turmos9: the table row "Kegel" (no word, see pyramidekegel in js/buch-pt/trigonometrie.js)
+        [/<td>Kegel<\/td>/g, '<td>Cone</td>'],
         // turmos9: the slant height of the cone roof in the picture is g (geratriz)
         [/<svg viewBox="0 0 320 340" role="img" aria-label="Turm aus einem Zylinder mit einem Kegeldach">[\s\S]*?<\/svg>/g, m => m.replace(/>s<\/text>/g, '>g</text>')],
         // parabelos9, quadglos9: the sliders p, q of the form x² + px + q are b, c (tied to their range rows; komplex.js has its own $p$)
