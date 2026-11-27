@@ -107,6 +107,18 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-9 mathegy11-pt:
         // book pt-12 mathegy8-pt:
         // book pt-13 mathegy9-pt:
+        // potenzfunktion (chapter 1.2): the table of properties (a função: feminine)
+        'Verwandte zeigen': 'Mostrar as parentes', 'Graph einer Potenzfunktion': 'Gráfico de uma função potência', 'Exponent': 'Expoente',
+        'Nullstelle': 'Zero', 'Polstelle': 'Polo', 'Gemeinsame Punkte': 'Pontos comuns',
+        'keine, $f$ ist nur für $x \\geq 0$ definiert': 'nenhuma, $f$ só está definida para $x \\geq 0$',
+        'achsensymmetrisch zur $y$-Achse, denn $f(-x) = f(x)$': 'simétrica em relação ao eixo $Oy$ (função par), porque $f(-x) = f(x)$',
+        'punktsymmetrisch zum Ursprung, denn $f(-x) = -f(x)$': 'simétrica em relação à origem (função ímpar), porque $f(-x) = -f(x)$',
+        'steigt für $x \\geq 0$': 'crescente para $x \\geq 0$', 'steigt überall': 'crescente em todo o domínio',
+        'fällt für $x < 0$, steigt für $x > 0$': 'decrescente para $x < 0$, crescente para $x > 0$',
+        'steigt für $x < 0$, fällt für $x > 0$': 'crescente para $x < 0$, decrescente para $x > 0$',
+        'fällt für $x < 0$ und fällt für $x > 0$': 'decrescente para $x < 0$ e decrescente para $x > 0$',
+        '$x = 0$, ohne Vorzeichenwechsel': '$x = 0$, sem mudança de sinal', '$x = 0$, mit Vorzeichenwechsel': '$x = 0$, com mudança de sinal',
+        'senkrecht $x = 0$, waagerecht $y = 0$': 'vertical $x = 0$, horizontal $y = 0$',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far

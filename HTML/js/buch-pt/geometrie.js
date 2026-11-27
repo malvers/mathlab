@@ -17,6 +17,9 @@ window.BuchPT && BuchPT.add('geometrie', {
         // book pt-11 mathegy7-pt:
         // book pt-12 mathegy8-pt:
         // book pt-13 mathegy9-pt:
+        // titelbildgy9 (the cover of GY 9)
+        'Titelbild: rechtwinkliges Dreieck mit den Quadraten über seinen Seiten, ein goldenes Rechteck mit Spirale, ein Kreis zwischen zwei Sechsecken und eine Parabel':
+            'Capa: um triângulo retângulo com os quadrados construídos sobre os seus lados, um retângulo de ouro com uma espiral, um círculo entre dois hexágonos e uma parábola',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
