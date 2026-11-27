@@ -36,7 +36,7 @@ window.BuchPT && BuchPT.add('gy8', {
         // ziffern8 (coin faces as in the other pt books: face nacional / face europeia; "Würfel" is the die here)
         'als Münze': 'como moeda', 'als Würfel': 'como dado', 'Lesart': 'Leitura', 'Neue Tabelle': 'Nova tabela',
         'Gerade Ziffer (0, 2, 4, 6, 8) = Wappen, ungerade = Zahl. Jede Ziffer ist ein Münzwurf.': 'Algarismo par (0, 2, 4, 6, 8) = face nacional, ímpar = face europeia. Cada algarismo é um lançamento da moeda.',
-        'Augenzahl': 'Número de pintas',
+        'Augenzahl': 'Número de pintas', 'absolut': 'absoluta', 'relativ': 'relativa',
         // wegzeit8 (the distance is d, as in the chapter text: «$d = 80t$»)
         'Zeit $t$ in min': 'Tempo $t$ em min', 't in min': 't em min', 'Weg-Zeit-Diagramm des Schulwegs': 'Gráfico distância-tempo do caminho para a escola',
         'Zuhause': 'Casa', 'Haltestelle': 'Paragem', 'Schule': 'Escola',
@@ -146,6 +146,8 @@ window.BuchPT && BuchPT.add('gy8', {
         [/<code>·2<\/code>/g, '<code>×2</code>'],
         // sets of whole numbers written by the widgets (gluecksrad8 …): Portuguese schools separate the elements with commas
         [/\\\{((?:\d+|\\ldots)(?:; (?:\d+|\\ldots))+)\\\}/g, (m, l) => '\\{' + l.replace(/; /g, ', ') + '\\}'],
+        // the same in plain text (urne of js/buch-stochastik.js lists its outcomes as {2; 3} and (1; 2))
+        [/(?<!\\)([{(])(\d+(?:; \d+)+)([})])/g, (m, a, l, b) => a + l.replace(/; /g, ', ') + b],
         // gluecksrad8: the number of elements is written #E, #Ω in Portuguese schools (tools/buch-pt/glossario.md, mathefos11-pt)
         [/\|E\|/g, '\\#E'], [/\|\\Omega\|/g, '\\#\\Omega'],
         // ziffern8: the coin count and the dice

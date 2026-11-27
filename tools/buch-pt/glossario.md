@@ -554,5 +554,12 @@ ensino básico (3.º ciclo).
 | Reißzwecke · Legostein (Noppen) · Kronkorken · Lostrommel (Los, Niete) | pionés · peça de Lego (pinos) · carica · tômbola (rifa, sem prémio) | |
 | Skatblatt: Herz, Bube, Dame, König, Ass · Pasch | baralho de 32 cartas: copas, valete, dama, rei, ás · dois números iguais | |
 | Namen | Lena → Rita, Tom → Tiago, Tim → Tomás, Lisa → Inês, Max → Rui | |
+| mehrstufiger Zufallsversuch · Produktregel / Summenregel (Pfade) · Verzweigung | experiência aleatória composta · regra do produto / regra da soma · ponto de ramificação | |
+| Produktregel (Zählen) · Fakultät $4!$ | princípio fundamental da contagem · fatorial | |
+| unabhängig / abhängig (Stufen) | independentes / dependentes | |
+| Kaugummikugeln · Zahlenschloss · Outfit | bolas de pastilha elástica · cadeado de código · maneira de se vestir | |
+| Eiscafé (Sorten, Kugeln) · Siegerpodest · Sechserpasch | gelataria (sabores, bolas) · pódio · duplo seis | |
+| Zufallszahl · `=ZUFALLSBEREICH(1;6)` | número aleatório · `=ALEATÓRIOENTRE(1;6)` | Excel auf Portugiesisch |
+| Schere, Stein, Papier · Chevalier de Méré | pedra, papel, tesoura · cavaleiro de Méré | |
 
 ## mathegy9-pt
