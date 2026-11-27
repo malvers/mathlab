@@ -568,5 +568,10 @@ ensino básico (3.º ciclo).
 | symmetrisch zur y-Achse / zum Ursprung | simétrico em relação ao eixo $Oy$ (função par) / à origem (função ímpar) | |
 | Weg-Zeit-Diagramm · Weg-Zeit-Gesetz $s = 5t$ | gráfico distância-tempo · lei distância-tempo $d = 5t$ | auch im Widget `wegzeit8` |
 | Haltestelle · Bus · Straßenbahn · Klimadiagramm (DWD) | paragem · autocarro · elétrico · gráfico termopluviométrico (IPMA) | |
+| lineare Funktion $y = mx + n$ · Anstieg · y-Achsenabschnitt | função afim $y = mx + b$ · declive · ordenada na origem | $n = 0$: função linear |
+| Differenzenquotient · Steigungsdreieck · Nullstelle $x_0 = -\tfrac{n}{m}$ | taxa de variação · triângulo de declive · zero $x_0 = -\tfrac{b}{m}$ | data-ph „n =“ → „b =“ |
+| Regressionsgerade · Methode der kleinsten Quadrate · Trendlinie | reta de regressão · método dos mínimos quadrados · linha de tendência | `=DECLIVE(…)`, `=INTERCETAR(…)` (Excel pt-PT) |
+| Grundgebühr (Taxi) · Steigung 12 % · Gefälle | bandeirada · inclinação de 12 % · descida | |
+| Federkraftmesser · Handyakku | dinamómetro · bateria do telemóvel | |
 
 ## mathegy9-pt
