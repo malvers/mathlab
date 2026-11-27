@@ -56,6 +56,10 @@ window.BuchPT && BuchPT.add('gy11lk', {
         'Streifenbreite $\\varepsilon$': 'Largura da faixa $\\varepsilon$',
         'Graph mit einem waagerechten Streifen der Breite Epsilon um den Grenzwert und einem senkrechten Streifen der Breite Delta um die Stelle':
             'Gráfico com uma faixa horizontal de largura épsilon à volta do limite e uma faixa vertical de largura delta à volta do ponto',
+        // ablnachdef (lb1-2): Schrittweite = passo
+        'Schrittweite $h = 10^{-k}$': 'Passo $h = 10^{-k}$',
+        'Graph von a hoch x mit Sekante durch (0|1) und Tangente': 'Gráfico de a elevado a x com a secante que passa por (0, 1) e a tangente',
+        '$a = e$ setzen': 'Pôr $a = e$',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk/*)
@@ -110,6 +114,11 @@ window.BuchPT && BuchPT.add('gy11lk', {
         ['Kein $\\delta$ passt:', 'Nenhum $\\delta$ serve:'],
         ['So nah man der 0 von links auch kommt, dort ist $f(x) = -1$, also mindestens 2 vom behaupteten Grenzwert entfernt. Für $\\varepsilon < 2$ scheitert jede Wahl. Die Funktion hat bei 0 keinen Grenzwert, nur einseitige.',
             'por mais perto de 0 que se chegue pela esquerda, aí $f(x) = -1$, ou seja, a uma distância de pelo menos 2 do limite afirmado. Para $\\varepsilon < 2$ qualquer escolha falha. A função não tem limite em 0, só limites laterais.'],
+        // ablnachdef
+        [': Es genügt, den Grenzwert von $\\dfrac{a^h - 1}{h}$ für $h \\to 0$ zu kennen, den Anstieg in $(0, 1)$.', ': basta conhecer o limite de $\\dfrac{a^h - 1}{h}$ quando $h \\to 0$, o declive em $(0, 1)$.'],
+        ['Bei welcher Basis ist der Grenzwert genau 1?', 'Para que base é o limite exatamente 1?'],
+        ['Für $a = ', 'Para $a = '], ['$ geht der Quotient gegen $\\ln a \\approx ', '$, o quociente tende para $\\ln a \\approx '],
+        ['Für $a = e$ ist der Grenzwert genau 1: $\\left(e^x\\right)\' = e^x$.', 'Para $a = e$ o limite é exatamente 1: $\\left(e^x\\right)\' = e^x$.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
