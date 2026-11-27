@@ -23,6 +23,7 @@ window.BuchPT && BuchPT.add('spiele', {
         'Einsatz 1 €. Wappen: 2 € zurück, Zahl: nichts.': 'Aposta de 1 €. Face nacional: recebes 2 €, face europeia: nada.',
         'Einsatz 1 €. Mit Wahrscheinlichkeit $\\tfrac{1}{10}$ gibt es 10 € zurück, sonst nichts.': 'Aposta de 1 €. Com probabilidade $\\tfrac{1}{10}$ recebes 10 €, senão nada.',
         'Einsatz 1 €. Mit Wahrscheinlichkeit $\\tfrac{1}{100}$ gibt es 100 € zurück, sonst nichts.': 'Aposta de 1 €. Com probabilidade $\\tfrac{1}{100}$ recebes 100 €, senão nada.',
+        // book pt-15 mathe6-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs spiele/*)
@@ -33,9 +34,11 @@ window.BuchPT && BuchPT.add('spiele', {
         ['die größere der beiden Augenzahlen', 'o maior dos dois números de pintas'], ['wie viele der beiden Würfel eine Sechs zeigen', 'quantos dos dois dados mostram um seis'],
         ['. Tippe auf ein Feld oder einen Wert.', '. Toca numa casa ou num valor.'],
         [' der 36 gleich wahrscheinlichen Ergebnisse gehören dazu. Alle Wahrscheinlichkeiten zusammen ergeben $1$.', ' dos 36 resultados equiprováveis dão este valor. Todas as probabilidades juntas somam $1$.'],
+        // book pt-15 mathe6-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-12 mathegy8-pt:
+        // book pt-15 mathe6-pt:
     ]
 });

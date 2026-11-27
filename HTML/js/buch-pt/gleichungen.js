@@ -30,6 +30,8 @@ window.BuchPT && BuchPT.add('gleichungen', {
         // ungleichung: the label of the test value on the number line
         'Probe': 'Teste',
         // book pt-13 mathegy9-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gleichungen/*)
@@ -61,6 +63,8 @@ window.BuchPT && BuchPT.add('gleichungen', {
         // book pt-11 mathegy7-pt:
         // book pt-12 mathegy8-pt:
         // book pt-13 mathegy9-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ],
     rule: [
         // pt0: the solution set is C.S. (conjunto-solução) in Portuguese schools, also in the widget sentences:
@@ -73,5 +77,7 @@ window.BuchPT && BuchPT.add('gleichungen', {
         // book pt-11 mathegy7-pt:
         // book pt-12 mathegy8-pt:
         // book pt-13 mathegy9-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ]
 });

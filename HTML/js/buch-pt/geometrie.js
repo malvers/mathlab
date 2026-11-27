@@ -63,6 +63,10 @@ window.BuchPT && BuchPT.add('geometrie', {
             'Lados $1{,}618 : 1$. Cortando o quadrado construído sobre o lado menor, fica outra vez um retângulo de ouro, reduzido pelo fator $\\Phi$.',
         'Regelmäßiges Fünfeck mit Pentagramm': 'Pentágono regular com o pentagrama', 'Seite': 'Lado',
         'größerer Teil': 'parte maior', 'kleinerer Teil': 'parte menor',
+        // book pt-14 mathe5-pt:
+        // book pt-15 mathe6-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
@@ -94,6 +98,10 @@ window.BuchPT && BuchPT.add('geometrie', {
         ['$ so lang. Die Viertelkreise bilden die <b>goldene Spirale</b>.', '$ do comprimento inicial. Os quartos de círculo formam a <b>espiral de ouro</b>.'],
         ['$s = \\sqrt{r^2 + h^2} \\approx ', '$g = \\sqrt{r^2 + h^2} \\approx '], ['$G = \\pi r^2 \\approx ', '$A_b = \\pi r^2 \\approx '],
         ['$M = \\pi r s \\approx ', '$A_L = \\pi r g \\approx '], ['$O = \\pi r^2 + \\pi r s \\approx ', '$A_T = \\pi r^2 + \\pi r g \\approx '],
+        // book pt-14 mathe5-pt:
+        // book pt-15 mathe6-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -116,5 +124,9 @@ window.BuchPT && BuchPT.add('geometrie', {
         [/(<button type="button" data-v="pyr">)Quadratische Pyramide(?=<\/button>)/g, '$1Pirâmide quadrangular regular'],
         // goldenerschnitt, the golden rectangle: "Nach 3 Schnitten ist die lange Seite nur noch $…$ so lang." (only this sentence)
         [/Nach (\d+) Schnitt(?:en)? ist die lange Seite nur noch \$/g, (m, n) => 'Ao fim de ' + n + (n === '1' ? ' corte' : ' cortes') + ', o lado maior mede apenas $'],
+        // book pt-14 mathe5-pt:
+        // book pt-15 mathe6-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ]
 });

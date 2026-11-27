@@ -137,6 +137,7 @@ window.BuchPT && BuchPT.add('funktionen', {
         'Scheitelpunktform: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$': 'Forma canónica: $A(x) = -x^2 + 12x = -(x - 6)^2 + 36$',
         'Maximum: das Quadrat mit $6\\,\\text{cm}$ Seitenlänge, $A = 36\\,\\text{cm}^2$.': 'Máximo: o quadrado com $6\\,\\text{cm}$ de lado, $A = 36\\,\\text{cm}^2$.',
         'Welches Rechteck mit Umfang $24\\,\\text{cm}$ hat die größte Fläche?': 'Que retângulo com $24\\,\\text{cm}$ de perímetro tem a maior área?',
+        // book pt-17 mathe8-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far
@@ -233,6 +234,7 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-13 mathegy9-pt:
         // parabelschar: "$f_a(x) = …$ für $a = 1$"; extremwert: "Jetzt: $A(6) = …"
         ['$ für $', '$ para $'], ['Jetzt: $A(', 'Agora: $A('],
+        // book pt-17 mathe8-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -279,5 +281,6 @@ window.BuchPT && BuchPT.add('funktionen', {
         // lage: the example button "parallel" (lines: paralelas; the word 'parallel' of js/buch-pt/vektoren.js is colineares for vectors)
         [/(data-v="parallel">)parallel</g, '$1paralelas<'],
         // book pt-13 mathegy9-pt:
+        // book pt-17 mathe8-pt:
     ]
 });

@@ -172,6 +172,9 @@ window.BuchPT && BuchPT.add('gy6', {
         // primfaktor6 (Portuguese m.d.c. and m.m.c., rules below)
         'Zahl $a$': 'Número $a$', 'Zahl $b$': 'Número $b$',
         'Gib für $a$ eine natürliche Zahl von 2 bis 9999 ein.': 'Escreve para $a$ um número natural de 2 a 9999.',
+        // book pt-15 mathe6-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy6/*)
@@ -303,6 +306,9 @@ window.BuchPT && BuchPT.add('gy6', {
             'O m.d.c. é formado pelos fatores primos que aparecem nas <b>duas</b> decomposições. O m.m.c. contém cada fator primo tantas vezes quantas ele aparece, <b>no máximo</b>. '],
         ['Damit kürzt man: $', 'Serve para simplificar: $'],
         ['Die beiden Zahlen haben keinen gemeinsamen Teiler außer 1.', 'Os dois números não têm nenhum divisor comum além do 1.'],
+        // book pt-15 mathe6-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -390,5 +396,8 @@ window.BuchPT && BuchPT.add('gy6', {
         [/Gefunden: (\d+) Primzahlen\. Gestrichen: /g, (m, n) => 'Encontrados: ' + n + (n === '1' ? ' número primo' : ' números primos') + '. Riscados: '],
         // primfaktor6: "ggT(360, 84) = 12" → "m.d.c.(360, 84) = 12", the same for kgV → m.m.c.
         [/(<span class="g-(?:lam|cy)">)(ggT|kgV)(<\/span>)\$\((\d+), (\d+)\) = /g, (m, a, k, b, x, y) => a + (k === 'ggT' ? 'm.d.c.' : 'm.m.c.') + b + '$(' + x + ', ' + y + ') = '],
+        // book pt-15 mathe6-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ]
 });

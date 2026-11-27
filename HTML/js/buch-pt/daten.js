@@ -47,6 +47,7 @@ window.BuchPT && BuchPT.add('daten', {
         'Histogramm der Körpergrößen': 'Histograma das alturas',
         'Sehr schmale Klassen zeigen fast nur Einzelwerte, sehr breite verwischen alles. Dazwischen erkennt man die Form der Verteilung.':
             'Classes muito estreitas mostram quase só valores isolados, classes muito largas apagam tudo. Entre umas e outras reconhece-se a forma da distribuição.',
+        // book pt-16 mathe7-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs daten/*)
@@ -56,6 +57,7 @@ window.BuchPT && BuchPT.add('daten', {
         // book pt-13 mathegy9-pt:
         // mittelwerte: "Geordnet ($n = 9$): …", "keiner …" (several modes "15 und 18 min": a rule below)
         ['Geordnet ($n = ', 'Ordenados ($n = '], ['keiner (jeder Wert kommt nur einmal vor)', 'nenhuma (cada valor aparece só uma vez)'],
+        // book pt-16 mathe7-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -69,5 +71,6 @@ window.BuchPT && BuchPT.add('daten', {
         // histogramm: "8 Klassen der Breite 5 cm · häufigste Klasse $[165;\,170)$ mit 10 von 40 Werten (" - Portuguese classes [165, 170[
         [/(\d+) Klassen der Breite (\d+) cm · häufigste Klasse \$\[(\d+);\\,(\d+)\)\$ mit (\d+) von (\d+) Werten \(/g,
             (m, k, w, a, b, c, n) => k + ' classes de amplitude ' + w + ' cm · classe mais frequente $[' + a + ', ' + b + '[$ com ' + c + ' de ' + n + ' valores ('],
+        // book pt-16 mathe7-pt:
     ]
 });

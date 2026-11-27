@@ -162,6 +162,8 @@ window.BuchPT && BuchPT.add('gy7', {
         'Mehr als $360^\\circ$: Die Vielecke überlappen sich. Daraus lässt sich keine Ecke falten.': 'Mais de $360^\\circ$: os polígonos sobrepõem-se. Assim não se consegue dobrar um vértice.',
         'Spalten: wie viele Vielecke an einer Ecke. Genau fünf Felder haben ein Häkchen: Es gibt genau fünf platonische Körper.':
             'Colunas: quantos polígonos há num vértice. Exatamente cinco casas têm um visto: há exatamente cinco sólidos platónicos.',
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy7/*)
@@ -245,6 +247,8 @@ window.BuchPT && BuchPT.add('gy7', {
         // eckenwinkel7 ("So ist das <b>Ikosaeder</b> gebaut." is a rule)
         ['Jeder Innenwinkel: $', 'Cada ângulo interno: $'], ['^\\circ$ · an der Ecke: $', '^\\circ$ · no vértice: $'],
         ['Weniger als $360^\\circ$: Klappt man die Lücke zu, entsteht eine räumliche Ecke. ', 'Menos de $360^\\circ$: fechando o espaço vazio, forma-se um vértice no espaço. '],
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -326,5 +330,7 @@ window.BuchPT && BuchPT.add('gy7', {
             'Cubo': 'cubo', 'Oktaeder': 'octaedro', 'Dodekaeder': 'dodecaedro', 'Ikosaeder': 'icosaedro' }[s] || s) + '</b>.'],
         [/>Lücke (\d+)°</g, '>Espaço $1°<'],
         [/^(\d+) regelmäßige (\d+)-Ecke an einer Ecke$/, (m, n, k) => n + ' polígonos regulares de ' + k + ' lados num vértice'],
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ]
 });

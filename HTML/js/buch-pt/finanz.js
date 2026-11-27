@@ -44,6 +44,8 @@ window.BuchPT && BuchPT.add('finanz', {
         'Zinsen (Kapital am Jahresende)': 'juros (capital no fim do ano)',
         'Zinsen &nbsp;': 'juros &nbsp;',
         'Tilgung (zusammen: die Rate)': 'amortização (juntos: a prestação)',
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs finanz/*)
@@ -66,11 +68,15 @@ window.BuchPT && BuchPT.add('finanz', {
         ['$ € · erste Rate ', '$ € · primeira prestação '],
         [', letzte Rate ', ', última prestação '],
         ['Die Rate sinkt, weil die Restschuld und damit die Zinsen sinken. Zinsen insgesamt: <b>', 'A prestação desce, porque a dívida em falta e, com ela, os juros descem. Juros no total: <b>'],
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-6 mathefos11-pt:
         // slider values: "20 J." → "20 anos" (1 → "1 ano")
         [/^(\d+) J\.$/, (m, n) => n + (n === '1' ? ' ano' : ' anos')],
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ]
 });

@@ -88,6 +88,9 @@ window.BuchPT && BuchPT.add('gy8', {
         '1000 Alben': '1000 cadernetas', 'Neues Album': 'Nova caderneta', 'Mittelwert': 'Média', 'Voll!': 'Completa!',
         'Anzahl der Tüten bis zum vollen Album': 'Número de saquetas até completar a caderneta',
         'Histogramm: wie viele Tüten 1000 Alben gebraucht haben': 'Histograma: quantas saquetas foram precisas para 1000 cadernetas',
+        // book pt-15 mathe6-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy8/*)
@@ -123,6 +126,9 @@ window.BuchPT && BuchPT.add('gy8', {
         ['}$ wäre falsch. ', '}$ estaria errado. '], ['Es zählt der Anteil am ganzen Rad: ', 'O que conta é a parte da roleta inteira: '],
         [', $E$ ist eingetreten.', ', $E$ ocorreu.'], [', $E$ ist nicht eingetreten.', ', $E$ não ocorreu.'],
         [' · Wahrscheinlichkeit $P(E) \\approx ', ' · probabilidade $P(E) \\approx '],
+        // book pt-15 mathe6-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -219,5 +225,8 @@ window.BuchPT && BuchPT.add('gy8', {
         [/Zuletzt: Feld <b>(\d+)<\/b>, \$E\$ ist (nicht )?eingetreten\./g, (m, f, n) => 'Último giro: setor <b>' + f + '</b>, $E$ ' + (n ? 'não ocorreu.' : 'ocorreu.')],
         [/Gedreht: \$([^$]*)\$-mal · \$E\$ eingetreten: \$([^$]*)\$-mal · relative Häufigkeit /g,
             (m, a, b) => 'Giros: $' + a + '$ · $E$ ocorreu: $' + b + '$ vezes · frequência relativa '],
+        // book pt-15 mathe6-pt:
+        // book pt-16 mathe7-pt:
+        // book pt-17 mathe8-pt:
     ]
 });

@@ -691,3 +691,11 @@ Block pt-13 (Gomes, 27.11.2026). Gymnasium bleibt deutsch und wird auf der Start
 | goldener Schnitt · goldene Zahl $\Phi$ | secção áurea · número de ouro $\Phi$ | goldenes Rechteck / Dreieck = retângulo / triângulo de ouro |
 | äußere Teilung | divisão exterior | Euklid: „em média e extrema razão“ |
 | Fibonacci-Folge | sucessão de Fibonacci | |
+
+## mathe5-pt (OS 5, block pt-14)
+
+## mathe6-pt (OS 6, block pt-15)
+
+## mathe7-pt (OS 7, block pt-16)
+
+## mathe8-pt (OS 8, block pt-17)
