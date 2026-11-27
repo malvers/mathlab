@@ -161,6 +161,8 @@ window.BuchPT && BuchPT.add('os8', {
         [/ Dass sie in (\d+) Zeilen? übereinstimmen, reicht nicht\./g, (m, n) => ' Coincidirem em ' + n + (n === '1' ? ' linha' : ' linhas') + ' não chega.'],
         // flaecheos8: "Probe mit $x = 5$: $3 \times (5 + 2) = 21$ und $3 \times 5 + 6 = 21$."
         [/Probe mit \$x = ([^$]+)\$: (\$[^$]+\$) und (\$[^$]+\$)\./g, 'Verificação com $x = $1$: $2 e $3.'],
+        // flaecheos8: the products in its own picture ("3 · 5 = 15") with ×, as the page text (only this SVG)
+        [/<svg[^>]*aria-label="Rechteck mit der Höhe a, aufgeteilt in zwei Teile[\s\S]*?<\/svg>/g, m => m.replace(/ · /g, ' × ')],
         // linearos8: the trend sentence
         [/Der Graph <b>steigt<\/b>: Geht man 1 nach rechts, geht es ([\d,]+) nach oben\./g, 'O gráfico <b>sobe</b>: quando se avança 1 para a direita, sobe $1.'],
         [/Der Graph <b>fällt<\/b>: Geht man 1 nach rechts, geht es ([\d,]+) nach unten\./g, 'O gráfico <b>desce</b>: quando se avança 1 para a direita, desce $1.'],
