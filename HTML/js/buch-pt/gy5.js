@@ -346,5 +346,8 @@ window.BuchPT && BuchPT.add('gy5', {
         [/(\d+) Schicht(?:en)? mit je (\d+) · (\d+) = (\d+) Würfeln\./g, (m, c, a, b, n) => c + (c === '1' ? ' camada' : ' camadas') + ' de ' + a + ' × ' + b + ' = ' + n + ' cubos cada uma.'],
         [/\$O = 2 \\times \(ab \+ ac \+ bc\)/g, '$$A = 2 \\times (ab + ac + bc)'],
         // book pt-21 mathegy5-pt:
+        // koord5 (chapter 3.1): plain-text points A(2 | 1) → A(2, 1), with a decimal comma A(1,5; 2), as the rule of os5.js,
+        // which the GY 5 pages do not load (on the OS 5 pages both rules give the same result)
+        [/\(([-−]?\d+(?:,\d+)?) \| ([-−]?\d+(?:,\d+)?)\)/g, (m, x, y) => '(' + x + (/,/.test(x + y) ? '; ' : ', ') + y + ')'],
     ]
 });
