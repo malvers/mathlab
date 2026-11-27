@@ -23,6 +23,11 @@ window.BuchPT && BuchPT.add('gy5', {
         'Zahl A': 'Número A', 'Zahl B': 'Número B', 'Zahlenstrahl mit zwei Zahlen': 'Reta numérica com dois números',
         'Gib Brüche wie 3/4 oder Dezimalzahlen wie 0,7 ein, auch Zahlen größer als 1 bis 3.': 'Escreve frações como 3/4 ou números decimais como 0,7, também maiores do que 1, até 3.',
         'Bitte zwei Zahlen zwischen 0 und 3 eingeben, zum Beispiel 3/4 oder 0,7.': 'Escreve dois números entre 0 e 3, por exemplo 3/4 ou 0,7.',
+        // komma5 (chapter 1.2)
+        'Neu': 'Recomeçar',
+        'Beim Multiplizieren mit 10 rückt jede Ziffer eine Stelle nach links, beim Dividieren nach rechts. Man sagt kurz: Das Komma wandert.':
+            'Ao multiplicar por 10, cada algarismo avança uma ordem para a esquerda; ao dividir, para a direita. Diz-se, para abreviar, que a vírgula se desloca.',
+        'nicht möglich: Die Ziffern würden aus der Tafel fallen.': 'não é possível: os algarismos sairiam do quadro.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy5/*)
@@ -52,5 +57,11 @@ window.BuchPT && BuchPT.add('gy5', {
         [/Kürzen mit (\d+) ergibt \$/g, (m, n) => 'Dividindo os dois termos por ' + n + ', obtém-se $'],
         // bruchstrahl5: "Auf denselben Nenner 15 gebracht: $…$"
         [/Auf denselben Nenner (\d+) gebracht: \$/g, (m, n) => 'Reduzidas ao mesmo denominador ' + n + ': $'],
+        // komma5: the place-value table with the Portuguese orders (DM UM C D U, d c m: décimas, centésimas, milésimas),
+        // only in this table; the product sign × on the buttons and in the line "2,35 × 10 ="
+        [/<table class="g5-sw g5-sw-dez"><tr>[\s\S]*?<\/tr>/g, m => m.replace(/(<th[^>]*>)(ZT|T|H|Z|E|z|h|t)(<\/th>)/g, (x, a, k, b) =>
+            a + ({ ZT: 'DM', T: 'UM', H: 'C', Z: 'D', E: 'U', z: 'd', h: 'c', t: 'm' })[k] + b)],
+        [/(<button type="button" class="b-btn" data-o="m" data-k="\d+">)· /g, '$1× '],
+        [/^<p>([^<]*?) · (\d+) =<\/p>/, '<p>$1 × $2 =</p>'],
     ]
 });
