@@ -45,7 +45,8 @@ window.BuchPT && BuchPT.add('geometrie', {
         'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circunferência com $r = 1$, portanto $P = 2\\pi$. Perímetro a dividir por $2$:',
         // spitzkoerper (chapter 3.3): base area A_b, lateral area A_L, total area A_T, apótema a_p, aresta lateral ℓ, geratriz g
         // (as pt-1 writes the koerper widget of js/buch-gleichungen.js; the formulas are phrases, the picture labels a rule below)
-        'Quadratische Pyramide': 'Pirâmide quadrangular regular', 'Kreiskegel': 'Cone', 'Körper': 'Sólido', 'Seitenhöhe': 'Apótema',
+        // the body button "Quadratische Pyramide" is a rule below (gy7.js has the word "Pirâmide quadrangular" for its 3D stage)
+        'Kreiskegel': 'Cone', 'Körper': 'Sólido', 'Seitenhöhe': 'Apótema',
         'Seitenkante': 'Aresta lateral', 'Hilfsdreieck': 'Triângulo auxiliar', 'Grundkante $a$': 'Aresta da base $a$', 'Höhe $h$': 'Altura $h$',
         'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Pirâmide quadrangular regular em perspetiva cavaleira, com o triângulo auxiliar',
         'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cone em perspetiva cavaleira, com o triângulo auxiliar',
@@ -110,6 +111,9 @@ window.BuchPT && BuchPT.add('geometrie', {
         // spitzkoerper, the labels in its own picture (only this SVG): hₛ → aₚ (apótema), s → ℓ (aresta lateral) or g (geratriz)
         [/<svg viewBox="0 0 360 290" role="img" aria-label="(Quadratische Pyramide|Kreiskegel) im Schrägbild mit Hilfsdreieck">[\s\S]*?<\/svg>/g,
             (m, k) => m.replace(/>hₛ</g, '>aₚ<').replace(/>s<\/text>/g, k === 'Kreiskegel' ? '>g</text>' : '>ℓ</text>')],
+        // spitzkoerper, the body button: «Pirâmide quadrangular regular», tied to the button so that gy7.js keeps its word
+        // «Pirâmide quadrangular» for the GY 7 solids (one word per German string; merge buch7, 27.11.2026)
+        [/(<button type="button" data-v="pyr">)Quadratische Pyramide(?=<\/button>)/g, '$1Pirâmide quadrangular regular'],
         // goldenerschnitt, the golden rectangle: "Nach 3 Schnitten ist die lange Seite nur noch $…$ so lang." (only this sentence)
         [/Nach (\d+) Schnitt(?:en)? ist die lange Seite nur noch \$/g, (m, n) => 'Ao fim de ' + n + (n === '1' ? ' corte' : ' cortes') + ', o lado maior mede apenas $'],
     ]
