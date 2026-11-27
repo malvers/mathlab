@@ -773,7 +773,7 @@ wie GY 6. Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Di
 | Deutsch | Português (PT) | Hinweis |
 |---|---|---|
 | gebrochene Zahlen | números racionais não negativos (frações e números decimais) | Kapiteltitel: „Representar frações e números decimais“ |
-| erweitern · kürzen · vollständig gekürzt | escrever uma fração equivalente (multiplicar os dois termos por …) · simplificar · fração irredutível | Knöpfe in `bruch5`: „Multiplicar por 2“, „por 3“, „Simplificar“ |
+| erweitern · kürzen · vollständig gekürzt | escrever uma fração equivalente (multiplicar os dois termos por …) · simplificar · fração irredutível | Knöpfe in `bruch5` nach dem Merge wie pt-14: „Termos × 2“, „× 3“, „Simplificar“ |
 | echter / unechter Bruch · gemischte Zahl | fração própria / imprópria · numeral misto | wie pt-14 |
 | endlich / periodisch | dízima finita / infinita periódica | |
 | gleichnamig machen · Hauptnenner | reduzir ao mesmo denominador · mínimo denominador comum | |
@@ -799,7 +799,7 @@ wie GY 6. Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Di
 | zerlegen · ergänzen · zusammengesetzte Figur | decompor · completar · figura composta | `rechteck5` |
 | Ar · Hektar | are (a) · hectare (ha) | |
 | Ecken · Kanten · Flächen · Vielflächner | vértices · arestas · faces · poliedros | |
-| Grundriss · Vorder-/Seitenansicht · Bauplan | planta · vista de frente / lateral · planta (com números) | `wuerfelbauos6`: „Planta“, „de frente“, „da direita“ |
+| Grundriss · Vorder-/Seitenansicht · Bauplan | planta · vista de frente / lateral · planta (com números) | `wuerfelbauos6` nach dem Merge wie pt-14: „Planta“, „vista de frente“, „vista da direita“ |
 | Schrägbild · Netz · Einheitswürfel | perspetiva cavaleira · planificação · cubos unitários | |
 | Mantel · Grund-/Deckfläche | superfície lateral ($A_L$) · base inferior / superior | |
 | Eulers Formel | relação de Euler | |

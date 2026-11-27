@@ -24,14 +24,9 @@ window.BuchPT && BuchPT.add('os6', {
         'Tippe im Bauplan auf ein Feld: Die Zahl sagt, wie viele Würfel dort übereinander stehen (bis 3, dann wieder 0). Kantenlänge 1 cm.':
             'Toca numa casa da planta: o número diz quantos cubos estão empilhados nesse sítio (até 3, depois outra vez 0). Aresta de 1 cm.',
         // book pt-15 mathe6-pt:
-        // the tangram pieces and the cube buildings (helpers of the module, outside every widget)
-        'großes Dreieck': 'triângulo grande', 'mittleres Dreieck': 'triângulo médio', 'kleines Dreieck': 'triângulo pequeno',
-        'Quadrat': 'Quadrado', 'Parallelogramm': 'Paralelogramo', 'Treppe': 'Escada', 'Turm': 'Torre', 'Mauer': 'Muro', 'Selbst bauen': 'Construir',
-        // wuerfelbauos6 (chapter 4): planta, vistas de frente e da direita
-        'vorne': 'frente', 'Körper aus Würfeln im Schrägbild': 'Sólido feito de cubos em perspetiva cavaleira', 'Bauplan: Draufsicht mit den Höhen': 'Planta: vista de cima com as alturas',
-        'Bauplan': 'Planta', 'von vorn': 'de frente', 'von rechts': 'da direita',
-        'Tippe im Bauplan auf ein Feld: Die Zahl sagt, wie viele Würfel dort übereinander stehen (bis 3, dann wieder 0). Kantenlänge 1 cm.':
-            'Toca num quadrado da planta: o número diz quantos cubos estão empilhados ali (até 3, depois outra vez 0). Aresta de 1 cm.',
+        // merge os5-os8-pt (27.11.2026): one Portuguese per German string - the tangram pieces are pt-14's phrases, the helpers
+        // (Quadrat, Parallelogramm, Treppe, Turm, Mauer, Selbst bauen) and the labels of wuerfelbauos6 are pt-14's words above
+        // (its «vista de frente», «casa da planta» are what the pages of OS 5 and OS 6 say)
         // tangramos6 (chapter O)
         'Tangram: sieben Teile in einem Quadrat': 'Tangram: sete peças num quadrado',
         // hanoios6 (chapter O): discos, hastes, jogadas
@@ -44,8 +39,9 @@ window.BuchPT && BuchPT.add('os6', {
         '15 Hölzer': '15 paus', '21 Hölzer': '21 paus', '30 Hölzer': '30 paus', 'Anzahl der Hölzer': 'Número de paus', 'ohne Hilfe': 'sem ajuda',
         'Vierer zeigen': 'Mostrar grupos de 4', 'Hilfe': 'Ajuda', 'Nimm 1': 'Tira 1', 'Nimm 2': 'Tira 2', 'Nimm 3': 'Tira 3',
         'Der Computer überlegt …': 'O computador está a pensar…', 'Du bist dran: Nimm 1, 2 oder 3 Hölzer.': 'É a tua vez: tira 1, 2 ou 3 paus.',
-        // schiebeos6 (chapter O): o puzzle de deslizar
-        '3 × 3 · 8 Steine': '3 × 3 · 8 peças', '4 × 4 · 15 Steine': '4 × 4 · 15 peças', 'Größe': 'Tamanho', 'Mischen': 'Baralhar', 'Ordnen': 'Ordenar',
+        // schiebeos6 (chapter O): o puzzle de deslizar ("Größe" is only the aria label of the size buttons: «Grandeza», the word
+        // of gy5 einheiten5 and os8 - one Portuguese per German word, merge os5-os8-pt)
+        '3 × 3 · 8 Steine': '3 × 3 · 8 peças', '4 × 4 · 15 Steine': '4 × 4 · 15 peças', 'Größe': 'Grandeza', 'Mischen': 'Baralhar', 'Ordnen': 'Ordenar',
         'Geordnet. Tippe auf „Mischen“.': 'Por ordem. Toca em «Baralhar».',
         'Tippe auf einen Stein neben der Lücke, er rutscht hinein. Ordne die Zahlen der Reihe nach, die Lücke unten rechts.':
             'Toca numa peça ao lado do espaço vazio, e ela desliza para lá. Põe os números por ordem, com o espaço vazio em baixo à direita.',
@@ -56,18 +52,14 @@ window.BuchPT && BuchPT.add('os6', {
         'Die 36 Ergebnisse zweier Würfel mit ihrer Augensumme': 'Os 36 resultados de dois dados, com a soma das pintas',
         'Säulendiagramm: relative Häufigkeiten der Augensummen': 'Gráfico de barras: frequências relativas das somas das pintas',
         // book pt-16 mathe7-pt:
-        // tangramos6 (the pieces are phrases below; 'Quadrat' and 'Parallelogramm' are words of js/buch-pt/gy6.js)
-        'Tangram: sieben Teile in einem Quadrat': 'Tangram: sete peças num quadrado',
-        // the helpers of the module (labels of wuerfelbauos6, reported on every page that loads os6; the same words as pt-14 and pt-15)
-        'Treppe': 'Escada', 'Turm': 'Torre', 'Mauer': 'Muro', 'Selbst bauen': 'Construir',
+        // (merge os5-os8-pt: the tangram title is pt-15's word, the helpers of wuerfelbauos6 pt-14's)
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs os6/*)
         // book pt-14 mathe5-pt:
         // the helpers of the module (the pieces of the tangram)
         ['großes Dreieck', 'triângulo grande'], ['mittleres Dreieck', 'triângulo médio'], ['kleines Dreieck', 'triângulo pequeno'],
-        // wuerfelbauos6: the line under the views (the number of cubes is a rule below)
-        [' · Oberfläche ', ' · área total '],
+        // wuerfelbauos6: the line under the views is pt-15's rule (merge os5-os8-pt)
         // book pt-15 mathe6-pt:
         // titelbildos6 (the cover)
         ['Titelbild: ein Tangram-Quadrat aus sieben Teilen, ein Kreis mit drei farbigen Vierteln, ein Zahlenstrahl, der Turm von Hanoi und ein Körper aus Würfeln',
@@ -85,17 +77,12 @@ window.BuchPT && BuchPT.add('os6', {
         ['Tippe auf ein Feld oder eine Säule. Die gestrichelte Linie zeigt den Anteil der Felder. Die 7 hat die meisten Felder (', 'Toca numa casa ou numa barra. A linha tracejada mostra a parte das casas. O 7 tem mais casas ('],
         ['), die 2 und die 12 nur eins.', '), o 2 e o 12 só uma.'],
         // book pt-16 mathe7-pt:
-        // tangramos6: the pieces (helpers of the module, outside the widget) and the sentences
-        ['großes Dreieck', 'triângulo grande'], ['mittleres Dreieck', 'triângulo médio'], ['kleines Dreieck', 'triângulo pequeno'],
-        ['Anteil am Quadrat: ', 'Parte do quadrado: '],
-        ['Ist das Quadrat 4 cm × 4 cm groß, hat das Teil ', 'Se o quadrado medir 4 cm × 4 cm, a peça tem '],
-        ['Tippe auf ein Teil. Alle sieben zusammen ergeben das ganze Quadrat: ', 'Toca numa peça. As sete peças juntas formam o quadrado inteiro: '],
+        // (merge os5-os8-pt: tangramos6 is translated once - the pieces in pt-14, the sentences in pt-15)
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-14 mathe5-pt:
-        // wuerfelbauos6: "7 Würfel · Volumen 7 cm³"
-        [/<b>(\d+)<\/b> Würfel · Volumen /, (m, n) => '<b>' + n + '</b> ' + (n === '1' ? 'cubo' : 'cubos') + ' · volume '],
+        // (merge os5-os8-pt: the line under the views of wuerfelbauos6 is pt-15's rule)
         // book pt-15 mathe6-pt:
         // wuerfelbauos6: "<b>7</b> Würfel · Volumen $7 cm³$ · Oberfläche $30 cm²$" (cubos · volume · área total, as Silva writes it)
         [/<b>(\d+)<\/b> Würfel · Volumen \$/g, (m, n) => '<b>' + n + '</b> ' + (n === '1' ? 'cubo' : 'cubos') + ' · volume $'], [/\$ · Oberfläche \$/g, '$$ · área total $$'],
@@ -120,9 +107,6 @@ window.BuchPT && BuchPT.add('os6', {
         [/Augensumme <b>(\d+)<\/b>: (\d+)-mal(, relativ \$)?/g, (m, s, k, r) => 'Soma <b>' + s + '</b>: ' + k + (k === '1' ? ' vez' : ' vezes') + (r ? ', relativa $' : '')],
         [/ · im Gitter (\d+) von 36 Feldern, also \$/g, (m, w) => ' · na grelha, ' + w + (w === '1' ? ' casa' : ' casas') + ' de 36, ou seja, $'],
         // book pt-16 mathe7-pt:
-        // tangramos6: the square and the parallelogram in lower case like the triangles, as the name of the piece and in the
-        // list of the pieces of equal area (the triangles of that list are phrases)
-        [/(<p style="margin:0"><b>)(Quadrat|Parallelogramm)(<\/b><\/p>)/, (m, a, n, b) => a + (n === 'Quadrat' ? 'quadrado' : 'paralelogramo') + b],
-        [/Genauso groß: ([^(<]+) \(hell markiert\)\./, (m, l) => 'Com a mesma área: ' + l.replace(/\bQuadrat\b/g, 'quadrado').replace(/\bParallelogramm\b/g, 'paralelogramo') + ' (com destaque a claro).'],
+        // (merge os5-os8-pt: the piece names of tangramos6 in lower case are pt-15's rules, the same output)
     ]
 });
