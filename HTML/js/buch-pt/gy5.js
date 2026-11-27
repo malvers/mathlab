@@ -137,6 +137,10 @@ window.BuchPT && BuchPT.add('gy5', {
             'Arrasta o ponto sobre a reta s para a rodar. Com «Inclinar h», g e h deixam de ser paralelas.',
         'Zwei Geraden g und h, geschnitten von s': 'Duas retas g e h, intersetadas pela secante s',
         // book pt-21 mathegy5-pt:
+        // GY 5 shares its widgets with OS 5 (pt-14) and OS 6 (pt-15); only the cover is new
+        // titelbildgy5 (the cover of GY 5)
+        'Titelbild: ein Quader aus Einheitswürfeln, ein Kreis mit drei Achteln, ein Winkel mit Skala, ein gespiegelter Drachen, ein Zahlenstrahl und Maya-Ziffern':
+            'Capa: um paralelepípedo formado por cubos unitários, um círculo com três oitavos, um ângulo com a sua escala, um papagaio refletido, uma reta numérica e algarismos maias',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy5/*)
