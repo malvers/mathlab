@@ -141,6 +141,8 @@ window.BuchPT && BuchPT.add('funktionen', {
         // book pt-18 mathe9-pt:
         // book pt-19 mathe10-pt:
         // book pt-20 mathegy10-pt:
+        // cover (lb4-4)
+        'Graphen der Grundfunktionen': 'Gráficos das funções de referência',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs funktionen/*): none so far

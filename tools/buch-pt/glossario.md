@@ -992,3 +992,42 @@ Block pt-19 (Almeida, 27.11.2026). Oberschule und Realschulbildungsgang bleiben 
 | Namen | Anna → Ana, Ben → Bruno, Lea → Leonor | |
 
 ## mathegy10-pt (GY 10, block pt-20)
+
+Block pt-20 (Pacheco, 27.11.2026). Gymnasium bleibt deutsch und wird auf der Startseite erklärt (10.º ano ≈ 10.º ano do ensino secundário,
+Matemática A). Wahlbereich `k: 'O'` (Área opcional) wie GY 6 und GY 9. Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“; Links auf
+andere Bücher gehen auf die portugiesische Ausgabe (BGY 11, BGY 12, FOS 11). Schreibweisen:
+
+- **sen, cos, tg** auf allen Seiten und in den Widgets: Regeln `\sin` → `\operatorname{sen}`, `\tan` → `\operatorname{tg}` in `trigonometrie.js` pt-20
+  (dieselben Regex wie `geometrie.js` pt-13; die sen-Regel von `funktionen.js` pt-1 bleibt). Taschenrechnertaste $\tan^{-1}$ bleibt, sonst $\operatorname{tg}^{-1}$.
+- **Produkt:** $\cdot$ im ganzen Buch, auch in 3.1/3.2 (die Seiten laden `geometrie.js` nicht, die Widgets schreiben $\cdot$), wie GY 11 und GY 12.
+- **log** statt $\lg$ (Regel aus `funktionen.js`), $\ln$, $\mathrm{e}$ = número de Neper; Punkte $(0, 1)$, $(1; 2{,}5)$; Intervalle $[0, 2\pi]$.
+- **Dreieckslöser:** SSS, SWS, WSW, SSW → LLL, LAL, ALA, LLA (wie die Kongruenzsätze in `gy6.js`); SWW → LAA, WWW → AAA.
+- **Körper** (3.2): apótema $a_p$, aresta lateral $\ell$, geratriz $g$, $A_L$, $A_T$, $A_b$ wie GY 9 und pt-18 (OS 9).
+- **Münze** Wappen/Zahl → face nacional $N$ / face europeia $E$; Urne rot/blau → $V$/$A$; Würfel „Augensumme“ = soma das pintas (wie die Widgets).
+- **quadkomplex** rechnet mit $x^2 + px + q$ und $D = \left(\tfrac{p}{2}\right)^2 - q$; die Seite nennt $\Delta = p^2 - 4q = 4D$ dazu.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| lineares / exponentielles / beschränktes / logistisches Wachstum | crescimento linear / exponencial / limitado / logístico | Schranke $S$ = limite $S$ |
+| Bestand · Anfangsbestand · Wachstumsfaktor | quantidade · quantidade inicial · fator de crescimento | Buchstabe $B$ bleibt |
+| rekursiv · explizit | por recorrência · termo geral (explícito) | Widget-Phrase „explizit: $“ = „termo geral: $“ |
+| Halbwertszeit · Verdopplungszeit | tempo de meia-vida · tempo de duplicação | $T_H$, $T_D$ |
+| periodisch · Periode · Frequenz · Amplitude · Mittellage | periódico · período · frequência · amplitude · linha média | |
+| Gradmaß · Bogenmaß · Einheitskreis | graus · radianos · círculo trigonométrico | |
+| Ebbe und Flut · Hochwasser / Niedrigwasser | marés · preia-mar / baixa-mar | Uhrzeit „5h12“ |
+| Zufallsgröße · Stabdiagramm · Pfadregeln | variável aleatória · diagrama de barras · regras do produto e da soma | Kapiteltitel „regras do diagrama em árvore“ |
+| genau / mindestens / höchstens $k$ | exatamente / pelo menos / no máximo $k$ | |
+| Erwartungswert · Einsatz · Auszahlung · faires Spiel | valor médio · aposta · prémio · jogo equitativo | wie pt-2; Pasch = dupla (dois números iguais) |
+| Sinussatz · Kosinussatz · Flächenformel | lei dos senos · lei dos cossenos · fórmula da área | mehrdeutiger Fall = caso ambíguo |
+| Lösungsplan · Höhenwinkel · Standlinie | plano de resolução · ângulo de elevação · base | |
+| Umkehrfunktion · umkehrbar · Winkelhalbierende | função inversa · invertível · bissetriz dos quadrantes ímpares | |
+| Logarithmus · Logarithmengesetze · Basiswechsel | logaritmo · regras dos logaritmos · mudança de base | Rechenschieber = régua de cálculo |
+| Verknüpfen · Verketten · innere / äußere Funktion | operações com funções · composição · função interior / exterior | |
+| Funktionsklasse · Steckbrief · Grundfunktion | família de funções · ficha de identidade · função de referência | ganzrational = polinomial, gebrochenrational = racional |
+| Zahlenfolge · Glied · arithmetisch / geometrisch | sucessão · termo · progressão aritmética / geométrica (razão $r$) | |
+| beschränkt · Schranke · Grenzwert · Nullfolge | limitada · majorante / minorante · limite · infinitésimo | $\varepsilon$-Schlauch = faixa |
+| Parameterdarstellung des Kreises | forma paramétrica da circunferência | Ellipse = elipse, Halbachse = semieixo |
+| Zinseszins · Zinsfaktor · Barwert · Laufzeit | juro composto · fator de capitalização · valor atual · prazo | wie pt-6 |
+| Raten- / Annuitätentilgung · Restschuld · Rate · Dispo | amortização constante / por anuidades · dívida em falta · prestação · descoberto bancário | Tabellenfunktion RMZ = PGTO |
+| imaginäre Einheit · Realteil · Imaginärteil · konjugiert | unidade imaginária · parte real · parte imaginária · conjugado | |
+| Gaußsche Zahlenebene · Betrag · Argument | plano de Argand · módulo · argumento | wie das Widget `komplex` (pt-6) |
