@@ -42,6 +42,9 @@ window.BuchPT && BuchPT.add('gy12lk', {
         // abstand3d (lb7-2): Lotfußpunkt = pé da perpendicular; the presets of mode gg are words of vektoren.js
         'Das 3D-Modul fehlt.': 'Falta o módulo 3D.', 'Beispiel 3': 'Exemplo 3', 'Ursprungsgerade': 'Reta pela origem', 'P auf g': 'P em g',
         // book pt-23 mathegy12lk-pt:
+        // titelbildgy12lk (cover)
+        'Titelbild: ein Rotationskörper mit Kreisscheiben, ein Binomialhistogramm unter der Glockenkurve, zwei windschiefe Geraden mit ihrem kürzesten Verbindungsstück':
+            'Capa: um sólido de revolução com discos, um histograma binomial sob a curva de Gauss, duas retas não complanares e o segmento mais curto entre elas',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12lk/*)
