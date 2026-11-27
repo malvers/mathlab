@@ -15,12 +15,18 @@ window.BuchPT && BuchPT.add('os6', {
         // pt0: the helpers of the module (outside every widget; check.mjs os6/*)
         // book pt-14 mathe5-pt:
         // book pt-15 mathe6-pt:
+        // the tangram pieces and the cube buildings (helpers of the module, outside every widget)
+        'großes Dreieck': 'triângulo grande', 'mittleres Dreieck': 'triângulo médio', 'kleines Dreieck': 'triângulo pequeno',
+        'Quadrat': 'Quadrado', 'Parallelogramm': 'Paralelogramo', 'Treppe': 'Escada', 'Turm': 'Torre', 'Mauer': 'Muro', 'Selbst bauen': 'Construir',
         // book pt-16 mathe7-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs os6/*)
         // book pt-14 mathe5-pt:
         // book pt-15 mathe6-pt:
+        // titelbildos6 (the cover)
+        ['Titelbild: ein Tangram-Quadrat aus sieben Teilen, ein Kreis mit drei farbigen Vierteln, ein Zahlenstrahl, der Turm von Hanoi und ein Körper aus Würfeln',
+            'Capa: um quadrado de tangram com sete peças, um círculo com três quartos coloridos, uma reta numérica, a Torre de Hanói e um sólido feito de cubos'],
         // book pt-16 mathe7-pt:
     ],
     rule: [
