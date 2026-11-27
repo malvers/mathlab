@@ -583,5 +583,11 @@ ensino básico (3.º ciclo).
 | geradentreu · parallelentreu · winkeltreu | transforma retas em retas · retas em retas paralelas · conserva os ângulos | |
 | Streckenverhältnis · Verhältnisgleichung · Strahlensätze | razão entre segmentos · proporção · teorema de Tales | |
 | Storchschnabel (Pantograph) · Maßstab | pantógrafo · escala | GeoGebra: `Homotetia(Polígono, k, O)` |
+| ähnlich · Hauptähnlichkeitssatz · kongruent | semelhante · critério AA de semelhança · geometricamente iguais | $[ABC] \sim [A'B'C']$ |
+| entsprechende Winkel / Seiten · Stufenwinkel | ângulos / lados correspondentes · ângulos correspondentes | $C\hat{D}E = C\hat{A}B$ |
+| Hilfsfigur · Vorwärts- / Rückwärtsarbeiten | figura auxiliar · trabalhar para a frente / para trás | |
+| Försterdreieck · Schattenmethode · Daumensprung | triângulo do guarda-florestal · método das sombras · salto do polegar | auch in `schatten8`; die Schatten $s$, $S$ bleiben (sombra) |
+| Einheitswürfel · Oberfläche · Maßstab $1 : m$ | cubo unitário · área total · escala $1 : m$ | `gulliver8` |
+| Liliputaner · Modell (Maßstab) | liliputianos · maqueta | |
 
 ## mathegy9-pt
