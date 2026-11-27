@@ -28,6 +28,9 @@ window.BuchPT && BuchPT.add('os7', {
         'Am Ursprung ändern beide Koordinaten ihr Vorzeichen.': 'Na simetria em relação à origem, as duas coordenadas mudam de sinal.',
         'Ziehe P. Zuerst kommt die x-Koordinate (nach rechts oder links), dann die y-Koordinate (nach oben oder unten).':
             'Arrasta P. Primeiro vem a abcissa x (para a direita ou para a esquerda), depois a ordenada y (para cima ou para baixo).',
+        // the helpers of the module (the tilings and the materials, outside every widget; reported on the start page, which
+        // loads os7 without gy7 - the same Portuguese as js/buch-pt/gy7.js)
+        'Dreiecke': 'Triângulos', 'Quadrate': 'Quadrados', 'Sechsecke': 'Hexágonos', 'Fünfecke': 'Pentágonos', 'Fichtenholz': 'Madeira de abeto',
         // dichteos7 ('Stoff' and 'Breite $b$' are in js/buch-pt/gy7.js, 'Länge $a$' in gleichungen.js)
         'Holz': 'Madeira', 'Eis': 'Gelo', 'Aluminium': 'Alumínio', 'Eisen': 'Ferro', 'Gold': 'Ouro', 'Höhe $c$': 'Altura $c$',
         // parkettos7 ('Dreiecke', 'Quadrate', 'Fünfecke', 'Sechsecke' are words of js/buch-pt/gy7.js; the angles at a vertex are phrases)
