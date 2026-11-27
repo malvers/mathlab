@@ -49,6 +49,19 @@ window.BuchPT && BuchPT.add('geometrie', {
         'Seitenkante': 'Aresta lateral', 'Hilfsdreieck': 'Triângulo auxiliar', 'Grundkante $a$': 'Aresta da base $a$', 'Höhe $h$': 'Altura $h$',
         'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Pirâmide quadrangular regular em perspetiva cavaleira, com o triângulo auxiliar',
         'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cone em perspetiva cavaleira, com o triângulo auxiliar',
+        // goldenerschnitt (chapter O): secção áurea, número de ouro Φ; the side of the pentagon is l, as in chapter 3.2
+        'Ansicht': 'Vista', 'Strecke teilen': 'Dividir um segmento', 'Goldenes Rechteck': 'Retângulo de ouro', 'Pentagramm': 'Pentagrama',
+        'Golden teilen': 'Dividir na secção áurea', 'Quadrate abschneiden': 'Cortar quadrados',
+        'Ganzes : größerer Teil': 'todo : parte maior', 'größerer : kleinerer Teil': 'parte maior : parte menor',
+        'Strecke AB mit Teilungspunkt T': 'Segmento [AB] com o ponto de divisão T',
+        'Beide Verhältnisse sind gleich: goldener Schnitt, $\\Phi = \\tfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$.':
+            'As duas razões são iguais: secção áurea, $\\Phi = \\tfrac{1 + \\sqrt{5}}{2} \\approx 1{,}618$.',
+        'Zieh den Punkt $T$, bis beide Verhältnisse gleich sind.': 'Arrasta o ponto $T$ até as duas razões serem iguais.',
+        'Goldenes Rechteck, in Quadrate zerlegt, mit Spirale': 'Retângulo de ouro decomposto em quadrados, com a espiral',
+        'Seiten $1{,}618 : 1$. Schneidet man das Quadrat über der kurzen Seite ab, bleibt wieder ein goldenes Rechteck übrig, um den Faktor $\\Phi$ verkleinert.':
+            'Lados $1{,}618 : 1$. Cortando o quadrado construído sobre o lado menor, fica outra vez um retângulo de ouro, reduzido pelo fator $\\Phi$.',
+        'Regelmäßiges Fünfeck mit Pentagramm': 'Pentágono regular com o pentagrama', 'Seite': 'Lado',
+        'größerer Teil': 'parte maior', 'kleinerer Teil': 'parte menor',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
@@ -71,6 +84,13 @@ window.BuchPT && BuchPT.add('geometrie', {
         ['$s = \\sqrt{h^2 + \\left(\\tfrac{d}{2}\\right)^2} = \\sqrt{h^2 + \\tfrac{a^2}{2}} \\approx ', '$\\ell = \\sqrt{h^2 + \\left(\\tfrac{d}{2}\\right)^2} = \\sqrt{h^2 + \\tfrac{a^2}{2}} \\approx '],
         ['$G = a^2 = ', '$A_b = a^2 = '], ['$M = 4 \\times \\tfrac12 a\\,h_s \\approx ', '$A_L = 4 \\times \\tfrac12 a\\,a_p \\approx '],
         ['$O = G + M \\approx ', '$A_T = A_b + A_L \\approx '], ['$V = \\tfrac13\\,G\\,h \\approx ', '$V = \\tfrac13\\,A_b\\,h \\approx '],
+        // goldenerschnitt
+        ['$\\overline{AB} = 10$ · größerer Teil $', '$\\overline{AB} = 10$ · parte maior $'], ['$ · kleinerer Teil $', '$ · parte menor $'],
+        ['\\text{Ganzes}', '\\text{todo}'], ['\\text{größerer Teil}', '\\text{parte maior}'], ['\\text{kleinerer Teil}', '\\text{parte menor}'],
+        [' $s$ und Diagonale $d$ des regelmäßigen Fünfecks: $\\tfrac{d}{s} = \\Phi', ' $l$ e diagonal $d$ do pentágono regular: $\\tfrac{d}{l} = \\Phi'],
+        ['Jede Diagonale wird von einer anderen im goldenen Schnitt geteilt: ', 'Cada diagonal é dividida por outra na secção áurea: '],
+        ['$= \\Phi$, und der größere Teil ist genau so lang wie die Seite.', '$= \\Phi$, e a parte maior tem exatamente o comprimento do lado.'],
+        ['$ so lang. Die Viertelkreise bilden die <b>goldene Spirale</b>.', '$ do comprimento inicial. Os quartos de círculo formam a <b>espiral de ouro</b>.'],
         ['$s = \\sqrt{r^2 + h^2} \\approx ', '$g = \\sqrt{r^2 + h^2} \\approx '], ['$G = \\pi r^2 \\approx ', '$A_b = \\pi r^2 \\approx '],
         ['$M = \\pi r s \\approx ', '$A_L = \\pi r g \\approx '], ['$O = \\pi r^2 + \\pi r s \\approx ', '$A_T = \\pi r^2 + \\pi r g \\approx '],
     ],
@@ -90,5 +110,7 @@ window.BuchPT && BuchPT.add('geometrie', {
         // spitzkoerper, the labels in its own picture (only this SVG): hₛ → aₚ (apótema), s → ℓ (aresta lateral) or g (geratriz)
         [/<svg viewBox="0 0 360 290" role="img" aria-label="(Quadratische Pyramide|Kreiskegel) im Schrägbild mit Hilfsdreieck">[\s\S]*?<\/svg>/g,
             (m, k) => m.replace(/>hₛ</g, '>aₚ<').replace(/>s<\/text>/g, k === 'Kreiskegel' ? '>g</text>' : '>ℓ</text>')],
+        // goldenerschnitt, the golden rectangle: "Nach 3 Schnitten ist die lange Seite nur noch $…$ so lang." (only this sentence)
+        [/Nach (\d+) Schnitt(?:en)? ist die lange Seite nur noch \$/g, (m, n) => 'Ao fim de ' + n + (n === '1' ? ' corte' : ' cortes') + ', o lado maior mede apenas $'],
     ]
 });
