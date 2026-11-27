@@ -33,6 +33,16 @@ window.BuchPT && BuchPT.add('geometrie', {
             'Os dois quadrados dos catetos têm, juntos, exatamente a área do quadrado da hipotenusa.',
         'Jedes Kathetenquadrat ist so groß wie das Rechteck darunter.': 'Cada quadrado de um cateto tem a mesma área que o retângulo por baixo dele.',
         'Das Höhenquadrat ist so groß wie das Rechteck aus den beiden Hypotenusenabschnitten.': 'O quadrado da altura tem a mesma área que o retângulo formado pelas duas projeções.',
+        // trigo (chapter 3.2): cateto oposto, cateto adjacente, hipotenusa; sen and tg (the rules below)
+        'Sinus': 'Seno', 'Kosinus': 'Cosseno', 'Tangens': 'Tangente', 'Verhältnis': 'Razão', 'Winkel $\\alpha$': 'Ângulo $\\alpha$', 'Hypotenuse $c$': 'Hipotenusa $c$',
+        'Gegenkathete a': 'cateto oposto a', 'Ankathete b': 'cateto adjacente b', 'Hypotenuse c': 'hipotenusa c',
+        'Rechtwinkliges Dreieck mit Winkel alpha': 'Triângulo retângulo com o ângulo alfa',
+        'Ändere $c$: Das Dreieck wird größer oder kleiner, die drei Verhältnisse bleiben gleich. Sie hängen nur vom Winkel ab.':
+            'Altera $c$: o triângulo fica maior ou mais pequeno, mas as três razões ficam iguais. Só dependem do ângulo.',
+        // vieleck (chapter 3.2): the perimeter is P
+        'Ecken verdoppeln': 'Duplicar os vértices', 'Zurück auf 6': 'Voltar a 6', 'Anzahl der Ecken $n$': 'Número de vértices $n$',
+        'Kreis mit einbeschriebenem und umbeschriebenem Vieleck': 'Circunferência com um polígono inscrito e um polígono circunscrito', 'innen': 'inscrito', 'außen': 'circunscrito',
+        'Kreis mit $r = 1$, also $u = 2\\pi$. Umfang durch $2$:': 'Circunferência com $r = 1$, portanto $P = 2\\pi$. Perímetro a dividir por $2$:',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
@@ -46,6 +56,10 @@ window.BuchPT && BuchPT.add('geometrie', {
         ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $u \\approx ', 'Arrasta a extremidade do arco. Para comparar, o círculo inteiro: $P \\approx '],
         // pythagoras: "$a^2 \approx 9$ und $c \times p \approx …" (the products are \times already)
         ['$ und $c \\times p \\approx ', '$ e $c \\times p \\approx '], ['$ und $c \\times q \\approx ', '$ e $c \\times q \\approx '], ['$ und $p \\times q \\approx ', '$ e $p \\times q \\approx '],
+        // trigo: the words in the fractions
+        ['\\text{Gegenkathete}', '\\text{cateto oposto}'], ['\\text{Ankathete}', '\\text{cateto adjacente}'], ['\\text{Hypotenuse}', '\\text{hipotenusa}'],
+        // vieleck: "Also $3{,}1… < \pi < 3{,}2…$, Abstand $…$"
+        ['Also $', 'Portanto, $'], ['$, Abstand $', '$, diferença $'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -57,5 +71,8 @@ window.BuchPT && BuchPT.add('geometrie', {
         // book pt-11 mathegy7-pt:
         // book pt-12 mathegy8-pt:
         // book pt-13 mathegy9-pt:
+        // trigo, vieleck: sine and tangent as Portuguese schools write them, sen and tg (as the pt-1 sen rule of funktionen.js;
+        // \operatorname{sen} and \operatorname{tg} contain no \sin or \tan, so a page that loads both modules is not changed twice)
+        [/\\sin(?![a-zA-Z])/g, '\\operatorname{sen}'], [/\\tan(?![a-zA-Z])/g, '\\operatorname{tg}'],
     ]
 });
