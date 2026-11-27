@@ -48,6 +48,7 @@ window.BuchPT && BuchPT.add('gy11lk', {
         'Tafeln „Classic“ $e_1$': 'Tabletes «Classic» $e_1$', 'Boxen „Mix“ $e_2$': 'Caixas «Mix» $e_2$',
         'Gozinto-Graph: drei Rohstoffe, zwei Zwischenprodukte, zwei Endprodukte, an den Pfeilen die benötigten Mengen':
             'Gozintograma: três matérias-primas, dois produtos intermédios, dois produtos finais; nas setas, as quantidades necessárias',
+        // book pt-22 mathegy11lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk/*)
@@ -91,6 +92,7 @@ window.BuchPT && BuchPT.add('gy11lk', {
         ['Zwischenprodukte: $\\vec{z} = B \\cdot \\vec{e} = ', 'Produtos intermédios: $\\vec{z} = B \\cdot \\vec{e} = '], ['Rohstoffe: $\\vec{r} = A \\cdot \\vec{z} = ', 'matérias-primas: $\\vec{r} = A \\cdot \\vec{z} = '],
         ['In einem Schritt: $C = A \\cdot B = ', 'Num só passo: $C = A \\cdot B = '],
         ['$ gibt den Rohstoffbedarf je Endprodukt an, und $C \\cdot \\vec{e} = ', '$ dá as necessidades de matérias-primas por produto final, e $C \\cdot \\vec{e} = '],
+        // book pt-22 mathegy11lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -103,5 +105,6 @@ window.BuchPT && BuchPT.add('gy11lk', {
         // verflechtung: "Für 10 Tafeln und 5 Boxen braucht man <b>… ME Kakao, … ME Zucker und … ME Milch</b>."
         [/Für (\d+) Tafeln und (\d+) Boxen braucht man <b>(\d+) ME Kakao, (\d+) ME Zucker und (\d+) ME Milch<\/b>\./g,
             'Para $1 tabletes e $2 caixas são precisas <b>$3 u.q. de cacau, $4 u.q. de açúcar e $5 u.q. de leite</b>.'],
+        // book pt-22 mathegy11lk-pt:
     ]
 });

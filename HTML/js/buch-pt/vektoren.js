@@ -72,6 +72,8 @@ window.BuchPT && BuchPT.add('vektoren', {
         'spitz': 'ângulo agudo', 'stumpfe Vektoren': 'vetores com ângulo obtuso', 'senkrecht': 'perpendiculares', 'schräg': 'oblíquos', 'Dach und Boden': 'telhado e chão',
         'Der Nullvektor hat keine Richtung, er liefert keinen Winkel.': 'O vetor nulo não tem direção; não dá nenhum ângulo.',
         // book pt-9 mathegy11-pt:
+        // book pt-22 mathegy11lk-pt:
+        // book pt-23 mathegy12lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs vektoren/*)
@@ -196,6 +198,8 @@ window.BuchPT && BuchPT.add('vektoren', {
         ['$. Gemessen wird der Winkel senkrecht zu ihr, zwischen den beiden farbigen Linien in den Ebenen.', '$. O ângulo mede-se perpendicularmente a ela, entre as duas linhas coloridas nos planos.'],
         ['$, also $', '$, logo $'],
         // book pt-9 mathegy11-pt:
+        // book pt-22 mathegy11lk-pt:
+        // book pt-23 mathegy12lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -233,5 +237,7 @@ window.BuchPT && BuchPT.add('vektoren', {
         // winkel3d: the norm of an indexed vector, |n_1| → ‖n_1‖ (the norm rule of pt-2 reads \vec{…}| only)
         [/\|(\\vec\{[^{}]*\}_\{?\w\}?)\|/g, '\\|$1\\|'],
         // book pt-9 mathegy11-pt:
+        // book pt-22 mathegy11lk-pt:
+        // book pt-23 mathegy12lk-pt:
     ]
 });

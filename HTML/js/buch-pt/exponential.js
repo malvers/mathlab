@@ -121,6 +121,7 @@ window.BuchPT && BuchPT.add('exponential', {
         'Jetzt die Punkte glatt verbinden und die Asymptoten beachten. So sieht der Graph aus.': 'Agora une os pontos com uma curva suave, tendo em conta as assíntotas. O gráfico é assim.',
         'Überleg zuerst selbst: Welche Grundfunktion steckt darin? Wie ist sie verschoben oder gestreckt? Dann Schritt für Schritt aufdecken.':
             'Pensa primeiro por ti: que função de referência está lá dentro? Como está transladada ou dilatada? Depois revela passo a passo.',
+        // book pt-22 mathegy11lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs exponential/*)
@@ -169,6 +170,7 @@ window.BuchPT && BuchPT.add('exponential', {
         // expanwendung: the pieces of the question alone (the rule below turns the whole question first)
         ['Wann ist das Kapital auf', 'Quando chega o capital a'], ['Wann ist der Anteil auf', 'Quando desce a fração para'],
         ['Wann sind nur noch', 'Quando restam apenas'], ['Wann sind es', 'Quando são'],
+        // book pt-22 mathegy11lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -182,5 +184,6 @@ window.BuchPT && BuchPT.add('exponential', {
         // expanwendung: the unit after the result ("… ≈ 13,7$ Jahre"); skizze: "(Funktion 2 von 6)"
         [/\$ Jahre<\/p>/g, '$ anos</p>'], [/\$ Stunden<\/p>/g, '$ horas</p>'],
         [/\(Funktion (\d+) von (\d+)\)/g, '(função $1 de $2)'],
+        // book pt-22 mathegy11lk-pt:
     ]
 });

@@ -108,6 +108,8 @@ window.BuchPT && BuchPT.add('analysis', {
         // book pt-9 mathegy11-pt:
         // bruchfunktion (lb1-4): the widget's words are in the pt-7 block above (merge 26.11.2026: one copy per string, the
         // lowest block wins; "Buraco" and "descontinuidade removível" also stand in the GY 11 text)
+        // book pt-22 mathegy11lk-pt:
+        // book pt-23 mathegy12lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -252,6 +254,8 @@ window.BuchPT && BuchPT.add('analysis', {
         // shorter than pt-7's keys, stay here
         ['Nullstellen: ', 'Zeros: '],
         [' mit Vorzeichenwechsel', ' com mudança de sinal'], [' ohne Vorzeichenwechsel', ' sem mudança de sinal'],
+        // book pt-22 mathegy11lk-pt:
+        // book pt-23 mathegy12lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -285,5 +289,7 @@ window.BuchPT && BuchPT.add('analysis', {
         [/ mit (Löchern|einem Loch)\./g, (m, w) => w === 'Löchern' ? ' com buracos.' : ' com um buraco.'],
         [/Nullstellen: keine(?![a-zäöüß])/g, 'Zeros: nenhum'], [/Polstellen: keine(?![a-zäöüß])/g, 'polos: nenhum'],
         [/(\\setminus \\\{)([^}]*)(\\\})/g, (m, a, b, c) => a + (b.indexOf('{,}') >= 0 ? b : b.replace(/; /g, ', ')) + c],
+        // book pt-22 mathegy11lk-pt:
+        // book pt-23 mathegy12lk-pt:
     ]
 });

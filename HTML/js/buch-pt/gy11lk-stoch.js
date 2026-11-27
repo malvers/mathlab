@@ -22,6 +22,7 @@ window.BuchPT && BuchPT.add('gy11lk-stoch', {
         // galton (lb1-3): Galtonbrett = tabuleiro de Galton, Nagelreihen = filas de pregos, Fach = compartimento
         'Nagelreihen $n$': 'Filas de pregos $n$', 'nach rechts mit $p$': 'para a direita com $p$', 'Leeren': 'Esvaziar',
         'Relative Häufigkeiten der Fächer im Vergleich mit der Binomialverteilung': 'Frequências relativas dos compartimentos comparadas com a distribuição binomial',
+        // book pt-22 mathegy11lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk-stoch/*)
@@ -39,6 +40,7 @@ window.BuchPT && BuchPT.add('gy11lk-stoch', {
             'Deixa cair bolas: cada uma bate em $n$ pregos e salta de cada vez para a direita com probabilidade $p$.'],
         ['Galtonbrett mit ', 'Tabuleiro de Galton com '], [' Nagelreihen', ' filas de pregos'],
         [' Kugeln. Balken: relative Häufigkeit je Fach, Punkte: $P(X = k)$ für $X \\sim B(', ' bolas. Barras: frequência relativa por compartimento, pontos: $P(X = k)$ para $X \\sim B('],
+        // book pt-22 mathegy11lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -63,5 +65,6 @@ window.BuchPT && BuchPT.add('gy11lk-stoch', {
         // galton: the board in the aria label and the count of balls
         [/Galtonbrett mit (\d+) Nagelreihen/g, (m, n) => 'Tabuleiro de Galton com ' + n + (n === '1' ? ' fila' : ' filas') + ' de pregos'],
         [/(\d[\d .]*?) Kugeln\. Balken: relative Häufigkeit je Fach, Punkte: \$/g, (m, k) => k + (k === '1' ? ' bola' : ' bolas') + '. Barras: frequência relativa por compartimento, pontos: $'],
+        // book pt-22 mathegy11lk-pt:
     ]
 });

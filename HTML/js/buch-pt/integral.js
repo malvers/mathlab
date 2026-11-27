@@ -50,6 +50,8 @@ window.BuchPT && BuchPT.add('integral', {
         'Fläche zwischen zwei Graphen': 'Área entre dois gráficos', 'Zu wenige Schnittstellen im Bild.': 'Poucos pontos de interseção na figura.',
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
+        // book pt-22 mathegy11lk-pt:
+        // book pt-23 mathegy12lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs integral/*)
@@ -80,6 +82,8 @@ window.BuchPT && BuchPT.add('integral', {
         
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
+        // book pt-22 mathegy11lk-pt:
+        // book pt-23 mathegy12lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -89,5 +93,7 @@ window.BuchPT && BuchPT.add('integral', {
         // book pt-5 mathe13lk-pt:
         // book pt-7 mathefos12-pt:
         // book pt-8 mathegy12-pt:
+        // book pt-22 mathegy11lk-pt:
+        // book pt-23 mathegy12lk-pt:
     ]
 });

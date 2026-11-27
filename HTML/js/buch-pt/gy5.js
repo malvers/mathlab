@@ -136,6 +136,7 @@ window.BuchPT && BuchPT.add('gy5', {
         'Zieh am Punkt auf der Geraden s, um sie zu drehen. Mit „h kippen“ sind g und h nicht mehr parallel.':
             'Arrasta o ponto sobre a reta s para a rodar. Com «Inclinar h», g e h deixam de ser paralelas.',
         'Zwei Geraden g und h, geschnitten von s': 'Duas retas g e h, intersetadas pela secante s',
+        // book pt-21 mathegy5-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy5/*)
@@ -203,6 +204,7 @@ window.BuchPT && BuchPT.add('gy5', {
         ['Weil g und h <b>nicht parallel</b> sind, sind sie verschieden groß.', 'Como g e h <b>não são paralelas</b>, têm amplitudes diferentes.'],
         // quader5: the sum of the edges with × (mathe6-pt has no os5.js, whose rule turns " · " into " × " on the OS 5 pages)
         ['Alle 12 Kanten zusammen: 4 \\times (a + b + c) = ', 'As 12 arestas juntas: 4 \\times (a + b + c) = '], ['Alle 12 Kanten zusammen: 4 · (a + b + c) = ', 'As 12 arestas juntas: 4 × (a + b + c) = '],
+        // book pt-21 mathegy5-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -339,5 +341,6 @@ window.BuchPT && BuchPT.add('gy5', {
         // words, and the total area A only in its own formula
         [/(\d+) Schicht(?:en)? mit je (\d+) · (\d+) = (\d+) Würfeln\./g, (m, c, a, b, n) => c + (c === '1' ? ' camada' : ' camadas') + ' de ' + a + ' × ' + b + ' = ' + n + ' cubos cada uma.'],
         [/\$O = 2 \\times \(ab \+ ac \+ bc\)/g, '$$A = 2 \\times (ab + ac + bc)'],
+        // book pt-21 mathegy5-pt:
     ]
 });

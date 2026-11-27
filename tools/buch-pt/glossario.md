@@ -1031,3 +1031,9 @@ andere Bücher gehen auf die portugiesische Ausgabe (BGY 11, BGY 12, FOS 11). Sc
 | Raten- / Annuitätentilgung · Restschuld · Rate · Dispo | amortização constante / por anuidades · dívida em falta · prestação · descoberto bancário | Tabellenfunktion RMZ = PGTO |
 | imaginäre Einheit · Realteil · Imaginärteil · konjugiert | unidade imaginária · parte real · parte imaginária · conjugado | |
 | Gaußsche Zahlenebene · Betrag · Argument | plano de Argand · módulo · argumento | wie das Widget `komplex` (pt-6) |
+
+## mathegy5-pt (GY 5, block pt-21)
+
+## mathegy11lk-pt (GY 11 Leistungskurs, block pt-22)
+
+## mathegy12lk-pt (GY 12 Leistungskurs, block pt-23)

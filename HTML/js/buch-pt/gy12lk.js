@@ -41,6 +41,7 @@ window.BuchPT && BuchPT.add('gy12lk', {
         'Negativ: P liegt auf der anderen Seite.': 'Negativo: P está do outro lado.',
         // abstand3d (lb7-2): Lotfußpunkt = pé da perpendicular; the presets of mode gg are words of vektoren.js
         'Das 3D-Modul fehlt.': 'Falta o módulo 3D.', 'Beispiel 3': 'Exemplo 3', 'Ursprungsgerade': 'Reta pela origem', 'P auf g': 'P em g',
+        // book pt-23 mathegy12lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy12lk/*)
@@ -69,6 +70,7 @@ window.BuchPT && BuchPT.add('gy12lk', {
         [', sie sind identisch.', ': são coincidentes.'], ['$ steht auf beiden Geraden senkrecht, $', '$ é perpendicular às duas retas, $'],
         ['. Abstand $0$: Die Geraden <b>schneiden</b> sich in $S(', '. Distância $0$: as retas <b>intersetam-se</b> em $S('],
         ['. <b>Windschief</b>; das kürzeste Verbindungsstück (pink) verbindet $F(', '. <b>Não complanares</b>; o segmento mais curto (cor-de-rosa) une $F('], [')$ und $G(', ')$ e $G('],
+        // book pt-23 mathegy12lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -78,5 +80,6 @@ window.BuchPT && BuchPT.add('gy12lk', {
             (m, a, b) => '$ em $[' + a + (/\{,\}/.test(a + b) ? '; ' : ', ') + b + ']$ roda em torno do eixo $Ox$: '],
         // rotation: "Summe der 12 Kreisscheiben (Radius in der Mitte jedes Streifens): "
         [/Summe der (\d+) Kreisscheiben \(Radius in der Mitte jedes Streifens\): /g, 'Soma dos $1 discos (raio no ponto médio de cada faixa): '],
+        // book pt-23 mathegy12lk-pt:
     ]
 });

@@ -19,6 +19,7 @@ window.BuchPT && BuchPT.add('gy11lk-vek', {
         // ebenenlage (wp1-2): Schnittgerade = reta de interseção, Spurgerade = traço; the preset "parallel" by the rule in vektoren.js
         'Dach': 'Telhado', 'Spurgerade': 'Traço', 'Zwei Ebenen im Raum und ihre Schnittgerade': 'Dois planos no espaço e a sua reta de interseção',
         'Mindestens ein Koeffizient von $x$, $y$, $z$ muss ungleich null sein, sonst ist es keine Ebene.': 'Pelo menos um coeficiente de $x$, $y$, $z$ tem de ser diferente de zero; caso contrário, não é um plano.',
+        // book pt-22 mathegy11lk-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk-vek/*)
@@ -33,9 +34,11 @@ window.BuchPT && BuchPT.add('gy11lk-vek', {
             'Os primeiros membros não são múltiplos: os planos <b>intersetam-se</b> numa reta. Variável livre $'],
         [' = t$, übrig bleibt für $', ' = t$; resta, para $'], ['$ und $', '$ e $'], ['Gelöst: $', 'Resolvido: $'], ['Schnittgerade: <b>$g', 'Reta de interseção: <b>$g'],
         ['. Ganzzahliger Richtungsvektor: $', '. Vetor diretor de coordenadas inteiras: $'],
+        // book pt-22 mathegy11lk-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-5 mathe13lk-pt:
+        // book pt-22 mathegy11lk-pt:
     ]
 });
