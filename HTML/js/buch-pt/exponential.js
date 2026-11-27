@@ -115,7 +115,7 @@ window.BuchPT && BuchPT.add('exponential', {
         // book pt-19 mathe10-pt:
         // book pt-20 mathegy10-pt:
         // wachstumsmodell
-        ['rekursiv: $B_0 = ', 'por recorrência: $B_0 = '], ['explizit: $', 'explícito: $'],
+        ['rekursiv: $B_0 = ', 'por recorrência: $B_0 = '], ['explizit: $', 'termo geral: $'],
         ['Der <b>Quotient</b> aufeinanderfolgender Werte ist konstant: ', 'O <b>quociente</b> entre valores consecutivos é constante: '],
         [' % pro Schritt (Abnahme).', ' % por passo (diminuição).'], [' % pro Schritt.', ' % por passo.'], ['Der Bestand bleibt gleich.', 'A quantidade mantém-se.'],
         ['Der <b>Abstand zur Schranke</b> schrumpft mit dem Faktor $1 - k = ', 'A <b>distância ao limite</b> diminui com o fator $1 - k = '],
