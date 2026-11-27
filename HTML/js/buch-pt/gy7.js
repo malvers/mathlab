@@ -119,7 +119,7 @@ window.BuchPT && BuchPT.add('gy7', {
         // umstellen7 (Portuguese letters: P for the perimeter, d for the distance, A_b for the base of the pyramid - rules below; "Dichte" is a
         // rule: gy12lk.js has the word for the density of a distribution)
         'Rechteck': 'Retângulo', 'Nächster Schritt': 'Próximo passo', 'Umfang': 'Perímetro', 'Geschwindigkeit': 'Velocidade', 'Formel': 'Fórmula', '⇄ Seiten tauschen': '⇄ Trocar os membros',
-        'umstellen nach': 'em ordem a',
+        'umstellen nach': 'em ordem a', 'Pyramide': 'Pirâmide',
         // prozent7 (the letters G, W, p stay, as in mathefos11-pt; the page names them once; the sentences with numbers are rules below)
         'Grundwert $G$': 'Valor de referência $G$', 'Prozentsatz $p\\,\\%$': 'Percentagem $p\\,\\%$', 'Änderung um': 'Variação de',
         'Danach um denselben Prozentsatz zurück': 'Depois a mesma percentagem no sentido inverso', 'Balken vor und nach der Änderung': 'Barras antes e depois da variação',
