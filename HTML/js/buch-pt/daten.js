@@ -40,13 +40,15 @@ window.BuchPT && BuchPT.add('daten', {
         // pt0: the helpers of the module (outside every widget; check.mjs daten/*)
         // book pt-11 mathegy7-pt:
         // book pt-13 mathegy9-pt:
-        // mittelwerte: "Geordnet ($n = 9$): …", "keiner …", several modes "15 und 18 min"
-        ['Geordnet ($n = ', 'Ordenados ($n = '], ['keiner (jeder Wert kommt nur einmal vor)', 'nenhuma (cada valor aparece só uma vez)'], [' und ', ' e '],
+        // mittelwerte: "Geordnet ($n = 9$): …", "keiner …" (several modes "15 und 18 min": a rule below)
+        ['Geordnet ($n = ', 'Ordenados ($n = '], ['keiner (jeder Wert kommt nur einmal vor)', 'nenhuma (cada valor aparece só uma vez)'],
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-11 mathegy7-pt:
         // book pt-13 mathegy9-pt:
+        // mittelwerte: several modes "15 und 18 min", "8 und 15 und 30 min" (only numbers followed by min)
+        [/(\d) und (?=\d+(?: und \d+)* min\b)/g, '$1 e '],
         // histogramm: "8 Klassen der Breite 5 cm · häufigste Klasse $[165;\,170)$ mit 10 von 40 Werten (" - Portuguese classes [165, 170[
         [/(\d+) Klassen der Breite (\d+) cm · häufigste Klasse \$\[(\d+);\\,(\d+)\)\$ mit (\d+) von (\d+) Werten \(/g,
             (m, k, w, a, b, c, n) => k + ' classes de amplitude ' + w + ' cm · classe mais frequente $[' + a + ', ' + b + '[$ com ' + c + ' de ' + n + ' valores ('],
