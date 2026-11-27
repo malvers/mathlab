@@ -589,5 +589,9 @@ ensino básico (3.º ciclo).
 | Försterdreieck · Schattenmethode · Daumensprung | triângulo do guarda-florestal · método das sombras · salto do polegar | auch in `schatten8`; die Schatten $s$, $S$ bleiben (sombra) |
 | Einheitswürfel · Oberfläche · Maßstab $1 : m$ | cubo unitário · área total · escala $1 : m$ | `gulliver8` |
 | Liliputaner · Modell (Maßstab) | liliputianos · maqueta | |
+| heuristische Strategien · Vorwärts- / Rückwärtsarbeiten · Teilziel | estratégias heurísticas · trabalhar para a frente / para trás · objetivo intermédio | |
+| Lösungsplan: verstehen, planen, durchführen, zurückschauen | plano de resolução: compreender, planear, executar, olhar para trás | Pólya, «Como Resolver Problemas» |
+| Umkehrrechnung · Startzahl · Rätsel | operação inversa · número inicial · enigma | `rueckwaerts8` |
+| Krug · Eimer · Händeschütteln · Taschengeld | jarro · balde · apertos de mão · semanada | |
 
 ## mathegy9-pt
