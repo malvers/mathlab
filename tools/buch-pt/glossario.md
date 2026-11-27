@@ -561,5 +561,12 @@ ensino básico (3.º ciclo).
 | Eiscafé (Sorten, Kugeln) · Siegerpodest · Sechserpasch | gelataria (sabores, bolas) · pódio · duplo seis | |
 | Zufallszahl · `=ZUFALLSBEREICH(1;6)` | número aleatório · `=ALEATÓRIOENTRE(1;6)` | Excel auf Portugiesisch |
 | Schere, Stein, Papier · Chevalier de Méré | pedra, papel, tesoura · cavaleiro de Méré | |
+| Funktion · eindeutige Zuordnung · Senkrechten-Test | função · correspondência unívoca · teste da reta vertical | |
+| unabhängige / abhängige Variable · Funktionswert | variável independente / dependente · imagem | $f\colon x \mapsto \ldots$ bleibt |
+| Definitionsbereich $D$ · Wertebereich $W$ | domínio $D_f$ · contradomínio $D'_f$ | |
+| monoton steigend / fallend · Hoch- / Tiefpunkt | crescente / decrescente · máximo / mínimo (no ponto $(-1, 2)$) | ohne die Buchstaben H, T |
+| symmetrisch zur y-Achse / zum Ursprung | simétrico em relação ao eixo $Oy$ (função par) / à origem (função ímpar) | |
+| Weg-Zeit-Diagramm · Weg-Zeit-Gesetz $s = 5t$ | gráfico distância-tempo · lei distância-tempo $d = 5t$ | auch im Widget `wegzeit8` |
+| Haltestelle · Bus · Straßenbahn · Klimadiagramm (DWD) | paragem · autocarro · elétrico · gráfico termopluviométrico (IPMA) | |
 
 ## mathegy9-pt
