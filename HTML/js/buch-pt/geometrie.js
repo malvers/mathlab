@@ -23,6 +23,16 @@ window.BuchPT && BuchPT.add('geometrie', {
         // kreisteil (chapter 2): the arc length is ℓ and the perimeter P (German b, u; the phrases below)
         'Radius $r$': 'Raio $r$', 'Mittelpunktswinkel $\\alpha$': 'Ângulo ao centro $\\alpha$', 'Kreis mit Kreisausschnitt und Kreisbogen': 'Círculo com um setor circular e um arco',
         'Kreisbogen': 'Arco', 'Kreisausschnitt': 'Setor circular',
+        // pythagoras (chapter 3.1): teorema da altura, teorema do cateto, projeções p, q; the area labels with × (whole SVG labels)
+        'Pythagoras': 'Pitágoras', 'Kathetensatz': 'Teorema do cateto', 'Höhensatz': 'Teorema da altura', 'Satz': 'Teorema', 'gleichschenklig': 'isósceles',
+        'c·q': 'c×q', 'c·p': 'c×p', 'p·q': 'p×q',
+        'Zieh am Punkt $C$. Er bleibt auf dem Thaleskreis über $\\overline{AB}$, deshalb ist der Winkel bei $C$ immer ein rechter.':
+            'Arrasta o ponto $C$. Ele fica sobre a semicircunferência de diâmetro $[AB]$; por isso, o ângulo em $C$ é sempre reto.',
+        'Rechtwinkliges Dreieck mit Quadraten über den Seiten': 'Triângulo retângulo com quadrados construídos sobre os lados',
+        'Die beiden Kathetenquadrate haben zusammen genau den Flächeninhalt des Hypotenusenquadrats.':
+            'Os dois quadrados dos catetos têm, juntos, exatamente a área do quadrado da hipotenusa.',
+        'Jedes Kathetenquadrat ist so groß wie das Rechteck darunter.': 'Cada quadrado de um cateto tem a mesma área que o retângulo por baixo dele.',
+        'Das Höhenquadrat ist so groß wie das Rechteck aus den beiden Hypotenusenabschnitten.': 'O quadrado da altura tem a mesma área que o retângulo formado pelas duas projeções.',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
@@ -34,6 +44,8 @@ window.BuchPT && BuchPT.add('geometrie', {
         ['Anteil am Vollkreis: $', 'Parte do círculo completo: $'],
         [' $b = \\tfrac{\\alpha}{360^\\circ} \\times 2\\pi r', ' $\\ell = \\tfrac{\\alpha}{360^\\circ} \\times 2\\pi r'],
         ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $u \\approx ', 'Arrasta a extremidade do arco. Para comparar, o círculo inteiro: $P \\approx '],
+        // pythagoras: "$a^2 \approx 9$ und $c \times p \approx …" (the products are \times already)
+        ['$ und $c \\times p \\approx ', '$ e $c \\times p \\approx '], ['$ und $c \\times q \\approx ', '$ e $c \\times q \\approx '], ['$ und $p \\times q \\approx ', '$ e $p \\times q \\approx '],
     ],
     rule: [
         // pt0: notation of the module, for every book
