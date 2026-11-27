@@ -1009,7 +1009,7 @@ andere Bücher gehen auf die portugiesische Ausgabe (BGY 11, BGY 12, FOS 11). Sc
 | Deutsch | Português (PT) | Hinweis |
 |---|---|---|
 | lineares / exponentielles / beschränktes / logistisches Wachstum | crescimento linear / exponencial / limitado / logístico | Schranke $S$ = limite $S$ |
-| Bestand · Anfangsbestand · Wachstumsfaktor | quantidade · quantidade inicial · fator de crescimento | Buchstabe $B$ bleibt |
+| Bestand · Anfangsbestand · Wachstumsfaktor | quantidade · valor inicial · fator de crescimento | Buchstabe $B$ bleibt |
 | rekursiv · explizit | por recorrência · termo geral (explícito) | Widget-Phrase „explizit: $“ = „termo geral: $“ |
 | Halbwertszeit · Verdopplungszeit | tempo de meia-vida · tempo de duplicação | $T_H$, $T_D$ |
 | periodisch · Periode · Frequenz · Amplitude · Mittellage | periódico · período · frequência · amplitude · linha média | |
@@ -1017,7 +1017,7 @@ andere Bücher gehen auf die portugiesische Ausgabe (BGY 11, BGY 12, FOS 11). Sc
 | Ebbe und Flut · Hochwasser / Niedrigwasser | marés · preia-mar / baixa-mar | Uhrzeit „5h12“ |
 | Zufallsgröße · Stabdiagramm · Pfadregeln | variável aleatória · diagrama de barras · regras do produto e da soma | Kapiteltitel „regras do diagrama em árvore“ |
 | genau / mindestens / höchstens $k$ | exatamente / pelo menos / no máximo $k$ | |
-| Erwartungswert · Einsatz · Auszahlung · faires Spiel | valor médio · aposta · prémio · jogo equitativo | wie pt-2; Pasch = dupla (dois números iguais) |
+| Erwartungswert · Einsatz · Auszahlung · faires Spiel | valor médio · aposta · prémio · jogo equitativo | wie pt-2; Pasch = duplo (dois números iguais), wie pt-19 |
 | Sinussatz · Kosinussatz · Flächenformel | lei dos senos · lei dos cossenos · fórmula da área | mehrdeutiger Fall = caso ambíguo |
 | Lösungsplan · Höhenwinkel · Standlinie | plano de resolução · ângulo de elevação · base | |
 | Umkehrfunktion · umkehrbar · Winkelhalbierende | função inversa · invertível · bissetriz dos quadrantes ímpares | |
