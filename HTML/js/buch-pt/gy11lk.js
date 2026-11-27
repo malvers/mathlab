@@ -60,6 +60,10 @@ window.BuchPT && BuchPT.add('gy11lk', {
         'Schrittweite $h = 10^{-k}$': 'Passo $h = 10^{-k}$',
         'Graph von a hoch x mit Sekante durch (0|1) und Tangente': 'Gráfico de a elevado a x com a secante que passa por (0, 1) e a tangente',
         '$a = e$ setzen': 'Pôr $a = e$',
+        // drehraum (lb2): Drehachse = eixo de rotação, the axes eixo Ox, Oy, Oz
+        'Dieses Bild braucht js/buch-vektoren.js.': 'Esta figura precisa de js/buch-vektoren.js.',
+        'Drehachse:': 'Eixo de rotação:', 'Drehachse': 'Eixo de rotação', 'x-Achse': 'eixo Ox', 'y-Achse': 'eixo Oy', 'z-Achse': 'eixo Oz',
+        'Ein Haus wird im Raum um eine Koordinatenachse gedreht': 'Uma casa roda no espaço em torno de um eixo coordenado',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk/*)
@@ -119,6 +123,11 @@ window.BuchPT && BuchPT.add('gy11lk', {
         ['Bei welcher Basis ist der Grenzwert genau 1?', 'Para que base é o limite exatamente 1?'],
         ['Für $a = ', 'Para $a = '], ['$ geht der Quotient gegen $\\ln a \\approx ', '$, o quociente tende para $\\ln a \\approx '],
         ['Für $a = e$ ist der Grenzwert genau 1: $\\left(e^x\\right)\' = e^x$.', 'Para $a = e$ o limite é exatamente 1: $\\left(e^x\\right)\' = e^x$.'],
+        // drehraum
+        ['$. Die Koordinate längs der Drehachse bleibt gleich, ', '$. A coordenada ao longo do eixo de rotação mantém-se, '],
+        ['die beiden anderen werden wie in der Ebene gedreht.', 'as outras duas rodam como no plano.'],
+        // verflechtung: the quantities under the boxes of the Gozinto graph ("100 ME"), the same u.q. as bgy13lk.js (not loaded by GY 11 LK)
+        [' ME', ' u.q.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -132,5 +141,7 @@ window.BuchPT && BuchPT.add('gy11lk', {
         [/Für (\d+) Tafeln und (\d+) Boxen braucht man <b>(\d+) ME Kakao, (\d+) ME Zucker und (\d+) ME Milch<\/b>\./g,
             'Para $1 tabletes e $2 caixas são precisas <b>$3 u.q. de cacau, $4 u.q. de açúcar e $5 u.q. de leite</b>.'],
         // book pt-22 mathegy11lk-pt:
+        // drehraum: "Drehung um die z-Achse um 90°: $D_z = …$"
+        [/Drehung um die ([xyz])-Achse um (\d+)°: /g, 'Rotação de $2° em torno do eixo O$1: '],
     ]
 });
