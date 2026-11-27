@@ -49,6 +49,7 @@ window.BuchPT && BuchPT.add('gy5', {
         'Gib Brüche wie 3/4 oder Dezimalzahlen wie 0,7 ein, auch Zahlen größer als 1 bis 3.':
             'Escreve frações como 3/4 ou números decimais como 0,7, também números maiores do que 1, até 3.',
         'Zahlenstrahl mit zwei Zahlen': 'Reta numérica com dois números',
+        'Zahl A': 'Número A', 'Zahl B': 'Número B',
         'Bitte zwei Zahlen zwischen 0 und 3 eingeben, zum Beispiel 3/4 oder 0,7.': 'Escreve dois números entre 0 e 3, por exemplo 3/4 ou 0,7.',
         // winkel5: amplitude, lado, ângulo nulo / agudo / reto / obtuso / raso / côncavo / giro (the rules below)
         'Messen': 'Medir', 'Schätzen': 'Estimar', 'Modus': 'Modo', 'Deine Schätzung': 'A tua estimativa', 'Schätzung in Grad': 'Estimativa em graus',
