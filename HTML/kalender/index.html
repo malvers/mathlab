@@ -20,6 +20,8 @@
     <script src="kalender-core.js"></script>
     <!-- the colour schemes Blau / Hell / Grau of the Stoffverteilungsplan (key svp-theme), like the To-do app -->
     <link rel="stylesheet" href="../svp/svp-tokens.css">
+    <!-- the nature photo behind the page, the SVP's (js/natur-bild.js picks it); the calendar's glass is below -->
+    <link rel="stylesheet" href="../svp/svp-natur.css">
     <style>
         /* --- plain standalone page, a sibling of the To-do app (HTML/todo/), deliberately no lab shell CSS --- */
         /* Blau = these values; Hell and Grau override them from svp-tokens.css (html.svp-light / html.svp-grey) */
@@ -65,13 +67,16 @@
 
         * { box-sizing: border-box; }
         html, body { margin: 0; background: var(--bg); color: var(--text); }
-        html { scrollbar-gutter: stable; }
+        /* no gutter kept for a scroll bar that is not there: on a Mac with a mouse it was an empty strip right of the week
+           (Doc, 27.11.2026: "Warum ist da drüben so viel Platz?") - a page that scrolls brings its bar, the week never does */
         body {
             font-family: Orbitron, sans-serif;
             padding: 0 0 max(40px, env(safe-area-inset-bottom));
         }
-        .wrap { max-width: 980px; margin: 0 auto; padding: 12px 16px 0; }
-        @media (max-width: 480px) { .wrap { padding-left: 8px; padding-right: 8px; } }
+        /* one gap all round the calendar, 6px to the header, the window's sides and (fitWeek) its bottom edge (Doc,
+           27.11.2026: "Mach den Platz einheitlich bitte und gefühlt 6 Pixel") */
+        .wrap { max-width: 980px; margin: 0 auto; padding: 6px 6px 0; }
+        @media (max-width: 480px) { .wrap { padding-left: 6px; padding-right: 6px; } }
         /* week and month use the whole width like the header (Doc, 07.11.2026: "den breit?"); the agenda stays a column */
         body[data-view="week"] .wrap, body[data-view="month"] .wrap { max-width: none; }
         /* the header: one slim bar over the whole width of the page (Doc, 07.11.2026: "Der Header ist viel zu groß ...
@@ -82,9 +87,9 @@
         :root { --ctl: 40px; }
         .top {
             position: sticky; top: 0; z-index: 4; background: var(--card); border-bottom: 1px solid var(--line);
-            padding: max(8px, env(safe-area-inset-top)) 16px 8px;
+            padding: max(8px, env(safe-area-inset-top)) 6px 8px;   /* the sides as the calendar's below */
         }
-        @media (max-width: 480px) { .top { padding-left: 8px; padding-right: 8px; } }
+        @media (max-width: 480px) { .top { padding-left: 6px; padding-right: 6px; } }
         .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
         .bar #micBtn { order: 1; }
         /* the search field takes the entry field's place while the search is on (same order, same flex at every width) */
@@ -175,7 +180,7 @@
 
         /* settings under the gear */
         .settings {
-            position: absolute; top: calc(100% + 6px); right: 16px; z-index: 5; width: min(360px, calc(100% - 32px));
+            position: absolute; top: calc(100% + 6px); right: 6px; z-index: 5; width: min(360px, calc(100% - 12px));
             padding: 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line);
             box-shadow: 0 12px 40px var(--shadow);
             /* never taller than the window below the header (100% = the header, its containing block): the sharing
@@ -363,7 +368,8 @@
         .wk { padding: 8px 0 10px 0; }   /* the table a little to the left, some air on the right (Doc, 07.11.2026) */
         /* left the hour column, right one of the same width: it holds the forward arrow beside the day names and is
            the air on the right (Doc, 09.11.2026: "mach mal die Pfeile auch links und rechts da unten") */
-        .wk-head, .wk-allday, .wk-grid, .wk-lines { display: grid; grid-template-columns: 34px repeat(7, minmax(0, 1fr)) 34px; }
+        /* --wk-days: the days shown (renderWeek / renderMonth set it - 7, or 6 / 5 with Saturday or Sunday hidden) */
+        .wk-head, .wk-allday, .wk-grid, .wk-lines { display: grid; grid-template-columns: 34px repeat(var(--wk-days, 7), minmax(0, 1fr)) 34px; }
         button.icon.nav-step { justify-self: center; align-self: end; width: 30px; height: 32px; border-radius: 8px; }
         button.icon.nav-step svg { width: 22px; height: 22px; }
         .wk-head .nav-step { margin-bottom: 8px; }
@@ -482,9 +488,9 @@
         /* ---------- Monat ---------- */
         /* the same side columns as the week, so the arrows stay in place when Doc switches (Doc, 09.11.2026: "bitte auch") */
         .mo { padding: 8px 0 6px; }
-        .mo-head, .mo-grid { display: grid; grid-template-columns: 34px repeat(7, minmax(0, 1fr)) 34px; }
+        .mo-head, .mo-grid { display: grid; grid-template-columns: 34px repeat(var(--wk-days, 7), minmax(0, 1fr)) 34px; }
         .mo-head .nav-step { margin-bottom: 4px; }
-        .mo-cell:nth-child(7n + 1) { grid-column-start: 2; }   /* each row starts after the left side column */
+        .mo-cell.row1 { grid-column-start: 2; }   /* each row starts after the left side column (renderMonth marks its first day) */
         .mo-head > span { padding: 4px 0 8px; text-align: center; font: 700 12px Orbitron, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--text); }
         /* where the Sunday column has room beside its date (week) and its name (month), the forward arrow moves into it,
            its right edge flush with the table's right edge, and the right side column goes - the air on the right is the
@@ -494,11 +500,12 @@
            beside the name, which is written out from about 990px, so the month waits until 1100px */
         .wk, .mo { container: kal / inline-size; }
         @container kal (min-width: 800px) {
-            .wk-head, .wk-allday, .wk-grid, .wk-lines { grid-template-columns: 34px repeat(7, minmax(0, 1fr)); }
+            .wk-head, .wk-allday, .wk-grid, .wk-lines { grid-template-columns: 34px repeat(var(--wk-days, 7), minmax(0, 1fr)); }
             .wk-head, .wk-allday, .wk-sep, .wk-frame { margin-right: 12px; }
             .wk-sep i { margin-right: 0; }
-            /* Sunday (8th child, after the back arrow) placed by hand too, else the grid pushes it into a second row */
-            .wk-head > :nth-child(8), .wk-head .nav-step[data-step="1"] { grid-area: 1 / 8; }
+            /* the last day (Sunday, or Friday / Saturday with the weekend hidden: the child before the forward arrow) placed
+               by hand too, into the last column, else the grid pushes it into a second row */
+            .wk-head > :nth-last-child(2), .wk-head .nav-step[data-step="1"] { grid-area: 1 / -2; }
             .wk-head .nav-step[data-step="1"] { justify-self: end; }
             /* the back arrow the same way on the left: into the Monday column, its left edge on the table's left line
                (Doc, 13.11.2026: "das Dreieck nach links bitte auch bündig machen wie das rechte"); Monday (2nd child)
@@ -510,8 +517,8 @@
         @container kal (min-width: 1100px) {
             /* the left side column is empty here (the back arrow stands in the Monday column), so it shrinks to nothing and
                the left gets the same 12px as the right (Doc, 13.11.2026: "Rechts ist gut, links ist zu groß. Bitte links.") */
-            .mo-head, .mo-grid { grid-template-columns: 0 repeat(7, minmax(0, 1fr)); margin: 0 12px; }
-            .mo-head > :nth-child(8), .mo-head .nav-step[data-step="1"] { grid-area: 1 / 8; }
+            .mo-head, .mo-grid { grid-template-columns: 0 repeat(var(--wk-days, 7), minmax(0, 1fr)); margin: 0 12px; }
+            .mo-head > :nth-last-child(2), .mo-head .nav-step[data-step="1"] { grid-area: 1 / -2; }
             .mo-head .nav-step[data-step="1"] { justify-self: end; }
             .mo-head > :nth-child(2), .mo-head .nav-step[data-step="-1"] { grid-area: 1 / 2; }
             .mo-head .nav-step[data-step="-1"] { justify-self: start; position: relative; z-index: 1; }
@@ -620,6 +627,9 @@
             content: ''; position: absolute; left: 5px; top: 1px; width: 6px; height: 12px;
             border: solid var(--ink-navy); border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
         }
+        /* mixed ("Samstag und Sonntag" while only one of them shows): the box filled, a dash instead of the tick */
+        .check input:indeterminate + i { background: rgb(var(--ck, var(--tint))); }
+        .check input:indeterminate + i::after { content: ''; position: absolute; left: 4px; right: 4px; top: 7px; height: 3px; border-radius: 1px; background: var(--ink-navy); }
         .check input:focus-visible + i { outline: 2px solid var(--lambda); outline-offset: 2px; }
         .check input:disabled + i { opacity: .55; }
         .check.ck-doc { --ck: var(--c-event-gold); }
@@ -912,6 +922,52 @@
             #printWeek p { margin: 0; color: rgb(110, 110, 110); }
         }
 
+        /* ---------- the nature photo behind the calendar (Doc, 27.11.2026: "Könnte man das Bild auch hinter einen Kalender
+           bringen?" - "so wie wir das im Stoffverteilungsplan haben") ----------
+           The SVP's own: js/natur-bild.js (loaded by svp-gate.js) picks the photo - a right click beside the calendar, the
+           N key, or "Hintergrundbild" in the menu on the day names - and keeps its "Transparenz" slider in --natur-mal;
+           svp/svp-natur.css lays the photo behind the page under a veil of --bg - softened outside the calendar too, never
+           more than 70 % of it (Doc, 27.11.2026: "das Bild außenrum auch ein wenig transparent machen"). Card, day boxes
+           and header are frosted glass, their own colour at a fixed share over the blurred photo, so the slider moves the
+           photo and never the glass: hour lines and labels keep their contrast at every value. The appointments let a
+           little of it through as well (Doc: "So ein bisschen transparent"): their fill from 90 % at the standard down to
+           80 %, the words stay solid. "Kein Bild" (no html.natur) leaves all of this out */
+        html.natur { --natur-deckung: clamp(30%, calc(100% - 25% * var(--natur-mal, 1)), 100%); --glass: 52%; --glass-head: 84%; --ev-a: clamp(.8, calc(1 - .1 * var(--natur-mal, 1)), 1); }
+        html.natur.svp-light { --natur-deckung: clamp(30%, calc(100% - 30% * var(--natur-mal, 1)), 100%); --glass: 50%; --glass-head: 82%; }
+        html.natur body { background: transparent; }   /* its own ground would cover the photo layer; html keeps --bg */
+        html.natur :is(.card, .day, .hero, .top) {
+            background: color-mix(in srgb, var(--card) var(--glass), transparent);
+            -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+        }
+        html.natur .top { background: color-mix(in srgb, var(--card) var(--glass-head), transparent); }
+        html.natur .day.holiday {
+            background: linear-gradient(rgba(var(--c-green), var(--hol-a)), rgba(var(--c-green), var(--hol-a))), color-mix(in srgb, var(--card) var(--glass), transparent);
+        }
+        /* inside the week card the grid lets the glass through; the still copy of the lines behind it (only for the
+           rubber band at the top) would then show twice, so it stays away; the hour zoom is a denser pane, as the header,
+           so the labels that scroll beneath it vanish under + and - */
+        html.natur .wk-grid { background: transparent; }
+        html.natur .wk-lines { visibility: hidden; }
+        html.natur .wk-zoom-in { background: color-mix(in srgb, var(--card) var(--glass-head), transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+        /* the appointments' fill a little see-through (--ev-a), lessons over the glass instead of the solid card */
+        html.natur :is(.wk-ev, .chip):not(.cl) { background: rgba(var(--c), var(--ev-a)); }
+        html.natur :is(.wk-ev, .chip).cw { background: linear-gradient(135deg, rgba(var(--c-event-gold), var(--ev-a)) 0 50%, rgba(var(--c-turquoise), var(--ev-a)) 50% 100%); }
+        html.natur .wk-ev.cl { background: linear-gradient(rgba(var(--tint), .2), rgba(var(--tint), .2)), color-mix(in srgb, var(--card) calc(var(--ev-a) * 100%), transparent); }
+        html.natur ul.evs li.cr .ev-body { background: rgba(var(--c-red), var(--ev-a)); }
+
+        /* ---------- what the views leave out (Doc, 27.11.2026: a right click on the day names - Saturday and / or Sunday,
+           reminders "das sieht ziemlich cluttered aus", lessons, all-day entries, birthdays) ---------- */
+        .wk-head, .mo-head { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }   /* the long press opens the menu */
+        .hide-menu {
+            position: fixed; z-index: 12; left: 0; top: 0; width: max-content; max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px);
+            overflow-y: auto; overscroll-behavior: contain; padding: 12px 16px 8px; border-radius: 14px;
+            background: var(--card); border: 1px solid var(--line); box-shadow: 0 12px 40px var(--shadow);
+        }
+        .hide-menu .set-title { margin-bottom: 4px; }
+        .hide-menu .check { min-height: 36px; }
+        .hide-menu .set-sep { margin: 6px 0; }
+        .hide-menu button.wide { margin: 2px 0 6px; }
+
         /* ---------- the phone turned sideways (Doc, 27.11.2026: "wenn man den Kalender auf dem Phone quer dreht, geht
            gar nicht ... man sieht praktisch gar nichts von den eigentlichen Ereignissen unten") ----------
            A short landscape screen on a touch device only - portrait, tablets and the Mac keep everything above. No
@@ -922,10 +978,10 @@
            their dates instead of above them; top, left and right keep clear of a camera cutout (safe area) */
         @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
             :root { --ctl: 34px; }   /* the dialogs' controls a little lower on the short screen */
-            .top { position: static; padding: 0 max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left)); border: 0; background: none; }
+            .top { position: static; padding: 0 max(6px, env(safe-area-inset-right)) 0 max(6px, env(safe-area-inset-left)); border: 0; background: none; }
             .top > .bar, .top > .settings, .top > .search-pop, .top > .status:not(.err) { display: none; }
             .top > .status { margin: 0; padding-top: max(4px, env(safe-area-inset-top)); }
-            .wrap { padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left)); }
+            .wrap { padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) 0 max(6px, env(safe-area-inset-left)); }
             /* week and month: the day name and its date on one line, the arrows beside them as low as the circle. The
                arrows keep their own side columns at every width here (no "kal" container, so the 800px rule does not
                move them into the Monday and Sunday columns, where they would now cover "MO 23") */
@@ -1101,6 +1157,26 @@
                 <div id="moDay"></div>
             </section>
         </main>
+    </div>
+
+    <!-- what the views show: a right click or a long press on the day names of week and month (showHideMenu). A tick
+         means shown, all ticked to begin with, untick to hide (Doc, 27.11.2026: "wenn das Check gesetzt ist, sieht man es,
+         wenn es nicht gesetzt ist, sieht man es nicht"); the ticks are the only sign of it. Only the view - nothing is
+         deleted, the reminders still ring -->
+    <div class="hide-menu" id="hideMenu" role="dialog" aria-label="Ansicht" hidden>
+        <p class="set-title">Ansicht</p>
+        <label class="check"><input type="checkbox" data-hide="sat"><i></i>Samstag</label>
+        <label class="check"><input type="checkbox" data-hide="sun"><i></i>Sonntag</label>
+        <label class="check"><input type="checkbox" data-hide="weekend"><i></i>Samstag und Sonntag</label>
+        <hr class="set-sep">
+        <label class="check" id="hideRemRow"><input type="checkbox" data-hide="rem"><i></i>Erinnerungen</label>
+        <label class="check"><input type="checkbox" data-hide="lessons"><i></i><span id="hideLessonsText">Unterricht</span></label>
+        <label class="check"><input type="checkbox" data-hide="allday"><i></i>Ganztägige Termine</label>
+        <label class="check"><input type="checkbox" data-hide="yearly"><i></i>Geburtstage &amp; Jährliches</label>
+        <div id="hideBgRow" hidden>
+            <hr class="set-sep">
+            <button class="wide" id="hideBg" type="button">Hintergrundbild …</button>
+        </div>
     </div>
 
     <!-- the editor -->
@@ -1357,8 +1433,21 @@
             const filterShown = () => GUEST || !!share;
             const filterAll = () => !filterShown() || (filter.me && filter.other);
             const ownerOf = ev => (ev.holiday ? 'all' : isJoint(ev) ? 'both' : GUEST ? (ev.kind === 'own' ? 'me' : 'other') : (ev.shared_by ? 'other' : 'me'));
-            const passes = ev => { if (filterAll()) return true; const o = ownerOf(ev); return o === 'all' || (o === 'both' ? filter.me || filter.other : filter[o]); };
-            const shownItems = () => (filterAll() ? items : items.filter(passes));
+            /* what the views leave out - the menu on the day names of week and month (Doc, 27.11.2026: "Samstag und Sonntag
+               ausblenden", "Erinnerungen ... Das sind jetzt so viele geworden, das sieht ziemlich cluttered aus"). Only the
+               view: no row is touched, Solita still rings. Saturday / Sunday drop their columns in week and month; the kinds
+               leave every view, the search included, like the people filter. Kept per device, the guest's apart - stored
+               as what is hidden; the menu ticks what is shown */
+            const HIDE_KEY = GUEST ? 'kalender-share-hide' : 'kalender-hide';
+            const HIDE_DAYS = ['sat', 'sun'], HIDE_KINDS = ['rem', 'lessons', 'allday', 'yearly'];
+            let hide = {};
+            try { const h = JSON.parse(localStorage.getItem(HIDE_KEY)) || {}; for (const k of HIDE_DAYS.concat(HIDE_KINDS)) hide[k] = h[k] === true; } catch (e) { }
+            const dayShown = d => !(hide.sat && d.getDay() === 6) && !(hide.sun && d.getDay() === 0);
+            const isYearly = ev => ev.kind === 'yearly' || /FREQ=YEARLY/.test(ev.rrule || '');
+            const kindShown = ev => !(hide.rem && isRem(ev)) && !(hide.lessons && ev.lesson) && !(hide.allday && ev.all_day && !ev.holiday) && !(hide.yearly && isYearly(ev));
+            const kindsHidden = () => HIDE_KINDS.some(k => hide[k]);
+            const passes = ev => { if (!kindShown(ev)) return false; if (filterAll()) return true; const o = ownerOf(ev); return o === 'all' || (o === 'both' ? filter.me || filter.other : filter[o]); };
+            const shownItems = () => (filterAll() && !kindsHidden() ? items : items.filter(passes));
 
             function status(msg, cls) {
                 const el = $('status');
@@ -1724,23 +1813,24 @@
                     $('period').innerHTML = esc(span(K.MONTH_LONG)) + kw;
                     if ($('period').scrollWidth > $('period').clientWidth + 1) $('period').innerHTML = esc(span(K.MONTH_SHORT)) + kw;
                 }
+                const vis = days.filter(dayShown);   // without the hidden Saturday / Sunday (the menu on the day names)
                 const occs = occsIn(mon, K.addDays(mon, 7));
-                const timed = occs.filter(o => !o.ev.all_day), allday = occs.filter(o => o.ev.all_day);
+                const timed = occs.filter(o => !o.ev.all_day), allday = occs.filter(o => o.ev.all_day && vis.some(d => o.start < K.addDays(d, 1) && o.end > d));
                 const h0 = 0, H = 24;   // the whole day; fitWeek opens the box at 8:00
                 shownOcc = new Map();
-                let html = '<div class="wk-head">' + STEP_BTN(-1) + days.map(d =>
+                let html = '<div class="wk-head">' + STEP_BTN(-1) + vis.map(d =>
                     `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}${isHoliday(d) ? ' holiday' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${dayName(d.getDay())}<b>${d.getDate()}</b></button>`).join('') + STEP_BTN(1) + '</div>';
                 if (allday.length) {
-                    html += WK_SEP + '<div class="wk-allday"><div></div>' + days.map(d => {
+                    html += WK_SEP + '<div class="wk-allday"><div></div>' + vis.map(d => {
                         const here = allday.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                         here.forEach(o => shownOcc.set(o.key, o));
                         return (isHoliday(d) ? '<div class="holiday">' : '<div>') + here.map(o => `<button type="button" class="chip c${colorOf(o.ev)}" data-key="${esc(o.key)}">${esc(o.ev.title)}</button>`).join('') + '</div>';
                     }).join('') + '</div>';
                 }
                 html += WK_SEP + '<div class="wk-frame"><div class="wk-lines" aria-hidden="true"><div></div>' +
-                    days.map(d => `<div class="${K.sameDay(d, now) ? 'today' : ''}${isHoliday(d) ? ' holiday' : ''}"></div>`).join('') + '</div>' +
+                    vis.map(d => `<div class="${K.sameDay(d, now) ? 'today' : ''}${isHoliday(d) ? ' holiday' : ''}"></div>`).join('') + '</div>' +
                     `<div class="wk-body"><div class="wk-grid" data-h0="${h0}"><div class="wk-hours"><div class="wk-zoom"><div class="wk-zoom-in"><button type="button" class="icon wk-zoom-btn" data-zoom="1" title="Stunden größer" aria-label="Stunden größer"><span class="sizer" aria-hidden="true">08</span><span class="glyph" aria-hidden="true">+</span></button><button type="button" class="icon wk-zoom-btn" data-zoom="-1" title="Stunden kleiner" aria-label="Stunden kleiner"><span class="sizer" aria-hidden="true">08</span><span class="glyph" aria-hidden="true">&minus;</span></button></div></div>` + [...Array(H)].map((_, i) => `<div><span>${String(h0 + i).padStart(2, '0')}</span>${i === H - 1 ? `<span class="end">${h0 + H}</span>` : ''}</div>`).join('') + '</div>';
-                html += days.map(d => {
+                html += vis.map(d => {
                     const dEnd = K.addDays(d, 1);
                     const here = timed.filter(o => o.start < dEnd && o.end > d).map(o => {
                         const s = Math.max(+o.start, +d), e = Math.min(+o.end, +dEnd);
@@ -1779,6 +1869,7 @@
                     }
                     return col + '</div>';
                 }).join('') + '</div></div></div>';
+                $('wk').style.setProperty('--wk-days', String(vis.length));
                 $('wk').innerHTML = html;
                 fitWeek();
             }
@@ -1811,7 +1902,7 @@
                 const box = $('wk').querySelector('.wk-body');
                 if (!box || $('vWeek').hidden) return;
                 const padB = parseFloat(getComputedStyle(box.firstElementChild).paddingBottom) || 0;
-                const room = Math.floor(innerHeight - (box.getBoundingClientRect().top + scrollY) - 14);   // 14 = card padding + border + air
+                const room = Math.floor(innerHeight - (box.getBoundingClientRect().top + scrollY) - 17);   // 17 = card padding + border + the 6px gap
                 // a status line coming and going in the header changes the box, not the size of the hours
                 const st = $('status').offsetHeight + (parseFloat(getComputedStyle($('status')).marginTop) || 0);
                 wkFitted = Math.max(WK_HOUR_MIN, Math.floor((room + st - WK_LABEL - padB) / (WK_TO - WK_FROM)));
@@ -1840,14 +1931,16 @@
                 const occs = K.expand(shownItems(), start, K.addDays(start, 42)).concat(holidayOccs(start, K.addDays(start, 42)))
                     .sort((a, b) => a.start - b.start || (b.ev.holiday ? 1 : 0) - (a.ev.holiday ? 1 : 0));   // the holiday's name first
                 shownOcc = new Map();
-                let html = '<div class="mo-head">' + STEP_BTN(-1) + [1, 2, 3, 4, 5, 6, 0].map(i => `<span>${dayName(i)}</span>`).join('') + STEP_BTN(1) + '</div><div class="mo-grid">';
-                for (const d of cells) {
+                const vis = cells.filter(dayShown);   // without the hidden Saturday / Sunday columns
+                const cols = [1, 2, 3, 4, 5, 6, 0].filter((_, i) => dayShown(cells[i]));
+                let html = '<div class="mo-head">' + STEP_BTN(-1) + cols.map(i => `<span>${dayName(i)}</span>`).join('') + STEP_BTN(1) + '</div><div class="mo-grid">';
+                for (const d of vis) {
                     const here = occs.filter(o => o.start < K.addDays(d, 1) && o.end > d);
                     const school = lessonOccs(d, K.addDays(d, 1)).some(o => !isOff(o));   // one quiet mark for the lessons
                     const cls = (d.getMonth() !== first.getMonth() ? ' out' : '') + (K.sameDay(d, now) ? ' today' : '') + (K.sameDay(d, selDay) ? ' sel' : '') + (isHoliday(d) ? ' holiday' : '');
                     const nApp = here.filter(o => !o.ev.holiday).length;   // the holiday is named, not counted as an appointment
                     here.slice(0, 3).forEach(o => shownOcc.set(o.key, o));   // for the hover preview (the chips take no taps)
-                    html += `<button type="button" class="mo-cell${cls}" data-day="${K.ymd(d)}" aria-label="${esc(longDay(d))}${isHoliday(d) ? ', ' + esc(K.holidayOf(d)) : ''}${nApp ? ', ' + nApp + ' Termin' + (nApp > 1 ? 'e' : '') : ''}${school ? ', ' + LESSON_WORD : ''}">` +
+                    html += `<button type="button" class="mo-cell${d.getDay() === cols[0] ? ' row1' : ''}${cls}" data-day="${K.ymd(d)}" aria-label="${esc(longDay(d))}${isHoliday(d) ? ', ' + esc(K.holidayOf(d)) : ''}${nApp ? ', ' + nApp + ' Termin' + (nApp > 1 ? 'e' : '') : ''}${school ? ', ' + LESSON_WORD : ''}">` +
                         `<span class="n">${d.getDate()}</span><span class="evs">` +
                         // data-key only for the search's outline - the chips take no taps (pointer-events: none), the cell does
                         here.slice(0, 3).map(o => isRem(o.ev)
@@ -1856,6 +1949,7 @@
                         (here.length > 3 ? `<span class="plus">+${here.length - 3}</span>` : '') +
                         (school ? `<span class="chip cl">${LESSON_WORD}</span>` : '') + '</span></button>';
                 }
+                $('mo').style.setProperty('--wk-days', String(cols.length));
                 $('mo').innerHTML = html + '</div>';
                 // the chosen day's appointments below the month
                 $('moDay').innerHTML = dayBox(selDay, occsIn(selDay, K.addDays(selDay, 1)), now, true);
@@ -2056,6 +2150,31 @@
             }
             /* the C / D buttons: two independent switches, the old checkmarks' rule - never both off */
             const cKey = () => (GUEST ? 'me' : 'other'), dKey = () => (GUEST ? 'other' : 'me');   // Cutie is the guest, Doc the owner
+            /* the menu that sets what the views leave out (HIDE_KEY above) */
+            function syncHideMenu() {
+                // a tick = shown; "Samstag und Sonntag" ticked when both show, mixed when only one does
+                for (const b of $('hideMenu').querySelectorAll('[data-hide]')) {
+                    const k = b.dataset.hide;
+                    b.checked = k === 'weekend' ? !hide.sat && !hide.sun : !hide[k];
+                    b.indeterminate = k === 'weekend' && hide.sat !== hide.sun;
+                }
+                $('hideBgRow').hidden = !(window.NaturBild && window.NaturBild.menu);
+            }
+            function showHideMenu(on, x, y) {
+                const m = $('hideMenu');
+                if (!on) { m.hidden = true; return; }
+                syncHideMenu();
+                m.hidden = false;
+                const r = m.getBoundingClientRect();   // at the pointer, never off screen
+                m.style.left = Math.max(8, Math.min(x, innerWidth - r.width - 8)) + 'px';
+                m.style.top = Math.max(8, Math.min(y, innerHeight - r.height - 8)) + 'px';
+            }
+            function setHide(k, on) {   // k: 'sat' | 'sun' | 'weekend' (both) | one of HIDE_KINDS; on = hidden
+                if (k === 'weekend') hide.sat = hide.sun = on; else hide[k] = on;
+                try { localStorage.setItem(HIDE_KEY, JSON.stringify(hide)); } catch (e) { }
+                syncHideMenu();
+                render();
+            }
             function renderFilter() {
                 const on = filterShown();
                 $('filterWrap').hidden = !on;
@@ -3226,7 +3345,8 @@
                    is swallowed - no new appointment, no info box, no navigation (Doc, 26.11.2026). Inside a menu all works as before. */
                 const MENUS = [
                     { open: () => !$('settings').hidden, inside: '#settings, #gearBtn', close: () => showSettings(false) },
-                    { open: () => !$('searchPop').hidden, inside: '#searchPop, #searchField, #searchBtn', close: () => showSearch(false) }
+                    { open: () => !$('searchPop').hidden, inside: '#searchPop, #searchField, #searchBtn', close: () => showSearch(false) },
+                    { open: () => !$('hideMenu').hidden, inside: '#hideMenu', close: () => showHideMenu(false) }
                 ];
                 let swallowClick = false, swallowTimer = 0;
                 document.addEventListener('pointerdown', e => {
@@ -3241,6 +3361,34 @@
                     swallowClick = false;
                     e.stopPropagation(); e.preventDefault();
                 }, true);
+                /* the menu on the day names of week and month: a right click, or a long press with finger or pen (half a
+                   second, Safari on the iPhone has no contextmenu for it); the click that ends the press adds nothing */
+                const HEADS = '.wk-head, .mo-head';
+                $('hideLessonsText').textContent = LESSON_WORD;   // "Schule" in the guest's view
+                $('hideRemRow').hidden = GUEST;   // the guest's page has no reminders
+                $('main').addEventListener('contextmenu', e => {
+                    if (!e.target.closest(HEADS)) return;
+                    e.preventDefault();   // neither the browser's menu nor the background picker (svp-gate.js)
+                    showHideMenu(true, e.clientX, e.clientY);
+                });
+                let pressTimer = 0, pressX = 0, pressY = 0, pressDone = false;
+                document.addEventListener('pointerdown', () => { pressDone = false; }, true);
+                $('main').addEventListener('pointerdown', e => {
+                    if (e.pointerType === 'mouse' || !e.target.closest(HEADS)) return;
+                    pressX = e.clientX; pressY = e.clientY;
+                    clearTimeout(pressTimer);
+                    pressTimer = setTimeout(() => { pressTimer = 0; pressDone = true; showHideMenu(true, pressX, pressY); }, 500);
+                });
+                const pressEnd = e => {
+                    if (!pressTimer || (e.type === 'pointermove' && Math.hypot(e.clientX - pressX, e.clientY - pressY) < 10)) return;
+                    clearTimeout(pressTimer); pressTimer = 0;
+                };
+                for (const t of ['pointerup', 'pointercancel', 'pointermove']) $('main').addEventListener(t, pressEnd);
+                document.addEventListener('click', e => { if (pressDone) { pressDone = false; e.stopPropagation(); e.preventDefault(); } }, true);
+                $('hideMenu').addEventListener('change', e => { const b = e.target.closest('[data-hide]'); if (b) setHide(b.dataset.hide, !b.checked); });   // untick = hide
+                $('hideBg').onclick = () => { const r = $('hideBg').getBoundingClientRect(); showHideMenu(false); window.NaturBild.menu(r.left, r.top); };
+                document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('hideMenu').hidden) { e.preventDefault(); showHideMenu(false); } });
+                addEventListener('resize', () => showHideMenu(false));
                 // the search: live while typing (a short pause first), Enter / arrow down into the hits, Esc closes
                 $('searchBtn').title = 'Suchen (Taste / oder ' + (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘F' : 'Strg+F') + ')';
                 // the hits follow the field: another window size, the field's width (period shown or not), the keyboard
