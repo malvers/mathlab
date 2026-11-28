@@ -49,6 +49,24 @@ window.BuchPT && BuchPT.add('gy11lk', {
         'Gozinto-Graph: drei Rohstoffe, zwei Zwischenprodukte, zwei Endprodukte, an den Pfeilen die benötigten Mengen':
             'Gozintograma: três matérias-primas, dois produtos intermédios, dois produtos finais; nas setas, as quantidades necessárias',
         // book pt-22 mathegy11lk-pt:
+        // the cover of GY 11 LK (titelbildgy11lk)
+        'Titelbild: eine Kurve mit Tangente, der Epsilon-Delta-Streifen um einen Punkt und eine Fixpunktiteration als Spinnennetz':
+            'Imagem da capa: uma curva com a tangente, a faixa épsilon-delta à volta de um ponto e uma iteração do ponto fixo em teia de aranha',
+        // epsdelta (lb1-1): Streifen = faixa, Behauptung = afirmação
+        'Streifenbreite $\\varepsilon$': 'Largura da faixa $\\varepsilon$',
+        'Graph mit einem waagerechten Streifen der Breite Epsilon um den Grenzwert und einem senkrechten Streifen der Breite Delta um die Stelle':
+            'Gráfico com uma faixa horizontal de largura épsilon à volta do limite e uma faixa vertical de largura delta à volta do ponto',
+        // ablnachdef (lb1-2): Schrittweite = passo
+        'Schrittweite $h = 10^{-k}$': 'Passo $h = 10^{-k}$',
+        'Graph von a hoch x mit Sekante durch (0|1) und Tangente': 'Gráfico de a elevado a x com a secante que passa por (0, 1) e a tangente',
+        '$a = e$ setzen': 'Pôr $a = e$',
+        // drehraum (lb2): Drehachse = eixo de rotação, the axes eixo Ox, Oy, Oz
+        'Dieses Bild braucht js/buch-vektoren.js.': 'Esta figura precisa de js/buch-vektoren.js.',
+        'Drehachse:': 'Eixo de rotação:', 'Drehachse': 'Eixo de rotação', 'x-Achse': 'eixo Ox', 'y-Achse': 'eixo Oy', 'z-Achse': 'eixo Oz',
+        'Ein Haus wird im Raum um eine Koordinatenachse gedreht': 'Uma casa roda no espaço em torno de um eixo coordenado',
+        // fixpunkt (wb2): Fixpunkt = ponto fixo, anziehend / abstoßend = atrativo / repulsivo, Spinnennetz = teia de aranha
+        'Funktion φ': 'Função φ',
+        'Fixpunktiteration: Spinnennetz zwischen dem Graphen von φ und der Geraden y = x': 'Iteração do ponto fixo: teia de aranha entre o gráfico de φ e a reta y = x',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk/*)
@@ -93,6 +111,39 @@ window.BuchPT && BuchPT.add('gy11lk', {
         ['In einem Schritt: $C = A \\cdot B = ', 'Num só passo: $C = A \\cdot B = '],
         ['$ gibt den Rohstoffbedarf je Endprodukt an, und $C \\cdot \\vec{e} = ', '$ dá as necessidades de matérias-primas por produto final, e $C \\cdot \\vec{e} = '],
         // book pt-22 mathegy11lk-pt:
+        // epsdelta
+        ['\\text{ rechts, } ', '\\text{ à direita, } '], ['\\text{ links, also } ', '\\text{ à esquerda, logo } '],
+        ['$, Behauptung: $', '$, afirmação: $'], ['$. Orange: alle $y$ mit $|y - ', '$. A laranja: todos os $y$ com $|y - '],
+        ['Blau: Für alle $x \\neq ', 'A azul: para todo o $x \\neq '], ['$ mit $|x - ', '$ com $|x - '],
+        ['| < \\delta$ liegt $f(x)$ im orangen Streifen. Das größte passende $\\delta$ ist hier etwa ', '| < \\delta$, $f(x)$ está na faixa cor de laranja. Aqui, o maior $\\delta$ que serve é cerca de '],
+        [' (exakt: $', ' (exatamente: $'],
+        ['. Mach $\\varepsilon$ kleiner: Es gibt immer noch ein $\\delta > 0$. Genau das heißt „Grenzwert“.', '. Diminui $\\varepsilon$: continua a existir um $\\delta > 0$. É exatamente isso que significa «limite».'],
+        ['Kein $\\delta$ passt:', 'Nenhum $\\delta$ serve:'],
+        ['So nah man der 0 von links auch kommt, dort ist $f(x) = -1$, also mindestens 2 vom behaupteten Grenzwert entfernt. Für $\\varepsilon < 2$ scheitert jede Wahl. Die Funktion hat bei 0 keinen Grenzwert, nur einseitige.',
+            'por mais perto de 0 que se chegue pela esquerda, aí $f(x) = -1$, ou seja, a uma distância de pelo menos 2 do limite afirmado. Para $\\varepsilon < 2$ qualquer escolha falha. A função não tem limite em 0, só limites laterais.'],
+        // ablnachdef
+        [': Es genügt, den Grenzwert von $\\dfrac{a^h - 1}{h}$ für $h \\to 0$ zu kennen, den Anstieg in $(0, 1)$.', ': basta conhecer o limite de $\\dfrac{a^h - 1}{h}$ quando $h \\to 0$, o declive em $(0, 1)$.'],
+        ['Bei welcher Basis ist der Grenzwert genau 1?', 'Para que base é o limite exatamente 1?'],
+        ['Für $a = ', 'Para $a = '], ['$ geht der Quotient gegen $\\ln a \\approx ', '$, o quociente tende para $\\ln a \\approx '],
+        ['Für $a = e$ ist der Grenzwert genau 1: $\\left(e^x\\right)\' = e^x$.', 'Para $a = e$ o limite é exatamente 1: $\\left(e^x\\right)\' = e^x$.'],
+        // drehraum
+        ['$. Die Koordinate längs der Drehachse bleibt gleich, ', '$. A coordenada ao longo do eixo de rotação mantém-se, '],
+        ['die beiden anderen werden wie in der Ebene gedreht.', 'as outras duas rodam como no plano.'],
+        // verflechtung: the quantities under the boxes of the Gozinto graph ("100 ME"), the same u.q. as bgy13lk.js (not loaded by GY 11 LK)
+        [' ME', ' u.q.'],
+        // fixpunkt
+        ['Hier ist $\\varphi\'(x^*) = 0$: Die Folge konvergiert extrem schnell, die Zahl der richtigen Stellen verdoppelt sich etwa bei jedem Schritt (das ist das Newton-Verfahren für $x^2 - 2 = 0$).',
+            'Aqui, $\\varphi\'(x^*) = 0$: a sucessão converge extremamente depressa e o número de casas certas duplica mais ou menos em cada passo (é o método de Newton para $x^2 - 2 = 0$).'],
+        ['Wegen $|\\varphi\'(x^*)| < 1$ ist der Fixpunkt <b>anziehend</b>: Nahe bei $x^*$ schrumpft der Fehler bei jedem Schritt etwa um diesen Faktor.',
+            'Como $|\\varphi\'(x^*)| < 1$, o ponto fixo é <b>atrativo</b>: perto de $x^*$, o erro é multiplicado em cada passo aproximadamente por este fator.'],
+        [' Weil $\\varphi\' < 0$ ist, springt die Folge um den Fixpunkt herum (Spirale).', ' Como $\\varphi\' < 0$, a sucessão salta de um lado para o outro do ponto fixo (espiral).'],
+        [' Weil $\\varphi\' > 0$ ist, nähert sie sich von einer Seite (Treppe).', ' Como $\\varphi\' > 0$, aproxima-se por um só lado (escada).'],
+        ['Hier ist $|\\varphi\'(x^*)| = 1$: Der Satz sagt nichts. Bei $\\varphi(x) = \\tfrac2x$ springt die Folge ewig zwischen zwei Werten hin und her, ein Zyklus.',
+            'Aqui, $|\\varphi\'(x^*)| = 1$: o teorema não diz nada. Com $\\varphi(x) = \\tfrac2x$, a sucessão salta sem fim entre dois valores: um ciclo.'],
+        ['Wegen $|\\varphi\'(x^*)| > 1$ ist der Fixpunkt <b>abstoßend</b>: Selbst ganz nahe bei $x^*$ wächst der Fehler, die Folge läuft weg.',
+            'Como $|\\varphi\'(x^*)| > 1$, o ponto fixo é <b>repulsivo</b>: mesmo muito perto de $x^*$ o erro cresce e a sucessão foge.'],
+        ['$ mit $\\varphi(x) = ', '$ com $\\varphi(x) = '], ['$, Fixpunkt $x^* \\approx ', '$, ponto fixo $x^* \\approx '],
+        ['$ (grün), $|\\varphi\'(x^*)| \\approx ', '$ (a verde), $|\\varphi\'(x^*)| \\approx '], ['\\text{sehr groß}', '\\text{muito grande}'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -106,5 +157,7 @@ window.BuchPT && BuchPT.add('gy11lk', {
         [/Für (\d+) Tafeln und (\d+) Boxen braucht man <b>(\d+) ME Kakao, (\d+) ME Zucker und (\d+) ME Milch<\/b>\./g,
             'Para $1 tabletes e $2 caixas são precisas <b>$3 u.q. de cacau, $4 u.q. de açúcar e $5 u.q. de leite</b>.'],
         // book pt-22 mathegy11lk-pt:
+        // drehraum: "Drehung um die z-Achse um 90°: $D_z = …$"
+        [/Drehung um die ([xyz])-Achse um (\d+)°: /g, 'Rotação de $2° em torno do eixo O$1: '],
     ]
 });
