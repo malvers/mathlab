@@ -47,6 +47,7 @@ window.BuchES && BuchES.add('daten', {
         'Sehr schmale Klassen zeigen fast nur Einzelwerte, sehr breite verwischen alles. Dazwischen erkennt man die Form der Verteilung.':
             'Las clases muy estrechas muestran casi solo valores sueltos, y las muy anchas lo difuminan todo. Entre medias se reconoce la forma de la distribución.',
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es mathegy7-es (Einstein)
@@ -58,6 +59,7 @@ window.BuchES && BuchES.add('daten', {
         // mittelwerte
         ['Geordnet ($n = ', 'Ordenados ($n = '], ['keiner (jeder Wert kommt nur einmal vor)', 'ninguna (cada valor aparece una sola vez)'],
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es mathegy7-es (Einstein)
@@ -70,5 +72,6 @@ window.BuchES && BuchES.add('daten', {
         [/(\d+) Klassen der Breite (\d+) cm · häufigste Klasse \$\[(\d+)(?:;\\,|, )(\d+)\)\$ mit (\d+) von (\d+) Werten \(/g,
             '$1 clases de anchura $2 cm · clase más frecuente $[$3, $4)$ con $5 de $6 valores ('],
 
+        // book es-24 pruefung-es:
     ]
 });

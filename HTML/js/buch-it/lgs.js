@@ -32,6 +32,7 @@ window.BuchIT && BuchIT.add('lgs', {
 
         // book it-7 mathegy11lk-it:
         // book it-13 mathegy8-it:
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -61,6 +62,7 @@ window.BuchIT && BuchIT.add('lgs', {
 
         // book it-7 mathegy11lk-it:
         // book it-13 mathegy8-it:
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -76,5 +78,6 @@ window.BuchIT && BuchIT.add('lgs', {
 
         // book it-7 mathegy11lk-it:
         // book it-13 mathegy8-it:
+        // book it-24 pruefung-it:
     ]
 });

@@ -35,8 +35,7 @@ window.BuchPT && BuchPT.add('spiele', {
         // book pt-20 mathegy10-pt:
         // spielstreuung, fairesspiel: pt-19's above (merge 27.11.2026, one Portuguese per German string); a Pasch is «duplo», as the older
         // books say «duplo seis» (the GY 10 page says it the same way)
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs spiele/*)
@@ -67,8 +66,7 @@ window.BuchPT && BuchPT.add('spiele', {
         // book pt-20 mathegy10-pt:
         // spielstreuung: the standard deviation (the rest of spielstreuung and fairesspiel is pt-19's above)
         ['Standardabweichung $\\sigma = \\sqrt{V(X)} \\approx ', 'Desvio padrão $\\sigma = \\sqrt{V(X)} \\approx '],
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -76,7 +74,6 @@ window.BuchPT && BuchPT.add('spiele', {
         // book pt-15 mathe6-pt:
         // book pt-19 mathe10-pt:
         // book pt-20 mathegy10-pt:
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     ]
 });

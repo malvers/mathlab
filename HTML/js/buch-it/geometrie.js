@@ -78,6 +78,7 @@ window.BuchIT && BuchIT.add('geometrie', {
 
         // book it-20 mathe10-it:
 
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-10 mathegy5-it:
@@ -122,6 +123,7 @@ window.BuchIT && BuchIT.add('geometrie', {
 
         // book it-20 mathe10-it:
 
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-10 mathegy5-it:
@@ -157,5 +159,6 @@ window.BuchIT && BuchIT.add('geometrie', {
         // vieleck: "Also $3,14159 < \pi < 3,21539$, Abstand $0,0738$." with its context, no bare piece "Also $"
         [/>Also \$([^$]*< \\pi < [^$]*)\$, Abstand \$/g, (m, a) => '>Quindi $' + a + '$, differenza $'],
 
+        // book it-24 pruefung-it:
     ]
 });

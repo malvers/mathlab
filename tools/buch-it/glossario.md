@@ -1047,3 +1047,5 @@ same as in mathe13, mathe12lk, mathegy12lk or mathegy11lk, the Italian of those 
 | Lotfußpunkt, Lotgerade | piede della perpendicolare, retta perpendicolare | W1.3 |
 | Für den Leistungskurs (heading) | PER IL LEISTUNGSKURS | 5.1, W1.2, W1.3 |
 | Gebiet 1–4 (abi) | Blocco 1–4 | as section 2 |
+
+## pruefung-it (Prüfungstraining Abitur, BLF, Vergleichsarbeit; block it-24)

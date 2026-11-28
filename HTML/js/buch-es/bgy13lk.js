@@ -31,6 +31,7 @@ window.BuchES && BuchES.add('bgy13lk', {
         // biquadratisch
         'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen': 'La parábola h(z) = z² + p·z + q con sus ceros',
         'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'La gráfica de f(x) = x⁴ + p·x² + q con sus ceros',
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es mathe13lk-es (Bayer)
@@ -69,6 +70,7 @@ window.BuchES && BuchES.add('bgy13lk', {
         [' liefert nichts, denn $x^2$ ist nie negativ', ' no da nada, porque $x^2$ nunca es negativo'],
         ['keine Lösung $z$, die Diskriminante ist negativ', 'ninguna solución $z$, el discriminante es negativo'],
         ['Keine Lösung', 'Ninguna solución'], ['Eine Lösung', 'Una solución'],
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es mathe13lk-es (Bayer)
@@ -92,5 +94,6 @@ window.BuchES && BuchES.add('bgy13lk', {
         [/<b>(\d) Lösungen<\/b>/g, '<b>$1 soluciones</b>'],
         // the solution set "x \in \{-2;\ -1;\ 1;\ 2\}" → commas, as long as no number has a decimal comma
         [/(\\in \\\{)([^$]*?)(\\\})/g, (m, a, s, b) => /,/.test(s) ? m : a + s.replace(/;\\ /g, ', ') + b],
+        // book es-24 pruefung-es:
     ]
 });

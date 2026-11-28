@@ -109,6 +109,7 @@ window.BuchFR && BuchFR.add('exponential', {
         // book fr-7 mathegy11-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-6 mathegy10-fr:
@@ -153,6 +154,7 @@ window.BuchFR && BuchFR.add('exponential', {
         // book fr-7 mathegy11-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-6 mathegy10-fr:
@@ -166,5 +168,6 @@ window.BuchFR && BuchFR.add('exponential', {
         // book fr-7 mathegy11-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     ]
 });

@@ -22,8 +22,7 @@ window.BuchEN && BuchEN.add('gy11', {
         // newton
         'Funktion': 'Function', 'Newton-Verfahren: Tangenten führen zur Nullstelle': 'Newton’s method: tangents lead to the zero',
         'Nächster Schritt': 'Next step', '5 Schritte': '5 steps', 'Zurücksetzen': 'Reset'
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     },
     phrase: [
         // kettenregel (numbers are already English here: the number rules run first)
@@ -46,14 +45,12 @@ window.BuchEN && BuchEN.add('gy11', {
         ['Bei $x_{', 'At $x_{'], ['}$ ist $f\'(x) = 0$: Die Tangente ist waagerecht, das Verfahren bricht ab.', '}$, $f\'(x) = 0$: the tangent is horizontal, the method stops.'],
         ['Die Folge läuft weg: anderer Startwert.', 'The sequence runs away: try another start value.'], ['$ und $f\'(x) = ', '$ and $f\'(x) = '],
         ['$. Den Startwert verschiebst du mit dem weißen Punkt auf der $x$-Achse.', '$. You move the start value with the white point on the $x$-axis.']
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ],
     rule: [
         // matrixprodukt: "A hat 2 Spalten, B aber 3 Zeilen: …" and "Zeile 1 von $A$ mal Spalte 2 von $B$" (the pieces alone are in tools/buch-en/known.json)
         [/ ([AB]) hat (\d+) Spalten, ([AB]) aber (\d+) Zeilen: /g, ' $1 has $2 columns, but $3 has $4 rows: '],
         [/Zeile (\d+) von \$([AB])\$ mal Spalte (\d+) von \$([AB])\$/g, (m, i, p, j, q) => 'Row ' + i + ' of $' + p + '$ times column ' + j + ' of $' + q + '$']
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ]
 });

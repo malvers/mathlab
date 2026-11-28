@@ -129,6 +129,7 @@ window.BuchES && BuchES.add('funktionen', {
         // cover
         'Graphen der Grundfunktionen': 'Gráficas de las funciones básicas',
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // parameter: c = 0 in f(c·x) (second check, 12.10.2026)
@@ -254,6 +255,7 @@ window.BuchES && BuchES.add('funktionen', {
 
         // book es mathegy10-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es-1 mathe11-es
@@ -306,5 +308,6 @@ window.BuchES && BuchES.add('funktionen', {
 
         // book es mathegy10-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ]
 });

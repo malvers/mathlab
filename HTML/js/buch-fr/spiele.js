@@ -34,6 +34,7 @@ window.BuchFR && BuchFR.add('spiele', {
         // book fr-15 mathegy8-fr:
         // book fr-17 mathe6-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-6 mathegy10-fr:
@@ -59,11 +60,13 @@ window.BuchFR && BuchFR.add('spiele', {
         // book fr-15 mathegy8-fr:
         // book fr-17 mathe6-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-6 mathegy10-fr:
         // book fr-15 mathegy8-fr:
         // book fr-17 mathe6-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     ]
 });

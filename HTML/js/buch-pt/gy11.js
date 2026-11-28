@@ -36,8 +36,7 @@ window.BuchPT && BuchPT.add('gy11', {
         'Titelbild: Sekanten, die sich einer Tangente nähern, Tangenten des Newton-Verfahrens auf dem Weg zu einer Nullstelle, eine Ebene, die von einer Geraden durchstoßen wird, und die Balken einer Binomialverteilung':
             'Capa: secantes que se aproximam de uma tangente, as tangentes do método de Newton a caminho de um zero, um plano atravessado por uma reta e as barras de uma distribuição binomial',
         // book pt-22 mathegy11lk-pt:
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11/*)
@@ -61,8 +60,7 @@ window.BuchPT && BuchPT.add('gy11', {
         ['$. Iteration: $x_{n+1}', '$. Iteração: $x_{n+1}'],
         ['$. Den Startwert verschiebst du mit dem weißen Punkt auf der $x$-Achse.', '$. O valor inicial desloca-se com o ponto branco no eixo $Ox$.'],
         // book pt-22 mathegy11lk-pt:
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -78,7 +76,6 @@ window.BuchPT && BuchPT.add('gy11', {
         [/\$([AB]) \\cdot ([AB])\$ hat den Typ \$\((\d),(\d)\)\$, ist also etwas ganz anderes\./g, (m, a, b, c, d) => '$' + a + ' \\cdot ' + b + '$ é do tipo $' + c + ' \\times ' + d + '$: é algo completamente diferente.'],
         // book pt-9 mathegy11-pt:
         // book pt-22 mathegy11lk-pt:
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     ]
 });

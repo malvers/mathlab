@@ -33,8 +33,7 @@ window.BuchEN && BuchEN.add('vektoren', {
         'Spiegelpunkt P′ zeigen': 'Show mirror point P′', 'Konstante $d$ in $\\vec{n} \\circ \\vec{x} = d$': 'Constant $d$ in $\\vec{n} \\circ \\vec{x} = d$',
         'Gerade – Gerade': 'line – line', 'Gerade – Ebene': 'line – plane', 'Ebene – Ebene': 'plane – plane', 'Welcher Winkel?': 'Which angle?',
         'spitz': 'acute', 'stumpfe Vektoren': 'obtuse vectors', 'senkrecht': 'perpendicular', 'schräg': 'oblique', 'Dach und Boden': 'roof and floor',
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     },
     phrase: [
         // raum3d
@@ -120,15 +119,13 @@ window.BuchEN && BuchEN.add('vektoren', {
         ['Die Normalenvektoren sind parallel: Die Ebenen sind parallel oder identisch.', 'The normal vectors are parallel: the planes are parallel or identical.'],
         ['Weiß: die Schnittgerade $s$ mit dem Richtungsvektor $', 'White: the line of intersection $s$ with the direction vector $'],
         ['$. Gemessen wird der Winkel senkrecht zu ihr, zwischen den beiden farbigen Linien in den Ebenen.', '$. The angle is measured perpendicular to it, between the two coloured lines in the planes.'],
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ],
     rule: [
         // the inputs: "Vektor a, x-Koordinate", "Punkt A, y-Koordinate"
         [/\b(Vektor|Punkt) ([^,]+), ([xyz])-Koordinate/g, (m, k, n, c) => (k === 'Vektor' ? 'Vector ' : 'Point ') + n + ', ' + c + '-coordinate'],
         // book 3 mathe13-en: points in space S(1 \mid 2 \mid 3) → S(1, 2, 3), and the same in the coordinate inputs ( 1 | 2 | 3 )
         [/\((-?[\d.]+) \\mid (-?[\d.]+) \\mid (-?[\d.]+)\)/g, '($1, $2, $3)'], [/(<span class="vk-par">)\|(<\/span>)/g, '$1,$2'],
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ]
 });

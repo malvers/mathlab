@@ -13,17 +13,14 @@
 window.BuchPT && BuchPT.add('pruefung', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs pruefung/*)
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs pruefung/*)
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     ]
 });

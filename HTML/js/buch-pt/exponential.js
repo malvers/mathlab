@@ -122,8 +122,7 @@ window.BuchPT && BuchPT.add('exponential', {
         'Überleg zuerst selbst: Welche Grundfunktion steckt darin? Wie ist sie verschoben oder gestreckt? Dann Schritt für Schritt aufdecken.':
             'Pensa primeiro por ti: que função de referência está lá dentro? Como está transladada ou dilatada? Depois revela passo a passo.',
         // book pt-22 mathegy11lk-pt:
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs exponential/*)
@@ -173,8 +172,7 @@ window.BuchPT && BuchPT.add('exponential', {
         ['Wann ist das Kapital auf', 'Quando chega o capital a'], ['Wann ist der Anteil auf', 'Quando desce a fração para'],
         ['Wann sind nur noch', 'Quando restam apenas'], ['Wann sind es', 'Quando são'],
         // book pt-22 mathegy11lk-pt:
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -189,7 +187,6 @@ window.BuchPT && BuchPT.add('exponential', {
         [/\$ Jahre<\/p>/g, '$ anos</p>'], [/\$ Stunden<\/p>/g, '$ horas</p>'],
         [/\(Funktion (\d+) von (\d+)\)/g, '(função $1 de $2)'],
         // book pt-22 mathegy11lk-pt:
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     ]
 });

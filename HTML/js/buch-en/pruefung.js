@@ -7,15 +7,12 @@
  */
 window.BuchEN && BuchEN.add('pruefung', {
     word: {
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     },
     phrase: [
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ],
     rule: [
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ]
 });

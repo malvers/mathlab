@@ -64,8 +64,7 @@ window.BuchEN && BuchEN.add('stochastik', {
         'mit Reihenfolge': 'with order', 'ohne Reihenfolge': 'without order', 'Reihenfolge': 'Order',
         'ohne Zurücklegen': 'without replacement', 'mit Zurücklegen': 'with replacement', 'Zurücklegen': 'Replacement', 'Einmal ziehen': 'Draw once', 'URNE': 'URN',
         '$n$ (Zeile)': '$n$ (row)', '$k$ (Stelle)': '$k$ (position)', 'Pascalsches Dreieck bis zur Zeile 10': 'Pascal’s triangle up to row 10',
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     },
     phrase: [
         // stochastics
@@ -132,8 +131,7 @@ window.BuchEN && BuchEN.add('stochastik', {
         [': So viele Möglichkeiten gibt es, $', ': that is how many ways there are to choose $'], ['$ aus $', '$ from $'], ['$ auszuwählen.', '$.'],
         ['Summenregel (grün umrandet): $', 'Sum rule (outlined in green): $'], ['Symmetrie (gestrichelt): $', 'Symmetry (dashed): $'],
         ['Die Mitte der Zeile: $', 'The middle of the row: $'], ['}$ ist hier sein eigenes Spiegelbild.', '}$ is its own mirror image here.'],
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ],
     rule: [
         // bernoulli-baum: the paths are labelled T (Treffer) and N (Niete) → H (hit) and M (miss)
@@ -160,7 +158,6 @@ window.BuchEN && BuchEN.add('stochastik', {
         [/(\d{1,3}(?:\.\d{3})*) Möglichkeiten sind zu viele zum Auflisten\./g, (m, c) => c.replace(/\./g, ',') + ' possibilities are too many to list.'],
         // book 4 mathefos11-en: pascal, "$, denn $2$ auswählen heißt $3$ weglassen."
         [/\$, denn \$(\d+)\$ auswählen heißt \$(\d+)\$ weglassen\./g, (m, k, r) => '$, because choosing $' + k + '$ means leaving out $' + r + '$.'],
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ]
 });

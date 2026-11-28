@@ -166,6 +166,7 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-19 mathe8-fr:
         // book fr-20 mathe9-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -282,6 +283,7 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-19 mathe8-fr:
         // book fr-20 mathe9-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // the letters of lines (see BuchFR.college above): gerade's zero, lage's intersection and orthogonality (× as everywhere in French)
@@ -337,5 +339,6 @@ window.BuchFR && BuchFR.add('funktionen', {
         // book fr-19 mathe8-fr:
         // book fr-20 mathe9-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     ]
 });

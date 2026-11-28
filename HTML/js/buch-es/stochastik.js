@@ -102,6 +102,7 @@ window.BuchES && BuchES.add('stochastik', {
 
         // book es mathegy10-es (Lovelace)
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es-1 mathe11-es: baum, schnelltest, vierfeld-trainer, simulation, ziegen
@@ -205,6 +206,7 @@ window.BuchES && BuchES.add('stochastik', {
 
         // book es mathegy10-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es-1 mathe11-es
@@ -261,5 +263,6 @@ window.BuchES && BuchES.add('stochastik', {
 
         // book es mathegy10-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ]
 });

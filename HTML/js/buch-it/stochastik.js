@@ -139,6 +139,7 @@ window.BuchIT && BuchIT.add('stochastik', {
         // book it-18 mathe8-it:
 
         // book it-20 mathe10-it:
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -260,6 +261,7 @@ window.BuchIT && BuchIT.add('stochastik', {
         // book it-18 mathe8-it:
 
         // book it-20 mathe10-it:
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -330,5 +332,6 @@ window.BuchIT && BuchIT.add('stochastik', {
         // book it-18 mathe8-it:
 
         // book it-20 mathe10-it:
+        // book it-24 pruefung-it:
     ]
 });

@@ -27,6 +27,7 @@ window.BuchES && BuchES.add('lgs', {
 
         // book es mathefos12-es (Lovelace)
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es-1 mathe11-es: gauss, geraden, matrizen, pagerank
@@ -58,6 +59,7 @@ window.BuchES && BuchES.add('lgs', {
 
         // book es mathefos12-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es-1 mathe11-es: gauss, pagerank
@@ -75,5 +77,6 @@ window.BuchES && BuchES.add('lgs', {
 
         // book es mathefos12-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ]
 });

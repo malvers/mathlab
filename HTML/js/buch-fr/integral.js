@@ -49,6 +49,7 @@ window.BuchFR && BuchFR.add('integral', {
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
         // bestand: the axes of the car ride
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -71,6 +72,7 @@ window.BuchFR && BuchFR.add('integral', {
         // book fr-8 mathegy12-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -85,5 +87,6 @@ window.BuchFR && BuchFR.add('integral', {
         // book fr-8 mathegy12-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-10 mathegy12lk-fr:
+        // book fr-24 pruefung-fr:
     ]
 });

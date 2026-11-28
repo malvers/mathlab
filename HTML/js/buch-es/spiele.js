@@ -36,6 +36,7 @@ window.BuchES && BuchES.add('spiele', {
 
         // book es mathegy10-es (Lovelace)
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es mathegy8-es (Curie)
@@ -62,6 +63,7 @@ window.BuchES && BuchES.add('spiele', {
 
         // book es mathegy10-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es mathegy8-es (Curie)
@@ -72,5 +74,6 @@ window.BuchES && BuchES.add('spiele', {
 
         // book es mathegy10-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ]
 });

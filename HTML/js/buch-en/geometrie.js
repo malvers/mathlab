@@ -49,8 +49,7 @@ window.BuchEN && BuchEN.add('geometrie', {
         'Hilfsdreieck': 'Auxiliary triangle', 'Grundkante $a$': 'Base edge $a$', 'Höhe $h$': 'Height $h$',
         'Quadratische Pyramide im Schrägbild mit Hilfsdreieck': 'Square pyramid in oblique view with auxiliary triangle',
         'Kreiskegel im Schrägbild mit Hilfsdreieck': 'Cone in oblique view with auxiliary triangle'
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     },
     phrase: [
         // book 11 mathegy9-en: pythagoras
@@ -74,13 +73,11 @@ window.BuchEN && BuchEN.add('geometrie', {
         ['$= \\Phi$, und der größere Teil ist genau so lang wie die Seite.', '$= \\Phi$, and the larger part is exactly as long as the side.'],
         // book 11 mathegy9-en: spitzkoerper
         [' im Schrägbild mit Hilfsdreieck', ' in oblique view with auxiliary triangle']
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ],
     rule: [
         // book 11 mathegy9-en: goldenerschnitt "Nach 5 Schnitten ist die lange Seite nur noch $…$ so lang." (the pieces alone are in tools/buch-en/known.json)
         [/Nach (\d+) Schnitt(?:en)? ist die lange Seite nur noch \$/g, (m, n) => 'After ' + n + ' cut' + (+n > 1 ? 's' : '') + ' the long side is only $']
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ]
 });

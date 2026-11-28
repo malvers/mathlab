@@ -42,8 +42,7 @@ window.BuchEN && BuchEN.add('trigonometrie', {
         // pyramidekegel
         'Quadratische Pyramide': 'Square pyramid', 'Kegel': 'Cone', 'Körper': 'Solid', 'Höhe – Seitenhöhe': 'Height – height of a side face', 'Höhe – Seitenkante': 'Height – lateral edge',
         'Höhe – Mantellinie': 'Height – slant height', 'Rechtwinkliges Dreieck': 'Right-angled triangle', 'Grundkante $a$': 'Base edge $a$', 'Höhe $h$': 'Height $h$'
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     },
     phrase: [
         // book 10 mathegy10-en
@@ -87,14 +86,12 @@ window.BuchEN && BuchEN.add('trigonometrie', {
         ['Seitenkante $s', 'Lateral edge $s'], ['$ mit der Diagonale $d', '$ with the diagonal $d'], ['Neigungswinkel der Seitenkante:', 'Angle of inclination of the lateral edge:'],
         ['Volumen $V', 'Volume $V'], ['$ · Oberfläche $O', '$ · surface area $O'], ['Mantellinie $s', 'Slant height $s'],
         ['halber Öffnungswinkel:', 'half the opening angle:'], ['$ · Öffnungswinkel $2', '$ · opening angle $2'], ['$ · Mantel $M', '$ · curved surface $M']
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ],
     rule: [
         // book 10 mathegy10-en
         // messkurve: the unit after the distance of the markers ("$11.0$ Jahre</b>")
         [/\$ Jahre<\/b>/g, '$ years</b>']
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ]
 });

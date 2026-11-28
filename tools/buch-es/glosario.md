@@ -1116,3 +1116,5 @@ answers and numbers stay. Nothing above was changed; where this book differs fro
 | $N(\mu;\ \sigma^2)$, NORM.VERT / NORM.INV | $N(\mu, \sigma^2)$, DISTR.NORM.N / INV.NORM | as in mathegy12lk-es |
 | Sekundarstufe I | ESO | chapter 3.4 |
 | Stadtwerke $S$, Konkurrenz $K$ | compañía municipal $M$, competencia $C$ | chapter OP2.3 |
+
+## pruefung-es (Prüfungstraining Abitur, BLF, Vergleichsarbeit; block es-24)

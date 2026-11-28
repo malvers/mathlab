@@ -88,8 +88,7 @@ window.BuchEN && BuchEN.add('funktionen', {
         'Welches Rechteck mit Umfang $24\\,\\text{cm}$ hat die größte Fläche?': 'Which rectangle with perimeter $24\\,\\text{cm}$ has the largest area?',
         // book 10 mathegy10-en: cover
         'Graphen der Grundfunktionen': 'Graphs of the basic functions',
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     },
     phrase: [
         // parameter: c = 0 in f(c·x) (second check, 12.10.2026)
@@ -179,8 +178,7 @@ window.BuchEN && BuchEN.add('funktionen', {
         ['Es entscheidet nur der Summand mit der höchsten Potenz: $', 'Only the term with the highest power decides: $'],
         // book 11 mathegy9-en: extremwert
         ['Jetzt: $A(', 'Now: $A('],
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ],
     rule: [
         // dates of the day-length widget: "21. Mär" → "21 Mar"
@@ -198,7 +196,6 @@ window.BuchEN && BuchEN.add('funktionen', {
             (m, c, d) => 'shifted $' + c + '$ ' + { links: 'to the left', rechts: 'to the right', oben: 'up', unten: 'down' }[d]],
         // book 4 mathefos11-en: funktion, "die Kurve <b>2-mal</b>"
         [/<b>(\d+)-mal<\/b>/g, '<b>$1 times</b>'],
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ]
 });

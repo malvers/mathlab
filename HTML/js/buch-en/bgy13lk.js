@@ -25,8 +25,7 @@ window.BuchEN && BuchEN.add('bgy13lk', {
         'Koeffizient $p$': 'Coefficient $p$', 'Koeffizient $q$': 'Coefficient $q$',
         'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen': 'The parabola h(z) = z² + p·z + q with its zeros',
         'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'The graph of f(x) = x⁴ + p·x² + q with its zeros'
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     },
     phrase: [
         // titelbildbgy13lk: the aria-label sits in a string piece that starts inside the <svg> tag, so it is a phrase
@@ -71,8 +70,7 @@ window.BuchEN && BuchEN.add('bgy13lk', {
         [' liefert nichts, denn $x^2$ ist nie negativ', ' gives nothing, because $x^2$ is never negative'],
         ['keine Lösung $z$, die Diskriminante ist negativ', 'no solution $z$, the discriminant is negative'],
         ['Keine Lösung', 'No solution'], ['Eine Lösung', 'One solution'], [' Lösungen', ' solutions']
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ],
     rule: [
         // matrixinverse: "Schritt 2 von 7: …", swapping, dividing, clearing a column
@@ -89,7 +87,6 @@ window.BuchEN && BuchEN.add('bgy13lk', {
         [/auf das ([\d.,]+)-Fache <b>geschrumpft<\/b>, die Population stirbt langfristig aus\./, (m, q) => 'has <b>shrunk</b> to ' + q + ' times its size; the population dies out in the long run.'],
         // biquadratisch: the solution set {−2; −1; 1; 2} with commas
         [/(x \\in \\\{)([^$]*?)(\\\})/, (m, a, b, c) => a + b.replace(/;\\ /g, ',\\ ') + c]
-        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
-        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book 24 pruefung-en:
     ]
 });

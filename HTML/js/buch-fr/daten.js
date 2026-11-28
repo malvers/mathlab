@@ -51,6 +51,7 @@ window.BuchFR && BuchFR.add('daten', {
             'Des classes très étroites ne montrent presque que des valeurs isolées, des classes très larges brouillent tout. Entre les deux, on reconnaît la forme de la distribution.',
         // book fr-18 mathe7-fr:
         // book fr-20 mathe9-fr:
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-14 mathegy7-fr:
@@ -61,6 +62,7 @@ window.BuchFR && BuchFR.add('daten', {
         ['keiner (jeder Wert kommt nur einmal vor)', 'aucun (chaque valeur n’apparaît qu’une fois)'],
         // book fr-18 mathe7-fr:
         // book fr-20 mathe9-fr:
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-14 mathegy7-fr:
@@ -78,5 +80,6 @@ window.BuchFR && BuchFR.add('daten', {
             (m, k, w, a, b, c, n) => k + ' classes d’amplitude ' + w + ' cm · classe la plus fréquente $[' + a + '\\,;\\,' + b + '[$ avec ' + c + ' valeurs sur ' + n + ' ('],
         // book fr-18 mathe7-fr:
         // book fr-20 mathe9-fr:
+        // book fr-24 pruefung-fr:
     ]
 });

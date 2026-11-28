@@ -71,6 +71,7 @@ window.BuchIT && BuchIT.add('vektoren', {
         // kreuzprodukt, lot3d, winkel3d (the same widgets as GY 12, js/buch-es/vektoren.js block mathegy12-es)
         // skalarprodukt: the preset "orthogonal" (two vectors)
         'orthogonal': 'ortogonali',
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -197,6 +198,7 @@ window.BuchIT && BuchIT.add('vektoren', {
         // winkel3d
         // ebene3d, raum3d, skalarprodukt, pyramide: pieces BGY 12/13 left German
         [' · <b>orthogonal</b>: $', ' · <b>ortogonali</b>: $'], 
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -225,5 +227,6 @@ window.BuchIT && BuchIT.add('vektoren', {
         // book it-9 mathegy12lk-it:
         // the preset "parallel" of winkel3d (line and plane: paralleli) and abstand3d (two lines: parallele), next to the rules of it-2 and it-3 above
         [/(data-p="flach">)parallel</g, '$1paralleli<'], [/(data-p="c">)parallel</g, '$1parallele<'],
+        // book it-24 pruefung-it:
     ]
 });

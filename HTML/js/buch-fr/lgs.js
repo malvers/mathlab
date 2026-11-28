@@ -29,6 +29,7 @@ window.BuchFR && BuchFR.add('lgs', {
         // book fr-7 mathegy11-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-15 mathegy8-fr:
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -57,6 +58,7 @@ window.BuchFR && BuchFR.add('lgs', {
         // book fr-7 mathegy11-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-15 mathegy8-fr:
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -71,5 +73,6 @@ window.BuchFR && BuchFR.add('lgs', {
         // book fr-7 mathegy11-fr:
         // book fr-9 mathegy11lk-fr:
         // book fr-15 mathegy8-fr:
+        // book fr-24 pruefung-fr:
     ]
 });

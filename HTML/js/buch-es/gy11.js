@@ -29,6 +29,7 @@ window.BuchES && BuchES.add('gy11', {
 
         // book es mathegy11lk-es (Turing)
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es mathegy11-es (Turing)
@@ -56,6 +57,7 @@ window.BuchES && BuchES.add('gy11', {
 
         // book es mathegy11lk-es (Turing)
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es mathegy11-es (Turing)
@@ -65,5 +67,6 @@ window.BuchES && BuchES.add('gy11', {
 
         // book es mathegy11lk-es (Turing)
 
+        // book es-24 pruefung-es:
     ]
 });

@@ -1397,3 +1397,5 @@ text is the one of `mathe13-fr`, `mathegy12lk-fr` and `mathe12lk-fr`, taken over
 | Tabellenkalkulation: NORM.VERT, NORM.INV, MITTELWERT, STABW.S, VAR.P | LOI.NORMALE.N, LOI.NORMALE.INVERSE.N, MOYENNE, ECARTYPE.STANDARD, VAR.P.N | 4, 5.1 (Excel en français) |
 | Verschiebungssatz | formule de König-Huygens | 5.1, as fr-22 |
 | Abitur-Training (LK) | ENTRAÎNEMENT À L’ABITUR (LK) | lab cards; « Konsultation » stays as in mathegy12lk-fr |
+
+## pruefung-fr (Prüfungstraining Abitur, BLF, Vergleichsarbeit; block fr-24)

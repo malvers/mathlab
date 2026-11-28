@@ -65,6 +65,7 @@ window.BuchES && BuchES.add('geometrie', {
         'Titelbild: rechtwinkliges Dreieck mit den Quadraten über seinen Seiten, ein goldenes Rechteck mit Spirale, ein Kreis zwischen zwei Sechsecken und eine Parabel':
             'Portada: un triángulo rectángulo con los cuadrados sobre sus lados, un rectángulo áureo con espiral, una circunferencia entre dos hexágonos y una parábola',
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es mathegy5-es (Einstein)
@@ -100,6 +101,7 @@ window.BuchES && BuchES.add('geometrie', {
         ['Anteil am Vollkreis: $', 'Fracción del círculo completo: $'],
         ['Zieh am Ende des Bogens. Zum Vergleich der ganze Kreis: $', 'Arrastra el extremo del arco. Para comparar, el círculo entero: $'],
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es mathegy5-es (Einstein)
@@ -116,5 +118,6 @@ window.BuchES && BuchES.add('geometrie', {
         // goldenerschnitt "Nach 5 Schnitten ist die lange Seite nur noch $…$ so lang."
         [/Nach (\d+) Schnitt(?:en)? ist die lange Seite nur noch \$/g, (m, n) => 'Después de ' + n + (+n > 1 ? ' cortes' : ' corte') + ', el lado largo solo mide el $'],
 
+        // book es-24 pruefung-es:
     ]
 });

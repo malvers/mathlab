@@ -75,6 +75,7 @@ window.BuchFR && BuchFR.add('vektoren', {
         'Das Skalarprodukt ist $0$: Die Geraden schneiden sich senkrecht.': 'Le produit scalaire vaut $0$ : les droites se coupent perpendiculairement.',
         'Das Skalarprodukt ist positiv, der Winkel zwischen den Vektoren ist schon spitz.': 'Le produit scalaire est positif, l’angle entre les vecteurs est déjà aigu.',
         'Die Normalenvektoren sind parallel: Die Ebenen sind parallel oder identisch.': 'Les vecteurs normaux sont colinéaires : les plans sont parallèles ou confondus.',
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-1 mathe11-fr:
@@ -205,6 +206,7 @@ window.BuchFR && BuchFR.add('vektoren', {
         // book fr-10 mathegy12lk-fr:
         // winkel3d
         ['Weiß: die Schnittgerade $s$ mit dem Richtungsvektor $\\vec{n}_1 \\times \\vec{n}_2 = ', 'En blanc : la droite d’intersection $s$, de vecteur directeur $\\vec{n}_1 \\times \\vec{n}_2 = '],
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // fr0: the helpers of the module (outside every widget; check.mjs vektoren/*), shared by the three books that load it
@@ -236,5 +238,6 @@ window.BuchFR && BuchFR.add('vektoren', {
         [/(data-p="dach">[^<]*<\/button><button type="button" class="b-btn" data-p="schraeg">)schräg(?=<)/g, '$1obliques'],
         [/(data-p="schraeg">)schräg(?=<)/g, '$1oblique'], [/(data-p="steil">)senkrecht(?=<)/g, '$1perpendiculaire'],
         [/(data-p="ortho">)senkrecht(?=<)/g, '$1perpendiculaires'], [/(data-p="flach">)parallel(?=<)/g, '$1parallèle'],
+        // book fr-24 pruefung-fr:
     ]
 });

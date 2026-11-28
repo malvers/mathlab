@@ -127,6 +127,7 @@ window.BuchES && BuchES.add('analysis', {
         'jährlich': 'anualmente', 'halbjährlich': 'semestralmente', 'vierteljährlich': 'trimestralmente', 'monatlich': 'mensualmente', 'wöchentlich': 'semanalmente',
         'täglich': 'a diario', 'stündlich': 'cada hora', 'minütlich': 'cada minuto',
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es-3 mathe13-es: kurve
@@ -274,6 +275,7 @@ window.BuchES && BuchES.add('analysis', {
         ['Je öfter verzinst wird, desto näher kommt das Guthaben an $\\mathrm{e} = 2{,}718281\\ldots$ heran, aber nie darüber: $',
             'Cuanto más a menudo se abonan los intereses, más se acerca el saldo a $\\mathrm{e} = 2{,}718281\\ldots$, pero nunca lo supera: $'],
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es-3 mathe13-es: kurve, the sliders "$a$ (vor $x^3$)" → "$a$ (coeficiente de $x^3$)"
@@ -301,5 +303,6 @@ window.BuchES && BuchES.add('analysis', {
         // efunktion: "1-mal $\tfrac…" is "1 vez" (the pieces make "veces" of every other number)
         [/(?<![\d.])1-mal \$/g, '1 vez $$'],
 
+        // book es-24 pruefung-es:
     ]
 });

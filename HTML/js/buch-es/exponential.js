@@ -109,6 +109,7 @@ window.BuchES && BuchES.add('exponential', {
         'Überleg zuerst selbst: Welche Grundfunktion steckt darin? Wie ist sie verschoben oder gestreckt? Dann Schritt für Schritt aufdecken.':
             'Piensa primero tú: ¿qué función básica se esconde? ¿Cómo está trasladada o dilatada? Después, descúbrelo paso a paso.',
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es mathe10-es (Curie)
@@ -156,6 +157,7 @@ window.BuchES && BuchES.add('exponential', {
         // skizze
         ['Skizziere ohne Taschenrechner:', 'Esboza sin calculadora:'],
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es mathe10-es (Curie)
@@ -169,5 +171,6 @@ window.BuchES && BuchES.add('exponential', {
         [/\$ Jahre<\/p>/g, '$ años</p>'], [/\$ Stunden<\/p>/g, '$ horas</p>'],
         [/\(Funktion (\d+) von (\d+)\)/g, '(función $1 de $2)'],
 
+        // book es-24 pruefung-es:
     ]
 });

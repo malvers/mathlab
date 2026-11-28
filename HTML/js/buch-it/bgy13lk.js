@@ -31,6 +31,7 @@ window.BuchIT && BuchIT.add('bgy13lk', {
         // biquadratisch
         'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen': 'La parabola h(z) = z² + p·z + q con i suoi zeri',
         'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'Il grafico di f(x) = x⁴ + p·x² + q con i suoi zeri',
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-23 mathe13lk-it:
@@ -77,6 +78,7 @@ window.BuchIT && BuchIT.add('bgy13lk', {
         [' liefert nichts, denn $x^2$ ist nie negativ', ' non dà nulla, perché $x^2$ non è mai negativo'],
         ['keine Lösung $z$, die Diskriminante ist negativ', 'nessuna soluzione $z$, il discriminante è negativo'],
         ['<b>Keine Lösung</b>', '<b>Nessuna soluzione</b>'], ['<b>Eine Lösung</b>', '<b>Una soluzione</b>'],
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-23 mathe13lk-it:
@@ -93,5 +95,6 @@ window.BuchIT && BuchIT.add('bgy13lk', {
         // biquadratisch: "<b>3 Lösungen</b>", the solution set {−2;\ 2} with commas when there is no decimal comma
         [/<b>(\d) Lösungen<\/b>/g, '<b>$1 soluzioni</b>'],
         [/\\in \\\{([^}$]*)\\\}/g, (m, body) => /\{,\}/.test(body) ? m : m.replace(/;\\ /g, ', ')],
+        // book it-24 pruefung-it:
     ]
 });

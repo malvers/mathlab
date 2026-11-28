@@ -54,6 +54,7 @@ window.BuchFR && BuchFR.add('trigonometrie', {
         'Höhe – Mantellinie': 'Hauteur – génératrice', 'Rechtwinkliges Dreieck': 'Triangle rectangle', 'Grundkante $a$': 'Arête de base $a$', 'Radius $r$': 'Rayon $r$', 'Höhe $h$': 'Hauteur $h$',
         // book fr-20 mathe9-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-6 mathegy10-fr:
@@ -104,6 +105,7 @@ window.BuchFR && BuchFR.add('trigonometrie', {
         ['Die Höhe aus zwei Richtungen: $h_c = b \\times \\sin\\alpha = ', 'La hauteur calculée de deux façons : $h_c = b \\times \\sin\\alpha = '],
         ['$ und $h_c = a \\times \\sin\\beta \\approx ', '$ et $h_c = a \\times \\sin\\beta \\approx '],
         ['Höhe $h = b \\times \\sin\\gamma = ', 'Hauteur $h = b \\times \\sin\\gamma = '],
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // pyramidekegel: the German side height h_s is the apothème h_a in French (the label is a phrase above)
@@ -113,5 +115,6 @@ window.BuchFR && BuchFR.add('trigonometrie', {
         [/\$ Jahre<\/b>/g, '$ ans</b>'],
         // book fr-20 mathe9-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     ]
 });

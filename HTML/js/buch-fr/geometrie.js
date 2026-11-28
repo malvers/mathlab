@@ -65,6 +65,7 @@ window.BuchFR && BuchFR.add('geometrie', {
         // book fr-19 mathe8-fr:
         // book fr-20 mathe9-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-11 mathe5-fr:
@@ -91,6 +92,7 @@ window.BuchFR && BuchFR.add('geometrie', {
         // book fr-19 mathe8-fr:
         // book fr-20 mathe9-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-11 mathe5-fr:
@@ -135,5 +137,6 @@ window.BuchFR && BuchFR.add('geometrie', {
         // book fr-19 mathe8-fr:
         // book fr-20 mathe9-fr:
         // book fr-21 mathe10-fr:
+        // book fr-24 pruefung-fr:
     ]
 });

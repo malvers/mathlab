@@ -132,6 +132,7 @@ window.BuchFR && BuchFR.add('analysis', {
         '$P$ liegt auf der Kurve, der Abstand ist $0$.': '$P$ est sur la courbe, la distance vaut $0$.',
         'Das Minimum liegt am Rand des Bereichs, dort muss die Strecke nicht senkrecht auf der Tangente stehen.': 'Le minimum est au bord de l’intervalle ; là, le segment n’a pas besoin d’être perpendiculaire à la tangente.',
         // geradenschar (the first note keeps \mid in its key: words are looked up before the point rules)
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // fr0: the helpers of the module (outside every widget; check.mjs analysis/*), shared by the four books that load it
@@ -287,6 +288,7 @@ window.BuchFR && BuchFR.add('analysis', {
         // abstandmin
         // geradenschar (the colon after the discriminant is a rule)
         ['zwei Schnittpunkte.', 'deux points d’intersection.'], ['kein gemeinsamer Punkt.', 'aucun point commun.'],
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-1 mathe11-fr:
@@ -315,5 +317,6 @@ window.BuchFR && BuchFR.add('analysis', {
         // book fr-10 mathegy12lk-fr:
         // geradenschar: "Diskriminante $a^2 - 4 = -3$: kein …" → a no-break space before the colon
         [/(Diskriminante \$a\^2 - 4 = [^$]*\$):/g, '$1 :'],
+        // book fr-24 pruefung-fr:
     ]
 });

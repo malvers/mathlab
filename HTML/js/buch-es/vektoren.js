@@ -54,6 +54,7 @@ window.BuchES && BuchES.add('vektoren', {
         'Zieh den Fluchtpunkt V. Er liegt auf dem Horizont in Augenhöhe.': 'Arrastra el punto de fuga V. Está en el horizonte, a la altura de los ojos.',
         'Zentralprojektion eines Quaders und einer Pfostenreihe mit Fluchtpunkt': 'Proyección central de un ortoedro y de una hilera de postes con su punto de fuga',
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es-3 mathe13-es: gerade3d
@@ -165,6 +166,7 @@ window.BuchES && BuchES.add('vektoren', {
         ['Ein Pfosten in der Tiefe $z$ erscheint mit dem Faktor $\\dfrac{a}{a + z}$: bei $z = 8$ also $\\dfrac{', 'Un poste a la profundidad $z$ aparece con el factor $\\dfrac{a}{a + z}$: con $z = 8$, $\\dfrac{'],
         ['$ so hoch wie vorn.', '$ veces la altura que tendría delante.'],
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es-3 mathe13-es: the inputs "Vektor a, x-Koordinate" → "Vector a, coordenada x"; between the coordinate inputs
@@ -192,5 +194,6 @@ window.BuchES && BuchES.add('vektoren', {
 
         // book es mathefos12-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ]
 });

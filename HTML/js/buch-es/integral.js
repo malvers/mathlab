@@ -38,6 +38,7 @@ window.BuchES && BuchES.add('integral', {
 
         // book es mathefos12-es (Lovelace)
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es-3 mathe13-es: stammfunktion
@@ -61,6 +62,7 @@ window.BuchES && BuchES.add('integral', {
 
         // book es mathefos12-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ],
     rule: [
 
@@ -72,5 +74,6 @@ window.BuchES && BuchES.add('integral', {
 
         // book es mathefos12-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ]
 });

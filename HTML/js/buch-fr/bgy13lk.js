@@ -30,6 +30,7 @@ window.BuchFR && BuchFR.add('bgy13lk', {
         'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen': 'La parabole h(z) = z² + p·z + q avec ses zéros',
         'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'La courbe de f(x) = x⁴ + p·x² + q avec ses zéros',
         'Keine Lösung': 'Aucune solution', 'Eine Lösung': 'Une solution',
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-23 mathe13lk-fr:
@@ -74,6 +75,7 @@ window.BuchFR && BuchFR.add('bgy13lk', {
         ['keine Lösung $z$, die Diskriminante ist negativ', 'aucune solution $z$, le discriminant est négatif'],
         ['$ wird mit $z = x^2$ zu $z^2', '$ devient, avec $z = x^2$, $z^2'], [' = 0$, Diskriminante $\\tfrac{p^2}{4} - q = ', ' = 0$, discriminant $\\tfrac{p^2}{4} - q = '],
         [' Lösungen', ' solutions'],
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-23 mathe13lk-fr:
@@ -92,5 +94,6 @@ window.BuchFR && BuchFR.add('bgy13lk', {
         [/(x \\in \\\{)([\s\S]*?)(\\\})/g, (m, a, b, c) => a + b.replace(/;\\ /g, '\\,;\\,') + c],
         // biquadratisch: French spacing before the semicolon between the z values and before the colon after the count
         [/; \$z = /g, '\u00a0; $z = '], [/<\/b>: \$x \\in /g, '</b>\u00a0: $x \\in '],
+        // book fr-24 pruefung-fr:
     ]
 });

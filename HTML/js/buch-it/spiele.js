@@ -42,6 +42,7 @@ window.BuchIT && BuchIT.add('spiele', {
         '1000 Spiele': '1000 partite',
         'Ergebnis': 'Risultato',
 
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-13 mathegy8-it:
@@ -71,6 +72,7 @@ window.BuchIT && BuchIT.add('spiele', {
 
         // book it-20 mathe10-it:
 
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-13 mathegy8-it:
@@ -88,5 +90,6 @@ window.BuchIT && BuchIT.add('spiele', {
         [/· 1 der 36 gleich wahrscheinlichen Ergebnisse gehören dazu\. Alle Wahrscheinlichkeiten zusammen ergeben \$1\$\./g,
             () => '· 1 dei 36 risultati ugualmente probabili gli appartiene. Tutte le probabilità insieme danno $1$.'],
 
+        // book it-24 pruefung-it:
     ]
 });

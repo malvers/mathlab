@@ -108,6 +108,7 @@ window.BuchIT && BuchIT.add('exponential', {
         // funktionsklassen: the table of the function types (the block mathe10-es of js/buch-es/exponential.js)
         // wachstumsmodell (axis label); expanwendung of GY 10, which the check counts for every page that loads the module
 
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-15 mathegy10-it:
@@ -153,6 +154,7 @@ window.BuchIT && BuchIT.add('exponential', {
         // expanwendung: "Wann ist das Kapital auf 3000 €?", "Wann sind nur noch 50 mg übrig?"
         [' mg übrig?', ' mg?'], 
 
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-15 mathegy10-it:
@@ -165,5 +167,6 @@ window.BuchIT && BuchIT.add('exponential', {
         [/\$ Jahre<\/p>/g, '$ anni</p>'], [/\$ Stunden<\/p>/g, '$ ore</p>'],
         [/\(Funktion (\d+) von (\d+)\)/g, '(funzione $1 di $2)'],
 
+        // book it-24 pruefung-it:
     ]
 });

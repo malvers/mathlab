@@ -47,6 +47,7 @@ window.BuchIT && BuchIT.add('integral', {
         // book it-8 mathegy12-it:
 
         // book it-9 mathegy12lk-it:
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -71,6 +72,7 @@ window.BuchIT && BuchIT.add('integral', {
         // book it-8 mathegy12-it:
 
         // book it-9 mathegy12lk-it:
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -83,5 +85,6 @@ window.BuchIT && BuchIT.add('integral', {
         // book it-8 mathegy12-it:
 
         // book it-9 mathegy12lk-it:
+        // book it-24 pruefung-it:
     ]
 });

@@ -128,6 +128,7 @@ window.BuchIT && BuchIT.add('analysis', {
         // book it-9 mathegy12lk-it:
         // abstandmin, geradenschar (the same widgets as GY 12, js/buch-es/analysis.js block mathegy12-es)
         // kurve (abi.html): the labels BGY 13 left German
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -281,6 +282,7 @@ window.BuchIT && BuchIT.add('analysis', {
         // geradenschar
         // kurve, schar: "Hochpunkt $H(…)$" (short widget labels as in the glossary, block mathe12-it)
         // schar: the piece "$. Für $" of an earlier block starts one position before the note and took its "Für" away
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -321,5 +323,6 @@ window.BuchIT && BuchIT.add('analysis', {
         // book it-9 mathegy12lk-it:
         // abstandmin: the general point Q(x | f(x))
         [/\$Q\(x \\mid f\(x\)\)\$/g, '$Q(x, f(x))$'],
+        // book it-24 pruefung-it:
     ]
 });

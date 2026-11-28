@@ -31,6 +31,7 @@ window.BuchIT && BuchIT.add('gy11', {
         // book it-7 mathegy11lk-it:
         // kettenregel (chapter 1.3), matrixprodukt and drehmatrix (chapter 2), newton (Wahlbereich 2) - the same widgets as in mathegy11-it (block it-6)
 
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-6 mathegy11-it:
@@ -62,6 +63,7 @@ window.BuchIT && BuchIT.add('gy11', {
         // drehmatrix
         // newton
 
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-6 mathegy11-it:
@@ -74,5 +76,6 @@ window.BuchIT && BuchIT.add('gy11', {
         [/ ([AB]) hat (\d+) Spalten, ([AB]) aber (\d+) Zeilen: /g, (m, p, i, q, j) => ' ' + p + ' ha ' + i + (i === '1' ? ' colonna' : ' colonne') + ', ma ' + q + ' ha ' + j + (j === '1' ? ' riga: ' : ' righe: ')],
         [/Zeile (\d+) von \$([AB])\$ mal Spalte (\d+) von \$([AB])\$/g, (m, i, p, j, q) => 'Riga ' + i + ' di $' + p + '$ per colonna ' + j + ' di $' + q + '$'],
 
+        // book it-24 pruefung-it:
     ]
 });

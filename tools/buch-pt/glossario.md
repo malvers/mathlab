@@ -1149,4 +1149,4 @@ deutsche Text gleich ist, ist die Übersetzung von GY 12 Grundkurs pt (sonst BGY
 | Ebenenschar · Trägergerade · Ebenenbüschel | família de planos · reta comum · feixe de planos | |
 | Probeklausur unter Abiturbedingungen | teste de avaliação de treino em condições de Abitur | |
 
-## pruefung-pt (Prüfungstraining Abitur, BLF, Vergleichsarbeit; blocks pt-24 Abitur, pt-25 BLF/VA)
+## pruefung-pt (Prüfungstraining Abitur, BLF, Vergleichsarbeit; block pt-24)

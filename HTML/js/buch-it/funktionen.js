@@ -145,6 +145,7 @@ window.BuchIT && BuchIT.add('funktionen', {
 
         // book it-20 mathe10-it:
         // potenzfunktion: the row "Polstelle"
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-1 mathe11-it:
@@ -281,6 +282,7 @@ window.BuchIT && BuchIT.add('funktionen', {
         // book it-19 mathe9-it:
 
         // book it-20 mathe10-it:
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-1 mathe11-it:
@@ -333,5 +335,6 @@ window.BuchIT && BuchIT.add('funktionen', {
         // book it-19 mathe9-it:
 
         // book it-20 mathe10-it:
+        // book it-24 pruefung-it:
     ]
 });

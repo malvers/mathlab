@@ -60,6 +60,7 @@ window.BuchIT && BuchIT.add('trigonometrie', {
         'Jahre': 'anni',
         // dreieckloeser: the step labels are written in capitals (k.toUpperCase())
 
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-15 mathegy10-it:
@@ -113,6 +114,7 @@ window.BuchIT && BuchIT.add('trigonometrie', {
 
         // book it-20 mathe10-it:
 
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-15 mathegy10-it:
@@ -132,5 +134,6 @@ window.BuchIT && BuchIT.add('trigonometrie', {
         // messkurve: the unit after the distance of the markers ("$11,0$ Jahre</b>")
         [/\$ Jahre<\/b>/g, '$ anni</b>'],
 
+        // book it-24 pruefung-it:
     ]
 });

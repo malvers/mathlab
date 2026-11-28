@@ -55,6 +55,7 @@ window.BuchES && BuchES.add('trigonometrie', {
         'Quadratische Pyramide': 'Pirámide cuadrangular', 'Kegel': 'Cono', 'Körper': 'Cuerpo', 'Höhe – Seitenhöhe': 'Altura – apotema', 'Höhe – Seitenkante': 'Altura – arista lateral',
         'Höhe – Mantellinie': 'Altura – generatriz', 'Rechtwinkliges Dreieck': 'Triángulo rectángulo', 'Grundkante $a$': 'Arista de la base $a$', 'Radius $r$': 'Radio $r$', 'Höhe $h$': 'Altura $h$',
 
+        // book es-24 pruefung-es:
     },
     phrase: [
         // book es mathe10-es (Curie)
@@ -101,6 +102,7 @@ window.BuchES && BuchES.add('trigonometrie', {
         ['$ · Oberfläche $O', '$ · área total $O'], ['Mantellinie $s', 'Generatriz $s'],
         ['halber Öffnungswinkel:', 'mitad del ángulo de abertura:'], ['$ · Öffnungswinkel $2', '$ · ángulo de abertura $2'], ['$ · Mantel $M', '$ · superficie lateral $M'],
 
+        // book es-24 pruefung-es:
     ],
     rule: [
         // book es mathe10-es (Curie)
@@ -109,5 +111,6 @@ window.BuchES && BuchES.add('trigonometrie', {
 
         // book es mathegy10-es (Lovelace)
 
+        // book es-24 pruefung-es:
     ]
 });

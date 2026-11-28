@@ -33,6 +33,7 @@ window.BuchFR && BuchFR.add('gy11', {
         // matrixprodukt
         // drehmatrix
         // newton (wb2 does not load js/buch-fr/lgs.js, so "Nächster Schritt" is here as well, the same French)
+        // book fr-24 pruefung-fr:
     },
     phrase: [
         // book fr-7 mathegy11-fr:
@@ -64,6 +65,7 @@ window.BuchFR && BuchFR.add('gy11', {
         ['Zeile ', 'Ligne '], [' von $', ' de $'], ['$ mal Spalte ', '$ fois colonne '],
         // drehmatrix
         // newton
+        // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-7 mathegy11-fr:
@@ -76,5 +78,6 @@ window.BuchFR && BuchFR.add('gy11', {
         // matrixprodukt: "A hat 2 Spalten, B aber 3 Zeilen: …" and "Zeile 1 von $A$ mal Spalte 2 von $B$: …"
         [/ ([AB]) hat (\d+) Spalten, ([AB]) aber (\d+) Zeilen: /g, (m, p, i, q, j) => ' ' + p + ' a ' + i + (i === '1' ? ' colonne' : ' colonnes') + ', mais ' + q + ' a ' + j + (j === '1' ? ' ligne : ' : ' lignes : ')],
         [/Zeile (\d+) von \$([AB])\$ mal Spalte (\d+) von \$([AB])\$: /g, (m, i, p, j, q) => 'Ligne ' + i + ' de $' + p + '$ fois colonne ' + j + ' de $' + q + '$ : '],
+        // book fr-24 pruefung-fr:
     ]
 });

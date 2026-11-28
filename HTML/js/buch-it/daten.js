@@ -55,6 +55,7 @@ window.BuchIT && BuchIT.add('daten', {
         // book it-19 mathe9-it:
         // achsentrick, mittelwerte (OS 9 chapter 4; "Mittelwert" is in os9.js)
 
+        // book it-24 pruefung-it:
     },
     phrase: [
         // book it-12 mathegy7-it:
@@ -75,6 +76,7 @@ window.BuchIT && BuchIT.add('daten', {
         // achsentrick: "Die letzte Säule wirkt 3,1-mal so hoch wie die erste."
         // mittelwerte
 
+        // book it-24 pruefung-it:
     ],
     rule: [
         // book it-12 mathegy7-it:
@@ -92,5 +94,6 @@ window.BuchIT && BuchIT.add('daten', {
         // mittelwerte: several modes "15 und 18 min" right after the label
         [/(<span class="g-phi">Modalwert<\/span> )([\d und]+ min)/g, (m, a, b) => a + b.replace(/ und /g, ' e ')],
 
+        // book it-24 pruefung-it:
     ]
 });

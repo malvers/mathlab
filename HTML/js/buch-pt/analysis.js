@@ -110,8 +110,7 @@ window.BuchPT && BuchPT.add('analysis', {
         // lowest block wins; "Buraco" and "descontinuidade removível" also stand in the GY 11 text)
         // book pt-22 mathegy11lk-pt:
         // book pt-23 mathegy12lk-pt:
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs analysis/*)
@@ -258,8 +257,7 @@ window.BuchPT && BuchPT.add('analysis', {
         [' mit Vorzeichenwechsel', ' com mudança de sinal'], [' ohne Vorzeichenwechsel', ' sem mudança de sinal'],
         // book pt-22 mathegy11lk-pt:
         // book pt-23 mathegy12lk-pt:
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -295,7 +293,6 @@ window.BuchPT && BuchPT.add('analysis', {
         [/(\\setminus \\\{)([^}]*)(\\\})/g, (m, a, b, c) => a + (b.indexOf('{,}') >= 0 ? b : b.replace(/; /g, ', ')) + c],
         // book pt-22 mathegy11lk-pt:
         // book pt-23 mathegy12lk-pt:
-        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
-        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
+        // book pt-24 pruefung-pt:
     ]
 });
