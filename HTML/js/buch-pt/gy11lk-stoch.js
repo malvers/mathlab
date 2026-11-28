@@ -23,6 +23,10 @@ window.BuchPT && BuchPT.add('gy11lk-stoch', {
         'Nagelreihen $n$': 'Filas de pregos $n$', 'nach rechts mit $p$': 'para a direita com $p$', 'Leeren': 'Esvaziar',
         'Relative Häufigkeiten der Fächer im Vergleich mit der Binomialverteilung': 'Frequências relativas dos compartimentos comparadas com a distribuição binomial',
         // book pt-22 mathegy11lk-pt:
+        // geburtstag (lb4-1): the birthday problem = o problema dos aniversários
+        'Personen $n$': 'Pessoas $n$',
+        'Wahrscheinlichkeit für mindestens zwei gleiche Geburtstage in Abhängigkeit von der Zahl der Personen': 'Probabilidade de pelo menos dois aniversários iguais em função do número de pessoas',
+        '1000 Klassen simulieren': 'Simular 1000 turmas',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk-stoch/*)
@@ -41,6 +45,11 @@ window.BuchPT && BuchPT.add('gy11lk-stoch', {
         ['Galtonbrett mit ', 'Tabuleiro de Galton com '], [' Nagelreihen', ' filas de pregos'],
         [' Kugeln. Balken: relative Häufigkeit je Fach, Punkte: $P(X = k)$ für $X \\sim B(', ' bolas. Barras: frequência relativa por compartimento, pontos: $P(X = k)$ para $X \\sim B('],
         // book pt-22 mathegy11lk-pt:
+        // geburtstag
+        ['$ günstige von $365^{', '$ casos favoráveis em $365^{'],
+        ['$ gleich wahrscheinlichen Ergebnissen, also $P(\\text{alle verschieden}) \\approx ', '$ casos possíveis equiprováveis, logo $P(\\text{todos diferentes}) \\approx '],
+        ['$P(\\text{mindestens zwei gleich}) = 1 - ', '$P(\\text{pelo menos dois iguais}) = 1 - '],
+        [' In 1000 simulierten Klassen hatten ', ' Em 1000 turmas simuladas, '], [' einen doppelten Geburtstag.', ' tinham um aniversário repetido.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -66,5 +75,7 @@ window.BuchPT && BuchPT.add('gy11lk-stoch', {
         [/Galtonbrett mit (\d+) Nagelreihen/g, (m, n) => 'Tabuleiro de Galton com ' + n + (n === '1' ? ' fila' : ' filas') + ' de pregos'],
         [/(\d[\d .]*?) Kugeln\. Balken: relative Häufigkeit je Fach, Punkte: \$/g, (m, k) => k + (k === '1' ? ' bola' : ' bolas') + '. Barras: frequência relativa por compartimento, pontos: $'],
         // book pt-22 mathegy11lk-pt:
+        // geburtstag: "Alle 23 Geburtstage verschieden: $…$"
+        [/Alle (\d+) Geburtstage verschieden: \$/g, 'Todos os $1 aniversários diferentes: $'],
     ]
 });
