@@ -17,5 +17,9 @@ window.BuchEN && BuchEN.add('pruefung', {
     ],
     rule: [
         // book 24 pruefung-en:
+        // pruefungsuhr: the second button "Zurück" resets the clock: "Reset", not the shared "Undo". Its label is parked as
+        // \u0003n\u0004 before the rules run, and a word entry would rename every "Zurück" on the page (the Gauss
+        // widget's undo in the print edition too), so this rule matches the clock's own markup only
+        [/(<span class="b-uhr-zeit" role="timer"><\/span><button type="button" class="b-btn b-go">[^<]*<\/button><button type="button" class="b-btn">)(?:\u0003\d+\u0004|Zurück)(<\/button>)/, '$1Reset$2'],
     ]
 });

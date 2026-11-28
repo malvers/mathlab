@@ -13,7 +13,7 @@
 window.BuchIT && BuchIT.add('pruefung', {
     word: {
         // book it-24 pruefung-it:
-        // pruefungsuhr: the pause label of the clock ('Zurück' stays the shared 'Annulla' of js/buch-it.js)
+        // pruefungsuhr: the pause label of the clock ('Zurück', the reset, is a rule below)
         'Pause': 'Pausa',
     },
     phrase: [
@@ -24,5 +24,9 @@ window.BuchIT && BuchIT.add('pruefung', {
     ],
     rule: [
         // book it-24 pruefung-it:
+        // pruefungsuhr: the second button "Zurück" resets the clock: "Azzera", not the shared "Annulla". Its label is parked as
+        // \u0003n\u0004 before the rules run, and a word entry would rename every "Zurück" on the page (the Gauss
+        // widget's undo in the print edition too), so this rule matches the clock's own markup only
+        [/(<span class="b-uhr-zeit" role="timer"><\/span><button type="button" class="b-btn b-go">[^<]*<\/button><button type="button" class="b-btn">)(?:\u0003\d+\u0004|Zurück)(<\/button>)/, '$1Azzera$2'],
     ]
 });

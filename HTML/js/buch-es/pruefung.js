@@ -23,8 +23,10 @@ window.BuchES && BuchES.add('pruefung', {
     ],
     rule: [
         // book es-24 pruefung-es:
-        // pruefungsuhr: its second button "Zurück" resets the clock, so "Reiniciar" and not the shared "Deshacer" (undo);
-        // the label is already parked as \u0003n\u0004 when the rules run, and only the clock ends with two b-btn buttons
-        [/(<button type="button" class="b-btn">)\u0003\d+\u0004(<\/button>)$/, '$1Reiniciar$2'],
+        // pruefungsuhr: the second button "Zurück" resets the clock: "Reiniciar", not the shared "Deshacer". Its label is parked as
+        // \u0003n\u0004 before the rules run, and a word entry would rename every "Zurück" on the page (the Gauss
+        // widget's undo in the print edition too), so this rule matches the clock's own markup only
+        // (the first rule took any string ending in a plain b-btn button, "Alle aufdecken" in the print edition too)
+        [/(<span class="b-uhr-zeit" role="timer"><\/span><button type="button" class="b-btn b-go">[^<]*<\/button><button type="button" class="b-btn">)(?:\u0003\d+\u0004|Zurück)(<\/button>)/, '$1Reiniciar$2'],
     ]
 });

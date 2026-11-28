@@ -14,8 +14,8 @@
 window.BuchFR && BuchFR.add('pruefung', {
     word: {
         // book fr-24 pruefung-fr:
-        // pruefungsuhr: "Pause" is French already, "Zurück" keeps the shared word « Annuler » of js/buch-fr.js (a whole label is
-        // looked up before any rule runs); "Start" is a rule below, tied to the clock: « Départ » in gy7.js means a starting point
+        // pruefungsuhr: "Pause" is French already, "Zurück" (reset) is a rule below; "Start" is a rule below, tied to the clock:
+        // « Départ » in gy7.js means a starting point
     },
     phrase: [
         // book fr-24 pruefung-fr:
@@ -24,5 +24,9 @@ window.BuchFR && BuchFR.add('pruefung', {
         // book fr-24 pruefung-fr:
         // pruefungsuhr: the start button, in the widget's innerHTML and in go.textContent after a pause
         [/^Start$/, 'Démarrer'], [/(class="b-btn b-go">)Start</g, '$1Démarrer<'],
+        // pruefungsuhr: the second button "Zurück" resets the clock: "Réinitialiser", not the shared "Annuler". Its label is parked as
+        // \u0003n\u0004 before the rules run, and a word entry would rename every "Zurück" on the page (the Gauss
+        // widget's undo in the print edition too), so this rule matches the clock's own markup only
+        [/(<span class="b-uhr-zeit" role="timer"><\/span><button type="button" class="b-btn b-go">[^<]*<\/button><button type="button" class="b-btn">)(?:\u0003\d+\u0004|Zurück)(<\/button>)/, '$1Réinitialiser$2'],
     ]
 });
