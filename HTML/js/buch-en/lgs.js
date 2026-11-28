@@ -15,6 +15,8 @@ window.BuchEN && BuchEN.add('lgs', {
         'eine Lösung': 'one solution', 'keine Lösung': 'no solution', 'unendlich viele': 'infinitely many', 'Zwei Geraden': 'Two lines',
         'mit $r =$': 'with $r =$', 'Neue Matrizen': 'New matrices', 'Wähle eine Rechnung.': 'Choose a calculation.',
         '1 Schritt': '1 step', '10 Schritte': '10 steps', 'Vier Webseiten und ihre Links': 'Four web pages and their links',
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // gauss, geraden, matrizen, pagerank
@@ -35,11 +37,15 @@ window.BuchEN && BuchEN.add('lgs', {
         ['Jeder Eintrag wird mit $r$ multipliziert.', 'Every entry is multiplied by $r$.'],
         ['Aus Zeilen werden Spalten: aus einer $2 \\times 3$- wird eine $3 \\times 2$-Matrix.', 'Rows become columns: a $2 \\times 3$ matrix becomes a $3 \\times 2$ matrix.'],
         ['Summe: $', 'Sum: $'],
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: [
         // gauss, pagerank
         [/In Spalte (\d) gibt es keinen Pivot mehr: Das LGS hat keine oder unendlich viele Lösungen\./g,
             'There is no pivot left in column $1: the system has no or infinitely many solutions.'],
         [/Schritt (\d+):/g, 'Step $1:'],
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ]
 });

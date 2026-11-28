@@ -38,6 +38,8 @@ window.BuchEN && BuchEN.add('daten', {
             'Turnover has <b>doubled</b>. The picture on the right is twice as high, but also twice as wide.',
         'Das Auge vergleicht Flächen: $2 \\cdot 2 = 4$, das Bild wirkt <b>viermal</b> so groß. Als Körper gezeichnet sogar $2^3 = 8$-mal.':
             'The eye compares areas: $2 \\cdot 2 = 4$, so the picture looks <b>four times</b> as large. Drawn as a solid, even $2^3 = 8$ times.'
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // book 11 mathegy9-en: mittelwerte
@@ -50,9 +52,13 @@ window.BuchEN && BuchEN.add('daten', {
         // book 11 mathegy9-en: achsentrick
         ['Mitglieder eines Sportvereins. Die letzte Säule <b>wirkt</b> ', 'Members of a sports club. The last bar <b>looks</b> '],
         ['-mal so hoch wie die erste.', ' times as tall as the first.'], ['Tatsächlich: $', 'In fact: $'], ['$, also ein Plus von ', '$, so an increase of ']
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: [
         // book 11 mathegy9-en: histogramm, half-open class [150;\,155) → [150, 155)
         [/\[(-?[\d.]+);\\,(-?[\d.]+)\)/g, '[$1, $2)']
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ]
 });

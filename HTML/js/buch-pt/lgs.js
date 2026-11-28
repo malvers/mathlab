@@ -27,6 +27,8 @@ window.BuchPT && BuchPT.add('lgs', {
         // book pt-9 mathegy11-pt:
         // book pt-12 mathegy8-pt:
         // book pt-22 mathegy11lk-pt:
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs lgs/*)
@@ -56,6 +58,8 @@ window.BuchPT && BuchPT.add('lgs', {
         // book pt-9 mathegy11-pt:
         // book pt-12 mathegy8-pt:
         // book pt-22 mathegy11lk-pt:
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -71,5 +75,7 @@ window.BuchPT && BuchPT.add('lgs', {
         // book pt-9 mathegy11-pt:
         // book pt-12 mathegy8-pt:
         // book pt-22 mathegy11lk-pt:
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     ]
 });

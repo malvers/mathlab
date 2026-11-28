@@ -25,6 +25,8 @@ window.BuchEN && BuchEN.add('spiele', {
         'Fairen Einsatz einstellen': 'Set the fair stake', '1000 Spiele': '1000 games',
         'Ergebnis': 'Result', 'Pasch': 'Double', 'Summe 7': 'Total 7', 'sonst': 'otherwise', 'Gewinn $x_i$ in €': 'Gain $x_i$ in €',
         'Lass das Spiel 1000-mal laufen und vergleiche den mittleren Gewinn mit dem Erwartungswert.': 'Let the game run 1000 times and compare the mean gain with the expected value.'
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // book 10 mathegy10-en
@@ -46,11 +48,15 @@ window.BuchEN && BuchEN.add('spiele', {
         ['Für die Spielerin oder den Spieler <b>günstig</b>: Die Klasse verliert im Mittel ', '<b>Favourable</b> for the player: on average the class loses '],
         [' € pro Spiel.', ' € per game.'], [' Fair wäre der Einsatz $e = \\tfrac{', ' The fair stake would be $e = \\tfrac{'],
         [' €</b> pro Spiel (Erwartungswert ', ' €</b> per game (expected value ']
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: [
         // book 10 mathegy10-en
         // fairesspiel writes amounts with a decimal comma by hand and the number of games with toLocaleString('de-DE')
         [/(\d+),(\d{2}) € pro Spiel\./g, '€$1.$2 per game.'],
         [/Gespielt: (\d{1,3}(?:\.\d{3})*) Spiele, mittlerer Gewinn/g, (m, n) => 'Played: ' + n.replace(/\./g, ',') + ' games, mean gain']
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ]
 });

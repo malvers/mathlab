@@ -101,6 +101,8 @@ window.BuchEN && BuchEN.add('exponential', {
         'Jetzt die Punkte glatt verbinden und die Asymptoten beachten. So sieht der Graph aus.': 'Now join the points smoothly and mind the asymptotes. This is what the graph looks like.',
         'Überleg zuerst selbst: Welche Grundfunktion steckt darin? Wie ist sie verschoben oder gestreckt? Dann Schritt für Schritt aufdecken.':
             'Think it through yourself first: which basic function is hidden in it? How is it shifted or stretched? Then reveal it step by step.'
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // book 10 mathegy10-en
@@ -141,6 +143,8 @@ window.BuchEN && BuchEN.add('exponential', {
         ['<b>periodisch</b>: Periode $2\\pi$ bei Sinus und Kosinus, $\\pi$ beim Tangens', '<b>periodic</b>: period $2\\pi$ for sine and cosine, $\\pi$ for tangent'],
         // skizze
         ['Skizziere ohne Taschenrechner:', 'Sketch without a calculator:']
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: [
         // book 10 mathegy10-en
@@ -149,5 +153,7 @@ window.BuchEN && BuchEN.add('exponential', {
         [/(?<=\d)\\,(?=\d{3}(?!\d))/g, '{,}'],
         // skizze: "(Funktion 2 von 6)"
         [/\(Funktion (\d+) von (\d+)\)/g, '(function $1 of $2)']
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ]
 });

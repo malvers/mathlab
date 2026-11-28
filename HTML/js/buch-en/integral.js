@@ -27,6 +27,8 @@ window.BuchEN && BuchEN.add('integral', {
         'Parabel und Gerade': 'Parabola and line', 'Kubik und Parabel': 'Cubic and parabola', 'Sinus und Kosinus': 'Sine and cosine',
         'Funktionen': 'Functions', 'Fläche zwischen zwei Graphen': 'Area between two graphs',
         'Zu wenige Schnittstellen im Bild.': 'Too few points of intersection in the picture.',
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // stammfunktion
@@ -41,6 +43,8 @@ window.BuchEN && BuchEN.add('integral', {
         [' · Achtung: $a > b$ dreht das Vorzeichen.', ' · Careful: $a > b$ reverses the sign.'],
         // zwischenflaeche
         ['$ · Schnittstellen: ', '$ · points of intersection: '],
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: []
 });

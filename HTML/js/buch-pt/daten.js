@@ -49,6 +49,8 @@ window.BuchPT && BuchPT.add('daten', {
             'Classes muito estreitas mostram quase só valores isolados, classes muito largas apagam tudo. Entre umas e outras reconhece-se a forma da distribuição.',
         // book pt-16 mathe7-pt:
         // book pt-18 mathe9-pt:
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs daten/*)
@@ -60,6 +62,8 @@ window.BuchPT && BuchPT.add('daten', {
         ['Geordnet ($n = ', 'Ordenados ($n = '], ['keiner (jeder Wert kommt nur einmal vor)', 'nenhuma (cada valor aparece só uma vez)'],
         // book pt-16 mathe7-pt:
         // book pt-18 mathe9-pt:
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -75,5 +79,7 @@ window.BuchPT && BuchPT.add('daten', {
             (m, k, w, a, b, c, n) => k + ' classes de amplitude ' + w + ' cm · classe mais frequente $[' + a + ', ' + b + '[$ com ' + c + ' de ' + n + ' valores ('],
         // book pt-16 mathe7-pt:
         // book pt-18 mathe9-pt:
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     ]
 });

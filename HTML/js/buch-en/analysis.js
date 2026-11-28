@@ -75,6 +75,8 @@ window.BuchEN && BuchEN.add('analysis', {
             'All the lines pass through $(2, 1)$: for $x = 2$, $a$ drops out. The parameter is the gradient, but one line is missing: the vertical line $x = 2$.',
         'Die Steigung ist immer $0{,}5$: Die Geraden sind parallel und haben keinen gemeinsamen Punkt. Der Parameter verschiebt sie.':
             'The gradient is always $0.5$: the lines are parallel and have no common point. The parameter shifts them.',
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // grenzwert
@@ -200,6 +202,8 @@ window.BuchEN && BuchEN.add('analysis', {
         ['Kürzen: $f(x) = ', 'Cancelling: $f(x) = '], ['$ · hebbare Lücken', '$ · removable holes'], ['$ · hebbare Lücke', '$ · removable hole'],
         ['Nullstellen: ', 'Zeros: '], [' · Polstellen: ', ' · poles: '],
         [' mit Vorzeichenwechsel', ' with a change of sign'], [' ohne Vorzeichenwechsel', ' without a change of sign'], [' (senkrechte Asymptote)', ' (vertical asymptote)'],
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: [
         // ableiten: "3 von 5 gelöst"
@@ -211,5 +215,7 @@ window.BuchEN && BuchEN.add('analysis', {
         // book 5 mathefos12-en: bruchfunktion, "… mit einem Loch." and "Nullstellen: keine" (the pieces alone are in tools/buch-en/known.json)
         [/ mit (Löchern|einem Loch)\./g, (m, w) => ' with ' + (w === 'Löchern' ? 'holes' : 'a hole') + '.'],
         [/(Nullstellen|Polstellen): keine(?![a-zäöüß])/g, '$1: none'],
+        // book 24a pruefung-en (Abitur: index, kapitel.js, abi-*):
+        // book 24b pruefung-en (BLF and Vergleichsarbeit: blf-*, va-*):
     ]
 });

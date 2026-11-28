@@ -35,6 +35,8 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         'Koeffizient $p$': 'Coeficiente $p$', 'Koeffizient $q$': 'Coeficiente $q$', 'Keine Lösung': 'Nenhuma solução', 'Eine Lösung': 'Uma solução',
         'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen': 'A parábola h(z) = z² + p·z + q com os seus zeros',
         'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'O gráfico de f(x) = x⁴ + p·x² + q com os seus zeros',
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs bgy13lk/*)
@@ -73,6 +75,8 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         [' = 0$ wird mit $z = x^2$ zu $z^2', ' = 0$ transforma-se, com $z = x^2$, em $z^2'], ['$, Diskriminante $\\tfrac{p^2}{4} - q = ', '$, discriminante reduzido $\\tfrac{p^2}{4} - q = '],
         [' liefert $x = \\pm', ' dá $x = \\pm'], [' liefert $x = 0$', ' dá $x = 0$'], [' liefert nichts, denn $x^2$ ist nie negativ', ' não dá nada, porque $x^2$ nunca é negativo'],
         ['keine Lösung $z$, die Diskriminante ist negativ', 'nenhuma solução $z$: o discriminante é negativo'],
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -92,5 +96,7 @@ window.BuchPT && BuchPT.add('bgy13lk', {
         [/<b>(\d) Lösungen<\/b>/g, '<b>$1 soluções</b>'],
         // biquadratisch: the solution set with whole numbers gets commas, with decimal commas it keeps the semicolons
         [/(x \\in \\\{)([^$]*?)(\\\})/g, (m, a, b, c) => a + (/\{,\}/.test(b) ? b : b.replace(/;\\ /g, ', ')) + c],
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     ]
 });

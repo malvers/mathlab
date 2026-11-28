@@ -57,6 +57,8 @@ window.BuchPT && BuchPT.add('trigonometrie', {
         // pyramidekegel: the words of js/buch-pt/geometrie.js these pages need (they do not load it; the same Portuguese), the others are
         // pt-18's above; "Kegel" is no word here (pt-18's rule below)
         'Körper': 'Sólido', 'Grundkante $a$': 'Aresta da base $a$', 'Radius $r$': 'Raio $r$', 'Höhe $h$': 'Altura $h$',
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs trigonometrie/*)
@@ -112,6 +114,8 @@ window.BuchPT && BuchPT.add('trigonometrie', {
         // and the cone pieces of geometrie.js; the other pieces are pt-18's above
         ['$O = a^2 + 4 \\cdot \\tfrac12 a h_s = a^2 + 2a\\,h_s \\approx ', '$A_T = a^2 + 4 \\cdot \\tfrac12 a\\,a_p = a^2 + 2a\\,a_p \\approx '],
         ['$M = \\pi r s \\approx ', '$A_L = \\pi r g \\approx '], ['$O = \\pi r^2 + \\pi r s \\approx ', '$A_T = \\pi r^2 + \\pi r g \\approx '],
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -136,5 +140,7 @@ window.BuchPT && BuchPT.add('trigonometrie', {
         [/\\sin(?![a-zA-Z])/g, '\\operatorname{sen}'], [/\\tan(?![a-zA-Z])/g, '\\operatorname{tg}'],
         // messkurve: the unit after the distance of the markers ("$11,0$ Jahre</b>")
         [/\$ Jahre<\/b>/g, '$ anos</b>'],
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     ]
 });

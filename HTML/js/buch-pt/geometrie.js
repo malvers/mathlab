@@ -70,6 +70,8 @@ window.BuchPT && BuchPT.add('geometrie', {
         // book pt-18 mathe9-pt:
         // book pt-19 mathe10-pt:
         // book pt-21 mathegy5-pt:
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs geometrie/*)
@@ -108,6 +110,8 @@ window.BuchPT && BuchPT.add('geometrie', {
         // book pt-18 mathe9-pt:
         // book pt-19 mathe10-pt:
         // book pt-21 mathegy5-pt:
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     ],
     rule: [
         // pt0: notation of the module, for every book
@@ -137,5 +141,7 @@ window.BuchPT && BuchPT.add('geometrie', {
         // book pt-18 mathe9-pt:
         // book pt-19 mathe10-pt:
         // book pt-21 mathegy5-pt:
+        // book pt-24 pruefung-pt (Abitur: index, kapitel.js, abi-*):
+        // book pt-25 pruefung-pt (BLF and Vergleichsarbeit: blf-*, va-*):
     ]
 });
