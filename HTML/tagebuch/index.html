@@ -1536,6 +1536,12 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 .spr-page.long .s { font-size: 5.4cqw; }
 .spr-page.longer .s { font-size: 4.8cqw; line-height: 1.3; }
 .spr-page .w { font-size: 3.4cqw; line-height: 1.35; }
+/* the phone's thought on its own sheet of handmade paper like the desk's card, with the same seasonal tint and gentle bow (Doc,
+   28.11.2026: "ja, auch auf dem Smartphone"); calm: no seal, only a slight tilt. Above the night's veil like the desk's
+   card, which lies over the pages too. */
+.spr-sheet { position: relative; z-index: 7; width: calc(100% + 4cqw); display: flex; flex-direction: column; align-items: center; gap: 2.2cqh; padding: 7.5cqw 5cqw 6.5cqw;
+  transform: rotate(-.8deg); background: var(--card-paper, var(--deckle-tall)) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 1cqw 1.3cqw rgba(40, 25, 10, .3)) drop-shadow(0 .2cqw .25cqw rgba(40, 25, 10, .28)); }
 .spr-page .q, .spr-page .r { display: none; }
 .stage.review .spr-page .q:not(:empty) { display: block; font-size: 2.7cqw; line-height: 1.4; color: var(--print-soft); overflow-wrap: anywhere; }
 .spr-page .q a { color: var(--ochre); text-decoration: none; }
@@ -1951,10 +1957,12 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
 <!-- phone only: the thought of the day as its own page between morning and evening (filled per day in personalise) -->
 <template id="tpl-spruch">
   <div class="pg paper"><div class="spr-page">
-    <span class="k">GEDANKE DES TAGES</span>
-    <div class="photo"><img alt="Gedanke der Woche"></div>
-    <span class="s"></span>
-    <span class="w"></span>
+    <div class="spr-sheet">
+      <span class="k">GEDANKE DES TAGES</span>
+      <div class="photo"><img alt="Gedanke der Woche"></div>
+      <span class="s"></span>
+      <span class="w"></span>
+    </div>
     <span class="q"></span>
     <span class="r"></span>
   </div></div>
@@ -3459,6 +3467,7 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       img.src = GDW_BASE + pad(t.nr) + '.webp';
     }
     if (REVIEW) { box.querySelector('.q').innerHTML = srcLinks(t && t.quelle); box.querySelector('.r').textContent = reviewLine(dayNo(day), t); }
+    sheetPaper(box.querySelector('.spr-sheet'), day);
   }
 
   /* long sayings: the card grows a little wider and its letters a little smaller until it ends above the first question,
@@ -3520,8 +3529,31 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
        thinner, so slightly see-through;
      - the pulp: the tint with a faint cloudy unevenness and a fine grain;
      - relief: a soft height map lit from the upper left (light cockling) by a point light, so the light also falls off
-       gently towards the far corners;
-     - fibres: sparse short streaks of the noise, plus a few drawn hairs, dark and light, scattered in the sheet. */
+       gently towards the far corners (raised with taller sheets, so the phone's page does not darken at the bottom);
+     - fibres: a few drawn hairs, dark and light, scattered in the sheet.
+     Over it the gentle bow (Doc, 28.11.2026: "das Papier selbst müsste irgendwie noch ganz vorsichtig gewölbt sein"): the
+     sheet arches a little across its width, its lower edge and corners lift a hair. Lit from the upper left, its light
+     and shade (paperBow) are laid over the sheet as soft gradients, masked by the same torn outline: a faint sheen
+     along the crest, the ends and the lower edge a shade darker, and under the lifted ends the shadow a touch deeper.
+     Only light and shade - the letters on the card stay as sharp as before. */
+  /* the bow across the width, u = 0..1 from the left end to the right one, as the light sees it (from the upper left,
+     fairly steep): the crest catches a soft broad sheen a little left of the middle, the slopes turn away from the
+     light - the right one more - and the very ends darken a shade where they curve. Gradient stops for the shading
+     (dark) and the sheen (light), each as [offset, opacity]. */
+  function paperBow() {
+    const dark = [], light = [];
+    for (let i = 0; i <= 20; i++) {
+      const u = i / 20;
+      const sheen = .15 * Math.exp(-Math.pow((u - .38) / .15, 2));
+      const slope = .09 * Math.pow(Math.max(0, (u - .5) / .5), 1.6) + .03 * Math.pow(Math.max(0, (.3 - u) / .3), 2);
+      const end = .05 * Math.pow(Math.max(0, Math.abs(u - .5) * 2 - .8) / .2, 2);
+      dark.push([u, slope + end]);
+      light.push([u, sheen]);
+    }
+    return { dark, light };
+  }
+  const BOW = paperBow();
+  const stops = (list, color) => list.map(([o, a]) => `<stop offset='${o.toFixed(2)}' stop-color='${color}' stop-opacity='${Math.min(.5, a).toFixed(3)}'/>`).join('');
   function paperSvg(day, ratio) {
     const W = 600, H = Math.round(W * ratio), mg = 9, tint = seasonTint(day), n = dayNo(day) || 1, rnd = rand32(n * 7919 + 13);
     const sd = k => 1 + Math.floor(rnd() * 900) + k;
@@ -3536,48 +3568,74 @@ html.sf-3 .stage:not(.portrait) .habits .hb { font-size: calc(var(--u) * 2.75 * 
       hairs += `<path d='M${x.toFixed(1)} ${y.toFixed(1)}Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}' stroke='${light ? '#fffdf6' : '#76603e'}' stroke-opacity='${op.toFixed(2)}' stroke-width='${(.3 + rnd() * .4).toFixed(2)}'/>`;
     }
     const grey = '1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 1';
-    return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${W} ${H}' preserveAspectRatio='none'>
-<filter id='p' filterUnits='userSpaceOnUse' x='0' y='0' width='${W}' height='${H}' color-interpolation-filters='sRGB'>
-<feTurbulence type='fractalNoise' baseFrequency='0.022' numOctaves='2' seed='${sd(0)}' result='n1'/>
+    /* the seeds in the order they always had (same sheet for the same day) */
+    const [s0, s1, s2, s5, s3, s4] = [sd(0), sd(1), sd(2), sd(5), sd(3), sd(4)];
+    /* the torn outline, used twice: for the sheet and as the mask of its light and shade */
+    const edge = `<feTurbulence type='fractalNoise' baseFrequency='0.022' numOctaves='2' seed='${s0}' result='n1'/>
 <feDisplacementMap in='SourceAlpha' in2='n1' scale='11' xChannelSelector='R' yChannelSelector='G' result='a1'/>
-<feTurbulence type='fractalNoise' baseFrequency='0.21' numOctaves='3' seed='${sd(1)}' result='n2'/>
-<feDisplacementMap in='a1' in2='n2' scale='7.5' xChannelSelector='R' yChannelSelector='B' result='shape'/>
+<feTurbulence type='fractalNoise' baseFrequency='0.21' numOctaves='3' seed='${s1}' result='n2'/>
+<feDisplacementMap in='a1' in2='n2' scale='7.5' xChannelSelector='R' yChannelSelector='B' result='shape'/>`;
+    const sheet = `x='${mg}' y='${mg}' width='${W - 2 * mg}' height='${H - 2 * mg}'`;
+    /* the lifted ends: their shadow reaches a little further out and down */
+    const lift = [[mg + 16, -2], [W - mg - 16, 2.5]].map(([x, dx]) => `<ellipse cx='${x + dx}' cy='${(H * .64 + 3).toFixed(1)}' rx='13' ry='${(H * .3).toFixed(1)}'/>`).join('');
+    return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${W} ${H}' preserveAspectRatio='none'>
+<defs>
+<filter id='b' x='-60%' y='-60%' width='220%' height='220%'><feGaussianBlur stdDeviation='2.6'/></filter>
+<filter id='o' filterUnits='userSpaceOnUse' x='0' y='0' width='${W}' height='${H}'>${edge}<feFlood flood-color='#fff'/><feComposite in2='shape' operator='in'/></filter>
+<mask id='m' maskUnits='userSpaceOnUse' x='0' y='0' width='${W}' height='${H}'><rect ${sheet} filter='url(#o)'/></mask>
+<linearGradient id='bd'>${stops(BOW.dark, '#3a2812')}</linearGradient>
+<linearGradient id='bl'>${stops(BOW.light, '#fffdf6')}</linearGradient>
+<linearGradient id='bv' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#fffdf6' stop-opacity='.07'/><stop offset='.22' stop-color='#fffdf6' stop-opacity='0'/><stop offset='.6' stop-color='#3a2812' stop-opacity='0'/><stop offset='1' stop-color='#3a2812' stop-opacity='.08'/></linearGradient>
+<radialGradient id='bc' gradientUnits='userSpaceOnUse' cx='0' cy='${H}' r='${Math.round(Math.min(H * .85, W * .4))}'><stop offset='0' stop-color='#3a2812' stop-opacity='.06'/><stop offset='1' stop-color='#3a2812' stop-opacity='0'/></radialGradient>
+</defs>
+<g fill='#2a1a0a' fill-opacity='.34' filter='url(#b)'>${lift}</g>
+<filter id='p' filterUnits='userSpaceOnUse' x='0' y='0' width='${W}' height='${H}' color-interpolation-filters='sRGB'>
+${edge}
 <feMorphology in='shape' operator='erode' radius='2.2' result='core'/>
 <feGaussianBlur in='core' stdDeviation='1' result='coreS'/>
 <feComposite in='shape' in2='coreS' operator='arithmetic' k2='0.6' k3='0.4' result='mask'/>
 <feFlood flood-color='${tint}' result='base'/>
-<feTurbulence type='fractalNoise' baseFrequency='0.012 0.018' numOctaves='3' seed='${sd(2)}' result='m'/>
+<feTurbulence type='fractalNoise' baseFrequency='0.012 0.018' numOctaves='3' seed='${s2}' result='m'/>
 <feColorMatrix in='m' values='${grey}' result='mg'/>
 <feComposite in='base' in2='mg' operator='arithmetic' k2='1' k3='0.07' k4='-0.035' result='b0'/>
-<feTurbulence type='fractalNoise' baseFrequency='0.07' numOctaves='2' seed='${sd(5)}' result='fl'/>
+<feTurbulence type='fractalNoise' baseFrequency='0.07' numOctaves='2' seed='${s5}' result='fl'/>
 <feColorMatrix in='fl' values='${grey}' result='flg'/>
 <feComposite in='b0' in2='flg' operator='arithmetic' k2='1' k3='0.05' k4='-0.025' result='b1'/>
-<feTurbulence type='fractalNoise' baseFrequency='0.006 0.009' numOctaves='2' seed='${sd(3)}' result='h'/>
+<feTurbulence type='fractalNoise' baseFrequency='0.006 0.009' numOctaves='2' seed='${s3}' result='h'/>
 <feColorMatrix in='h' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0' result='ha'/>
-<feDiffuseLighting in='ha' surfaceScale='13' diffuseConstant='1' lighting-color='#fff' result='L0'><fePointLight x='${W * .3}' y='${-H * .7}' z='${W * 1.1}'/></feDiffuseLighting>
+<feDiffuseLighting in='ha' surfaceScale='13' diffuseConstant='1' lighting-color='#fff' result='L0'><fePointLight x='${W * .3}' y='${-Math.min(H, 210) * .7}' z='${W * 1.1 + Math.max(0, H - 210) * 2.5}'/></feDiffuseLighting>
 <feGaussianBlur in='L0' stdDeviation='2.5' result='L'/>
 <feComposite in='b1' in2='L' operator='arithmetic' k1='0.26' k2='0.77' result='b2'/>
-<feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' seed='${sd(4)}' result='g'/>
+<feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' seed='${s4}' result='g'/>
 <feColorMatrix in='g' values='${grey}' result='gg'/>
 <feComposite in='b2' in2='gg' operator='arithmetic' k2='1' k3='0.05' k4='-0.025' result='b3'/>
 <feComposite in='b3' in2='mask' operator='in'/>
 </filter>
-<rect x='${mg}' y='${mg}' width='${W - 2 * mg}' height='${H - 2 * mg}' filter='url(#p)'/>
+<rect ${sheet} filter='url(#p)'/>
 <g fill='none' stroke-linecap='round'>${hairs}</g>
+<g mask='url(#m)'><rect width='${W}' height='${H}' fill='url(#bd)'/><rect width='${W}' height='${H}' fill='url(#bl)'/><rect width='${W}' height='${H}' fill='url(#bv)'/><rect width='${W}' height='${H}' fill='url(#bc)'/><rect width='${W}' height='${H}' fill='url(#bc)' transform='matrix(-1 0 0 1 ${W} 0)'/></g>
 </svg>`;
   }
-  let paperKey = '';
-  function paintCardPaper() {
-    const card = $('#spruchCard');
-    if (!card || !cardDay) return;
-    const w = card.offsetWidth, h = card.offsetHeight;
-    const ratio = w && h ? Math.round(h / w * 50) / 50 : .35;   /* steps of 2 %: no new sheet for every pixel */
-    const key = cardDay + '|' + ratio;
-    if (key === paperKey) return;
-    paperKey = key;
-    card.style.setProperty('--card-paper', 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(paperSvg(cardDay, ratio)) + '")');
+  /* one painter for every sheet of the thought of the day - the desk's card and the phone's page: the element gets the
+     day's paper as --card-paper as soon as it has a size, and again when its proportions change (a longer saying, the
+     picture arriving, another width); steps of 2 % in the proportions, so not every pixel draws a new sheet */
+  const sheetDay = new WeakMap();
+  const sheetRO = window.ResizeObserver ? new ResizeObserver(list => list.forEach(e => paintSheet(e.target))) : null;
+  function paintSheet(el) {
+    const day = sheetDay.get(el), w = el.offsetWidth, h = el.offsetHeight;
+    if (!day || !w || !h) return;
+    const ratio = Math.round(h / w * 50) / 50, key = day + '|' + ratio;
+    if (el.dataset.paper === key) return;
+    el.dataset.paper = key;
+    el.style.setProperty('--card-paper', 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(paperSvg(day, ratio)) + '")');
   }
-  window.addEventListener('resize', () => { clearTimeout(paintCardPaper.t); paintCardPaper.t = setTimeout(paintCardPaper, 200); });
+  function sheetPaper(el, day) {
+    if (!el || !day) return;
+    sheetDay.set(el, day);
+    paintSheet(el);
+    if (sheetRO) sheetRO.observe(el);
+  }
+  function paintCardPaper() { sheetPaper($('#spruchCard'), cardDay); }
 
   /* ---------- sheets: contents (left tab) and settings (gear) ---------- */
   function closeSheets() {
