@@ -1118,3 +1118,37 @@ answers and numbers stay. Nothing above was changed; where this book differs fro
 | Stadtwerke $S$, Konkurrenz $K$ | compañía municipal $M$, competencia $C$ | chapter OP2.3 |
 
 ## pruefung-es (Prüfungstraining Abitur, BLF, Vergleichsarbeit; block es-24)
+
+Pastor, 28.11.2026. Nothing above was changed. Exam tasks are written in the usted form, everything else in tú (start page says so).
+
+| Deutsch | Español | Note |
+|---|---|---|
+| Prüfungstraining Mathematik · Abitur, BLF und Vergleichsarbeit | Preparación de exámenes de matemáticas · Abitur, BLF y Vergleichsarbeit | `short`: Preparación de exámenes; kicker LIBRO INTERACTIVO DE EJERCICIOS |
+| Abitur, BLF (Besondere Leistungsfeststellung), Vergleichsarbeit | stay German | explained once on the start page and in chapters 18 and 27 («evaluación especial del rendimiento», «prueba comparativa») |
+| Berechnen Sie, Bestimmen Sie, Ermitteln Sie, Geben Sie an, Zeigen Sie / Weisen Sie nach, Begründen Sie, Beurteilen Sie, Deuten Sie, Untersuchen Sie | Calcule, Determine, Halle, Indique, Demuestre, Justifique, Valore, Interprete, Estudie | usted form as in Spanish exams (EBAU); hints, solutions, Merke, tests stay tú |
+| Operatoren (Merkkasten) | verbos de la consigna: Indicar, Calcular, Demostrar, Justificar, Valorar, Interpretar | infinitives in the box |
+| Teil A / Teil B | parte A / parte B | widget word 'Teil A' → 'Parte A' (js/buch-es/pruefung.js) |
+| Aufgabe 1 (exam), Teilaufgabe | ejercicio 1, apartado | as Spanish exams; widget words 'Aufgabe 1/2/3' |
+| Pflichtaufgabe, Wahlaufgabe | ejercicio obligatorio, ejercicio optativo | |
+| Ankreuzaufgabe, ankreuzen | pregunta de opción múltiple | "Fünfmal ankreuzen" → Cinco preguntas de opción múltiple |
+| Satz 1 / Satz 2 (Teil A) | serie 1 / serie 2 | |
+| BE (Bewertungseinheiten) | puntos | explained once: «los puntos (en alemán Bewertungseinheiten, BE)»; "(4 BE)" → (4 puntos) |
+| AFB I · Reproduzieren / AFB II · Zusammenhänge / AFB III · Beurteilen | NIVEL I · REPRODUCIR / NIVEL II · ESTABLECER RELACIONES / NIVEL III · VALORAR | Anforderungsbereich = nivel de exigencia |
+| GK / LK, Grundkurs / Leistungskurs, „Nur LK“, „GK und LK“ | curso básico / curso avanzado, «Solo avanzado», «Básico y avanzado» | kickers: CURSO BÁSICO Y AVANZADO, SOLO CURSO AVANZADO |
+| Klasse 10, BGY Klasse 11 | 10.º curso, BGY 11.º curso | |
+| MMS (modulares Mathematiksystem) | MMS | explained once: la calculadora con CAS, geometría dinámica y hoja de cálculo |
+| Hilfsmittel, ohne Hilfsmittel, Formelsammlung, Tabellen- und Formelsammlung, Zeichengeräte, Geodreieck | herramientas, sin calculadora, formulario, tablas y formulario, instrumentos de dibujo, escuadra con transportador | chips: SIN CALCULADORA, CON FORMULARIO, CON MMS |
+| Werkzeugkasten (data-toc-short Werkzeug) | Caja de herramientas (Herramientas) | |
+| Das wird geprüft / Check-in: Das brauchst du | ESTO ES LO QUE SE EXAMINA / CHECK-IN: LO QUE NECESITAS | |
+| Falle, Die Idee und die Falle | trampa, LA IDEA Y LA TRAMPA | |
+| Generalprobe, Deine Uhr | ensayo general, TU RELOJ | widget pruefungsuhr: Inicio, Pausa, Reiniciar |
+| Dieselben Ideen, neue Zahlen | LAS MISMAS IDEAS, NÚMEROS NUEVOS | |
+| Jahrgang (exam year), Notenskala, Note, Klassenarbeit, Lehrkraft, Kennziffer | convocatoria, escala de notas, nota, examen de clase, profesor o profesora, código | German marks explained once: del 1 (la mejor) al 6, con un 4 se aprueba |
+| Einheitsmatrix $E$, $(E - A)^{-1}$ | $I$, $(I - A)^{-1}$ | as mathe13lk-es; Mengeneinheit ME → u. |
+| Deckungsbeitrag, Fixkosten, variable Stückkosten | margen de contribución, costes fijos, costes variables unitarios | |
+| LE / FE (Längen-, Flächeneinheiten) | u / u² (unidades de longitud, unidades de área) | |
+| Gewinnlos / Niete (Tombola) | papeleta premiada / papeleta sin premio | letters G, N kept |
+| Pasch, Augensumme | dobles, suma de puntos | |
+| Slipanlage, Talsperre, Raddampfer, Striezelmarkt, Glühwein, Schwibbogen, Weihnachtspyramide, Erzgebirge | rampa de botadura, embalse, barco de vapor de ruedas, mercado navideño Striezelmarkt, vino caliente, arco de luces (Schwibbogen), pirámide navideña, Montes Metálicos (Erzgebirge) | place names stay (Kriebstein, Bastei, Lilienstein, Königstein, Görlitz, Pillnitz, Moritzburg) |
+| p-q-Formel | la fórmula para $x^2 + px + q = 0$ | |
+| dritte binomische Formel | suma por diferencia | |
