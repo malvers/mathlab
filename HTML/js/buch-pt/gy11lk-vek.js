@@ -20,6 +20,11 @@ window.BuchPT && BuchPT.add('gy11lk-vek', {
         'Dach': 'Telhado', 'Spurgerade': 'Traço', 'Zwei Ebenen im Raum und ihre Schnittgerade': 'Dois planos no espaço e a sua reta de interseção',
         'Mindestens ein Koeffizient von $x$, $y$, $z$ muss ungleich null sein, sonst ist es keine Ebene.': 'Pelo menos um coeficiente de $x$, $y$, $z$ tem de ser diferente de zero; caso contrário, não é um plano.',
         // book pt-22 mathegy11lk-pt:
+        // koordsys3d (lb3-1): Zylinder-/Kugelkoordinaten = coordenadas cilíndricas / esféricas, Länge / Breite = longitude / latitude, Höhe = cota
+        'Welches Koordinatensystem?': 'Que sistema de coordenadas?',
+        'Ein Punkt im Raum mit seinen Zylinder- oder Kugelkoordinaten': 'Um ponto no espaço com as suas coordenadas cilíndricas ou esféricas',
+        'Abstand $r$ zur $z$-Achse': 'Distância $r$ ao eixo $Oz$', 'Winkel $\\varphi$': 'Ângulo $\\varphi$', 'Höhe $z$': 'Cota $z$',
+        'Abstand $r$ zum Ursprung': 'Distância $r$ à origem', 'Länge $\\varphi$': 'Longitude $\\varphi$', 'Breite $\\vartheta$': 'Latitude $\\vartheta$',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk-vek/*)
@@ -35,6 +40,12 @@ window.BuchPT && BuchPT.add('gy11lk-vek', {
         [' = t$, übrig bleibt für $', ' = t$; resta, para $'], ['$ und $', '$ e $'], ['Gelöst: $', 'Resolvido: $'], ['Schnittgerade: <b>$g', 'Reta de interseção: <b>$g'],
         ['. Ganzzahliger Richtungsvektor: $', '. Vetor diretor de coordenadas inteiras: $'],
         // book pt-22 mathegy11lk-pt:
+        // koordsys3d
+        ['Zylinderkoordinaten', 'Coordenadas cilíndricas'], ['Kugelkoordinaten', 'Coordenadas esféricas'], ['Kartesisch: $P(', 'Cartesianas: $P('],
+        [')$. Alle Punkte mit demselben $r$ liegen auf einem Zylindermantel um die $z$-Achse.', ')$. Todos os pontos com o mesmo $r$ estão numa superfície cilíndrica em torno do eixo $Oz$.'],
+        ['^\\circ)$ mit der Länge $\\varphi$ und der Breite $\\vartheta$', '^\\circ)$, com a longitude $\\varphi$ e a latitude $\\vartheta$'],
+        [')$. Alle Punkte mit demselben $r$ liegen auf einer Kugel um den Ursprung; auf der Erde sind $\\varphi$ und $\\vartheta$ die geografische Länge und Breite.',
+            ')$. Todos os pontos com o mesmo $r$ estão numa superfície esférica de centro na origem; na Terra, $\\varphi$ e $\\vartheta$ são a longitude e a latitude geográficas.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
