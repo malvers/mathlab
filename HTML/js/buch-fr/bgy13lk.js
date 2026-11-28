@@ -76,6 +76,8 @@ window.BuchFR && BuchFR.add('bgy13lk', {
         ['$ wird mit $z = x^2$ zu $z^2', '$ devient, avec $z = x^2$, $z^2'], [' = 0$, Diskriminante $\\tfrac{p^2}{4} - q = ', ' = 0$, discriminant $\\tfrac{p^2}{4} - q = '],
         [' Lösungen', ' solutions'],
         // book fr-24 pruefung-fr:
+        // matrixinverse on a page without js/buch-gy11.js (Abitur 13): "Zeile I durch $…$ teilen", the piece as in js/buch-fr/gy11.js
+        ['Zeile ', 'Ligne '],
     ],
     rule: [
         // book fr-23 mathe13lk-fr:

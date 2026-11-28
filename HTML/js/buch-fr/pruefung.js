@@ -14,11 +14,15 @@
 window.BuchFR && BuchFR.add('pruefung', {
     word: {
         // book fr-24 pruefung-fr:
+        // pruefungsuhr: "Pause" is French already; "Start" and "Zurück" are rules below ("Start" is « Départ » in gy7.js, which
+        // these pages do not load, and the shared word "Zurück" → « Annuler » does not fit a clock that is reset)
     },
     phrase: [
         // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-24 pruefung-fr:
+        // pruefungsuhr: the start button (innerHTML and textContent) and the reset button
+        [/^Start$/, 'Démarrer'], [/(class="b-btn b-go">)Start</g, '$1Démarrer<'], [/(class="b-btn">)Zurück</g, '$1Réinitialiser<'],
     ]
 });

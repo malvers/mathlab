@@ -106,6 +106,9 @@ window.BuchFR && BuchFR.add('trigonometrie', {
         ['$ und $h_c = a \\times \\sin\\beta \\approx ', '$ et $h_c = a \\times \\sin\\beta \\approx '],
         ['Höhe $h = b \\times \\sin\\gamma = ', 'Hauteur $h = b \\times \\sin\\gamma = '],
         // book fr-24 pruefung-fr:
+        // pyramidekegel on pages that also load js/buch-geometrie.js (BLF 24, VA 32): its rules turn "$M = \pi r s" and "$O = "
+        // into A_L and A first, so the pieces of this file no longer match - the same French as in js/buch-fr/os9.js
+        ['$ · Oberfläche $A = ', '$ · aire totale $A = '], ['$ · Mantel $A_L = ', '$ · aire latérale $A_L = '],
     ],
     rule: [
         // pyramidekegel: the German side height h_s is the apothème h_a in French (the label is a phrase above)
