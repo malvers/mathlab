@@ -39,6 +39,7 @@ FILES = {
     'tagebuch/sprueche-tag.json': 'sprueche-tag.json',    # thought of the day, one for every day of the year
     'tagebuch/sondertage.js': 'sondertage.js',            # the fixed special days (Oct 31, Dec 31), imported only then
     'tagebuch/buehne.js': 'buehne.js',                    # Christmas Day: the theatre round the oratorio's finale, imported only then
+    'tagebuch/persoenlichkeiten.json': 'persoenlichkeiten.json',   # the personalities of the days
     'svp/svp-auth.js': 'svp/svp-auth.js',
     'svp/svp-gate.js': 'svp/svp-gate.js',
     'svp/svp-tokens.css': 'svp/svp-tokens.css',          # the colours of Hell and Grau
@@ -53,6 +54,7 @@ DIRS = {
     'tagebuch/img': 'img',            # desk, Böcklin painting
     'tagebuch/icons': 'icons',        # the app's own icon (book with ribbon), see tagebuch/icons/icon.svg
     'tagebuch/sondertage': 'sondertage',   # the scenes of the special days, one small module each (sondertage.js loads them)
+    'tagebuch/audio': 'audio',        # music boxes (birthday, farewell lullaby)
     'svp/gdw': 'svp/gdw',             # thumbnails of the thought of the week - fallback when R2 does not answer
 }
 
