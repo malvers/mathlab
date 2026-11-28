@@ -31,6 +31,9 @@ window.BuchPT && BuchPT.add('gy11lk-vek', {
         // varignon3d (lb3-2): Mittenviereck = quadrilátero dos pontos médios
         'eben': 'plano', 'räumlich': 'no espaço', 'nicht konvex': 'não convexo',
         'Ein Viereck im Raum mit dem Parallelogramm seiner Seitenmitten': 'Um quadrilátero no espaço com o paralelogramo dos pontos médios dos seus lados',
+        // ebenelim (lb3-3): Koordinatenform = equação cartesiana, Spurdreieck = triângulo dos pontos de interseção com os eixos, Durchstoßpunkt = ponto de interseção
+        'Koordinatenform': 'Equação cartesiana', 'Gerade und Ebene': 'Reta e plano',
+        'Eine Ebene im Raum mit ihrem Spurdreieck': 'Um plano no espaço com o triângulo dos seus pontos de interseção com os eixos',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk-vek/*)
@@ -66,10 +69,26 @@ window.BuchPT && BuchPT.add('gy11lk-vek', {
         ['Die Ecken $A$, $B$, $C$, $D$ liegen in einer Ebene.', 'Os vértices $A$, $B$, $C$, $D$ estão num mesmo plano.'],
         ['Die Ecken liegen <b>nicht</b> in einer Ebene: ein räumliches Viereck.', 'Os vértices <b>não</b> estão num mesmo plano: um quadrilátero no espaço.'],
         [' Das Mittenviereck ist trotzdem immer ein ebenes <b>Parallelogramm</b>.', ' Mesmo assim, o quadrilátero dos pontos médios é sempre um <b>paralelogramo</b> plano.'],
+        // ebenelim
+        ['$\\vec{u}$ und $\\vec{v}$ sind linear abhängig. Sie spannen keine Ebene auf.', '$\\vec{u}$ e $\\vec{v}$ são linearmente dependentes. Não definem um plano.'],
+        ['Die Zeilen mit ', 'Multiplicar as linhas por '],
+        [' multiplizieren und addieren. Dann fallen die Parameter weg: $r$-Glieder $', ' e somar. Então os parâmetros desaparecem: termos em $r$: $'], ['$s$-Glieder $', 'termos em $s$: $'],
+        ['Koordinatenweise: $', 'Coordenada a coordenada: $'], ['Koordinatenform: <b>$', 'Equação cartesiana: <b>$'], ['Koordinatenform $', 'Equação cartesiana $'],
+        ['$. Einsetzen von $Q(', '$. Substituindo $Q('], ['$: <b>$Q$ liegt nicht in $E$</b>.', '$: <b>$Q$ não pertence a $E$</b>.'], ['$: <b>$Q$ liegt in $E$</b>.', '$: <b>$Q$ pertence a $E$</b>.'],
+        ['In der Parameterform gehört $Q$ zu $r = ', 'Na equação vetorial, $Q$ corresponde a $r = '],
+        ['$ einsetzen: $', '$, substituindo: $'],
+        ['Der Richtungsvektor $\\vec{w}$ darf nicht der Nullvektor sein.', 'O vetor diretor $\\vec{w}$ não pode ser o vetor nulo.'],
+        ['Immer wahr: <b>$g$ liegt in $E$</b>.', 'Sempre verdadeiro: <b>$g$ está contida em $E$</b>.'],
+        ['Ein Widerspruch: <b>$g$ ist parallel zu $E$</b> und hat keinen Punkt mit ihr gemeinsam.', 'Uma contradição: <b>$g$ é paralela a $E$</b> e não tem nenhum ponto em comum com ele.'],
+        ['Genau eine Lösung $t = ', 'Exatamente uma solução $t = '], ['$: <b>Durchstoßpunkt $S(', '$: <b>ponto de interseção $S('],
     ],
     rule: [
         // pt0: notation of the module, for every book
         // book pt-5 mathe13lk-pt:
         // book pt-22 mathegy11lk-pt:
+        // ebenelim: "Spurpunkte: keine" (a plane through the origin parallel to two axes) - "keine" alone is "não tem" in funktionen.js
+        [/(Spurpunkte: )keine(?=<\/p>)/g, '$1nenhum'],
+        // ebenelim: "Die Zeilen mit 3, 4 und 6 multiplizieren" - the "und" between the factors
+        [/(Die Zeilen mit [^<$]*?) und /g, '$1 e '],
     ]
 });
