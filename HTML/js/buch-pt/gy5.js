@@ -352,5 +352,8 @@ window.BuchPT && BuchPT.add('gy5', {
         // einheiten5 (chapters 4.1, 4.2, 5): × for the steps of the stairs ("· 24" on the steps, "Rechnung: 3,5 · 24 = 84"),
         // the job of the plain-text rule of os5.js on the OS 5 pages; tied to the widget's markup
         [/(<text[^>]*>)· (?=\d)/g, '$1× '], [/<p>Rechnung: [^<]*<\/p>/g, m => m.replace(/ · /g, ' × ')],
+        // zahlschrift5 (chapter O): × in the Egyptian and Maya sums ("<p>5 · 400 + 1 · 20 + 6 · 1 = 2026</p>", the Maya labels
+        // "5 · 400"); the Roman line "M = 1000 · D = 500" keeps its separator dot
+        [/(<text[^>]*>\d+) · (?=\d)/g, '$1 × '], [/<p>\d+ · [^<]*<\/p>/g, m => m.replace(/(\d) · (?=\d)/g, '$1 × ')],
     ]
 });
