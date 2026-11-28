@@ -1434,5 +1434,5 @@ once on the start page (and the BLF / VA again in their overview chapters).
 | Fehler 1. / 2. Art, $P(X \leq 39 \mid p = 0{,}25)$ | erreur de première / deuxième espèce, $P_{p = 0{,}25}(X \leq 39)$ | no bar for the parameter |
 | Wertebereich $\{y \mid y \in \mathbb{R};\ y \geq -4\}$ | ensemble des images $[-4\,;\,+\infty[$ | intervals the French way |
 | Mantellinie $s$, Mantel $M$, Grundfläche $G$ (BLF 24, VA 32) | génératrice $g$, aire latérale $A_L$, base $\mathcal{B}$ | as the geometrie widgets; Abitur keeps $O(a)$ for a surface function as fr-2 |
-| Prüfungsuhr: Start / Zurück | Démarrer / Réinitialiser | rules in js/buch-fr/pruefung.js |
+| Prüfungsuhr: Start / Pause / Zurück | Démarrer / Pause / Annuler | « Démarrer » is a rule in js/buch-fr/pruefung.js; « Annuler » is the shared word |
 | Striezelmarkt, Schwibbogen, Weihnachtspyramide, Erzgebirge | Striezelmarkt (le marché de Noël de Dresde), Schwibbogen (arc de lumière de Noël), pyramide de Noël, monts Métallifères (Erzgebirge) | VA 33, 35 |
