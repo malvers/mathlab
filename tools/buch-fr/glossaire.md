@@ -1399,3 +1399,40 @@ text is the one of `mathe13-fr`, `mathegy12lk-fr` and `mathe12lk-fr`, taken over
 | Abitur-Training (LK) | ENTRAÎNEMENT À L’ABITUR (LK) | lab cards; « Konsultation » stays as in mathegy12lk-fr |
 
 ## pruefung-fr (Prüfungstraining Abitur, BLF, Vergleichsarbeit; block fr-24)
+
+Book 24 (Germain, 28.11.2026). The exam tasks are in the **infinitive**, as French exam papers write them (« Calculer »,
+« Justifier », « Montrer que »): the German book gives them in the exam's « Sie » tone and everything else in « du », so the
+book's own voice stays **tu**. The start page says so once. Abitur, BLF and Vergleichsarbeit stay German and are explained
+once on the start page (and the BLF / VA again in their overview chapters).
+
+| German | French | Note |
+|---|---|---|
+| Prüfungstraining Mathematik | Entraînement aux examens de mathématiques | `short`: Entraînement aux examens; header ENTRAÎNEMENT AUX EXAMENS · ABITUR · BLF · VA |
+| Interaktives Übungsbuch | Cahier d’exercices interactif | kicker |
+| Besondere Leistungsfeststellung (BLF) | BLF (Besondere Leistungsfeststellung) | start page: l’épreuve écrite commune à toute la Saxe en fin de 10e année au Gymnasium |
+| Vergleichsarbeit | Vergleichsarbeit | start page: l’épreuve commune (évaluation comparative) de 11e année au Berufliches Gymnasium |
+| Teil A / Teil B | partie A / partie B | chips PARTIE A |
+| ohne Hilfsmittel / mit Rechner und Formelsammlung | sans calculatrice / avec calculatrice et formulaire | as section 2 |
+| MMS | MMS | explained once per overview: l’outil de calcul numérique (logiciel de mathématiques) autorisé à l’examen |
+| BE (Bewertungseinheiten) | points | « (BE, Bewertungseinheiten) » once per overview; chips 45 POINTS |
+| Aufgabe 1 / Pflichtaufgabe 1 / Teilaufgabe | exercice 1 / exercice obligatoire 1 / question | |
+| Ankreuzaufgabe, ankreuzen | QCM, cocher | |
+| AFB I · Reproduzieren / II · Zusammenhänge / III · Beurteilen | AFB I · RESTITUER / AFB II · FAIRE DES LIENS / AFB III · ÉVALUER | start page: niveaux d’exigence (AFB, Anforderungsbereich) |
+| Operatoren: angeben, nennen / berechnen, bestimmen, ermitteln / zeigen, nachweisen / begründen / beurteilen / deuten | donner, citer / calculer, déterminer / montrer, démontrer / justifier / évaluer / interpréter | chapter 1 |
+| Auftakt / Werkzeugkasten / Rückblick / Test / So übst du | Introduction / Boîte à outils / Bilan / Test / Comment t’entraîner | toc letters I / O / B / T / E |
+| Das wird geprüft · Check-in: Das brauchst du | CE QUI EST ÉVALUÉ · CHECK-IN : CE DONT TU AS BESOIN | |
+| Die Idee und die Falle · Falle | L’IDÉE ET LE PIÈGE · Piège | Bilan |
+| Dieselben Ideen, neue Zahlen · Runde 1 | LES MÊMES IDÉES, DE NOUVEAUX NOMBRES · PARTIE 1 | Test |
+| Generalprobe | répétition générale | as fr-8 |
+| Notenskala, eine Vier | barème des notes, un 4 (la note « suffisant ») | « 1 est la meilleure note » said with it |
+| Kennziffer (Abitur) | code attribué à ton cours | chapter 1 |
+| Anstieg | coefficient directeur | lines $y = mx + p$ (the German $n$ becomes $p$, also the input placeholder in VA 28) |
+| Einheitsmatrix $E$ | matrice identité $I$ | chapter 13 says once « notée $E$ dans le manuel allemand »; $(I - A \,|\, I)$ |
+| Mengeneinheiten (ME) · LE · FE | u. · u.l. · u.a. | as fr-9 |
+| Pfadregeln, Baumdiagramm, Vierfeldertafel | règles des chemins, arbre pondéré, tableau croisé | as section 5 |
+| Gewinnlos ($G$), Niete ($N$) | billet gagnant ($G$), billet non gagnant ($N$) | the letters of the figures stay |
+| Fehler 1. / 2. Art, $P(X \leq 39 \mid p = 0{,}25)$ | erreur de première / deuxième espèce, $P_{p = 0{,}25}(X \leq 39)$ | no bar for the parameter |
+| Wertebereich $\{y \mid y \in \mathbb{R};\ y \geq -4\}$ | ensemble des images $[-4\,;\,+\infty[$ | intervals the French way |
+| Mantellinie $s$, Mantel $M$, Grundfläche $G$ (BLF 24, VA 32) | génératrice $g$, aire latérale $A_L$, base $\mathcal{B}$ | as the geometrie widgets; Abitur keeps $O(a)$ for a surface function as fr-2 |
+| Prüfungsuhr: Start / Zurück | Démarrer / Réinitialiser | rules in js/buch-fr/pruefung.js |
+| Striezelmarkt, Schwibbogen, Weihnachtspyramide, Erzgebirge | Striezelmarkt (le marché de Noël de Dresde), Schwibbogen (arc de lumière de Noël), pyramide de Noël, monts Métallifères (Erzgebirge) | VA 33, 35 |
