@@ -25,6 +25,12 @@ window.BuchPT && BuchPT.add('gy11lk-vek', {
         'Ein Punkt im Raum mit seinen Zylinder- oder Kugelkoordinaten': 'Um ponto no espaço com as suas coordenadas cilíndricas ou esféricas',
         'Abstand $r$ zur $z$-Achse': 'Distância $r$ ao eixo $Oz$', 'Winkel $\\varphi$': 'Ângulo $\\varphi$', 'Höhe $z$': 'Cota $z$',
         'Abstand $r$ zum Ursprung': 'Distância $r$ à origem', 'Länge $\\varphi$': 'Longitude $\\varphi$', 'Breite $\\vartheta$': 'Latitude $\\vartheta$',
+        // linabh3d (lb3-2): linear (un)abhängig = linearmente (in)dependentes, komplanar / kollinear = complanares / colineares
+        'unabhängig': 'independentes', 'komplanar': 'complanares', 'zwei parallel': 'dois colineares',
+        'Drei Vektoren vom Ursprung aus und die Ebene, die zwei von ihnen aufspannen': 'Três vetores a partir da origem e o plano definido por dois deles',
+        // varignon3d (lb3-2): Mittenviereck = quadrilátero dos pontos médios
+        'eben': 'plano', 'räumlich': 'no espaço', 'nicht konvex': 'não convexo',
+        'Ein Viereck im Raum mit dem Parallelogramm seiner Seitenmitten': 'Um quadrilátero no espaço com o paralelogramo dos pontos médios dos seus lados',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy11lk-vek/*)
@@ -46,6 +52,20 @@ window.BuchPT && BuchPT.add('gy11lk-vek', {
         ['^\\circ)$ mit der Länge $\\varphi$ und der Breite $\\vartheta$', '^\\circ)$, com a longitude $\\varphi$ e a latitude $\\vartheta$'],
         [')$. Alle Punkte mit demselben $r$ liegen auf einer Kugel um den Ursprung; auf der Erde sind $\\varphi$ und $\\vartheta$ die geografische Länge und Breite.',
             ')$. Todos os pontos com o mesmo $r$ estão numa superfície esférica de centro na origem; na Terra, $\\varphi$ e $\\vartheta$ são a longitude e a latitude geográficas.'],
+        // linabh3d (the zero vector is written $\vec{0}$ in Portuguese)
+        ['$r\\vec{a} + s\\vec{b} + t\\vec{c} = \\vec{o}$ als Gleichungssystem: $', '$r\\vec{a} + s\\vec{b} + t\\vec{c} = \\vec{0}$ como sistema de equações: $'],
+        ['Das Gauß-Verfahren führt auf die Einheitsmatrix: Nur $r = s = t = 0$ löst das System. Die Vektoren sind <b>linear unabhängig</b>, sie liegen nicht in einer Ebene.',
+            'O método de Gauss leva à matriz identidade: só $r = s = t = 0$ resolve o sistema. Os vetores são <b>linearmente independentes</b>, não estão num mesmo plano.'],
+        ['Das System hat auch Lösungen mit Zahlen, die nicht alle null sind', 'O sistema também tem soluções com números que não são todos nulos'],
+        ['. Die Vektoren sind <b>linear abhängig</b>: ', '. Os vetores são <b>linearmente dependentes</b>: '],
+        ['$\\vec{c}$ liegt in der Ebene von $\\vec{a}$ und $\\vec{b}$ (komplanar).', '$\\vec{c}$ está no plano de $\\vec{a}$ e $\\vec{b}$ (complanares).'],
+        ['$\\vec{a}$ und $\\vec{b}$ sind parallel (kollinear).', '$\\vec{a}$ e $\\vec{b}$ são colineares.'],
+        // varignon3d
+        ['Gleiche Vektoren: Zwei Gegenseiten des Mittenvierecks sind parallel und gleich lang, beide halb so lang wie die Diagonale $AC$. Ebenso $',
+            'Vetores iguais: dois lados opostos do quadrilátero dos pontos médios são paralelos e têm o mesmo comprimento, ambos metade da diagonal $[AC]$. Do mesmo modo, $'],
+        ['Die Ecken $A$, $B$, $C$, $D$ liegen in einer Ebene.', 'Os vértices $A$, $B$, $C$, $D$ estão num mesmo plano.'],
+        ['Die Ecken liegen <b>nicht</b> in einer Ebene: ein räumliches Viereck.', 'Os vértices <b>não</b> estão num mesmo plano: um quadrilátero no espaço.'],
+        [' Das Mittenviereck ist trotzdem immer ein ebenes <b>Parallelogramm</b>.', ' Mesmo assim, o quadrilátero dos pontos médios é sempre um <b>paralelogramo</b> plano.'],
     ],
     rule: [
         // pt0: notation of the module, for every book
