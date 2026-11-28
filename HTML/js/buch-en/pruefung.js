@@ -8,6 +8,9 @@
 window.BuchEN && BuchEN.add('pruefung', {
     word: {
         // book 24 pruefung-en:
+        // beverteilung: the parts of an exam come from data-teile in the German page
+        'Teil A': 'Part A', 'Aufgabe 1': 'Task 1', 'Aufgabe 2': 'Task 2', 'Aufgabe 3': 'Task 3',
+        'Stochastik': 'Statistics', 'Geometrie oder Algebra': 'Geometry or algebra'
     },
     phrase: [
         // book 24 pruefung-en:
