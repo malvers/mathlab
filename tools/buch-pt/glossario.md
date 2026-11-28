@@ -1150,3 +1150,37 @@ deutsche Text gleich ist, ist die Übersetzung von GY 12 Grundkurs pt (sonst BGY
 | Probeklausur unter Abiturbedingungen | teste de avaliação de treino em condições de Abitur | |
 
 ## pruefung-pt (Prüfungstraining Abitur, BLF, Vergleichsarbeit; block pt-24)
+
+Die Begriffe, die das Prüfungstraining (`pruefung-pt`, Santos, 28.11.2026) dazubringt. Abitur, BLF (Besondere Leistungsfeststellung)
+und Vergleichsarbeit bleiben deutsch und werden auf der Startseite einmal erklärt (BLF ≈ prova final do 10.º ano, Vergleichsarbeit ≈
+prova de aferição); Grundkurs / Leistungskurs wie pt-4. Die Aufgabenstellungen stehen im Prüfungston der exames nacionais
+(„Calcule“, „Determine“, „Mostre que“), alles andere duzt („Calcula“). Fußzeile jedes Kapitels: „edição portuguesa, segundo os tipos
+de exercícios …“. Notenskala bleibt deutsch (1 bis 6), einmal erklärt: 1 die beste, 4 die schwächste bestandene Note.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Prüfungstraining · Generalprobe | treino para exames · ensaio geral | Buchtitel „Treino para exames de Matemática“ |
+| Bewertungseinheiten (BE) | pontos | einmal „pontos (em alemão Bewertungseinheiten, BE)“; Chips „45 PONTOS“ |
+| Teil A / Teil B · ohne Hilfsmittel | parte A / parte B · sem calculadora | |
+| Pflichtaufgabe · Wahlaufgabe · Kennziffer | exercício obrigatório · exercício opcional · código | |
+| Ankreuzaufgabe · Teilaufgabe | questão de escolha múltipla · alínea | „A opção certa é a (B).“ |
+| AFB I · II · III | nível I · II · III (reproduzir · relacionar · avaliar) | auch auf der Startseite |
+| Werkzeugkasten · Rückblick · Falle | caixa de ferramentas · síntese · armadilha | |
+| Operatoren angeben · berechnen · zeigen · begründen · beurteilen · deuten | indique · calcule / determine · mostre que · justifique · avalie · interprete | |
+| MMS (Mathematisches Multimediasystem) | MMS (calculadora com CAS ou programa equivalente) | einmal erklärt; GTR = calculadora gráfica |
+| Formelsammlung · Zeichengeräte | formulário (e tabelas) · material de desenho | |
+| Hochpunkt $H$ / Tiefpunkt $T$ | máximo / mínimo relativo, ohne Buchstaben; mit Parameter $M_t$ / $N_t$ | Leinwand und SVG: Máx / Mín, $W$ → $I$ |
+| Mengeneinheit · Einheitsmatrix $E$ | u.q. · matriz identidade $I$ ($(I - A)^{-1}$) | wie pt-5 |
+| Gewinnlos / Niete | rifa premiada $P$ / rifa em branco $B$ | Lostrommel = tambor, Losbude = banca das rifas |
+| Pasch · Skatblatt | duplo · baralho de 32 cartas | |
+| Schüler $S$ / Grillstand $G$ · App $E$ / Retoure $R$ | aluno $E$ / grelhados $G$ · aplicação $E$ / devolvida $D$ | Buchstaben aus portugiesischen Wörtern |
+| Zulieferer $Z_i$ / schadhaft $S$ · dicht $D$ | fornecedor $F_i$ / defeituosa $D$ · estanque $E$ | |
+| Mensa $M$ / zufrieden $Z$ | cantina $C$ / satisfeito $S$ | |
+| rote / blaue Kugel $R$, $B$ · Engel / Bergmann | bola vermelha $V$ / azul $A$ · anjo / mineiro | |
+| Erwachsene $e$ / Kinder $k$ | adultos $a$ / crianças $c$ | |
+| Steigung in Prozent | inclinação em percentagem | $\operatorname{tg}\alpha$; $12{,}9\,\%$ ≠ $12{,}9°$ |
+| Grundwert · Prozentwert · Prozentsatz | valor de referência · valor percentual · percentagem | $G = \frac{W}{p}$ bleibt |
+| Mantellinie $s$ · Kegelmantel $M$ | geratriz $g$ · área lateral $A_L = \pi r g$ | Grundfläche $G$ → $A_b$ |
+| Slipanlage · Raddampfer · Riesenrad · Springbrunnen | rampa para barcos · barco a vapor de rodas · roda-gigante · fonte (bocal) | |
+| Weihnachtspyramide · Schwibbogen · Striezelmarkt | pirâmide de Natal · Schwibbogen (arco de velas) · Striezelmarkt, o mercado de Natal de Dresden | |
+| Namen: Lena · Tom | Leonor · Tomás | |

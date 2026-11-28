@@ -17,8 +17,9 @@ window.BuchPT && BuchPT.add('pruefung', {
         // beverteilung: the labels of data-teile (kept German in the pages, the skeleton stays the same)
         'Teil A': 'Parte A', 'Analysis': 'Análise', 'Geometrie oder Algebra': 'Geometria ou Álgebra', 'Stochastik': 'Probabilidades',
         'Aufgabe 1': 'Exercício 1', 'Aufgabe 2': 'Exercício 2', 'Aufgabe 3': 'Exercício 3',
-        // pruefungsuhr: the clock's buttons; "Zurück" here sets the clock back (the shared word says "Anular")
-        'Start': 'Iniciar', 'Pause': 'Pausa', 'Zurück': 'Repor',
+        // pruefungsuhr: the clock's buttons; "Zurück" here sets the clock back (the shared word says "Anular"); "Start" is a
+        // rule below, because gy7 has the word "Start" as "Partida" (a race start)
+        'Pause': 'Pausa', 'Zurück': 'Repor',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs pruefung/*)
@@ -27,5 +28,7 @@ window.BuchPT && BuchPT.add('pruefung', {
     rule: [
         // pt0: notation of the module, for every book
         // book pt-24 pruefung-pt:
+        // pruefungsuhr: the start button, in the widget's markup and when its label is set back
+        [/(class="b-btn b-go">)Start(<\/button>)/g, '$1Iniciar$2'], [/^Start$/, 'Iniciar'],
     ]
 });
