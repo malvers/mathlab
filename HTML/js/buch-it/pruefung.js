@@ -13,9 +13,14 @@
 window.BuchIT && BuchIT.add('pruefung', {
     word: {
         // book it-24 pruefung-it:
+        // pruefungsuhr: the pause label of the clock ('Zurück' stays the shared 'Annulla' of js/buch-it.js)
+        'Pause': 'Pausa',
     },
     phrase: [
         // book it-24 pruefung-it:
+        // pruefungsuhr: the start button of a stopwatch; a phrase and not a word, because js/buch-it/gy7.js has the
+        // word 'Start' → 'Partenza' for the start point of its number line (different meaning, never on the same page)
+        ['Start', 'Avvia'],
     ],
     rule: [
         // book it-24 pruefung-it:

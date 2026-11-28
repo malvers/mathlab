@@ -1049,3 +1049,34 @@ same as in mathe13, mathe12lk, mathegy12lk or mathegy11lk, the Italian of those 
 | Gebiet 1–4 (abi) | Blocco 1–4 | as section 2 |
 
 ## pruefung-it (Prüfungstraining Abitur, BLF, Vergleichsarbeit; block it-24)
+
+Agnesi, 28.11.2026: decisions made while translating the training book; nothing above was changed. Where the German text is
+the same as in a sibling Italian edition (widget boxes, lab cards), that Italian was taken over unchanged.
+
+| German | Italian | Note |
+|---|---|---|
+| Prüfungstraining Mathematik · Abitur, BLF und Vergleichsarbeit | Allenamento all’esame di matematica · Abitur, BLF e Vergleichsarbeit | `short`: Allenamento all’esame |
+| Interaktives Übungsbuch | Eserciziario interattivo | kicker: ESERCIZIARIO INTERATTIVO · SASSONIA |
+| BLF (Besondere Leistungsfeststellung), Vergleichsarbeit (VA) | stay German | start page: «verifica speciale del rendimento», 10ª classe del Gymnasium; «prova comparativa», 11ª classe del Berufliches Gymnasium |
+| Aufgaben im Prüfungston („Berechnen Sie“) | infinitive («Calcolare …», «Dimostrare che …») | as in Italian exam papers; everything else is «tu», said once on the start page |
+| Aufgabe 1 · Pflichtaufgabe · Teilaufgabe | esercizio 1 · esercizio obbligatorio · richiesta | «le richieste da a) a d)» |
+| BE (Bewertungseinheiten) | punti | explained once: «unità di valutazione (BE, qui: punti)»; chips «45 PUNTI», «(4 punti)» |
+| AFB I · Reproduzieren / II · Zusammenhänge / III · Beurteilen | AFB I · RIPRODURRE / AFB II · COLLEGARE / AFB III · VALUTARE | AFB = Anforderungsbereich, explained on the start page |
+| Teil A · ohne Hilfsmittel / Teil B · mit MMS und Formelsammlung | parte A · senza calcolatrice / parte B · con MMS e formulario | MMS: «il sistema matematico digitale ammesso all’esame» (chapter 18) |
+| Grundkurs (GK), Leistungskurs (LK), „Nur LK“ | stay; «GK e LK», «Solo LK» | |
+| Klasse 10, BGY Klasse 11 | 10ª classe, BGY, 11ª classe | `when` in kapitel.js |
+| Auftakt · Werkzeugkasten · Rückblick · Test (toc letters A, W, R, T) | Introduzione · Strumenti (band: CASSETTA DEGLI ATTREZZI) · Riepilogo · Test (I, S, R, T) | |
+| Das wird geprüft · Check-in: Das brauchst du | CHE COSA VIENE VERIFICATO · CHECK-IN: QUELLO CHE TI SERVE | |
+| Die Idee und die Falle · Falle | L’IDEA E LA TRAPPOLA · Trappola | |
+| Generalprobe · Satz 1 / 2 (Teil A) | prova generale · serie 1 / 2 | |
+| Ankreuzaufgabe · fünfmal ankreuzen | domanda a risposta multipla · cinque risposte multiple | |
+| Operatoren: angeben, berechnen, zeigen, begründen, beurteilen, deuten | indicare, calcolare, mostrare/dimostrare, giustificare, valutare, interpretare | chapter 1 |
+| Note 1–6, „eine Vier“ | voto 1–6, «un 4, la sufficienza nella scala tedesca da 1 (ottimo) a 6» | chapters 18, 27 |
+| Kennziffer (des Kurses) | codice | chapter 1 |
+| Anstieg | pendenza | |
+| FE, LE, ME | unità di superficie, unità, unità (in SVG labels: u.) | |
+| Einheitsmatrix E, (E − A)⁻¹ | I, (I − A)⁻¹ | as mathe13lk-it, chapter 13 |
+| Fehler 1. / 2. Art, Annahmebereich | errore di I / II specie, regione di accettazione | |
+| Pruefungsuhr: Start, Pause, Zurück | Avvia, Pausa, Annulla | js/buch-it/pruefung.js; 'Start' as a phrase (gy7.js has the word 'Start' → 'Partenza'), 'Zurück' stays the shared 'Annulla' |
+| Striezelmarkt, Schwibbogen, Weihnachtspyramide, Erzgebirge | lo Striezelmarkt (mercatino di Natale di Dresda), Schwibbogen (arco di candele), piramide di Natale, Monti Metalliferi | chapters 33, 35 |
+| Dresden, Leipzig, Görlitz, Bastei, Lilienstein, Königstein, Kriebstein, Pillnitz, Moritzburg | Dresda, Lipsia, the others stay | |
