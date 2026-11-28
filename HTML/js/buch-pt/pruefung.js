@@ -14,6 +14,11 @@ window.BuchPT && BuchPT.add('pruefung', {
     word: {
         // pt0: the helpers of the module (outside every widget; check.mjs pruefung/*)
         // book pt-24 pruefung-pt:
+        // beverteilung: the labels of data-teile (kept German in the pages, the skeleton stays the same)
+        'Teil A': 'Parte A', 'Analysis': 'Análise', 'Geometrie oder Algebra': 'Geometria ou Álgebra', 'Stochastik': 'Probabilidades',
+        'Aufgabe 1': 'Exercício 1', 'Aufgabe 2': 'Exercício 2', 'Aufgabe 3': 'Exercício 3',
+        // pruefungsuhr: the clock's buttons; "Zurück" here sets the clock back (the shared word says "Anular")
+        'Start': 'Iniciar', 'Pause': 'Pausa', 'Zurück': 'Repor',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs pruefung/*)
