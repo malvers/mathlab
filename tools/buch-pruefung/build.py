@@ -112,11 +112,16 @@ def fig_html(svg, caption):
 
 
 def part_html(text):
-    """A part of a task; the multiple-choice parts carry their options after bullets."""
-    head, *opts = text.split(" • ")
-    out = "<p>%s</p>" % md(head)
-    if opts:
-        out += '<ul class="b-optionen">%s</ul>' % "".join("<li>%s</li>" % md(o) for o in opts)
+    """A part of a task; the multiple-choice parts carry their options after bullets. The Vergleichsarbeit sheets put two
+    Ankreuz items into one part, joined by " ‖ " (tools/aufgaben/va/teila*.py SEP: their sheet allows four parts at most) -
+    in the book each item is a question of its own with its own options, else the second stem ended up inside option (E)
+    of the first (Doc, 28.11.2026: "ja, reparieren")."""
+    out = ""
+    for item in re.split(r"\s*‖\s*", text):
+        head, *opts = item.split(" • ")
+        out += "<p>%s</p>" % md(head)
+        if opts:
+            out += '<ul class="b-optionen">%s</ul>' % "".join("<li>%s</li>" % md(o) for o in opts)
     return out
 
 
