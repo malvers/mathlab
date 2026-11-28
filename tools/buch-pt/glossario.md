@@ -1036,4 +1036,44 @@ andere Bücher gehen auf die portugiesische Ausgabe (BGY 11, BGY 12, FOS 11). Sc
 
 ## mathegy11lk-pt (GY 11 Leistungskurs, block pt-22)
 
+Die Begriffe, die GY 11 Leistungskurs (`mathegy11lk-pt`, 27./28.11.2026) zu `mathegy11-pt` (pt-9) und den BGY-LK-Büchern (pt-4, pt-5)
+dazubringt. Die Kapitel 3.1–4.3 sind dort, wo der deutsche Text Zeile für Zeile gleich ist, aus `mathegy11-pt`, `mathe12lk-pt` und
+`mathe13lk-pt` übernommen. Punkte $(1, 2, 3)$, mit Dezimalkomma $(2{,}5; 4; 3)$; Norm $\|\vec a\|$, Nullvektor $\vec 0$ (auch im Widget `linabh3d`);
+$P(B|A)$ statt $P_A(B)$; $X \sim B(n, p)$, mit Dezimalkomma $B(10; 0{,}25)$.
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Leistungskurs / Grundkurs | Leistungskurs (curso de nível avançado) / Grundkurs (curso de nível base) | bleibt Deutsch, einmal auf der Startseite erklärt |
+| ε-δ-Definition · Streifen | definição com ε e δ · faixa | Widget `epsdelta` |
+| h-Methode | método de $h$ | |
+| bestimmt divergent | divergente (tende para infinito) | |
+| Polynomdivision · schiefe Asymptote | divisão de polinómios · assíntota oblíqua | |
+| Zwischenwertsatz · Einschließung | teorema de Bolzano · enquadramento | |
+| Differenzen- / Differentialquotient | razão incremental (taxa média de variação) / derivada num ponto | |
+| Schrittweite | passo | Widget `ablnachdef` |
+| Stammfunktion | primitiva | wie pt-5 |
+| Sattelpunkt · Ortskurve | ponto de sela · lugar geométrico | |
+| Hoch-/Tiefpunkt $H$, $T$ · Wendepunkt $W$ | máximo / mínimo (ohne Buchstaben) · ponto de inflexão $I$ | |
+| knickfrei · krümmungsruckfrei | sem bico · sem salto de curvatura | Kapitel 1.5 |
+| Typ $(m,n)$ · Einheitsmatrix $E$ | tipo $m \times n$ · matriz identidade $I$ | |
+| Verflechtung · Gozinto-Graph · ME | processo de produção · gozintograma · u.q. | auch in den Widgets (`[' ME', ' u.q.']` in gy11lk.js) |
+| Drehachse · $x$-Achse | eixo de rotação · eixo $Ox$ | Widget `drehraum` |
+| Bisektion · Fixpunktiteration · anziehend / abstoßend · Spinnennetz | método da bissecção · iteração do ponto fixo · atrativo / repulsivo · teia de aranha | Satz von Banach = teorema do ponto fixo de Banach |
+| Zylinder- / Kugelkoordinaten · Länge / Breite | coordenadas cilíndricas / esféricas · longitude / latitude | Widget `koordsys3d` |
+| Kugel (Fläche) | superfície esférica | |
+| geschlossener Vektorzug · Koeffizientenvergleich | cadeia fechada de vetores · comparação de coeficientes | |
+| Schwerpunkt $S$ | baricentro $G$ | wie pt-4 |
+| Mittenviereck | quadrilátero dos pontos médios | Widget `varignon3d` |
+| parameterfreie Form · Achsenabschnittsform · Spurdreieck | forma sem parâmetro(s) · equação segmentária · triângulo dos pontos de interseção com os eixos | |
+| First (Dach) · Streichen (Geologie) | cumeeira · direção da camada | |
+| statistischer / Laplace’scher / axiomatischer Wahrscheinlichkeitsbegriff | conceito frequencista / de Laplace / axiomático | Kolmogorov |
+| Additionssatz · Produktregel (Abzählen) | probabilidade da reunião · princípio fundamental da contagem | |
+| Fakultät · Binomialkoeffizient | fatorial · coeficiente binomial ($n$ escolhe $k$) | |
+| Geburtstagsproblem · Ziegenproblem | problema dos aniversários · problema de Monty Hall | |
+| außerhalb $A$ / Bus $B$ | mora fora $F$ / autocarro $A$ | Kapitel 4.1, 4.2 |
+| gerade $G$ · mindestens 4 $V$ · höchstens 2 $Z$ | $A$ · $B$ · $C$ | Kapitel 4.2 |
+| Brille $B$ / linkshändig $L$ | óculos $O$ / canhoto $C$ | |
+| Bernoulli-Kette · Treffer / Niete ($T$/$N$) | sucessão de provas de Bernoulli · sucesso / insucesso ($S$/$I$) | |
+| Galtonbrett · Fach | tabuleiro de Galton · compartimento | |
+
 ## mathegy12lk-pt (GY 12 Leistungskurs, block pt-23)
