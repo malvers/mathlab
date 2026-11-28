@@ -10,11 +10,11 @@ window.BUCH = {
     lang: 'fr',
     // the dedication page at the front of the print edition (js/buch-druck.js)
     widmung: 'Pour Franziska et Franz',
-    description: 'Cahier d’exercices interactif pour les examens de Saxe : l’Abitur au Berufliches Gymnasium, la Besondere Leistungsfeststellung (BLF) en 10e année et la Vergleichsarbeit en 11e année au Berufliches Gymnasium, 35 chapitres avec 96 exercices au format de l’examen, des solutions, des pièges, des widgets et des autoévaluations.',
+    description: 'Cahier d’exercices interactif pour les examens de Saxe : l’Abitur au Berufliches Gymnasium, la Besondere Leistungsfeststellung (BLF) en 10e année et la Vergleichsarbeit en 11e année au Berufliches Gymnasium, 35 chapitres avec 96 exercices au format de l’examen, des solutions, des pièges, des widgets et des autoévaluations.',
     chapters: [
         { file: 'abi-ueberblick.html', lb: 'Abitur · Vue d’ensemble', k: '1', title: 'Comment l’Abitur est construit',
           sub: 'Partie A et partie B, points, types d’exercices, verbes de consigne, ordre d’entraînement', when: 'GK et LK', ustd: 0 },
-        { file: 'abi-teila.html', lb: 'Abitur · Partie A', k: '2', title: 'Partie A : sans calculatrice',
+        { file: 'abi-teila.html', lb: 'Abitur · Partie A', k: '2', title: 'Partie A : sans calculatrice',
           sub: 'QCM, questions courtes sur l’aire, le plan, la pyramide, le tirage sans remise', when: 'GK et LK', ustd: 0 },
         { file: 'abi-analysis.html', lb: 'Abitur · Analyse', k: '3', title: 'Analyse',
           sub: 'Étude de fonction, tangentes parallèles, fonction exponentielle en contexte', when: 'GK et LK', ustd: 0 },
@@ -45,7 +45,7 @@ window.BUCH = {
         { file: 'abi-stochastik-lk.html', lb: 'Abitur · Probabilités', k: '16', title: 'Probabilités en Leistungskurs',
           sub: 'Contrôles en plusieurs étapes, Bayes, tests et erreurs de première et de deuxième espèce', when: 'LK seulement', ustd: 0 },
         { file: 'abi-simulation.html', lb: 'Abitur · Répétition générale', k: '17', title: 'Répétition générale partie B',
-          sub: 'Un examen complet, avec le temps et les outils du jour J : 25 + 15 + 15 points', when: 'Grundkurs', ustd: 0 },
+          sub: 'Un examen complet, avec le temps et les outils du jour J : 25 + 15 + 15 points', when: 'Grundkurs', ustd: 0 },
         { file: 'blf-ueberblick.html', lb: 'BLF · Vue d’ensemble', k: '18', title: 'Comment la BLF est construite',
           sub: '90 minutes, 45 points, partie A sans calculatrice, partie B avec le MMS, barème des notes', when: '10e année', ustd: 0 },
         { file: 'blf-teila.html', lb: 'BLF · Partie A', k: '19', title: 'Partie A, série 1',
@@ -59,11 +59,11 @@ window.BUCH = {
         { file: 'blf-trigonometrie.html', lb: 'BLF · Partie B', k: '23', title: 'Trigonométrie',
           sub: 'Loi des sinus, loi des cosinus, aire, relèvement et photographie', when: '10e année', ustd: 0 },
         { file: 'blf-koerper.html', lb: 'BLF · Partie B', k: '24', title: 'Solides et surfaces',
-          sub: 'Serre, toit de verre, cornet de glace : volume, aire totale, comparaison', when: '10e année', ustd: 0 },
+          sub: 'Serre, toit de verre, cornet de glace : volume, aire totale, comparaison', when: '10e année', ustd: 0 },
         { file: 'blf-stochastik.html', lb: 'BLF · Partie B', k: '25', title: 'Données et hasard',
           sub: 'Diagramme circulaire, moyenne pondérée, tirage sans remise, jeux équitables', when: '10e année', ustd: 0 },
         { file: 'blf-simulation.html', lb: 'BLF · Répétition générale', k: '26', title: 'Répétition générale partie B',
-          sub: 'La partie B avec le temps et les outils du jour J : 10 + 6 + 14 points', when: '10e année', ustd: 0 },
+          sub: 'La partie B avec le temps et les outils du jour J : 10 + 6 + 14 points', when: '10e année', ustd: 0 },
         { file: 'va-ueberblick.html', lb: 'Vergleichsarbeit · Vue d’ensemble', k: '27', title: 'Comment la Vergleichsarbeit est construite',
           sub: '90 minutes, 45 points, partie A sans calculatrice, partie B avec le MMS, barème des notes', when: 'BGY 11e année', ustd: 0 },
         { file: 'va-teila.html', lb: 'Vergleichsarbeit · Partie A', k: '28', title: 'Partie A, série 1',
@@ -81,6 +81,6 @@ window.BUCH = {
         { file: 'va-lgs.html', lb: 'Vergleichsarbeit · Partie B', k: '34', title: 'Systèmes d’équations linéaires',
           sub: 'Bateau à aubes vers Pillnitz, nourriture au zoo de Leipzig avec la méthode de Gauss, une location de vélos avec paramètre libre', when: 'BGY 11e année', ustd: 0 },
         { file: 'va-simulation.html', lb: 'Vergleichsarbeit · Répétition générale', k: '35', title: 'Répétition générale partie B',
-          sub: 'La partie B avec le temps et les outils du jour J : 8 + 7 + 15 points', when: 'BGY 11e année', ustd: 0 }
+          sub: 'La partie B avec le temps et les outils du jour J : 8 + 7 + 15 points', when: 'BGY 11e année', ustd: 0 }
     ]
 };
