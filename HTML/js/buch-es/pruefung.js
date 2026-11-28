@@ -12,11 +12,19 @@
 window.BuchES && BuchES.add('pruefung', {
     word: {
         // book es-24 pruefung-es:
+        // beverteilung: the parts of an exam (data-teile in the overview chapters)
+        'Teil A': 'Parte A', 'Analysis': 'Análisis', 'Geometrie oder Algebra': 'Geometría o álgebra', 'Stochastik': 'Probabilidad',
+        'Aufgabe 1': 'Ejercicio 1', 'Aufgabe 2': 'Ejercicio 2', 'Aufgabe 3': 'Ejercicio 3',
+        // pruefungsuhr: the clock of a rehearsal ('Start' as in js/buch-es/gy7.js)
+        'Start': 'Inicio', 'Pause': 'Pausa',
     },
     phrase: [
         // book es-24 pruefung-es:
     ],
     rule: [
         // book es-24 pruefung-es:
+        // pruefungsuhr: its second button "Zurück" resets the clock, so "Reiniciar" and not the shared "Deshacer" (undo);
+        // the label is already parked as \u0003n\u0004 when the rules run, and only the clock ends with two b-btn buttons
+        [/(<button type="button" class="b-btn">)\u0003\d+\u0004(<\/button>)$/, '$1Reiniciar$2'],
     ]
 });
