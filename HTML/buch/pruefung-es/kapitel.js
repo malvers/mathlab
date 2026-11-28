@@ -2,13 +2,14 @@
  * (buch/pruefung/): Abitur first, then the BLF, then the Vergleichsarbeit, as in the German book.
  * Doc, 28.11.2026: the training book in all five languages (package arch3-24, Pastor).
  * Terms as in tools/buch-es/glosario.md (block "pruefung-es"). Single source for the table of contents (index.html) and
- * the previous/next cards at the end of every chapter.
+ * the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Preparación de exámenes de matemáticas · Abitur, BLF y Vergleichsarbeit',
     short: 'Preparación de exámenes',
     lang: 'es',
-    druck: false,
+    // the dedication page at the front of the print edition (js/buch-druck.js), as in the German book
+    widmung: 'Para Franziska y Franz',
     description: 'Libro interactivo de ejercicios para los exámenes de Sajonia: el Abitur del Berufliches Gymnasium, la BLF (Besondere Leistungsfeststellung) de 10.º curso y la Vergleichsarbeit de 11.º curso del Berufliches Gymnasium, 35 capítulos con 96 ejercicios en formato de examen, soluciones, trampas típicas, widgets y autoevaluaciones.',
     chapters: [
         { file: 'abi-ueberblick.html', lb: 'Abitur · Visión general', k: '1', title: 'Así es el Abitur',

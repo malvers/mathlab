@@ -1,13 +1,12 @@
 /* kapitel.js — the chapters of the Italian edition of "Prüfungstraining Mathematik · Abitur, BLF und Vergleichsarbeit"
  * (buch/pruefung/), Abitur first, then the BLF, then the Vergleichsarbeit (Agnesi, block it-24, 28.11.2026).
  * Terms as in tools/buch-it/glossario.md (section "pruefung-it"). Single source for the table of contents (index.html) and
- * the previous/next cards at the end of every chapter. No print edition yet (druck: false).
+ * the previous/next cards at the end of every chapter. Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Allenamento all’esame di matematica · Abitur, BLF e Vergleichsarbeit',
     short: 'Allenamento all’esame',
     lang: 'it',
-    druck: false,
     // the dedication page at the front of the print edition (js/buch-druck.js)
     widmung: 'Per Franziska e Franz',
     description: 'Eserciziario interattivo per gli esami in Sassonia: l’Abitur al Berufliches Gymnasium, la Besondere Leistungsfeststellung (BLF) nella 10ª classe e la Vergleichsarbeit nell’11ª classe del Berufliches Gymnasium, 35 capitoli con 96 esercizi nel formato d’esame, soluzioni, trappole, widget e autoverifiche.',

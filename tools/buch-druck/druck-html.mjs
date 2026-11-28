@@ -10,7 +10,8 @@
  * book: the cover of its start page (index.html; the kicker gets "· PRINT EDITION" as the German one gets "· DRUCKAUSGABE"),
  * the page title, and the scripts its pages load, in their order - the dictionaries js/buch-<lang>.js and js/buch-<lang>/*.js
  * included. "So arbeitest du mit diesem Buch" is translated here (FRONT): the German books differ only in the clause of its
- * first sentence (CLAUSE), so a new German clause stops this script until it has its four translations.
+ * first sentence (CLAUSE), so a new German clause stops this script until it has its four translations; the training book
+ * (pruefung) also in its chapter plan (FRONT_PRUEFUNG, chosen by the "Werkzeugkasten" of its German page).
  * The book's kapitel.js loses "druck: false": the overview (O) and the PDF button of js/buch.js are on from then on.
  * The fixed texts of the pages themselves (contents, solutions, chapter heads) are in js/buch-druck.js.
  * Afterwards: node tools/buch-seiten/seitenbilder.mjs --alle (after the push) makes the page pictures and the PDFs.
@@ -122,6 +123,47 @@ const CLAUSE = {
         it: 'costruire ogni termine come albero di calcolo, far girare mille volte ogni ruota della fortuna e allungare ogni triangolo',
         fr: 'construire chaque terme comme un arbre de calcul, faire tourner mille fois chaque roue de la fortune et étirer chaque triangle',
     },
+    // the training book (pruefung, 28.11.2026); pt is ready for the day the Portuguese editions get a print edition (not in LANGS yet)
+    'Graphen verschieben und Ergebnisse eintippen': {
+        en: 'drag graphs and type in your results',
+        es: 'mover gráficas y escribir tus resultados',
+        it: 'spostare grafici e scrivere i tuoi risultati',
+        fr: 'déplacer des courbes et saisir des résultats',
+        pt: 'deslocar gráficos e escrever os teus resultados',
+    },
+};
+// The training book has its own chapter plan (Auftakt, Werkzeugkasten, three tasks, Rückblick, Test) and the requirement levels
+// AFB I-III instead of the textbook's levels: its German page names the "Werkzeugkasten", and then the first paragraph of FRONT
+// is followed by these three, in the terms of the translated start pages (#sogehts)
+const FRONT_PRUEFUNG = {
+    en: ['Every chapter has the same structure: an <b>Opener</b> with what is tested and a check-in, a <b>Toolkit</b> with a key-point ' +
+        'box and a widget, <b>three tasks</b> in exam format, <b>Looking back</b> with the idea and the trap of each task, and a ' +
+        '<b>Test</b> with new numbers.',
+        'The tasks follow the requirement levels: ' + LVL(1) + ' Level I, ' + LVL(2) + ' Level II, ' + LVL(3) + ' Level III. ' +
+        'The solutions to all tasks and self-checks are in the appendix. The tasks are worded as in the exam, as instructions such as “Calculate”.',
+        'Whatever is in an orange <b>key-point box</b>, you need to be able to recall in the exam. Everything else helps you to understand it.'],
+    es: ['Todos los capítulos tienen la misma estructura: una <b>introducción</b> con lo que se examina y un check-in, la <b>caja de ' +
+        'herramientas</b> con el recuadro «Recuerda» y un widget, <b>tres ejercicios</b> en formato de examen, un <b>repaso final</b> ' +
+        'con la idea y la trampa de cada ejercicio y un <b>test</b> con números nuevos.',
+        'Los ejercicios siguen los niveles de exigencia: ' + LVL(1) + ' nivel I, ' + LVL(2) + ' nivel II, ' + LVL(3) + ' nivel III. ' +
+        'Las soluciones de todos los ejercicios y autoevaluaciones están en el anexo. Los enunciados están redactados en el tono del ' +
+        'examen, de usted («Calcule»).',
+        'Lo que está en un recuadro naranja <b>«Recuerda»</b> tienes que saberlo de memoria en el examen. Todo lo demás te ayuda a entenderlo.'],
+    it: ['Tutti i capitoli hanno la stessa struttura: un’<b>introduzione</b> con ciò che viene verificato e un check-in, la ' +
+        '<b>cassetta degli attrezzi</b> con il riquadro «Ricorda» e un widget, <b>tre esercizi</b> nel formato d’esame, un ' +
+        '<b>riepilogo</b> con l’idea e la trappola di ogni esercizio e un <b>test</b> con numeri nuovi.',
+        'Gli esercizi seguono i livelli di richiesta: ' + LVL(1) + ' AFB I, ' + LVL(2) + ' AFB II, ' + LVL(3) + ' AFB III. ' +
+        'Le soluzioni di tutti gli esercizi e delle autoverifiche sono in appendice. Gli esercizi sono formulati come all’esame, ' +
+        'cioè all’infinito («Calcolare …»).',
+        'Quello che sta in un riquadro arancione <b>«Ricorda»</b> devi saperlo richiamare all’esame. Tutto il resto ti aiuta a capirlo.'],
+    fr: ['Tous les chapitres ont la même structure' + NB + ': une <b>introduction</b> avec ce qui est évalué et un check-in, une ' +
+        '<b>boîte à outils</b> avec l’encadré «' + NB + 'À retenir' + NB + '» et un widget, <b>trois exercices</b> au format de ' +
+        'l’examen, un <b>bilan</b> avec l’idée et le piège de chaque exercice et un <b>test</b> avec de nouveaux nombres.',
+        'Les exercices suivent les niveaux d’exigence' + NB + ': ' + LVL(1) + ' AFB I, ' + LVL(2) + ' AFB II, ' + LVL(3) + ' AFB III. ' +
+        'Les solutions de tous les exercices et des autoévaluations se trouvent en annexe. Les exercices sont rédigés dans le ton de ' +
+        'l’examen, à l’infinitif («' + NB + 'Calculer' + NB + '»).',
+        'Ce qui figure dans un encadré orange <b>«' + NB + 'À retenir' + NB + '»</b>, tu dois savoir le restituer à l’examen. ' +
+        'Tout le reste t’aide à le comprendre.'],
 };
 
 // the <div class="b-titel…"> block of a page, by counting its divs
@@ -168,7 +210,8 @@ function make(book) {
     const front = ger.match(/<section class="d-front">[\s\S]*?<\/section>/);
     const clause = front && front[0].replace(/\s+/g, ' ').match(/als Online-Buch, in dem du (.+?) kannst, und als Druckausgabe/);
     if (!clause || !CLAUSE[clause[1]]) throw new Error(base + ': neuer Satz in „So arbeitest du“, bitte in CLAUSE übersetzen: ' + (clause ? clause[1] : '?'));
-    const [h1, ...ps] = FRONT[lang](CLAUSE[clause[1]][lang]);
+    let [h1, ...ps] = FRONT[lang](CLAUSE[clause[1]][lang]);
+    if (/<b>Werkzeugkasten<\/b>/.test(front[0])) ps = [ps[0], ...FRONT_PRUEFUNG[lang]];
     const frontHtml = '<section class="d-front">\n        <h1>' + h1 + '</h1>\n        <div class="b-text">\n' +
         ps.map(p => '            <p>' + p + '</p>\n').join('') + '        </div>\n    </section>';
 

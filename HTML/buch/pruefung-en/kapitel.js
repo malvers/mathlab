@@ -3,13 +3,12 @@
  * Doc wants the training book in five languages (book 24, pruefung-en; Hardy translates, Marie orchestrates, 28.11.2026).
  * The names of the three Saxon exams stay German; the start page explains each of them once.
  * Single source for the table of contents (index.html) and the previous/next cards at the end of every chapter.
- * No print edition yet (druck: false).
+ * Print edition: druck.html, made by tools/buch-druck/druck-html.mjs.
  */
 window.BUCH = {
     title: 'Exam Training in Mathematics · Abitur, BLF and Vergleichsarbeit',
     short: 'Exam Training',
     lang: 'en',
-    druck: false,
     // the dedication page at the front of the print edition (js/buch-druck.js), as in the German book
     widmung: 'For Franziska and Franz',
     description: 'Interactive exercise book for the exams in Saxony: the Abitur at the Berufliches Gymnasium (vocational grammar school), the BLF (special performance assessment) in Year 10 and the Vergleichsarbeit (state-wide comparison test) in Year 11 at the Berufliches Gymnasium, 35 chapters with 96 tasks in exam format, solutions, traps, widgets and self-checks.',
