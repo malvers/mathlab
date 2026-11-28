@@ -14,11 +14,15 @@
 window.BuchFR && BuchFR.add('pruefung', {
     word: {
         // book fr-24 pruefung-fr:
+        // pruefungsuhr: "Pause" is French already, "Zurück" keeps the shared word « Annuler » of js/buch-fr.js (a whole label is
+        // looked up before any rule runs); "Start" is a rule below, tied to the clock: « Départ » in gy7.js means a starting point
     },
     phrase: [
         // book fr-24 pruefung-fr:
     ],
     rule: [
         // book fr-24 pruefung-fr:
+        // pruefungsuhr: the start button, in the widget's innerHTML and in go.textContent after a pause
+        [/^Start$/, 'Démarrer'], [/(class="b-btn b-go">)Start</g, '$1Démarrer<'],
     ]
 });
