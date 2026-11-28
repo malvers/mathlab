@@ -14,6 +14,8 @@ the scripts and styles it loads change (Doc, 17.09.2026).
 The plans' "Notizen" button opens Doc's DocMitschrift of a week from /__mitschrift/ (docmitschrift-app/mitschrift_seite.py,
 school data from ~/Documents/mitschrift, so it exists only here, never on docalvers.de); /__mitschrift/tag shows a day,
 and a POST to /__mitschrift/papierkorb hides one section of it, never deleting anything.
+DocCal's sunrise button opens Doc's morning briefing of a day from /__briefing/YYYY-MM-DD (~/Documents/briefing, read
+only, never online): this Mac and Doc's own devices through Tailscale Serve, nobody else.
 
     python3 serve.py            # http://localhost:8765, serves the HTML/ folder
     python3 serve.py 8080       # other port
@@ -254,6 +256,39 @@ BADGE = (b'<div id="local-badge" aria-hidden="true"></div>'
          b'<script>' + FRAME_JS.encode('utf-8') + b'</script>\n')
 
 BODY_END = re.compile(rb'</body\s*>', re.IGNORECASE)
+
+# Doc's morning briefings (~/bin/morgen-briefing.sh writes them at 05:00) - only ever read (Handler.briefing_page)
+BRIEFING_DIR = os.path.join(os.path.expanduser('~'), 'Documents', 'briefing')
+# the day without a briefing: the briefings' own look (light / dark with the system), Orbitron for the line
+BRIEFING_NONE = """<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Kein Briefing</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #f6f7fb; --card: #ffffff; --ink: #1d2433; --muted: #5b6475; --line: #dfe3ec; --gold: rgb(245, 194, 66); }
+@media (prefers-color-scheme: dark) { :root { --bg: #0f1522; --card: #172033; --ink: #e8ecf4; --muted: #9aa5b8; --line: #2a3550; } }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: var(--bg); color: var(--ink);
+       font: 17px/1.5 Arial, Helvetica, sans-serif; }
+main { max-width: 460px; padding: 28px 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); text-align: center; }
+svg { width: 44px; height: 44px; fill: none; stroke: var(--gold); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+h1 { margin: 12px 0 6px; font: 700 1.15rem/1.3 Orbitron, Arial, sans-serif; letter-spacing: .02em; }
+p { margin: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 19h19M7 19a5 5 0 0 1 10 0M12 6.5V10M5.7 11.2l1.6 1.6M18.3 11.2l-1.6 1.6"/></svg>
+<h1>Für diesen Tag gibt es kein Briefing</h1>
+<p>{when}</p>
+</main>
+</body>
+</html>
+"""
 
 # Red lambda for local tabs. Every page in HTML/ links resources/favicon.svg and
 # resources/favicon.png, so swapping the two files here paints the tab icon red
@@ -506,6 +541,60 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 pass
         return bool(me.get('login')) and login == me['login'] and host == me.get('host')
 
+    def briefing_page(self):
+        """Doc's morning briefing of one day for DocCal's sunrise button (Doc, 28.11.2026: "dass ich da immer direkt zum
+        Briefing des jeweiligen Tages komme").
+
+        /__briefing/YYYY-MM-DD shows ~/Documents/briefing/briefing-YYYY-MM-DD.html - school data and private things,
+        so they live only on this Mac and are never copied anywhere: read here, never written, moved or listed. Only
+        that exact name is served (a strict date, no other file, no directory listing); today without one falls back
+        to heute.html when it is from today, like ~/bin/morgen-briefing-zeigen.sh. A missing day gets a small page
+        saying so. Like DocMitschrift: pages of this server, and Doc's own devices through Tailscale Serve.
+        """
+        if not (self.local_caller() or self.tailnet_owner()):
+            return self.send_error(403, 'local pages only')
+        import datetime
+        from urllib.parse import urlsplit
+        m = re.fullmatch(r'/__briefing/(\d{4}-\d{2}-\d{2})/?', urlsplit(self.path).path)
+        try:
+            day = datetime.date.fromisoformat(m.group(1)) if m else None
+        except ValueError:
+            day = None
+        if not day:
+            return self.send_error(404, 'File not found')
+        here = os.path.realpath(BRIEFING_DIR)
+        page = os.path.realpath(os.path.join(here, 'briefing-%s.html' % day.isoformat()))
+        if not os.path.isfile(page) and day == datetime.date.today():
+            alt = os.path.realpath(os.path.join(here, 'heute.html'))
+            if os.path.isfile(alt) and datetime.date.fromtimestamp(os.stat(alt).st_mtime) == day:
+                page = alt
+        body = None
+        if os.path.dirname(page) == here and os.path.isfile(page):
+            try:
+                with open(page, 'rb') as f:
+                    body = f.read()
+            except OSError:
+                body = None
+        status = 200
+        if body is None:
+            status = 404
+            names = ('Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag')
+            months = ('Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober',
+                      'November', 'Dezember')
+            when = '%s, %d. %s %d' % (names[day.weekday()], day.day, months[day.month - 1], day.year)
+            body = BRIEFING_NONE.replace('{when}', when).encode('utf-8')
+        body = inject(body)                      # the LOCAL frame, like every page of this server
+        self.send_response(status)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'DENY')                       # no other page may frame it
+        self.send_header('Content-Security-Policy', "frame-ancestors 'none'")
+        self.send_header('Referrer-Policy', 'no-referrer')
+        self.send_header('X-Robots-Tag', 'noindex')
+        self.end_headers()
+        self.wfile.write(body)
+
     UNTIS_CACHE = {}
 
     def untis_api(self):
@@ -599,6 +688,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.untis_api()
         if self.path.startswith('/__mitschrift/'):
             return self.mitschrift_api()
+        if self.path.startswith('/__briefing/'):
+            return self.briefing_page()
         self.path = local_icon(self.path) or self.path   # served as usual, just the red file
         path = self.translate_path(self.path)
         if os.path.isdir(path):

@@ -388,6 +388,25 @@
         .wk-dayname, .mo-head > span { container-type: inline-size; }
         .dn-l { display: none; }
         @container (min-width: 124px) { .dn-l { display: inline; font-size: 13px; } .dn-s { display: none; } }
+        /* the day's morning briefing (Doc, 28.11.2026: "vor die Wochentage ... einen ganz kleinen Button mit Briefing"): a
+           small sunrise in the text colour, only on days that have one (briefDay). In the week it hangs left of the
+           weekday, so every name stays centred whether its day has one or not; in the day list it stands before "Heute" */
+        .brief { color: var(--text); cursor: pointer; }
+        .brief svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+        .brief:hover { color: var(--lambda); }
+        .wk-dayname .dn { position: relative; }
+        .wk-dayname .brief { position: absolute; right: 100%; top: 50%; width: 16px; height: 16px; margin: -9px 3px 0 0; }
+        .wk-dayname .brief::after { content: ''; position: absolute; inset: -5px -2px -5px -5px; }   /* a larger target, unseen */
+        /* a column without room beside its name (short names below 80px - the phone held upright -, the long ones below
+           165px - a tablet): hung out, the sunrise would come close to the day before; there it stands in the line, the
+           two centred together, its horizon on the letters' baseline */
+        @container (max-width: 79px) or ((min-width: 124px) and (max-width: 164px)) {
+            .wk-dayname .dn { white-space: nowrap; }
+            .wk-dayname .brief { position: relative; right: auto; top: auto; display: inline-block; width: 15px; height: 15px; margin: 0 1px 0 0; vertical-align: -3px; }
+        }
+        .day-head .brief { flex: none; width: 28px; height: 28px; margin: 0 -9px 0 -5px; padding: 5px; border: 0; border-radius: 6px; background: transparent; }
+        .day-head .brief:focus-visible { outline: 2px solid var(--lambda); outline-offset: -2px; }
+        @media print { .brief { display: none; } }
         .wk-allday { min-height: 6px; }
         /* the line under the day names (and under the all-day row): like the table's lines and from the table edge, and
            it stays put while the hours scroll beneath it - scrolled up it is the 0:00 line (Doc, 07.11.2026: "Die oben
@@ -1374,6 +1393,21 @@
                doc-kalender.pages.dev has no copy of it, so from there the links and the map go to docalvers.de.
                (Written without "../": tools/kalender_pages.py rewrites that prefix for the app's own files.) */
             const SVP_ORIGIN = /^(localhost|127\.0\.0\.1|(www\.)?docalvers\.de)$/.test(location.hostname) ? '' : 'https://docalvers.de';
+
+            /* The morning briefing of a day (Doc, 28.11.2026: "dass ich da immer direkt zum Briefing des jeweiligen Tages
+               komme"). The briefings (~/Documents/briefing) hold school data and private things and never go online: only
+               serve.py on Doc's Mac hands them out, read-only, at /__briefing/YYYY-MM-DD - to the Mac itself and to Doc's
+               own devices through Tailscale Serve. So the sunrise shows where that server answers: on a page it served
+               (localhost, the tailnet's *.ts.net) as a link of the same site; on docalvers.de or the app on the Mac with
+               the local server's address; never on a phone or tablet outside the tailnet, never in the guest's view, and
+               only from the first briefing up to today (the later ones are not written yet). */
+            const BRIEF_FROM = '2026-11-26';
+            const BRIEF_BASE = GUEST ? null
+                : /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /\.ts\.net$/.test(location.hostname) ? '/__briefing/'
+                : /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints < 2 ? 'http://localhost:8765/__briefing/' : null;
+            const briefDay = (d, now) => { const k = K.ymd(d); return BRIEF_BASE && k >= BRIEF_FROM && k <= K.ymd(now) ? k : null; };
+            // a sunrise: the horizon, half a sun, three rays
+            const ICON_BRIEF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 19h19M7 19a5 5 0 0 1 10 0M12 6.5V10M5.7 11.2l1.6 1.6M18.3 11.2l-1.6 1.6"/></svg>';
             const SVP_MAP_KEY = 'kalender-svp-map';
             let svpMap = null;         // svp-map.json: which plan page belongs to which class and subject (K.svpPlanPath)
 
@@ -1681,6 +1715,9 @@
             const longDay = d => K.WEEKDAY_LONG[d.getDay()] + ', ' + d.getDate() + '. ' + K.MONTH_LONG[d.getMonth()];
             // a column head: both names, the CSS shows the long one where the column has room (.dn-l / .dn-s)
             const dayName = i => `<span class="dn-l">${K.WEEKDAY_LONG[i]}</span><span class="dn-s">${K.WEEKDAY_SHORT[i]}</span>`;
+            // the week's day head: the sunrise to the day's briefing - inside the day's button (that one starts an all-day
+            // entry), so not a button itself; the click goes to it first (the views' click handler)
+            const briefMark = (d, now) => (briefDay(d, now) ? `<span class="brief" data-brief="${K.ymd(d)}" title="Briefing ${esc(longDay(d))}">${ICON_BRIEF}</span>` : '');
             function relDay(d) {
                 const diff = Math.round((K.startOfDay(d) - K.startOfDay(new Date())) / K.DAY);
                 return diff === 0 ? 'Heute' : diff === 1 ? 'Morgen' : diff === 2 ? 'Übermorgen' : diff === -1 ? 'Gestern' : null;
@@ -1766,6 +1803,7 @@
                 const isToday = K.sameDay(day, now);
                 for (const o of occs) shownOcc.set(o.key, o);
                 return `<section class="day${isToday ? ' today' : ''}${isHoliday(day) ? ' holiday' : ''}" data-day="${K.ymd(day)}"><div class="day-head">` +
+                    (briefDay(day, now) ? `<button type="button" class="brief" data-brief="${K.ymd(day)}" title="Briefing ${esc(longDay(day))}" aria-label="Briefing ${esc(longDay(day))}">${ICON_BRIEF}</button>` : '') +
                     `<h2 class="pill">${esc(rel || dayLabel(day))}</h2>${rel ? `<span class="sub">${esc(longDay(day))}</span>` : ''}` +
                     (addBtn ? `<button class="add" type="button" data-add="${K.ymd(day)}" aria-label="Termin an diesem Tag">${ICON_ADD}</button>` : '') +
                     `</div><ul class="evs">${occs.map(o => evRow(o, now)).join('')}</ul></section>`;
@@ -1822,7 +1860,7 @@
                 const h0 = 0, H = 24;   // the whole day; fitWeek opens the box at 8:00
                 shownOcc = new Map();
                 let html = '<div class="wk-head">' + STEP_BTN(-1) + vis.map(d =>
-                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}${isHoliday(d) ? ' holiday' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}">${dayName(d.getDay())}<b>${d.getDate()}</b></button>`).join('') + STEP_BTN(1) + '</div>';
+                    `<button type="button" class="wk-dayname${K.sameDay(d, now) ? ' today' : ''}${d.getDay() % 6 === 0 ? ' weekend' : ''}${isHoliday(d) ? ' holiday' : ''}" data-add="${K.ymd(d)}" aria-label="Termin am ${esc(longDay(d))}"><span class="dn">${briefMark(d, now)}${dayName(d.getDay())}</span><b>${d.getDate()}</b></button>`).join('') + STEP_BTN(1) + '</div>';
                 if (allday.length) {
                     html += WK_SEP + '<div class="wk-allday"><div></div>' + vis.map(d => {
                         const here = allday.filter(o => o.start < K.addDays(d, 1) && o.end > d);
@@ -3498,6 +3536,8 @@
                 // taps in the views: an appointment opens it, a "+" or an empty place in the week starts a new one there
                 $('main').addEventListener('click', e => {
                     if (e.target.closest('a.svp-pill')) return;   // the lesson's SVP: the link opens, not the row's info box
+                    const brief = e.target.closest('[data-brief]');   // the day's morning briefing, in a tab of its own
+                    if (brief) { window.open(BRIEF_BASE + brief.dataset.brief, '_blank', 'noopener'); return; }
                     const stp = e.target.closest('[data-step]');
                     if (stp) { step(Number(stp.dataset.step)); return; }
                     const zm = e.target.closest('[data-zoom]');
