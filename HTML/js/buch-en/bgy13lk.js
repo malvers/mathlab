@@ -24,8 +24,10 @@ window.BuchEN && BuchEN.add('bgy13lk', {
         // biquadratisch
         'Koeffizient $p$': 'Coefficient $p$', 'Koeffizient $q$': 'Coefficient $q$',
         'Die Parabel h(z) = z² + p·z + q mit ihren Nullstellen': 'The parabola h(z) = z² + p·z + q with its zeros',
-        'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'The graph of f(x) = x⁴ + p·x² + q with its zeros'
+        'Der Graph von f(x) = x⁴ + p·x² + q mit seinen Nullstellen': 'The graph of f(x) = x⁴ + p·x² + q with its zeros',
         // book 24 pruefung-en:
+        // matrixinverse: the button (mathe13lk-en gets it from js/buch-en/lgs.js, which this book's page does not load)
+        'Nächster Schritt': 'Next step'
     },
     phrase: [
         // titelbildbgy13lk: the aria-label sits in a string piece that starts inside the <svg> tag, so it is a phrase
