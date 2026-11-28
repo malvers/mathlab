@@ -1034,6 +1034,47 @@ andere Bücher gehen auf die portugiesische Ausgabe (BGY 11, BGY 12, FOS 11). Sc
 
 ## mathegy5-pt (GY 5, block pt-21)
 
+Block pt-21 (Lemos, 27./28.11.2026). „Gymnasium“ bleibt deutsch und wird auf der Startseite erklärt wie in GY 6 (Schule bis zum
+Abitur, Saxónia 5.º–12.º ano; 5.º ano ≈ 5.º ano do ensino básico, 2.º ciclo). Wahlbereich `k: 'O'`, Kicker „ÁREA OPCIONAL · JUNHO“
+wie OS 5. Lab-Namen bleiben deutsch, „MAIS PRÁTICA ONLINE (EM ALEMÃO)“. Die Widgets sind die von OS 5 (pt-14) und OS 6 (pt-15),
+nur das Titelbild `titelbildgy5` ist neu. Begriffe und Schreibweisen wie `## mathe5-pt` und `## mathegy6-pt`:
+
+- **× für das Produkt** überall; GY 5 lädt `os5.js` nicht, deshalb drei Regeln in `gy5.js` pt-21, die dort `os5.js` übernimmt:
+  Klartext-Punkte $A(2, 1)$ in `koord5`, × auf der Einheitentreppe (`einheiten5`) und in den ägyptischen und Maya-Summen
+  (`zahlschrift5`; der Trennpunkt der römischen Zeile bleibt).
+- **Punkte** $P(3, 5)$, mit Dezimalkomma $F(2{,}5; 1{,}5)$; Strecke $[AB]$; Abszisse/Ordinate statt x-/y-Koordinate im Text.
+- **Umfang** $P$, **Flächeninhalt** $A$, **Oberfläche** área total $A$ (zwei Schachteln: $A_1$, $A_2$ statt $O_A$, $O_B$).
+- **Teilermenge** $D_{12}$; $3 \mid 12$ bleibt, gelesen „3 divide 12“. Natürliche Zahlen ab 0 wie in der deutschen Schule, einmal erklärt.
+- **Zahlwörter** nach portugiesischer Schulschreibung (Regel von pt-14): „três mil e dezassete milhões e oito mil“; Hinweis
+  „Cuidado ao traduzir“ (mil milhões / billion / bilhão) und eine Ortografia-Notiz zum „e“ statt der deutschen Ein-Wort-Regel.
+- Dezimalzahlen gelesen „três unidades e quarenta e sete centésimas“; die Notiz „nicht siebenundvierzig lesen“ wird zu
+  „Cuidado com a leitura curta“ (três vírgula quarenta e sete).
+
+| Deutsch | Português (PT) | Hinweis |
+|---|---|---|
+| Stellenwerttafel · Dreiergruppe | quadro de ordens e classes · classe | wie pt-14 |
+| Rechenvorteile · geschickt rechnen | cálculo com jeito · calcular com jeito | wie pt-15 |
+| Summand · Minuend · Subtrahend · Faktor · Dividend · Divisor | parcela · aditivo · subtrativo · fator · dividendo · divisor | |
+| schriftlich dividieren · herunterholen · Probe | algoritmo da divisão · baixar · prova | |
+| Rasterverfahren | método da grelha | |
+| Quersumme · Teilermenge | soma dos algarismos · conjunto dos divisores $D_n$ | |
+| Primzahlzwillinge · kleinstes gemeinsames Vielfaches | primos gémeos · mínimo múltiplo comum | |
+| erweitern · Erweitern mit 2 | escrever uma fração equivalente · «Termos × 2» (Knopf in `bruch5`) | |
+| vollständig kürzen · ggT | fração irredutível · máximo divisor comum | |
+| Zehnerbruch · Kommaverschiebung | fração decimal · deslocar a vírgula | |
+| arithmetisches Mittel · Ausgleich | média aritmética · igualar | `mittel5`: „Igualar“ |
+| Achsensymmetrie · Punktsymmetrie · Symmetriezentrum | simetria axial · simetria central · centro de simetria | |
+| Verschiebung · Drehung um Z · Spiegelung · Bildfigur | translação · rotação de centro O · reflexão · imagem | |
+| Muster-Werkstatt | oficina de padrões | `symmetrie5` |
+| Einheitentreppe · Ar · Hektar · Hohlmaße | escada das unidades · are · hectare · unidades de capacidade | |
+| Körpernetz · Kantenmodell · verdeckte Kanten | planificação · modelo de arestas · arestas escondidas (a tracejado) | |
+| Fermi-Aufgabe · Näherungswert · Fahrplan | problema de Fermi · valor aproximado · horário | |
+| Additionssystem · Stellenwertsystem · Zweier-/Fünfersystem | sistema aditivo · sistema de numeração posicional · sistema binário / de base 5 | |
+| Strich · Fessel · Seil · Lotus · Finger · Kaulquappe | traço · arco · corda · flor de lótus · dedo · girino | ägyptisch, wie pt-14 |
+| Punkt · Strich · Muschel · Zwanzigersystem | ponto · traço · concha · sistema vigesimal | Maya |
+| Linienbrett · Rechenpfennig · bündeln | tábua de linhas · ficha de cálculo · agrupar | Adam Ries, wie pt-14 |
+| Namen | Lea → Rita, Mia → Inês, Ben → Bruno, Lena → Beatriz, Paul → Pedro, Tom → Tiago, Ida → Inês, Max → Rui, Ole → Tomás, Pia → Leonor, Emil → Duarte, Jana → Joana, Lisa → Luísa, Tim → Tomás, Emma → Matilde | Klassen 5a → 5.º A |
+
 ## mathegy11lk-pt (GY 11 Leistungskurs, block pt-22)
 
 ## mathegy12lk-pt (GY 12 Leistungskurs, block pt-23)

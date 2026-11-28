@@ -137,6 +137,10 @@ window.BuchPT && BuchPT.add('gy5', {
             'Arrasta o ponto sobre a reta s para a rodar. Com «Inclinar h», g e h deixam de ser paralelas.',
         'Zwei Geraden g und h, geschnitten von s': 'Duas retas g e h, intersetadas pela secante s',
         // book pt-21 mathegy5-pt:
+        // GY 5 shares its widgets with OS 5 (pt-14) and OS 6 (pt-15); only the cover is new
+        // titelbildgy5 (the cover of GY 5)
+        'Titelbild: ein Quader aus Einheitswürfeln, ein Kreis mit drei Achteln, ein Winkel mit Skala, ein gespiegelter Drachen, ein Zahlenstrahl und Maya-Ziffern':
+            'Capa: um paralelepípedo formado por cubos unitários, um círculo com três oitavos, um ângulo com a sua escala, um papagaio refletido, uma reta numérica e algarismos maias',
     },
     phrase: [
         // pt0: the helpers of the module (outside every widget; check.mjs gy5/*)
@@ -342,5 +346,14 @@ window.BuchPT && BuchPT.add('gy5', {
         [/(\d+) Schicht(?:en)? mit je (\d+) · (\d+) = (\d+) Würfeln\./g, (m, c, a, b, n) => c + (c === '1' ? ' camada' : ' camadas') + ' de ' + a + ' × ' + b + ' = ' + n + ' cubos cada uma.'],
         [/\$O = 2 \\times \(ab \+ ac \+ bc\)/g, '$$A = 2 \\times (ab + ac + bc)'],
         // book pt-21 mathegy5-pt:
+        // koord5 (chapter 3.1): plain-text points A(2 | 1) → A(2, 1), with a decimal comma A(1,5; 2), as the rule of os5.js,
+        // which the GY 5 pages do not load (on the OS 5 pages both rules give the same result)
+        [/\(([-−]?\d+(?:,\d+)?) \| ([-−]?\d+(?:,\d+)?)\)/g, (m, x, y) => '(' + x + (/,/.test(x + y) ? '; ' : ', ') + y + ')'],
+        // einheiten5 (chapters 4.1, 4.2, 5): × for the steps of the stairs ("· 24" on the steps, "Rechnung: 3,5 · 24 = 84"),
+        // the job of the plain-text rule of os5.js on the OS 5 pages; tied to the widget's markup
+        [/(<text[^>]*>)· (?=\d)/g, '$1× '], [/<p>Rechnung: [^<]*<\/p>/g, m => m.replace(/ · /g, ' × ')],
+        // zahlschrift5 (chapter O): × in the Egyptian and Maya sums ("<p>5 · 400 + 1 · 20 + 6 · 1 = 2026</p>", the Maya labels
+        // "5 · 400"); the Roman line "M = 1000 · D = 500" keeps its separator dot
+        [/(<text[^>]*>\d+) · (?=\d)/g, '$1 × '], [/<p>\d+ · [^<]*<\/p>/g, m => m.replace(/(\d) · (?=\d)/g, '$1 × ')],
     ]
 });
